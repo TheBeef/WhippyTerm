@@ -33,7 +33,10 @@ QMAKE_LFLAGS += -static -static-libgcc -static-libstdc++
 }
 
 SOURCES += ../src/UI/QT/main.cpp\
-    ../ExternPlugins/IODrivers/TestLoopback/src/LB2_Main.cpp \
+    ../src/App/StdPlugins/IODrivers/TCPClient/src/TCPClient_Main.cpp \
+    ../src/App/StdPlugins/IODrivers/TCPServer/src/TCPServer_Main.cpp \
+    ../src/App/StdPlugins/IODrivers/UDPClient/src/UDPClient_Main.cpp \
+    ../src/App/StdPlugins/IODrivers/UDPServer/src/UDPServer_Main.cpp \
     ../src/UI/QT/Form_MainWindow.cpp \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.cpp \
     ../src/UI/QT/VerPanelHandle.cpp \
@@ -160,10 +163,6 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/UI/QT/Widget_TextCanvas.cpp \
     ../src/UI/QT/Frame_MainTextAreaAccess.cpp \
     ../src/App/Util/TextStyleHelpers.cpp \
-    ../ExternPlugins/IODrivers/TCPClient/src/TCPClient_Main.cpp \
-    ../ExternPlugins/IODrivers/TCPServer/src/TCPServer_Main.cpp \
-    ../ExternPlugins/IODrivers/UDPClient/src/UDPClient_Main.cpp \
-    ../ExternPlugins/IODrivers/UDPServer/src/UDPServer_Main.cpp \
 
 win32 {
 # Windows
@@ -177,10 +176,10 @@ win32 {
     ../src/OS/Windows/OSTime.cpp \
     ../src/OS/Windows/System.cpp \
     ../src/App/StdPlugins/IODrivers/Comport/OS/Win/Comport_OS_Serial.cpp \
-    ../ExternPlugins/IODrivers/TCPClient/src/OS/Win/TCPClient_OS_Socket.cpp \
-    ../ExternPlugins/IODrivers/TCPServer/src/OS/Win/TCPServer_OS_Socket.cpp \
-    ../ExternPlugins/IODrivers/UDPClient/src/OS/Win/UDPClient_OS_Socket.cpp \
-    ../ExternPlugins/IODrivers/UDPServer/src/OS/Win/UDPServer_OS_Socket.cpp \
+    ../src/App/StdPlugins/IODrivers/TCPClient/src/OS/Win/TCPClient_OS_Socket.cpp \
+    ../src/App/StdPlugins/IODrivers/TCPServer/src/OS/Win/TCPServer_OS_Socket.cpp \
+    ../src/App/StdPlugins/IODrivers/UDPClient/src/OS/Win/UDPClient_OS_Socket.cpp \
+    ../src/App/StdPlugins/IODrivers/UDPServer/src/OS/Win/UDPServer_OS_Socket.cpp \
 }
 
 unix:!macx {
@@ -193,10 +192,10 @@ unix:!macx {
     ../src/OS/Linux/OSTime.cpp \
     ../src/OS/Linux/System.cpp \
     ../src/App/StdPlugins/IODrivers/Comport/OS/Linux/Comport_OS_Serial.cpp \
-    ../ExternPlugins/IODrivers/TCPClient/src/OS/Linux/TCPClient_OS_Socket.cpp \
-    ../ExternPlugins/IODrivers/TCPServer/src/OS/Linux/TCPServer_OS_Socket.cpp \
-    ../ExternPlugins/IODrivers/UDPClient/src/OS/Linux/UDPClient_OS_Socket.cpp \
-    ../ExternPlugins/IODrivers/UDPServer/src/OS/Linux/UDPServer_OS_Socket.cpp \
+    ../src/App/StdPlugins/IODrivers/TCPClient/src/OS/Linux/TCPClient_OS_Socket.cpp \
+    ../src/App/StdPlugins/IODrivers/TCPServer/src/OS/Linux/TCPServer_OS_Socket.cpp \
+    ../src/App/StdPlugins/IODrivers/UDPClient/src/OS/Linux/UDPClient_OS_Socket.cpp \
+    ../src/App/StdPlugins/IODrivers/UDPServer/src/OS/Linux/UDPServer_OS_Socket.cpp \
 }
 
 macx {

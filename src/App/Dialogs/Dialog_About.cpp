@@ -10,9 +10,18 @@
  * COPYRIGHT:
  *    Copyright 2020 Paul Hutchinson.
  *
- *    This software is the property of Paul Hutchinson and may not be
- *    reused in any manner except under express written permission of
- *    Paul Hutchinson.
+ *    This program is free software: you can redistribute it and/or modify it
+ *    under the terms of the GNU General Public License as published by the
+ *    Free Software Foundation, either version 3 of the License, or (at your
+ *    option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ *    General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License along
+ *    with this program. If not, see https://www.gnu.org/licenses/.
  *
  * CREATED BY:
  *    Paul Hutchinson (06 Jul 2020)
@@ -83,11 +92,21 @@ void RunAboutDialog(void)
     snprintf(buff,sizeof(buff)-1,"Paul Hutchinson<br/>hutchinson.paul@gmail.com");
     UISetAboutText(buff,e_UIAboutTab_Author);
 
-    snprintf(buff,sizeof(buff)-1,"Prerelease.  License not selected yet.  Source not released.  So for now:<br/><br/>"
-        "Copyright (C) Paul Hutchinson - All Rights Reserved<br/>"
-        "Unauthorized copying of this file, via any medium is strictly prohibited<br/>"
-        "Proprietary and confidential<br/>"
-        "Written by Paul Hutchinson &lt;hutchinson.paul@gmail.com&gt;, 2020<br/>");
+    snprintf(buff,sizeof(buff)-1,
+            "Copyright 2024 Paul Hutchinson.<br/>"
+            ""
+            "<p>This program is free software: you can redistribute it and/or modify it "
+            "under the terms of the GNU General Public License as published by the "
+            "Free Software Foundation, either version 3 of the License, or (at your "
+            "option) any later version.</p>"
+            ""
+            "<p>This program is distributed in the hope that it will be useful, "
+            "but WITHOUT ANY WARRANTY; without even the implied warranty of "
+            "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU "
+            "General Public License for more details.</p>"
+            ""
+            "<p>You should have received a copy of the GNU General Public License along "
+            "with this program. If not, see https://www.gnu.org/licenses/.</p>");
     UISetAboutText(buff,e_UIAboutTab_License);
 
     snprintf(buff,sizeof(buff)-1,

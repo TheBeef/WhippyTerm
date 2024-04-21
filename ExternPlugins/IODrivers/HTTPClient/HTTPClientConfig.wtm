@@ -1,0 +1,19 @@
+<?xml version="1.0" standalone="no" ?>
+<ExternPluginMaker>
+    <LastBuildFile>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/IODrivers/HTTPClient/HTTPClient.wtp</LastBuildFile>
+    <LinuxFilename>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/IODrivers/HTTPClient/Linux/HTTPClient.so</LinuxFilename>
+    <WindowsFilename></WindowsFilename>
+    <MacFilename></MacFilename>
+    <RPI64Filename></RPI64Filename>
+    <RPI32Filename></RPI32Filename>
+    <PluginName>HTTP Client</PluginName>
+    <InstallFilename>HTTPClient</InstallFilename>
+    <Description>A client to open HTTP connections and read the body.  HTTP hand shake is handled by the plugin.</Description>
+    <Contributors>Paul Hutchinson</Contributors>
+    <Copyright>2022</Copyright>
+    <ReleaseDate>17 May 2022</ReleaseDate>
+    <Version>0.1.2</Version>
+    <APIVersion>0.8.0.0</APIVersion>
+    <PluginClass>2</PluginClass>
+    <PluginSubClass>0</PluginSubClass>
+</ExternPluginMaker>

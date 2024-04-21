@@ -1,0 +1,2578 @@
+/*******************************************************************************
+ * FILENAME: Dialog_Settings.cpp
+ *
+ * PROJECT:
+ *    Whippy Term
+ *
+ * FILE DESCRIPTION:
+ *    This file runs the settings dialog.
+ *
+ * COPYRIGHT:
+ *    Copyright 2018 Paul Hutchinson.
+ *
+ *    This software is the property of Paul Hutchinson. and may not be
+ *    reused in any manner except under express written permission of
+ *    Paul Hutchinson.
+ *
+ * CREATED BY:
+ *    Paul Hutchinson (27 Sep 2018)
+ *
+ ******************************************************************************/
+
+/*** HEADER FILES TO INCLUDE  ***/
+#include "App/Dialogs/Dialog_Settings.h"
+#include "App/Display/DisplayColors.h"
+#include "App/DataProcessorsSystem.h"
+#include "App/Settings.h"
+#include "App/Session.h"
+#include "App/IOSystem.h"
+#include "UI/UIAsk.h"
+#include "UI/UISettings.h"
+#include "UI/UIMainWindow.h"
+#include "UI/UIFileReq.h"
+#include "UI/UIFontReq.h"
+#include "UI/UIColorReq.h"
+#include "Version.h"
+#include <time.h>
+#include <string>
+#include <algorithm>
+#include <string.h>
+
+using namespace std;
+
+/*** DEFINES                  ***/
+
+/*********
+ * Term
+ *********/
+#define MIN_TERM_SIZE_X     1
+#define MIN_TERM_SIZE_Y     1
+
+#define MAX_TERM_SIZE_X     1000
+#define MAX_TERM_SIZE_Y     1000
+
+#define MIN_TERM_SCROLLBUFFER_LINES 0
+#define MAX_TERM_SCROLLBUFFER_LINES 10000
+
+/*** MACROS                   ***/
+
+/*** TYPE DEFINITIONS         ***/
+enum e_DS_SettingsArea
+{
+    e_DS_SettingsArea_Panels,
+    e_DS_SettingsArea_Startup,
+    e_DS_SettingsArea_Connections,
+    e_DS_SettingsArea_Display,
+    e_DS_SettingsArea_Terminal,
+    e_DS_SettingsArea_Behaviour,
+    e_DS_SettingsAreaMAX
+};
+
+/*** FUNCTION PROTOTYPES      ***/
+static void DS_SetSettingGUI(void);
+static void DS_GetSettingsFromGUI(void);
+static void DS_RethinkGUI(void);
+static void DS_RethinkTerminalDisplay(void);
+static void DS_RethinkDisplayDisplay(void);
+static void DS_RethinkHexDisplayDisplay(void);
+static void DS_CopySysColors2GUI(void);
+static void DS_UpdateColorPreview(bool UpdateWeb);
+static void DS_SetCurrentColor(uint32_t RGB);
+static uint32_t DS_GetCurrentColor(void);
+static void DS_FillInConnectionsList4GUI(void);
+static void DS_CollectConnectionOptions(void);
+static void DS_SelectCaptureFilename(void);
+static void UIS_DoSelectFont(void);
+static void UIS_DoSelectHexDisplayFont(void);
+static void UIS_DoSysColApply(void);
+static void UIS_HandleLeftPanelAutoHideClick(bool checked);
+static void UIS_HandleRightPanelAutoHideClick(bool checked);
+static void UIS_HandleBottomPanelAutoHideClick(bool checked);
+static void UIS_HandleSysColPreviewColorClick(void);
+static void UIS_HandleSysColDefaultColorClick(void);
+static void UIS_ProcessSysColWebInputValue(const char *Text);
+static void UIS_HandleWindowStartPosChanged(uintptr_t ID);
+static void UIS_HandleInputProcessingChange(uintptr_t ID);
+static void UIS_HandleInputProcessingCharEncChange(void);
+static void UIS_HandleInputProcessingTermEmuChange(void);
+static void UIS_HandleSysColPresetChange(uintptr_t ID);
+static void UIS_HandleAreaChanged(uintptr_t ID);
+static void UIS_HandleKeyboardCmdListChange(uintptr_t ID);
+static void UIS_HandleConnectionListChanged(uintptr_t ID);
+static void UIS_HandleKeyboardCmdShortCutChange(void);
+
+/*** VARIABLE DEFINITIONS     ***/
+t_DPS_TextProInfoType m_CharEncodingInputPros;
+t_DPS_TextProInfoType m_TermEmulationInputPros;
+t_DPS_TextProInfoType m_HighlighterInputPros;
+t_DPS_TextProInfoType m_OtherInputPros;
+uint32_t m_DS_SysColors[e_SysColShadeMAX][e_SysColMAX];
+uint32_t m_DS_DefaultColors[e_DefaultColorsMAX];
+bool m_DS_UpdatingColorPreview;
+class TheMainWindow *m_SettingsMW;
+struct ConnectionInfoList *m_DS_ConList;
+t_ConnectionOptionsDataType *m_DS_ConOptions;
+t_ConnectionsOptions m_DS_ConnectionsOptions;
+struct ConnectionInfoList *m_DS_SelectedConnection;
+uint32_t m_CursorColor;
+uint32_t m_HexDisplaysFGColor;
+uint32_t m_HexDisplaysBGColor;
+uint32_t m_HexDisplaysSelBGColor;
+struct CommandKeySeq m_CopyOfKeyMapping[e_CmdMAX];
+class ConSettings *m_SettingConSettings;
+bool m_SettingConSettingsOnly;
+
+struct TestProInfoSortCB
+{
+    inline bool operator() (const struct DPS_TextProInfo &ent1,
+            const struct DPS_TextProInfo &ent2)
+    {
+        return strcasecmp(ent1.DisplayName,ent2.DisplayName)<0;
+    }
+};
+struct DPS_TextProInfo DS_DPSNoneEntry=
+{
+    NULL,
+    "NONE",
+    NULL,
+    NULL
+};
+
+/*******************************************************************************
+ * NAME:
+ *    RunSettingsDialog
+ *
+ * SYNOPSIS:
+ *    bool RunSettingsDialog(class TheMainWindow *MW,
+ *          class ConSettings *SetConSettings);
+ *
+ * PARAMETERS:
+ *    MW [I] -- The main window to take info about (the main window that
+ *              was active when the command was run)
+ *    SetConSettings [I] -- If this set to a ConSettings structure then
+ *                          the dialog will only set connection settings.
+ *                          If this is set to NULL then it will set all
+ *                          settings including the default connection settings.
+ *
+ * FUNCTION:
+ *    This function shows the new connection dialog and fill in all the
+ *    defaults.
+ *
+ * RETURNS:
+ *    true -- User pressed ok
+ *    false -- User canceled or there was an error
+ *
+ * SEE ALSO:
+ *    
+ *******************************************************************************
+ * REVISION HISTORY:
+ *    Paul Hutchinson (27 Sep 2018)
+ *       Created
+ ******************************************************************************/
+bool RunSettingsDialog(class TheMainWindow *MW,
+        class ConSettings *SetConSettings)
+{
+    bool RetValue;
+    t_UIListViewCtrl *AreaList;
+    t_UIListViewCtrl *InputProTextHighlight;
+    t_UIListViewCtrl *InputProTextOther;
+    t_UIComboBoxCtrl *WindowStartupPos;
+    t_UINumberInput *TermSize_Width;
+    t_UINumberInput *TermSize_Height;
+    t_UINumberInput *ScrollBufferLines;
+    t_UIComboBoxCtrl *DataProcessor;
+    t_UIComboBoxCtrl *TextProCharEnc;
+    t_UIComboBoxCtrl *TextProTermEmu;
+    t_UIComboBoxCtrl *SysColPreset;
+    t_UIRadioBttnCtrl *SysColShade;
+    t_UIRadioBttnCtrl *SysColPrev;
+    t_UIScrollBarCtrl *RedScroll;
+    t_UIScrollBarCtrl *GreenScroll;
+    t_UIScrollBarCtrl *BlueScroll;
+    t_UINumberInput *RedInput;
+    t_UINumberInput *GreenInput;
+    t_UINumberInput *BlueInput;
+    t_UIListViewCtrl *KeyboardCmdList;
+    t_UITabCtrl *TerminalTabCtrl;
+    t_UITabCtrl *DisplayTabCtrl;
+    t_UIGroupBox *Display_Tabs;
+    t_UIGroupBox *Display_ClearScreen;
+    unsigned int r;
+    e_DS_SettingsArea FirstSelectedArea;
+
+    m_SettingsMW=MW;
+    m_DS_ConList=NULL;
+    m_DS_SelectedConnection=NULL;
+    m_DS_ConOptions=NULL;
+
+    if(SetConSettings==NULL)
+    {
+        m_SettingConSettingsOnly=false;
+        m_SettingConSettings=&g_Settings.DefaultConSettings;
+    }
+    else
+    {
+        m_SettingConSettingsOnly=true;
+        m_SettingConSettings=SetConSettings;
+    }
+
+    if(!UIS_Alloc_Settings())
+    {
+        /* DEBUG PAUL: Ask here */
+        return false;
+    }
+
+    memcpy(&m_CopyOfKeyMapping,&g_Settings.KeyMapping,
+            sizeof(m_CopyOfKeyMapping));
+
+    /* Setup the UI */
+    AreaList=UIS_GetListViewHandle(e_UIS_ListView_AreaList);
+    UIClearListView(AreaList);
+    if(!m_SettingConSettingsOnly)
+    {
+        UIAddItem2ListView(AreaList,"Behaviour",e_DS_SettingsArea_Behaviour);
+        UIAddItem2ListView(AreaList,"Connections",e_DS_SettingsArea_Connections);
+    }
+    UIAddItem2ListView(AreaList,"Display",e_DS_SettingsArea_Display);
+    if(!m_SettingConSettingsOnly)
+    {
+        UIAddItem2ListView(AreaList,"Panels",e_DS_SettingsArea_Panels);
+        UIAddItem2ListView(AreaList,"Startup",e_DS_SettingsArea_Startup);
+    }
+    UIAddItem2ListView(AreaList,"Terminal",e_DS_SettingsArea_Terminal);
+
+    if(m_SettingConSettingsOnly)
+        FirstSelectedArea=e_DS_SettingsArea_Display;
+    else
+        FirstSelectedArea=e_DS_SettingsArea_Behaviour;
+
+    WindowStartupPos=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_WindowStartupPos);
+    UIClearComboBox(WindowStartupPos);
+    UIAddItem2ComboBox(WindowStartupPos,"OS Default",e_WindowStartupPos_OSDefault);
+    UIAddItem2ComboBox(WindowStartupPos,"Session",e_WindowStartupPos_RestoreFromSession);
+    UIAddItem2ComboBox(WindowStartupPos,"Settings",e_WindowStartupPos_RestoreFromSettings);
+
+    TermSize_Width=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_TermSizeWidth);
+    TermSize_Height=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_TermSizeHeight);
+    UISetNumberInputCtrlMin(TermSize_Width,MIN_TERM_SIZE_X);
+    UISetNumberInputCtrlMin(TermSize_Height,MIN_TERM_SIZE_Y);
+    UISetNumberInputCtrlMax(TermSize_Width,MAX_TERM_SIZE_X);
+    UISetNumberInputCtrlMax(TermSize_Height,MAX_TERM_SIZE_Y);
+
+    ScrollBufferLines=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_ScrollBufferLines);
+    UISetNumberInputCtrlMin(ScrollBufferLines,MIN_TERM_SCROLLBUFFER_LINES);
+    UISetNumberInputCtrlMax(ScrollBufferLines,MAX_TERM_SCROLLBUFFER_LINES);
+
+    /*** Input Processors ***/
+    DataProcessor=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_DataProcessor);
+    UIClearComboBox(DataProcessor);
+    UIAddItem2ComboBox(DataProcessor,"Text",e_DataProcessorType_Text);
+    UIAddItem2ComboBox(DataProcessor,"Binary",e_DataProcessorType_Binary);
+
+    /* Fill in the available input processors */
+    DPS_GetListOfTextProcessors(e_DataProcessorClass_CharEncoding,
+            m_CharEncodingInputPros);
+    DPS_GetListOfTextProcessors(e_DataProcessorClass_TermEmulation,
+            m_TermEmulationInputPros);
+    DPS_GetListOfTextProcessors(e_DataProcessorClass_Highlighter,
+            m_HighlighterInputPros);
+    DPS_GetListOfTextProcessors(e_DataProcessorClass_Other,
+            m_OtherInputPros);
+
+    /* Sort them */
+    std::sort(m_CharEncodingInputPros.begin(),m_CharEncodingInputPros.end(),
+            TestProInfoSortCB());
+    std::sort(m_TermEmulationInputPros.begin(),m_TermEmulationInputPros.end(),
+            TestProInfoSortCB());
+    std::sort(m_HighlighterInputPros.begin(),m_HighlighterInputPros.end(),
+            TestProInfoSortCB());
+    std::sort(m_OtherInputPros.begin(),m_OtherInputPros.end(),
+            TestProInfoSortCB());
+
+    /* Add NONE to the top */
+    m_CharEncodingInputPros.insert(m_CharEncodingInputPros.begin(),
+            DS_DPSNoneEntry);
+    m_TermEmulationInputPros.insert(m_TermEmulationInputPros.begin(),
+            DS_DPSNoneEntry);
+
+    TextProCharEnc=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_TextProCharEnc);
+    UIClearComboBox(TextProCharEnc);
+    for(r=0;r<m_CharEncodingInputPros.size();r++)
+    {
+        UIAddItem2ComboBox(TextProCharEnc,
+                m_CharEncodingInputPros[r].DisplayName,r);
+
+        if(m_CharEncodingInputPros[r].Tip!=NULL)
+        {
+            UISetComboBoxItemToolTip(TextProCharEnc,r,
+                    m_CharEncodingInputPros[r].Tip);
+        }
+    }
+
+    TextProTermEmu=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_TextProTermEmu);
+    UIClearComboBox(TextProTermEmu);
+    for(r=0;r<m_TermEmulationInputPros.size();r++)
+    {
+        UIAddItem2ComboBox(TextProTermEmu,
+                m_TermEmulationInputPros[r].DisplayName,r);
+        if(m_TermEmulationInputPros[r].Tip!=NULL)
+        {
+            UISetComboBoxItemToolTip(TextProTermEmu,r,
+                    m_TermEmulationInputPros[r].Tip);
+        }
+    }
+
+    InputProTextHighlight=UIS_GetListViewHandle(e_UIS_ListView_InputProTextHighlight);
+    UIClearListView(InputProTextHighlight);
+    for(r=0;r<m_HighlighterInputPros.size();r++)
+    {
+        UIAddItem2ListView(InputProTextHighlight,
+                m_HighlighterInputPros[r].DisplayName,r);
+        UISetListViewEntryCheckable(InputProTextHighlight,r,true);
+        UISetListViewEntryToolTip(InputProTextHighlight,r,
+                m_HighlighterInputPros[r].Tip);
+//        UISetListViewEntryCheckedState(InputProTextHighlight,0,true);
+    }
+
+    InputProTextOther=UIS_GetListViewHandle(e_UIS_ListView_InputProTextOther);
+    UIClearListView(InputProTextOther);
+    for(r=0;r<m_OtherInputPros.size();r++)
+    {
+        UIAddItem2ListView(InputProTextOther,
+                m_OtherInputPros[r].DisplayName,r);
+        UISetListViewEntryCheckable(InputProTextOther,r,true);
+        UISetListViewEntryToolTip(InputProTextOther,r,
+                m_OtherInputPros[r].Tip);
+//        UISetListViewEntryCheckedState(InputProTextOther,0,true);
+    }
+
+    SysColPreset=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_SysCol_Preset);
+    UIClearComboBox(SysColPreset);
+    UIAddItem2ComboBox(SysColPreset,"",e_SysColPresetMAX);
+    UIAddItem2ComboBox(SysColPreset,WHIPPYTERM_NAME,e_SysColPreset_WhippyTerm);
+    UIAddItem2ComboBox(SysColPreset,"VGA",e_SysColPreset_VGA);
+    UIAddItem2ComboBox(SysColPreset,"CMD",e_SysColPreset_CMD);
+    UIAddItem2ComboBox(SysColPreset,"Terminal.app",e_SysColPreset_TerminalApp);
+    UIAddItem2ComboBox(SysColPreset,"PuTTY",e_SysColPreset_PuTTY);
+    UIAddItem2ComboBox(SysColPreset,"mIRC",e_SysColPreset_mIRC);
+    UIAddItem2ComboBox(SysColPreset,"xterm",e_SysColPreset_xterm);
+    UIAddItem2ComboBox(SysColPreset,"Ubuntu",e_SysColPreset_Ubuntu);
+
+    SysColShade=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Normal);
+    UISelectRadioBttn(SysColShade);
+    SysColPrev=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysColPrev_Black);
+    UISelectRadioBttn(SysColPrev);
+
+    RedScroll=UIS_GetScrollBarHandle(e_UIS_ScrollBar_SysCol_RedScroll);
+    UISetScrollBarTotalSize(RedScroll,255+10);
+    UISetScrollBarPageSize(RedScroll,10);
+    GreenScroll=UIS_GetScrollBarHandle(e_UIS_ScrollBar_SysCol_GreenScroll);
+    UISetScrollBarTotalSize(GreenScroll,255+10);
+    UISetScrollBarPageSize(GreenScroll,10);
+    BlueScroll=UIS_GetScrollBarHandle(e_UIS_ScrollBar_SysCol_BlueScroll);
+    UISetScrollBarTotalSize(BlueScroll,255+10);
+    UISetScrollBarPageSize(BlueScroll,10);
+
+    RedInput=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_SysCol_RedInput);
+    UISetNumberInputCtrlMin(RedInput,0);
+    UISetNumberInputCtrlMax(RedInput,255);
+    GreenInput=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_SysCol_GreenInput);
+    UISetNumberInputCtrlMin(GreenInput,0);
+    UISetNumberInputCtrlMax(GreenInput,255);
+    BlueInput=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_SysCol_BlueInput);
+    UISetNumberInputCtrlMin(BlueInput,0);
+    UISetNumberInputCtrlMax(BlueInput,255);
+
+    /* Keyboard */
+    KeyboardCmdList=UIS_GetListViewHandle(e_UIS_ListView_Keyboard_CommandList);
+    UIClearListView(KeyboardCmdList);
+    for(r=0;r<e_CmdMAX;r++)
+        UIAddItem2ListView(KeyboardCmdList,GetCmdName((e_CmdType)r),r);
+
+//    UIAddItem2ComboBox(WindowStartupPos,"None",e_WindowStartupPos_OSDefault);
+
+    /* Hide anything we can't set if we are in Con Settings Only */
+    if(m_SettingConSettingsOnly)
+    {
+        TerminalTabCtrl=UIS_GetTabCtrlHandle(e_UIS_TabCtrl_Terminal);
+        DisplayTabCtrl=UIS_GetTabCtrlHandle(e_UIS_TabCtrl_Display);
+        Display_Tabs=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_Tabs);
+        Display_ClearScreen=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_ClearScreen);
+
+        UITabCtrlSetTabVisibleByIndex(TerminalTabCtrl,
+                e_UIS_TabCtrl_Terminal_Page_Keyboard,false);
+        UITabCtrlSetTabVisibleByIndex(DisplayTabCtrl,
+                e_UIS_TabCtrl_Display_Page_HexDumps,false);
+
+        UIGroupBoxVisible(Display_Tabs,false);
+        UIGroupBoxVisible(Display_ClearScreen,false);
+    }
+
+    /* Load settings into UI */
+    DS_SetSettingGUI();
+
+    DS_RethinkGUI();
+
+    UISetListViewSelectedEntry(AreaList,FirstSelectedArea);
+    UIS_HandleAreaChanged(FirstSelectedArea);
+    UIS_HandleSysColPresetChange(e_SysColPresetMAX);
+
+    RetValue=false;
+    if(UIS_Show_Settings())
+    {
+        /* Save */
+        RetValue=true;
+
+        DS_GetSettingsFromGUI();
+
+        if(!m_SettingConSettingsOnly)
+        {
+            while(!SaveSettings())
+            {
+                if(UIAsk("Error saving settings","Failed to save the setting.",
+                        e_AskBox_Error,e_AskBttns_RetryCancel)==e_AskRet_Cancel)
+                {
+                    break;
+                }
+            }
+            ApplySettings();
+        }
+    }
+
+    if(m_DS_ConList!=NULL)
+    {
+        if(m_DS_ConOptions!=NULL)
+            IOS_FreeConnectionOptions(m_DS_ConOptions);
+        IOS_FreeListOfAvailableConnections(m_DS_ConList);
+    }
+
+    UIS_Free_Settings();
+
+    return RetValue;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DS_SetSettingGUI
+ *
+ * SYNOPSIS:
+ *    static void DS_SetSettingGUI(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function reads the settings out of the settings system and
+ *    fills in the GUI.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void DS_SetSettingGUI(void)
+{
+    t_UICheckboxCtrl *CheckboxHandle;
+    t_UIComboBoxCtrl *ComboBoxHandle;
+    t_UINumberInput *NumberInputHandle;
+    t_UIListViewCtrl *ListViewHandle;
+    t_UIRadioBttnCtrl *ClearScreen_Clear;
+    t_UIRadioBttnCtrl *ClearScreen_Scroll;
+    t_UIRadioBttnCtrl *ClearScreen_ScrollAll;
+    t_UIRadioBttnCtrl *ClearScreen_ScrollWithHr;
+    t_UITextInputCtrl *TxtHandle;
+    t_UIColorPreviewCtrl *ColorPreviewHandle;
+    i_StringListType CurStr;
+    unsigned int r;
+
+    /********************/
+    /* Behaviour        */
+    /********************/
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_BookmarksOpenNewTab);
+    UICheckCheckbox(CheckboxHandle,g_Settings.BookmarksOpenNewTabs);
+
+    /********************/
+    /* Panels           */
+    /********************/
+
+    /* Left panel */
+    /* RestoreFromSettings */
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_LeftPanel_RestoreFromSettings);
+    UICheckCheckbox(CheckboxHandle,g_Settings.LeftPanelFromSettings);
+    /* ShowPanelOnStartup */
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_LeftPanel_ShowPanelOnStartup);
+    UICheckCheckbox(CheckboxHandle,g_Settings.LeftPanelOpenOnStartup);
+    /* AutoHidePanel */
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_LeftPanel_AutoHidePanel);
+    UICheckCheckbox(CheckboxHandle,g_Settings.LeftPanelAutoHide);
+
+    /* Right panel */
+    /* RestoreFromSettings */
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_RightPanel_RestoreFromSettings);
+    UICheckCheckbox(CheckboxHandle,g_Settings.RightPanelFromSettings);
+    /* ShowPanelOnStartup */
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_RightPanel_ShowPanelOnStartup);
+    UICheckCheckbox(CheckboxHandle,g_Settings.RightPanelOpenOnStartup);
+    /* AutoHidePanel */
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_RightPanel_AutoHidePanel);
+    UICheckCheckbox(CheckboxHandle,g_Settings.RightPanelAutoHide);
+
+    /* Bottom panel */
+    /* RestoreFromSettings */
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_BottomPanel_RestoreFromSettings);
+    UICheckCheckbox(CheckboxHandle,g_Settings.BottomPanelFromSettings);
+    /* ShowPanelOnStartup */
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_BottomPanel_ShowPanelOnStartup);
+    UICheckCheckbox(CheckboxHandle,g_Settings.BottomPanelOpenOnStartup);
+    /* AutoHidePanel */
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_BottomPanel_AutoHidePanel);
+    UICheckCheckbox(CheckboxHandle,g_Settings.BottomPanelAutoHide);
+
+    /* Stop Watch */
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_StopWatchAutoLap);
+    UICheckCheckbox(CheckboxHandle,g_Settings.StopWatchAutoLap);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_StopWatchAutoStart);
+    UICheckCheckbox(CheckboxHandle,g_Settings.StopWatchAutoStart);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_StopWatchShowPanel);
+    UICheckCheckbox(CheckboxHandle,g_Settings.StopWatchShowPanel);
+
+    /* Capture */
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CaptureTimestamp);
+    UICheckCheckbox(CheckboxHandle,g_Settings.CaptureTimestamp);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CaptureAppend);
+    UICheckCheckbox(CheckboxHandle,g_Settings.CaptureAppend);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CaptureStripCtrl);
+    UICheckCheckbox(CheckboxHandle,g_Settings.CaptureStripCtrl);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CaptureStripEsc);
+    UICheckCheckbox(CheckboxHandle,g_Settings.CaptureStripEsc);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CaptureHexDump);
+    UICheckCheckbox(CheckboxHandle,g_Settings.CaptureHexDump);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CaptureShowPanel);
+    UICheckCheckbox(CheckboxHandle,g_Settings.CaptureShowPanel);
+    TxtHandle=UIS_GetTextInputHandle(e_UIS_TextInput_Capture_DefaultFilename);
+    UISetTextCtrlText(TxtHandle,g_Settings.CaptureDefaultFilename.c_str());
+
+    /* Hex Display */
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_HexDisplayEnabled);
+    UICheckCheckbox(CheckboxHandle,g_Settings.HexDisplayEnabled);
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_HexDisplay_BufferSize);
+    UISetNumberInputCtrlValue(NumberInputHandle,g_Settings.HexDisplayBufferSize);
+
+    m_HexDisplaysFGColor=g_Settings.HexDisplaysFGColor;
+    ColorPreviewHandle=UIS_GetColorPreviewHandle(e_UIS_ColorPreview_HexDisplay_FGDisplay);
+    UISetColorPreviewColor(ColorPreviewHandle,m_HexDisplaysFGColor);
+
+    m_HexDisplaysBGColor=g_Settings.HexDisplaysBGColor;
+    ColorPreviewHandle=UIS_GetColorPreviewHandle(e_UIS_ColorPreview_HexDisplay_BGDisplay);
+    UISetColorPreviewColor(ColorPreviewHandle,m_HexDisplaysBGColor);
+
+    m_HexDisplaysSelBGColor=g_Settings.HexDisplaysSelBGColor;
+    ColorPreviewHandle=UIS_GetColorPreviewHandle(e_UIS_ColorPreview_HexDisplay_SelBGDisplay);
+    UISetColorPreviewColor(ColorPreviewHandle,m_HexDisplaysSelBGColor);
+
+    /********************/
+    /* Startup          */
+    /********************/
+    ComboBoxHandle=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_WindowStartupPos);
+    UISetComboBoxSelectedEntry(ComboBoxHandle,g_Settings.RestoreWindowPos);
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_StartMax);
+    UICheckCheckbox(CheckboxHandle,g_Settings.AppMaximized);
+
+    /********************/
+    /* Connections      */
+    /********************/
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoConnectOnNewConnection);
+    UICheckCheckbox(CheckboxHandle,g_Settings.AutoConnectOnNewConnection);
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_Connections_UseConnectionDefaults);
+    UICheckCheckbox(CheckboxHandle,g_Settings.UseConnectionDefaults);
+
+    /* These are added to the GUI only when the tab is selected (for speed)
+       but we make a copy here */
+    m_DS_ConnectionsOptions=g_Settings.DefaultConnectionsOptions;
+
+    /********************/
+    /* Display          */
+    /********************/
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AlwaysShowTabs);
+    UICheckCheckbox(CheckboxHandle,g_Settings.AlwaysShowTabs);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CloseButtonOnTabs);
+    UICheckCheckbox(CheckboxHandle,g_Settings.CloseButtonOnTabs);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CursorBlink);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->CursorBlink);
+
+    m_CursorColor=m_SettingConSettings->CursorColor;
+    ColorPreviewHandle=UIS_GetColorPreviewHandle(e_UIS_ColorPreview_CursorColor);
+    UISetColorPreviewColor(ColorPreviewHandle,m_CursorColor);
+
+    ClearScreen_Clear=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Clear);
+    ClearScreen_Scroll=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Scroll);
+    ClearScreen_ScrollAll=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollAll);
+    ClearScreen_ScrollWithHr=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollWithHR);
+    switch(g_Settings.ScreenClear)
+    {
+        case e_ScreenClear_Clear:
+        case e_ScreenClearMAX:
+            UISelectRadioBttn(ClearScreen_Clear);
+        break;
+        case e_ScreenClear_Scroll:
+            UISelectRadioBttn(ClearScreen_Scroll);
+        break;
+        case e_ScreenClear_ScrollAll:
+            UISelectRadioBttn(ClearScreen_ScrollAll);
+        break;
+        case e_ScreenClear_ScrollWithHR:
+            UISelectRadioBttn(ClearScreen_ScrollWithHr);
+        break;
+        default:
+        break;
+    }
+
+    memcpy(m_DS_SysColors,m_SettingConSettings->SysColors,sizeof(m_DS_SysColors));
+    memcpy(m_DS_DefaultColors,m_SettingConSettings->DefaultColors,sizeof(m_DS_DefaultColors));
+
+    DS_RethinkDisplayDisplay();
+    DS_RethinkHexDisplayDisplay();
+
+    /********************/
+    /* Terminal         */
+    /********************/
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_TerminalSize_FixedWidth);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->TermSizeFixedWidth);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_TerminalSize_FixedHeight);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->TermSizeFixedHeight);
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_TermSizeWidth);
+    UISetNumberInputCtrlValue(NumberInputHandle,m_SettingConSettings->TermSizeWidth);
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_TermSizeHeight);
+    UISetNumberInputCtrlValue(NumberInputHandle,m_SettingConSettings->TermSizeHeight);
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_ScrollBufferLines);
+    UISetNumberInputCtrlValue(NumberInputHandle,m_SettingConSettings->ScrollBufferLines);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CenterTextInWindow);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->CenterTextInWindow);
+
+    DS_RethinkTerminalDisplay();
+
+    /*******************/
+    /* Data Processors */
+    /*******************/
+    ComboBoxHandle=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_DataProcessor);
+    UISetComboBoxSelectedEntry(ComboBoxHandle,m_SettingConSettings->DataProcessorType);
+
+    for(CurStr=m_SettingConSettings->EnabledTextDataProcessors.begin();
+            CurStr!=m_SettingConSettings->EnabledTextDataProcessors.end();CurStr++)
+    {
+        /* Char Enc */
+        for(r=0;r<m_CharEncodingInputPros.size();r++)
+        {
+            if(m_CharEncodingInputPros[r].IDStr==NULL)
+                continue;
+
+            if(strcmp(m_CharEncodingInputPros[r].IDStr,CurStr->c_str())==0)
+            {
+                /* Found it */
+                ComboBoxHandle=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_TextProCharEnc);
+                UISetComboBoxSelectedEntry(ComboBoxHandle,r);
+                break;
+            }
+        }
+
+        /* Term Emulation */
+        for(r=0;r<m_TermEmulationInputPros.size();r++)
+        {
+            if(m_TermEmulationInputPros[r].IDStr==NULL)
+                continue;
+
+            if(strcmp(m_TermEmulationInputPros[r].IDStr,CurStr->c_str())==0)
+            {
+                /* Found it */
+                ComboBoxHandle=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_TextProTermEmu);
+                UISetComboBoxSelectedEntry(ComboBoxHandle,r);
+                break;
+            }
+        }
+
+        /* Highlighter */
+        for(r=0;r<m_HighlighterInputPros.size();r++)
+        {
+            if(strcmp(m_HighlighterInputPros[r].IDStr,CurStr->c_str())==0)
+            {
+                /* Found it */
+                ListViewHandle=UIS_GetListViewHandle(e_UIS_ListView_InputProTextHighlight);
+                UISetListViewEntryCheckedState(ListViewHandle,r,true);
+                break;
+            }
+        }
+
+        /* Other */
+        for(r=0;r<m_OtherInputPros.size();r++)
+        {
+            if(strcmp(m_OtherInputPros[r].IDStr,CurStr->c_str())==0)
+            {
+                /* Found it */
+                ListViewHandle=UIS_GetListViewHandle(e_UIS_ListView_InputProTextOther);
+                UISetListViewEntryCheckedState(ListViewHandle,r,true);
+                break;
+            }
+        }
+    }
+}
+
+static void DS_RethinkTerminalDisplay(void)
+{
+    t_UICheckboxCtrl *FixedWidthHandle;
+    t_UICheckboxCtrl *FixedHeightHandle;
+    t_UICheckboxCtrl *CenterTextInWindowHandle;
+    t_UINumberInput *Width;
+    t_UINumberInput *Height;
+    bool CenterTextInWindowEnable;
+    bool Enable;
+
+    FixedWidthHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_TerminalSize_FixedWidth);
+    FixedHeightHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_TerminalSize_FixedHeight);
+    CenterTextInWindowHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CenterTextInWindow);
+    Width=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_TermSizeWidth);
+    Height=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_TermSizeHeight);
+
+    CenterTextInWindowEnable=true;
+    if(!UIGetCheckboxCheckStatus(FixedWidthHandle) &&
+            !UIGetCheckboxCheckStatus(FixedHeightHandle))
+    {
+        CenterTextInWindowEnable=false;
+    }
+    UIEnableCheckbox(CenterTextInWindowHandle,CenterTextInWindowEnable);
+
+    Enable=true;
+    if(!UIGetCheckboxCheckStatus(FixedWidthHandle))
+        Enable=false;
+    UIEnableNumberInputCtrl(Width,Enable);
+
+    Enable=true;
+    if(!UIGetCheckboxCheckStatus(FixedHeightHandle))
+        Enable=false;
+    UIEnableNumberInputCtrl(Height,Enable);
+}
+
+static void DS_RethinkDisplayDisplay(void)
+{
+    t_UILabelCtrl *FontLabelCtrl;
+    string FontLabel;
+    char buff[100];
+
+    FontLabelCtrl=UIS_GetLabelHandle(e_UIS_Labels_CurrentFont);
+
+    sprintf(buff,"%d",m_SettingConSettings->FontSize);
+    FontLabel=m_SettingConSettings->FontName;
+    FontLabel+=" / ";
+    FontLabel+=buff;
+    UISetLabelText(FontLabelCtrl,FontLabel.c_str());
+
+    DS_CopySysColors2GUI();
+}
+
+static void DS_RethinkHexDisplayDisplay(void)
+{
+    t_UILabelCtrl *FontLabelCtrl;
+    string FontLabel;
+    char buff[100];
+
+    FontLabelCtrl=UIS_GetLabelHandle(e_UIS_Labels_HexDisplayCurrentFont);
+
+    sprintf(buff,"%d",g_Settings.HexDisplaysFontSize);
+    FontLabel=g_Settings.HexDisplaysFontName;
+    FontLabel+=" / ";
+    FontLabel+=buff;
+    UISetLabelText(FontLabelCtrl,FontLabel.c_str());
+
+    DS_CopySysColors2GUI();
+}
+
+static void DS_GetSettingsFromGUI(void)
+{
+    t_UICheckboxCtrl *CheckboxHandle;
+    t_UIComboBoxCtrl *ComboBoxHandle;
+    t_UINumberInput *NumberInputHandle;
+    t_UIListViewCtrl *ListViewHandle;
+    t_UIRadioBttnCtrl *RadioHandle;
+    t_UITextInputCtrl *TxtHandle;
+    uintptr_t ID;
+
+    if(!m_SettingConSettingsOnly)
+    {
+        /********************/
+        /* Behaviour        */
+        /********************/
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_BookmarksOpenNewTab);
+        g_Settings.BookmarksOpenNewTabs=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        /********************/
+        /* Panels           */
+        /********************/
+        /* Left panel */
+        /* RestoreFromSettings */
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_LeftPanel_RestoreFromSettings);
+        g_Settings.LeftPanelFromSettings=UIGetCheckboxCheckStatus(CheckboxHandle);
+        /* ShowPanelOnStartup */
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_LeftPanel_ShowPanelOnStartup);
+        g_Settings.LeftPanelOpenOnStartup=UIGetCheckboxCheckStatus(CheckboxHandle);
+        /* AutoHidePanel */
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_LeftPanel_AutoHidePanel);
+        g_Settings.LeftPanelAutoHide=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        /* Right panel */
+        /* RestoreFromSettings */
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_RightPanel_RestoreFromSettings);
+        g_Settings.RightPanelFromSettings=UIGetCheckboxCheckStatus(CheckboxHandle);
+        /* ShowPanelOnStartup */
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_RightPanel_ShowPanelOnStartup);
+        g_Settings.RightPanelOpenOnStartup=UIGetCheckboxCheckStatus(CheckboxHandle);
+        /* AutoHidePanel */
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_RightPanel_AutoHidePanel);
+        g_Settings.RightPanelAutoHide=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        /* Bottom panel */
+        /* RestoreFromSettings */
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_BottomPanel_RestoreFromSettings);
+        g_Settings.BottomPanelFromSettings=UIGetCheckboxCheckStatus(CheckboxHandle);
+        /* ShowPanelOnStartup */
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_BottomPanel_ShowPanelOnStartup);
+        g_Settings.BottomPanelOpenOnStartup=UIGetCheckboxCheckStatus(CheckboxHandle);
+        /* AutoHidePanel */
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_BottomPanel_AutoHidePanel);
+        g_Settings.BottomPanelAutoHide=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        /* Stop Watch */
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_StopWatchAutoLap);
+        g_Settings.StopWatchAutoLap=UIGetCheckboxCheckStatus(CheckboxHandle);
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_StopWatchAutoStart);
+        g_Settings.StopWatchAutoStart=UIGetCheckboxCheckStatus(CheckboxHandle);
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_StopWatchShowPanel);
+        g_Settings.StopWatchShowPanel=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        /* Capture */
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CaptureTimestamp);
+        g_Settings.CaptureTimestamp=UIGetCheckboxCheckStatus(CheckboxHandle);
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CaptureAppend);
+        g_Settings.CaptureAppend=UIGetCheckboxCheckStatus(CheckboxHandle);
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CaptureStripCtrl);
+        g_Settings.CaptureStripCtrl=UIGetCheckboxCheckStatus(CheckboxHandle);
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CaptureStripEsc);
+        g_Settings.CaptureStripEsc=UIGetCheckboxCheckStatus(CheckboxHandle);
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CaptureHexDump);
+        g_Settings.CaptureHexDump=UIGetCheckboxCheckStatus(CheckboxHandle);
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CaptureShowPanel);
+        g_Settings.CaptureShowPanel=UIGetCheckboxCheckStatus(CheckboxHandle);
+        TxtHandle=UIS_GetTextInputHandle(e_UIS_TextInput_Capture_DefaultFilename);
+        UIGetTextCtrlText(TxtHandle,g_Settings.CaptureDefaultFilename);
+
+        /* Hex Display */
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_HexDisplayEnabled);
+        g_Settings.HexDisplayEnabled=UIGetCheckboxCheckStatus(CheckboxHandle);
+        NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_HexDisplay_BufferSize);
+        g_Settings.HexDisplayBufferSize=UIGetNumberInputCtrlValue(NumberInputHandle);
+
+        g_Settings.HexDisplaysFGColor=m_HexDisplaysFGColor;
+        g_Settings.HexDisplaysBGColor=m_HexDisplaysBGColor;
+        g_Settings.HexDisplaysSelBGColor=m_HexDisplaysSelBGColor;
+
+        /********************/
+        /* Startup          */
+        /********************/
+        ComboBoxHandle=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_WindowStartupPos);
+        g_Settings.RestoreWindowPos=(e_WindowStartupPosType)
+                UIGetComboBoxSelectedEntry(ComboBoxHandle);
+
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_StartMax);
+        g_Settings.AppMaximized=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        /********************/
+        /* Connections      */
+        /********************/
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoConnectOnNewConnection);
+        g_Settings.AutoConnectOnNewConnection=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_Connections_UseConnectionDefaults);
+        g_Settings.UseConnectionDefaults=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        if(g_Settings.UseConnectionDefaults && m_DS_SelectedConnection!=NULL)
+        {
+            DS_CollectConnectionOptions();
+            g_Settings.DefaultConnectionsOptions=m_DS_ConnectionsOptions;
+        }
+    }
+
+    /********************/
+    /* Display          */
+    /********************/
+    if(!m_SettingConSettingsOnly)
+    {
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AlwaysShowTabs);
+        g_Settings.AlwaysShowTabs=UIGetCheckboxCheckStatus(CheckboxHandle);
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CloseButtonOnTabs);
+        g_Settings.CloseButtonOnTabs=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Clear);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.ScreenClear=e_ScreenClear_Clear;
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Scroll);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.ScreenClear=e_ScreenClear_Scroll;
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollAll);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.ScreenClear=e_ScreenClear_ScrollAll;
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollWithHR);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.ScreenClear=e_ScreenClear_ScrollWithHR;
+    }
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CursorBlink);
+    m_SettingConSettings->CursorBlink=UIGetCheckboxCheckStatus(CheckboxHandle);
+    m_SettingConSettings->CursorColor=m_CursorColor;
+
+    /********************/
+    /* Terminal         */
+    /********************/
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_TerminalSize_FixedWidth);
+    m_SettingConSettings->TermSizeFixedWidth=UIGetCheckboxCheckStatus(CheckboxHandle);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_TerminalSize_FixedHeight);
+    m_SettingConSettings->TermSizeFixedHeight=UIGetCheckboxCheckStatus(CheckboxHandle);
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_TermSizeWidth);
+    m_SettingConSettings->TermSizeWidth=UIGetNumberInputCtrlValue(NumberInputHandle);
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_TermSizeHeight);
+    m_SettingConSettings->TermSizeHeight=UIGetNumberInputCtrlValue(NumberInputHandle);
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_ScrollBufferLines);
+    m_SettingConSettings->ScrollBufferLines=UIGetNumberInputCtrlValue(NumberInputHandle);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CenterTextInWindow);
+    m_SettingConSettings->CenterTextInWindow=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+    if(!m_SettingConSettingsOnly)
+    {
+        /* Keyboard */
+        memcpy(&g_Settings.KeyMapping,&m_CopyOfKeyMapping,
+                sizeof(m_CopyOfKeyMapping));
+    }
+
+    /*******************/
+    /* Data Processors */
+    /*******************/
+    ComboBoxHandle=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_DataProcessor);
+    m_SettingConSettings->DataProcessorType=(e_DataProcessorTypeType)
+            UIGetComboBoxSelectedEntry(ComboBoxHandle);
+
+    /* We use one master list of processors and then split it up for the GUI */
+    m_SettingConSettings->EnabledTextDataProcessors.clear();
+
+    /* Char Enc */
+    ComboBoxHandle=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_TextProCharEnc);
+    ID=UIGetComboBoxSelectedEntry(ComboBoxHandle);
+    if(m_CharEncodingInputPros[ID].IDStr!=NULL)
+    {
+        m_SettingConSettings->EnabledTextDataProcessors.
+                push_back(m_CharEncodingInputPros[ID].IDStr);
+    }
+
+    /* Term Emulation */
+    ComboBoxHandle=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_TextProTermEmu);
+    ID=UIGetComboBoxSelectedEntry(ComboBoxHandle);
+    if(m_TermEmulationInputPros[ID].IDStr!=NULL)
+    {
+        m_SettingConSettings->EnabledTextDataProcessors.
+                push_back(m_TermEmulationInputPros[ID].IDStr);
+    }
+
+    /* Highlighter */
+    ListViewHandle=UIS_GetListViewHandle(e_UIS_ListView_InputProTextHighlight);
+    for(ID=0;ID<m_HighlighterInputPros.size();ID++)
+    {
+        if(UIGetListViewEntryCheckedState(ListViewHandle,ID))
+        {
+            m_SettingConSettings->EnabledTextDataProcessors.
+                    push_back(m_HighlighterInputPros[ID].IDStr);
+        }
+    }
+
+    /* Other */
+    ListViewHandle=UIS_GetListViewHandle(e_UIS_ListView_InputProTextOther);
+    for(ID=0;ID<m_OtherInputPros.size();ID++)
+    {
+        if(UIGetListViewEntryCheckedState(ListViewHandle,ID))
+        {
+            m_SettingConSettings->EnabledTextDataProcessors.
+                    push_back(m_OtherInputPros[ID].IDStr);
+        }
+    }
+
+    /********************/
+    /* Colors           */
+    /********************/
+    memcpy(m_SettingConSettings->SysColors,m_DS_SysColors,sizeof(m_DS_SysColors));
+    memcpy(m_SettingConSettings->DefaultColors,m_DS_DefaultColors,sizeof(m_DS_DefaultColors));
+}
+
+static void DS_RethinkGUI(void)
+{
+    t_UIButtonCtrl *ButtonHandle;
+    t_UIListViewCtrl *ListViewHandle;
+
+    UIS_HandleLeftPanelAutoHideClick(g_Settings.LeftPanelAutoHide);
+    UIS_HandleRightPanelAutoHideClick(g_Settings.RightPanelAutoHide);
+    UIS_HandleBottomPanelAutoHideClick(g_Settings.BottomPanelAutoHide);
+    UIS_HandleWindowStartPosChanged(g_Settings.RestoreWindowPos);
+
+    UIS_HandleInputProcessingChange(m_SettingConSettings->DataProcessorType);
+    UIS_HandleInputProcessingCharEncChange();
+    UIS_HandleInputProcessingTermEmuChange();
+
+    ListViewHandle=UIS_GetListViewHandle(e_UIS_ListView_InputProTextHighlight);
+    UIClearListViewSelectedEntry(ListViewHandle);
+    ButtonHandle=UIS_GetButtonHandle(e_UIS_Button_InputProHighLighting_Settings);
+    UIEnableButton(ButtonHandle,false);
+
+    ListViewHandle=UIS_GetListViewHandle(e_UIS_ListView_InputProTextOther);
+    UIClearListViewSelectedEntry(ListViewHandle);
+    ButtonHandle=UIS_GetButtonHandle(e_UIS_Button_InputProOther_Settings);
+    UIEnableButton(ButtonHandle,false);
+
+    DS_UpdateColorPreview(true);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleLeftPanelAutoHideClick
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleLeftPanelAutoHideClick(bool checked);
+ *
+ * PARAMETERS:
+ *    checked [I] -- Is the input checked?
+ *
+ * FUNCTION:
+ *    This function handles the left panel auto hide checkbox being clicked.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleLeftPanelAutoHideClick(bool checked)
+{
+    t_UICheckboxCtrl *CheckboxHandle;
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_LeftPanel_ShowPanelOnStartup);
+
+    UIEnableCheckbox(CheckboxHandle,!checked);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleRightPanelAutoHideClick
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleRightPanelAutoHideClick(bool checked);
+ *
+ * PARAMETERS:
+ *    checked [I] -- Is the input checked?
+ *
+ * FUNCTION:
+ *    This function handles the right panel auto hide checkbox being clicked.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleRightPanelAutoHideClick(bool checked)
+{
+    t_UICheckboxCtrl *CheckboxHandle;
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_RightPanel_ShowPanelOnStartup);
+
+    UIEnableCheckbox(CheckboxHandle,!checked);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleBottomPanelAutoHideClick
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleBottomPanelAutoHideClick(bool checked);
+ *
+ * PARAMETERS:
+ *    checked [I] -- Is the input checked?
+ *
+ * FUNCTION:
+ *    This function handles the bottom panel auto hide checkbox being clicked.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleBottomPanelAutoHideClick(bool checked)
+{
+    t_UICheckboxCtrl *CheckboxHandle;
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_BottomPanel_ShowPanelOnStartup);
+
+    UIEnableCheckbox(CheckboxHandle,!checked);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleAreaChanged
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleAreaChanged(uintptr_t ID);
+ *
+ * PARAMETERS:
+ *    ID [I] -- The new area that was selected
+ *
+ * FUNCTION:
+ *    This function updates the UI when the area select input changes.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleAreaChanged(uintptr_t ID)
+{
+    switch(ID)
+    {
+        case e_DS_SettingsArea_Panels:
+            UIS_MakeTabVisable(e_UIS_TabCtrl_PanelTab);
+        break;
+        case e_DS_SettingsArea_Startup:
+            UIS_MakeTabVisable(e_UIS_TabCtrl_StartupTab);
+        break;
+        case e_DS_SettingsArea_Connections:
+            DS_FillInConnectionsList4GUI();
+            UIS_MakeTabVisable(e_UIS_TabCtrl_ConnectionsTab);
+        break;
+        case e_DS_SettingsArea_Display:
+            UIS_MakeTabVisable(e_UIS_TabCtrl_Display);
+        break;
+        case e_DS_SettingsArea_Terminal:
+            UIS_MakeTabVisable(e_UIS_TabCtrl_Terminal);
+        break;
+        case e_DS_SettingsArea_Behaviour:
+            UIS_MakeTabVisable(e_UIS_TabCtrl_Behaviour);
+        break;
+        default:
+        break;
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleKeyboardCmdListChange
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleKeyboardCmdListChange(uintptr_t ID);
+ *
+ * PARAMETERS:
+ *    ID [I] -- The command ID that has been selected
+ *
+ * FUNCTION:
+ *    This function updates the UI when the keyboard cmd list changes.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleKeyboardCmdListChange(uintptr_t ID)
+{
+    e_CmdType Cmd;
+    t_UITextInputCtrl *ShortcutInput;
+
+    Cmd=(e_CmdType)ID;
+
+    if(Cmd>=e_CmdMAX)
+        return;
+
+    ShortcutInput=UIS_GetTextInputHandle(e_UIS_TextInput_Keyboard_Assigned2);
+    UISetTextCtrlText(ShortcutInput,
+            ConvertKeySeq2String(&m_CopyOfKeyMapping[Cmd]));
+
+//const char *ConvertKeySeq2String(struct CommandKeySeq *KeySeq);
+//void ConvertString2KeySeq(struct CommandKeySeq *KeySeq,const char *Str);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleKeyboardCmdShortCutChange
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleKeyboardCmdShortCutChange(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function converts a key seq string from the UI into a cmd and
+ *    stores it in the currently selected key cmd list entry.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleKeyboardCmdShortCutChange(void)
+{
+    struct CommandKeySeq KeySeq;
+    t_UIListViewCtrl *KeyList;
+    e_CmdType Cmd;
+    t_UITextInputCtrl *ShortcutInput;
+    char KeyNameBuffer[100];
+    char buff[100];
+    int r;
+
+    ShortcutInput=UIS_GetTextInputHandle(e_UIS_TextInput_Keyboard_Assigned2);
+    KeyList=UIS_GetListViewHandle(e_UIS_ListView_Keyboard_CommandList);
+    if(ShortcutInput==NULL || KeyList==NULL)
+        return;
+
+    UIGetTextCtrlText(ShortcutInput,KeyNameBuffer,sizeof(KeyNameBuffer));
+
+    if(!ConvertString2KeySeq(&KeySeq,KeyNameBuffer))
+    {
+        /* Invalid */
+        UIAsk("Error getting key sequence",
+                "The key sequence is not understood.",e_AskBox_Error,
+                e_AskBttns_Ok);
+        return;
+    }
+
+    /* Check if this key seq is already in use (only if it's not blank) */
+    if(KeySeq.Key!=e_UIKeysMAX || KeySeq.Letter!=0)
+    {
+        for(r=0;r<e_CmdMAX;r++)
+        {
+            if(m_CopyOfKeyMapping[r].Mod==KeySeq.Mod &&
+                    m_CopyOfKeyMapping[r].Key==KeySeq.Key &&
+                    m_CopyOfKeyMapping[r].Letter==KeySeq.Letter)
+            {
+                sprintf(buff,"The key sequence is already used by %s.",
+                        GetCmdName((e_CmdType)r));
+                UIAsk("Key sequence already in use",buff,e_AskBox_Error,
+                        e_AskBttns_Ok);
+                return;
+            }
+        }
+    }
+
+    Cmd=(e_CmdType)UIGetListViewSelectedEntry(KeyList);
+    if(Cmd>=e_CmdMAX)
+        return;
+
+    m_CopyOfKeyMapping[Cmd]=KeySeq;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleWindowStartPosChanged
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleWindowStartPosChanged(uintptr_t ID);
+ *
+ * PARAMETERS:
+ *    ID [I] -- The userdata from the selected item.
+ *
+ * FUNCTION:
+ *    This function handles the window start pos combox box changing.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleWindowStartPosChanged(uintptr_t ID)
+{
+    t_UIButtonCtrl *GrabCurrent;
+    bool EnableAll;
+
+    EnableAll=false;
+    switch(ID)
+    {
+        case e_WindowStartupPos_OSDefault:
+            EnableAll=false;
+        break;
+        case e_WindowStartupPos_RestoreFromSession:
+            EnableAll=false;
+        break;
+        case e_WindowStartupPos_RestoreFromSettings:
+            EnableAll=true;
+        break;
+        default:
+        break;
+    }
+
+    GrabCurrent=UIS_GetButtonHandle(e_UIS_Button_GrabCurrentWinPos);
+
+    UIEnableButton(GrabCurrent,EnableAll);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_DoSelectFont
+ *
+ * SYNOPSIS:
+ *    void UIS_DoSelectFont(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function asks the user to select the default font for the text
+ *    canvas.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_DoSelectFont(void)
+{
+    long FontStyle;
+
+    FontStyle=0;
+    if(m_SettingConSettings->FontBold)
+        FontStyle|=UIFONT_STYLE_BOLD;
+    if(m_SettingConSettings->FontItalic)
+        FontStyle|=UIFONT_STYLE_ITALIC;
+
+    if(UI_FontReq("Select font",m_SettingConSettings->FontName,m_SettingConSettings->FontSize,
+            FontStyle,UIFONT_FLAGS_FIXEDWIDTH))
+    {
+        m_SettingConSettings->FontBold=FontStyle&UIFONT_STYLE_BOLD;
+        m_SettingConSettings->FontItalic=FontStyle&UIFONT_STYLE_ITALIC;
+        DS_RethinkDisplayDisplay();
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_DoSelectHexDisplayFont
+ *
+ * SYNOPSIS:
+ *    void UIS_DoSelectHexDisplayFont(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function asks the user to select the hex display font.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_DoSelectHexDisplayFont(void)
+{
+    long FontStyle;
+
+    FontStyle=0;
+    if(g_Settings.HexDisplaysFontBold)
+        FontStyle|=UIFONT_STYLE_BOLD;
+    if(g_Settings.HexDisplaysFontItalic)
+        FontStyle|=UIFONT_STYLE_ITALIC;
+
+    if(UI_FontReq("Select font",g_Settings.HexDisplaysFontName,
+            g_Settings.HexDisplaysFontSize,FontStyle,UIFONT_FLAGS_FIXEDWIDTH))
+    {
+        g_Settings.HexDisplaysFontBold=FontStyle&UIFONT_STYLE_BOLD;
+        g_Settings.HexDisplaysFontItalic=FontStyle&UIFONT_STYLE_ITALIC;
+        DS_RethinkHexDisplayDisplay();
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleInputProcessingChange
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleInputProcessingChange(uintptr_t ID);
+ *
+ * PARAMETERS:
+ *    ID [I] -- Type of data processor selected
+ *
+ * FUNCTION:
+ *    This function handles updating the UI with the selected data
+ *    processor type.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleInputProcessingChange(uintptr_t ID)
+{
+    t_UIPagePanelCtrl *DataProcessing;
+
+    DataProcessing=UIS_GetPagePanelHandle(e_UIS_PagePanel_DataProcessing);
+    switch(ID)
+    {
+        case e_DataProcessorType_Binary:
+            UIPagePanelCtrlSetPage(DataProcessing,
+                    e_UIS_DataProcessingPages_Binary);
+        break;
+        case e_DataProcessorType_Text:
+            UIPagePanelCtrlSetPage(DataProcessing,
+                    e_UIS_DataProcessingPages_Text);
+        break;
+        default:
+        break;
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleInputProcessingCharEncChange
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleInputProcessingCharEncChange(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    Updates the UI when the input processor encoding is changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleInputProcessingCharEncChange(void)
+{
+    bool DataProcessorHasSettings;
+    t_UIButtonCtrl *InputProCharEnc_Settings;
+
+    InputProCharEnc_Settings=UIS_GetButtonHandle(e_UIS_Button_InputProCharEnc_Settings);
+
+    DataProcessorHasSettings=false;
+
+    UIEnableButton(InputProCharEnc_Settings,DataProcessorHasSettings);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleInputProcessingTermEmuChange
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleInputProcessingTermEmuChange(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function updates the UI when the input processing term emulation
+ *    changes.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleInputProcessingTermEmuChange(void)
+{
+    bool DataProcessorHasSettings;
+    t_UIButtonCtrl *InputProTermEmu_Settings;
+
+    InputProTermEmu_Settings=UIS_GetButtonHandle(e_UIS_Button_InputProTermEmu_Settings);
+
+    DataProcessorHasSettings=false;
+
+    UIEnableButton(InputProTermEmu_Settings,DataProcessorHasSettings);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleSysColPresetChange
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleSysColPresetChange(uintptr_t ID);
+ *
+ * PARAMETERS:
+ *    ID [I] -- The new preset selected
+ *
+ * FUNCTION:
+ *    This function handles updating the UI when the color preset is changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleSysColPresetChange(uintptr_t ID)
+{
+    uint32_t Colors[e_SysColShadeMAX][e_SysColMAX];
+    t_UIButtonCtrl *SysCol_Apply;
+    int r;
+
+    SysCol_Apply=UIS_GetButtonHandle(e_UIS_Button_SysCol_Apply);
+
+    if(ID<e_SysColPresetMAX)
+    {
+        UIEnableButton(SysCol_Apply,true);
+        GetPresetSysColors((e_SysColPresetType)ID,Colors);
+    }
+    else
+    {
+        UIEnableButton(SysCol_Apply,false);
+        memset(Colors,0x00,sizeof(Colors));
+    }
+
+    for(r=0;r<e_SysColMAX;r++)
+    {
+        UIS_SetPresetPreviewColor((e_SysColType)r,
+                Colors[e_SysColShade_Normal][r]);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_DoSysColApply
+ *
+ * SYNOPSIS:
+ *    void UIS_DoSysColApply(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function applies the default colors that user has selected in the
+ *    UI.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_DoSysColApply(void)
+{
+    t_UIComboBoxCtrl *SysColPreset;
+    e_SysColPresetType Preset;
+
+    SysColPreset=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_SysCol_Preset);
+
+    Preset=(e_SysColPresetType)UIGetComboBoxSelectedEntry(SysColPreset);
+
+    if(Preset<e_SysColPresetMAX)
+    {
+        GetPresetSysColors(Preset,m_DS_SysColors);
+        m_DS_DefaultColors[e_DefaultColors_BG]=
+                m_DS_SysColors[e_SysColShade_Normal][e_SysCol_Black];
+        m_DS_DefaultColors[e_DefaultColors_FG]=
+                m_DS_SysColors[e_SysColShade_Normal][e_SysCol_White];
+        DS_CopySysColors2GUI();
+    }
+}
+
+static void DS_CopySysColors2GUI(void)
+{
+    int r;
+    t_UIRadioBttnCtrl *SysColShade_Normal;
+    t_UIRadioBttnCtrl *SysColShade_Bright;
+    t_UIRadioBttnCtrl *SysColShade_Dark;
+    e_SysColShadeType Shade;
+
+    SysColShade_Normal=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Normal);
+    SysColShade_Bright=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Bright);
+    SysColShade_Dark=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Dark);
+
+    Shade=e_SysColShade_Normal;
+    if(UIIsRadioBttnSelected(SysColShade_Normal))
+        Shade=e_SysColShade_Normal;
+    if(UIIsRadioBttnSelected(SysColShade_Bright))
+        Shade=e_SysColShade_Bright;
+    if(UIIsRadioBttnSelected(SysColShade_Dark))
+        Shade=e_SysColShade_Dark;
+
+    for(r=0;r<e_SysColMAX;r++)
+    {
+        UIS_SetSysColPreviewColor((e_SysColType)r,
+                m_DS_SysColors[Shade][r]);
+    }
+
+    for(r=0;r<e_DefaultColorsMAX;r++)
+    {
+        UIS_SetDefaultPreviewColor((e_DefaultColorsType)r,
+                m_DS_DefaultColors[r]);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleSysColPreviewColorClick
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleSysColPreviewColorClick(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when one of the preview colors is clicked.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleSysColPreviewColorClick(void)
+{
+    t_UIRadioBttnCtrl *DefaultBttn;
+    int Bttn;
+
+    for(Bttn=e_UIS_RadioBttn_DefaultColorPrev_Forground;
+            Bttn<=e_UIS_RadioBttn_DefaultColorPrev_Background;Bttn++)
+    {
+        DefaultBttn=UIS_GetRadioBttnHandle((e_UIS_RadioBttns)(Bttn));
+        UIUnselectRadioBttn(DefaultBttn);
+    }
+
+    DS_UpdateColorPreview(true);
+}
+
+void DS_SetCurrentColor(uint32_t RGB)
+{
+    int Color;
+    e_SysColShadeType Shade;
+    int DefaultColor;
+    t_UIRadioBttnCtrl *SysColShade_Normal;
+    t_UIRadioBttnCtrl *SysColShade_Bright;
+    t_UIRadioBttnCtrl *SysColShade_Dark;
+    t_UIRadioBttnCtrl *PreviewBttn;
+    t_UIRadioBttnCtrl *DefaultBttnFG;
+    t_UIRadioBttnCtrl *DefaultBttnBG;
+
+    /* Find the selected color */
+    for(Color=0;Color<e_SysColMAX;Color++)
+    {
+        PreviewBttn=UIS_GetRadioBttnHandle(
+                (e_UIS_RadioBttns)(e_UIS_RadioBttn_SysColPrev_Black+Color));
+        if(UIIsRadioBttnSelected(PreviewBttn))
+        {
+            /* Found it */
+            break;
+        }
+    }
+    if(Color==e_SysColMAX)
+    {
+        /* Check the Default FG & BG */
+        DefaultBttnFG=UIS_GetRadioBttnHandle(
+                e_UIS_RadioBttn_DefaultColorPrev_Forground);
+        DefaultBttnBG=UIS_GetRadioBttnHandle(
+                e_UIS_RadioBttn_DefaultColorPrev_Background);
+
+        if(UIIsRadioBttnSelected(DefaultBttnFG))
+        {
+            DefaultColor=e_DefaultColors_FG;
+        }
+        else if(UIIsRadioBttnSelected(DefaultBttnBG))
+        {
+            DefaultColor=e_DefaultColors_BG;
+        }
+        else
+        {
+            /* Nothing select, use black */
+            Color=e_SysCol_Black;
+        }
+    }
+
+    SysColShade_Normal=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Normal);
+    SysColShade_Bright=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Bright);
+    SysColShade_Dark=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Dark);
+
+    if(Color==e_SysColMAX)
+    {
+        m_DS_DefaultColors[DefaultColor]=RGB;
+    }
+    else
+    {
+        Shade=e_SysColShade_Normal;
+        if(UIIsRadioBttnSelected(SysColShade_Normal))
+            Shade=e_SysColShade_Normal;
+        if(UIIsRadioBttnSelected(SysColShade_Bright))
+            Shade=e_SysColShade_Bright;
+        if(UIIsRadioBttnSelected(SysColShade_Dark))
+            Shade=e_SysColShade_Dark;
+
+        m_DS_SysColors[Shade][Color]=RGB;
+    }
+}
+
+uint32_t DS_GetCurrentColor(void)
+{
+    int Color;
+    e_SysColShadeType Shade;
+    int DefaultColor;
+    t_UIRadioBttnCtrl *SysColShade_Normal;
+    t_UIRadioBttnCtrl *SysColShade_Bright;
+    t_UIRadioBttnCtrl *SysColShade_Dark;
+    t_UIRadioBttnCtrl *PreviewBttn;
+    t_UIRadioBttnCtrl *DefaultBttnFG;
+    t_UIRadioBttnCtrl *DefaultBttnBG;
+
+    /* Find the selected color */
+    for(Color=0;Color<e_SysColMAX;Color++)
+    {
+        PreviewBttn=UIS_GetRadioBttnHandle(
+                (e_UIS_RadioBttns)(e_UIS_RadioBttn_SysColPrev_Black+Color));
+        if(UIIsRadioBttnSelected(PreviewBttn))
+        {
+            /* Found it */
+            break;
+        }
+    }
+    if(Color==e_SysColMAX)
+    {
+        /* Check the Default FG & BG */
+        DefaultBttnFG=UIS_GetRadioBttnHandle(
+                e_UIS_RadioBttn_DefaultColorPrev_Forground);
+        DefaultBttnBG=UIS_GetRadioBttnHandle(
+                e_UIS_RadioBttn_DefaultColorPrev_Background);
+
+        if(UIIsRadioBttnSelected(DefaultBttnFG))
+        {
+            DefaultColor=e_DefaultColors_FG;
+        }
+        else if(UIIsRadioBttnSelected(DefaultBttnBG))
+        {
+            DefaultColor=e_DefaultColors_BG;
+        }
+        else
+        {
+            /* Nothing select, use black */
+            Color=e_SysCol_Black;
+        }
+    }
+
+    SysColShade_Normal=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Normal);
+    SysColShade_Bright=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Bright);
+    SysColShade_Dark=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Dark);
+
+    if(Color==e_SysColMAX)
+    {
+        return m_DS_DefaultColors[DefaultColor];
+    }
+    else
+    {
+        Shade=e_SysColShade_Normal;
+        if(UIIsRadioBttnSelected(SysColShade_Normal))
+            Shade=e_SysColShade_Normal;
+        if(UIIsRadioBttnSelected(SysColShade_Bright))
+            Shade=e_SysColShade_Bright;
+        if(UIIsRadioBttnSelected(SysColShade_Dark))
+            Shade=e_SysColShade_Dark;
+
+        return m_DS_SysColors[Shade][Color];
+    }
+}
+
+void DS_UpdateColorPreview(bool UpdateWeb)
+{
+    int Color;
+    e_SysColShadeType Shade;
+    t_UIScrollBarCtrl *RedScroll;
+    t_UIScrollBarCtrl *GreenScroll;
+    t_UIScrollBarCtrl *BlueScroll;
+    t_UIRadioBttnCtrl *SysColShade_Normal;
+    t_UIRadioBttnCtrl *SysColShade_Bright;
+    t_UIRadioBttnCtrl *SysColShade_Dark;
+    t_UINumberInput *RedInput;
+    t_UINumberInput *GreenInput;
+    t_UINumberInput *BlueInput;
+    t_UITextInputCtrl *WebInput;
+    t_UIRadioBttnCtrl *PreviewBttn;
+    t_UIRadioBttnCtrl *DefaultBttnFG;
+    t_UIRadioBttnCtrl *DefaultBttnBG;
+    int DefaultColor;
+    uint32_t RGB;
+    char buff[100];
+
+    m_DS_UpdatingColorPreview=true;
+
+    /* Find the selected color */
+    for(Color=0;Color<e_SysColMAX;Color++)
+    {
+        PreviewBttn=UIS_GetRadioBttnHandle(
+                (e_UIS_RadioBttns)(e_UIS_RadioBttn_SysColPrev_Black+Color));
+        if(UIIsRadioBttnSelected(PreviewBttn))
+        {
+            /* Found it */
+            break;
+        }
+    }
+    if(Color==e_SysColMAX)
+    {
+        /* Check the Default FG & BG */
+        DefaultBttnFG=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_DefaultColorPrev_Forground);
+        DefaultBttnBG=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_DefaultColorPrev_Background);
+
+        if(UIIsRadioBttnSelected(DefaultBttnFG))
+        {
+            DefaultColor=e_DefaultColors_FG;
+        }
+        else if(UIIsRadioBttnSelected(DefaultBttnBG))
+        {
+            DefaultColor=e_DefaultColors_BG;
+        }
+        else
+        {
+            /* Nothing select, use black */
+            Color=e_SysCol_Black;
+        }
+    }
+
+    SysColShade_Normal=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Normal);
+    SysColShade_Bright=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Bright);
+    SysColShade_Dark=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Dark);
+    RedScroll=UIS_GetScrollBarHandle(e_UIS_ScrollBar_SysCol_RedScroll);
+    GreenScroll=UIS_GetScrollBarHandle(e_UIS_ScrollBar_SysCol_GreenScroll);
+    BlueScroll=UIS_GetScrollBarHandle(e_UIS_ScrollBar_SysCol_BlueScroll);
+    RedInput=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_SysCol_RedInput);
+    GreenInput=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_SysCol_GreenInput);
+    BlueInput=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_SysCol_BlueInput);
+    WebInput=UIS_GetTextInputHandle(e_UIS_TextInput_SysCol_Web);
+
+    if(Color==e_SysColMAX)
+    {
+        RGB=m_DS_DefaultColors[DefaultColor];
+    }
+    else
+    {
+        Shade=e_SysColShade_Normal;
+        if(UIIsRadioBttnSelected(SysColShade_Normal))
+            Shade=e_SysColShade_Normal;
+        if(UIIsRadioBttnSelected(SysColShade_Bright))
+            Shade=e_SysColShade_Bright;
+        if(UIIsRadioBttnSelected(SysColShade_Dark))
+            Shade=e_SysColShade_Dark;
+
+        RGB=m_DS_SysColors[Shade][Color];
+    }
+
+    UISetScrollBarPos(RedScroll,(RGB>>16)&0xFF);
+    UISetScrollBarPos(GreenScroll,(RGB>>8)&0xFF);
+    UISetScrollBarPos(BlueScroll,(RGB)&0xFF);
+
+    UISetNumberInputCtrlValue(RedInput,(RGB>>16)&0xFF);
+    UISetNumberInputCtrlValue(GreenInput,(RGB>>8)&0xFF);
+    UISetNumberInputCtrlValue(BlueInput,(RGB)&0xFF);
+
+    if(UpdateWeb)
+    {
+        sprintf(buff,"#%06X",RGB);
+        UISetTextCtrlText(WebInput,buff);
+    }
+
+    if(Color==e_SysColMAX)
+        UIS_SetDefaultPreviewColor((e_DefaultColorsType)DefaultColor,RGB);
+    else
+        UIS_SetSysColPreviewColor((e_SysColType)Color,RGB);
+    m_DS_UpdatingColorPreview=false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_ProcessSysColWebInputValue
+ *
+ * SYNOPSIS:
+ *    void UIS_ProcessSysColWebInputValue(const char *Text);
+ *
+ * PARAMETERS:
+ *    Text [I] -- The text from the system color web input control
+ *
+ * FUNCTION:
+ *    This function processes the color info that was input into the
+ *    system color web input.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_ProcessSysColWebInputValue(const char *Text)
+{
+    int Len;
+    const char *Start;
+    char buff[100];
+    uint32_t RGB;
+
+    if(m_DS_UpdatingColorPreview)
+        return;
+
+    Len=strlen(Text);
+    Start=Text;
+    if(Text[0]=='#')
+    {
+        Start++;
+        Len--;
+    }
+
+    if(Len==6)
+    {
+        buff[0]=Start[0];
+        buff[1]=Start[1];
+        buff[2]=0;
+        RGB=strtol(buff,NULL,16)<<16;
+        buff[0]=Start[2];
+        buff[1]=Start[3];
+        buff[2]=0;
+        RGB|=strtol(buff,NULL,16)<<8;
+        buff[0]=Start[4];
+        buff[1]=Start[5];
+        buff[2]=0;
+        RGB|=strtol(buff,NULL,16);
+    }
+    else if(Len==3)
+    {
+        buff[0]=Start[0];
+        buff[1]=Start[0];
+        buff[2]=0;
+        RGB=strtol(buff,NULL,16)<<16;
+        buff[0]=Start[1];
+        buff[1]=Start[1];
+        buff[2]=0;
+        RGB|=strtol(buff,NULL,16)<<8;
+        buff[0]=Start[2];
+        buff[1]=Start[2];
+        buff[2]=0;
+        RGB|=strtol(buff,NULL,16);
+    }
+    else
+    {
+        return;
+    }
+    DS_SetCurrentColor(RGB);
+    DS_UpdateColorPreview(false);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleSysColDefaultColorClick
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleSysColDefaultColorClick(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when one of the default color button are clicked.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleSysColDefaultColorClick(void)
+{
+    t_UIRadioBttnCtrl *PreviewBttn;
+    int Color;
+
+    for(Color=0;Color<e_SysColMAX;Color++)
+    {
+        PreviewBttn=UIS_GetRadioBttnHandle(
+                (e_UIS_RadioBttns)(e_UIS_RadioBttn_SysColPrev_Black+Color));
+        UIUnselectRadioBttn(PreviewBttn);
+    }
+
+    DS_UpdateColorPreview(true);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DS_FillInConnectionsList4GUI
+ *
+ * SYNOPSIS:
+ *    static void DS_FillInConnectionsList4GUI(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets the list of connections and fills in the list.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void DS_FillInConnectionsList4GUI(void)
+{
+    t_UIListViewCtrl *GUIConnectionList;
+    t_UICheckboxCtrl *GUICheckboxHandle;
+    struct ConnectionInfoList *Con;
+
+    GUICheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_Connections_UseConnectionDefaults);
+    GUIConnectionList=UIS_GetListViewHandle(e_UIS_ListView_Connections_ConnectionList);
+
+    UIClearListView(GUIConnectionList);
+
+    /* If we aren't using the options nothing more to do */
+    if(!UIGetCheckboxCheckStatus(GUICheckboxHandle))
+        return;
+
+    if(m_DS_ConList==NULL)
+    {
+        m_DS_ConList=IOS_GetListOfAvailableConnections();
+        if(m_DS_ConList==NULL)
+            return;
+    }
+
+    for(Con=m_DS_ConList;Con!=NULL;Con=Con->Next)
+        UIAddItem2ListView(GUIConnectionList,Con->Name,(uintptr_t)Con);
+
+    UISetListViewSelectedEntry(GUIConnectionList,(uintptr_t)m_DS_ConList);
+    UIS_HandleConnectionListChanged((uintptr_t)m_DS_ConList);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleConnectionListChanged
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleConnectionListChanged(uintptr_t ID);
+ *
+ * PARAMETERS:
+ *    
+ *
+ * FUNCTION:
+ *    DEBUG PAUL: Delete this?
+ *
+ * RETURNS:
+ *    
+ *
+ * NOTES:
+ *    
+ *
+ * LIMITATIONS:
+ *    
+ *
+ * EXAMPLE:
+ *    
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleConnectionListChanged(uintptr_t ID)
+{
+    struct ConnectionInfoList *Con=(struct ConnectionInfoList *)ID;
+    i_ConnectionsOptions ConOptions;
+    string DetectedID;
+    t_KVList EntpyOptions;
+    t_KVList *UseOptions;
+
+    if(m_DS_ConList==NULL)
+        return;
+
+    if(m_DS_ConOptions!=NULL)
+    {
+        /* Need to free the last options */
+        DS_CollectConnectionOptions();
+        IOS_FreeConnectionOptions(m_DS_ConOptions);
+        m_DS_ConOptions=NULL;
+    }
+
+    m_DS_SelectedConnection=NULL;
+
+    if(Con==NULL)
+        return;
+
+    /* See if we can find the options */
+    DetectedID=Con->UniqueID;
+
+    ConOptions=m_DS_ConnectionsOptions.find(DetectedID);
+    if(ConOptions==m_DS_ConnectionsOptions.end())
+    {
+        /* We didn't find it in our list of options.  See if session has
+           this connection. */
+        ConOptions=g_Session.ConnectionsOptions.find(DetectedID);
+        if(ConOptions==g_Session.ConnectionsOptions.end())
+        {
+            /* Ok, we don't have options */
+            UseOptions=&EntpyOptions;
+        }
+        else
+        {
+            UseOptions=&ConOptions->second.Options;
+        }
+    }
+    else
+    {
+        UseOptions=&ConOptions->second.Options;
+    }
+
+    m_DS_ConOptions=IOS_AllocConnectionOptions(Con,
+            UINC_GetSettingsConnectionsOptionsFrameContainer(),*UseOptions,
+            NULL,NULL);
+
+    /* Note what connection is selected */
+    m_DS_SelectedConnection=Con;
+}
+
+static void DS_CollectConnectionOptions(void)
+{
+    string DetectedID;
+    i_ConnectionsOptions ConOptions;
+    struct ConOptions EmptyConOptions;
+
+    if(m_DS_ConList==NULL || m_DS_ConOptions==NULL ||
+            m_DS_SelectedConnection==NULL)
+    {
+        return;
+    }
+
+    /* See if we can find the options */
+    DetectedID=m_DS_SelectedConnection->UniqueID;
+
+    ConOptions=m_DS_ConnectionsOptions.find(DetectedID);
+    if(ConOptions==m_DS_ConnectionsOptions.end())
+    {
+        /* Didn't find it, add one */
+        EmptyConOptions.Age=time(NULL);
+        m_DS_ConnectionsOptions.insert(make_pair(DetectedID,EmptyConOptions));
+        ConOptions=m_DS_ConnectionsOptions.find(DetectedID);
+        if(ConOptions==m_DS_ConnectionsOptions.end())
+        {
+            /* Didn't find what we just added, abort */
+            return;
+        }
+    }
+
+    IOS_StoreConnectionOptions(m_DS_ConOptions,ConOptions->second.Options);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DS_Event
+ *
+ * SYNOPSIS:
+ *    bool DS_Event(const struct DSEvent *Event);
+ *
+ * PARAMETERS:
+ *    Event [I] -- The event we should process.
+ *
+ * FUNCTION:
+ *    This function is called from the UI to tell us there was a UI event.
+ *
+ * RETURNS:
+ *    true -- The event should act normally
+ *    false -- There event should be canceled
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DS_Event(const struct DSEvent *Event)
+{
+    bool AcceptEvent;
+    uint32_t SelColor;
+    uint32_t RGB;
+    t_UIButtonCtrl *InputProHighLighting_Settings;
+    t_UIButtonCtrl *InputProOther_Settings;
+    t_UIColorPreviewCtrl *ColorPreviewHandle;
+
+    AcceptEvent=true;
+    switch(Event->EventType)
+    {
+        case e_DSEvent_BttnTriggered:
+            switch(Event->Info.Bttn.InputID)
+            {
+                case e_UIS_Button_LeftPanel_GrabLayout:
+                    /* Copy the session pos over to settings */
+                    g_Settings.LeftPanelSize=g_Session.LeftPanelSize;
+                break;
+                case e_UIS_Button_RightPanel_GrabLayout:
+                    /* Copy the session pos over to settings */
+                    g_Settings.RightPanelSize=g_Session.RightPanelSize;
+                break;
+                case e_UIS_Button_BottomPanel_GrabLayout:
+                    /* Copy the session pos over to settings */
+                    g_Settings.BottomPanelSize=g_Session.BottomPanelSize;
+                break;
+                case e_UIS_Button_GrabCurrentWinPos:
+                    m_SettingsMW->GetSizeAndPos(g_Settings.WindowPosX,
+                            g_Settings.WindowPosY,g_Settings.WindowWidth,
+                            g_Settings.WindowHeight);
+                break;
+                case e_UIS_Button_InputProCharEnc_Settings:
+                break;
+                case e_UIS_Button_InputProTermEmu_Settings:
+                break;
+                case e_UIS_Button_InputProHighLighting_Settings:
+                break;
+                case e_UIS_Button_InputProOther_Settings:
+                break;
+                case e_UIS_Button_SysCol_Apply:
+                    UIS_DoSysColApply();
+                break;
+                case e_UIS_Button_SelectFont:
+                    UIS_DoSelectFont();
+                break;
+                case e_UIS_Button_SelectCursorColor:
+                    SelColor=UIGetColor(m_CursorColor);
+                    if(SelColor!=0xFFFFFFFF)
+                    {
+                        m_CursorColor=SelColor;
+                        ColorPreviewHandle=UIS_GetColorPreviewHandle(
+                                e_UIS_ColorPreview_CursorColor);
+                        UISetColorPreviewColor(ColorPreviewHandle,
+                                m_CursorColor);
+                    }
+                break;
+                case e_UIS_Button_KeyboardCmdSet:
+                    UIS_HandleKeyboardCmdShortCutChange();
+                break;
+                case e_UIS_Button_CaptureSelectFilename:
+                    DS_SelectCaptureFilename();
+                break;
+
+                case e_UIS_Button_SelectHexDisplayFGColor:
+                    SelColor=UIGetColor(m_HexDisplaysFGColor);
+                    if(SelColor!=0xFFFFFFFF)
+                    {
+                        m_HexDisplaysFGColor=SelColor;
+                        ColorPreviewHandle=UIS_GetColorPreviewHandle(
+                                e_UIS_ColorPreview_HexDisplay_FGDisplay);
+                        UISetColorPreviewColor(ColorPreviewHandle,
+                                m_HexDisplaysFGColor);
+                    }
+                break;
+
+                case e_UIS_Button_SelectHexDisplayBGColor:
+                    SelColor=UIGetColor(m_HexDisplaysBGColor);
+                    if(SelColor!=0xFFFFFFFF)
+                    {
+                        m_HexDisplaysBGColor=SelColor;
+                        ColorPreviewHandle=UIS_GetColorPreviewHandle(
+                                e_UIS_ColorPreview_HexDisplay_BGDisplay);
+                        UISetColorPreviewColor(ColorPreviewHandle,
+                                m_HexDisplaysBGColor);
+                    }
+                break;
+
+                case e_UIS_Button_SelectHexDisplaySelBGColor:
+                    SelColor=UIGetColor(m_HexDisplaysSelBGColor);
+                    if(SelColor!=0xFFFFFFFF)
+                    {
+                        m_HexDisplaysSelBGColor=SelColor;
+                        ColorPreviewHandle=UIS_GetColorPreviewHandle(
+                                e_UIS_ColorPreview_HexDisplay_SelBGDisplay);
+                        UISetColorPreviewColor(ColorPreviewHandle,
+                                m_HexDisplaysSelBGColor);
+                    }
+                break;
+
+                case e_UIS_Button_SelectHexDisplayFont:
+                    UIS_DoSelectHexDisplayFont();
+                break;
+
+                case e_UIS_ButtonMAX:
+                default:
+                break;
+            }
+        break;
+        case e_DSEvent_CheckboxClick:
+            switch(Event->Info.Checkbox.InputID)
+            {
+                case e_UIS_Checkbox_LeftPanel_AutoHidePanel:
+                    UIS_HandleLeftPanelAutoHideClick(Event->
+                            Info.Checkbox.Checked);
+                break;
+                case e_UIS_Checkbox_RightPanel_AutoHidePanel:
+                    UIS_HandleRightPanelAutoHideClick(Event->
+                            Info.Checkbox.Checked);
+                break;
+                case e_UIS_Checkbox_BottomPanel_AutoHidePanel:
+                    UIS_HandleBottomPanelAutoHideClick(Event->
+                            Info.Checkbox.Checked);
+                break;
+                case e_UIS_Checkbox_TerminalSize_FixedWidth:
+                case e_UIS_Checkbox_TerminalSize_FixedHeight:
+                    DS_RethinkTerminalDisplay();
+                break;
+                case e_UIS_Checkbox_Connections_UseConnectionDefaults:
+                    DS_FillInConnectionsList4GUI();
+                break;
+
+                case e_UIS_Checkbox_LeftPanel_RestoreFromSettings:
+                case e_UIS_Checkbox_LeftPanel_ShowPanelOnStartup:
+                case e_UIS_Checkbox_RightPanel_RestoreFromSettings:
+                case e_UIS_Checkbox_RightPanel_ShowPanelOnStartup:
+                case e_UIS_Checkbox_BottomPanel_RestoreFromSettings:
+                case e_UIS_Checkbox_BottomPanel_ShowPanelOnStartup:
+                case e_UIS_Checkbox_StartMax:
+                case e_UIS_Checkbox_AutoConnectOnNewConnection:
+                case e_UIS_Checkbox_AlwaysShowTabs:
+                case e_UIS_Checkbox_CloseButtonOnTabs:
+                case e_UIS_Checkbox_CenterTextInWindow:
+                case e_UIS_Checkbox_CursorBlink:
+                case e_UIS_Checkbox_BookmarksOpenNewTab:
+                case e_UIS_Checkbox_StopWatchAutoLap:
+                case e_UIS_Checkbox_StopWatchAutoStart:
+                case e_UIS_Checkbox_StopWatchShowPanel:
+                case e_UIS_Checkbox_CaptureTimestamp:
+                case e_UIS_Checkbox_CaptureAppend:
+                case e_UIS_Checkbox_CaptureStripCtrl:
+                case e_UIS_Checkbox_CaptureStripEsc:
+                case e_UIS_Checkbox_CaptureHexDump:
+                case e_UIS_Checkbox_CaptureShowPanel:
+                case e_UIS_Checkbox_HexDisplayEnabled:
+                case e_UIS_CheckboxMAX:
+                default:
+                break;
+            }
+        break;
+        case e_DSEvent_RadioBttnClick:
+            switch(Event->Info.RadioBttn.InputID)
+            {
+                case e_UIS_RadioBttn_SysCol_Shade_Normal:
+                case e_UIS_RadioBttn_SysCol_Shade_Bright:
+                case e_UIS_RadioBttn_SysCol_Shade_Dark:
+                    DS_CopySysColors2GUI();
+                    DS_UpdateColorPreview(true);
+                break;
+                case e_UIS_RadioBttn_SysColPrev_Black:
+                case e_UIS_RadioBttn_SysColPrev_Red:
+                case e_UIS_RadioBttn_SysColPrev_Green:
+                case e_UIS_RadioBttn_SysColPrev_Yellow:
+                case e_UIS_RadioBttn_SysColPrev_Blue:
+                case e_UIS_RadioBttn_SysColPrev_Magenta:
+                case e_UIS_RadioBttn_SysColPrev_Cyan:
+                case e_UIS_RadioBttn_SysColPrev_White:
+                    UIS_HandleSysColPreviewColorClick();
+                break;
+                case e_UIS_RadioBttn_DefaultColorPrev_Forground:
+                case e_UIS_RadioBttn_DefaultColorPrev_Background:
+                    UIS_HandleSysColDefaultColorClick();
+                break;
+                case e_UIS_RadioBttn_Display_ClearScreen_Clear:
+                break;
+                case e_UIS_RadioBttn_Display_ClearScreen_Scroll:
+                break;
+                case e_UIS_RadioBttn_Display_ClearScreen_ScrollAll:
+                break;
+                case e_UIS_RadioBttn_Display_ClearScreen_ScrollWithHR:
+                break;
+                case e_UIS_RadioBttn_SysColMAX:
+                default:
+                break;
+            }
+        break;
+        case e_DSEvent_ScrollBarChange:
+            switch(Event->Info.ScrollBar.InputID)
+            {
+                case e_UIS_ScrollBar_SysCol_RedScroll:
+                    if(m_DS_UpdatingColorPreview)   // DEBUG PAUL: Still needed?
+                        break;
+
+                    RGB=DS_GetCurrentColor();
+                    RGB&=~0xFF0000;
+                    RGB|=Event->Info.ScrollBar.position<<16;
+                    DS_SetCurrentColor(RGB);
+                    DS_UpdateColorPreview(true);
+                break;
+                case e_UIS_ScrollBar_SysCol_GreenScroll:
+                    if(m_DS_UpdatingColorPreview)   // DEBUG PAUL: Still needed?
+                        break;
+
+                    RGB=DS_GetCurrentColor();
+                    RGB&=~0x00FF00;
+                    RGB|=Event->Info.ScrollBar.position<<8;
+                    DS_SetCurrentColor(RGB);
+                    DS_UpdateColorPreview(true);
+                break;
+                case e_UIS_ScrollBar_SysCol_BlueScroll:
+                    if(m_DS_UpdatingColorPreview)   // DEBUG PAUL: Still needed?
+                        break;
+
+                    RGB=DS_GetCurrentColor();
+                    RGB&=~0x0000FF;
+                    RGB|=Event->Info.ScrollBar.position;
+                    DS_SetCurrentColor(RGB);
+                    DS_UpdateColorPreview(true);
+                break;
+                case e_UIS_ScrollBar_SysColMAX:
+                default:
+                break;
+            }
+        break;
+        case e_DSEvent_NumberInputChange:
+            switch(Event->Info.NumberInput.InputID)
+            {
+                case e_UIS_NumberInput_SysCol_RedInput:
+                    if(m_DS_UpdatingColorPreview)   // DEBUG PAUL: Still needed?
+                        break;
+
+                    RGB=DS_GetCurrentColor();
+                    RGB&=~0xFF0000;
+                    RGB|=Event->Info.NumberInput.value<<16;
+                    DS_SetCurrentColor(RGB);
+                    DS_UpdateColorPreview(true);
+                break;
+                case e_UIS_NumberInput_SysCol_GreenInput:
+                    if(m_DS_UpdatingColorPreview)   // DEBUG PAUL: Still needed?
+                        break;
+
+                    RGB=DS_GetCurrentColor();
+                    RGB&=~0x00FF00;
+                    RGB|=Event->Info.NumberInput.value<<8;
+                    DS_SetCurrentColor(RGB);
+                    DS_UpdateColorPreview(true);
+                break;
+                case e_UIS_NumberInput_SysCol_BlueInput:
+                    if(m_DS_UpdatingColorPreview)   // DEBUG PAUL: Still needed?
+                        break;
+
+                    RGB=DS_GetCurrentColor();
+                    RGB&=~0x0000FF;
+                    RGB|=Event->Info.NumberInput.value;
+                    DS_SetCurrentColor(RGB);
+                    DS_UpdateColorPreview(true);
+                break;
+                case e_UIS_NumberInput_TermSizeWidth:
+                case e_UIS_NumberInput_TermSizeHeight:
+                case e_UIS_NumberInput_ScrollBufferLines:
+                case e_UIS_NumberInput_HexDisplay_BufferSize:
+                case e_UIS_NumberInputMAX:
+                default:
+                break;
+            }
+        break;
+
+        case e_DSEvent_StringInputTextChange:
+            switch(Event->Info.StrInput.InputID)
+            {
+                case e_UIS_TextInput_SysCol_Web:
+                    UIS_ProcessSysColWebInputValue(Event->Info.StrInput.NewText);
+                break;
+                case e_UIS_TextInput_Keyboard_Assigned2:
+                case e_UIS_TextInput_Capture_DefaultFilename:
+                case e_UIS_TextInputMAX:
+                default:
+                break;
+            }
+        break;
+
+        case e_DSEvent_ComboBoxIndexChange:
+            switch(Event->Info.ComboBox.InputID)
+            {
+                case e_UIS_ComboBox_WindowStartupPos:
+                    UIS_HandleWindowStartPosChanged(Event->ID);
+                break;
+                case e_UIS_ComboBox_DataProcessor:
+                    UIS_HandleInputProcessingChange(Event->ID);
+                break;
+                case e_UIS_ComboBox_TextProCharEnc:
+                    UIS_HandleInputProcessingCharEncChange();
+                break;
+                case e_UIS_ComboBox_TextProTermEmu:
+                    UIS_HandleInputProcessingTermEmuChange();
+                break;
+                case e_UIS_ComboBox_SysCol_Preset:
+                    UIS_HandleSysColPresetChange(Event->ID);
+                break;
+                case e_UIS_ComboBoxMAX:
+                default:
+                break;
+            }
+        break;
+        case e_DSEvent_ListViewChange:
+            switch(Event->Info.ListView.InputID)
+            {
+                case e_UIS_ListView_AreaList:
+                    UIS_HandleAreaChanged(Event->ID);
+                break;
+                case e_UIS_ListView_InputProTextHighlight:
+                    InputProHighLighting_Settings=UIS_GetButtonHandle(
+                            e_UIS_Button_InputProHighLighting_Settings);
+
+                    UIEnableButton(InputProHighLighting_Settings,false);
+                break;
+                case e_UIS_ListView_InputProTextOther:
+                    InputProOther_Settings=UIS_GetButtonHandle(
+                            e_UIS_Button_InputProOther_Settings);
+
+                    UIEnableButton(InputProOther_Settings,false);
+                break;
+                case e_UIS_ListView_Connections_ConnectionList:
+                    UIS_HandleConnectionListChanged(Event->ID);
+                break;
+                case e_UIS_ListView_Keyboard_CommandList:
+                    UIS_HandleKeyboardCmdListChange(Event->ID);
+                break;
+                case e_UIS_ListViewMAX:
+                default:
+                break;
+            }
+        break;
+        case e_DSEventMAX:
+        default:
+        break;
+    }
+    return AcceptEvent;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DS_SelectCaptureFilename
+ *
+ * SYNOPSIS:
+ *    static void DS_SelectCaptureFilename(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function prompts the user for the default capture filename.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void DS_SelectCaptureFilename(void)
+{
+    std::string Path;
+    std::string Filename;
+    t_UITextInputCtrl *TxtHandle;
+
+    TxtHandle=UIS_GetTextInputHandle(e_UIS_TextInput_Capture_DefaultFilename);
+    UIGetTextCtrlText(TxtHandle,Path);
+
+    Filename="";
+    if(Path=="")
+        Filename="Capture.log";
+    if(UI_SaveFileReq("Default Capture to Filename",Path,Filename,
+            "All Files|*\n"
+            "Log Files|*.log\n"
+            "Binary|*.bin\n",0))
+    {
+        Filename=UI_ConcatFile2Path(Path,Filename);
+        UISetTextCtrlText(TxtHandle,Filename.c_str());
+    }
+}

@@ -1,0 +1,232 @@
+/*******************************************************************************
+ * FILENAME: PluginUI.h
+ * 
+ * PROJECT:
+ *    Whippy Term
+ *
+ * FILE DESCRIPTION:
+ *    
+ *
+ * COPYRIGHT:
+ *    Copyright 2018 Paul Hutchinson.
+ *
+ *    This software is the property of Paul Hutchinson. and may not be
+ *    reused in any manner except under express written permission of
+ *    Paul Hutchinson.
+ *
+ * HISTORY:
+ *    Paul Hutchinson (10 Jul 2018)
+ *       Created
+ *
+ *******************************************************************************/
+#ifndef __PLUGINUI_H_
+#define __PLUGINUI_H_
+
+/***  HEADER FILES TO INCLUDE          ***/
+#include "PluginSDK/PluginTypes.h"
+#include <stdint.h>
+
+/***  DEFINES                          ***/
+
+/***  MACROS                           ***/
+
+/***  TYPE DEFINITIONS                 ***/
+
+/* What this really is depends on the sub system */
+struct WidgetSysHandle {int PrivateData;};
+typedef struct WidgetSysHandle t_WidgetSysHandle;
+
+struct PIUIComboBoxCtrl {int PrivateData;};
+typedef struct PIUIComboBoxCtrl t_PIUIComboBoxCtrl;
+
+struct PIUITextInputCtrl {int PrivateData;};
+typedef struct PIUITextInputCtrl t_PIUITextInputCtrl;
+
+struct PIUINumberInputCtrl {int PrivateData;};
+typedef struct PIUINumberInputCtrl t_PIUINumberInputCtrl;
+
+struct PIUIDoubleInputCtrl {int PrivateData;};
+typedef struct PIUIDoubleInputCtrl t_PIUIDoubleInputCtrl;
+
+struct PIUILabelCtrl {int PrivateData;};
+typedef struct PIUILabelCtrl t_PIUILabelCtrl;
+
+struct PIUIRadioBttnCtrl {int PrivateData;};
+typedef struct PIUIRadioBttnCtrl t_PIUIRadioBttnCtrl;
+
+struct PIUICheckboxCtrl {int PrivateData;};
+typedef struct PIUICheckboxCtrl t_PIUICheckboxCtrl;
+
+typedef enum
+{
+    e_PIECB_IndexChanged,
+    e_PIECB_TextInputChanged,
+    e_PIECBMAX
+} e_PIECBType;
+
+struct PICBEvent
+{
+    e_PIECBType EventType;
+};
+
+typedef enum
+{
+    e_PIERB_Changed,
+    e_PIERBMAX
+} e_PIERBType;
+
+struct PIRBEvent
+{
+    e_PIERBType EventType;
+    struct PI_RadioBttn *Bttn;
+};
+
+typedef enum
+{
+    e_PIECheckbox_Changed,
+    e_PIECheckboxMAX
+} e_PIECheckboxType;
+
+struct PICheckboxEvent
+{
+    e_PIECheckboxType EventType;
+    struct PI_Checkbox *CheckBox;
+    PG_BOOL Checked;
+};
+
+struct PI_ComboBox
+{
+    t_PIUIComboBoxCtrl *Ctrl;
+    t_PIUILabelCtrl *Label;
+    void *UIData;
+};
+
+struct PI_RadioBttn
+{
+    t_PIUIRadioBttnCtrl *Ctrl;
+    void *UIData;
+};
+
+struct PI_Checkbox
+{
+    t_PIUICheckboxCtrl *Ctrl;
+    t_PIUILabelCtrl *Label;
+    void *UIData;
+};
+
+struct PI_RadioBttnGroup {int PrivateData;};
+typedef struct PI_RadioBttnGroup t_PI_RadioBttnGroup;
+
+struct PI_TextInput
+{
+    t_PIUITextInputCtrl *Ctrl;
+    t_PIUILabelCtrl *Label;
+    void *UIData;
+};
+
+struct PI_NumberInput
+{
+    t_PIUINumberInputCtrl *Ctrl;
+    t_PIUILabelCtrl *Label;
+    void *UIData;
+};
+
+struct PI_DoubleInput
+{
+    t_PIUIDoubleInputCtrl *Ctrl;
+    t_PIUILabelCtrl *Label;
+    void *UIData;
+};
+
+/* !!!! You can only add to this.  Changing it will break the plugins !!!! */
+
+/* DEBUG PAUL: All the callbacks are wrong.  The user has no way of knowning
+what input is the one that made the change currently, this will have to be
+fixed.  DEBUG PAUL: Can likely be handled by including a pointer to the input
+in the event.
+
+I would also like to have 1 unified event type instead per type.
+ */
+
+struct PI_UIAPI
+{
+    /* Combobox Input */
+    struct PI_ComboBox *(*AddComboBox)(t_WidgetSysHandle *WidgetHandle,
+            PG_BOOL UserEditable,const char *Label,
+            void (*EventCB)(
+            const struct PICBEvent *Event,void *UserData),
+            void *UserData);
+    void (*FreeComboBox)(t_WidgetSysHandle *WidgetHandle,struct PI_ComboBox *UICtrl);
+    void (*ClearComboBox)(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox);
+    void (*AddItem2ComboBox)(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox,const char *Label,uintptr_t ID);
+    void (*SetComboBoxSelectedEntry)(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox,uintptr_t ID);
+    uintptr_t (*GetComboBoxSelectedEntry)(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox);
+
+    /* Radio button Input */
+    t_PI_RadioBttnGroup *(*AllocRadioBttnGroup)(t_WidgetSysHandle *WidgetHandle,const char *Label);
+    void (*FreeRadioBttnGroup)(t_WidgetSysHandle *WidgetHandle,t_PI_RadioBttnGroup *UICtrl);
+    struct PI_RadioBttn *(*AddRadioBttn)(t_WidgetSysHandle *WidgetHandle,t_PI_RadioBttnGroup *RBGroup,const char *Label,void (*EventCB)(const struct PIRBEvent *Event,void *UserData),void *UserData);
+    void (*FreeRadioBttn)(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttn *UICtrl);
+    PG_BOOL (*IsRadioBttnChecked)(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttn *Bttn);
+    void (*SetRadioBttnChecked)(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttn *Bttn,PG_BOOL Checked);
+
+    /* Combobox Input (again) */
+    const char *(*GetComboBoxText)(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox);
+    void (*SetComboBoxText)(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox,const char *Txt);
+
+    /* Checkbox Input */
+    struct PI_Checkbox *(*AddCheckbox)(t_WidgetSysHandle *WidgetHandle,const char *Label,void (*EventCB)(const struct PICheckboxEvent *Event,void *UserData),void *UserData);
+    void (*FreeCheckbox)(t_WidgetSysHandle *WidgetHandle,struct PI_Checkbox *UICtrl);
+    PG_BOOL (*IsCheckboxChecked)(t_WidgetSysHandle *WidgetHandle,t_PIUICheckboxCtrl *Bttn);
+    void (*SetCheckboxChecked)(t_WidgetSysHandle *WidgetHandle,t_PIUICheckboxCtrl *Bttn,PG_BOOL Checked);
+
+    /* Text Input */
+    struct PI_TextInput *(*AddTextInput)(t_WidgetSysHandle *WidgetHandle,
+            const char *Label,void (*EventCB)(const struct PICBEvent *Event,void *UserData),
+            void *UserData);
+    void (*FreeTextInput)(t_WidgetSysHandle *WidgetHandle,struct PI_TextInput *UICtrl);
+    const char *(*GetTextInputText)(t_WidgetSysHandle *WidgetHandle,t_PIUITextInputCtrl *TextInput);
+    void (*SetTextInputText)(t_WidgetSysHandle *WidgetHandle,t_PIUITextInputCtrl *TextInput,const char *Txt);
+
+    /* Number Input */
+    struct PI_NumberInput *(*AddNumberInput)(t_WidgetSysHandle *WidgetHandle,
+            const char *Label,
+            void (*EventCB)(const struct PICBEvent *Event,void *UserData),
+            void *UserData);
+    void (*FreeNumberInput)(t_WidgetSysHandle *WidgetHandle,struct PI_NumberInput *UICtrl);
+    uint64_t (*GetNumberInputValue)(t_WidgetSysHandle *WidgetHandle,t_PIUINumberInputCtrl *NumberInput);
+    void (*SetNumberInputValue)(t_WidgetSysHandle *WidgetHandle,t_PIUINumberInputCtrl *NumberInput,int64_t Value);
+    void (*SetNumberInputMinMax)(t_WidgetSysHandle *WidgetHandle,t_PIUINumberInputCtrl *NumberInput,int64_t Min,int64_t Max);
+
+    /* Double Input */
+    struct PI_DoubleInput *(*AddDoubleInput)(t_WidgetSysHandle *WidgetHandle,
+            const char *Label,
+            void (*EventCB)(const struct PICBEvent *Event,void *UserData),
+            void *UserData);
+    void (*FreeDoubleInput)(t_WidgetSysHandle *WidgetHandle,struct PI_DoubleInput *UICtrl);
+    double (*GetDoubleInputValue)(t_WidgetSysHandle *WidgetHandle,t_PIUIDoubleInputCtrl *DoubleInput);
+    void (*SetDoubleInputValue)(t_WidgetSysHandle *WidgetHandle,t_PIUIDoubleInputCtrl *DoubleInput,double Value);
+    void (*SetDoubleInputMinMax)(t_WidgetSysHandle *WidgetHandle,t_PIUIDoubleInputCtrl *DoubleInput,double Min,double Max);
+    void (*SetDoubleInputDecimals)(t_WidgetSysHandle *WidgetHandle,t_PIUIDoubleInputCtrl *DoubleInput,int Points);
+
+    /* Combobox Input */
+    void (*EnableComboBox)(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox,PG_BOOL Enabled);
+    /* Radio button Input */
+    void (*EnableRadioBttn)(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttn *Bttn,PG_BOOL Enabled);
+    /* Checkbox Input */
+    void (*EnableCheckbox)(t_WidgetSysHandle *WidgetHandle,t_PIUICheckboxCtrl *Bttn,PG_BOOL Enabled);
+    /* Text Input */
+    void (*EnableTextInput)(t_WidgetSysHandle *WidgetHandle,t_PIUITextInputCtrl *TextInput,PG_BOOL Enabled);
+    /* Number Input */
+    void (*EnableNumberInput)(t_WidgetSysHandle *WidgetHandle,t_PIUINumberInputCtrl *NumberInput,PG_BOOL Enabled);
+    /* Double Input */
+    void (*EnableDoubleInput)(t_WidgetSysHandle *WidgetHandle,t_PIUIDoubleInputCtrl *DoubleInput,PG_BOOL Enabled);
+};
+
+/***  CLASS DEFINITIONS                ***/
+
+/***  GLOBAL VARIABLE DEFINITIONS      ***/
+
+/***  EXTERNAL FUNCTION PROTOTYPES     ***/
+
+#endif

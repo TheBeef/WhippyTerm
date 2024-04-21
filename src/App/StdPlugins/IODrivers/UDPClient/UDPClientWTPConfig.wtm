@@ -1,0 +1,19 @@
+<?xml version="1.0" standalone="no" ?>
+<ExternPluginMaker>
+    <LastBuildFile>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/IODrivers/UDPClient/UDPClient.wtp</LastBuildFile>
+    <LinuxFilename>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/IODrivers/UDPClient/Linux/UDPClient.so</LinuxFilename>
+    <WindowsFilename></WindowsFilename>
+    <MacFilename></MacFilename>
+    <RPI64Filename></RPI64Filename>
+    <RPI32Filename>/home/paul/work/pi/w/WhippyTerm/ExternPlugins/IODrivers/UDPClient/Linux/UDPClient.so</RPI32Filename>
+    <PluginName>UDP Client</PluginName>
+    <InstallFilename>UDPClient</InstallFilename>
+    <Description>A client for sending and receiving bytes over a UDP socket.</Description>
+    <Contributors>Paul Hutchinson</Contributors>
+    <Copyright>2022</Copyright>
+    <ReleaseDate>28 Nov 2022</ReleaseDate>
+    <Version>0.4</Version>
+    <APIVersion>0.9.7.0</APIVersion>
+    <PluginClass>2</PluginClass>
+    <PluginSubClass>0</PluginSubClass>
+</ExternPluginMaker>

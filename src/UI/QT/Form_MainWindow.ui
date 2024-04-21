@@ -1,0 +1,2490 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form_MainWindow</class>
+ <widget class="QMainWindow" name="Form_MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1114</width>
+    <height>699</height>
+   </rect>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="MainResource.qrc">
+    <normaloff>:/G/Graphics/WIcon.svg</normaloff>:/G/Graphics/WIcon.svg</iconset>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QFrame" name="BackgroundPanel">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>100</height>
+       </size>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QSplitter" name="TopBottomSplitter">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="opaqueResize">
+          <bool>false</bool>
+         </property>
+         <property name="handleWidth">
+          <number>1</number>
+         </property>
+         <property name="childrenCollapsible">
+          <bool>false</bool>
+         </property>
+         <widget class="QFrame" name="TopPanel">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QSplitter" name="LeftRightSplitter">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="opaqueResize">
+              <bool>false</bool>
+             </property>
+             <property name="handleWidth">
+              <number>1</number>
+             </property>
+             <property name="childrenCollapsible">
+              <bool>false</bool>
+             </property>
+             <widget class="QFrame" name="LeftPanel">
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QFrame" name="LeftWidgetsPanel">
+                 <property name="frameShape">
+                  <enum>QFrame::NoFrame</enum>
+                 </property>
+                 <property name="frameShadow">
+                  <enum>QFrame::Raised</enum>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_4">
+                  <property name="spacing">
+                   <number>2</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>2</number>
+                  </property>
+                  <item>
+                   <widget class="QTabWidget" name="LeftPanel_tabWidget">
+                    <property name="currentIndex">
+                     <number>5</number>
+                    </property>
+                    <widget class="QWidget" name="Display_Tab">
+                     <attribute name="title">
+                      <string>Display</string>
+                     </attribute>
+                    </widget>
+                    <widget class="QWidget" name="tab_ConnectionOptions">
+                     <attribute name="title">
+                      <string>Con Options</string>
+                     </attribute>
+                     <layout class="QVBoxLayout" name="verticalLayout_5">
+                      <item>
+                       <layout class="QFormLayout" name="formLayout_ConOptions">
+                        <property name="horizontalSpacing">
+                         <number>6</number>
+                        </property>
+                        <property name="verticalSpacing">
+                         <number>6</number>
+                        </property>
+                        <property name="leftMargin">
+                         <number>9</number>
+                        </property>
+                        <property name="rightMargin">
+                         <number>9</number>
+                        </property>
+                        <property name="bottomMargin">
+                         <number>9</number>
+                        </property>
+                       </layout>
+                      </item>
+                      <item>
+                       <spacer name="verticalSpacer">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>20</width>
+                          <height>40</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <widget class="QWidget" name="widget_3" native="true">
+                        <layout class="QHBoxLayout" name="horizontalLayout_10">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QPushButton" name="pushButton_CO_Apply">
+                           <property name="text">
+                            <string>Apply</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer">
+                           <property name="orientation">
+                            <enum>Qt::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                    <widget class="QWidget" name="Capture_Tab">
+                     <attribute name="title">
+                      <string>Capture</string>
+                     </attribute>
+                     <layout class="QVBoxLayout" name="verticalLayout_9">
+                      <item>
+                       <widget class="QGroupBox" name="groupBox">
+                        <property name="title">
+                         <string>File</string>
+                        </property>
+                        <layout class="QHBoxLayout" name="horizontalLayout_13">
+                         <item>
+                          <widget class="QLineEdit" name="lineEdit_Cap_FileName">
+                           <property name="toolTip">
+                            <string>Filename to save to</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QPushButton" name="pushButton_Cap_GetFilename">
+                           <property name="maximumSize">
+                            <size>
+                             <width>40</width>
+                             <height>16777215</height>
+                            </size>
+                           </property>
+                           <property name="toolTip">
+                            <string>Select the path and filename to save to</string>
+                           </property>
+                           <property name="text">
+                            <string>...</string>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QGroupBox" name="groupBox_2">
+                        <property name="title">
+                         <string>Options</string>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_8">
+                         <item>
+                          <widget class="QCheckBox" name="checkBox_Cap_Timestamp">
+                           <property name="toolTip">
+                            <string>Add a timestamp at the start of new lines</string>
+                           </property>
+                           <property name="text">
+                            <string>Timestamp</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QCheckBox" name="checkBox_Cap_Append">
+                           <property name="toolTip">
+                            <string>Append to an existing file instead of clearing it</string>
+                           </property>
+                           <property name="text">
+                            <string>Append</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QCheckBox" name="checkBox_Cap_StripCtrlChars">
+                           <property name="toolTip">
+                            <string>Don't save control characters except new line</string>
+                           </property>
+                           <property name="text">
+                            <string>Strip Control Char's</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QCheckBox" name="checkBox_Cap_StripEscSeq">
+                           <property name="toolTip">
+                            <string>Don't save ANSI escape sequences</string>
+                           </property>
+                           <property name="text">
+                            <string>Strip Escape Seq's</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QCheckBox" name="checkBox_Cap_HexDump">
+                           <property name="toolTip">
+                            <string>Save a hex dump instead of the text</string>
+                           </property>
+                           <property name="text">
+                            <string>Hex Dump</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="verticalSpacer_3">
+                           <property name="orientation">
+                            <enum>Qt::Vertical</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>20</width>
+                             <height>40</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="pushButton_Cap_Start">
+                        <property name="toolTip">
+                         <string>Start / Stop the capture</string>
+                        </property>
+                        <property name="text">
+                         <string>Start</string>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                    <widget class="QWidget" name="tab_Upload">
+                     <attribute name="title">
+                      <string>Upload</string>
+                     </attribute>
+                     <layout class="QVBoxLayout" name="verticalLayout_10">
+                      <item>
+                       <widget class="QWidget" name="widget_6" native="true">
+                        <layout class="QHBoxLayout" name="horizontalLayout_14">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QLabel" name="label">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="text">
+                            <string>Protocol</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QComboBox" name="comboBox_UploadProtocol">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QGroupBox" name="groupBox_3">
+                        <property name="title">
+                         <string>File</string>
+                        </property>
+                        <layout class="QHBoxLayout" name="horizontalLayout_15">
+                         <item>
+                          <widget class="QLineEdit" name="lineEdit_UploadFilename"/>
+                         </item>
+                         <item>
+                          <widget class="QPushButton" name="pushButton_UploadSelectFilename">
+                           <property name="maximumSize">
+                            <size>
+                             <width>40</width>
+                             <height>16777215</height>
+                            </size>
+                           </property>
+                           <property name="text">
+                            <string>...</string>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QGroupBox" name="groupBox_4">
+                        <property name="title">
+                         <string>Options</string>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_12">
+                         <item>
+                          <layout class="QFormLayout" name="formLayout_UploadOptions"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <spacer name="verticalSpacer_4">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>20</width>
+                          <height>40</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <widget class="QWidget" name="widget_7" native="true">
+                        <layout class="QHBoxLayout" name="horizontalLayout_16">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QPushButton" name="pushButton_UploadStart">
+                           <property name="text">
+                            <string>Start</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QPushButton" name="pushButton_UploadAbort">
+                           <property name="text">
+                            <string>Abort</string>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QGroupBox" name="groupBox_7">
+                        <property name="title">
+                         <string>Info</string>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_15">
+                         <item>
+                          <widget class="QWidget" name="widget_11" native="true">
+                           <layout class="QFormLayout" name="formLayout_2">
+                            <property name="leftMargin">
+                             <number>0</number>
+                            </property>
+                            <property name="topMargin">
+                             <number>0</number>
+                            </property>
+                            <property name="rightMargin">
+                             <number>0</number>
+                            </property>
+                            <property name="bottomMargin">
+                             <number>0</number>
+                            </property>
+                            <item row="0" column="0">
+                             <widget class="QLabel" name="label_5">
+                              <property name="text">
+                               <string>Bytes Transfered:</string>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="0" column="1">
+                             <widget class="QLabel" name="label_UploadBytesTrans">
+                              <property name="text">
+                               <string>TextLabel</string>
+                              </property>
+                             </widget>
+                            </item>
+                           </layout>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QProgressBar" name="progressBar_UploadProgress">
+                           <property name="textVisible">
+                            <bool>true</bool>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                    <widget class="QWidget" name="tab_Download">
+                     <attribute name="title">
+                      <string>Download</string>
+                     </attribute>
+                     <layout class="QVBoxLayout" name="verticalLayout_11">
+                      <item>
+                       <widget class="QWidget" name="widget_8" native="true">
+                        <layout class="QHBoxLayout" name="horizontalLayout_18">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QLabel" name="label_2">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="text">
+                            <string>Protocol</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QComboBox" name="comboBox_DownloadProtocol">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QGroupBox" name="groupBox_6">
+                        <property name="title">
+                         <string>Options</string>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_13">
+                         <item>
+                          <layout class="QFormLayout" name="formLayout_DownloadOptions"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <spacer name="verticalSpacer_5">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>20</width>
+                          <height>74</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <widget class="QWidget" name="widget_9" native="true">
+                        <layout class="QHBoxLayout" name="horizontalLayout_19">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QPushButton" name="pushButton_DownloadStart">
+                           <property name="text">
+                            <string>Start</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QPushButton" name="pushButton_DownloadAbort">
+                           <property name="text">
+                            <string>Abort</string>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QGroupBox" name="groupBox_5">
+                        <property name="title">
+                         <string>Info</string>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_14">
+                         <item>
+                          <widget class="QWidget" name="widget_10" native="true">
+                           <layout class="QFormLayout" name="formLayout">
+                            <property name="leftMargin">
+                             <number>0</number>
+                            </property>
+                            <property name="topMargin">
+                             <number>0</number>
+                            </property>
+                            <property name="rightMargin">
+                             <number>0</number>
+                            </property>
+                            <property name="bottomMargin">
+                             <number>0</number>
+                            </property>
+                            <item row="0" column="0">
+                             <widget class="QLabel" name="label_3">
+                              <property name="sizePolicy">
+                               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                               </sizepolicy>
+                              </property>
+                              <property name="text">
+                               <string>File:</string>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="0" column="1">
+                             <widget class="QLabel" name="label_DownloadFilename">
+                              <property name="text">
+                               <string>TextLabel</string>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="1" column="0">
+                             <widget class="QLabel" name="label_4">
+                              <property name="text">
+                               <string>Bytes Transfered:</string>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="1" column="1">
+                             <widget class="QLabel" name="label_DownloadBytesTrans">
+                              <property name="text">
+                               <string>TextLabel</string>
+                              </property>
+                             </widget>
+                            </item>
+                           </layout>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QProgressBar" name="progressBar_DownloadProgress"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                    <widget class="QWidget" name="Bridge_Tab">
+                     <attribute name="title">
+                      <string>Bridge</string>
+                     </attribute>
+                     <layout class="QVBoxLayout" name="verticalLayout_17">
+                      <item>
+                       <widget class="QWidget" name="widget_14" native="true">
+                        <layout class="QHBoxLayout" name="horizontalLayout_21">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QLabel" name="label_6">
+                           <property name="text">
+                            <string>Connection 1</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QComboBox" name="comboBox_Bridge_Con1"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QWidget" name="widget_15" native="true">
+                        <layout class="QHBoxLayout" name="horizontalLayout_22">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QLabel" name="label_7">
+                           <property name="text">
+                            <string>Connection 2</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QComboBox" name="comboBox_Bridge_Con2"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="Line" name="line">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QWidget" name="widget_16" native="true">
+                        <layout class="QHBoxLayout" name="horizontalLayout_23">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QPushButton" name="pushButton_Bridge_Bridge">
+                           <property name="text">
+                            <string>Bridge</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QPushButton" name="pushButton_Bridge_Release">
+                           <property name="text">
+                            <string>Release</string>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="Line" name="line_2">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QCheckBox" name="checkBox_Bridge_Lockout1">
+                        <property name="text">
+                         <string>Lockout 1</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QCheckBox" name="checkBox_Bridge_Lockout2">
+                        <property name="text">
+                         <string>Lockout 2</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <spacer name="verticalSpacer_6">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>20</width>
+                          <height>40</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                     </layout>
+                    </widget>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="VerPanelHandle" name="LeftResizeFrame">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>16</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="frameShape">
+                  <enum>QFrame::NoFrame</enum>
+                 </property>
+                 <property name="frameShadow">
+                  <enum>QFrame::Raised</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QFrame" name="ClientWidgetsPanel">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_7">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="MovableTabWidget" name="Main_tabWidget">
+                 <property name="tabPosition">
+                  <enum>QTabWidget::North</enum>
+                 </property>
+                 <property name="tabShape">
+                  <enum>QTabWidget::Rounded</enum>
+                 </property>
+                 <property name="currentIndex">
+                  <number>-1</number>
+                 </property>
+                 <property name="elideMode">
+                  <enum>Qt::ElideLeft</enum>
+                 </property>
+                 <property name="tabsClosable">
+                  <bool>true</bool>
+                 </property>
+                 <property name="movable">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QFrame" name="ContainerFrame">
+                 <property name="frameShape">
+                  <enum>QFrame::StyledPanel</enum>
+                 </property>
+                 <property name="frameShadow">
+                  <enum>QFrame::Raised</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QFrame" name="RightPanel">
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="VerPanelHandle" name="RightResizeFrame">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Minimum">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>16</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="frameShape">
+                  <enum>QFrame::NoFrame</enum>
+                 </property>
+                 <property name="frameShadow">
+                  <enum>QFrame::Raised</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QFrame" name="RightWidgetsPanel">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="frameShape">
+                  <enum>QFrame::NoFrame</enum>
+                 </property>
+                 <property name="frameShadow">
+                  <enum>QFrame::Raised</enum>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_5">
+                  <property name="spacing">
+                   <number>2</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>2</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>2</number>
+                  </property>
+                  <item>
+                   <widget class="QTabWidget" name="RightPanel_tabWidget">
+                    <property name="currentIndex">
+                     <number>0</number>
+                    </property>
+                    <widget class="QWidget" name="tab_StopWatch">
+                     <attribute name="title">
+                      <string>Stop Watch</string>
+                     </attribute>
+                     <layout class="QVBoxLayout" name="verticalLayout_4">
+                      <item>
+                       <widget class="QLabel" name="label_SW_Time">
+                        <property name="font">
+                         <font>
+                          <pointsize>20</pointsize>
+                         </font>
+                        </property>
+                        <property name="text">
+                         <string>00:00:00</string>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QWidget" name="widget" native="true">
+                        <layout class="QHBoxLayout" name="horizontalLayout_8">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QPushButton" name="pushButton_SW_Start">
+                           <property name="text">
+                            <string>Start</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QPushButton" name="pushButton_SW_Reset">
+                           <property name="text">
+                            <string>Reset</string>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="pushButton_SW_Lap">
+                        <property name="text">
+                         <string>Lap</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QListWidget" name="listWidget_SW_Laps">
+                        <property name="font">
+                         <font>
+                          <pointsize>14</pointsize>
+                         </font>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QWidget" name="widget_5" native="true">
+                        <layout class="QHBoxLayout" name="horizontalLayout_12">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <spacer name="horizontalSpacer_2">
+                           <property name="orientation">
+                            <enum>Qt::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                         <item>
+                          <widget class="QPushButton" name="pushButton_SW_Clear">
+                           <property name="text">
+                            <string>Clear</string>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QWidget" name="widget_2" native="true">
+                        <layout class="QHBoxLayout" name="horizontalLayout_9">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QCheckBox" name="checkBox_SW_StartOnTx">
+                           <property name="text">
+                            <string>Start On Tx</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QCheckBox" name="checkBox_SW_AutoLap">
+                           <property name="text">
+                            <string>Auto Lap</string>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QFrame" name="BottomPanel">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>16</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="HozPanelHandle" name="BottomResizeFrame">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>16</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16</height>
+              </size>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QFrame" name="BottomWidgetsPanel">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <property name="spacing">
+               <number>2</number>
+              </property>
+              <property name="leftMargin">
+               <number>2</number>
+              </property>
+              <property name="topMargin">
+               <number>2</number>
+              </property>
+              <property name="rightMargin">
+               <number>2</number>
+              </property>
+              <property name="bottomMargin">
+               <number>2</number>
+              </property>
+              <item>
+               <widget class="QTabWidget" name="BottomPanel_tabWidget">
+                <property name="currentIndex">
+                 <number>0</number>
+                </property>
+                <widget class="QWidget" name="Hex_Tab">
+                 <attribute name="title">
+                  <string>Hex</string>
+                 </attribute>
+                 <layout class="QHBoxLayout" name="horizontalLayout_11">
+                  <item>
+                   <widget class="QWidget" name="widget_HexDisplay" native="true">
+                    <layout class="QVBoxLayout" name="verticalLayout_6">
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QFrame" name="frame_HexDisplayContainer">
+                       <property name="frameShape">
+                        <enum>QFrame::StyledPanel</enum>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QWidget" name="widget_4" native="true">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayout_7">
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QPushButton" name="pushButton_HexClear">
+                       <property name="text">
+                        <string>Clear</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="pushButton_HexCopy">
+                       <property name="text">
+                        <string>Copy</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="pushButton_HexCopyAs">
+                       <property name="text">
+                        <string>Copy As...</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="verticalSpacer_2">
+                       <property name="orientation">
+                        <enum>Qt::Vertical</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>20</width>
+                         <height>40</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QCheckBox" name="checkBox_HexPaused">
+                       <property name="text">
+                        <string>Paused</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+                <widget class="QWidget" name="Injection_Tab">
+                 <attribute name="title">
+                  <string>Injection</string>
+                 </attribute>
+                </widget>
+                <widget class="QWidget" name="Buffers_Tab">
+                 <attribute name="title">
+                  <string>Buffers</string>
+                 </attribute>
+                 <layout class="QHBoxLayout" name="horizontalLayout_20">
+                  <item>
+                   <widget class="QListWidget" name="listWidget_Buffer_BufferList">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QWidget" name="widget_12" native="true">
+                    <layout class="QVBoxLayout" name="verticalLayout_16">
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QFrame" name="frame_Buffer_HexDisplayContainer">
+                       <property name="frameShape">
+                        <enum>QFrame::StyledPanel</enum>
+                       </property>
+                       <property name="frameShadow">
+                        <enum>QFrame::Raised</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QWidget" name="widget_13" native="true">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <layout class="QHBoxLayout" name="horizontalLayout_17">
+                        <property name="leftMargin">
+                         <number>0</number>
+                        </property>
+                        <property name="topMargin">
+                         <number>0</number>
+                        </property>
+                        <property name="rightMargin">
+                         <number>0</number>
+                        </property>
+                        <property name="bottomMargin">
+                         <number>0</number>
+                        </property>
+                        <item>
+                         <widget class="QPushButton" name="pushButton_Buffer_Edit">
+                          <property name="text">
+                           <string>Edit...</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <spacer name="horizontalSpacer_3">
+                          <property name="orientation">
+                           <enum>Qt::Horizontal</enum>
+                          </property>
+                          <property name="sizeHint" stdset="0">
+                           <size>
+                            <width>40</width>
+                            <height>20</height>
+                           </size>
+                          </property>
+                         </spacer>
+                        </item>
+                        <item>
+                         <widget class="QPushButton" name="pushButton_Buffer_Send">
+                          <property name="text">
+                           <string>Send</string>
+                          </property>
+                         </widget>
+                        </item>
+                       </layout>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1114</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>Fi&amp;le</string>
+    </property>
+    <widget class="QMenu" name="menuCapture">
+     <property name="title">
+      <string>Ca&amp;pture</string>
+     </property>
+     <addaction name="actionCapture_To_File"/>
+     <addaction name="actionCapture_Stop"/>
+     <addaction name="separator"/>
+     <addaction name="actionTimestamp_new_lines"/>
+     <addaction name="actionAppend_To_Existing_File"/>
+     <addaction name="actionStrip_Control_Char_s"/>
+     <addaction name="actionStrip_Esc_Sequences"/>
+     <addaction name="actionHex_Dump"/>
+    </widget>
+    <widget class="QMenu" name="menu_Upload">
+     <property name="title">
+      <string>&amp;Upload</string>
+     </property>
+     <addaction name="actionPlaceholder"/>
+    </widget>
+    <widget class="QMenu" name="menu_Download">
+     <property name="title">
+      <string>&amp;Download</string>
+     </property>
+     <addaction name="actionPlaceholder_2"/>
+    </widget>
+    <addaction name="actionNew_Tab"/>
+    <addaction name="actionNew_Window"/>
+    <addaction name="actionOpen_Connection"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave_Connection"/>
+    <addaction name="actionSave_Connection_As"/>
+    <addaction name="separator"/>
+    <addaction name="actionRecent_Connections"/>
+    <addaction name="separator"/>
+    <addaction name="menuCapture"/>
+    <addaction name="menu_Upload"/>
+    <addaction name="menu_Download"/>
+    <addaction name="separator"/>
+    <addaction name="actionClose_Tab"/>
+    <addaction name="actionClose_Window"/>
+    <addaction name="actionClose_All"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout_Whippy_Term"/>
+   </widget>
+   <widget class="QMenu" name="menuDebug">
+    <property name="title">
+     <string>Deb&amp;ug</string>
+    </property>
+    <addaction name="actionTest1"/>
+    <addaction name="actionTest2"/>
+    <addaction name="actionTest4"/>
+    <addaction name="actionTest5"/>
+    <addaction name="separator"/>
+    <addaction name="actionComPort_TEST"/>
+    <addaction name="actionTest6"/>
+    <addaction name="actionFont_Request_Test"/>
+    <addaction name="separator"/>
+    <addaction name="actionStats"/>
+   </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settin&amp;gs</string>
+    </property>
+    <addaction name="actionSettings"/>
+    <addaction name="separator"/>
+    <addaction name="actionImport_Settings"/>
+    <addaction name="actionExport_Settings"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>&amp;View</string>
+    </property>
+    <widget class="QMenu" name="menuStop_Watch">
+     <property name="title">
+      <string>&amp;Stop Watch</string>
+     </property>
+     <addaction name="actionStopWatch_Start"/>
+     <addaction name="actionStopWatch_Stop"/>
+     <addaction name="separator"/>
+     <addaction name="actionStopWatch_Reset"/>
+     <addaction name="actionStopWatch_Clear"/>
+     <addaction name="separator"/>
+     <addaction name="actionStopWatch_Lap"/>
+     <addaction name="separator"/>
+     <addaction name="actionStopWatch_Start_On_Tx"/>
+     <addaction name="actionStopWatch_Auto_Lap"/>
+    </widget>
+    <addaction name="actionShow_NonPrintables"/>
+    <addaction name="actionShow_End_Of_Lines"/>
+    <addaction name="actionWord_Wrap"/>
+    <addaction name="separator"/>
+    <addaction name="menuStop_Watch"/>
+    <addaction name="separator"/>
+    <addaction name="actionZoom_In"/>
+    <addaction name="actionZoom_Out"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <widget class="QMenu" name="menuOther_Clipboards">
+     <property name="title">
+      <string>&amp;Other Clipboards</string>
+     </property>
+     <addaction name="actionCopy_to_Clipboard_2"/>
+     <addaction name="actionPaste_From_Clipboard_2"/>
+     <addaction name="separator"/>
+     <addaction name="actionCopy_to_Clipboard_3"/>
+     <addaction name="actionPaste_From_Clipboard_3"/>
+    </widget>
+    <addaction name="actionCopy"/>
+    <addaction name="actionPaste"/>
+    <addaction name="menuOther_Clipboards"/>
+    <addaction name="separator"/>
+    <addaction name="actionFind"/>
+    <addaction name="actionFind_Next"/>
+    <addaction name="actionFind_First"/>
+    <addaction name="separator"/>
+    <addaction name="actionGoto_Column"/>
+    <addaction name="actionGoto_Line"/>
+    <addaction name="separator"/>
+    <addaction name="actionSelect_All"/>
+   </widget>
+   <widget class="QMenu" name="menuConnection">
+    <property name="title">
+     <string>&amp;Connection</string>
+    </property>
+    <addaction name="actionConnect_Menu"/>
+    <addaction name="actionDisconnect_Menu"/>
+    <addaction name="separator"/>
+    <addaction name="actionBridge_Connections"/>
+    <addaction name="actionRelease_Bridged_Connections"/>
+    <addaction name="separator"/>
+    <addaction name="actionMenu_Change_Name"/>
+    <addaction name="actionConnection_Options"/>
+    <addaction name="actionConnection_Settings"/>
+    <addaction name="actionRestore_Connection_Settings_to_Defaults"/>
+    <addaction name="separator"/>
+    <addaction name="actionTransmit_delay"/>
+   </widget>
+   <widget class="QMenu" name="menuTerminal">
+    <property name="title">
+     <string>Te&amp;rminal</string>
+    </property>
+    <addaction name="actionClear_Screen"/>
+    <addaction name="actionClear_Scroll_Buffer"/>
+    <addaction name="separator"/>
+    <addaction name="actionInsert_Horizontal_Rule"/>
+    <addaction name="actionInsert_Time_Stamp"/>
+    <addaction name="separator"/>
+    <addaction name="actionReset"/>
+   </widget>
+   <widget class="QMenu" name="menuBookmarks">
+    <property name="title">
+     <string>Boo&amp;kmarks</string>
+    </property>
+    <addaction name="actionBookmark_this_connection"/>
+    <addaction name="actionManage_Bookmarks"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuPlugins">
+    <property name="title">
+     <string>Plugins</string>
+    </property>
+    <addaction name="actionGet_Plugins"/>
+    <addaction name="separator"/>
+    <addaction name="actionInstall_Plugin"/>
+    <addaction name="actionManage_Plugins"/>
+   </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionCom_Test"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuView"/>
+   <addaction name="menuTerminal"/>
+   <addaction name="menuBookmarks"/>
+   <addaction name="menuConnection"/>
+   <addaction name="menuPlugins"/>
+   <addaction name="menuTools"/>
+   <addaction name="menuSettings"/>
+   <addaction name="menuHelp"/>
+   <addaction name="menuDebug"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QToolBar" name="mainToolBar">
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionNew_Tab_Toolbar"/>
+   <addaction name="actionConnectToggle"/>
+   <addaction name="separator"/>
+   <addaction name="actionClear_Screen"/>
+   <addaction name="separator"/>
+   <addaction name="actionTest1"/>
+   <addaction name="actionTest2"/>
+   <addaction name="actionTest4"/>
+   <addaction name="actionactionURIGo"/>
+  </widget>
+  <action name="actionQuit">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/door_in.png</normaloff>:/G/Graphics/door_in.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Exit</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionAbout_Whippy_Term">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/help.png</normaloff>:/G/Graphics/help.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;About Whippy Term</string>
+   </property>
+   <property name="toolTip">
+    <string>About Whippy Term</string>
+   </property>
+  </action>
+  <action name="actionTest1">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/bug.png</normaloff>:/G/Graphics/bug.png</iconset>
+   </property>
+   <property name="text">
+    <string>Screen &amp;Internals (Test1)</string>
+   </property>
+   <property name="toolTip">
+    <string>Screen Internals (Test1)</string>
+   </property>
+  </action>
+  <action name="actionTest2">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/bug_go.png</normaloff>:/G/Graphics/bug_go.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Refresh Screen Internals (Test2)</string>
+   </property>
+   <property name="toolTip">
+    <string>Refresh Screen Internals (Test2)</string>
+   </property>
+  </action>
+  <action name="actionOpen_Connection">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/folder_with_open.png</normaloff>:/G/Graphics/folder_with_open.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Open Connection...</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionClose_Tab">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/cross.png</normaloff>:/G/Graphics/cross.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Close Tab</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionSave_Connection">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/disk.png</normaloff>:/G/Graphics/disk.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Save Connection</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionSave_Connection_As">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/disk_multiple.png</normaloff>:/G/Graphics/disk_multiple.png</iconset>
+   </property>
+   <property name="text">
+    <string>Sa&amp;ve Connection As...</string>
+   </property>
+   <property name="toolTip">
+    <string>Save Connection As</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionClose_All">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/CloseAll.png</normaloff>:/G/Graphics/CloseAll.png</iconset>
+   </property>
+   <property name="text">
+    <string>C&amp;lose All</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionRecent_Connections">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Recent Connections</string>
+   </property>
+   <property name="toolTip">
+    <string>Recent Connections</string>
+   </property>
+  </action>
+  <action name="actionComPort_TEST">
+   <property name="text">
+    <string>&amp;ComPort TEST</string>
+   </property>
+  </action>
+  <action name="actionConnectToggle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/connect.png</normaloff>
+     <normalon>:/G/Graphics/disconnect.png</normalon>:/G/Graphics/connect.png</iconset>
+   </property>
+   <property name="text">
+    <string>Connect / Disconnect</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/cog.png</normaloff>:/G/Graphics/cog.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Settings...</string>
+   </property>
+  </action>
+  <action name="actionImport_Settings">
+   <property name="text">
+    <string>&amp;Import Settings...</string>
+   </property>
+  </action>
+  <action name="actionExport_Settings">
+   <property name="text">
+    <string>&amp;Export Settings...</string>
+   </property>
+  </action>
+  <action name="actionZoom_In">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/zoom_in.png</normaloff>:/G/Graphics/zoom_in.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Zoom In</string>
+   </property>
+  </action>
+  <action name="actionZoom_Out">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/zoom_out.png</normaloff>:/G/Graphics/zoom_out.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom &amp;Out</string>
+   </property>
+  </action>
+  <action name="actionShow_End_Of_Lines">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/pilcrow.png</normaloff>:/G/Graphics/pilcrow.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show &amp;End Of Lines</string>
+   </property>
+  </action>
+  <action name="actionWord_Wrap">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Word Wrap</string>
+   </property>
+  </action>
+  <action name="actionShow_NonPrintables">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/eye.png</normaloff>:/G/Graphics/eye.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show Non-&amp;printable chars</string>
+   </property>
+   <property name="toolTip">
+    <string>Show Non-printable chars</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/page_copy.png</normaloff>:/G/Graphics/page_copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Copy</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/paste_plain.png</normaloff>:/G/Graphics/paste_plain.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Paste</string>
+   </property>
+  </action>
+  <action name="actionFind">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/find.png</normaloff>:/G/Graphics/find.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Find...</string>
+   </property>
+  </action>
+  <action name="actionFind_Next">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/find_again.png</normaloff>:/G/Graphics/find_again.png</iconset>
+   </property>
+   <property name="text">
+    <string>Find &amp;Next</string>
+   </property>
+  </action>
+  <action name="actionFind_First">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>F&amp;ind First...</string>
+   </property>
+  </action>
+  <action name="actionGoto_Column">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/GotoColumn.png</normaloff>:/G/Graphics/GotoColumn.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Goto Column...</string>
+   </property>
+  </action>
+  <action name="actionGoto_Line">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/GotoLine.png</normaloff>:/G/Graphics/GotoLine.png</iconset>
+   </property>
+   <property name="text">
+    <string>Goto &amp;Line...</string>
+   </property>
+  </action>
+  <action name="actionSelect_All">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Select All</string>
+   </property>
+  </action>
+  <action name="actionCopy_to_Clipboard_2">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/page_copy_2.png</normaloff>:/G/Graphics/page_copy_2.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Copy to Clipboard 2</string>
+   </property>
+  </action>
+  <action name="actionPaste_From_Clipboard_2">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/paste_plain_2.png</normaloff>:/G/Graphics/paste_plain_2.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Paste From Clipboard 2</string>
+   </property>
+  </action>
+  <action name="actionCopy_to_Clipboard_3">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/page_copy_3.png</normaloff>:/G/Graphics/page_copy_3.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy to Clipboard &amp;3</string>
+   </property>
+  </action>
+  <action name="actionPaste_From_Clipboard_3">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/paste_plain_3.png</normaloff>:/G/Graphics/paste_plain_3.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste &amp;From Clipboard 3</string>
+   </property>
+  </action>
+  <action name="actionTest4">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/bug_add.png</normaloff>:/G/Graphics/bug_add.png</iconset>
+   </property>
+   <property name="text">
+    <string>Test&amp;4</string>
+   </property>
+  </action>
+  <action name="actionTest5">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/bug_delete.png</normaloff>:/G/Graphics/bug_delete.png</iconset>
+   </property>
+   <property name="text">
+    <string>Test&amp;5</string>
+   </property>
+  </action>
+  <action name="actionConnection_Settings">
+   <property name="text">
+    <string>Customize Connection &amp;Settings...</string>
+   </property>
+   <property name="iconText">
+    <string>Customize Connection Settings...</string>
+   </property>
+   <property name="toolTip">
+    <string>Customize Customize Connection Settings</string>
+   </property>
+  </action>
+  <action name="actionTest6">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/bug_edit.png</normaloff>:/G/Graphics/bug_edit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Test&amp;6</string>
+   </property>
+  </action>
+  <action name="actionFont_Request_Test">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Font Request Test</string>
+   </property>
+  </action>
+  <action name="actionConnect_Menu">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/connect.png</normaloff>:/G/Graphics/connect.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Connect</string>
+   </property>
+  </action>
+  <action name="actionDisconnect_Menu">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/disconnect.png</normaloff>:/G/Graphics/disconnect.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Disconnect</string>
+   </property>
+  </action>
+  <action name="actionNew_Tab">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/tab_add.png</normaloff>:/G/Graphics/tab_add.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;New Tab...</string>
+   </property>
+   <property name="toolTip">
+    <string>New Tab</string>
+   </property>
+  </action>
+  <action name="actionNew_Tab_Toolbar">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/tab_add.png</normaloff>:/G/Graphics/tab_add.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Tab</string>
+   </property>
+   <property name="toolTip">
+    <string>New Tab</string>
+   </property>
+  </action>
+  <action name="actionClear_Screen">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/application.png</normaloff>:/G/Graphics/application.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Clear Screen</string>
+   </property>
+  </action>
+  <action name="actionReset">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Reset</string>
+   </property>
+  </action>
+  <action name="actionInsert_Horizontal_Rule">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Insert Horizontal Rule</string>
+   </property>
+  </action>
+  <action name="actionClear_Scroll_Buffer">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Clear &amp;Scroll Buffer</string>
+   </property>
+  </action>
+  <action name="actionInsert_Time_Stamp">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>I&amp;nsert Time Stamp</string>
+   </property>
+  </action>
+  <action name="actionNew_Window">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/application_add.png</normaloff>:/G/Graphics/application_add.png</iconset>
+   </property>
+   <property name="text">
+    <string>New &amp;Window...</string>
+   </property>
+  </action>
+  <action name="actionMenu_Change_Name">
+   <property name="text">
+    <string>Change &amp;Name...</string>
+   </property>
+  </action>
+  <action name="actionStats">
+   <property name="text">
+    <string>&amp;Stats</string>
+   </property>
+  </action>
+  <action name="actionClose_Window">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Close W&amp;indow</string>
+   </property>
+  </action>
+  <action name="actionactionURIGo">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/bullet_go.png</normaloff>:/G/Graphics/bullet_go.png</iconset>
+   </property>
+   <property name="text">
+    <string>actionURIGo</string>
+   </property>
+  </action>
+  <action name="actionBookmark_this_connection">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/book_add.png</normaloff>:/G/Graphics/book_add.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Bookmark This Connection...</string>
+   </property>
+  </action>
+  <action name="actionManage_Bookmarks">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/book_edit.png</normaloff>:/G/Graphics/book_edit.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Manage Bookmarks...</string>
+   </property>
+  </action>
+  <action name="actionGet_Plugins">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/plugin_link.png</normaloff>:/G/Graphics/plugin_link.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Get Plugins Web Site...</string>
+   </property>
+  </action>
+  <action name="actionInstall_Plugin">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/plugin_add.png</normaloff>:/G/Graphics/plugin_add.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Install Plugin...</string>
+   </property>
+  </action>
+  <action name="actionManage_Plugins">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/plugin_edit.png</normaloff>:/G/Graphics/plugin_edit.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Manage Plugins...</string>
+   </property>
+  </action>
+  <action name="actionStopWatch_Start">
+   <property name="text">
+    <string>&amp;Start</string>
+   </property>
+  </action>
+  <action name="actionStopWatch_Stop">
+   <property name="text">
+    <string>Sto&amp;p</string>
+   </property>
+  </action>
+  <action name="actionStopWatch_Reset">
+   <property name="text">
+    <string>&amp;Reset</string>
+   </property>
+  </action>
+  <action name="actionStopWatch_Lap">
+   <property name="text">
+    <string>&amp;Lap</string>
+   </property>
+  </action>
+  <action name="actionStopWatch_Clear">
+   <property name="text">
+    <string>&amp;Clear</string>
+   </property>
+  </action>
+  <action name="actionStopWatch_Start_On_Tx">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Start &amp;On Tx</string>
+   </property>
+  </action>
+  <action name="actionStopWatch_Auto_Lap">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Auto Lap</string>
+   </property>
+  </action>
+  <action name="actionCapture_To_File">
+   <property name="text">
+    <string>&amp;Capture To File...</string>
+   </property>
+  </action>
+  <action name="actionTimestamp_new_lines">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Timestamp New Lines</string>
+   </property>
+  </action>
+  <action name="actionAppend_To_Existing_File">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Append To Existing File</string>
+   </property>
+  </action>
+  <action name="actionStrip_Control_Char_s">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Strip Control Char's</string>
+   </property>
+  </action>
+  <action name="actionStrip_Esc_Sequences">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Strip &amp;Esc Sequences</string>
+   </property>
+  </action>
+  <action name="actionCapture_Stop">
+   <property name="text">
+    <string>St&amp;op</string>
+   </property>
+  </action>
+  <action name="actionHex_Dump">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Hex Dump</string>
+   </property>
+  </action>
+  <action name="actionPlaceholder">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Placeholder</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionPlaceholder_2">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Placeholder</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionConnection_Options">
+   <property name="text">
+    <string>Connection &amp;Options...</string>
+   </property>
+  </action>
+  <action name="actionCom_Test">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ComTest.png</normaloff>:/G/Graphics/ComTest.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Com Test...</string>
+   </property>
+  </action>
+  <action name="actionTransmit_delay">
+   <property name="text">
+    <string>&amp;Transmit delay...</string>
+   </property>
+  </action>
+  <action name="actionBridge_Connections">
+   <property name="text">
+    <string>&amp;Bridge This Connection...</string>
+   </property>
+  </action>
+  <action name="actionRelease_Bridged_Connections">
+   <property name="text">
+    <string>&amp;Release Bridged Connections...</string>
+   </property>
+  </action>
+  <action name="actionRestore_Connection_Settings_to_Defaults">
+   <property name="text">
+    <string>R&amp;estore Connection Settings to Defaults...</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>HozPanelHandle</class>
+   <extends>QFrame</extends>
+   <header>HozPanelHandle.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>VerPanelHandle</class>
+   <extends>QFrame</extends>
+   <header>VerPanelHandle.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MovableTabWidget</class>
+   <extends>QTabWidget</extends>
+   <header>Widget_MovableTabWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="MainResource.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -1,0 +1,19 @@
+<?xml version="1.0" standalone="no" ?>
+<ExternPluginMaker>
+    <LastBuildFile>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/IODrivers/RemoteSPI/RemoteSPI.wtp</LastBuildFile>
+    <LinuxFilename>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/IODrivers/RemoteSPI/Linux/RemoteSPI.so</LinuxFilename>
+    <WindowsFilename></WindowsFilename>
+    <MacFilename></MacFilename>
+    <RPI64Filename></RPI64Filename>
+    <RPI32Filename></RPI32Filename>
+    <PluginName>Remote SPI</PluginName>
+    <InstallFilename>RemoteSPI</InstallFilename>
+    <Description>A client for remotly sending and receiving bytes over a SPI connection.&#10;&#10;You run a remote program on the target system.  SPI commands will then be sent over a TCP connection from Whippy Term to the target where they will be sent out the selected SPI bus.&#10;&#10;You need to download the remote program, compile on your target, and then run it before starting a connection from this plugin.</Description>
+    <Contributors>Paul Hutchinson</Contributors>
+    <Copyright>2022</Copyright>
+    <ReleaseDate>04 Jun 2022</ReleaseDate>
+    <Version>0.1.4</Version>
+    <APIVersion>0.8.0.0</APIVersion>
+    <PluginClass>2</PluginClass>
+    <PluginSubClass>0</PluginSubClass>
+</ExternPluginMaker>

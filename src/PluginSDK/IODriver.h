@@ -1,0 +1,124 @@
+/*******************************************************************************
+ * FILENAME: IODriver.h
+ *
+ * PROJECT:
+ *    Whippy Term
+ *
+ * FILE DESCRIPTION:
+ *    This file is part of the Plugin SDK.  It has things needed for
+ *    the IOSystem (IO drivers).
+ *
+ * COPYRIGHT:
+ *    Copyright 2018 Paul Hutchinson.
+ *
+ *    This software is the property of Paul Hutchinson. and may not be
+ *    reused in any manner except under express written permission of
+ *    Paul Hutchinson.
+ *
+ * HISTORY:
+ *    Paul Hutchinson (09 Jul 2018)
+ *       Created
+ *
+ *******************************************************************************/
+#ifndef __IODRIVER_H_
+#define __IODRIVER_H_
+
+/***  HEADER FILES TO INCLUDE          ***/
+#include "PluginUI.h"
+
+/***  DEFINES                          ***/
+#define RETERROR_NOBYTES                0
+#define RETERROR_DISCONNECT             -1
+#define RETERROR_IOERROR                -2
+#define RETERROR_BUSY                   -3
+
+/* IODriverInfo.Flags */
+#define IODRVINFOFLAG_BLOCKDEV          0x00000001
+
+///* IODriverDetectedInfo.Flags */
+#define IODRV_DETECTFLAG_INUSE          0x00000001
+
+/***  MACROS                           ***/
+
+/***  TYPE DEFINITIONS                 ***/
+
+/* !!!! You can only add to this.  Changing it will break the plugins !!!! 
+   You can not change any of the sizes either */
+struct IODriverDetectedInfo
+{
+    struct IODriverDetectedInfo *Next;
+    uint32_t StructureSize;             // The size of the allocated structure.  Set to sizeof(struct IODriverDetectedInfo) in your plugin
+    uint32_t Flags;
+    char DeviceUniqueID[512];
+    char Name[256];
+    char Title[256];
+};
+
+struct DriverIOHandle {int PrivateData;};  // Fake type holder
+typedef struct DriverIOHandle t_DriverIOHandleType;
+
+typedef struct IOSystemHandle {int PrivateDataHere;} t_IOSystemHandle;  // Fake type holder
+
+typedef enum
+{
+    e_DataEventCode_BytesAvailable,
+    e_DataEventCode_Disconnected,
+    e_DataEventCode_Connected,
+    e_DataEventCodeMAX
+}e_DataEventCodeType;
+
+typedef struct DetectedDevices {int PrivateDataHere;} t_DetectedDevices;    // Fake type holder
+
+typedef struct ConnectionOptionsWidgets {int PrivateDataHere;} t_ConnectionOptionsWidgetsType;    // Fake type holder
+
+/* !!!! You can only add to this.  Changing it will break the plugins !!!! */
+struct IODriverInfo
+{
+    uint32_t Flags;
+};
+
+/* !!!! You can only add to this.  Changing it will break the plugins !!!! */
+struct IODriverAPI
+{
+    PG_BOOL (*Init)(void);
+    const struct IODriverInfo *(*GetDriverInfo)(unsigned int *SizeOfInfo);
+
+    PG_BOOL (*InstallPlugin)(void);
+    void (*UnInstallPlugin)(void);
+
+    const struct IODriverDetectedInfo *(*DetectDevices)(void);
+    void (*FreeDetectedDevices)(const struct IODriverDetectedInfo *Devices);
+    PG_BOOL (*GetConnectionInfo)(const char *DeviceUniqueID,t_PIKVList *Options,struct IODriverDetectedInfo *RetInfo);
+
+    t_ConnectionOptionsWidgetsType *(*ConnectionOptionsWidgets_AllocWidgets)(t_WidgetSysHandle *WidgetHandle);
+    void (*ConnectionOptionsWidgets_FreeWidgets)(t_ConnectionOptionsWidgetsType *ConOptions,t_WidgetSysHandle *WidgetHandle);
+    void (*ConnectionOptionsWidgets_StoreUI)(t_ConnectionOptionsWidgetsType *ConOptions,t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,t_PIKVList *Options);
+    void (*ConnectionOptionsWidgets_UpdateUI)(t_ConnectionOptionsWidgetsType *ConOptions,t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,t_PIKVList *Options);
+
+    PG_BOOL (*Convert_URI_To_Options)(const char *URI,t_PIKVList *Options,char *DeviceUniqueID,unsigned int MaxDeviceUniqueIDLen,PG_BOOL Update);
+    PG_BOOL (*Convert_Options_To_URI)(const char *DeviceUniqueID,t_PIKVList *Options,char *URI,unsigned int MaxURILen);
+
+    t_DriverIOHandleType *(*AllocateHandle)(const char *DeviceUniqueID,t_IOSystemHandle *IOHandle);
+    void (*FreeHandle)(t_DriverIOHandleType *DriverIO);
+    PG_BOOL (*Open)(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options);
+    void (*Close)(t_DriverIOHandleType *DriverIO);
+    int (*Read)(t_DriverIOHandleType *DriverIO,uint8_t *Data,int Bytes);
+    int (*Write)(t_DriverIOHandleType *DriverIO,const uint8_t *Data,int Bytes);
+    PG_BOOL (*ChangeOptions)(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options);
+    int (*Transmit)(t_DriverIOHandleType *DriverIO);
+};
+
+struct IOS_API
+{
+    PG_BOOL (*RegisterDriver)(const char *DriverName,const char *BaseURI,const struct IODriverAPI *DriverAPI,int SizeOfDriverAPI);
+    const struct PI_UIAPI *(*GetAPI_UI)(void);
+    void (*DrvDataEvent)(t_IOSystemHandle *IOHandle,int Code); // Really Code is 'e_DataEventCodeType Code'
+};
+
+/***  CLASS DEFINITIONS                ***/
+
+/***  GLOBAL VARIABLE DEFINITIONS      ***/
+
+/***  EXTERNAL FUNCTION PROTOTYPES     ***/
+
+#endif

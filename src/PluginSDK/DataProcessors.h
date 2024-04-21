@@ -1,0 +1,156 @@
+/*******************************************************************************
+ * FILENAME: DataProcessors.h
+ * 
+ * PROJECT:
+ *    Whippy Term
+ *
+ * FILE DESCRIPTION:
+ *    This file is part of the Plugin SDK.  It has things needed for
+ *    the Data Processors System (encoders, decoders, ect).
+ *
+ * COPYRIGHT:
+ *    Copyright 2018 Paul Hutchinson.
+ *
+ *    This software is the property of Paul Hutchinson and may not be
+ *    reused in any manner except under express written permission of
+ *    Paul Hutchinson.
+ *
+ * HISTORY:
+ *    Paul Hutchinson (30 Aug 2018)
+ *       Created
+ *
+ *******************************************************************************/
+#ifndef __DATAPROCESSORS_H_
+#define __DATAPROCESSORS_H_
+
+/***  HEADER FILES TO INCLUDE          ***/
+#include "PluginTypes.h"
+#include "KeyDefines.h"
+
+/***  DEFINES                          ***/
+#define TXT_ATTRIB_UNDERLINE                0x0001
+#define TXT_ATTRIB_UNDERLINE_DOUBLE         0x0002
+#define TXT_ATTRIB_UNDERLINE_DOTTED         0x0004
+#define TXT_ATTRIB_UNDERLINE_DASHED         0x0008
+#define TXT_ATTRIB_UNDERLINE_WAVY           0x0010
+#define TXT_ATTRIB_OVERLINE                 0x0020
+#define TXT_ATTRIB_LINETHROUGHT             0x0040
+#define TXT_ATTRIB_BOLD                     0x0080
+#define TXT_ATTRIB_ITALIC                   0x0100
+#define TXT_ATTRIB_OUTLINE                  0x0200
+#define TXT_ATTRIB_BOX                      0x0400  // Future
+#define TXT_ATTRIB_ROUNDBOX                 0x0800
+
+/***  MACROS                           ***/
+
+/***  TYPE DEFINITIONS                 ***/
+typedef enum
+{
+    e_SysCol_Black=0,
+    e_SysCol_Red,
+    e_SysCol_Green,
+    e_SysCol_Yellow,
+    e_SysCol_Blue,
+    e_SysCol_Magenta,
+    e_SysCol_Cyan,
+    e_SysCol_White,
+    e_SysColMAX
+} e_SysColType;
+
+typedef enum
+{
+    e_SysColShade_Normal,
+    e_SysColShade_Bright,
+    e_SysColShade_Dark,
+    e_SysColShadeMAX,
+} e_SysColShadeType;
+
+typedef enum
+{
+    e_DefaultColors_BG,
+    e_DefaultColors_FG,
+    e_DefaultColorsMAX
+} e_DefaultColorsType;
+
+struct DataProcessorHandle {int AllPrivate;};  // Fake type holder
+typedef struct DataProcessorHandle t_DataProcessorHandleType;
+
+typedef enum
+{
+    e_DataProcessorClass_Other,
+    e_DataProcessorClass_CharEncoding,
+    e_DataProcessorClass_TermEmulation,
+    e_DataProcessorClass_Highlighter,
+    e_DataProcessorClass_Logger,
+    e_DataProcessorClassMAX
+} e_DataProcessorClassType;
+
+typedef enum
+{
+    e_DataProcessorType_Text,
+    e_DataProcessorType_Binary,
+    e_DataProcessorTypeMAX
+} e_DataProcessorTypeType;
+
+/* !!!! You can only add to this.  Changing it will break the plugins !!!! */
+struct DataProcessorInfo
+{
+    const char *DisplayName;
+    const char *Tip;
+    const char *Help;
+    e_DataProcessorTypeType ProType;
+
+    /* Only applies to text processors */
+    e_DataProcessorClassType ProClass;
+};
+
+/* !!!! You can only add to this.  Changing it will break the plugins !!!! */
+struct DataProcessorAPI
+{
+    t_DataProcessorHandleType *(*AllocateData)(void);
+    void (*FreeData)(t_DataProcessorHandleType *DataHandle);
+    const struct DataProcessorInfo *(*GetProcessorInfo)(unsigned int *SizeOfInfo);
+    PG_BOOL (*ProcessKeyPress)(t_DataProcessorHandleType *DataHandle,
+            const uint8_t *KeyChar,int KeyCharLen,e_UIKeys ExtendedKey,
+            uint8_t Mod);
+    void (*ProcessIncomingByte)(t_DataProcessorHandleType *DataHandle,
+            const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+            PG_BOOL *Consumed);
+};
+
+/* !!!! You can only add to this.  Changing it will break the plugins !!!! */
+struct DPS_API
+{
+    PG_BOOL (*RegisterDataProcessor)(const char *ProID,const struct DataProcessorAPI *ProAPI,int SizeOfProAPI);
+    const struct PI_UIAPI *(*GetAPI_UI)(void);
+    void (*SetFGColor)(uint32_t FGColor);
+    uint32_t (*GetFGColor)(void);
+    void (*SetBGColor)(uint32_t BGColor);
+    uint32_t (*GetBGColor)(void);
+    void (*SetULineColor)(uint32_t ULineColor);
+    uint32_t (*GetULineColor)(void);
+    void (*SetAttribs)(uint16_t Attribs);
+    uint16_t (*GetAttribs)(void);
+    void (*DoNewLine)(void);
+    void (*DoReturn)(void);
+    void (*DoBackspace)(void);
+    void (*DoMoveCursor)(uint32_t X,uint32_t Y);
+    void (*DoClearScreen)(void);
+    void (*DoClearArea)(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2);
+    void (*GetCursorXY)(int32_t *RetCursorX,int32_t *RetCursorY);
+    void (*InsertString)(uint8_t *Str,uint32_t Len);
+    void (*GetScreenSize)(int32_t *RetRows,int32_t *RetColumns);
+    uint32_t (*GetSysColor)(uint32_t SysColShade,uint32_t SysColor);
+    uint32_t (*GetSysDefaultColor)(uint32_t DefaultColor);
+    void (*NoteNonPrintable)(const char *CodeStr);
+    void (*DoTab)(void);
+};
+
+/***  CLASS DEFINITIONS                ***/
+
+/***  GLOBAL VARIABLE DEFINITIONS      ***/
+
+/***  EXTERNAL FUNCTION PROTOTYPES     ***/
+
+#endif
+//                TmpCol=g_Settings.SysColors[Shade][Data->CSIArg[r]-30];

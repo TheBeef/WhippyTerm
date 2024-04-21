@@ -1,0 +1,1342 @@
+#include "Form_MainWindow.h"
+#include "ui_Form_MainWindow.h"
+#include "UI/UIMainWindow.h"
+#include "UI/UIAsk.h"
+#include "QTKeyMappings.h"
+#include "main.h"
+#include "VerPanelHandle.h"
+#include "Version.h"
+#include "main.h"
+#include <stdio.h>
+#include <QCloseEvent>
+
+#include "Form_DebugStats.h"
+
+#include "UI/UISettings.h"
+#include "UI/UIDebug.h"
+#include "UI/UIFontReq.h"
+
+bool g_DEBUG_DoInsertTest;
+
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+#include <QToolButton>
+#include <QStyleFactory>
+#include "App/MainWindow.h"
+void Form_MainWindow::on_actionTest1_triggered()
+{
+    Debug_Send2DebugFn(MWDebug1);
+//    MW_Test();
+//qApp->setStyle("Windows");
+//    UIMW_SwitchTabControlCloseBttnPos(true);
+}
+
+void Form_MainWindow::Debug_Send2DebugFn(void (*fn)(uintptr_t ID))
+{
+    uintptr_t ID;
+    QWidget *Tab;
+
+    Tab=ui->Main_tabWidget->widget(ui->Main_tabWidget->currentIndex());
+    if(Tab!=0)
+    {
+        ID=Tab->objectName().toULongLong();
+        fn(ID);
+    }
+}
+
+void Form_MainWindow::on_actionTest2_triggered()
+{
+    Debug_Send2DebugFn(MWDebug2);
+//    MW_Test2();
+//    UIMW_SwitchTabControlCloseBttnPos(false);
+}
+
+void Form_MainWindow::on_actionTest4_triggered()
+{
+    Debug_Send2DebugFn(MWDebug4);
+//    MW_Test4();
+}
+
+void Form_MainWindow::on_actionTest5_triggered()
+{
+qDebug("DEBUG5");
+
+    Debug_Send2DebugFn(MWDebug5);
+//    MW_Test5();
+}
+
+void Form_MainWindow::on_actionTest6_triggered()
+{
+    Debug_Send2DebugFn(MWDebug6);
+//    g_DEBUG_DoInsertTest=!g_DEBUG_DoInsertTest;
+}
+
+//int g_DEBUG_Comlist;
+void Form_MainWindow::on_actionComPort_TEST_triggered()
+{
+//    g_DEBUG_Comlist++;
+//    if(g_DEBUG_Comlist>3)
+//        g_DEBUG_Comlist=0;
+}
+
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+
+Form_MainWindow::Form_MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::Form_MainWindow)
+{
+    FirstShow=true;
+    IgnoreNextKeyEvent=false;
+
+    ui->setupUi(this);
+
+    ToolBarURI_LineEdit = new QLineEdit(ui->mainToolBar);
+    ToolBarURI_LineEdit->setObjectName(QString::fromUtf8("ToolBarURI"));
+    ToolBarURI_LineEdit->setGeometry(QRect(200, 10, 113, 27));
+
+    ToolBarURI_LineEdit->setToolTip(
+            "The URI is a way of specifying what device to connect to and"
+            " set parameters for that connection.\n"
+            "\n"
+            "The format is:\n"
+            "Device : parameters\n"
+            "\n"
+            "The parameters format depends on the device.\n"
+            "\n"
+            "For example:\n"
+            "\"COM1:9600,8,n,1\" is for comport 1 at 9600 baud, 8 bits, no parity, 1 stop bit.");
+
+    ToolBarURI=ui->mainToolBar->insertWidget(ui->actionactionURIGo,ToolBarURI_LineEdit);
+
+    ToolbarURILabel_Label = new QLabel(ui->mainToolBar);
+    ToolbarURILabel_Label->setObjectName(QString::fromUtf8("ToolbarURILabel"));
+    ToolbarURILabel_Label->setGeometry(QRect(200, 10, 62, 17));
+    ToolbarURILabel_Label->setText("URI ");
+
+    ToolBarURILabel=ui->mainToolBar->insertWidget(ToolBarURI,ToolbarURILabel_Label);
+
+    connect(ToolBarURI_LineEdit, SIGNAL(returnPressed()), this, SLOT(URIreturnPressed()));
+
+//    App1SecTimer=new QTimer(this);
+//    AppCursorSecTimer=new QTimer(this);
+DebugInsertTimer=new QTimer(this);
+
+    StopWatchTimer=new QTimer(this);
+    StopWatchTimer->setInterval(13);   // 13ms so the updates look like they are coming in faster
+    connect(StopWatchTimer, SIGNAL(timeout()), this, SLOT(StopWatchTimer_triggered()));
+}
+
+Form_MainWindow::~Form_MainWindow()
+{
+    delete ui;
+}
+
+void Form_MainWindow::on_actionNew_Tab_Toolbar_triggered()
+{
+    DoToolbarTriggered(e_UIMWToolbar_NewTab);
+}
+
+void Form_MainWindow::Setup(class TheMainWindow *MW)
+{
+    MainWindowClassPtr=MW;
+
+    ui->LeftResizeFrame->LeftMode();
+    ui->LeftResizeFrame->ChangeArrowDir(true);
+
+    ui->BottomResizeFrame->RegisterClickHandler(this);
+    ui->RightResizeFrame->RegisterClickHandler(this);
+    ui->LeftResizeFrame->RegisterClickHandler(this);
+
+    /* Make sure the panel handles are on top */
+    ui->BottomResizeFrame->raise();
+    ui->RightResizeFrame->raise();
+    ui->LeftResizeFrame->raise();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Form_MainWindow::SendEvent()
+ *
+ * SYNOPSIS:
+ *    bool Form_MainWindow::SendEvent(e_MWEventType EventType,
+ *          union MWEventData *Info,uintptr_t ID);
+ *
+ * PARAMETERS:
+ *    EventType [I] -- The event to send (see UIMainWindow.h)
+ *    Info [I] -- Extra info to send with this event.  Can be NULL for none.
+ *    ID [I] -- The user data for this event
+ *
+ * FUNCTION:
+ *    This function sends a main window event out of the UI system to the main
+ *    code.
+ *
+ * RETURNS:
+ *    true -- Accept this event
+ *    false -- Cancel this event
+ *
+ * NOTES:
+ *    The return value is normally ignored as most events have no other action.
+ *    However there are some that you want to cancel the next part of the
+ *    event (close main window for example).
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Form_MainWindow::SendEvent(e_MWEventType EventType,union MWEventData *Info,
+        uintptr_t ID)
+{
+    struct MWEvent NewEvent;
+
+    NewEvent.EventType=EventType;
+    NewEvent.ID=ID;
+    NewEvent.UIWindow=(t_UIMainWindow *)this;
+    NewEvent.MW=MainWindowClassPtr;
+    if(Info!=NULL)
+        NewEvent.Info=*Info;
+
+    return MW_Event(&NewEvent);
+}
+bool Form_MainWindow::SendEvent(e_MWEventType EventType,union MWEventData *Info)
+{
+    return SendEvent(EventType,Info,objectName().toULongLong());
+}
+bool Form_MainWindow::SendEvent(e_MWEventType EventType)
+{
+    return SendEvent(EventType,NULL,objectName().toULongLong());
+}
+
+void Form_MainWindow::keyPressEvent(QKeyEvent * event)
+{
+    uint8_t Mods;
+    e_UIKeys UIKey;
+    union MWEventData EventData;
+    std::string Text;
+    char c;
+
+    if(IgnoreNextKeyEvent)
+    {
+        IgnoreNextKeyEvent=false;
+        return;
+    }
+
+    Mods=0;
+    if(event->modifiers() & Qt::ShiftModifier)
+        Mods|=KEYMOD_SHIFT;
+    if(event->modifiers() & Qt::ControlModifier)
+        Mods|=KEYMOD_CONTROL;
+    if(event->modifiers() & Qt::AltModifier)
+        Mods|=KEYMOD_ALT;
+    if(event->modifiers() & Qt::MetaModifier)
+        Mods|=KEYMOD_LOGO;
+
+    UIKey=ConvertQTKey2UIKey((Qt::Key)event->key());
+
+    if(UIKey==e_UIKeysMAX)
+    {
+        /* Convert CTRL-? (AscII<32) to their letter and let 'Mods' say
+           it was a letter with the ctrl key held */
+        if(event->text().length()==1 && event->text()[0]<' ')
+        {
+            /* Remove the CTRL part */
+            c=event->text()[0].toLatin1();
+            c+='@'; // Move up to ABC range
+            Text=c;
+        }
+        else
+        {
+            Text=event->text().toStdString();
+        }
+    }
+    else
+    {
+        Text="";
+    }
+
+    EventData.Key.Mods=Mods;
+    EventData.Key.Key=UIKey;
+    EventData.Key.Text=(const uint8_t *)Text.c_str();
+    EventData.Key.TextLen=Text.length();
+    SendEvent(e_MWEvent_MainWindowKeyPress,&EventData);
+}
+
+bool Form_MainWindow::focusNextPrevChild(bool next)
+{
+//    if(g_FocusedTextCanvas!=NULL)
+//        return false;
+    return QMainWindow::focusNextPrevChild(next);
+}
+
+void Form_MainWindow::focusInEvent(QFocusEvent * event)
+{
+DebugMsg("MAIN WINDOW FOCUS");
+    g_FocusedMainWindow=this;
+
+    QMainWindow::focusInEvent(event);
+}
+
+void Form_MainWindow::focusOutEvent(QFocusEvent * event)
+{
+    g_FocusedMainWindow=NULL;
+
+    QMainWindow::focusOutEvent(event);
+}
+
+void Form_MainWindow::on_actionQuit_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Quit);
+}
+
+void Form_MainWindow::DoMenuTriggered(e_UIMWMenuType MenuID)
+{
+    union MWEventData EventData;
+
+    EventData.Menu.InputID=MenuID;
+    SendEvent(e_MWEvent_MenuTriggered,&EventData);
+}
+
+void Form_MainWindow::DoBttnTriggered(e_UIMWBttnType BttnID)
+{
+    union MWEventData EventData;
+
+    EventData.Bttn.InputID=BttnID;
+    SendEvent(e_MWEvent_BttnTriggered,&EventData);
+}
+
+void Form_MainWindow::DoToolbarTriggered(e_UIMWToolbarType ToolID)
+{
+    union MWEventData EventData;
+
+    EventData.Toolbar.InputID=ToolID;
+    SendEvent(e_MWEvent_ToolbarTriggered,&EventData);
+}
+
+void Form_MainWindow::DoCheckboxTriggered(e_UIMWCheckboxType CheckboxID,bool Checked)
+{
+    union MWEventData EventData;
+
+    EventData.Checkbox.Checked=Checked;
+    EventData.Checkbox.InputID=CheckboxID;
+    SendEvent(e_MWEvent_CheckboxTriggered,&EventData);
+}
+
+void Form_MainWindow::DoTextInputChanged(e_UIMWTxtInputType InputID,const char *FinalText)
+{
+    union MWEventData EventData;
+
+    EventData.Txt.InputID=InputID;
+    EventData.Txt.Text=FinalText;
+    SendEvent(e_MWEvent_TxtInputEditFinished,&EventData);
+}
+
+void Form_MainWindow::on_actionAbout_Whippy_Term_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_About);
+}
+
+void Form_MainWindow::PanelClicked(e_PanelType Panel)
+{
+    QList<int> CurrentSizes;
+    QList<int> newSizes;
+    int SpaceLeft;
+    int OtherPanelWidth;
+    int NewSize;
+
+    if(FirstShow)
+        return;
+
+    switch(Panel)
+    {
+        case e_Panel_Bottom:
+            CurrentSizes=ui->TopBottomSplitter->sizes();
+            SpaceLeft=CurrentSizes[0]+CurrentSizes[1];
+
+            if(CurrentSizes[1]>16)
+            {
+                /* It's open and we are closing it */
+
+                /* Save the height */
+                BottomPanelLastSize=CurrentSizes[1];
+                NewSize=16; // the min size of a hidden panel is 16
+
+                newSizes.append(SpaceLeft-NewSize);
+                newSizes.append(NewSize);
+
+                EnableBottomSplitter(false);
+            }
+            else
+            {
+                /* We are opening it */
+                /* Restore the saved height */
+                newSizes.append(SpaceLeft-BottomPanelLastSize);
+                newSizes.append(BottomPanelLastSize);
+
+                EnableBottomSplitter(true);
+            }
+
+            ui->TopBottomSplitter->setSizes(newSizes);
+
+            ui->BottomResizeFrame->ClearHighlight();
+            on_TopBottomSplitter_splitterMoved(0,0);
+        break;
+        case e_Panel_Left:
+            CurrentSizes=ui->LeftRightSplitter->sizes();
+            SpaceLeft=CurrentSizes[0]+CurrentSizes[1]+CurrentSizes[2];
+
+            OtherPanelWidth=CurrentSizes[2];
+
+            if(CurrentSizes[0]>16)
+            {
+                /* We are closing it */
+
+                /* Save the height */
+                LeftPanelLastSize=CurrentSizes[0];
+                NewSize=16; // the min size of a hidden panel is 16
+
+                newSizes.append(NewSize);
+                newSizes.append(SpaceLeft-OtherPanelWidth-NewSize);
+                newSizes.append(OtherPanelWidth);
+
+                EnableLeftSplitter(false);
+            }
+            else
+            {
+                /* We are opening it */
+                /* Restore the saved width */
+                newSizes.append(LeftPanelLastSize);
+                newSizes.append(SpaceLeft-OtherPanelWidth-LeftPanelLastSize);
+                newSizes.append(OtherPanelWidth);
+
+                EnableLeftSplitter(true);
+            }
+
+            ui->LeftRightSplitter->setSizes(newSizes);
+
+            ui->LeftResizeFrame->ClearHighlight();
+            on_LeftRightSplitter_splitterMoved(0,1);
+        break;
+        case e_Panel_Right:
+            CurrentSizes=ui->LeftRightSplitter->sizes();
+            SpaceLeft=CurrentSizes[0]+CurrentSizes[1]+CurrentSizes[2];
+
+            OtherPanelWidth=CurrentSizes[0];
+
+            if(CurrentSizes[2]>16)
+            {
+                /* We are closing it */
+
+                /* Save the height */
+                RightPanelLastSize=CurrentSizes[2];
+                NewSize=16; // the min size of a hidden panel is 16
+
+                newSizes.append(OtherPanelWidth);
+                newSizes.append(SpaceLeft-OtherPanelWidth-NewSize);
+                newSizes.append(NewSize);
+
+                EnableRightSplitter(false);
+            }
+            else
+            {
+                /* We are opening it */
+                /* Restore the saved width */
+                newSizes.append(OtherPanelWidth);
+                newSizes.append(SpaceLeft-OtherPanelWidth-RightPanelLastSize);
+                newSizes.append(RightPanelLastSize);
+
+                EnableRightSplitter(true);
+            }
+
+            ui->LeftRightSplitter->setSizes(newSizes);
+
+            ui->RightResizeFrame->ClearHighlight();
+            on_LeftRightSplitter_splitterMoved(0,2);
+        break;
+        case e_PanelMAX:
+        default:
+        break;
+    }
+}
+
+void Form_MainWindow::EnableBottomSplitter(bool Enable)
+{
+    QSplitterHandle *hndl;
+    int i;
+
+    for(i=0;i<ui->TopBottomSplitter->count();i++)
+    {
+        hndl=ui->TopBottomSplitter->handle(i);
+        hndl->setEnabled(Enable);
+    }
+
+    ui->BottomWidgetsPanel->setVisible(Enable);
+}
+
+void Form_MainWindow::on_TopBottomSplitter_splitterMoved(int pos, int index)
+{
+    union MWEventData EInfo;
+    QList<int> CurrentSizes;
+    bool PanelOpen;
+
+    if(FirstShow)
+        return;
+
+    CurrentSizes=ui->TopBottomSplitter->sizes();
+
+    PanelOpen=CurrentSizes[1]>16;
+
+    /* See how big the panel is (and what direction the arrows should be
+       pointing) */
+    if(PanelOpen)
+    {
+        /* We are open so we need to save the new size */
+        BottomClosed=false;
+        ui->BottomResizeFrame->ChangeArrowDir(false);
+        BottomPanelLastSize=CurrentSizes[1];
+    }
+    else
+    {
+        BottomClosed=true;
+        ui->BottomResizeFrame->ChangeArrowDir(true);
+    }
+
+    EInfo.PanelInfo.NewSize=BottomPanelLastSize;
+    EInfo.PanelInfo.PanelOpen=PanelOpen;
+    SendEvent(e_MWEvent_BottomPanelSizeChange,&EInfo);
+}
+
+void Form_MainWindow::resizeEvent(QResizeEvent *event)
+{
+    union MWEventData EventData;
+    QList<int> CurrentSizes;
+    QList<int> newSizes;
+    int SpaceLeft;
+    int BottomSize;
+    int LeftSize;
+    int RightSize;
+
+    if(FirstShow)
+        return;
+
+    /* Bottom panel */
+    CurrentSizes=ui->TopBottomSplitter->sizes();
+    SpaceLeft=CurrentSizes[0]+CurrentSizes[1];
+
+    if(BottomClosed)
+    {
+        /* Make sure the bottom panel stays closed */
+        BottomSize=0;
+    }
+    else
+    {
+        /* Keep it the open size */
+        BottomSize=BottomPanelLastSize;
+    }
+
+    newSizes.append(SpaceLeft-BottomSize);
+    newSizes.append(BottomSize);
+    ui->TopBottomSplitter->setSizes(newSizes);
+
+    /* Left + Right panels */
+    if(LeftClosed)
+    {
+        /* Make sure the left panel stays closed */
+        LeftSize=16;
+    }
+    else
+    {
+        /* Keep it the open size */
+        LeftSize=LeftPanelLastSize;
+    }
+
+    if(RightClosed)
+    {
+        /* Make sure the right panel stays closed */
+        RightSize=16;
+    }
+    else
+    {
+        /* Keep it the open size */
+        RightSize=RightPanelLastSize;
+    }
+
+    CurrentSizes=ui->LeftRightSplitter->sizes();
+    SpaceLeft=CurrentSizes[0]+CurrentSizes[1]+CurrentSizes[2];
+    newSizes.clear();
+    newSizes.append(LeftSize);
+    newSizes.append(SpaceLeft-LeftSize-RightSize);
+    newSizes.append(RightSize);
+    ui->LeftRightSplitter->setSizes(newSizes);
+
+    EventData.NewSize.Width=event->size().width();
+    EventData.NewSize.Height=event->size().height();
+    SendEvent(e_MWEvent_WindowResize,&EventData);
+}
+
+void Form_MainWindow::showEvent(QShowEvent *event)
+{
+    QList<int> CurrentSizes;
+
+    /* On first show we get all the sizes */
+    if(FirstShow)
+    {
+        FirstShow=false;
+
+        CurrentSizes=ui->TopBottomSplitter->sizes();
+
+        BottomPanelLastSize=CurrentSizes[1];
+        BottomClosed=false;
+
+        CurrentSizes=ui->LeftRightSplitter->sizes();
+        LeftPanelLastSize=CurrentSizes[0];
+        RightPanelLastSize=CurrentSizes[2];
+        LeftClosed=false;
+        RightClosed=false;
+
+        SendEvent(e_MWEvent_FirstShow);
+    }
+}
+
+void Form_MainWindow::on_LeftRightSplitter_splitterMoved(int pos, int index)
+{
+    union MWEventData EInfo;
+    QList<int> CurrentSizes;
+
+    if(FirstShow)
+        return;
+
+    CurrentSizes=ui->LeftRightSplitter->sizes();
+
+    if(index==1)
+    {
+        /* Left side */
+        /* See how big the panel is (and what direction the arrows should be
+           pointing) */
+        if(CurrentSizes[0]>16)
+        {
+            /* We are open so we need to save the new size */
+            LeftPanelLastSize=CurrentSizes[0];
+
+            LeftClosed=false;
+        }
+        else
+        {
+            LeftClosed=true;
+        }
+        ui->LeftResizeFrame->ChangeArrowDir(!LeftClosed);
+
+        EInfo.PanelInfo.NewSize=LeftPanelLastSize;
+        EInfo.PanelInfo.PanelOpen=!LeftClosed;
+        SendEvent(e_MWEvent_LeftPanelSizeChange,&EInfo);
+    }
+    else
+    {
+        /* Right side */
+        /* See how big the panel is (and what direction the arrows should be
+           pointing) */
+        if(CurrentSizes[2]>16)
+        {
+            /* We are open so we need to save the new size */
+            RightPanelLastSize=CurrentSizes[2];
+
+            RightClosed=false;
+        }
+        else
+        {
+            RightClosed=true;
+        }
+        ui->RightResizeFrame->ChangeArrowDir(RightClosed);
+        EInfo.PanelInfo.NewSize=RightPanelLastSize;
+        EInfo.PanelInfo.PanelOpen=!RightClosed;
+        SendEvent(e_MWEvent_RightPanelSizeChange,&EInfo);
+    }
+}
+
+void Form_MainWindow::EnableLeftSplitter(bool Enable)
+{
+    QSplitterHandle *hndl;
+
+    hndl=ui->LeftRightSplitter->handle(0);
+    hndl->setEnabled(Enable);
+    hndl=ui->LeftRightSplitter->handle(1);
+    hndl->setEnabled(Enable);
+
+    ui->LeftWidgetsPanel->setVisible(Enable);
+}
+
+void Form_MainWindow::EnableRightSplitter(bool Enable)
+{
+    QSplitterHandle *hndl;
+
+//    hndl=ui->LeftRightSplitter->handle(1);
+//    hndl->setEnabled(Enable);
+    hndl=ui->LeftRightSplitter->handle(2);
+    hndl->setEnabled(Enable);
+
+    ui->RightWidgetsPanel->setVisible(Enable);
+}
+
+void Form_MainWindow::closeEvent(QCloseEvent *event)
+{
+    if(!SendEvent(e_MWEvent_MainWindowClose))
+        event->ignore();
+    else
+        event->accept();
+}
+
+void Form_MainWindow::changeEvent(QEvent *event)
+{
+    union MWEventData EventData;
+    QWindowStateChangeEvent *StateEvent;
+
+    if(FirstShow)
+        return;
+
+    if(event->type()==QEvent::WindowStateChange)
+    {
+        StateEvent=static_cast<QWindowStateChangeEvent *>(event);
+
+        if(this->windowState()==Qt::WindowNoState)
+        {
+            /* Normal state */
+            if(StateEvent->oldState()&Qt::WindowMaximized)
+            {
+                /* Restored to normal */
+                EventData.MaximizedInfo.Max=false;
+                SendEvent(e_MWEvent_WindowSet2Maximized,&EventData);
+            }
+        }
+        else if(this->windowState()&Qt::WindowMaximized)
+        {
+            if(!(StateEvent->oldState()&Qt::WindowMaximized))
+            {
+                /* Maximized */
+                EventData.MaximizedInfo.Max=true;
+                SendEvent(e_MWEvent_WindowSet2Maximized,&EventData);
+            }
+        }
+    }
+}
+
+void Form_MainWindow::moveEvent(QMoveEvent *event)
+{
+    union MWEventData EventData;
+
+    /* Don't know why but it seems we have to read out of the window instead
+       of using the event ones */
+    EventData.Moved.x=this->x();
+    EventData.Moved.y=this->y();
+    SendEvent(e_MWEvent_WindowMoved,&EventData);
+}
+
+void Form_MainWindow::on_actionSettings_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Settings);
+}
+
+void Form_MainWindow::on_actionImport_Settings_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ImportSettings);
+}
+
+void Form_MainWindow::on_actionExport_Settings_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ExportSettings);
+}
+
+void Form_MainWindow::on_Main_tabWidget_tabCloseRequested(int index)
+{
+    uintptr_t ID;
+    QWidget *Tab;
+
+    Tab=this->ui->Main_tabWidget->widget(index);
+    if(Tab!=0)
+    {
+        ID=Tab->objectName().toULongLong();
+
+        SendEvent(e_MWEvent_TabClose,NULL,ID);
+    }
+}
+
+void Form_MainWindow::GlobalCloseTabBttnClicked(void)
+{
+    on_Main_tabWidget_tabCloseRequested(ui->Main_tabWidget->currentIndex());
+}
+
+void Form_MainWindow::on_Main_tabWidget_TabMoved(int from,int to)
+{
+//    uintptr_t FromID;
+//    uintptr_t ToID;
+//    QWidget *Tab;
+
+//    Tab=this->ui->Main_tabWidget->widget(from);
+//    if(Tab!=0)
+//    {
+//        FromID=Tab->objectName().toULongLong();
+//        Tab=this->ui->Main_tabWidget->widget(to);
+//        if(Tab!=0)
+//        {
+//            ToID=Tab->objectName().toULongLong();
+
+//            InformOf_TabMoved(FromID,ToID);
+//        }
+//    }
+}
+
+void Form_MainWindow::on_actionClose_Tab_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_CloseTab);
+}
+
+void Form_MainWindow::on_actionClose_All_triggered()
+{
+//    Menu_CloseAll();
+}
+
+void Form_MainWindow::on_actionFont_Request_Test_triggered()
+{
+    std::string FontName;
+    int FontSize;
+    long FontStyle;
+
+    FontName="";
+    FontSize=12;
+    FontStyle=UIFONT_STYLE_BOLD|UIFONT_STYLE_ITALIC;
+
+    if(UI_FontReq("Test font select",FontName,FontSize,FontStyle,0))
+    {
+        qDebug("FONT:%s,%d,%ld",FontName.c_str(),FontSize,FontStyle);
+    }
+}
+
+void Form_MainWindow::on_actionNew_Tab_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_NewTab);
+}
+
+void Form_MainWindow::on_actionConnect_Menu_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Connect);
+}
+
+void Form_MainWindow::on_actionDisconnect_Menu_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Disconnect);
+}
+
+void Form_MainWindow::on_actionConnectToggle_triggered(bool checked)
+{
+    DoToolbarTriggered(e_UIMWToolbar_ConnectToggle);
+}
+
+void Form_MainWindow::on_Main_tabWidget_currentChanged(int index)
+{
+    union MWEventData EventData;
+    uintptr_t ID;
+    QWidget *Tab;
+
+    Tab=this->ui->Main_tabWidget->widget(index);
+
+    if(Tab!=0)
+    {
+        ID=Tab->objectName().toULongLong();
+        EventData.PanelTab.TabID=e_UIMWTabCtrl_MainTabs;
+        EventData.PanelTab.NewIndex=index;
+        SendEvent(e_MWEvent_PanelTabChange,&EventData,ID);
+    }
+}
+
+void Form_MainWindow::on_actionInsert_Horizontal_Rule_triggered()
+{
+}
+
+void Form_MainWindow::on_actionClear_Screen_triggered()
+{
+}
+
+void Form_MainWindow::on_actionNew_Window_triggered()
+{
+}
+
+void Form_MainWindow::on_actionMenu_Change_Name_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ChangeConnectionName);
+}
+
+void Form_MainWindow::on_pushButton_SW_Start_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_StopWatch_Start);
+}
+
+void Form_MainWindow::on_pushButton_SW_Reset_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_StopWatch_Reset);
+}
+
+void Form_MainWindow::on_pushButton_SW_Lap_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_StopWatch_Lap);
+}
+
+void Form_MainWindow::on_pushButton_SW_Clear_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_StopWatch_Clear);
+}
+
+void Form_MainWindow::on_checkBox_SW_StartOnTx_clicked(bool checked)
+{
+    DoCheckboxTriggered(e_UIMWCheckbox_StopWatch_StartOnTx,checked);
+}
+
+void Form_MainWindow::on_checkBox_SW_AutoLap_clicked(bool checked)
+{
+    DoCheckboxTriggered(e_UIMWCheckbox_StopWatch_AutoLap,checked);
+}
+
+void Form_MainWindow::on_actionStats_triggered()
+{
+    Form_DebugStats *DebugStats;
+    DebugStats=new Form_DebugStats(this);
+    DebugStats->show();
+}
+
+void Form_MainWindow::on_actionCopy_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Copy);
+}
+
+void Form_MainWindow::on_actionPaste_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Paste);
+}
+
+void Form_MainWindow::on_pushButton_CO_Apply_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_ConnectionOptionApply);
+}
+
+void Form_MainWindow::URIreturnPressed()
+{
+    DoToolbarTriggered(e_UIMWToolbar_URIGo);
+    IgnoreNextKeyEvent=true;
+}
+
+void Form_MainWindow::on_actionactionURIGo_triggered()
+{
+    DoToolbarTriggered(e_UIMWToolbar_URIGo);
+}
+
+void Form_MainWindow::on_actionBookmark_this_connection_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_AddBookmark);
+}
+
+void Form_MainWindow::actionBookmarkMenuItem_triggered()
+{
+    uintptr_t ID;
+    QObject *MenuAction;
+
+    MenuAction=sender();
+    ID=MenuAction->objectName().toULongLong();
+
+    SendEvent(e_MWEvent_BookmarkMenuSelected,NULL,ID);
+}
+
+void Form_MainWindow::actionFTPUploadMenuItem_triggered()
+{
+    uintptr_t ID;
+    QObject *MenuAction;
+
+    MenuAction=sender();
+    ID=MenuAction->objectName().toULongLong();
+
+    SendEvent(e_MWEvent_UploadMenuTriggered,NULL,ID);
+}
+
+void Form_MainWindow::actionFTPDownloadMenuItem_triggered()
+{
+    uintptr_t ID;
+    QObject *MenuAction;
+
+    MenuAction=sender();
+    ID=MenuAction->objectName().toULongLong();
+
+    SendEvent(e_MWEvent_DownloadMenuTriggered,NULL,ID);
+}
+
+void Form_MainWindow::on_actionManage_Bookmarks_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ManageBookmarks);
+}
+
+void Form_MainWindow::StopWatchTimer_triggered()
+{
+    SendEvent(e_MWEvent_StopWatch_Timer);
+}
+
+void Form_MainWindow::on_actionStopWatch_Start_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StopWatch_Start);
+}
+
+void Form_MainWindow::on_actionStopWatch_Stop_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StopWatch_Stop);
+}
+
+void Form_MainWindow::on_actionStopWatch_Reset_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StopWatch_Reset);
+}
+
+void Form_MainWindow::on_actionStopWatch_Lap_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StopWatch_Lap);
+}
+
+void Form_MainWindow::on_actionStopWatch_Clear_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StopWatch_Clear);
+}
+
+void Form_MainWindow::on_actionStopWatch_Start_On_Tx_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StopWatch_StartOnTx);
+}
+
+void Form_MainWindow::on_actionStopWatch_Auto_Lap_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StopWatch_AutoLap);
+}
+
+void Form_MainWindow::on_lineEdit_Cap_FileName_editingFinished()
+{
+    DoTextInputChanged(e_UIMWTxtInput_Capture_Filename,
+            qPrintable(ui->lineEdit_Cap_FileName->text()));
+}
+
+void Form_MainWindow::on_pushButton_Cap_GetFilename_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_Capture_SelectFilename);
+}
+
+void Form_MainWindow::on_checkBox_Cap_Timestamp_clicked(bool checked)
+{
+    DoCheckboxTriggered(e_UIMWCheckbox_Capture_Timestamp,checked);
+}
+
+void Form_MainWindow::on_checkBox_Cap_Append_clicked(bool checked)
+{
+    DoCheckboxTriggered(e_UIMWCheckbox_Capture_Append,checked);
+}
+
+void Form_MainWindow::on_checkBox_Cap_StripCtrlChars_clicked(bool checked)
+{
+    DoCheckboxTriggered(e_UIMWCheckbox_Capture_StripCtrlChars,checked);
+}
+
+void Form_MainWindow::on_checkBox_Cap_StripEscSeq_clicked(bool checked)
+{
+    DoCheckboxTriggered(e_UIMWCheckbox_Capture_StripEscSeq,checked);
+}
+
+void Form_MainWindow::on_pushButton_Cap_Start_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_Capture_Start);
+}
+
+void Form_MainWindow::on_actionCapture_To_File_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Capture_CaptureToFile);
+}
+
+void Form_MainWindow::on_actionTimestamp_new_lines_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Capture_TimestampToggle);
+}
+
+void Form_MainWindow::on_actionAppend_To_Existing_File_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Capture_AppendToggle);
+}
+
+void Form_MainWindow::on_actionStrip_Control_Char_s_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Capture_StripCtrlCharsToggle);
+}
+
+void Form_MainWindow::on_actionStrip_Esc_Sequences_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Capture_StripEscSeqToggle);
+}
+
+void Form_MainWindow::on_actionCapture_Stop_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Capture_Stop);
+}
+
+void Form_MainWindow::on_checkBox_Cap_HexDump_clicked(bool checked)
+{
+    DoCheckboxTriggered(e_UIMWCheckbox_Capture_HexDump,checked);
+}
+
+void Form_MainWindow::on_actionHex_Dump_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Capture_HexDumpToggle);
+}
+
+void Form_MainWindow::on_pushButton_UploadSelectFilename_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_Upload_SelectFilename);
+}
+
+void Form_MainWindow::on_pushButton_UploadStart_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_Upload_Start);
+}
+
+void Form_MainWindow::on_comboBox_UploadProtocol_activated(int index)
+{
+    uintptr_t ID;   // The ID for this item
+    union MWEventData EventData;
+
+    ID=ui->comboBox_UploadProtocol->itemData(index).toULongLong();
+
+    EventData.ComboBox.InputID=e_UIMWComboBox_Upload_Protocol;
+    EventData.ComboBox.Index=index;
+    SendEvent(e_MWEvent_ComboBoxChanged,&EventData,ID);
+}
+
+void Form_MainWindow::on_lineEdit_UploadFilename_editingFinished()
+{
+    DoTextInputChanged(e_UIMWTxtInput_Upload_Filename,
+            qPrintable(ui->lineEdit_UploadFilename->text()));
+}
+
+void Form_MainWindow::on_pushButton_UploadAbort_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_Upload_Abort);
+}
+
+void Form_MainWindow::on_pushButton_DownloadStart_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_Download_Start);
+}
+
+void Form_MainWindow::on_pushButton_DownloadAbort_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_Download_Abort);
+}
+
+void Form_MainWindow::on_comboBox_DownloadProtocol_activated(int index)
+{
+    uintptr_t ID;   // The ID for this item
+    union MWEventData EventData;
+
+    ID=ui->comboBox_DownloadProtocol->itemData(index).toULongLong();
+
+    EventData.ComboBox.InputID=e_UIMWComboBox_Download_Protocol;
+    EventData.ComboBox.Index=index;
+    SendEvent(e_MWEvent_ComboBoxChanged,&EventData,ID);
+}
+
+void Form_MainWindow::on_BottomPanel_tabWidget_currentChanged(int index)
+{
+    union MWEventData EventData;
+    uintptr_t ID;
+    QWidget *Tab;
+
+    Tab=this->ui->BottomPanel_tabWidget->widget(index);
+
+    if(Tab!=0)
+    {
+        ID=Tab->objectName().toULongLong();
+
+        EventData.PanelTab.TabID=e_UIMWTabCtrl_BottomPanel;
+        EventData.PanelTab.NewIndex=index;
+        SendEvent(e_MWEvent_PanelTabChange,&EventData,ID);
+    }
+}
+
+void Form_MainWindow::on_LeftPanel_tabWidget_currentChanged(int index)
+{
+    union MWEventData EventData;
+    uintptr_t ID;
+    QWidget *Tab;
+
+    Tab=this->ui->LeftPanel_tabWidget->widget(index);
+
+    if(Tab!=0)
+    {
+        ID=Tab->objectName().toULongLong();
+
+        EventData.PanelTab.TabID=e_UIMWTabCtrl_LeftPanel;
+        EventData.PanelTab.NewIndex=index;
+        SendEvent(e_MWEvent_PanelTabChange,&EventData,ID);
+    }
+}
+
+void Form_MainWindow::on_RightPanel_tabWidget_currentChanged(int index)
+{
+    union MWEventData EventData;
+    uintptr_t ID;
+    QWidget *Tab;
+
+    Tab=this->ui->RightPanel_tabWidget->widget(index);
+
+    if(Tab!=0)
+    {
+        ID=Tab->objectName().toULongLong();
+
+        EventData.PanelTab.TabID=e_UIMWTabCtrl_RightPanel;
+        EventData.PanelTab.NewIndex=index;
+        SendEvent(e_MWEvent_PanelTabChange,&EventData,ID);
+    }
+}
+
+void Form_MainWindow::on_pushButton_HexClear_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_HexDisplay_Clear);
+}
+
+void Form_MainWindow::on_pushButton_HexCopy_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_HexDisplay_Copy);
+}
+
+void Form_MainWindow::on_pushButton_HexCopyAs_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_HexDisplay_CopyAs);
+}
+
+void Form_MainWindow::on_checkBox_HexPaused_clicked(bool checked)
+{
+    DoCheckboxTriggered(e_UIMWCheckbox_HexDisplay_Paused,checked);
+}
+
+void Form_MainWindow::on_pushButton_Buffer_Edit_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_SendBuffers_Edit);
+}
+
+void Form_MainWindow::on_pushButton_Buffer_Send_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_SendBuffers_Send);
+}
+
+void Form_MainWindow::on_listWidget_Buffer_BufferList_currentRowChanged(int currentRow)
+{
+    union MWEventData EventData;
+
+    EventData.ListView.InputID=e_UIMWListView_Buffers_List;
+
+    SendEvent(e_MWEvent_ListViewChange,&EventData,
+            (uintptr_t)(ui->listWidget_Buffer_BufferList->item(currentRow)->
+            data(Qt::UserRole).toULongLong()));
+}
+
+void Form_MainWindow::on_actionConnection_Options_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ConnectionOptions);
+}
+
+void Form_MainWindow::on_actionConnection_Settings_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ConnectionSettings);
+}
+
+void Form_MainWindow::on_actionCom_Test_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Tools_ComTest);
+}
+
+void Form_MainWindow::on_actionTransmit_delay_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_TransmitDelay);
+}
+
+void Form_MainWindow::on_actionManage_Plugins_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ManagePlugin);
+}
+
+void Form_MainWindow::on_actionInstall_Plugin_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_InstallPlugin);
+}
+
+void Form_MainWindow::on_pushButton_Bridge_Bridge_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_Bridge_Bridge);
+}
+
+void Form_MainWindow::on_pushButton_Bridge_Release_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_Bridge_Release);
+}
+
+void Form_MainWindow::on_comboBox_Bridge_Con1_activated(int index)
+{
+    uintptr_t ID;   // The ID for this item
+    union MWEventData EventData;
+
+    ID=ui->comboBox_Bridge_Con1->itemData(index).toULongLong();
+
+    EventData.ComboBox.InputID=e_UIMWComboBox_Bridge_Connection1;
+    EventData.ComboBox.Index=index;
+    SendEvent(e_MWEvent_ComboBoxChanged,&EventData,ID);
+}
+
+void Form_MainWindow::on_comboBox_Bridge_Con2_activated(int index)
+{
+    uintptr_t ID;   // The ID for this item
+    union MWEventData EventData;
+
+    ID=ui->comboBox_Bridge_Con2->itemData(index).toULongLong();
+
+    EventData.ComboBox.InputID=e_UIMWComboBox_Bridge_Connection2;
+    EventData.ComboBox.Index=index;
+    SendEvent(e_MWEvent_ComboBoxChanged,&EventData,ID);
+}
+
+void Form_MainWindow::on_checkBox_Bridge_Lockout1_clicked(bool checked)
+{
+    DoCheckboxTriggered(e_UIMWCheckbox_Bridge_Lock1,checked);
+}
+
+void Form_MainWindow::on_checkBox_Bridge_Lockout2_clicked(bool checked)
+{
+    DoCheckboxTriggered(e_UIMWCheckbox_Bridge_Lock2,checked);
+}
+
+void Form_MainWindow::on_actionBridge_Connections_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_BridgeConnections);
+}
+
+void Form_MainWindow::on_actionRelease_Bridged_Connections_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ReleaseBridgedConnections);
+}
+
+void Form_MainWindow::on_actionGet_Plugins_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_GetPlugins);
+}
+
+
+void Form_MainWindow::on_actionRestore_Connection_Settings_to_Defaults_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_RestoreConnectionSettings);
+}
+
+void Form_MainWindow::on_actionShow_NonPrintables_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ShowNonPrintable);
+}
+
+void Form_MainWindow::on_actionShow_End_Of_Lines_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ShowEndOfLines);
+}

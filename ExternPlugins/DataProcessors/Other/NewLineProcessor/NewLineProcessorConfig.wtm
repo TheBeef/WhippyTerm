@@ -1,0 +1,19 @@
+<?xml version="1.0" standalone="no" ?>
+<ExternPluginMaker>
+    <LastBuildFile>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/DataProcessors/Other/NewLineProcessor/NewLineProcessor.wtp</LastBuildFile>
+    <LinuxFilename>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/DataProcessors/Other/NewLineProcessor/Linux/NewLineProcessor.so</LinuxFilename>
+    <WindowsFilename></WindowsFilename>
+    <MacFilename></MacFilename>
+    <RPI64Filename></RPI64Filename>
+    <RPI32Filename></RPI32Filename>
+    <PluginName>New Line Processor</PluginName>
+    <InstallFilename>NewLineProcessor</InstallFilename>
+    <Description>Does a cartridge return when a new line character is read.</Description>
+    <Contributors>Paul Hutchinson</Contributors>
+    <Copyright>2022</Copyright>
+    <ReleaseDate>18 May 2022</ReleaseDate>
+    <Version>1.1</Version>
+    <APIVersion>0.8.0.0</APIVersion>
+    <PluginClass>1</PluginClass>
+    <PluginSubClass>4</PluginSubClass>
+</ExternPluginMaker>

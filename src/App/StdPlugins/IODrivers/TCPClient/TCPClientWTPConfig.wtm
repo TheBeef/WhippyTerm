@@ -1,0 +1,19 @@
+<?xml version="1.0" standalone="no" ?>
+<ExternPluginMaker>
+    <LastBuildFile>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/IODrivers/TCPClient/TCPClient.wtp</LastBuildFile>
+    <LinuxFilename>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/IODrivers/TCPClient/Linux/TCPClient.so</LinuxFilename>
+    <WindowsFilename></WindowsFilename>
+    <MacFilename></MacFilename>
+    <RPI64Filename></RPI64Filename>
+    <RPI32Filename>/home/paul/work/pi/w/WhippyTerm/ExternPlugins/IODrivers/TCPClient/Linux/TCPClient.so</RPI32Filename>
+    <PluginName>TCP Client</PluginName>
+    <InstallFilename>TCPClient</InstallFilename>
+    <Description>A client for sending and receiving bytes over a TCP/IP socket. </Description>
+    <Contributors>Paul Hutchinson</Contributors>
+    <Copyright>2022</Copyright>
+    <ReleaseDate>18 May 2022</ReleaseDate>
+    <Version>0.1.2</Version>
+    <APIVersion>0.8.0.0</APIVersion>
+    <PluginClass>2</PluginClass>
+    <PluginSubClass>0</PluginSubClass>
+</ExternPluginMaker>

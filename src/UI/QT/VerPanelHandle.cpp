@@ -1,0 +1,170 @@
+/*******************************************************************************
+ * FILENAME:
+ *    VerPanelHandle.cpp
+ *
+ * PROJECT:
+ *    Whippy Term
+ *
+ * FILE DESCRIPTION:
+ *    .h file
+ *
+ * COPYRIGHT:
+ *    Copyright 2018 Paul Hutchinson.
+ *
+ *    This software is the property of Paul Hutchinson. and may not be
+ *    reused in any manner except under express written permission of
+ *    Paul Hutchinson.
+ *
+ * CREATED BY:
+ *    Paul Hutchinson (27 Sep 2018)
+ *
+ ******************************************************************************/
+
+/*** HEADER FILES TO INCLUDE  ***/
+#include <QtGui>
+#include "VerPanelHandle.h"
+#include "Form_MainWindow.h"
+
+/*** DEFINES                  ***/
+#define BAR_MARGIN_TB    3
+#define BAR_CENTER_MARGIN  11
+
+/*** MACROS                   ***/
+
+/*** TYPE DEFINITIONS         ***/
+
+/*** FUNCTION PROTOTYPES      ***/
+
+/*** VARIABLE DEFINITIONS     ***/
+
+VerPanelHandle::VerPanelHandle(QWidget *parent) : QFrame(parent)
+{
+    MainWindow=NULL;
+    setMouseTracking(true);
+    DrawPointingLeft=false;
+    MouseIn=false;
+    LeftPanel=false;
+}
+
+void VerPanelHandle::ChangeArrowDir(bool Left)
+{
+    DrawPointingLeft=Left;
+    update();
+}
+
+void VerPanelHandle::enterEvent(QEvent *event)
+{
+    MouseIn=true;
+    update();
+}
+
+void VerPanelHandle::leaveEvent(QEvent *event)
+{
+    MouseIn=false;
+    update();
+}
+
+void VerPanelHandle::ClearHighlight(void)
+{
+    MouseIn=false;
+    update();
+}
+
+void VerPanelHandle::LeftMode(void)
+{
+    LeftPanel=true;
+}
+
+void VerPanelHandle::mouseReleaseEvent(QMouseEvent *event)
+{
+    e_PanelType PanelType;
+
+    if(event->y()>=0 && event->y()<=this->height() &&
+            event->x()>=0 && event->x()<=this->width())
+    {
+        PanelType=e_Panel_Right;
+        if(LeftPanel)
+            PanelType=e_Panel_Left;
+
+        if(MainWindow!=NULL)
+            MainWindow->PanelClicked(PanelType);
+    }
+}
+
+void VerPanelHandle::RegisterClickHandler(Form_MainWindow *MW)
+{
+    MainWindow=MW;
+}
+
+void VerPanelHandle::paintEvent(QPaintEvent *Event)
+{
+    QPainter painter(this);
+    QBrush brush;
+    QImage Background(":/G/Graphics/PanelHandleBackground.png");
+    QImage Left(":/G/Graphics/Arrow_Left.png");
+    QImage Right(":/G/Graphics/Arrow_Right.png");
+    QImage *Arrow;
+    int BarWidth;
+    int BarHeight;
+    int x,y,x2,y2;
+    int ArrowHeight;
+
+    if(DrawPointingLeft)
+        Arrow=&Left;
+    else
+        Arrow=&Right;
+
+    brush=painter.brush();
+
+    BarWidth=this->width()-1;
+    BarHeight=this->height()-1;
+    ArrowHeight=Arrow->height();
+
+    /* Fill the whole background */
+    if(MouseIn)
+        brush.setColor(QColor(0x96,0xC7,0xE6));
+    else
+        brush.setColor(this->palette().color(QPalette::Window));
+    brush.setStyle(Qt::SolidPattern);
+    painter.fillRect(0,0,BarWidth,BarHeight,brush);
+
+    /* Draw the border */
+    painter.setPen(QColor(255,255,255));
+    painter.drawLine(0,0,BarWidth,0);
+    painter.drawLine(0,0,0,BarHeight);
+
+    painter.setPen(QColor(128,128,128));
+    painter.drawLine(BarWidth,0,BarWidth,BarHeight);
+    painter.drawLine(0,BarHeight,BarWidth,BarHeight);
+
+    /* Fill in the dots */
+    brush.setTextureImage(Background);
+    brush.setStyle(Qt::TexturePattern);
+    brush.setTextureImage(Background);
+
+    /* Top */
+    x=BAR_MARGIN_TB;
+    y=5+ArrowHeight+5+1;
+    x2=BarWidth-BAR_MARGIN_TB;
+    y2=BarHeight/2-BAR_CENTER_MARGIN-ArrowHeight/2;
+    painter.fillRect(x,y,x2-x,y2-y,brush);
+    /* Bottom */
+    x=BAR_MARGIN_TB;
+    y=BarHeight/2+BAR_CENTER_MARGIN+ArrowHeight/2;
+    x2=BarWidth-BAR_MARGIN_TB;
+    y2=BarHeight-(5+ArrowHeight+5+1);
+    painter.fillRect(x,y,x2-x,y2-y,brush);
+
+    /* Draw the arrows */
+    painter.drawImage(BAR_MARGIN_TB,6,*Arrow);
+    painter.drawImage(BAR_MARGIN_TB,BarHeight/2-ArrowHeight/2,*Arrow);
+    painter.drawImage(BAR_MARGIN_TB,BarHeight-6-ArrowHeight,*Arrow);
+
+    /* Draw the dividers */
+    painter.setPen(QColor(0x90,0x90,0x90));
+    painter.drawLine(BAR_MARGIN_TB,5+ArrowHeight+5,
+            BarWidth-BAR_MARGIN_TB,5+ArrowHeight+5);
+    painter.drawLine(BAR_MARGIN_TB,BarHeight-(5+ArrowHeight+5),
+            BarHeight-BAR_MARGIN_TB,BarHeight-(5+ArrowHeight+5));
+}
+

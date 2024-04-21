@@ -1,0 +1,126 @@
+//#define ALL_PLUGINS 1
+/*******************************************************************************
+ * FILENAME: RegisterStdPlugins.cpp
+ *
+ * PROJECT:
+ *    Whippy Term
+ *
+ * FILE DESCRIPTION:
+ *    This file registers all the standard built in plugins.
+ *    Standard plugins are like normal plugins except they don't get
+ *    loaded from disk, but are instead compiled into the exe.
+ *
+ *    They use the same plugin API and regsiter them selfs the same as normal
+ *    plugins.
+ *
+ * COPYRIGHT:
+ *    Copyright 2018 Paul Hutchinson.
+ *
+ *    This software is the property of Paul Hutchinson. and may not be
+ *    reused in any manner except under express written permission of
+ *    Paul Hutchinson.
+ *
+ * CREATED BY:
+ *    Paul Hutchinson (27 Sep 2018)
+ *
+ ******************************************************************************/
+
+/*** HEADER FILES TO INCLUDE  ***/
+#include "App/IOSystem.h"
+#include "App/PluginSupport/SystemSupport.h"
+#include "App/StdPlugins/RegisterStdPlugins.h"
+#include "Version.h"
+
+/*** DEFINES                  ***/
+
+/*** MACROS                   ***/
+
+/*** TYPE DEFINITIONS         ***/
+
+/*** FUNCTION PROTOTYPES      ***/
+
+/* List of built in plugins */
+extern "C"
+{
+    unsigned int Comport_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+    unsigned int CodePage437Decode_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+    unsigned int UnicodeDecoder_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+    unsigned int ANSIX3_64_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+    unsigned int BasicCtrlCharsDecoder_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+    unsigned int RAWFileUpload_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+    unsigned int XModemUpload_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+
+#if defined(DEBUGWINDOWSBUILD) || defined(ALL_PLUGINS)
+/* Currently for testing */
+    unsigned int TCPClient_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+    unsigned int TCPServer_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+
+    unsigned int UDPClient_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+    unsigned int UDPServer_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+
+#endif
+
+#ifdef ALL_PLUGINS
+    /* For testing we do all plugins */
+    unsigned int HTTPClient_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+    unsigned int RemoteSPI_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+    unsigned int TestLB_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+    unsigned int TestFile_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+#endif
+}
+
+/*** VARIABLE DEFINITIONS     ***/
+
+/*******************************************************************************
+ * NAME:
+ *    RegisterStdPlugins
+ *
+ * SYNOPSIS:
+ *    void RegisterStdPlugins(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function registers all the standard plugins in the system.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void RegisterStdPlugins(void)
+{
+    /* IO Drivers */
+    Comport_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+
+    /* Term Emulation */
+    ANSIX3_64_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+    BasicCtrlCharsDecoder_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+
+    /* e_DataProcessorClass_CharEncoding */
+    CodePage437Decode_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+    UnicodeDecoder_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+
+    /* File Transfer Protocols */
+    RAWFileUpload_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+    XModemUpload_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+
+#if defined(DEBUGWINDOWSBUILD) || defined(ALL_PLUGINS)
+/* Currently for testing */
+    TCPClient_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+    TCPServer_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+
+    UDPClient_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+    UDPServer_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+#endif
+
+#ifdef ALL_PLUGINS
+    /* For testing we do all plugins */
+    HTTPClient_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+    RemoteSPI_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+    TestLB_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+    TestFile_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+#endif
+}

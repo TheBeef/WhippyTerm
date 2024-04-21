@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Whippy Term
+Comment=A modern term program.
+Exec=whippyterm
+Icon=WhippyTerm.png
+Categories=Network
+Terminal=false
+Type=Application
+Keywords=Term;Serial;Serial Terminal;Whippy Term;
+
+Name[en_CA]=WhippyTerm

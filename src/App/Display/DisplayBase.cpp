@@ -1,0 +1,628 @@
+/*******************************************************************************
+ * FILENAME: DisplayBase.cpp
+ *
+ * PROJECT:
+ *    Whippy Term
+ *
+ * FILE DESCRIPTION:
+ *    This is the display base class.
+ *
+ * COPYRIGHT:
+ *    Copyright 2023 Paul Hutchinson.
+ *
+ *    This software is the property of Paul Hutchinson and may not be
+ *    reused in any manner except under express written permission of
+ *    Paul Hutchinson.
+ *
+ * CREATED BY:
+ *    Paul Hutchinson (03 Aug 2023)
+ *
+ ******************************************************************************/
+
+/*** HEADER FILES TO INCLUDE  ***/
+#include "DisplayBase.h"
+#include "App/Settings.h"
+
+/*** DEFINES                  ***/
+
+/*** MACROS                   ***/
+
+/*** TYPE DEFINITIONS         ***/
+
+/*** FUNCTION PROTOTYPES      ***/
+
+/*** VARIABLE DEFINITIONS     ***/
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::DisplayBase
+ *
+ * SYNOPSIS:
+ *    DisplayBase::DisplayBase();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the constructor for this class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    InitBase();
+ ******************************************************************************/
+DisplayBase::DisplayBase()
+{
+    Settings=&g_Settings.DefaultConSettings;
+    HasFocus=false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::~DisplayBase
+ *
+ * SYNOPSIS:
+ *    DisplayBase::~DisplayBase();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the destructor for this class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+DisplayBase::~DisplayBase()
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBuffer::Init
+ *
+ * SYNOPSIS:
+ *    bool DisplayBuffer::Init(bool (*EventCallback)(const struct
+ *          DBEvent *Event),uintptr_t UserData);
+ *
+ * PARAMETERS:
+ *    EventCallback [I] -- The event callback.  See below.
+ *    UserData [I] -- The user data that will be sent to the event callback.
+ *
+ * FUNCTION:
+ *    This funciton init's the display.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error.  User has NOT been informed
+ *
+ * CALLBACKS:
+ * =============================================================================
+ * NAME:
+ *    EventCallback
+ *
+ * SYNOPSIS:
+ *    bool EventCallback(const struct DBEvent *Event);
+ *
+ * PARAMETERS:
+ *    Event [I] -- The event
+ *
+ * FUNCTION:
+ *    This function is called when there is an event from the display.
+ *
+ * RETURNS:
+ *    true -- The event should act normally
+ *    false -- There event should be canceled
+ *
+ * SEE ALSO:
+ *    
+ * =============================================================================
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayBase::InitBase(bool (*EventCallback)(const struct DBEvent *Event),
+        uintptr_t UserData)
+{
+    DBEventHandler=EventCallback;
+    EventHandlerUserData=UserData;
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetCustomSettings
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetCustomSettings(class ConSettings *NewSettingsPtr);
+ *
+ * PARAMETERS:
+ *    NewSettingsPtr [I] -- A pointer to the settings you want to use with
+ *                          this display.  If NULL then the global one will
+ *                          be used.
+ *
+ * FUNCTION:
+ *    This function changes where the settings are being read from for this
+ *    display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SetCustomSettings(class ConSettings *NewSettingsPtr)
+{
+    Settings=NewSettingsPtr;
+    if(Settings==nullptr)
+        Settings=&g_Settings.DefaultConSettings;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SendEvent
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SendEvent(e_DBEventType EventID,
+ *          const union DBEventData *Info);
+ *
+ * PARAMETERS:
+ *    EventID [I] -- The event we are doing
+ *    Info [I] -- The extra info.  This can be NULL.
+ *
+ * FUNCTION:
+ *    This function sends an event to the registered event callback.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SendEvent(e_DBEventType EventID,const union DBEventData *Info)
+{
+    struct DBEvent Event;
+
+    if(DBEventHandler==nullptr)
+        return;
+
+    Event.EventType=EventID;
+    Event.UserData=EventHandlerUserData;
+    Event.Info=Info;
+
+    DBEventHandler(&Event);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetBlockDeviceMode
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetBlockDeviceMode(bool On);
+ *
+ * PARAMETERS:
+ *    On [I] -- This device is a block device (true), or a steam device (false)
+ *
+ * FUNCTION:
+ *    This function changes if the device this display is connected to is a
+ *    block or steam device.
+ *
+ *    This is the default version and does nothing.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SetBlockDeviceMode(bool On)
+{
+    /* We do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::NoteNonPrintable
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::NoteNonPrintable(const char *NoteStr);
+ *
+ * PARAMETERS:
+ *    NoteStr [I] -- The string to add as a non-printable note.
+ *
+ * FUNCTION:
+ *    This function adds a decoded non-printable char.  When something is
+ *    decoded that does not result in a printable char this function can be
+ *    used to add a note about the char (which the user can show or hide).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::NoteNonPrintable(const char *NoteStr)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetShowNonPrintable
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetShowNonPrintable(bool Show);
+ *
+ * PARAMETERS:
+ *    Show [I] -- true = show the non-printable chars, false = hide them.
+ *
+ * FUNCTION:
+ *    This function sets if this display should show non-printable chars.
+ *    Not all displays support this (they may always show them, or always
+ *    hide them).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SetShowNonPrintable(bool Show)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetShowEndOfLines
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetShowEndOfLines(bool Show);
+ *
+ * PARAMETERS:
+ *    Show [I] -- true = show the end of lines, false = hide them.
+ *
+ * FUNCTION:
+ *    This function sets if this display should show end of lines.
+ *    Not all displays support this (they may always show them, or always
+ *    hide them).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SetShowEndOfLines(bool Show)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::ApplySettings
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::ApplySettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function needs to be called after there is a change to the con
+ *    settings that this display has been connected to.
+ *
+ *    It will look things again and apply them to this display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::ApplySettings(void)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetCursorBlinking
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetCursorBlinking(bool Blinking);
+ *
+ * PARAMETERS:
+ *    Blinking [I] -- Is the cursor blinking (true), or on solid (false)
+ *
+ * FUNCTION:
+ *    This function changes if the cursor is blinking or not.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SetCursorBlinking(bool Blinking)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetCursorStyle
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetCursorStyle(e_TextCursorStyleType Style)
+ *
+ * PARAMETERS:
+ *    Style [I] -- What style to draw the cursor in
+ *
+ * FUNCTION:
+ *    This function changes what style the cursor is drawen as in this display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SetCursorStyle(e_TextCursorStyleType Style)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetInFocus
+ *
+ * SYNOPSIS:
+ *    bool DisplayBase::GetInFocus(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets if this display has focus or not.
+ *
+ * RETURNS:
+ *    true -- Has focus
+ *    false -- Does not have focus
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayBase::GetInFocus(void)
+{
+    return HasFocus;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetCursorXY
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetCursorXY(unsigned int x,unsigned y);
+ *
+ * PARAMETERS:
+ *    x [I] -- The new x position of the cursor
+ *    y [I] -- The new y position of the cursor
+ *
+ * FUNCTION:
+ *    This function moves the cursor in the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SetCursorXY(unsigned int x,unsigned y)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetCursorXY
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::GetCursorXY(unsigned int *x,unsigned int *y);
+ *
+ * PARAMETERS:
+ *    x [O] -- The X pos of the cursor
+ *    y [O] -- The Y pos of the cursor
+ *
+ * FUNCTION:
+ *    This function gets the current pos of the cursor on the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::GetCursorXY(unsigned int *x,unsigned int *y)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::AddTab
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::AddTab(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function handles when a driver send a tab command.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::AddTab(void)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::DoBackspace
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::DoBackspace(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function handles when a driver send a backspace command.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::DoBackspace(void)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::DoReturn
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::DoReturn(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function handles when a driver send a cartridge return command.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::DoReturn(void)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::DoLineFeed
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::DoLineFeed(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function handles when a driver send a line feed command.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::DoLineFeed(void)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetSelectionString
+ *
+ * SYNOPSIS:
+ *    bool DisplayBase::GetSelectionString(std::string &Clip);
+ *
+ * PARAMETERS:
+ *    Clip [O] -- The text from the selection
+ *
+ * FUNCTION:
+ *    This function gets a copy of the selection text.
+ *
+ * RETURNS:
+ *    true -- The selection was valid and 'Clip' has been set
+ *    false --- There was no selection and 'Clip' has been set to ""
+ *
+ * SEE ALSO:
+ *    DisplayBase::IsThereASelection()
+ ******************************************************************************/
+bool DisplayBase::GetSelectionString(std::string &Clip)
+{
+    /* Do nothing */
+    Clip="";
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::IsThereASelection
+ *
+ * SYNOPSIS:
+ *    bool DisplayBase::IsThereASelection(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function checks to see if there is selected text.
+ *
+ * RETURNS:
+ *    true -- There is text that can be copied to the clip board
+ *    false -- There is not selection (nothing to copy).
+ *
+ * SEE ALSO:
+ *    DisplayBase::GetSelectionString()
+ ******************************************************************************/
+bool DisplayBase::IsThereASelection(void)
+{
+    /* Do nothing */
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetOverrideMessage
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetOverrideMessage(const char *Msg);
+ *
+ * PARAMETERS:
+ *    Msg [I] -- The message to display or NULL to clear it.
+ *
+ * FUNCTION:
+ *    This function locks the display with a message telling the user why the
+ *    connection is locked out.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SetOverrideMessage(const char *Msg)
+{
+    /* Do nothing */
+}
+

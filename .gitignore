@@ -1,5 +1,6 @@
 Project/WT.pro.user
 build-WT-Desktop5-Debug
+build-WT-Desktop5-Release
 
 # Prerequisites
 *.d

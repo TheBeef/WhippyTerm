@@ -58,16 +58,10 @@ extern "C"
     unsigned int BasicCtrlCharsDecoder_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
     unsigned int RAWFileUpload_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
     unsigned int XModemUpload_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
-
-#if defined(DEBUGWINDOWSBUILD) || defined(ALL_PLUGINS)
-/* Currently for testing */
     unsigned int TCPClient_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
     unsigned int TCPServer_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
-
     unsigned int UDPClient_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
     unsigned int UDPServer_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
-
-#endif
 
 #ifdef ALL_PLUGINS
     /* For testing we do all plugins */
@@ -116,14 +110,11 @@ void RegisterStdPlugins(void)
     RAWFileUpload_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
     XModemUpload_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
 
-#if defined(DEBUGWINDOWSBUILD) || defined(ALL_PLUGINS)
-/* Currently for testing */
     TCPClient_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
     TCPServer_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
 
     UDPClient_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
     UDPServer_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
-#endif
 
 #ifdef ALL_PLUGINS
     /* For testing we do all plugins */

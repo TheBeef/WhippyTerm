@@ -317,7 +317,7 @@ void URLHighlighter_ProcessByte(t_DataProcessorHandleType *DataHandle,
                 if(!Data->AttribAlreadySet)
                 {
                     Attribs=m_DPS->GetAttribs();
-                    Attribs&=~DB_ATTRIB_UNDERLINE;
+                    Attribs&=~TXT_ATTRIB_UNDERLINE;
                     m_DPS->SetAttribs(Attribs);
                 }
             }
@@ -336,10 +336,10 @@ void URLHighlighter_ProcessByte(t_DataProcessorHandleType *DataHandle,
                 Data->DoingHighlight=true;
 
                 Data->AttribAlreadySet=false;
-                if(m_DPS->GetAttribs()&DB_ATTRIB_UNDERLINE)
+                if(m_DPS->GetAttribs()&TXT_ATTRIB_UNDERLINE)
                     Data->AttribAlreadySet=true;
 
-                m_DPS->SetAttribs(m_DPS->GetAttribs()|DB_ATTRIB_UNDERLINE);
+                m_DPS->SetAttribs(m_DPS->GetAttribs()|TXT_ATTRIB_UNDERLINE);
 
                 /* We now have to back and highlight the http:// part */
                 for(r=0;r<SearchStrLen-1;r++)

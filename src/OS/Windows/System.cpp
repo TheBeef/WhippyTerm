@@ -31,6 +31,7 @@
 /*** HEADER FILES TO INCLUDE  ***/
 #include "OS/System.h"
 #include <string.h>
+#include <windows.h>
 
 /*** DEFINES                  ***/
 
@@ -87,7 +88,7 @@ void InitOS(void)
  ******************************************************************************/
 struct DLLHandle *LoadDLL(const char *Filename)
 {
-    return NULL;
+    return (struct DLLHandle *)LoadLibraryA(Filename);
 }
 
 /*******************************************************************************
@@ -112,7 +113,9 @@ struct DLLHandle *LoadDLL(const char *Filename)
  ******************************************************************************/
 void *DLL2Function(struct DLLHandle *Handle,const char *FnName)
 {
-    return NULL;
+    HMODULE hModule=(HMODULE)Handle;
+
+    return (void *)GetProcAddress(hModule,FnName);
 }
 
 /*******************************************************************************
@@ -139,6 +142,9 @@ void *DLL2Function(struct DLLHandle *Handle,const char *FnName)
  ******************************************************************************/
 void CloseDLL(struct DLLHandle *Handle)
 {
+    HMODULE hModule=(HMODULE)Handle;
+
+    FreeLibrary(hModule);
 }
 
 /*******************************************************************************
@@ -168,8 +174,32 @@ void CloseDLL(struct DLLHandle *Handle)
  ******************************************************************************/
 const char *LastDLLError(void)
 {
-    return NULL;
+    DWORD ErrorCode;
+    static char RetBuff[256];
+    char *ReturnedErrorStr;
+
+    ErrorCode=GetLastError();
+    if(ErrorCode==ERROR_SUCCESS)
+        return NULL;
+
+    if(!FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS|
+            FORMAT_MESSAGE_ALLOCATE_BUFFER,NULL,
+            ErrorCode,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR)&ReturnedErrorStr,
+            0,
+            NULL))
+    {
+        return NULL;
+    }
+    strncpy(RetBuff,ReturnedErrorStr,sizeof(RetBuff)-1);
+    RetBuff[sizeof(RetBuff)-1]=0;
+
+    LocalFree(ReturnedErrorStr);
+
+    return RetBuff;
 }
+
 /*******************************************************************************
  * NAME:
  *    RunningOS

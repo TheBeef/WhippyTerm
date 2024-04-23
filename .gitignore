@@ -4,6 +4,10 @@ build-WT-Desktop5-Release
 Tools/ExternPluginMaker/ExternPluginMaker/build
 Tools/ExternPluginMaker/ExternPluginMaker/ExternPluginMaker.pro.user
 Project/build
+Tools/ExternPluginMaker/build-ExternPluginMaker-Desktop5-Debug
+*.wtp
+*.deb
+LinuxInstaller/WhippyTerm_*
 
 # Prerequisites
 *.d

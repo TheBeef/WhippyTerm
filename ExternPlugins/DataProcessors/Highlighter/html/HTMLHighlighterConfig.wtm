@@ -10,10 +10,10 @@
     <InstallFilename>HTMLHighlighter</InstallFilename>
     <Description>A plugin to highlight HTML tags as they come in.</Description>
     <Contributors>Paul Hutchinson</Contributors>
-    <Copyright>2022</Copyright>
-    <ReleaseDate>18 May 2022</ReleaseDate>
-    <Version>1.1</Version>
-    <APIVersion>0.8.0.0</APIVersion>
+    <Copyright>2024</Copyright>
+    <ReleaseDate>21 Apr 2024</ReleaseDate>
+    <Version>1.2</Version>
+    <APIVersion>0.11.0.0</APIVersion>
     <PluginClass>1</PluginClass>
     <PluginSubClass>2</PluginSubClass>
 </ExternPluginMaker>

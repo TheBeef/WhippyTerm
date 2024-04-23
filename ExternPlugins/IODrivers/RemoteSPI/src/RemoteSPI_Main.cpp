@@ -47,7 +47,7 @@ using namespace std;
 
 #define REMOTESPI_URI_PREFIX                    "RSPI"
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      RemoteSPI // The name to append on the RegisterPlugin() function for built in version
-#define NEEDED_MIN_API_VERSION                  0x00080000
+#define NEEDED_MIN_API_VERSION                  0x000B0000
 #define DEFAULT_PORT                            2000
 
 /*** MACROS                   ***/

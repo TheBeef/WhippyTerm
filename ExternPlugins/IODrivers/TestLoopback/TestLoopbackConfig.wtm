@@ -5,15 +5,15 @@
     <WindowsFilename></WindowsFilename>
     <MacFilename></MacFilename>
     <RPI64Filename></RPI64Filename>
-    <RPI32Filename>/home/paul/work/pi/w/WhippyTerm/ExternPlugins/IODrivers/TestLoopback/Linux/TestLoopback.so</RPI32Filename>
+    <RPI32Filename></RPI32Filename>
     <PluginName>Loop back</PluginName>
     <InstallFilename>TestLoopback</InstallFilename>
     <Description>A test plugin to echo back any bytes send out back in.  A loopback.</Description>
     <Contributors>Paul Hutchinson</Contributors>
-    <Copyright>2022</Copyright>
-    <ReleaseDate>18 May 2022</ReleaseDate>
-    <Version>0.1.3</Version>
-    <APIVersion>0.8.0.0</APIVersion>
+    <Copyright>2024</Copyright>
+    <ReleaseDate>21 Apr 2024</ReleaseDate>
+    <Version>0.1.4</Version>
+    <APIVersion>0.11.0.0</APIVersion>
     <PluginClass>2</PluginClass>
     <PluginSubClass>0</PluginSubClass>
 </ExternPluginMaker>

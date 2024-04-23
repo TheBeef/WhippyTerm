@@ -300,25 +300,25 @@ t_ActiveHandlesListType m_ActiveHandlesList;    // A list of active handles
  * SEE ALSO:
  *    
  *==============================================================================
- *    NAME:
- *      GetProcessorInfo
+ * NAME:
+ *   GetDriverInfo
  *
- *    SYNOPSIS:
- *      const struct IODriverInfo *(*GetDriverInfo)(unsigned int *SizeOfInfo);
+ * SYNOPSIS:
+ *   const struct IODriverInfo *(*GetDriverInfo)(unsigned int *SizeOfInfo);
  *
- *    PARAMETERS:
- *      SizeOfInfo [O] -- The size of 'struct IODriverInfo'.  This is used
- *                        for forward / backward compatibility.
+ * PARAMETERS:
+ *   SizeOfInfo [O] -- The size of 'struct IODriverInfo'.  This is used
+ *                     for forward / backward compatibility.
  *
- *    FUNCTION:
- *      This function gets info about the plugin.  'IODriverInfo' has
- *      the following fields:
- *              Flags -- Attributes about this driver.
- *                          Supported flags:
- *                              
+ * FUNCTION:
+ *   This function gets info about the plugin.  'IODriverInfo' has
+ *   the following fields:
+ *           Flags -- Attributes about this driver.
+ *                       Supported flags:
+ *                           
  *
- *    RETURNS:
- *      NONE
+ * RETURNS:
+ *   NONE
  *==============================================================================
  * NAME:
  *    InstallPlugin (TBD)
@@ -568,31 +568,6 @@ t_ActiveHandlesListType m_ActiveHandlesList;    // A list of active handles
  *    ConnectionOptionsWidgets_StoreUI()
  *==============================================================================
  * NAME:
- *    Convert_Options_To_URI
- *
- * SYNOPSIS:
- *    PG_BOOL Convert_Options_To_URI(const char *DeviceUniqueID,
- *          t_PIKVList *Options,char *URI,int MaxURILen);
- *
- * PARAMETERS:
- *    DeviceUniqueID [I] -- This is the unique ID for the device we are working
- *                          on.
- *    Options [I] -- The options for this connection.
- *    URI [O] -- A buffer to fill with the URI for this connection.
- *    MaxURILen [I] -- The size of the 'URI' buffer.
- *
- * FUNCTION:
- *    This function builds a URI for the device unique ID and options and
- *    returns that in a buffer.
- *
- * RETURNS:
- *    true -- all ok
- *    false -- There was an error
- *
- * SEE ALSO:
- *    Convert_URI_To_Options
- *==============================================================================
- * NAME:
  *    Convert_URI_To_Options
  *
  * SYNOPSIS:
@@ -620,6 +595,31 @@ t_ActiveHandlesListType m_ActiveHandlesList;    // A list of active handles
  *
  * SEE ALSO:
  *    
+ *==============================================================================
+ * NAME:
+ *    Convert_Options_To_URI
+ *
+ * SYNOPSIS:
+ *    PG_BOOL Convert_Options_To_URI(const char *DeviceUniqueID,
+ *          t_PIKVList *Options,char *URI,int MaxURILen);
+ *
+ * PARAMETERS:
+ *    DeviceUniqueID [I] -- This is the unique ID for the device we are working
+ *                          on.
+ *    Options [I] -- The options for this connection.
+ *    URI [O] -- A buffer to fill with the URI for this connection.
+ *    MaxURILen [I] -- The size of the 'URI' buffer.
+ *
+ * FUNCTION:
+ *    This function builds a URI for the device unique ID and options and
+ *    returns that in a buffer.
+ *
+ * RETURNS:
+ *    true -- all ok
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    Convert_URI_To_Options
  *==============================================================================
  * NAME:
  *    AllocateHandle

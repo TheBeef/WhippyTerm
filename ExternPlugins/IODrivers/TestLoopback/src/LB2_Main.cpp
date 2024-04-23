@@ -32,7 +32,7 @@ using namespace std;
 /*** DEFINES                  ***/
 #define LB2_URI_PREFIX          "LB"
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      TestLB // The name to append on the RegisterPlugin() function for built in version
-#define NEEDED_MIN_API_VERSION                  0x00080000
+#define NEEDED_MIN_API_VERSION                  0x000B0000
 
 #define QUEUE_SIZE              2000
 

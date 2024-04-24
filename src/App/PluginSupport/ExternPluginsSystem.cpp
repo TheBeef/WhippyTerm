@@ -743,9 +743,9 @@ bool InstallNewExternPlugin(const char *Filename)
         else
             sprintf(Verbuff,",%d.%d.%d%c",Maj,Min,Patch,Letter+'A'-1);
 
-        snprintf(buff,sizeof(buff),"Failed to install plugin.  This plugin "
-                "requires a newer version of WhippyTerm\nRequired version:"
-                "%s",Verbuff);
+        snprintf(buff,sizeof(buff),"Failed to install plugin.\n\n"
+                "This plugin requires a newer version of WhippyTerm.\n\n"
+                "Required version: %s",Verbuff);
         UIAsk("Error",buff,e_AskBox_Error);
         return false;
     }
@@ -754,13 +754,21 @@ bool InstallNewExternPlugin(const char *Filename)
     if(!LoadInfoAboutExternPlugin(Filename,Info,true))
         return false;
 
+    if(!Info.DLLFound)
+    {
+        /* We did not find a valid dll for this platform. */
+        UIAsk("Error","Failed to install plugin.\n\n"
+                "The plugin does have support for this OS.",e_AskBox_Error);
+        return false;
+    }
+
     Info.Enabled=true;
 
     /* Register this plugin */
     if(!GetAppDataPath(PluginDir))
     {
-        UIAsk("Error","Failed to install plugin.  App data path unknown.",
-                e_AskBox_Error);
+        UIAsk("Error","Failed to install plugin.\n\n"
+                "App data path unknown.",e_AskBox_Error);
         return false;
     }
 
@@ -768,8 +776,8 @@ bool InstallNewExternPlugin(const char *Filename)
 
     if(!PathExists(PluginDir.c_str()))
     {
-        snprintf(buff,sizeof(buff),"Failed to install plugin.  %s missing.",
-                PluginDir.c_str());
+        snprintf(buff,sizeof(buff),"Failed to install plugin.\n\n"
+                "\"%s\" missing.",PluginDir.c_str());
         UIAsk("Error",buff,e_AskBox_Error);
         return false;
     }
@@ -779,7 +787,7 @@ bool InstallNewExternPlugin(const char *Filename)
     LoadFilename=ConvertPath2Native(PluginFilename.c_str());
     if(LoadFilename==NULL)
     {
-        snprintf(buff,sizeof(buff)-1,"Failed to install plugin.  "
+        snprintf(buff,sizeof(buff)-1,"Failed to install plugin.\n\n"
                 "\"%s\" failed to filename + path to long.",
                 Info.Filename.c_str());
         UIAsk("Error",buff,e_AskBox_Error);
@@ -841,7 +849,7 @@ bool GetNewExternPluginInfo(const char *Filename,struct ExternPluginInfo &Info)
  * PARAMETERS:
  *    Filename [I] -- The filename and path of the plugin .wtp file to load
  *    Info [O] -- Fill this in with the loaded plugin into
- *    InstallDLL [I] -- If this is true then we copy the DLL to the correct
+ *    InstallDLL [I] -- If this is true then we copied the DLL to the correct
  *                      installed directory.
  *
  * FUNCTION:
@@ -991,7 +999,8 @@ static bool LoadInfoAboutExternPlugin(const char *Filename,
     }
     catch(const char *Msg)
     {
-        snprintf(buff,sizeof(buff),"Failed to install plugin:%s\n",Msg);
+        snprintf(buff,sizeof(buff),"Failed to install plugin:\n\n"
+                "%s\n",Msg);
         UIAsk("Error",buff,e_AskBox_Error);
         RetValue=false;
     }

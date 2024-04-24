@@ -96,10 +96,20 @@ void Form_ManagePlugins::on_Uninstall_pushButton_clicked()
     SendEvent(e_DMPEvent_BttnTriggered,&EventData);
 }
 
-void Form_ManagePlugins::on_PluginList_listWidget_itemClicked(QListWidgetItem *item)
+void Form_ManagePlugins::on_buttonBox_accepted()
+{
+    SendEvent(e_DMPEvent_DialogOk);
+}
+
+void Form_ManagePlugins::on_PluginList_listWidget_currentRowChanged(int currentRow)
 {
     uintptr_t ID;   // The ID for this item
     union DMPEventData EventData;
+    QListWidgetItem *item;
+
+    item=ui->PluginList_listWidget->currentItem();
+    if(item==NULL)
+        return;
 
     ID=(uintptr_t)(item->data(Qt::UserRole).toULongLong());
 
@@ -107,7 +117,3 @@ void Form_ManagePlugins::on_PluginList_listWidget_itemClicked(QListWidgetItem *i
     SendEvent(e_DMPEvent_ListViewChange,&EventData,ID);
 }
 
-void Form_ManagePlugins::on_buttonBox_accepted()
-{
-    SendEvent(e_DMPEvent_DialogOk);
-}

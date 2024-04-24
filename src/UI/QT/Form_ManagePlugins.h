@@ -27,10 +27,10 @@ private slots:
     
     void on_Uninstall_pushButton_clicked();
     
-    void on_PluginList_listWidget_itemClicked(QListWidgetItem *item);
-    
     void on_buttonBox_accepted();
     
+    void on_PluginList_listWidget_currentRowChanged(int currentRow);
+
 private:
     bool DoingEvent;
     bool SendEvent(e_DMPEventType EventType,union DMPEventData *Info,uintptr_t ID);

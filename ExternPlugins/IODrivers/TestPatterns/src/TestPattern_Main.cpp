@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string>
-#include <cinttypes>
+#include <inttypes.h>
 
 using namespace std;
 

@@ -696,7 +696,13 @@ void Connection::FinalizeNewConnection(void)
 {
     /* We auto open this when we open the tab */
     if(g_Settings.AutoConnectOnNewConnection)
-        IOS_Open(IOHandle);
+    {
+        if(!IOS_Open(IOHandle))
+        {
+            /* Mark this connection as closed */
+            InformOfDisconnected();
+        }
+    }
 
     /* DEBUG PAUL: Set show non-printables based on settings */
     //SetShowNonPrintable(xxx);
@@ -2172,7 +2178,11 @@ void Connection::SetConnectedState(bool Connect)
 
     if(Connect)
     {
-        IOS_Open(IOHandle);
+        if(!IOS_Open(IOHandle))
+        {
+            /* Mark this connection as closed */
+            InformOfDisconnected();
+        }
     }
     else
     {

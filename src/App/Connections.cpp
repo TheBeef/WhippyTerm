@@ -2088,7 +2088,7 @@ void Connection::DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
             Display->SetCursorXY(Arg1,Arg2);
         break;
         case e_ConFunc_ClearScreen:
-//            Display_ClearScreen(DB,NULL);
+            ClearScreen();
         break;
         case e_ConFunc_ClearArea:
 //            Display_ClearArea(DB,NULL,Arg1,Arg2,Arg3,Arg4);
@@ -5703,3 +5703,31 @@ void Connection::RethinkCursor(void)
     Display->SetCursorBlinking(CursorBlinking);
     Display->SetCursorStyle(CursorStyle);
 }
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::ClearScreen
+ *
+ * SYNOPSIS:
+ *    void Connection::ClearScreen(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function clears the screen.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::ClearScreen(void)
+{
+    if(Display==NULL)
+        return;
+
+    Display->ClearScreen(g_Settings.ScreenClear);
+}
+

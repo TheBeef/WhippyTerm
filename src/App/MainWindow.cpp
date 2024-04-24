@@ -1682,323 +1682,6 @@ void TheMainWindow::ToggleShowEndOfLines(void)
 
 /*******************************************************************************
  * NAME:
- *    TheMainWindow::ExeCmd
- *
- * SYNOPSIS:
- *    void TheMainWindow::ExeCmd(e_CmdType Cmd);
- *
- * PARAMETERS:
- *    Cmd [I] -- The command to exe.
- *                  e_Cmd_NewTab -- Open a new connection.
- *                  e_Cmd_CloseTab -- Close the active connection
- *                  e_Cmd_Quit -- Quit the program
- *                  e_Cmd_About -- Show about dialog
- *                  e_Cmd_Settings -- Show the settings dialog
- *                  e_Cmd_ImportSettings -- Ask for a filename and import
- *                      settings
- *                  e_Cmd_ExportSettings -- Ask for a filename and export
- *                      settings
- *                  e_Cmd_Connect -- Open the active connection
- *                  e_Cmd_Disconnect -- Close the active connection
- *                  e_Cmd_Copy -- Copy selected text to the clipboard
- *                  e_Cmd_Paste -- Paste the text from the clipboard
- *                  e_Cmd_ConnectToggle -- Toggle the connect / disconnect
- *                      status of active connection.
- *                  e_Cmd_BridgeCurrentConnection -- Show the bridge current
- *                      connection dialog.
- *                  e_Cmd_ReleaseBridgedConnections -- Release the bridged
- *                      connections
- *
- * FUNCTION:
- *    This function executes a command.
- *
- * RETURNS:
- *    NONE
- *
- * SEE ALSO:
- *
- ******************************************************************************/
-void TheMainWindow::ExeCmd(e_CmdType Cmd)
-{
-    t_UITextInputCtrl *URIInput;
-    char URIBuffer[MAX_URI_LENGTH];
-    string path;
-    string file;
-    string FullFilename;
-
-    switch(Cmd)
-    {
-        case e_Cmd_NewTab:
-            NewConnection();
-        break;
-        case e_Cmd_CloseTab:
-            CloseActiveConnection();
-        break;
-        case e_Cmd_Quit:
-            if(m_MainWindowsList.size()>1)
-            {
-                if(UIAsk("Exit program","Are you sure you want to exit?",
-                        e_AskBox_Warning,e_AskBttns_YesNo)==e_AskRet_No)
-                {
-                    return;
-                }
-            }
-
-            AppShutdown();
-            UIExit(0);
-        break;
-        case e_Cmd_About:
-            RunAboutDialog();
-        break;
-        case e_Cmd_Settings:
-            RunSettingsDialog(this,NULL);
-        break;
-        case e_Cmd_ImportSettings:
-            g_Settings.GetDefaultSettingsPathAndName(path,file);
-
-            if(UI_LoadFileReq("Import Settings",path,file,
-                    "All Files|*.*\nSettings|*.cfg",1))
-            {
-                FullFilename=UI_ConcatFile2Path(path,file);
-                LoadSettings(FullFilename.c_str());
-            }
-        break;
-        case e_Cmd_ExportSettings:
-            g_Settings.GetDefaultSettingsPathAndName(path,file);
-
-            if(UI_SaveFileReq("Export Settings",path,file,
-                    "All Files|*.*\nSettings|*.cfg",1))
-            {
-                FullFilename=UI_ConcatFile2Path(path,file);
-                SaveSettings(FullFilename.c_str());
-            }
-        break;
-        case e_Cmd_Connect:
-            ChangeConnectStatus(true);
-        break;
-        case e_Cmd_Disconnect:
-            ChangeConnectStatus(false);
-        break;
-        case e_Cmd_Copy:
-            CopyActiveTabSelectionToClipboard();
-        break;
-        case e_Cmd_Paste:
-            PasteFromClipboard();
-        break;
-        case e_Cmd_ConnectToggle:
-            ToggleConnectStatus();
-        break;
-        case e_Cmd_ApplyConnectionOptions:
-            ApplyConnectionOptions();
-        break;
-        case e_Cmd_ChangeConnectionName:
-            ChangeCurrentConnectionName();
-        break;
-        case e_Cmd_ConnectionOptions:
-            ShowConnectionOptions();
-        break;
-        case e_Cmd_ConnectionSettings:
-            ShowConnectionSettings();
-        break;
-        case e_Cmd_URIGo:
-            URIInput=UIMW_GetTxtInputHandle(UIWin,e_UIMWTxtInput_URI);
-            UIGetTextCtrlText(URIInput,URIBuffer,MAX_URI_LENGTH);
-            ReloadTabFromURI(NULL,NULL,URIBuffer);
-        break;
-        case e_Cmd_AddBookmark:
-            BookmarkCurrentTab();
-        break;
-        case e_Cmd_ManageBookmarks:
-            ManageBookmarks();
-            MW_RebuildAllBookmarkMenus();
-        break;
-        case e_Cmd_StopWatch_StartStopToggle:
-            StopWatchPanel.ToggleStartStop();
-        break;
-        case e_Cmd_StopWatch_Start:
-            StopWatchPanel.StartTimer();
-        break;
-        case e_Cmd_StopWatch_Stop:
-            StopWatchPanel.StopTimer();
-        break;
-        case e_Cmd_StopWatch_Reset:
-            StopWatchPanel.ResetTimer();
-        break;
-        case e_Cmd_StopWatch_Lap:
-            StopWatchPanel.AddLap();
-        break;
-        case e_Cmd_StopWatch_Clear:
-            StopWatchPanel.ClearLaps();
-        break;
-        case e_Cmd_StopWatch_AutoLap:
-            StopWatchPanel.ToggleAutoLap();
-        break;
-        case e_Cmd_StopWatch_AutoStart:
-            StopWatchPanel.ToggleAutoStartOnTx();
-        break;
-        case e_Cmd_Capture_Capture2File:
-            CapturePanel.Prompt4FileAndStart();
-        break;
-        case e_Cmd_Capture_Start:
-            CapturePanel.PressStartBttn();
-        break;
-        case e_Cmd_Capture_SelectFilename:
-            CapturePanel.SelectFilename();
-        break;
-        case e_Cmd_Upload_Start:
-            UploadPanel.Start();
-        break;
-        case e_Cmd_Upload_Abort:
-            UploadPanel.Abort();
-        break;
-        case e_Cmd_Upload_SelectFilename:
-            UploadPanel.SelectFilename();
-        break;
-        case e_Cmd_Capture_TimestampToggle:
-            CapturePanel.ToggleTimestamp();
-        break;
-        case e_Cmd_Capture_AppendToggle:
-            CapturePanel.ToggleAppend();
-        break;
-        case e_Cmd_Capture_StripCtrlCharsToggle:
-            CapturePanel.ToggleStripCtrlChars();
-        break;
-        case e_Cmd_Capture_StripEscSeqToggle:
-            CapturePanel.ToggleStripEscSeq();
-        break;
-        case e_Cmd_Capture_HexDumpToggle:
-            CapturePanel.ToggleHexDump();
-        break;
-        case e_Cmd_Capture_Stop:
-            CapturePanel.Stop();
-        break;
-        case e_Cmd_Download_Start:
-            DownloadPanel.Start();
-        break;
-        case e_Cmd_Download_Abort:
-            DownloadPanel.Abort();
-        break;
-        case e_Cmd_HexDisplay_PauseToggle:
-            HexDisplayPanel.TogglePause();
-        break;
-        case e_Cmd_HexDisplay_Clear:
-            HexDisplayPanel.Clear();
-        break;
-        case e_Cmd_HexDisplay_Copy:
-            HexDisplayPanel.Copy2Clip();
-        break;
-        case e_Cmd_HexDisplay_CopyAs:
-            HexDisplayPanel.CopyAs();
-        break;
-        case e_Cmd_SendBuffer_Edit:
-            SendBuffersPanel.EditCurrentBuffer();
-        break;
-        case e_Cmd_SendBuffer_Send1:
-            SendBuffersPanel.SendBuffer(0);
-        break;
-        case e_Cmd_SendBuffer_Send2:
-            SendBuffersPanel.SendBuffer(1);
-        break;
-        case e_Cmd_SendBuffer_Send3:
-            SendBuffersPanel.SendBuffer(2);
-        break;
-        case e_Cmd_SendBuffer_Send4:
-            SendBuffersPanel.SendBuffer(3);
-        break;
-        case e_Cmd_SendBuffer_Send5:
-            SendBuffersPanel.SendBuffer(4);
-        break;
-        case e_Cmd_SendBuffer_Send6:
-            SendBuffersPanel.SendBuffer(5);
-        break;
-        case e_Cmd_SendBuffer_Send7:
-            SendBuffersPanel.SendBuffer(6);
-        break;
-        case e_Cmd_SendBuffer_Send8:
-            SendBuffersPanel.SendBuffer(7);
-        break;
-        case e_Cmd_SendBuffer_Send9:
-            SendBuffersPanel.SendBuffer(8);
-        break;
-        case e_Cmd_SendBuffer_Send10:
-            SendBuffersPanel.SendBuffer(9);
-        break;
-        case e_Cmd_SendBuffer_Send11:
-            SendBuffersPanel.SendBuffer(10);
-        break;
-        case e_Cmd_SendBuffer_Send12:
-            SendBuffersPanel.SendBuffer(11);
-        break;
-        case e_Cmd_Tools_ComTest:
-            RunComTestDialog();
-        break;
-        case e_Cmd_TransmitDelay:
-            ShowTransmitDelayDialog();
-        break;
-        case e_Cmd_GetPlugins:
-            UI_GotoWebPage("http://whippyterm.com/plugins.php");
-        break;
-        case e_Cmd_InstallPlugin:
-            PromptAndInstallPlugin();
-        break;
-        case e_Cmd_ManagePlugin:
-            RunManagePluginsDialog();
-        break;
-        case e_Cmd_BridgeConnections:
-            BridgePanel.BridgeConnections();
-            RethinkBridgeMenu();
-        break;
-        case e_Cmd_ReleaseBridge:
-            BridgePanel.ReleaseConnections();
-            RethinkBridgeMenu();
-        break;
-        case e_Cmd_BridgeLockConnection1:
-            BridgePanel.LockConnectionChange(0);
-        break;
-        case e_Cmd_BridgeLockConnection2:
-            BridgePanel.LockConnectionChange(1);
-        break;
-        case e_Cmd_BridgeCurrentConnection:
-            RunBridgeConDialog(this);
-        break;
-        case e_Cmd_ReleaseBridgedConnections:
-            if(BridgedCon1!=NULL && BridgedCon2!=NULL)
-            {
-                if(UIAsk("Bridged connections",
-                        "Undo the bridging of the two connections?",
-                        e_AskBox_Question,e_AskBttns_YesNo)==e_AskRet_Yes)
-                {
-                    class Connection *Saved1;
-                    class Connection *Saved2;
-
-                    /* We need to save them because we can get an event that
-                       will clear 'BridgedCon1' and 'BridgedCon2' */
-                    Saved1=BridgedCon1;
-                    Saved2=BridgedCon2;
-
-                    Saved1->BridgeConnection(NULL);
-                    Saved2->BridgeConnection(NULL);
-                }
-            }
-        break;
-        case e_Cmd_RestoreConnectionSettings:
-            ResetConnectionCustomSettings();
-        break;
-        case e_Cmd_ShowNonPrintable:
-            ToggleShowNonPrintables();
-        break;
-        case e_Cmd_ShowEndOfLines:
-            ToggleShowEndOfLines();
-        break;
-
-        case e_CmdMAX:
-        default:
-        break;
-    }
-}
-
-/*******************************************************************************
- * NAME:
  *    TheMainWindow::KeyPress
  *
  * SYNOPSIS:
@@ -2950,6 +2633,36 @@ static bool MW_DoMainWindowClose(class TheMainWindow *win)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::ClearScreen
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::ClearScreen(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function looks up the current tab and sends a clear screen to it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void TheMainWindow::ClearScreen(void)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+        TabCon->ClearScreen();
+}
+
+/*******************************************************************************
+ * NAME:
  *    MW_Event
  *
  * SYNOPSIS:
@@ -3171,4 +2884,325 @@ bool MW_Event(const struct MWEvent *Event)
         break;
     }
     return AcceptEvent;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::ExeCmd
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::ExeCmd(e_CmdType Cmd);
+ *
+ * PARAMETERS:
+ *    Cmd [I] -- The command to exe.
+ *                  e_Cmd_NewTab -- Open a new connection.
+ *                  e_Cmd_ClearScreen -- Clear the screen.
+ *                  e_Cmd_CloseTab -- Close the active connection
+ *                  e_Cmd_Quit -- Quit the program
+ *                  e_Cmd_About -- Show about dialog
+ *                  e_Cmd_Settings -- Show the settings dialog
+ *                  e_Cmd_ImportSettings -- Ask for a filename and import
+ *                      settings
+ *                  e_Cmd_ExportSettings -- Ask for a filename and export
+ *                      settings
+ *                  e_Cmd_Connect -- Open the active connection
+ *                  e_Cmd_Disconnect -- Close the active connection
+ *                  e_Cmd_Copy -- Copy selected text to the clipboard
+ *                  e_Cmd_Paste -- Paste the text from the clipboard
+ *                  e_Cmd_ConnectToggle -- Toggle the connect / disconnect
+ *                      status of active connection.
+ *                  e_Cmd_BridgeCurrentConnection -- Show the bridge current
+ *                      connection dialog.
+ *                  e_Cmd_ReleaseBridgedConnections -- Release the bridged
+ *                      connections
+ *
+ * FUNCTION:
+ *    This function executes a command.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void TheMainWindow::ExeCmd(e_CmdType Cmd)
+{
+    t_UITextInputCtrl *URIInput;
+    char URIBuffer[MAX_URI_LENGTH];
+    string path;
+    string file;
+    string FullFilename;
+
+    switch(Cmd)
+    {
+        case e_Cmd_NewTab:
+            NewConnection();
+        break;
+        case e_Cmd_ClearScreen:
+            ClearScreen();
+        break;
+        case e_Cmd_CloseTab:
+            CloseActiveConnection();
+        break;
+        case e_Cmd_Quit:
+            if(m_MainWindowsList.size()>1)
+            {
+                if(UIAsk("Exit program","Are you sure you want to exit?",
+                        e_AskBox_Warning,e_AskBttns_YesNo)==e_AskRet_No)
+                {
+                    return;
+                }
+            }
+
+            AppShutdown();
+            UIExit(0);
+        break;
+        case e_Cmd_About:
+            RunAboutDialog();
+        break;
+        case e_Cmd_Settings:
+            RunSettingsDialog(this,NULL);
+        break;
+        case e_Cmd_ImportSettings:
+            g_Settings.GetDefaultSettingsPathAndName(path,file);
+
+            if(UI_LoadFileReq("Import Settings",path,file,
+                    "All Files|*.*\nSettings|*.cfg",1))
+            {
+                FullFilename=UI_ConcatFile2Path(path,file);
+                LoadSettings(FullFilename.c_str());
+            }
+        break;
+        case e_Cmd_ExportSettings:
+            g_Settings.GetDefaultSettingsPathAndName(path,file);
+
+            if(UI_SaveFileReq("Export Settings",path,file,
+                    "All Files|*.*\nSettings|*.cfg",1))
+            {
+                FullFilename=UI_ConcatFile2Path(path,file);
+                SaveSettings(FullFilename.c_str());
+            }
+        break;
+        case e_Cmd_Connect:
+            ChangeConnectStatus(true);
+        break;
+        case e_Cmd_Disconnect:
+            ChangeConnectStatus(false);
+        break;
+        case e_Cmd_Copy:
+            CopyActiveTabSelectionToClipboard();
+        break;
+        case e_Cmd_Paste:
+            PasteFromClipboard();
+        break;
+        case e_Cmd_ConnectToggle:
+            ToggleConnectStatus();
+        break;
+        case e_Cmd_ApplyConnectionOptions:
+            ApplyConnectionOptions();
+        break;
+        case e_Cmd_ChangeConnectionName:
+            ChangeCurrentConnectionName();
+        break;
+        case e_Cmd_ConnectionOptions:
+            ShowConnectionOptions();
+        break;
+        case e_Cmd_ConnectionSettings:
+            ShowConnectionSettings();
+        break;
+        case e_Cmd_URIGo:
+            URIInput=UIMW_GetTxtInputHandle(UIWin,e_UIMWTxtInput_URI);
+            UIGetTextCtrlText(URIInput,URIBuffer,MAX_URI_LENGTH);
+            ReloadTabFromURI(NULL,NULL,URIBuffer);
+        break;
+        case e_Cmd_AddBookmark:
+            BookmarkCurrentTab();
+        break;
+        case e_Cmd_ManageBookmarks:
+            ManageBookmarks();
+            MW_RebuildAllBookmarkMenus();
+        break;
+        case e_Cmd_StopWatch_StartStopToggle:
+            StopWatchPanel.ToggleStartStop();
+        break;
+        case e_Cmd_StopWatch_Start:
+            StopWatchPanel.StartTimer();
+        break;
+        case e_Cmd_StopWatch_Stop:
+            StopWatchPanel.StopTimer();
+        break;
+        case e_Cmd_StopWatch_Reset:
+            StopWatchPanel.ResetTimer();
+        break;
+        case e_Cmd_StopWatch_Lap:
+            StopWatchPanel.AddLap();
+        break;
+        case e_Cmd_StopWatch_Clear:
+            StopWatchPanel.ClearLaps();
+        break;
+        case e_Cmd_StopWatch_AutoLap:
+            StopWatchPanel.ToggleAutoLap();
+        break;
+        case e_Cmd_StopWatch_AutoStart:
+            StopWatchPanel.ToggleAutoStartOnTx();
+        break;
+        case e_Cmd_Capture_Capture2File:
+            CapturePanel.Prompt4FileAndStart();
+        break;
+        case e_Cmd_Capture_Start:
+            CapturePanel.PressStartBttn();
+        break;
+        case e_Cmd_Capture_SelectFilename:
+            CapturePanel.SelectFilename();
+        break;
+        case e_Cmd_Upload_Start:
+            UploadPanel.Start();
+        break;
+        case e_Cmd_Upload_Abort:
+            UploadPanel.Abort();
+        break;
+        case e_Cmd_Upload_SelectFilename:
+            UploadPanel.SelectFilename();
+        break;
+        case e_Cmd_Capture_TimestampToggle:
+            CapturePanel.ToggleTimestamp();
+        break;
+        case e_Cmd_Capture_AppendToggle:
+            CapturePanel.ToggleAppend();
+        break;
+        case e_Cmd_Capture_StripCtrlCharsToggle:
+            CapturePanel.ToggleStripCtrlChars();
+        break;
+        case e_Cmd_Capture_StripEscSeqToggle:
+            CapturePanel.ToggleStripEscSeq();
+        break;
+        case e_Cmd_Capture_HexDumpToggle:
+            CapturePanel.ToggleHexDump();
+        break;
+        case e_Cmd_Capture_Stop:
+            CapturePanel.Stop();
+        break;
+        case e_Cmd_Download_Start:
+            DownloadPanel.Start();
+        break;
+        case e_Cmd_Download_Abort:
+            DownloadPanel.Abort();
+        break;
+        case e_Cmd_HexDisplay_PauseToggle:
+            HexDisplayPanel.TogglePause();
+        break;
+        case e_Cmd_HexDisplay_Clear:
+            HexDisplayPanel.Clear();
+        break;
+        case e_Cmd_HexDisplay_Copy:
+            HexDisplayPanel.Copy2Clip();
+        break;
+        case e_Cmd_HexDisplay_CopyAs:
+            HexDisplayPanel.CopyAs();
+        break;
+        case e_Cmd_SendBuffer_Edit:
+            SendBuffersPanel.EditCurrentBuffer();
+        break;
+        case e_Cmd_SendBuffer_Send1:
+            SendBuffersPanel.SendBuffer(0);
+        break;
+        case e_Cmd_SendBuffer_Send2:
+            SendBuffersPanel.SendBuffer(1);
+        break;
+        case e_Cmd_SendBuffer_Send3:
+            SendBuffersPanel.SendBuffer(2);
+        break;
+        case e_Cmd_SendBuffer_Send4:
+            SendBuffersPanel.SendBuffer(3);
+        break;
+        case e_Cmd_SendBuffer_Send5:
+            SendBuffersPanel.SendBuffer(4);
+        break;
+        case e_Cmd_SendBuffer_Send6:
+            SendBuffersPanel.SendBuffer(5);
+        break;
+        case e_Cmd_SendBuffer_Send7:
+            SendBuffersPanel.SendBuffer(6);
+        break;
+        case e_Cmd_SendBuffer_Send8:
+            SendBuffersPanel.SendBuffer(7);
+        break;
+        case e_Cmd_SendBuffer_Send9:
+            SendBuffersPanel.SendBuffer(8);
+        break;
+        case e_Cmd_SendBuffer_Send10:
+            SendBuffersPanel.SendBuffer(9);
+        break;
+        case e_Cmd_SendBuffer_Send11:
+            SendBuffersPanel.SendBuffer(10);
+        break;
+        case e_Cmd_SendBuffer_Send12:
+            SendBuffersPanel.SendBuffer(11);
+        break;
+        case e_Cmd_Tools_ComTest:
+            RunComTestDialog();
+        break;
+        case e_Cmd_TransmitDelay:
+            ShowTransmitDelayDialog();
+        break;
+        case e_Cmd_GetPlugins:
+            UI_GotoWebPage("http://whippyterm.com/plugins.php");
+        break;
+        case e_Cmd_InstallPlugin:
+            PromptAndInstallPlugin();
+        break;
+        case e_Cmd_ManagePlugin:
+            RunManagePluginsDialog();
+        break;
+        case e_Cmd_BridgeConnections:
+            BridgePanel.BridgeConnections();
+            RethinkBridgeMenu();
+        break;
+        case e_Cmd_ReleaseBridge:
+            BridgePanel.ReleaseConnections();
+            RethinkBridgeMenu();
+        break;
+        case e_Cmd_BridgeLockConnection1:
+            BridgePanel.LockConnectionChange(0);
+        break;
+        case e_Cmd_BridgeLockConnection2:
+            BridgePanel.LockConnectionChange(1);
+        break;
+        case e_Cmd_BridgeCurrentConnection:
+            RunBridgeConDialog(this);
+        break;
+        case e_Cmd_ReleaseBridgedConnections:
+            if(BridgedCon1!=NULL && BridgedCon2!=NULL)
+            {
+                if(UIAsk("Bridged connections",
+                        "Undo the bridging of the two connections?",
+                        e_AskBox_Question,e_AskBttns_YesNo)==e_AskRet_Yes)
+                {
+                    class Connection *Saved1;
+                    class Connection *Saved2;
+
+                    /* We need to save them because we can get an event that
+                       will clear 'BridgedCon1' and 'BridgedCon2' */
+                    Saved1=BridgedCon1;
+                    Saved2=BridgedCon2;
+
+                    Saved1->BridgeConnection(NULL);
+                    Saved2->BridgeConnection(NULL);
+                }
+            }
+        break;
+        case e_Cmd_RestoreConnectionSettings:
+            ResetConnectionCustomSettings();
+        break;
+        case e_Cmd_ShowNonPrintable:
+            ToggleShowNonPrintables();
+        break;
+        case e_Cmd_ShowEndOfLines:
+            ToggleShowEndOfLines();
+        break;
+
+        case e_CmdMAX:
+        default:
+        break;
+    }
 }

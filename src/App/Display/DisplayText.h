@@ -133,6 +133,7 @@ class DisplayText : public DisplayBase
         bool GetSelectionString(std::string &Clip);
         bool IsThereASelection(void);
         void SetOverrideMessage(const char *Msg);
+        void ClearScreen(e_ScreenClearType Type);
 
         void SetBlockDeviceMode(bool On);
 
@@ -165,8 +166,8 @@ class DisplayText : public DisplayBase
         int TextAreaHeightPx;
 
         /* Screen Area (the area the cursor can move in) in chars */
-        int ScreenWidthChars;
-        int ScreenHeightChars;
+        int ScreenWidthChars;           // The number of chars wide is the screen area
+        int ScreenHeightChars;          // The number of chars height is the screen area
         i_TextLines ScreenFirstLine;    // The line the cursor lives in below
         struct TextLine *ActiveLine;    // The line with the cursor on it
         int ActiveLineY;                // What line count (from 'ScreenFirstLine') is 'ActiveLine'
@@ -191,7 +192,7 @@ class DisplayText : public DisplayBase
         int Selection_AnchorX;      // The selection end left pos (in chars)
         int Selection_AnchorY;      // The selection end top pos (in lines)
 
-        void ScrollScreenBy1Line(void);
+        void ScrollScreenByXLines(int Lines2Scroll);
         bool DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event);
         void DoScrollTimerTimeout(void);
         void SetupCanvas(void);
@@ -233,6 +234,8 @@ class DisplayText : public DisplayBase
         void ScrollScreen2MakeCursorVisible(void);
         int CalcCursorXPx(void);
         int CharUnderCursorWidthPx(void);
+        void PadOutScreenWithBlankLines(void);
+        bool IsLineBlank(i_TextLines Line);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

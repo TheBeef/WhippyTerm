@@ -2769,17 +2769,17 @@ int DisplayText::GetLineEndSize(struct TextLine *Line)
 
 /*******************************************************************************
  * NAME:
- *    DisplayText::ScrollScreenBy1Line
+ *    DisplayText::ScrollScreenByXLines
  *
  * SYNOPSIS:
- *    void DisplayText::ScrollScreenBy1Line(void);
+ *    void DisplayText::ScrollScreenByXLines(int Lines2Scroll);
  *
  * PARAMETERS:
  *    NONE
  *
  * FUNCTION:
- *    This function scrolls the lines.  It adds a new line to the 'Lines'.
- *    It also removed old lines.
+ *    This function scrolls the lines by 'Lines2Scroll' lines.  It adds new
+ *    lines to the 'Lines'.  It also removed old lines.
  *
  * RETURNS:
  *    NONE
@@ -2787,12 +2787,13 @@ int DisplayText::GetLineEndSize(struct TextLine *Line)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void DisplayText::ScrollScreenBy1Line(void)
+void DisplayText::ScrollScreenByXLines(int Lines2Scroll)
 {
     struct TextLine BlankLine;
     i_TextLines CurLine;
     int y;
     int TotalLinesBeforeAdjust;
+    int LinesScrolled;
 
     try
     {
@@ -2803,23 +2804,27 @@ void DisplayText::ScrollScreenBy1Line(void)
         BlankLine.LineWidthPx=0;
         BlankLine.EOL=e_DTEOL_Hard;
 
-        Lines.push_back(BlankLine);
-        LinesCount++;
-
-        if(LinesCount>ScreenHeightChars)
+        for(LinesScrolled=0;LinesScrolled<Lines2Scroll;LinesScrolled++)
         {
-            /* Move the screens top line down 1 */
-            ScreenFirstLine++;
-        }
+            Lines.push_back(BlankLine);
+            LinesCount++;
 
-        /* Remove any extra lines */
-        while(LinesCount>(int)(Settings->ScrollBufferLines+ScreenHeightChars))
-        {
-            /* We are shifting all the lines so we need to move 'TopLine' down
-               one */
-            TopLine++;
-            Lines.pop_front();
-            LinesCount--;
+            if(LinesCount>ScreenHeightChars)
+            {
+                /* Move the screens top line down 1 */
+                ScreenFirstLine++;
+            }
+
+            /* Remove any extra lines */
+            while(LinesCount>(int)(Settings->ScrollBufferLines+
+                    ScreenHeightChars))
+            {
+                /* We are shifting all the lines so we need to move 'TopLine'
+                   down one */
+                TopLine++;
+                Lines.pop_front();
+                LinesCount--;
+            }
         }
 
         /* We go from the bottom of 'Lines' to the 'CursorY' pos (inverted) */
@@ -2985,7 +2990,7 @@ void DisplayText::MoveToNextLine(int &NewCursorY)
     if(NewCursorY>=ScreenHeightChars)
     {
         NewCursorY=ScreenHeightChars-1;
-        ScrollScreenBy1Line();
+        ScrollScreenByXLines(1);
     }
 }
 
@@ -3905,3 +3910,209 @@ void DisplayText::SetOverrideMessage(const char *Msg)
         UITC_RedrawScreen(TextDisplayCtrl);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ClearScreen
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ClearScreen(e_ScreenClearType Type);
+ *
+ * PARAMETERS:
+ *    Msg [I] -- The type of clearing we want to do.  Supported types:
+ *                  e_ScreenClear_Clear -- Normal clearing.  Throw away
+ *                          anything that's on the screen area.
+ *                  e_ScreenClear_Scroll -- Move any non blank lines to the
+ *                          scroll back buffer before clearing.
+ *                  e_ScreenClear_ScrollAll -- Move all the screen area lines
+ *                          to the scroll back buffer.
+ *                  e_ScreenClear_ScrollWithHR -- Move any non blank lines to
+ *                          the scroll back buffer and then add a marker to
+ *                          show that's where the new screen starts.
+ *
+ * FUNCTION:
+ *    This function clears the search area.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::ClearScreen(e_ScreenClearType Type)
+{
+    int y;
+    t_UIScrollBarCtrl *VertScroll;
+    i_TextLines CurLine;
+    i_TextLines LastLine;
+    int Lines2Scroll;
+
+    switch(Type)
+    {
+        case e_ScreenClear_Clear:
+        case e_ScreenClearMAX:
+        default:
+            /* Just set all the lines to blank */
+            for(CurLine=ScreenFirstLine;CurLine!=Lines.end();CurLine++)
+            {
+                CurLine->LineBackgroundColor=Settings->
+                        DefaultColors[e_DefaultColors_BG];
+                CurLine->LineWidthPx=0;
+                CurLine->EOL=e_DTEOL_Hard;
+                CurLine->Frags.clear();
+            }
+        break;
+        case e_ScreenClear_Scroll:
+        case e_ScreenClear_ScrollWithHR:
+            /* Ok, scan for blank lines, starting at the bottom */
+            if(ScreenFirstLine!=Lines.end())
+            {
+                LastLine=Lines.end();
+                LastLine--;  // Goto the last line
+                while(LastLine!=ScreenFirstLine)
+                {
+                    if(!IsLineBlank(LastLine))
+                        break;
+
+                    LastLine--;
+                }
+
+                /* Check if the last line is blank or not */
+                if(!IsLineBlank(LastLine))
+                    LastLine++;
+
+                /* Ok, we need to scroll everything from 'ScreenFirstLine' to
+                    'LastLine' into the back buffer */
+                Lines2Scroll=0;
+                for(CurLine=ScreenFirstLine;CurLine!=LastLine;CurLine++)
+                    Lines2Scroll++;
+
+                if(Lines2Scroll>0)
+                {
+                    PadOutScreenWithBlankLines();
+                    ScrollScreenByXLines(Lines2Scroll);
+                }
+            }
+            if(Type==e_ScreenClear_ScrollWithHR)
+            {
+                /* Ok, we also need to a HR line to the end of the back
+                   buffer */
+            }
+        break;
+        case e_ScreenClear_ScrollAll:
+            /* Make sure we have enough lines (we need to push a full screen
+               into the back buffer (which we can only do if we have a full
+               screen of lines to start with) */
+            PadOutScreenWithBlankLines();
+            ScrollScreenByXLines(ScreenHeightChars);
+        break;
+    }
+
+    /* Scroll the window to be at the bottom */
+    WindowXOffsetPx=0;
+    TopLine=ScreenFirstLine;
+    if(LinesCount>=ScreenHeightChars)
+        TopLineY=LinesCount-ScreenHeightChars;
+    else
+        TopLineY=0;
+
+    RethinkScrollBars();
+
+    if(TextDisplayCtrl!=nullptr)
+        UITC_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
+
+    /* Now we have the cursor to the top/left */
+    SetCursorXY(0,0);
+
+    RedrawFullScreen();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::PadOutScreenWithBlankLines
+ *
+ * SYNOPSIS:
+ *    void DisplayText::PadOutScreenWithBlankLines(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function adds blank lines to the end of the 'Lines' so we have a
+ *    full screen worth of lines.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::PadOutScreenWithBlankLines(void)
+{
+    struct TextLine BlankLine;
+
+    if(LinesCount<ScreenHeightChars)
+    {
+        /* We didn't have enough lines, add blank lines */
+        BlankLine.LineBackgroundColor=Settings->
+                DefaultColors[e_DefaultColors_BG];
+        BlankLine.LineWidthPx=0;
+        BlankLine.EOL=e_DTEOL_Hard;
+
+        while(LinesCount<ScreenHeightChars)
+        {
+            Lines.push_back(BlankLine);
+            LinesCount++;
+        }
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::IsLineBlank
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::IsLineBlank(i_TextLines Line);
+ *
+ * PARAMETERS:
+ *    Line [I] -- The line to check
+ *
+ * FUNCTION:
+ *    This function looks to see if a line is considered blank (empty).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayText::IsLineBlank(i_TextLines Line)
+{
+    i_TextLineFrags CurFrag;
+
+    if(Line->Frags.empty())
+        return true;
+
+    for(CurFrag=Line->Frags.begin();CurFrag!=Line->Frags.end();CurFrag++)
+    {
+        /* Fragment must be all blank or all spaces */
+        switch(CurFrag->FragType)
+        {
+            case e_TextCanvasFrag_String:
+                if(CurFrag->Text.find_first_not_of(' ')!=
+                        std::string::npos)
+                {
+                    return false;
+                }
+            break;
+            case e_TextCanvasFrag_NonPrintableChar:
+            case e_TextCanvasFrag_SoftRet:
+            case e_TextCanvasFrag_HardRet:
+            case e_TextCanvasFrag_RetText:
+            case e_TextCanvasFragMAX:
+            default:
+                /* These count as blank */
+            break;
+        }
+    }
+    return true;
+}

@@ -143,6 +143,7 @@ void Debug6(void);
         void RethinkTabCountAfterFree(void);
         void ToggleShowNonPrintables(void);
         void ToggleShowEndOfLines(void);
+        void ClearScreen(void);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

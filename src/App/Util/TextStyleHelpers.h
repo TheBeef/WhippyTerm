@@ -48,6 +48,23 @@ struct CharStyling
     uint16_t Attribs;
 };
 
+/*
+  e_TextCanvasFragType types:
+    * e_TextCanvasFrag_String -- This is a normal UTF-8 C string.  You can
+            find the string in 'TextLineFrag.Text'
+    * e_TextCanvasFrag_NonPrintableChar -- This is a control char.  You can
+            find the name of the control char in 'TextLineFrag.Text'
+    * e_TextCanvasFrag_SoftRet -- This is a 'soft' end of line.  A soft end of
+            line is one the program added on it's own (wrap because it hit the
+            edge of the screen, word wrap, etc).
+    * e_TextCanvasFrag_HardRet -- This is a 'hard' end of line.  A hard end of
+            line is where a control char made the line end (\n for example).
+    * e_TextCanvasFrag_RetText -- This is an end of line that we drawing.  The
+            text to draw as the end of line is in 'TextLineFrag.Text'.
+            NOTE: This isn't used so it may no longer work (turns out figuring
+            out if a \r or \r\n was used or if it's a line end that was made
+            by moving the cursor was VERY hard to get right).
+*/
 typedef enum
 {
     e_TextCanvasFrag_String,

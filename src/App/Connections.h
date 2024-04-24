@@ -382,6 +382,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void ApplyCustomSettings(void);
         void Connect2Bookmark(int BookmarkUID);
         int GetConnectionBookmark(void);
+        void ClearScreen(void);
 
         void SetDownloadProtocol(const char *NewProtocol);
         void GetDownloadProtocol(std::string &SelectedProtocol);

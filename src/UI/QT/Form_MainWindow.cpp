@@ -853,6 +853,7 @@ void Form_MainWindow::on_actionInsert_Horizontal_Rule_triggered()
 
 void Form_MainWindow::on_actionClear_Screen_triggered()
 {
+    DoMenuTriggered(e_UIMWMenu_ClearScreen);
 }
 
 void Form_MainWindow::on_actionNew_Window_triggered()

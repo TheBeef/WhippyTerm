@@ -77,7 +77,7 @@ typedef enum
 //    e_UIMWMenu_NewConnection,
 //    e_UIMWMenu_CloseAllConnections,
 //    e_UIMWMenu_InsertHorizontalRule,
-//    e_UIMWMenu_ClearScreen,
+    e_UIMWMenu_ClearScreen,
     e_UIMWMenu_CloseTab,
     e_UIMWMenu_Quit,
     e_UIMWMenu_About,

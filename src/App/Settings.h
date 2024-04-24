@@ -34,6 +34,7 @@
 /***  HEADER FILES TO INCLUDE          ***/
 #include "App/KeySeqs.h"
 #include "App/Display/DisplayColors.h"
+#include "App/Display/DisplayBase.h"
 #include "App/MainWindow.h"
 #include "App/Util/StorageHelpers.h"
 #include "PluginSDK/DataProcessors.h"
@@ -53,15 +54,6 @@ typedef enum
     e_WindowStartupPos_RestoreFromSettings,
     e_WindowStartupPosMAX
 } e_WindowStartupPosType;
-
-typedef enum
-{
-    e_ScreenClear_Clear,
-    e_ScreenClear_Scroll,
-    e_ScreenClear_ScrollAll,
-    e_ScreenClear_ScrollWithHR,
-    e_ScreenClearMAX
-} e_ScreenClearType;
 
 typedef std::list<std::string> t_StringListType;
 typedef t_StringListType::iterator i_StringListType;

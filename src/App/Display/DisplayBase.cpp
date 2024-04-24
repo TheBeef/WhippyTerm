@@ -635,3 +635,35 @@ void DisplayBase::SetOverrideMessage(const char *Msg)
     /* Do nothing */
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ClearScreen
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ClearScreen(e_ScreenClearType Type);
+ *
+ * PARAMETERS:
+ *    Msg [I] -- The type of clearing we want to do.  Supported types:
+ *                  e_ScreenClear_Clear -- Normal clearing.  Throw away
+ *                          anything that's on the screen area.
+ *                  e_ScreenClear_Scroll -- Move any non blank lines to the
+ *                          scroll back buffer before clearing.
+ *                  e_ScreenClear_ScrollAll -- Move all the screen area lines
+ *                          to the scroll back buffer.
+ *                  e_ScreenClear_ScrollWithHR -- Move any non blank lines to
+ *                          the scroll back buffer and then add a marker to
+ *                          show that's where the new screen starts.
+ *
+ * FUNCTION:
+ *    This function clears the search area.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::ClearScreen(e_ScreenClearType Type)
+{
+    /* Do nothing */
+}

@@ -50,6 +50,7 @@ static void SetKeySeq(struct CommandKeySeq *KeyMapping,uint8_t Mod,
 const char *m_CmdNames[e_CmdMAX]=
 {
     "NewTab",                               // e_Cmd_NewTab
+    "ClearScreen",                          // e_Cmd_ClearScreen
     "CloseTab",                             // e_Cmd_CloseTab
     "Quit",                                 // e_Cmd_Quit
     "About",                                // e_Cmd_About
@@ -126,6 +127,7 @@ const char *m_CmdNames[e_CmdMAX]=
 e_CmdType m_Cmd2MenuMapping[e_UIMWMenuMAX]=
 {
     e_Cmd_NewTab,                       // e_UIMWMenu_NewTab
+    e_Cmd_ClearScreen,                  // e_UIMWMenu_ClearScreen
     e_Cmd_CloseTab,                     // e_UIMWMenu_CloseTab
     e_Cmd_Quit,                         // e_UIMWMenu_Quit
     e_Cmd_About,                        // e_UIMWMenu_About

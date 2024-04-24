@@ -1510,7 +1510,7 @@
      <x>0</x>
      <y>0</y>
      <width>1114</width>
-     <height>28</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -2187,9 +2187,6 @@
    </property>
   </action>
   <action name="actionClear_Screen">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="icon">
     <iconset resource="MainResource.qrc">
      <normaloff>:/G/Graphics/application.png</normaloff>:/G/Graphics/application.png</iconset>

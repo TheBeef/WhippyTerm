@@ -53,6 +53,15 @@ typedef enum
     e_DBEventMAX
 } e_DBEventType;
 
+typedef enum
+{
+    e_ScreenClear_Clear,
+    e_ScreenClear_Scroll,
+    e_ScreenClear_ScrollAll,
+    e_ScreenClear_ScrollWithHR,
+    e_ScreenClearMAX
+} e_ScreenClearType;
+
 struct DBEventKeyPress
 {
     uint8_t Mods;
@@ -119,6 +128,7 @@ class DisplayBase
         virtual bool GetSelectionString(std::string &Clip);
         virtual bool IsThereASelection(void);
         virtual void SetOverrideMessage(const char *Msg);
+        virtual void ClearScreen(e_ScreenClearType Type);
 
         void SetCustomSettings(class ConSettings *NewSettingsPtr);
 

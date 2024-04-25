@@ -525,6 +525,9 @@ int Widget_TextCanvas::DrawFrag(QPainter *painter,QFontMetrics *fm,
         case e_TextCanvasFrag_RetText:
             px=DrawTextFrag(painter,fm,ScreenX,ScreenY,Frag);
         break;
+        case e_TextCanvasFrag_HR:
+            px=DrawHRFrag(painter,fm,ScreenX,ScreenY,Frag);
+        break;
         case e_TextCanvasFragMAX:
         default:
             px=0;
@@ -549,6 +552,9 @@ int Widget_TextCanvas::CalcFragWidth(QFontMetrics *fm,struct WTCFrag *Frag)
         break;
         case e_TextCanvasFrag_HardRet:
             px=CalHardRetFragWidth(fm);
+        break;
+        case e_TextCanvasFrag_HR:
+            px=0;
         break;
         case e_TextCanvasFragMAX:
         default:
@@ -662,6 +668,15 @@ void Widget_TextCanvas::RethinkCursor(void)
 
                 CursorPx+=CalTextFragWidth(&fm,&*Frag,Frag->Text);
                 xpos+=1;
+            break;
+            case e_TextCanvasFrag_HR:
+                /* The HR can be the only thing on a line so if we see one
+                   then we have found the cursor */
+
+                CursorFrag=*Frag;
+
+                /* Ok, we have what we where looking for.  We are done */
+                return;
             break;
             case e_TextCanvasFragMAX:
             default:
@@ -1148,6 +1163,46 @@ int Widget_TextCanvas::CalHardRetFragWidth(QFontMetrics *fm)
     return GUICharHeight/4+2;
 }
 
+int Widget_TextCanvas::DrawHRFrag(QPainter *painter,QFontMetrics *fm,
+        int ScreenX,int ScreenY,struct WTCFrag *Frag)
+{
+    QPen DrawPen;
+    QColor FgColor;
+    QColor BgColor;
+    int DrawWidth;
+
+    FgColor=QColor(QRgb(Frag->Styling.FGColor));
+    BgColor=QColor(QRgb(Frag->Styling.BGColor));
+
+    if(OverrideActive)
+    {
+        FgColor=FgColor.darker(200); // 1/2 bright;
+        BgColor=BgColor.darker(200); // 1/2 bright;
+    }
+
+    DrawPen.setWidth(0);    // 1 pixel (don't ask)
+//    DrawPen.setStyle(Qt::SolidLine);
+    DrawPen.setStyle(Qt::DotLine);
+    DrawPen.setCapStyle(Qt::FlatCap);
+    DrawPen.setJoinStyle(Qt::BevelJoin);
+    DrawPen.setColor(FgColor);
+    painter->setPen(DrawPen);
+    painter->setBackground(QBrush(BgColor));
+
+    painter->setFont(RenderFont);
+
+    DrawWidth=DisplayWidth;
+
+    /* Clear background (we need to do this because sometimes QT drops the
+       Qt::TransparentMode when drawing Unicode chars (like U+2302 on
+       Windows)) */
+    painter->fillRect(ScreenX,ScreenY,DrawWidth,GUICharHeight,BgColor);
+    painter->drawLine(ScreenX,ScreenY+GUICharHeight/2,DrawWidth,
+            ScreenY+GUICharHeight/2);
+
+    return DrawWidth;
+}
+
 int Widget_TextCanvas::CalcCursorWidth(QFontMetrics *fm)
 {
     return CalcFragWidth(fm,&CursorFrag);
@@ -1243,6 +1298,9 @@ int Widget_TextCanvas::GetTextWidth(const struct TextCanvasFrag *Frag)
         break;
         case e_TextCanvasFrag_HardRet:
             return CalHardRetFragWidth(&fm);
+        break;
+        case e_TextCanvasFrag_HR:
+            return 0;
         break;
         case e_TextCanvasFragMAX:
         default:

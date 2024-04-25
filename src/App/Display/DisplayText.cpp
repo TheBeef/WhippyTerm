@@ -1029,7 +1029,7 @@ void DisplayText::RedrawFullScreen(void)
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    WriteChar()
  ******************************************************************************/
 void DisplayText::NoteNonPrintable(const char *NoteStr)
 {
@@ -1628,6 +1628,7 @@ bool DisplayText::RethinkInsertFrag(void)
             case e_TextCanvasFrag_SoftRet:
             case e_TextCanvasFrag_HardRet:
             case e_TextCanvasFrag_RetText:
+            case e_TextCanvasFrag_HR:
             case e_TextCanvasFragMAX:
             default:
             break;
@@ -1677,7 +1678,7 @@ bool DisplayText::RethinkInsertFrag(void)
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    NoteNonPrintable()
  ******************************************************************************/
 void DisplayText::WriteChar(uint8_t *Chr)
 {
@@ -1782,6 +1783,7 @@ void DisplayText::PadOutCurrentLine2Cursor(void)
             case e_TextCanvasFrag_SoftRet:
             case e_TextCanvasFrag_HardRet:
             case e_TextCanvasFrag_RetText:
+            case e_TextCanvasFrag_HR:
             case e_TextCanvasFragMAX:
             default:
             break;
@@ -2100,7 +2102,7 @@ void DisplayText::AdjustCursorAfterWriteChar(uint8_t *Chr)
  *
  * FUNCTION:
  *    This is a helper function that takes a frag and rethinks the width in
- *    pixels of that frag.  The 
+ *    pixels of that frag.
  *
  * RETURNS:
  *    NONE
@@ -2178,7 +2180,8 @@ void DisplayText::HandleDeletingNPAfterOverwrite(void)
         {
             if(PrevFrag->FragType!=e_TextCanvasFrag_NonPrintableChar &&
                     PrevFrag->FragType!=e_TextCanvasFrag_SoftRet &&
-                    PrevFrag->FragType!=e_TextCanvasFrag_HardRet)
+                    PrevFrag->FragType!=e_TextCanvasFrag_HardRet &&
+                    PrevFrag->FragType!=e_TextCanvasFrag_HR)
             {
                 break;
             }
@@ -2213,6 +2216,7 @@ void DisplayText::HandleDeletingNPAfterOverwrite(void)
                 case e_TextCanvasFrag_SoftRet:
                 case e_TextCanvasFrag_HardRet:
                 case e_TextCanvasFrag_RetText:
+                case e_TextCanvasFrag_HR:
                 break;
                 case e_TextCanvasFrag_String:
                     if(!Frag->Text.empty())
@@ -3945,85 +3949,122 @@ void DisplayText::ClearScreen(e_ScreenClearType Type)
     i_TextLines CurLine;
     i_TextLines LastLine;
     int Lines2Scroll;
+    i_TextLineFrags NewFrag;
+    struct TextLineFrag NewHRFrag;
 
-    switch(Type)
+    try
     {
-        case e_ScreenClear_Clear:
-        case e_ScreenClearMAX:
-        default:
-            /* Just set all the lines to blank */
-            for(CurLine=ScreenFirstLine;CurLine!=Lines.end();CurLine++)
-            {
-                CurLine->LineBackgroundColor=Settings->
-                        DefaultColors[e_DefaultColors_BG];
-                CurLine->LineWidthPx=0;
-                CurLine->EOL=e_DTEOL_Hard;
-                CurLine->Frags.clear();
-            }
-        break;
-        case e_ScreenClear_Scroll:
-        case e_ScreenClear_ScrollWithHR:
-            /* Ok, scan for blank lines, starting at the bottom */
-            if(ScreenFirstLine!=Lines.end())
-            {
-                LastLine=Lines.end();
-                LastLine--;  // Goto the last line
-                while(LastLine!=ScreenFirstLine)
+        switch(Type)
+        {
+            case e_ScreenClear_Clear:
+            case e_ScreenClearMAX:
+            default:
+                /* Just set all the lines to blank */
+                for(CurLine=ScreenFirstLine;CurLine!=Lines.end();CurLine++)
                 {
-                    if(!IsLineBlank(LastLine))
-                        break;
-
-                    LastLine--;
+                    CurLine->LineBackgroundColor=Settings->
+                            DefaultColors[e_DefaultColors_BG];
+                    CurLine->LineWidthPx=0;
+                    CurLine->EOL=e_DTEOL_Hard;
+                    CurLine->Frags.clear();
                 }
-
-                /* Check if the last line is blank or not */
-                if(!IsLineBlank(LastLine))
-                    LastLine++;
-
-                /* Ok, we need to scroll everything from 'ScreenFirstLine' to
-                    'LastLine' into the back buffer */
+            break;
+            case e_ScreenClear_Scroll:
+            case e_ScreenClear_ScrollWithHR:
                 Lines2Scroll=0;
-                for(CurLine=ScreenFirstLine;CurLine!=LastLine;CurLine++)
-                    Lines2Scroll++;
-
-                if(Lines2Scroll>0)
+                if(ScreenFirstLine!=Lines.end())
                 {
-                    PadOutScreenWithBlankLines();
-                    ScrollScreenByXLines(Lines2Scroll);
+                    /* Ok, scan for blank lines, starting at the bottom */
+                    LastLine=Lines.end();
+                    LastLine--;  // Goto the last line
+                    while(LastLine!=ScreenFirstLine)
+                    {
+                        if(!IsLineBlank(LastLine))
+                            break;
+
+                        LastLine--;
+                    }
+
+                    /* Check if the last line is blank or not */
+                    if(!IsLineBlank(LastLine))
+                        LastLine++;
+
+                    /* Ok, we need to scroll everything from 'ScreenFirstLine'
+                       to 'LastLine' into the back buffer */
+                    for(CurLine=ScreenFirstLine;CurLine!=LastLine;CurLine++)
+                        Lines2Scroll++;
+
+                    if(Lines2Scroll>0)
+                    {
+                        PadOutScreenWithBlankLines();
+                        ScrollScreenByXLines(Lines2Scroll);
+                    }
+
+                    if(Type==e_ScreenClear_ScrollWithHR && Lines2Scroll>0)
+                    {
+                        /* Move the cursor to the top/left before we insert
+                           the HR */
+                        SetCursorXY(0,0);
+
+                        /* Ok, we also need to a HR line to the end of the back
+                           buffer */
+//                        NewHRFrag.FragType=e_TextCanvasFrag_String;
+//                        NewHRFrag.Text="---";
+//                        NewHRFrag.Styling.FGColor=0xFFFFFF;
+//                        NewHRFrag.Styling.BGColor=0x000000;
+//                        NewHRFrag.Styling.ULineColor=0xFFFFFF;
+//                        NewHRFrag.Styling.Attribs=0;
+//                        NewHRFrag.WidthPx=0;
+//                        NewHRFrag.Value=0;
+//                        NewHRFrag.Data=NULL;
+
+                        NewHRFrag.FragType=e_TextCanvasFrag_HR;
+                        NewHRFrag.Text="";
+                        NewHRFrag.Styling.FGColor=0xFFFFFF;
+                        NewHRFrag.Styling.BGColor=0x000000;
+                        NewHRFrag.Styling.ULineColor=0xFFFFFF;
+                        NewHRFrag.Styling.Attribs=0;
+                        NewHRFrag.WidthPx=0;
+                        NewHRFrag.Value=0;
+                        NewHRFrag.Data=NULL;
+
+                        NewFrag=AddSpecialFrag(NewHRFrag);
+                        RethinkFragWidth(NewFrag);
+                        RethinkInsertFrag();
+                        ScrollScreenByXLines(1);
+                    }
                 }
-            }
-            if(Type==e_ScreenClear_ScrollWithHR)
-            {
-                /* Ok, we also need to a HR line to the end of the back
-                   buffer */
-            }
-        break;
-        case e_ScreenClear_ScrollAll:
-            /* Make sure we have enough lines (we need to push a full screen
-               into the back buffer (which we can only do if we have a full
-               screen of lines to start with) */
-            PadOutScreenWithBlankLines();
-            ScrollScreenByXLines(ScreenHeightChars);
-        break;
+            break;
+            case e_ScreenClear_ScrollAll:
+                /* Make sure we have enough lines (we need to push a full screen
+                   into the back buffer (which we can only do if we have a full
+                   screen of lines to start with) */
+                PadOutScreenWithBlankLines();
+                ScrollScreenByXLines(ScreenHeightChars);
+            break;
+        }
+
+        /* Scroll the window to be at the bottom */
+        WindowXOffsetPx=0;
+        TopLine=ScreenFirstLine;
+        if(LinesCount>=ScreenHeightChars)
+            TopLineY=LinesCount-ScreenHeightChars;
+        else
+            TopLineY=0;
+
+        RethinkScrollBars();
+
+        if(TextDisplayCtrl!=nullptr)
+            UITC_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
+
+        /* Now we have to move the cursor to the top/left */
+        SetCursorXY(0,0);
+
+        RedrawFullScreen();
     }
-
-    /* Scroll the window to be at the bottom */
-    WindowXOffsetPx=0;
-    TopLine=ScreenFirstLine;
-    if(LinesCount>=ScreenHeightChars)
-        TopLineY=LinesCount-ScreenHeightChars;
-    else
-        TopLineY=0;
-
-    RethinkScrollBars();
-
-    if(TextDisplayCtrl!=nullptr)
-        UITC_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
-
-    /* Now we have the cursor to the top/left */
-    SetCursorXY(0,0);
-
-    RedrawFullScreen();
+    catch(...)
+    {
+    }
 }
 
 /*******************************************************************************
@@ -4108,6 +4149,7 @@ bool DisplayText::IsLineBlank(i_TextLines Line)
             case e_TextCanvasFrag_SoftRet:
             case e_TextCanvasFrag_HardRet:
             case e_TextCanvasFrag_RetText:
+            case e_TextCanvasFrag_HR:
             case e_TextCanvasFragMAX:
             default:
                 /* These count as blank */

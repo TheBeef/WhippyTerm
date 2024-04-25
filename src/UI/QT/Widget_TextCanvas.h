@@ -199,6 +199,7 @@ private:
     int CalSoftRetFragWidth(QFontMetrics *fm);
     int DrawHardRet(QPainter *painter,QFontMetrics *fm,int ScreenX,int ScreenY,struct WTCFrag *Frag);
     int CalHardRetFragWidth(QFontMetrics *fm);
+    int DrawHRFrag(QPainter *painter,QFontMetrics *fm,int ScreenX,int ScreenY,struct WTCFrag *Frag);
     void DrawCursor(QPainter *painter,QFontMetrics *fm);
     void RedrawCursor(void);
     int DrawFrag(QPainter *painter,QFontMetrics *fm,int ScreenX,int ScreenY,struct WTCFrag *Frag);

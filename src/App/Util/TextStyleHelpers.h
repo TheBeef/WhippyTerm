@@ -64,6 +64,7 @@ struct CharStyling
             NOTE: This isn't used so it may no longer work (turns out figuring
             out if a \r or \r\n was used or if it's a line end that was made
             by moving the cursor was VERY hard to get right).
+    * e_TextCanvasFrag_HR -- Horizontal rule that uses up the whole line.
 */
 typedef enum
 {
@@ -72,7 +73,7 @@ typedef enum
     e_TextCanvasFrag_SoftRet,
     e_TextCanvasFrag_HardRet,
     e_TextCanvasFrag_RetText,
-//    e_TextCanvasFrag_HR,
+    e_TextCanvasFrag_HR,
     e_TextCanvasFragMAX
 } e_TextCanvasFragType;
 

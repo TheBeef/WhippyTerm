@@ -71,12 +71,13 @@ typedef enum
     e_BottomPanelTabMAX
 } e_BottomPanelTabType;
 
+/* Don't forget to update 'm_Cmd2MenuMapping' */
 typedef enum
 {
     e_UIMWMenu_NewTab,
 //    e_UIMWMenu_NewConnection,
 //    e_UIMWMenu_CloseAllConnections,
-//    e_UIMWMenu_InsertHorizontalRule,
+    e_UIMWMenu_InsertHorizontalRule,
     e_UIMWMenu_ClearScreen,
     e_UIMWMenu_CloseTab,
     e_UIMWMenu_Quit,

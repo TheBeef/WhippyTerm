@@ -4042,9 +4042,14 @@ void DisplayText::ClearScreen(e_ScreenClearType Type)
                             NewHRFrag.WidthPx=0;
                             NewHRFrag.Value=0;
                             NewHRFrag.Data=NULL;
+
                             ActiveLine->Frags.clear();
                             ActiveLine->Frags.push_back(NewHRFrag);
+                            ActiveLine->EOL=e_DTEOL_Hard;
+                            ActiveLine->LineBackgroundColor=
+                                    CurrentStyle.BGColor;
                             RethinkFragWidth(ActiveLine->Frags.begin());
+
                             InsertFrag=ActiveLine->Frags.end();
                             InsertPos=-1;
 
@@ -4082,6 +4087,68 @@ void DisplayText::ClearScreen(e_ScreenClearType Type)
     }
     catch(...)
     {
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::InsertHorizontalRule
+ *
+ * SYNOPSIS:
+ *    void DisplayText::InsertHorizontalRule(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function does an insert of a horizontal rule on the current line
+ *    with the cursor.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::InsertHorizontalRule(void)
+{
+    struct TextLineFrag NewHRFrag;
+    int NewCursorY;
+
+    try
+    {
+        /* We replace the current line with a HR and then move the cursor to the
+           next line */
+
+        NewHRFrag.FragType=e_TextCanvasFrag_HR;
+        NewHRFrag.Text="";
+        NewHRFrag.Styling.FGColor=CurrentStyle.FGColor;
+        NewHRFrag.Styling.BGColor=CurrentStyle.BGColor;
+        NewHRFrag.Styling.ULineColor=CurrentStyle.FGColor;
+        NewHRFrag.Styling.Attribs=0;
+        NewHRFrag.WidthPx=0;
+        NewHRFrag.Value=0;
+        NewHRFrag.Data=NULL;
+
+        ActiveLine->Frags.clear();
+        ActiveLine->Frags.push_back(NewHRFrag);
+        ActiveLine->EOL=e_DTEOL_Hard;
+        ActiveLine->LineBackgroundColor=CurrentStyle.BGColor;
+        RethinkFragWidth(ActiveLine->Frags.begin());
+
+        InsertFrag=ActiveLine->Frags.end();
+        InsertPos=-1;
+
+        RedrawActiveLine();
+
+        /* Move to the start of the next line */
+        NewCursorY=CursorY;
+        MoveToNextLine(NewCursorY);
+        MoveCursor(0,NewCursorY,false);
+    }
+    catch(...)
+    {
+        
     }
 }
 

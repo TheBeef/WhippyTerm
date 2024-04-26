@@ -849,80 +849,6 @@ If it is not checked then are restored from the last options that where used for
                </widget>
               </item>
               <item>
-               <widget class="QGroupBox" name="groupBox_DisplayClearScreen">
-                <property name="toolTip">
-                 <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This controls what happens when a command to clear the screen comes in a connection or when the user selects to clear the screen.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="title">
-                 <string>Clear Screen</string>
-                </property>
-                <layout class="QHBoxLayout" name="horizontalLayout_27">
-                 <item>
-                  <widget class="QWidget" name="widget_7" native="true">
-                   <layout class="QVBoxLayout" name="verticalLayout_22">
-                    <property name="leftMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="topMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="rightMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="bottomMargin">
-                     <number>0</number>
-                    </property>
-                    <item>
-                     <widget class="QRadioButton" name="ClearScreen_radioButton">
-                      <property name="toolTip">
-                       <string>Clears the screen without moving anything to the scroll back buffer</string>
-                      </property>
-                      <property name="text">
-                       <string>Clear Screen</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QRadioButton" name="ClearScreen_Scroll_radioButton">
-                      <property name="toolTip">
-                       <string>Moves all the non blank lines to the scroll buffer before clearing</string>
-                      </property>
-                      <property name="text">
-                       <string>Scroll Non Blank Lines</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QRadioButton" name="ClearScreen_ScrollAll_radioButton">
-                      <property name="toolTip">
-                       <string>Moves all lines (including blank ones) to the scroll buffer before clearing</string>
-                      </property>
-                      <property name="text">
-                       <string>Scroll All Lines</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QRadioButton" name="ClearScreen_ScrollAndHR_radioButton">
-                      <property name="toolTip">
-                       <string>The same as &quot;Scroll Non Blank Lines&quot; but also adds a Horizontal Rule to the end of the scroll back buffer.</string>
-                      </property>
-                      <property name="text">
-                       <string>Scroll and Insert Hori&amp;zontal Rule</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item>
                <widget class="QGroupBox" name="groupBox_8">
                 <property name="title">
                  <string>Cursor</string>
@@ -11705,6 +11631,38 @@ p, li { white-space: pre-wrap; }
              </attribute>
              <layout class="QVBoxLayout" name="verticalLayout_10">
               <item>
+               <widget class="QGroupBox" name="groupBox_7">
+                <property name="title">
+                 <string>Scroll Buffer</string>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_8">
+                 <item>
+                  <widget class="QSpinBox" name="ScrollBufferLines_spinBox"/>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="label_4">
+                   <property name="text">
+                    <string>Lines</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_3">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
                <widget class="QGroupBox" name="groupBox_6">
                 <property name="title">
                  <string>Terminal Size</string>
@@ -11829,33 +11787,75 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item>
-               <widget class="QGroupBox" name="groupBox_7">
-                <property name="title">
-                 <string>Scroll Buffer</string>
+               <widget class="QGroupBox" name="groupBox_DisplayClearScreen">
+                <property name="toolTip">
+                 <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This controls what happens when a command to clear the screen comes in a connection or when the user selects to clear the screen.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
-                <layout class="QHBoxLayout" name="horizontalLayout_8">
+                <property name="title">
+                 <string>Clear Screen</string>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_27">
                  <item>
-                  <widget class="QSpinBox" name="ScrollBufferLines_spinBox"/>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="label_4">
-                   <property name="text">
-                    <string>Lines</string>
-                   </property>
+                  <widget class="QWidget" name="widget_7" native="true">
+                   <layout class="QVBoxLayout" name="verticalLayout_22">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QRadioButton" name="ClearScreen_radioButton">
+                      <property name="toolTip">
+                       <string>Clears the screen without moving anything to the scroll back buffer</string>
+                      </property>
+                      <property name="text">
+                       <string>Clear Screen</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="ClearScreen_Scroll_radioButton">
+                      <property name="toolTip">
+                       <string>Moves all the non blank lines to the scroll buffer before clearing</string>
+                      </property>
+                      <property name="text">
+                       <string>Scroll Non Blank Lines</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="ClearScreen_ScrollAll_radioButton">
+                      <property name="toolTip">
+                       <string>Moves all lines (including blank ones) to the scroll buffer before clearing</string>
+                      </property>
+                      <property name="text">
+                       <string>Scroll All Lines</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="ClearScreen_ScrollAndHR_radioButton">
+                      <property name="toolTip">
+                       <string>The same as &quot;Scroll Non Blank Lines&quot; but also adds a Horizontal Rule to the end of the scroll back buffer.</string>
+                      </property>
+                      <property name="text">
+                       <string>Scroll and Insert Hori&amp;zontal Rule</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </widget>
-                 </item>
-                 <item>
-                  <spacer name="horizontalSpacer_3">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
                  </item>
                 </layout>
                </widget>

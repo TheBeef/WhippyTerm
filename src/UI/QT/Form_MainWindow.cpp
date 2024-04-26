@@ -849,6 +849,7 @@ void Form_MainWindow::on_Main_tabWidget_currentChanged(int index)
 
 void Form_MainWindow::on_actionInsert_Horizontal_Rule_triggered()
 {
+    DoMenuTriggered(e_UIMWMenu_InsertHorizontalRule);
 }
 
 void Form_MainWindow::on_actionClear_Screen_triggered()

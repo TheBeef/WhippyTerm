@@ -130,6 +130,8 @@ class Settings
         /***** Display *****/
         bool AlwaysShowTabs;
         bool CloseButtonOnTabs;
+
+        /***** Terminal *****/
         e_ScreenClearType ScreenClear;
 
         /* Hex Displays */

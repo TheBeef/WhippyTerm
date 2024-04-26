@@ -643,7 +643,7 @@ void DisplayBase::SetOverrideMessage(const char *Msg)
  *    void DisplayText::ClearScreen(e_ScreenClearType Type);
  *
  * PARAMETERS:
- *    Msg [I] -- The type of clearing we want to do.  Supported types:
+ *    Type [I] -- The type of clearing we want to do.  Supported types:
  *                  e_ScreenClear_Clear -- Normal clearing.  Throw away
  *                          anything that's on the screen area.
  *                  e_ScreenClear_Scroll -- Move any non blank lines to the
@@ -664,6 +664,31 @@ void DisplayBase::SetOverrideMessage(const char *Msg)
  *    
  ******************************************************************************/
 void DisplayBase::ClearScreen(e_ScreenClearType Type)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::InsertHorizontalRule
+ *
+ * SYNOPSIS:
+ *    void DisplayText::InsertHorizontalRule(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function does an insert of a horizontal rule on the current line
+ *    with the cursor.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::InsertHorizontalRule(void)
 {
     /* Do nothing */
 }

@@ -5730,3 +5730,29 @@ void Connection::ClearScreen(void)
     Display->ClearScreen(g_Settings.ScreenClear);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Connection::InsertHorizontalRule
+ *
+ * SYNOPSIS:
+ *    void Connection::InsertHorizontalRule(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function replaces the current line with a horizontal rule.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::InsertHorizontalRule(void)
+{
+    if(Display==NULL)
+        return;
+
+    Display->InsertHorizontalRule();
+}

@@ -56,5 +56,6 @@
         <file>Graphics/book_edit.png</file>
         <file>Graphics/go.png</file>
         <file>Graphics/WIcon.svg</file>
+        <file>Graphics/text_horizontalrule.png</file>
     </qresource>
 </RCC>

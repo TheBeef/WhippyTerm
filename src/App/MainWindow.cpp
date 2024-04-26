@@ -2663,6 +2663,37 @@ void TheMainWindow::ClearScreen(void)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::InsertHorizontalRule
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::InsertHorizontalRule(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function looks up the current tab and sends an insert horizontal
+ *    rule to it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void TheMainWindow::InsertHorizontalRule(void)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+        TabCon->InsertHorizontalRule();
+}
+
+/*******************************************************************************
+ * NAME:
  *    MW_Event
  *
  * SYNOPSIS:
@@ -2896,6 +2927,8 @@ bool MW_Event(const struct MWEvent *Event)
  * PARAMETERS:
  *    Cmd [I] -- The command to exe.
  *                  e_Cmd_NewTab -- Open a new connection.
+ *                  e_Cmd_InsertHorizontalRule -- A horizontal rule replaces
+ *                          the current line.  Cursor is moved to the next line.
  *                  e_Cmd_ClearScreen -- Clear the screen.
  *                  e_Cmd_CloseTab -- Close the active connection
  *                  e_Cmd_Quit -- Quit the program
@@ -2937,6 +2970,9 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
     {
         case e_Cmd_NewTab:
             NewConnection();
+        break;
+        case e_Cmd_InsertHorizontalRule:
+            InsertHorizontalRule();
         break;
         case e_Cmd_ClearScreen:
             ClearScreen();

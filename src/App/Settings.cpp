@@ -619,51 +619,50 @@ void ApplySettings(void)
 void Settings::RegisterAllMembers(class TinyCFG &cfg)
 {
     cfg.StartBlock("MainWindow");
-    RegisterWindowStartupPos(cfg,"RestoreWindowPos",RestoreWindowPos);
-    cfg.Register("LeftPanelFromSettings",LeftPanelFromSettings);
-    cfg.Register("RightPanelFromSettings",RightPanelFromSettings);
-    cfg.Register("BottomPanelFromSettings",BottomPanelFromSettings);
-    cfg.Register("LeftPanelAutoHide",LeftPanelAutoHide);
-    cfg.Register("RightPanelAutoHide",RightPanelAutoHide);
-    cfg.Register("BottomPanelAutoHide",BottomPanelAutoHide);
-    cfg.Register("LeftPanelSize",LeftPanelSize);
-    cfg.Register("RightPanelSize",RightPanelSize);
-    cfg.Register("BottomPanelSize",BottomPanelSize);
-    cfg.Register("LeftPanelOpenOnStartup",LeftPanelOpenOnStartup);
-    cfg.Register("RightPanelOpenOnStartup",RightPanelOpenOnStartup);
-    cfg.Register("BottomPanelOpenOnStartup",BottomPanelOpenOnStartup);
-    cfg.Register("AppMaximized",AppMaximized);
-    cfg.Register("WindowPosX",WindowPosX);
-    cfg.Register("WindowPosY",WindowPosY);
-    cfg.Register("WindowWidth",WindowWidth);
-    cfg.Register("WindowHeight",WindowHeight);
+        RegisterWindowStartupPos(cfg,"RestoreWindowPos",RestoreWindowPos);
+        cfg.Register("LeftPanelFromSettings",LeftPanelFromSettings);
+        cfg.Register("RightPanelFromSettings",RightPanelFromSettings);
+        cfg.Register("BottomPanelFromSettings",BottomPanelFromSettings);
+        cfg.Register("LeftPanelAutoHide",LeftPanelAutoHide);
+        cfg.Register("RightPanelAutoHide",RightPanelAutoHide);
+        cfg.Register("BottomPanelAutoHide",BottomPanelAutoHide);
+        cfg.Register("LeftPanelSize",LeftPanelSize);
+        cfg.Register("RightPanelSize",RightPanelSize);
+        cfg.Register("BottomPanelSize",BottomPanelSize);
+        cfg.Register("LeftPanelOpenOnStartup",LeftPanelOpenOnStartup);
+        cfg.Register("RightPanelOpenOnStartup",RightPanelOpenOnStartup);
+        cfg.Register("BottomPanelOpenOnStartup",BottomPanelOpenOnStartup);
+        cfg.Register("AppMaximized",AppMaximized);
+        cfg.Register("WindowPosX",WindowPosX);
+        cfg.Register("WindowPosY",WindowPosY);
+        cfg.Register("WindowWidth",WindowWidth);
+        cfg.Register("WindowHeight",WindowHeight);
 
-    cfg.StartBlock("Panels");
-        cfg.StartBlock("StopWatch");
-            cfg.Register("StopWatchAutoLap",StopWatchAutoLap);
-            cfg.Register("StopWatchAutoStart",StopWatchAutoStart);
-            cfg.Register("StopWatchShowPanel",StopWatchShowPanel);
+        cfg.StartBlock("Panels");
+            cfg.StartBlock("StopWatch");
+                cfg.Register("StopWatchAutoLap",StopWatchAutoLap);
+                cfg.Register("StopWatchAutoStart",StopWatchAutoStart);
+                cfg.Register("StopWatchShowPanel",StopWatchShowPanel);
+            cfg.EndBlock();
+            cfg.StartBlock("Capture");
+                cfg.Register("CaptureTimestamp",CaptureTimestamp);
+                cfg.Register("CaptureAppend",CaptureAppend);
+                cfg.Register("CaptureStripCtrl",CaptureStripCtrl);
+                cfg.Register("CaptureStripEsc",CaptureStripEsc);
+                cfg.Register("CaptureHexDump",CaptureHexDump);
+                cfg.Register("CaptureDefaultFilename",CaptureDefaultFilename);
+                cfg.Register("CaptureShowPanel",CaptureShowPanel);
+            cfg.EndBlock();
+            cfg.StartBlock("HexDisplay");
+                cfg.Register("HexDisplayEnabled",HexDisplayEnabled);
+                cfg.Register("HexDisplayBufferSize",HexDisplayBufferSize);
+            cfg.EndBlock();
         cfg.EndBlock();
-        cfg.StartBlock("Capture");
-            cfg.Register("CaptureTimestamp",CaptureTimestamp);
-            cfg.Register("CaptureAppend",CaptureAppend);
-            cfg.Register("CaptureStripCtrl",CaptureStripCtrl);
-            cfg.Register("CaptureStripEsc",CaptureStripEsc);
-            cfg.Register("CaptureHexDump",CaptureHexDump);
-            cfg.Register("CaptureDefaultFilename",CaptureDefaultFilename);
-            cfg.Register("CaptureShowPanel",CaptureShowPanel);
-        cfg.EndBlock();
-        cfg.StartBlock("HexDisplay");
-            cfg.Register("HexDisplayEnabled",HexDisplayEnabled);
-            cfg.Register("HexDisplayBufferSize",HexDisplayBufferSize);
-        cfg.EndBlock();
-    cfg.EndBlock();
     cfg.EndBlock();
 
     cfg.StartBlock("Display");
-    cfg.Register("AlwaysShowTabs",AlwaysShowTabs);
-    cfg.Register("CloseButtonOnTabs",CloseButtonOnTabs);
-    RegisterScreenClear(cfg,"ScreenClear",ScreenClear);
+        cfg.Register("AlwaysShowTabs",AlwaysShowTabs);
+        cfg.Register("CloseButtonOnTabs",CloseButtonOnTabs);
         cfg.StartBlock("HexDisplays");
             cfg.Register("HexDisplaysFGColor",HexDisplaysFGColor);
             cfg.Register("HexDisplaysBGColor",HexDisplaysBGColor);
@@ -676,20 +675,24 @@ void Settings::RegisterAllMembers(class TinyCFG &cfg)
     cfg.EndBlock();
 
     cfg.StartBlock("Connections");
-    cfg.Register("AutoConnectOnNewConnection",AutoConnectOnNewConnection);
-    cfg.Register("UseConnectionDefaults",UseConnectionDefaults);
-    RegisterConnectionOptions_TinyCFG(cfg,"DefaultOptions",DefaultConnectionsOptions);
+        cfg.Register("AutoConnectOnNewConnection",AutoConnectOnNewConnection);
+        cfg.Register("UseConnectionDefaults",UseConnectionDefaults);
+        RegisterConnectionOptions_TinyCFG(cfg,"DefaultOptions",DefaultConnectionsOptions);
     cfg.EndBlock();
 
     cfg.StartBlock("Behaviour");
-    cfg.Register("BookmarksOpenNewTabs",BookmarksOpenNewTabs);
+        cfg.Register("BookmarksOpenNewTabs",BookmarksOpenNewTabs);
     cfg.EndBlock();
 
     RegisterKeyCommandType(cfg,"KeyBindings",&KeyMapping);
     cfg.Register("DotInputStartsAt0",DotInputStartsAt0);
 
     cfg.StartBlock("ConnectionDefaults");
-    DefaultConSettings.RegisterAllMembers(cfg);
+        DefaultConSettings.RegisterAllMembers(cfg);
+    cfg.EndBlock();
+
+    cfg.StartBlock("Terminal");
+        RegisterScreenClear(cfg,"ScreenClear",ScreenClear);
     cfg.EndBlock();
 }
 

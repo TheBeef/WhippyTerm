@@ -105,10 +105,10 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionConnect_Menu;
         case e_UIMWMenu_Disconnect:
             return (e_UIMenuCtrl *)realwin->ui->actionDisconnect_Menu;
-//        case e_UIMWMenu_InsertHorizontalRule:
-//            return (e_UIMenuCtrl *)realwin->ui->actionInsert_Horizontal_Rule;
-//        case e_UIMWMenu_ClearScreen:
-//            return (e_UIMenuCtrl *)realwin->ui->actionClear_Screen;
+        case e_UIMWMenu_InsertHorizontalRule:
+            return (e_UIMenuCtrl *)realwin->ui->actionInsert_Horizontal_Rule;
+        case e_UIMWMenu_ClearScreen:
+            return (e_UIMenuCtrl *)realwin->ui->actionClear_Screen;
         case e_UIMWMenu_Copy:
             return (e_UIMenuCtrl *)realwin->ui->actionCopy;
         case e_UIMWMenu_Paste:

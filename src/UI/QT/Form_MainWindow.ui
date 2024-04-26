@@ -177,7 +177,7 @@
                   <item>
                    <widget class="QTabWidget" name="LeftPanel_tabWidget">
                     <property name="currentIndex">
-                     <number>5</number>
+                     <number>0</number>
                     </property>
                     <widget class="QWidget" name="Display_Tab">
                      <attribute name="title">
@@ -2204,8 +2204,9 @@
    </property>
   </action>
   <action name="actionInsert_Horizontal_Rule">
-   <property name="enabled">
-    <bool>false</bool>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/text_horizontalrule.png</normaloff>:/G/Graphics/text_horizontalrule.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Insert Horizontal Rule</string>

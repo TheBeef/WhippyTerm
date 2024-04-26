@@ -477,7 +477,6 @@ void UIReplaceItemInListView(t_UIListViewCtrl *ListView,uintptr_t ID,const char 
 {
     QListWidget *lv=(QListWidget *)ListView;
     int Index;   // The index of the entry with 'ID' 
-    QFont font;
 
     /* Find the entry with this ID */
     for(Index=0;Index<lv->count();Index++)

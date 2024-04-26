@@ -1161,6 +1161,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *RestoreConnectionSettings;
     e_UIMenuCtrl *ShowNonPrintable;
     e_UIMenuCtrl *ShowEndOfLines;
+    e_UIMenuCtrl *InsertHorizontalRule;
+    e_UIMenuCtrl *ClearScreen;
 
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
     ConnectToggle=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_ConnectToggle);
@@ -1175,6 +1177,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     RestoreConnectionSettings=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_RestoreConnectionSettings);
     ShowNonPrintable=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ShowNonPrintable);
     ShowEndOfLines=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ShowEndOfLines);
+    InsertHorizontalRule=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_InsertHorizontalRule);
+    ClearScreen=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ClearScreen);
 
     RestoreConnectionSettingsActive=false;
 
@@ -1192,6 +1196,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(AddBookmark,false);
         UIEnableMenu(ShowNonPrintable,false);
         UIEnableMenu(ShowEndOfLines,false);
+        UIEnableMenu(InsertHorizontalRule,false);
+        UIEnableMenu(ClearScreen,false);
 
         ActivatePanels=false;
     }
@@ -1206,6 +1212,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(AddBookmark,true);
         UIEnableMenu(ShowNonPrintable,true);
         UIEnableMenu(ShowEndOfLines,true);
+        UIEnableMenu(InsertHorizontalRule,true);
+        UIEnableMenu(ClearScreen,true);
 
         Con=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
         if(Con==NULL)

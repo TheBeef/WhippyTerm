@@ -4231,10 +4231,12 @@ bool DisplayText::IsLineBlank(i_TextLines Line)
                 }
             break;
             case e_TextCanvasFrag_NonPrintableChar:
+            case e_TextCanvasFrag_HR:
+                return false;
+            break;
             case e_TextCanvasFrag_SoftRet:
             case e_TextCanvasFrag_HardRet:
             case e_TextCanvasFrag_RetText:
-            case e_TextCanvasFrag_HR:
             case e_TextCanvasFragMAX:
             default:
                 /* These count as blank */

@@ -2,7 +2,7 @@
 <ExternPluginMaker>
     <LastBuildFile>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/IODrivers/TestLoopback/TestLoopback.wtp</LastBuildFile>
     <LinuxFilename>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/IODrivers/TestLoopback/Linux/TestLoopback.so</LinuxFilename>
-    <WindowsFilename></WindowsFilename>
+    <WindowsFilename>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/IODrivers/TestLoopback/Windows/TestLoopback.dll</WindowsFilename>
     <MacFilename></MacFilename>
     <RPI64Filename></RPI64Filename>
     <RPI32Filename></RPI32Filename>
@@ -11,8 +11,8 @@
     <Description>A test plugin to echo back any bytes send out back in.  A loopback.</Description>
     <Contributors>Paul Hutchinson</Contributors>
     <Copyright>2024</Copyright>
-    <ReleaseDate>21 Apr 2024</ReleaseDate>
-    <Version>0.1.4</Version>
+    <ReleaseDate>23 Apr 2024</ReleaseDate>
+    <Version>0.1.5</Version>
     <APIVersion>0.11.0.0</APIVersion>
     <PluginClass>2</PluginClass>
     <PluginSubClass>0</PluginSubClass>

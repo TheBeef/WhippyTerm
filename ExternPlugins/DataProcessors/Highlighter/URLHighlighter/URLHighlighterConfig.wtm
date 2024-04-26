@@ -2,7 +2,7 @@
 <ExternPluginMaker>
     <LastBuildFile>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/DataProcessors/Highlighter/URLHighlighter/URLHighlighter.wtp</LastBuildFile>
     <LinuxFilename>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/DataProcessors/Highlighter/URLHighlighter/Linux/URLHighlighter.so</LinuxFilename>
-    <WindowsFilename></WindowsFilename>
+    <WindowsFilename>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/DataProcessors/Highlighter/URLHighlighter/Windows/URLHighlighter.dll</WindowsFilename>
     <MacFilename></MacFilename>
     <RPI64Filename></RPI64Filename>
     <RPI32Filename></RPI32Filename>
@@ -11,8 +11,8 @@
     <Description>Underlines URL's starting with http://</Description>
     <Contributors>Paul Hutchinson</Contributors>
     <Copyright>2024</Copyright>
-    <ReleaseDate>21 Apr 2024</ReleaseDate>
-    <Version>1.2</Version>
+    <ReleaseDate>23 Apr 2024</ReleaseDate>
+    <Version>1.3</Version>
     <APIVersion>0.11.0.0</APIVersion>
     <PluginClass>1</PluginClass>
     <PluginSubClass>2</PluginSubClass>

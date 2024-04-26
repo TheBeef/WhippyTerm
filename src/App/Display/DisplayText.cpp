@@ -3160,6 +3160,9 @@ bool DisplayText::ConvertScreenXY2Chars(int x,int y,int *CharX,int *CharY)
     string::iterator EndPos;
     int FragWidthPx;
 
+    *CharX=0;
+    *CharY=0;
+
     if(TextDisplayCtrl==NULL)
         return false;
 

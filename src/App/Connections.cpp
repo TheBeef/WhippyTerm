@@ -5676,7 +5676,6 @@ void Connection::RethinkCursor(void)
         return;
 
     CursorBlinking=false;
-    CursorStyle=e_TextCursorStyle_Block;
 //    if(DoingOverrideText)
 //    {
 //        CursorStyle=e_TextCursorStyle_Hidden;

@@ -1181,8 +1181,7 @@ int Widget_TextCanvas::DrawHRFrag(QPainter *painter,QFontMetrics *fm,
     }
 
     DrawPen.setWidth(0);    // 1 pixel (don't ask)
-//    DrawPen.setStyle(Qt::SolidLine);
-    DrawPen.setStyle(Qt::DotLine);
+    DrawPen.setStyle(Qt::DashLine);
     DrawPen.setCapStyle(Qt::FlatCap);
     DrawPen.setJoinStyle(Qt::BevelJoin);
     DrawPen.setColor(FgColor);

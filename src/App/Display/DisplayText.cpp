@@ -1248,6 +1248,17 @@ i_TextLineFrags DisplayText::AddSpecialFrag(struct TextLineFrag &SpecialFrag)
         ActiveLine->Frags.pop_back();
     }
 
+    if(!ActiveLine->Frags.empty() &&
+        ActiveLine->Frags.front().FragType==e_TextCanvasFrag_HR)
+    {
+        /* Ok, the first frag of this line is a HR, we delete that and
+           setup for a virtual insert */
+        ActiveLine->Frags.clear();
+        InsertFrag=ActiveLine->Frags.end();
+        /* We don't set 'InsertPos' so if the user was in virtual space
+           we will still pad correctly */
+    }
+
     if(InsertFrag==ActiveLine->Frags.end())
     {
         if(InsertPos>=0)
@@ -1686,6 +1697,17 @@ void DisplayText::WriteChar(uint8_t *Chr)
     {
         if(ActiveLine==nullptr)
             return;
+
+        if(!ActiveLine->Frags.empty() &&
+            ActiveLine->Frags.front().FragType==e_TextCanvasFrag_HR)
+        {
+            /* Ok, the first frag of this line is a HR, we delete that and
+               setup for a virtual insert */
+            ActiveLine->Frags.clear();
+            InsertFrag=ActiveLine->Frags.end();
+            /* We don't set 'InsertPos' so if the user was in virtual space
+               we will still pad correctly */
+        }
 
         /* See how we are writing this char (see RethinkInsertFrag() for info on
            the 4 different modes) */
@@ -3944,8 +3966,6 @@ void DisplayText::SetOverrideMessage(const char *Msg)
  ******************************************************************************/
 void DisplayText::ClearScreen(e_ScreenClearType Type)
 {
-    int y;
-    t_UIScrollBarCtrl *VertScroll;
     i_TextLines CurLine;
     i_TextLines LastLine;
     int Lines2Scroll;
@@ -4002,36 +4022,31 @@ void DisplayText::ClearScreen(e_ScreenClearType Type)
 
                     if(Type==e_ScreenClear_ScrollWithHR && Lines2Scroll>0)
                     {
-                        /* Move the cursor to the top/left before we insert
-                           the HR */
-                        SetCursorXY(0,0);
+                        if(ActiveLine!=NULL)
+                        {
+                            /* Move the cursor to the top/left before we insert
+                               the HR */
+                            SetCursorXY(0,0);
 
-                        /* Ok, we also need to a HR line to the end of the back
-                           buffer */
-//                        NewHRFrag.FragType=e_TextCanvasFrag_String;
-//                        NewHRFrag.Text="---";
-//                        NewHRFrag.Styling.FGColor=0xFFFFFF;
-//                        NewHRFrag.Styling.BGColor=0x000000;
-//                        NewHRFrag.Styling.ULineColor=0xFFFFFF;
-//                        NewHRFrag.Styling.Attribs=0;
-//                        NewHRFrag.WidthPx=0;
-//                        NewHRFrag.Value=0;
-//                        NewHRFrag.Data=NULL;
+                            /* Ok, we also need to a HR line to the end of the back
+                               buffer */
+                            NewHRFrag.FragType=e_TextCanvasFrag_HR;
+                            NewHRFrag.Text="";
+                            NewHRFrag.Styling.FGColor=CurrentStyle.FGColor;
+                            NewHRFrag.Styling.BGColor=CurrentStyle.BGColor;
+                            NewHRFrag.Styling.ULineColor=CurrentStyle.FGColor;
+                            NewHRFrag.Styling.Attribs=0;
+                            NewHRFrag.WidthPx=0;
+                            NewHRFrag.Value=0;
+                            NewHRFrag.Data=NULL;
+                            ActiveLine->Frags.clear();
+                            ActiveLine->Frags.push_back(NewHRFrag);
+                            RethinkFragWidth(ActiveLine->Frags.begin());
+                            InsertFrag=ActiveLine->Frags.end();
+                            InsertPos=-1;
 
-                        NewHRFrag.FragType=e_TextCanvasFrag_HR;
-                        NewHRFrag.Text="";
-                        NewHRFrag.Styling.FGColor=0xFFFFFF;
-                        NewHRFrag.Styling.BGColor=0x000000;
-                        NewHRFrag.Styling.ULineColor=0xFFFFFF;
-                        NewHRFrag.Styling.Attribs=0;
-                        NewHRFrag.WidthPx=0;
-                        NewHRFrag.Value=0;
-                        NewHRFrag.Data=NULL;
-
-                        NewFrag=AddSpecialFrag(NewHRFrag);
-                        RethinkFragWidth(NewFrag);
-                        RethinkInsertFrag();
-                        ScrollScreenByXLines(1);
+                            ScrollScreenByXLines(1);
+                        }
                     }
                 }
             break;

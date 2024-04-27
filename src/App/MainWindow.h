@@ -144,7 +144,9 @@ void Debug6(void);
         void ToggleShowNonPrintables(void);
         void ToggleShowEndOfLines(void);
         void ClearScreen(void);
+        void ClearScrollBackBuffer(void);
         void InsertHorizontalRule(void);
+        void ResetTerm(void);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

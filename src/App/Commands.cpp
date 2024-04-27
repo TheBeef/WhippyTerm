@@ -50,8 +50,10 @@ static void SetKeySeq(struct CommandKeySeq *KeyMapping,uint8_t Mod,
 const char *m_CmdNames[e_CmdMAX]=
 {
     "NewTab",                               // e_Cmd_NewTab
+    "ResetTerm",                            // e_Cmd_ResetTerm
     "InsertHorizontalRule",                 // e_Cmd_InsertHorizontalRule
     "ClearScreen",                          // e_Cmd_ClearScreen
+    "ClearScrollBackBuffer",                // e_Cmd_ClearScrollBackBuffer
     "CloseTab",                             // e_Cmd_CloseTab
     "Quit",                                 // e_Cmd_Quit
     "About",                                // e_Cmd_About
@@ -128,8 +130,10 @@ const char *m_CmdNames[e_CmdMAX]=
 e_CmdType m_Cmd2MenuMapping[e_UIMWMenuMAX]=
 {
     e_Cmd_NewTab,                       // e_UIMWMenu_NewTab
+    e_Cmd_ResetTerm,                    // e_UIMWMenu_ResetTerm
     e_Cmd_InsertHorizontalRule,         // e_UIMWMenu_InsertHorizontalRule
     e_Cmd_ClearScreen,                  // e_UIMWMenu_ClearScreen
+    e_Cmd_ClearScrollBackBuffer,        // e_UIMWMenu_ClearScrollBackBuffer
     e_Cmd_CloseTab,                     // e_UIMWMenu_CloseTab
     e_Cmd_Quit,                         // e_UIMWMenu_Quit
     e_Cmd_About,                        // e_UIMWMenu_About

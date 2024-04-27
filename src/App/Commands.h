@@ -42,8 +42,10 @@
 typedef enum
 {
     e_Cmd_NewTab,
+    e_Cmd_ResetTerm,
     e_Cmd_InsertHorizontalRule,
     e_Cmd_ClearScreen,
+    e_Cmd_ClearScrollBackBuffer,
     e_Cmd_CloseTab,
     e_Cmd_Quit,
     e_Cmd_About,

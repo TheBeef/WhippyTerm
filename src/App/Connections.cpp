@@ -5732,6 +5732,33 @@ void Connection::ClearScreen(void)
 
 /*******************************************************************************
  * NAME:
+ *    Connection::ClearScrollBackBuffer
+ *
+ * SYNOPSIS:
+ *    void Connection::ClearScrollBackBuffer(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function clears the scroll back buffer.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::ClearScrollBackBuffer(void)
+{
+    if(Display==NULL)
+        return;
+
+    Display->ClearScrollBackBuffer();
+}
+
+/*******************************************************************************
+ * NAME:
  *    Connection::InsertHorizontalRule
  *
  * SYNOPSIS:
@@ -5755,4 +5782,31 @@ void Connection::InsertHorizontalRule(void)
         return;
 
     Display->InsertHorizontalRule();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::ResetTerm
+ *
+ * SYNOPSIS:
+ *    void Connection::ResetTerm(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function resets the term.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::ResetTerm(void)
+{
+    if(Display==NULL)
+        return;
+
+    Display->ResetTerm();
 }

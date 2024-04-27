@@ -134,7 +134,9 @@ class DisplayText : public DisplayBase
         bool IsThereASelection(void);
         void SetOverrideMessage(const char *Msg);
         void ClearScreen(e_ScreenClearType Type);
+        void ClearScrollBackBuffer(void);
         void InsertHorizontalRule(void);
+        void ResetTerm(void);
 
         void SetBlockDeviceMode(bool On);
 

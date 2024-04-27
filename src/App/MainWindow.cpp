@@ -1162,7 +1162,9 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *ShowNonPrintable;
     e_UIMenuCtrl *ShowEndOfLines;
     e_UIMenuCtrl *InsertHorizontalRule;
+    e_UIMenuCtrl *ResetTerm;
     e_UIMenuCtrl *ClearScreen;
+    e_UIMenuCtrl *ClearScrollBackBuffer;
 
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
     ConnectToggle=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_ConnectToggle);
@@ -1178,7 +1180,9 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     ShowNonPrintable=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ShowNonPrintable);
     ShowEndOfLines=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ShowEndOfLines);
     InsertHorizontalRule=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_InsertHorizontalRule);
+    ResetTerm=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ResetTerm);
     ClearScreen=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ClearScreen);
+    ClearScrollBackBuffer=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ClearScrollBackBuffer);
 
     RestoreConnectionSettingsActive=false;
 
@@ -1197,7 +1201,9 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(ShowNonPrintable,false);
         UIEnableMenu(ShowEndOfLines,false);
         UIEnableMenu(InsertHorizontalRule,false);
+        UIEnableMenu(ResetTerm,false);
         UIEnableMenu(ClearScreen,false);
+        UIEnableMenu(ClearScrollBackBuffer,false);
 
         ActivatePanels=false;
     }
@@ -1213,7 +1219,9 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(ShowNonPrintable,true);
         UIEnableMenu(ShowEndOfLines,true);
         UIEnableMenu(InsertHorizontalRule,true);
+        UIEnableMenu(ResetTerm,true);
         UIEnableMenu(ClearScreen,true);
+        UIEnableMenu(ClearScrollBackBuffer,true);
 
         Con=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
         if(Con==NULL)
@@ -2671,6 +2679,37 @@ void TheMainWindow::ClearScreen(void)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::ClearScrollBackBuffer
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::ClearScrollBackBuffer(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function looks up the current tab and sends a clear scroll back
+ *    buffer to it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void TheMainWindow::ClearScrollBackBuffer(void)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+        TabCon->ClearScrollBackBuffer();
+}
+
+/*******************************************************************************
+ * NAME:
  *    TheMainWindow::InsertHorizontalRule
  *
  * SYNOPSIS:
@@ -2698,6 +2737,37 @@ void TheMainWindow::InsertHorizontalRule(void)
     TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
     if(TabCon!=NULL)
         TabCon->InsertHorizontalRule();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::ResetTerm
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::ResetTerm(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function looks up the current tab and sends an reset term command to
+ *    it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void TheMainWindow::ResetTerm(void)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+        TabCon->ResetTerm();
 }
 
 /*******************************************************************************
@@ -2935,9 +3005,11 @@ bool MW_Event(const struct MWEvent *Event)
  * PARAMETERS:
  *    Cmd [I] -- The command to exe.
  *                  e_Cmd_NewTab -- Open a new connection.
+ *                  e_Cmd_ResetTerm -- Resets the term
  *                  e_Cmd_InsertHorizontalRule -- A horizontal rule replaces
  *                          the current line.  Cursor is moved to the next line.
  *                  e_Cmd_ClearScreen -- Clear the screen.
+ *                  e_Cmd_ClearScrollBackBuffer -- Clear the scroll back buffer
  *                  e_Cmd_CloseTab -- Close the active connection
  *                  e_Cmd_Quit -- Quit the program
  *                  e_Cmd_About -- Show about dialog
@@ -2979,11 +3051,17 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         case e_Cmd_NewTab:
             NewConnection();
         break;
+        case e_Cmd_ResetTerm:
+            ResetTerm();
+        break;
         case e_Cmd_InsertHorizontalRule:
             InsertHorizontalRule();
         break;
         case e_Cmd_ClearScreen:
             ClearScreen();
+        break;
+        case e_Cmd_ClearScrollBackBuffer:
+            ClearScrollBackBuffer();
         break;
         case e_Cmd_CloseTab:
             CloseActiveConnection();

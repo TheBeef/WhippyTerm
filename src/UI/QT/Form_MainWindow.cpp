@@ -1342,3 +1342,15 @@ void Form_MainWindow::on_actionShow_End_Of_Lines_triggered()
 {
     DoMenuTriggered(e_UIMWMenu_ShowEndOfLines);
 }
+
+void Form_MainWindow::on_actionClear_Scroll_Buffer_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ClearScrollBackBuffer);
+}
+
+
+void Form_MainWindow::on_actionReset_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ResetTerm);
+}
+

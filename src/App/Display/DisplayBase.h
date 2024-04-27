@@ -129,7 +129,9 @@ class DisplayBase
         virtual bool IsThereASelection(void);
         virtual void SetOverrideMessage(const char *Msg);
         virtual void ClearScreen(e_ScreenClearType Type);
+        virtual void ClearScrollBackBuffer(void);
         virtual void InsertHorizontalRule(void);
+        virtual void ResetTerm(void);
 
         void SetCustomSettings(class ConSettings *NewSettingsPtr);
 

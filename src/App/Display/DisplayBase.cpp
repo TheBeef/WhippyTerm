@@ -655,7 +655,7 @@ void DisplayBase::SetOverrideMessage(const char *Msg)
  *                          show that's where the new screen starts.
  *
  * FUNCTION:
- *    This function clears the search area.
+ *    This function clears the screen area.
  *
  * RETURNS:
  *    NONE
@@ -664,6 +664,30 @@ void DisplayBase::SetOverrideMessage(const char *Msg)
  *    
  ******************************************************************************/
 void DisplayBase::ClearScreen(e_ScreenClearType Type)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ClearScrollBackBuffer
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ClearScrollBackBuffer(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function clears the scroll back buffer.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::ClearScrollBackBuffer(void)
 {
     /* Do nothing */
 }
@@ -689,6 +713,30 @@ void DisplayBase::ClearScreen(e_ScreenClearType Type)
  *    
  ******************************************************************************/
 void DisplayBase::InsertHorizontalRule(void)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ResetTerm
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ResetTerm(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function does an reset term on the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::ResetTerm(void)
 {
     /* Do nothing */
 }

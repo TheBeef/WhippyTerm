@@ -228,6 +228,10 @@ private slots:
     
     void on_actionShow_End_Of_Lines_triggered();
     
+    void on_actionClear_Scroll_Buffer_triggered();
+    
+    void on_actionReset_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

@@ -3947,7 +3947,7 @@ void DisplayText::SetOverrideMessage(const char *Msg)
  *    void DisplayText::ClearScreen(e_ScreenClearType Type);
  *
  * PARAMETERS:
- *    Msg [I] -- The type of clearing we want to do.  Supported types:
+ *    Type [I] -- The type of clearing we want to do.  Supported types:
  *                  e_ScreenClear_Clear -- Normal clearing.  Throw away
  *                          anything that's on the screen area.
  *                  e_ScreenClear_Scroll -- Move any non blank lines to the
@@ -3959,7 +3959,7 @@ void DisplayText::SetOverrideMessage(const char *Msg)
  *                          show that's where the new screen starts.
  *
  * FUNCTION:
- *    This function clears the search area.
+ *    This function clears the screen area.
  *
  * RETURNS:
  *    NONE
@@ -4092,6 +4092,48 @@ void DisplayText::ClearScreen(e_ScreenClearType Type)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayText::ClearScrollBackBuffer
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ClearScrollBackBuffer(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function clears the search area.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::ClearScrollBackBuffer(void)
+{
+    i_TextLines Bottom;
+
+    Bottom=ScreenFirstLine;
+
+    if(Bottom==Lines.end() || Bottom==Lines.begin())
+        return;
+
+    Lines.erase(Lines.begin(),Bottom);
+    LinesCount=Lines.size();
+
+    TopLine=Lines.begin();
+    TopLineY=0;
+    SelectionValid=false;
+
+    RethinkLineLengths();
+    RethinkScrollBars();
+    RethinkCursorHidden();
+    UITC_SetCursorPos(TextDisplayCtrl,CursorX,CalcCorrectedCursorPos());
+    RedrawFullScreen();
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayText::InsertHorizontalRule
  *
  * SYNOPSIS:
@@ -4145,6 +4187,71 @@ void DisplayText::InsertHorizontalRule(void)
         NewCursorY=CursorY;
         MoveToNextLine(NewCursorY);
         MoveCursor(0,NewCursorY,false);
+    }
+    catch(...)
+    {
+        
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ResetTerm
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ResetTerm(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function does an reset of the term.  It clears the scroll back
+ *    buffer, clears the screen, and resets the colors.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::ResetTerm(void)
+{
+    struct TextLineFrag NewHRFrag;
+    int NewCursorY;
+
+    try
+    {
+        /* Current Style */
+        CurrentStyle.FGColor=Settings->DefaultColors[e_DefaultColors_FG];
+        CurrentStyle.BGColor=Settings->DefaultColors[e_DefaultColors_BG];
+        CurrentStyle.Attribs=0;
+        CurrentStyle.ULineColor=CurrentStyle.FGColor;
+
+        ClearScrollBackBuffer();
+        ClearScreen(e_ScreenClear_Clear);
+
+        SelectionValid=false;
+        Selection_X=0;
+        Selection_Y=0;
+        Selection_AnchorX=0;
+        Selection_AnchorY=0;
+
+//        Lines.clear();
+//        LinesCount=0;
+//        FirstLine.LineWidthPx=0;
+//        FirstLine.LineBackgroundColor=Settings->
+//                DefaultColors[e_DefaultColors_BG];
+//        FirstLine.EOL=e_DTEOL_Hard;
+//        Lines.push_back(FirstLine);
+//        LinesCount++;
+//        TopLine=Lines.begin();
+//        ScreenFirstLine=TopLine;
+//        TopLineY=0;
+//        ActiveLine=&*ScreenFirstLine;
+//        ActiveLineY=0;
+//        InsertFrag=ActiveLine->Frags.end();
+//        InsertPos=-1;
+
     }
     catch(...)
     {

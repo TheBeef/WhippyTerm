@@ -1510,7 +1510,7 @@
      <x>0</x>
      <y>0</y>
      <width>1114</width>
-     <height>22</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -2196,9 +2196,6 @@
    </property>
   </action>
   <action name="actionReset">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="text">
     <string>&amp;Reset</string>
    </property>
@@ -2213,9 +2210,6 @@
    </property>
   </action>
   <action name="actionClear_Scroll_Buffer">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="text">
     <string>Clear &amp;Scroll Buffer</string>
    </property>

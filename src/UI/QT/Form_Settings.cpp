@@ -461,26 +461,6 @@ void Form_Settings::on_SysColPrev_DefaultBG_radioButton_clicked()
     SendEvent(e_DSEvent_RadioBttnClick,&EventData);
 }
 
-void Form_Settings::on_UseConnectionDefaults_checkBox_toggled(bool checked)
-{
-    union DSEventData EventData;
-
-    EventData.Checkbox.InputID=e_UIS_Checkbox_Connections_UseConnectionDefaults;
-    EventData.Checkbox.Checked=checked;
-    SendEvent(e_DSEvent_CheckboxClick,&EventData);
-}
-
-void Form_Settings::on_ConnectionList_listWidget_itemClicked(QListWidgetItem *item)
-{
-    uintptr_t ID;   // The ID for this item
-    union DSEventData EventData;
-
-    ID=(uintptr_t)(item->data(Qt::UserRole).toULongLong());
-
-    EventData.ListView.InputID=e_UIS_ListView_Connections_ConnectionList;
-    SendEvent(e_DSEvent_ListViewChange,&EventData,ID);
-}
-
 void Form_Settings::on_SelectCursorColor_pushButton_clicked()
 {
     union DSEventData EventData;

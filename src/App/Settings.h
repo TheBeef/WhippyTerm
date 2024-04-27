@@ -145,8 +145,8 @@ class Settings
 
         /***** Connections *****/
         bool AutoConnectOnNewConnection;
-        bool UseConnectionDefaults;
-        t_ConnectionsOptions DefaultConnectionsOptions;
+//        bool UseConnectionDefaults;
+//        t_ConnectionsOptions DefaultConnectionsOptions;
 
         /* Keyboard */
         struct CommandKeySeq KeyMapping[e_CmdMAX];

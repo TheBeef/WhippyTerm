@@ -99,10 +99,6 @@ private slots:
     
     void on_SysColPrev_DefaultBG_radioButton_clicked();
     
-    void on_UseConnectionDefaults_checkBox_toggled(bool checked);
-
-    void on_ConnectionList_listWidget_itemClicked(QListWidgetItem *item);
-
     void on_Keyboard_CommandList_listWidget_itemClicked(QListWidgetItem *item);
     
     void on_SelectCursorColor_pushButton_clicked();

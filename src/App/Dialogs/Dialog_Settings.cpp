@@ -88,8 +88,6 @@ static void DS_CopySysColors2GUI(void);
 static void DS_UpdateColorPreview(bool UpdateWeb);
 static void DS_SetCurrentColor(uint32_t RGB);
 static uint32_t DS_GetCurrentColor(void);
-static void DS_FillInConnectionsList4GUI(void);
-static void DS_CollectConnectionOptions(void);
 static void DS_SelectCaptureFilename(void);
 static void UIS_DoSelectFont(void);
 static void UIS_DoSelectHexDisplayFont(void);
@@ -107,7 +105,6 @@ static void UIS_HandleInputProcessingTermEmuChange(void);
 static void UIS_HandleSysColPresetChange(uintptr_t ID);
 static void UIS_HandleAreaChanged(uintptr_t ID);
 static void UIS_HandleKeyboardCmdListChange(uintptr_t ID);
-static void UIS_HandleConnectionListChanged(uintptr_t ID);
 static void UIS_HandleKeyboardCmdShortCutChange(void);
 
 /*** VARIABLE DEFINITIONS     ***/
@@ -121,7 +118,6 @@ bool m_DS_UpdatingColorPreview;
 class TheMainWindow *m_SettingsMW;
 struct ConnectionInfoList *m_DS_ConList;
 t_ConnectionOptionsDataType *m_DS_ConOptions;
-t_ConnectionsOptions m_DS_ConnectionsOptions;
 struct ConnectionInfoList *m_DS_SelectedConnection;
 uint32_t m_CursorColor;
 uint32_t m_HexDisplaysFGColor;
@@ -595,13 +591,6 @@ static void DS_SetSettingGUI(void)
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoConnectOnNewConnection);
     UICheckCheckbox(CheckboxHandle,g_Settings.AutoConnectOnNewConnection);
 
-    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_Connections_UseConnectionDefaults);
-    UICheckCheckbox(CheckboxHandle,g_Settings.UseConnectionDefaults);
-
-    /* These are added to the GUI only when the tab is selected (for speed)
-       but we make a copy here */
-    m_DS_ConnectionsOptions=g_Settings.DefaultConnectionsOptions;
-
     /********************/
     /* Display          */
     /********************/
@@ -900,15 +889,6 @@ static void DS_GetSettingsFromGUI(void)
         /********************/
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoConnectOnNewConnection);
         g_Settings.AutoConnectOnNewConnection=UIGetCheckboxCheckStatus(CheckboxHandle);
-
-        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_Connections_UseConnectionDefaults);
-        g_Settings.UseConnectionDefaults=UIGetCheckboxCheckStatus(CheckboxHandle);
-
-        if(g_Settings.UseConnectionDefaults && m_DS_SelectedConnection!=NULL)
-        {
-            DS_CollectConnectionOptions();
-            g_Settings.DefaultConnectionsOptions=m_DS_ConnectionsOptions;
-        }
     }
 
     /********************/
@@ -1159,7 +1139,6 @@ void UIS_HandleAreaChanged(uintptr_t ID)
             UIS_MakeTabVisable(e_UIS_TabCtrl_StartupTab);
         break;
         case e_DS_SettingsArea_Connections:
-            DS_FillInConnectionsList4GUI();
             UIS_MakeTabVisable(e_UIS_TabCtrl_ConnectionsTab);
         break;
         case e_DS_SettingsArea_Display:
@@ -2013,170 +1992,6 @@ void UIS_HandleSysColDefaultColorClick(void)
 
 /*******************************************************************************
  * NAME:
- *    DS_FillInConnectionsList4GUI
- *
- * SYNOPSIS:
- *    static void DS_FillInConnectionsList4GUI(void);
- *
- * PARAMETERS:
- *    NONE
- *
- * FUNCTION:
- *    This function gets the list of connections and fills in the list.
- *
- * RETURNS:
- *    NONE
- *
- * SEE ALSO:
- *    
- ******************************************************************************/
-static void DS_FillInConnectionsList4GUI(void)
-{
-    t_UIListViewCtrl *GUIConnectionList;
-    t_UICheckboxCtrl *GUICheckboxHandle;
-    struct ConnectionInfoList *Con;
-
-    GUICheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_Connections_UseConnectionDefaults);
-    GUIConnectionList=UIS_GetListViewHandle(e_UIS_ListView_Connections_ConnectionList);
-
-    UIClearListView(GUIConnectionList);
-
-    /* If we aren't using the options nothing more to do */
-    if(!UIGetCheckboxCheckStatus(GUICheckboxHandle))
-        return;
-
-    if(m_DS_ConList==NULL)
-    {
-        m_DS_ConList=IOS_GetListOfAvailableConnections();
-        if(m_DS_ConList==NULL)
-            return;
-    }
-
-    for(Con=m_DS_ConList;Con!=NULL;Con=Con->Next)
-        UIAddItem2ListView(GUIConnectionList,Con->Name,(uintptr_t)Con);
-
-    UISetListViewSelectedEntry(GUIConnectionList,(uintptr_t)m_DS_ConList);
-    UIS_HandleConnectionListChanged((uintptr_t)m_DS_ConList);
-}
-
-/*******************************************************************************
- * NAME:
- *    UIS_HandleConnectionListChanged
- *
- * SYNOPSIS:
- *    void UIS_HandleConnectionListChanged(uintptr_t ID);
- *
- * PARAMETERS:
- *    
- *
- * FUNCTION:
- *    DEBUG PAUL: Delete this?
- *
- * RETURNS:
- *    
- *
- * NOTES:
- *    
- *
- * LIMITATIONS:
- *    
- *
- * EXAMPLE:
- *    
- *
- * SEE ALSO:
- *    
- ******************************************************************************/
-void UIS_HandleConnectionListChanged(uintptr_t ID)
-{
-    struct ConnectionInfoList *Con=(struct ConnectionInfoList *)ID;
-    i_ConnectionsOptions ConOptions;
-    string DetectedID;
-    t_KVList EntpyOptions;
-    t_KVList *UseOptions;
-
-    if(m_DS_ConList==NULL)
-        return;
-
-    if(m_DS_ConOptions!=NULL)
-    {
-        /* Need to free the last options */
-        DS_CollectConnectionOptions();
-        IOS_FreeConnectionOptions(m_DS_ConOptions);
-        m_DS_ConOptions=NULL;
-    }
-
-    m_DS_SelectedConnection=NULL;
-
-    if(Con==NULL)
-        return;
-
-    /* See if we can find the options */
-    DetectedID=Con->UniqueID;
-
-    ConOptions=m_DS_ConnectionsOptions.find(DetectedID);
-    if(ConOptions==m_DS_ConnectionsOptions.end())
-    {
-        /* We didn't find it in our list of options.  See if session has
-           this connection. */
-        ConOptions=g_Session.ConnectionsOptions.find(DetectedID);
-        if(ConOptions==g_Session.ConnectionsOptions.end())
-        {
-            /* Ok, we don't have options */
-            UseOptions=&EntpyOptions;
-        }
-        else
-        {
-            UseOptions=&ConOptions->second.Options;
-        }
-    }
-    else
-    {
-        UseOptions=&ConOptions->second.Options;
-    }
-
-    m_DS_ConOptions=IOS_AllocConnectionOptions(Con,
-            UINC_GetSettingsConnectionsOptionsFrameContainer(),*UseOptions,
-            NULL,NULL);
-
-    /* Note what connection is selected */
-    m_DS_SelectedConnection=Con;
-}
-
-static void DS_CollectConnectionOptions(void)
-{
-    string DetectedID;
-    i_ConnectionsOptions ConOptions;
-    struct ConOptions EmptyConOptions;
-
-    if(m_DS_ConList==NULL || m_DS_ConOptions==NULL ||
-            m_DS_SelectedConnection==NULL)
-    {
-        return;
-    }
-
-    /* See if we can find the options */
-    DetectedID=m_DS_SelectedConnection->UniqueID;
-
-    ConOptions=m_DS_ConnectionsOptions.find(DetectedID);
-    if(ConOptions==m_DS_ConnectionsOptions.end())
-    {
-        /* Didn't find it, add one */
-        EmptyConOptions.Age=time(NULL);
-        m_DS_ConnectionsOptions.insert(make_pair(DetectedID,EmptyConOptions));
-        ConOptions=m_DS_ConnectionsOptions.find(DetectedID);
-        if(ConOptions==m_DS_ConnectionsOptions.end())
-        {
-            /* Didn't find what we just added, abort */
-            return;
-        }
-    }
-
-    IOS_StoreConnectionOptions(m_DS_ConOptions,ConOptions->second.Options);
-}
-
-/*******************************************************************************
- * NAME:
  *    DS_Event
  *
  * SYNOPSIS:
@@ -2322,9 +2137,6 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Checkbox_TerminalSize_FixedWidth:
                 case e_UIS_Checkbox_TerminalSize_FixedHeight:
                     DS_RethinkTerminalDisplay();
-                break;
-                case e_UIS_Checkbox_Connections_UseConnectionDefaults:
-                    DS_FillInConnectionsList4GUI();
                 break;
 
                 case e_UIS_Checkbox_LeftPanel_RestoreFromSettings:
@@ -2526,9 +2338,6 @@ bool DS_Event(const struct DSEvent *Event)
                             e_UIS_Button_InputProOther_Settings);
 
                     UIEnableButton(InputProOther_Settings,false);
-                break;
-                case e_UIS_ListView_Connections_ConnectionList:
-                    UIS_HandleConnectionListChanged(Event->ID);
                 break;
                 case e_UIS_ListView_Keyboard_CommandList:
                     UIS_HandleKeyboardCmdListChange(Event->ID);

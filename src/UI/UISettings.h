@@ -42,7 +42,6 @@ enum e_UIS_Checkbox
     e_UIS_Checkbox_TerminalSize_FixedWidth,
     e_UIS_Checkbox_TerminalSize_FixedHeight,
     e_UIS_Checkbox_CenterTextInWindow,
-    e_UIS_Checkbox_Connections_UseConnectionDefaults,
     e_UIS_Checkbox_CursorBlink,
     e_UIS_Checkbox_BookmarksOpenNewTab,
     e_UIS_Checkbox_StopWatchAutoLap,
@@ -63,7 +62,6 @@ enum e_UIS_ListView
     e_UIS_ListView_AreaList=0,
     e_UIS_ListView_InputProTextHighlight,
     e_UIS_ListView_InputProTextOther,
-    e_UIS_ListView_Connections_ConnectionList,
     e_UIS_ListView_Keyboard_CommandList,
     e_UIS_ListViewMAX
 };
@@ -126,7 +124,6 @@ enum e_UIS_NumberInput
 enum e_UIS_GroupBox
 {
     e_UIS_GroupBox_TextProcessingSettings,
-    e_UIS_GroupBox_Connections_ConnectionDefaultsOptions,
     e_UIS_GroupBox_Display_Tabs,
     e_UIS_GroupBox_Display_ClearScreen,
     e_UIS_GroupBoxMAX
@@ -324,8 +321,6 @@ void UIS_SetDefaultPreviewColor(e_DefaultColorsType Color,uint32_t RGB);
 void UIS_SetPresetPreviewColor(e_SysColType Color,uint32_t RGB);
 void UIS_SetSysColPreviewColor(e_SysColType Color,uint32_t RGB);
 void UIS_SetSysColPreviewSelected(e_SysColType Selected);
-
-t_UIContainerCtrl *UINC_GetSettingsConnectionsOptionsFrameContainer(void);
 
 bool DS_Event(const struct DSEvent *Event);
 

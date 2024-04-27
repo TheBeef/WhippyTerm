@@ -292,24 +292,10 @@ static bool DNC_GetListOfConnections(void)
                session */
             Found=false;
 
-            /* Try settings */
-            if(g_Settings.UseConnectionDefaults)
-            {
-                FoundConOptions=g_Settings.DefaultConnectionsOptions.
-                        find(DetectedID);
-
-                /* Didn't find it in the settings, search the session */
-                if(FoundConOptions!=g_Settings.DefaultConnectionsOptions.end())
-                    Found=true;
-            }
-
-            if(!Found)
-            {
-                /* Try the session */
-                FoundConOptions=g_Session.ConnectionsOptions.find(DetectedID);
-                if(FoundConOptions!=g_Session.ConnectionsOptions.end())
-                    Found=true;
-            }
+            /* Try the session */
+            FoundConOptions=g_Session.ConnectionsOptions.find(DetectedID);
+            if(FoundConOptions!=g_Session.ConnectionsOptions.end())
+                Found=true;
 
             strncpy(NewConOptions.Name,Entry->Title.c_str(),
                     MAX_CONNECTION_NAME_LEN);

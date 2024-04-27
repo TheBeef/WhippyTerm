@@ -676,8 +676,6 @@ void Settings::RegisterAllMembers(class TinyCFG &cfg)
 
     cfg.StartBlock("Connections");
         cfg.Register("AutoConnectOnNewConnection",AutoConnectOnNewConnection);
-        cfg.Register("UseConnectionDefaults",UseConnectionDefaults);
-        RegisterConnectionOptions_TinyCFG(cfg,"DefaultOptions",DefaultConnectionsOptions);
     cfg.EndBlock();
 
     cfg.StartBlock("Behaviour");
@@ -801,8 +799,6 @@ void Settings::DefaultSettings(void)
 //            ScrollBackLines=20;
     AlwaysShowTabs=true;                    // TBD
     AutoConnectOnNewConnection=true;
-
-    DefaultConnectionsOptions.clear();
 
     DefaultCmdKeyMapping(KeyMapping);
     DotInputStartsAt0=false;

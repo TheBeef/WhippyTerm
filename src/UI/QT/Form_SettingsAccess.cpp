@@ -68,8 +68,6 @@ t_UICheckboxCtrl *UIS_GetCheckboxHandle(e_UIS_Checkbox UIObj)
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->FixedHeight_checkBox;
         case e_UIS_Checkbox_CenterTextInWindow:
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->CenterTextInWindow_checkBox;
-        case e_UIS_Checkbox_Connections_UseConnectionDefaults:
-            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->UseConnectionDefaults_checkBox;
         case e_UIS_Checkbox_CursorBlink:
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->BlinkingCursor_checkBox;
         case e_UIS_Checkbox_BookmarksOpenNewTab:
@@ -112,8 +110,6 @@ t_UIListViewCtrl *UIS_GetListViewHandle(e_UIS_ListView UIObj)
             return (t_UIListViewCtrl *)g_SettingsDialog->ui->TextHigh_listWidget;
         case e_UIS_ListView_InputProTextOther:
             return (t_UIListViewCtrl *)g_SettingsDialog->ui->Other_listWidget;
-        case e_UIS_ListView_Connections_ConnectionList:
-            return (t_UIListViewCtrl *)g_SettingsDialog->ui->ConnectionList_listWidget;
         case e_UIS_ListView_Keyboard_CommandList:
             return (t_UIListViewCtrl *)g_SettingsDialog->ui->Keyboard_CommandList_listWidget;
 
@@ -247,8 +243,6 @@ t_UIGroupBox *UIS_GetGroupBoxHandle(e_UIS_GroupBox UIObj)
     {
         case e_UIS_GroupBox_TextProcessingSettings:
             return (t_UIGroupBox *)g_SettingsDialog->ui->TextProcessingSettings_groupBox;
-        case e_UIS_GroupBox_Connections_ConnectionDefaultsOptions:
-            return (t_UIGroupBox *)g_SettingsDialog->ui->ConnectionDefaultsOptions_groupBox;
         case e_UIS_GroupBox_Display_Tabs:
             return (t_UIGroupBox *)g_SettingsDialog->ui->groupBox_DisplayTabs;
         case e_UIS_GroupBox_Display_ClearScreen:
@@ -600,15 +594,4 @@ void UIS_SetDefaultPreviewColor(e_DefaultColorsType Color,uint32_t RGB)
         default:
         break;
     }
-}
-
-void *UINC_GetSettingsConnectionsOptionsFrameParent(void)
-{
-    return g_SettingsDialog->ui->ConnectionDefaultsOptions_groupBox;
-}
-
-t_UIContainerCtrl *UINC_GetSettingsConnectionsOptionsFrameContainer(void)
-{
-    /* Always has to be a QFormLayout based widget */
-    return (t_UIContainerCtrl *)g_SettingsDialog->ui->Connections_Options_Layout;
 }

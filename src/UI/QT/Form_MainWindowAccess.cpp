@@ -117,6 +117,10 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionCopy;
         case e_UIMWMenu_Paste:
             return (e_UIMenuCtrl *)realwin->ui->actionPaste;
+        case e_UIMWMenu_GotoColumn:
+            return (e_UIMenuCtrl *)realwin->ui->actionGoto_Column;
+        case e_UIMWMenu_GotoRow:
+            return (e_UIMenuCtrl *)realwin->ui->actionGoto_Line;
         case e_UIMWMenu_ChangeConnectionName:
             return (e_UIMenuCtrl *)realwin->ui->actionMenu_Change_Name;
         case e_UIMWMenu_AddBookmark:
@@ -175,6 +179,8 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionShow_NonPrintables;
         case e_UIMWMenu_ShowEndOfLines:
             return (e_UIMenuCtrl *)realwin->ui->actionShow_End_Of_Lines;
+        case e_UIMWMenu_SelectAll:
+            return (e_UIMenuCtrl *)realwin->ui->actionSelect_All;
         case e_UIMWMenuMAX:
         default:
         break;

@@ -50,6 +50,7 @@
 #include "UI/UIFileReq.h"
 #include "UI/UIDebug.h"
 #include "UI/UISystem.h"
+#include "UI/UITextInputBox.h"
 #include "Version.h"
 #include <list>
 #include <map>
@@ -1165,6 +1166,11 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *ResetTerm;
     e_UIMenuCtrl *ClearScreen;
     e_UIMenuCtrl *ClearScrollBackBuffer;
+    e_UIMenuCtrl *GotoColumn;
+    e_UIMenuCtrl *GotoRow;
+    e_UIMenuCtrl *Copy;
+    e_UIMenuCtrl *Paste;
+    e_UIMenuCtrl *SelectAll;
 
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
     ConnectToggle=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_ConnectToggle);
@@ -1183,6 +1189,11 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     ResetTerm=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ResetTerm);
     ClearScreen=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ClearScreen);
     ClearScrollBackBuffer=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ClearScrollBackBuffer);
+    GotoColumn=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_GotoColumn);
+    GotoRow=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_GotoRow);
+    Copy=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Copy);
+    Paste=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Paste);
+    SelectAll=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_SelectAll);
 
     RestoreConnectionSettingsActive=false;
 
@@ -1204,6 +1215,11 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(ResetTerm,false);
         UIEnableMenu(ClearScreen,false);
         UIEnableMenu(ClearScrollBackBuffer,false);
+        UIEnableMenu(GotoColumn,false);
+        UIEnableMenu(GotoRow,false);
+        UIEnableMenu(Copy,false);
+        UIEnableMenu(Paste,false);
+        UIEnableMenu(SelectAll,false);
 
         ActivatePanels=false;
     }
@@ -1222,6 +1238,11 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(ResetTerm,true);
         UIEnableMenu(ClearScreen,true);
         UIEnableMenu(ClearScrollBackBuffer,true);
+        UIEnableMenu(GotoColumn,true);
+        UIEnableMenu(GotoRow,true);
+        UIEnableMenu(Copy,true);
+        UIEnableMenu(Paste,true);
+        UIEnableMenu(SelectAll,true);
 
         Con=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
         if(Con==NULL)
@@ -1237,6 +1258,11 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
 
         UICheckMenu(ShowNonPrintable,Con->GetShowNonPrintable());
         UICheckMenu(ShowEndOfLines,Con->GetShowEndOfLines());
+
+        if(Con->IsThereASelection())
+            UIEnableMenu(Copy,true);
+        else
+            UIEnableMenu(Copy,false);
 
         ActivatePanels=true;
     }
@@ -1443,6 +1469,88 @@ void TheMainWindow::PasteFromClipboard(void)
     TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
     if(TabCon!=NULL)
         TabCon->PasteFromClipboard();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::GotoColumn
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::GotoColumn(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function prompts the user for what column to goto and then goes
+ *    to that column.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void TheMainWindow::GotoColumn(void)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+    string ColumnStr;
+    int ColumnNumber;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+    {
+        if(UITextInputBox("Goto Column",
+                "Select the column you want to move the cursor to",ColumnStr))
+        {
+            ColumnNumber=atoi(ColumnStr.c_str());
+            if(ColumnNumber>0)
+                TabCon->GotoColumn(ColumnNumber-1);
+        }
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::GotoRow
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::GotoRow(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function prompts the user for what row to goto and then goes
+ *    to that row.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void TheMainWindow::GotoRow(void)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+    string RowStr;
+    int RowNumber;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+    {
+        if(UITextInputBox("Goto Row",
+                "Select the row you want to move the cursor to",RowStr))
+        {
+            RowNumber=atoi(RowStr.c_str());
+            if(RowNumber>0)
+                TabCon->GotoRow(RowNumber-1);
+        }
+    }
 }
 
 /*******************************************************************************
@@ -1694,6 +1802,36 @@ void TheMainWindow::ToggleShowEndOfLines(void)
         TabCon->SetShowEndOfLines(!TabCon->GetShowEndOfLines());
 
     RethinkActiveConnectionUI();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::SelectAll
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::SelectAll(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function select everything in the display of the active connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void TheMainWindow::SelectAll(void)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+        TabCon->SelectAll();
 }
 
 /*******************************************************************************
@@ -2297,6 +2435,9 @@ void TheMainWindow::ConnectionEvent(const struct ConMWEvent *Event)
             BridgePanel.ConnectionBridgedChanged(BridgedCon1,BridgedCon2);
 
             RethinkBridgeMenu();
+        break;
+        case ConMWEvent_SelectionChanged:
+            RethinkActiveConnectionUI();
         break;
         case ConMWEventMAX:
         default:
@@ -3022,12 +3163,15 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_Disconnect -- Close the active connection
  *                  e_Cmd_Copy -- Copy selected text to the clipboard
  *                  e_Cmd_Paste -- Paste the text from the clipboard
+ *                  e_Cmd_GotoColumn -- Let the user change the cursor column
+ *                  e_Cmd_GotoRow -- Let the user change the cursor row
  *                  e_Cmd_ConnectToggle -- Toggle the connect / disconnect
  *                      status of active connection.
  *                  e_Cmd_BridgeCurrentConnection -- Show the bridge current
  *                      connection dialog.
  *                  e_Cmd_ReleaseBridgedConnections -- Release the bridged
  *                      connections
+ *                  e_Cmd_SelectAll -- Select all in the connection
  *
  * FUNCTION:
  *    This function executes a command.
@@ -3116,6 +3260,12 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_Paste:
             PasteFromClipboard();
+        break;
+        case e_Cmd_GotoColumn:
+            GotoColumn();
+        break;
+        case e_Cmd_GotoRow:
+            GotoRow();
         break;
         case e_Cmd_ConnectToggle:
             ToggleConnectStatus();
@@ -3321,6 +3471,9 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_ShowEndOfLines:
             ToggleShowEndOfLines();
+        break;
+        case e_Cmd_SelectAll:
+            SelectAll();
         break;
 
         case e_CmdMAX:

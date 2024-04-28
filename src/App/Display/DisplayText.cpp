@@ -3535,6 +3535,61 @@ bool DisplayText::IsThereASelection(void)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayText::SelectAll
+ *
+ * SYNOPSIS:
+ *    void DisplayText::SelectAll(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function sets the selection to select everything.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DisplayText::GetSelectionString()
+ ******************************************************************************/
+void DisplayText::SelectAll(void)
+{
+    i_TextLineFrags CurFrag;
+    i_TextLines Line;
+
+    if(Lines.empty())
+    {
+        SelectionValid=false;
+    }
+    else
+    {
+        Line=Lines.end();
+        Line--;
+
+        Selection_AnchorX=0;
+        for(CurFrag=Line->Frags.begin();CurFrag!=Line->Frags.end();CurFrag++)
+        {
+            if(CurFrag->FragType==e_TextCanvasFrag_String)
+            {
+                Selection_AnchorX+=utf8::distance(CurFrag->Text.begin(),
+                        CurFrag->Text.end());
+            }
+        }
+
+        SelectionValid=true;
+
+        Selection_Y=0;
+        Selection_X=0;
+        Selection_AnchorY=LinesCount-1;
+    }
+
+    RedrawFullScreen();
+
+    SendEvent(e_DBEvent_SelectionChanged,NULL);
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayText::ScrollScreen
  *
  * SYNOPSIS:
@@ -4217,7 +4272,6 @@ void DisplayText::InsertHorizontalRule(void)
 void DisplayText::ResetTerm(void)
 {
     struct TextLineFrag NewHRFrag;
-    int NewCursorY;
 
     try
     {

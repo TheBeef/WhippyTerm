@@ -1354,3 +1354,21 @@ void Form_MainWindow::on_actionReset_triggered()
     DoMenuTriggered(e_UIMWMenu_ResetTerm);
 }
 
+
+void Form_MainWindow::on_actionGoto_Column_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_GotoColumn);
+}
+
+
+void Form_MainWindow::on_actionGoto_Line_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_GotoRow);
+}
+
+
+void Form_MainWindow::on_actionSelect_All_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_SelectAll);
+}
+

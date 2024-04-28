@@ -1952,6 +1952,9 @@
    <property name="text">
     <string>&amp;Word Wrap</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionShow_NonPrintables">
    <property name="checkable">
@@ -1997,6 +2000,9 @@
    <property name="text">
     <string>&amp;Find...</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionFind_Next">
    <property name="enabled">
@@ -2009,6 +2015,9 @@
    <property name="text">
     <string>Find &amp;Next</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionFind_First">
    <property name="enabled">
@@ -2017,11 +2026,11 @@
    <property name="text">
     <string>F&amp;ind First...</string>
    </property>
-  </action>
-  <action name="actionGoto_Column">
-   <property name="enabled">
+   <property name="visible">
     <bool>false</bool>
    </property>
+  </action>
+  <action name="actionGoto_Column">
    <property name="icon">
     <iconset resource="MainResource.qrc">
      <normaloff>:/G/Graphics/GotoColumn.png</normaloff>:/G/Graphics/GotoColumn.png</iconset>
@@ -2031,9 +2040,6 @@
    </property>
   </action>
   <action name="actionGoto_Line">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="icon">
     <iconset resource="MainResource.qrc">
      <normaloff>:/G/Graphics/GotoLine.png</normaloff>:/G/Graphics/GotoLine.png</iconset>
@@ -2043,9 +2049,6 @@
    </property>
   </action>
   <action name="actionSelect_All">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="text">
     <string>&amp;Select All</string>
    </property>

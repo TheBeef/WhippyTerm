@@ -220,6 +220,7 @@ typedef enum
     ConMWEvent_HexDisplayUpdate,
     ConMWEvent_BridgeStateChange,
     ConMWEvent_HexDisplayBufferChange,
+    ConMWEvent_SelectionChanged,
     ConMWEventMAX
 } ConMWEventType;
 
@@ -338,6 +339,8 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void SetShowNonPrintable(bool Show);
         bool GetShowEndOfLines(void);
         void SetShowEndOfLines(bool Show);
+        void SelectAll(void);
+        bool IsThereASelection(void);
 
         void InformOfConnected(void);
         void InformOfDisconnected(void);
@@ -364,6 +367,8 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void GiveFocus(void);
         void CopySelectionToClipboard(void);
         void PasteFromClipboard(void);
+        void GotoColumn(int Column);
+        void GotoRow(int Row);
 //        bool ReopenConnectionBasedOnURI(const char *URI);
         bool GetURI(std::string &URI);
         void FileTransSetTimeout(uint32_t MSec);

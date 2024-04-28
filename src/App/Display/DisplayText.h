@@ -132,6 +132,7 @@ class DisplayText : public DisplayBase
         void DoLineFeed(void);
         bool GetSelectionString(std::string &Clip);
         bool IsThereASelection(void);
+        void SelectAll(void);
         void SetOverrideMessage(const char *Msg);
         void ClearScreen(e_ScreenClearType Type);
         void ClearScrollBackBuffer(void);
@@ -231,7 +232,6 @@ class DisplayText : public DisplayBase
 
         void HandleLeftMousePress(bool Down,int x,int y);
         void HandleMouseMove(int x,int y);
-        void CalSelectionPoint(int x,int y,int *SelX,int *SelY);
         void GetNormalizedSelection(int &X1,int &Y1,int &X2,int &Y2);
         bool ConvertScreenXY2Chars(int x,int y,int *CharX,int *CharY);
         void ScrollScreen2MakeCursorVisible(void);

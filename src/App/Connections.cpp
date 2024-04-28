@@ -2385,6 +2385,68 @@ void Connection::PasteFromClipboard(void)
 
 /*******************************************************************************
  * NAME:
+ *    Connection::GotoColumn
+ *
+ * SYNOPSIS:
+ *    void Connection::GotoColumn(int Column);
+ *
+ * PARAMETERS:
+ *    Column [I] -- What column to go to (1-xxx)
+ *
+ * FUNCTION:
+ *    This function moves the cursor to a column.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::GotoColumn(int Column)
+{
+    unsigned int CurColumn;
+    unsigned int CurRow;
+
+    if(Display==NULL)
+        return;
+
+    Display->GetCursorXY(&CurColumn,&CurRow);
+    Display->SetCursorXY(Column,CurRow);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::GotoRow
+ *
+ * SYNOPSIS:
+ *    void Connection::GotoRow(int Row);
+ *
+ * PARAMETERS:
+ *    Row [I] -- What row to go to (1-xxx)
+ *
+ * FUNCTION:
+ *    This function moves the cursor to a column.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::GotoRow(int Row)
+{
+    unsigned int CurColumn;
+    unsigned int CurRow;
+
+    if(Display==NULL)
+        return;
+
+    Display->GetCursorXY(&CurColumn,&CurRow);
+    Display->SetCursorXY(CurColumn,Row);
+}
+
+/*******************************************************************************
+ * NAME:
  *    Connection::GetConnectionUniqueID
  *
  * SYNOPSIS:
@@ -2545,6 +2607,9 @@ bool Connection::ProcessDisplayEvent(const struct DBEvent *Event)
 
                 if(Display->GetSelectionString(SelectContents))
                     UI_SetClipboardText(SelectContents,e_Clipboard_Selection);
+
+                /* Update the HEX UI */
+                SendMWEvent(ConMWEvent_SelectionChanged,NULL);
             }
         break;
         case e_DBEvent_KeyEvent:
@@ -5646,6 +5711,59 @@ void Connection::SetShowEndOfLines(bool Show)
 bool Connection::GetShowEndOfLines(void)
 {
     return ShowEndOfLines;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::SelectAll
+ *
+ * SYNOPSIS:
+ *    void Connection::SelectAll(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function selects eveything in the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::SelectAll(void)
+{
+    if(Display!=NULL)
+        Display->SelectAll();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::IsThereASelection
+ *
+ * SYNOPSIS:
+ *    bool Connection::IsThereASelection(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function returns if there is a selection.
+ *
+ * RETURNS:
+ *    true -- There is a selection
+ *    false -- Nothing selected
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::IsThereASelection(void)
+{
+    if(Display==NULL)
+        return false;
+
+    return Display->IsThereASelection();
 }
 
 /*******************************************************************************

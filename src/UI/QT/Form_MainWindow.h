@@ -232,6 +232,12 @@ private slots:
     
     void on_actionReset_triggered();
     
+    void on_actionGoto_Column_triggered();
+    
+    void on_actionGoto_Line_triggered();
+    
+    void on_actionSelect_All_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

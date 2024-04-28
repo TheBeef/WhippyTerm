@@ -64,6 +64,8 @@ const char *m_CmdNames[e_CmdMAX]=
     "Disconnect",                           // e_Cmd_Disconnect
     "Copy",                                 // e_Cmd_Copy
     "Paste",                                // e_Cmd_Paste
+    "GotoColumn",                           // e_UIMWMenu_GotoColumn
+    "GotoRow",                              // e_UIMWMenu_GotoRow
     "ConnectToggle",                        // e_Cmd_ConnectToggle
     "ApplyConnectionOptions",               // e_Cmd_ApplyConnectionOptions
     "ChangeConnectionName",                 // e_Cmd_ChangeConnectionName
@@ -125,6 +127,7 @@ const char *m_CmdNames[e_CmdMAX]=
     "RestoreConnectionSettings",            // e_Cmd_RestoreConnectionSettings
     "ShowNonPrintable",                     // e_Cmd_ShowNonPrintable
     "ShowEndOfLines",                       // e_Cmd_ShowEndOfLines
+    "SelectAll",                            // e_Cmd_SelectAll
 };
 
 e_CmdType m_Cmd2MenuMapping[e_UIMWMenuMAX]=
@@ -144,6 +147,8 @@ e_CmdType m_Cmd2MenuMapping[e_UIMWMenuMAX]=
     e_Cmd_Disconnect,                   // e_UIMWMenu_Disconnect
     e_Cmd_Copy,                         // e_UIMWMenu_Copy
     e_Cmd_Paste,                        // e_UIMWMenu_Paste
+    e_Cmd_GotoColumn,                   // e_UIMWMenu_GotoColumn
+    e_Cmd_GotoRow,                      // e_UIMWMenu_GotoRow
     e_Cmd_ChangeConnectionName,         // e_UIMWMenu_ChangeConnectionName
     e_Cmd_ConnectionOptions,            // e_UIMWMenu_ConnectionOptions
     e_Cmd_ConnectionSettings,           // e_UIMWMenu_ConnectionSettings
@@ -173,6 +178,7 @@ e_CmdType m_Cmd2MenuMapping[e_UIMWMenuMAX]=
     e_Cmd_RestoreConnectionSettings,    // e_UIMWMenu_RestoreConnectionSettings
     e_Cmd_ShowNonPrintable,             // e_UIMWMenu_ShowNonPrintable
     e_Cmd_ShowEndOfLines,               // e_UIMWMenu_ShowEndOfLines
+    e_Cmd_SelectAll,                    // e_UIMWMenu_SelectAll
 };
 
 e_CmdType m_Cmd2ToolbarMapping[e_UIMWToolbarMAX]=

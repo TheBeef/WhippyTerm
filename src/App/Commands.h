@@ -56,6 +56,8 @@ typedef enum
     e_Cmd_Disconnect,
     e_Cmd_Copy,
     e_Cmd_Paste,
+    e_Cmd_GotoColumn,
+    e_Cmd_GotoRow,
     e_Cmd_ConnectToggle,
     e_Cmd_ApplyConnectionOptions,
     e_Cmd_ChangeConnectionName,
@@ -117,6 +119,7 @@ typedef enum
     e_Cmd_RestoreConnectionSettings,
     e_Cmd_ShowNonPrintable,
     e_Cmd_ShowEndOfLines,
+    e_Cmd_SelectAll,
     e_CmdMAX
 } e_CmdType;
 

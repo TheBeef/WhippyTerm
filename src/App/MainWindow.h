@@ -129,6 +129,8 @@ void Debug6(void);
 
         void CopyActiveTabSelectionToClipboard(void);
         void PasteFromClipboard(void);
+        void GotoColumn(void);
+        void GotoRow(void);
         void ToggleConnectStatus(void);
         void RemoveAllTabPanelControls(void);
         void ApplyConnectionOptions(void);
@@ -143,6 +145,7 @@ void Debug6(void);
         void RethinkTabCountAfterFree(void);
         void ToggleShowNonPrintables(void);
         void ToggleShowEndOfLines(void);
+        void SelectAll(void);
         void ClearScreen(void);
         void ClearScrollBackBuffer(void);
         void InsertHorizontalRule(void);

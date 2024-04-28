@@ -91,6 +91,8 @@ typedef enum
     e_UIMWMenu_Disconnect,
     e_UIMWMenu_Copy,
     e_UIMWMenu_Paste,
+    e_UIMWMenu_GotoColumn,
+    e_UIMWMenu_GotoRow,
     e_UIMWMenu_ChangeConnectionName,
     e_UIMWMenu_ConnectionOptions,
     e_UIMWMenu_ConnectionSettings,
@@ -120,6 +122,7 @@ typedef enum
     e_UIMWMenu_RestoreConnectionSettings,
     e_UIMWMenu_ShowNonPrintable,
     e_UIMWMenu_ShowEndOfLines,
+    e_UIMWMenu_SelectAll,
     e_UIMWMenuMAX
 } e_UIMWMenuType;
 

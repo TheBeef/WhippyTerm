@@ -173,6 +173,31 @@ void DisplayBase::SetCustomSettings(class ConSettings *NewSettingsPtr)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayBase::GetCustomSettings
+ *
+ * SYNOPSIS:
+ *    class ConSettings *DisplayBase::GetCustomSettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets the connection settings that have been applied to
+ *    this display.
+ *
+ * RETURNS:
+ *    A pointer to the connection settings being used by this display.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+class ConSettings *DisplayBase::GetCustomSettings(void)
+{
+    return Settings;
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayBase::SendEvent
  *
  * SYNOPSIS:
@@ -763,4 +788,95 @@ void DisplayBase::InsertHorizontalRule(void)
 void DisplayBase::ResetTerm(void)
 {
     /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetFont
+ *
+ * SYNOPSIS:
+ *    bool DisplayBase::SetFont(const std::string &NewFontName,int NewFontSize,
+ *              bool NewFontBold,bool NewFontItalic);
+ *
+ * PARAMETERS:
+ *    NewFontName [I] -- The font to use
+ *    NewFontSize [I] -- The size to use
+ *    NewFontBold [I] -- Use the bold font
+ *    NewFontItalic [I] -- Use the italic font
+ *
+ * FUNCTION:
+ *    This function sets what font to use on this display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SetFont(const std::string &NewFontName,int NewFontSize,
+        bool NewFontBold,bool NewFontItalic)
+{
+    FontName=NewFontName;
+    FontSize=NewFontSize;
+    FontBold=NewFontBold;
+    FontItalic=NewFontItalic;
+
+    SetupCanvas();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetFont
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::GetFont(std::string &CurFontName,int &CurFontSize,
+ *              bool &CurFontBold,bool &CurFontItalic);
+ *
+ * PARAMETERS:
+ *    CurFontName [O] -- The font in use
+ *    CurFontSize [O] -- The size in use
+ *    CurFontBold [O] -- Are we using the bold version
+ *    CurFontItalic [O] -- Are we using the italic version
+ *
+ * FUNCTION:
+ *    This function sets what font to use on this display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::GetFont(std::string &CurFontName,int &CurFontSize,
+        bool &CurFontBold,bool &CurFontItalic)
+{
+    CurFontName=FontName;
+    CurFontSize=FontSize;
+    CurFontBold=FontBold;
+    CurFontItalic=FontItalic;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetupCanvas
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetupCanvas(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function sets up the display canvas with the correct font and
+ *    other settings.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SetupCanvas(void)
+{
+    /* Does nothing */
 }

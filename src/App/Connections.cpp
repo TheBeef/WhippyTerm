@@ -2600,6 +2600,10 @@ bool Connection::ProcessDisplayEvent(const struct DBEvent *Event)
         case e_DBEvent_MouseMiddlePress:
             HandleMiddleMousePress(Event->Info->Mouse.x,Event->Info->Mouse.y);
         break;
+        case e_DBEvent_MouseMouseWheel:
+            if(Event->Info->MouseWheel.Mods&KEYMOD_CONTROL)
+                HandleMouseWheelZoom(Event->Info->MouseWheel.Steps);
+        break;
         case e_DBEvent_SelectionChanged:
             if(Display!=NULL)
             {
@@ -5768,6 +5772,109 @@ bool Connection::IsThereASelection(void)
 
 /*******************************************************************************
  * NAME:
+ *    Connection::ZoomIn
+ *
+ * SYNOPSIS:
+ *    void Connection::ZoomIn(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function zooms in on the connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::ZoomIn(void)
+{
+    std::string FontName;
+    int FontSize;
+    bool FontBold;
+    bool FontItalic;
+
+    if(Display==NULL)
+        return;
+
+    Display->GetFont(FontName,FontSize,FontBold,FontItalic);
+    FontSize++;
+    Display->SetFont(FontName,FontSize,FontBold,FontItalic);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::ZoomOut
+ *
+ * SYNOPSIS:
+ *    void Connection::ZoomOut(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function zooms out on the connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::ZoomOut(void)
+{
+    std::string FontName;
+    int FontSize;
+    bool FontBold;
+    bool FontItalic;
+
+    if(Display==NULL)
+        return;
+
+    Display->GetFont(FontName,FontSize,FontBold,FontItalic);
+    if(FontSize>3)
+    {
+        FontSize--;
+        Display->SetFont(FontName,FontSize,FontBold,FontItalic);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::ResetZoom
+ *
+ * SYNOPSIS:
+ *    void Connection::ResetZoom(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function resets the zoom level to settings.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::ResetZoom(void)
+{
+    class ConSettings *ConSettings;
+
+    if(Display==NULL)
+        return;
+
+    ConSettings=Display->GetCustomSettings();
+
+    Display->SetFont(ConSettings->FontName,ConSettings->FontSize,
+            ConSettings->FontBold,ConSettings->FontItalic);
+}
+
+/*******************************************************************************
+ * NAME:
  *    Connection::RethinkCursor
  *
  * SYNOPSIS:
@@ -5928,3 +6035,32 @@ void Connection::ResetTerm(void)
 
     Display->ResetTerm();
 }
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::HandleMouseWheelZoom
+ *
+ * SYNOPSIS:
+ *    void Connection::HandleMouseWheelZoom(int Steps);
+ *
+ * PARAMETERS:
+ *    Steps [I] -- The number of steps (-+) that the mouse wheel was moved.
+ *
+ * FUNCTION:
+ *    This function is called when the user moves the mouse wheel with
+ *    CTRL down.  It zooms in/out.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::HandleMouseWheelZoom(int Steps)
+{
+    if(Steps<0)
+        ZoomOut();
+    else
+        ZoomIn();
+}
+

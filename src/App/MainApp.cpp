@@ -15,6 +15,7 @@
 /*** HEADER FILES TO INCLUDE  ***/
 #include "MainApp.h"
 #include "App/Bookmarks.h"
+#include "App/Commands.h"
 #include "App/MainWindow.h"
 #include "App/Session.h"
 #include "App/Settings.h"
@@ -70,6 +71,9 @@
  ******************************************************************************/
 bool AppMain(int argc,char *argv[])
 {
+    /* Debug checks */
+    CmdCheck();
+
     InitOS();
 
     /* Startup code */

@@ -1372,3 +1372,19 @@ void Form_MainWindow::on_actionSelect_All_triggered()
     DoMenuTriggered(e_UIMWMenu_SelectAll);
 }
 
+void Form_MainWindow::on_actionZoom_In_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ZoomIn);
+}
+
+void Form_MainWindow::on_actionZoom_Out_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ZoomOut);
+}
+
+
+void Form_MainWindow::on_actionReset_Zoom_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ResetZoom);
+}
+

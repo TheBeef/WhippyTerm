@@ -35,6 +35,7 @@
 #include "App/KeySeqs.h"
 #include "App/Settings.h"
 #include "UI/UIMainWindow.h"
+#include "UI/UIAsk.h"
 
 /*** DEFINES                  ***/
 
@@ -47,7 +48,7 @@ static void SetKeySeq(struct CommandKeySeq *KeyMapping,uint8_t Mod,
         e_UIKeys Key,char Letter);
 
 /*** VARIABLE DEFINITIONS     ***/
-const char *m_CmdNames[e_CmdMAX]=
+const char *m_CmdNames[]=
 {
     "NewTab",                               // e_Cmd_NewTab
     "ResetTerm",                            // e_Cmd_ResetTerm
@@ -128,9 +129,12 @@ const char *m_CmdNames[e_CmdMAX]=
     "ShowNonPrintable",                     // e_Cmd_ShowNonPrintable
     "ShowEndOfLines",                       // e_Cmd_ShowEndOfLines
     "SelectAll",                            // e_Cmd_SelectAll
+    "ZoomIn",                               // e_Cmd_ZoomIn
+    "ZoomOut",                              // e_Cmd_ZoomOut
+    "ResetZoom",                            // e_Cmd_ResetZoom
 };
 
-e_CmdType m_Cmd2MenuMapping[e_UIMWMenuMAX]=
+e_CmdType m_Cmd2MenuMapping[]=
 {
     e_Cmd_NewTab,                       // e_UIMWMenu_NewTab
     e_Cmd_ResetTerm,                    // e_UIMWMenu_ResetTerm
@@ -179,16 +183,19 @@ e_CmdType m_Cmd2MenuMapping[e_UIMWMenuMAX]=
     e_Cmd_ShowNonPrintable,             // e_UIMWMenu_ShowNonPrintable
     e_Cmd_ShowEndOfLines,               // e_UIMWMenu_ShowEndOfLines
     e_Cmd_SelectAll,                    // e_UIMWMenu_SelectAll
+    e_Cmd_ZoomIn,                       // e_UIMWMenu_ZoomIn
+    e_Cmd_ZoomOut,                      // e_UIMWMenu_ZoomOut
+    e_Cmd_ResetZoom,                    // e_UIMWMenu_ResetZoom
 };
 
-e_CmdType m_Cmd2ToolbarMapping[e_UIMWToolbarMAX]=
+e_CmdType m_Cmd2ToolbarMapping[]=
 {
     e_Cmd_NewTab,                       // e_UIMWToolbar_NewTab
     e_Cmd_ConnectToggle,                // e_UIMWToolbar_ConnectToggle
     e_Cmd_URIGo,                        // e_UIMWToolbar_URIGo
 };
 
-e_CmdType m_Cmd2ButtonMapping[e_UIMWBttnMAX]=
+e_CmdType m_Cmd2ButtonMapping[]=
 {
     e_Cmd_ApplyConnectionOptions,       // e_UIMWBttn_ConnectionOptionApply
     e_Cmd_StopWatch_StartStopToggle,    // e_UIMWBttn_StopWatch_Start
@@ -211,7 +218,7 @@ e_CmdType m_Cmd2ButtonMapping[e_UIMWBttnMAX]=
     e_Cmd_ReleaseBridge,                // e_UIMWBttn_Bridge_Release
 };
 
-e_CmdType m_Cmd2CheckboxMapping[e_UIMWCheckboxMAX]=
+e_CmdType m_Cmd2CheckboxMapping[]=
 {
     e_Cmd_StopWatch_AutoStart,          // e_UIMWCheckbox_StopWatch_StartOnTx
     e_Cmd_StopWatch_AutoLap,            // e_UIMWCheckbox_StopWatch_AutoLap
@@ -224,6 +231,60 @@ e_CmdType m_Cmd2CheckboxMapping[e_UIMWCheckboxMAX]=
     e_Cmd_BridgeLockConnection1,        // e_UIMWCheckbox_Bridge_Lock1
     e_Cmd_BridgeLockConnection2,        // e_UIMWCheckbox_Bridge_Lock2
 };
+
+/*******************************************************************************
+ * NAME:
+ *    CmdCheck
+ *
+ * SYNOPSIS:
+ *    void CmdCheck(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is a helper function for the programmer.  It checks that
+ *    all the command stuff looks good.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void CmdCheck(void)
+{
+    /* Check if there is a problem with the name of the commands */
+    if(sizeof(m_CmdNames)/sizeof(const char *)!=e_CmdMAX)
+    {
+        UIAsk("To programmer:\nYou do not have the correct number of entries in 'm_CmdNames'");
+        exit(0);
+    }
+
+    if(sizeof(m_Cmd2MenuMapping)/sizeof(e_CmdType)!=e_UIMWMenuMAX)
+    {
+        UIAsk("To programmer:\n'm_Cmd2MenuMapping' does not have the correct number of entries.");
+        exit(0);
+    }
+
+    if(sizeof(m_Cmd2CheckboxMapping)/sizeof(e_CmdType)!=e_UIMWCheckboxMAX)
+    {
+        UIAsk("To programmer:\n'm_Cmd2CheckboxMapping' does not have the correct number of entries.");
+        exit(0);
+    }
+
+    if(sizeof(m_Cmd2ToolbarMapping)/sizeof(e_CmdType)!=e_UIMWToolbarMAX)
+    {
+        UIAsk("To programmer:\n'm_Cmd2ToolbarMapping' does not have the correct number of entries.");
+        exit(0);
+    }
+
+    if(sizeof(m_Cmd2ButtonMapping)/sizeof(e_CmdType)!=e_UIMWBttnMAX)
+    {
+        UIAsk("To programmer:\n'm_Cmd2ButtonMapping' does not have the correct number of entries.");
+        exit(0);
+    }
+}
 
 /*******************************************************************************
  * NAME:
@@ -359,18 +420,6 @@ e_CmdType MainWindowBttn2Cmd(e_UIMWBttnType Bttn)
     return m_Cmd2ButtonMapping[Bttn];
 }
 
-//void RegisterSettingsEnum(class TinyCFG &cfg)
-//{
-//    cfg.RegisterEnum("Shape",Shape,e_Shape_Square,e_ShapeMAX,
-//        e_Shape_Square,
-//        e_Shape_Circle,
-//        e_Shape_Triangle,
-//        e_Shape_Rectangle,
-//        e_Shape_Star,
-//        e_Shape_Oval,
-//        e_Shape_Diamond);
-//}
-
 /*******************************************************************************
  * NAME:
  *    GetCmdName
@@ -465,6 +514,10 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     }
 
     SetKeySeq(&KeyMapping[e_Cmd_NewTab],KEYMOD_SHIFT|KEYMOD_CONTROL,e_UIKeysMAX,'T');
+    // e_Cmd_ResetTerm
+    // e_Cmd_InsertHorizontalRule
+    // e_Cmd_ClearScreen
+    // e_Cmd_ClearScrollBackBuffer
     SetKeySeq(&KeyMapping[e_Cmd_CloseTab],KEYMOD_SHIFT|KEYMOD_CONTROL,e_UIKeysMAX,'W');
     SetKeySeq(&KeyMapping[e_Cmd_Quit],KEYMOD_SHIFT|KEYMOD_CONTROL,e_UIKeysMAX,'Q');
     // e_Cmd_About
@@ -535,7 +588,10 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     // e_Cmd_ReleaseBridgedConnections
     // e_Cmd_ShowNonPrintable
     // e_Cmd_ShowEndOfLines
-
+    SetKeySeq(&KeyMapping[e_Cmd_SelectAll],KEYMOD_SHIFT|KEYMOD_CONTROL,e_UIKeysMAX,'A');
+    SetKeySeq(&KeyMapping[e_Cmd_ZoomIn],KEYMOD_CONTROL,e_UIKeysMAX,'+');
+    SetKeySeq(&KeyMapping[e_Cmd_ZoomOut],KEYMOD_CONTROL,e_UIKeysMAX,'-');
+    SetKeySeq(&KeyMapping[e_Cmd_ResetZoom],KEYMOD_CONTROL,e_UIKeysMAX,'0');
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A
@@ -555,9 +611,6 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
  * Tab 8            Alt-8
  * Tab 9            Alt-9
  * Tab 10           Alt-0
- * Zoom In          Ctrl++
- * Zoom Out         Ctrl+-
- * Zoom normal      Ctrl+0
 */
 
 

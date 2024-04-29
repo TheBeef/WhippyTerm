@@ -207,6 +207,11 @@ bool DisplayText::Init(void *ParentWidget,
         CurrentStyle.Attribs=0;
         CurrentStyle.ULineColor=CurrentStyle.FGColor;
 
+        FontName=Settings->FontName;
+        FontSize=Settings->FontSize;
+        FontBold=Settings->FontBold;
+        FontItalic=Settings->FontItalic;
+
         Lines.clear();
         LinesCount=0;
         FirstLine.LineWidthPx=0;
@@ -368,28 +373,37 @@ bool DisplayText::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
             if(TextDisplayCtrl==NULL)
                 return false;
 
-            Delta=-Event->Info.MouseWheel.Steps;
-
-            if(Delta!=0 && TopLineY+Delta>=0 &&
-                        TopLineY+Delta<=LinesCount-ScreenHeightChars)
+            if(Event->Info.MouseWheel.Mods)
             {
-                if(Delta>0)
-                {
-                    for(r=0;r<Delta;r++)
-                        TopLine++;
-                }
-                else if(Delta<0)
-                {
-                    for(r=0;r<-Delta;r++)
-                        TopLine--;
-                }
+                Info.MouseWheel.Mods=Event->Info.MouseWheel.Mods;
+                Info.MouseWheel.Steps=Event->Info.MouseWheel.Steps;
+                SendEvent(e_DBEvent_MouseMouseWheel,&Info);
+            }
+            else
+            {
+                Delta=-Event->Info.MouseWheel.Steps;
 
-                TopLineY=TopLineY+Delta;
+                if(Delta!=0 && TopLineY+Delta>=0 &&
+                            TopLineY+Delta<=LinesCount-ScreenHeightChars)
+                {
+                    if(Delta>0)
+                    {
+                        for(r=0;r<Delta;r++)
+                            TopLine++;
+                    }
+                    else if(Delta<0)
+                    {
+                        for(r=0;r<-Delta;r++)
+                            TopLine--;
+                    }
 
-                UITC_SetCursorPos(TextDisplayCtrl,CursorX,
-                        CalcCorrectedCursorPos());
-                RethinkCursorHidden();
-                RedrawFullScreen();
+                    TopLineY=TopLineY+Delta;
+
+                    UITC_SetCursorPos(TextDisplayCtrl,CursorX,
+                            CalcCorrectedCursorPos());
+                    RethinkCursorHidden();
+                    RedrawFullScreen();
+                }
             }
         break;
         case e_TextDisplayEvent_MouseMove:
@@ -611,8 +625,7 @@ void DisplayText::SetBlockDeviceMode(bool On)
  ******************************************************************************/
 void DisplayText::SetupCanvas(void)
 {
-    UITC_SetFont(TextDisplayCtrl,Settings->FontName.c_str(),Settings->FontSize,
-            Settings->FontBold,Settings->FontItalic);
+    UITC_SetFont(TextDisplayCtrl,FontName.c_str(),FontSize,FontBold,FontItalic);
 
     UITC_SetCursorColor(TextDisplayCtrl,Settings->CursorColor);
 
@@ -1381,6 +1394,11 @@ void DisplayText::ApplySettings(void)
     CurrentStyle.BGColor=Settings->DefaultColors[e_DefaultColors_BG];
     CurrentStyle.Attribs=0;
     CurrentStyle.ULineColor=CurrentStyle.FGColor;
+
+    FontName=Settings->FontName;
+    FontSize=Settings->FontSize;
+    FontBold=Settings->FontBold;
+    FontItalic=Settings->FontItalic;
 
     /* DEBUG PAUL: Should we do something here when the user changes the
        defaults?  Maybe only change if we where already using the defaults,

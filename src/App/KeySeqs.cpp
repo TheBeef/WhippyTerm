@@ -426,27 +426,39 @@ bool ConvertString2KeySeq(struct CommandKeySeq *KeySeq,const char *Str)
     if(strcasecmp(Str,"None")==0 || *Str==0)
         return true;
 
-    Point=Str;
-    LastPoint=Point;
-    do
+    if(Str[0]=='+' && Str[1]=='\0')
     {
-        Point=strchr(Point,'+');
-        if(Point!=NULL)
+        /* Special case where user has sent in "+" as the key to assign */
+        Point=Str;
+        LastPoint=Str;
+    }
+    else
+    {
+        Point=Str;
+        LastPoint=Point;
+        do
         {
-            Point++;    // Move past the +
+            Point=strchr(Point,'+');
+            if(Point!=NULL)
+            {
+                if(strncasecmp(LastPoint,"SHIFT",5)==0)
+                    KeySeq->Mod|=KEYMOD_SHIFT;
+                else if(strncasecmp(LastPoint,"CTRL",4)==0)
+                    KeySeq->Mod|=KEYMOD_CONTROL;
+                else if(strncasecmp(LastPoint,"ALT",3)==0)
+                    KeySeq->Mod|=KEYMOD_ALT;
+                else if(strncasecmp(LastPoint,"LOGO",4)==0)
+                    KeySeq->Mod|=KEYMOD_LOGO;
 
-            if(strncasecmp(LastPoint,"SHIFT",5)==0)
-                KeySeq->Mod|=KEYMOD_SHIFT;
-            if(strncasecmp(LastPoint,"CTRL",4)==0)
-                KeySeq->Mod|=KEYMOD_CONTROL;
-            if(strncasecmp(LastPoint,"ALT",3)==0)
-                KeySeq->Mod|=KEYMOD_ALT;
-            if(strncasecmp(LastPoint,"LOGO",4)==0)
-                KeySeq->Mod|=KEYMOD_LOGO;
+                Point++;    // Move past the +
+                LastPoint=Point;
 
-            LastPoint=Point;
-        }
-    } while(Point!=NULL);
+                /* Special case where we have something like CTRL++ */
+                if(*Point=='+')
+                    break;
+            }
+        } while(Point!=NULL);
+    }
 
     /* Find this key name */
     KeySeq->Key=ConvertKeyName2ENum(LastPoint);

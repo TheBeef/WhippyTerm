@@ -181,6 +181,12 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionShow_End_Of_Lines;
         case e_UIMWMenu_SelectAll:
             return (e_UIMenuCtrl *)realwin->ui->actionSelect_All;
+        case e_UIMWMenu_ZoomIn:
+            return (e_UIMenuCtrl *)realwin->ui->actionZoom_In;
+        case e_UIMWMenu_ZoomOut:
+            return (e_UIMenuCtrl *)realwin->ui->actionZoom_Out;
+        case e_UIMWMenu_ResetZoom:
+            return (e_UIMenuCtrl *)realwin->ui->actionReset_Zoom;
         case e_UIMWMenuMAX:
         default:
         break;

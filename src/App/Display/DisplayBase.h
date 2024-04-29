@@ -50,6 +50,7 @@ typedef enum
     e_DBEvent_SelectionChanged,
     e_DBEvent_SendBlockData,
     e_DBEvent_FocusChange,
+    e_DBEvent_MouseMouseWheel,
     e_DBEventMAX
 } e_DBEventType;
 
@@ -68,6 +69,12 @@ struct DBEventKeyPress
     e_UIKeys Key;
     const uint8_t *TextPtr;
     unsigned int TextLen;
+};
+
+struct DBEventMouseWheel
+{
+    uint8_t Mods;
+    int Steps;
 };
 
 struct DBEventMouse
@@ -93,6 +100,7 @@ union DBEventData
     struct DBEventMouse Mouse;
     struct DBEventBlockSend BlockSend;
     struct DBEventFocusInfo Focus;
+    struct DBEventMouseWheel MouseWheel;
 };
 
 struct DBEvent
@@ -133,8 +141,12 @@ class DisplayBase
         virtual void ClearScrollBackBuffer(void);
         virtual void InsertHorizontalRule(void);
         virtual void ResetTerm(void);
+        virtual void SetupCanvas(void);
 
         void SetCustomSettings(class ConSettings *NewSettingsPtr);
+        class ConSettings *GetCustomSettings(void);
+        void GetFont(std::string &CurFontName,int &CurFontSize,bool &CurFontBold,bool &CurFontItalic);
+        void SetFont(const std::string &NewFontName,int NewFontSize,bool NewFontBold,bool NewFontItalic);
 
         struct CharStyling CurrentStyle;
 
@@ -146,6 +158,12 @@ class DisplayBase
 
         class ConSettings *Settings;
         bool HasFocus;
+
+        /* What font we are rendering in */
+        std::string FontName;
+        int FontSize;
+        bool FontBold;
+        bool FontItalic;
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

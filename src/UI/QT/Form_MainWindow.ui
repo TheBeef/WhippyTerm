@@ -1619,6 +1619,7 @@
     <addaction name="separator"/>
     <addaction name="actionZoom_In"/>
     <addaction name="actionZoom_Out"/>
+    <addaction name="actionReset_Zoom"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -1910,9 +1911,6 @@
    </property>
   </action>
   <action name="actionZoom_In">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="icon">
     <iconset resource="MainResource.qrc">
      <normaloff>:/G/Graphics/zoom_in.png</normaloff>:/G/Graphics/zoom_in.png</iconset>
@@ -1922,9 +1920,6 @@
    </property>
   </action>
   <action name="actionZoom_Out">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="icon">
     <iconset resource="MainResource.qrc">
      <normaloff>:/G/Graphics/zoom_out.png</normaloff>:/G/Graphics/zoom_out.png</iconset>
@@ -2454,6 +2449,11 @@
   <action name="actionRestore_Connection_Settings_to_Defaults">
    <property name="text">
     <string>R&amp;estore Connection Settings to Defaults...</string>
+   </property>
+  </action>
+  <action name="actionReset_Zoom">
+   <property name="text">
+    <string>Reset Zoom</string>
    </property>
   </action>
  </widget>

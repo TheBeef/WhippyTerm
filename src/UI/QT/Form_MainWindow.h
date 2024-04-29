@@ -238,6 +238,12 @@ private slots:
     
     void on_actionSelect_All_triggered();
     
+    void on_actionZoom_In_triggered();
+    
+    void on_actionZoom_Out_triggered();
+    
+    void on_actionReset_Zoom_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

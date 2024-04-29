@@ -150,6 +150,9 @@ void Debug6(void);
         void ClearScrollBackBuffer(void);
         void InsertHorizontalRule(void);
         void ResetTerm(void);
+        void ZoomIn(void);
+        void ZoomOut(void);
+        void ResetZoom(void);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

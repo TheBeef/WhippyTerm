@@ -79,7 +79,6 @@ typedef t_TextLines::iterator i_TextLines;
 
 /*
 
-
            / +-------------------+
           /  |                   |
          /   |    Back Buffer    |
@@ -103,8 +102,6 @@ CursorY is relative to 'ScreenFirstLine'
 ActiveLine is relative to 'ScreenFirstLine'
 
 */
-
-
 
 class DisplayText : public DisplayBase
 {
@@ -138,6 +135,7 @@ class DisplayText : public DisplayBase
         void ClearScrollBackBuffer(void);
         void InsertHorizontalRule(void);
         void ResetTerm(void);
+        void SetupCanvas(void);
 
         void SetBlockDeviceMode(bool On);
 
@@ -199,7 +197,6 @@ class DisplayText : public DisplayBase
         void ScrollScreenByXLines(int Lines2Scroll);
         bool DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event);
         void DoScrollTimerTimeout(void);
-        void SetupCanvas(void);
         void RedrawActiveLine(void);
         void RedrawFullScreen(void);
         bool RethinkInsertFrag(void);

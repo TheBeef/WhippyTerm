@@ -123,6 +123,9 @@ typedef enum
     e_UIMWMenu_ShowNonPrintable,
     e_UIMWMenu_ShowEndOfLines,
     e_UIMWMenu_SelectAll,
+    e_UIMWMenu_ZoomIn,
+    e_UIMWMenu_ZoomOut,
+    e_UIMWMenu_ResetZoom,
     e_UIMWMenuMAX
 } e_UIMWMenuType;
 

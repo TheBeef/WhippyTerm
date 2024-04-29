@@ -120,6 +120,9 @@ typedef enum
     e_Cmd_ShowNonPrintable,
     e_Cmd_ShowEndOfLines,
     e_Cmd_SelectAll,
+    e_Cmd_ZoomIn,
+    e_Cmd_ZoomOut,
+    e_Cmd_ResetZoom,
     e_CmdMAX
 } e_CmdType;
 
@@ -128,6 +131,7 @@ typedef enum
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
+void CmdCheck(void);
 e_UIMWMenuType Cmd2MainMenu(e_CmdType Cmd);
 e_CmdType MainMenu2Cmd(e_UIMWMenuType Menu);
 e_CmdType MainToolBar2Cmd(e_UIMWToolbarType Tool);

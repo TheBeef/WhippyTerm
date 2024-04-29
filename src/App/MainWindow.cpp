@@ -1171,6 +1171,9 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *Copy;
     e_UIMenuCtrl *Paste;
     e_UIMenuCtrl *SelectAll;
+    e_UIMenuCtrl *ZoomIn;
+    e_UIMenuCtrl *ZoomOut;
+    e_UIMenuCtrl *ResetZoom;
 
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
     ConnectToggle=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_ConnectToggle);
@@ -1194,6 +1197,9 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     Copy=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Copy);
     Paste=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Paste);
     SelectAll=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_SelectAll);
+    ZoomIn=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ZoomIn);
+    ZoomOut=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ZoomOut);
+    ResetZoom=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ResetZoom);
 
     RestoreConnectionSettingsActive=false;
 
@@ -1220,6 +1226,9 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(Copy,false);
         UIEnableMenu(Paste,false);
         UIEnableMenu(SelectAll,false);
+        UIEnableMenu(ZoomIn,false);
+        UIEnableMenu(ZoomOut,false);
+        UIEnableMenu(ResetZoom,false);
 
         ActivatePanels=false;
     }
@@ -1243,6 +1252,9 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(Copy,true);
         UIEnableMenu(Paste,true);
         UIEnableMenu(SelectAll,true);
+        UIEnableMenu(ZoomIn,true);
+        UIEnableMenu(ZoomOut,true);
+        UIEnableMenu(ResetZoom,true);
 
         Con=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
         if(Con==NULL)
@@ -1832,6 +1844,96 @@ void TheMainWindow::SelectAll(void)
     TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
     if(TabCon!=NULL)
         TabCon->SelectAll();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::ZoomIn
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::ZoomIn(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function zooms in on the active connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void TheMainWindow::ZoomIn(void)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+        TabCon->ZoomIn();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::ZoomOut
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::ZoomOut(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function zooms out on the active connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void TheMainWindow::ZoomOut(void)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+        TabCon->ZoomOut();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::ResetZoom
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::ResetZoom(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function zooms out on the active connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void TheMainWindow::ResetZoom(void)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+        TabCon->ResetZoom();
 }
 
 /*******************************************************************************
@@ -3172,6 +3274,9 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_ReleaseBridgedConnections -- Release the bridged
  *                      connections
  *                  e_Cmd_SelectAll -- Select all in the connection
+ *                  e_Cmd_ZoomIn -- Zoom in (make font bigger)
+ *                  e_Cmd_ZoomOut -- Zoom out (make font smaller)
+ *                  e_Cmd_ResetZoom -- Reset the zoom level to settings.
  *
  * FUNCTION:
  *    This function executes a command.
@@ -3474,6 +3579,15 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_SelectAll:
             SelectAll();
+        break;
+        case e_Cmd_ZoomIn:
+            ZoomIn();
+        break;
+        case e_Cmd_ZoomOut:
+            ZoomOut();
+        break;
+        case e_Cmd_ResetZoom:
+            ResetZoom();
         break;
 
         case e_CmdMAX:

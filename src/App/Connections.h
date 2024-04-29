@@ -341,6 +341,9 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void SetShowEndOfLines(bool Show);
         void SelectAll(void);
         bool IsThereASelection(void);
+        void ZoomIn(void);
+        void ZoomOut(void);
+        void ResetZoom(void);
 
         void InformOfConnected(void);
         void InformOfDisconnected(void);
@@ -461,6 +464,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void FreeTransmitDelayBuffer(void);
         void RethinkLockOut(void);
         void RethinkCursor(void);
+        void HandleMouseWheelZoom(int Steps);
 
         /* Call backs */
         void InformOfDelayTransmitTimeout(void);

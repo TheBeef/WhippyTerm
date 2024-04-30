@@ -641,6 +641,7 @@ void DisplayText::SetupCanvas(void)
 
     RethinkTextAreaSize();
     RethinkWindowSize();
+    RethinkLineLengths();
     RethinkScrollBars();
 }
 
@@ -1406,9 +1407,6 @@ void DisplayText::ApplySettings(void)
        was in the middle of the text??? */
 
     SetupCanvas();
-
-    RethinkLineLengths();
-    RethinkScrollBars();
 
     RedrawFullScreen();
 }

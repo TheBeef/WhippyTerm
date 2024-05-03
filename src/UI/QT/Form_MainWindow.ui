@@ -2203,6 +2203,11 @@
    </property>
   </action>
   <action name="actionReset">
+   <property name="icon">
+    <iconset>
+     <normalon>:/G/Graphics/lightning.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>&amp;Reset</string>
    </property>

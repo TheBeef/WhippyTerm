@@ -57,5 +57,6 @@
         <file>Graphics/go.png</file>
         <file>Graphics/WIcon.svg</file>
         <file>Graphics/text_horizontalrule.png</file>
+        <file>Graphics/lightning.png</file>
     </qresource>
 </RCC>

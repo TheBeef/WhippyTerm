@@ -1,6 +1,7 @@
 Project/WT.pro.user
 build-WT-Desktop5-Debug
 build-WT-Desktop5-Release
+build-WT-Desktop5-Profile
 Tools/ExternPluginMaker/ExternPluginMaker/build
 Tools/ExternPluginMaker/ExternPluginMaker/ExternPluginMaker.pro.user
 Project/build

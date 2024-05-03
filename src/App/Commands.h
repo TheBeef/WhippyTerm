@@ -123,6 +123,14 @@ typedef enum
     e_Cmd_ZoomIn,
     e_Cmd_ZoomOut,
     e_Cmd_ResetZoom,
+    e_Cmd_Send_NULL,
+    e_Cmd_Send_Backspace,
+    e_Cmd_Send_Tab,
+    e_Cmd_Send_Line_Feed,
+    e_Cmd_Send_Form_Feed,
+    e_Cmd_Send_Carriage_Return,
+    e_Cmd_Send_Escape,
+    e_Cmd_Send_Other,
     e_CmdMAX
 } e_CmdType;
 

@@ -187,6 +187,24 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionZoom_Out;
         case e_UIMWMenu_ResetZoom:
             return (e_UIMenuCtrl *)realwin->ui->actionReset_Zoom;
+
+        case e_UIMWMenu_Send_NULL:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_NULL;
+        case e_UIMWMenu_Send_Backspace:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Backspace;
+        case e_UIMWMenu_Send_Tab:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Tab;
+        case e_UIMWMenu_Send_Line_Feed:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Line_Feed;
+        case e_UIMWMenu_Send_Form_Feed:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Form_Feed;
+        case e_UIMWMenu_Send_Carriage_Return:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Carriage_Return;
+        case e_UIMWMenu_Send_Escape:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Escape;
+        case e_UIMWMenu_Send_Other:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Other;
+
         case e_UIMWMenuMAX:
         default:
         break;

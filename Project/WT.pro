@@ -33,11 +33,14 @@ QMAKE_LFLAGS += -static -static-libgcc -static-libstdc++
 }
 
 SOURCES += ../src/UI/QT/main.cpp\
+    ../src/App/Dialogs/Dialog_SendByte.cpp \
     ../src/App/StdPlugins/IODrivers/TCPClient/src/TCPClient_Main.cpp \
     ../src/App/StdPlugins/IODrivers/TCPServer/src/TCPServer_Main.cpp \
     ../src/App/StdPlugins/IODrivers/UDPClient/src/UDPClient_Main.cpp \
     ../src/App/StdPlugins/IODrivers/UDPServer/src/UDPServer_Main.cpp \
     ../src/UI/QT/Form_MainWindow.cpp \
+    ../src/UI/QT/Form_SendByte.cpp \
+    ../src/UI/QT/Form_SendByteAccess.cpp \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.cpp \
     ../src/UI/QT/VerPanelHandle.cpp \
     ../src/UI/QT/HozPanelHandle.cpp \
@@ -209,6 +212,7 @@ macx {
 }
 
 HEADERS  += ../src/UI/QT/Form_MainWindow.h \
+    ../src/UI/QT/Form_SendByte.h \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.h \
     ../src/UI/QT/VerPanelHandle.h \
     ../src/UI/QT/HozPanelHandle.h \
@@ -244,6 +248,7 @@ HEADERS  += ../src/UI/QT/Form_MainWindow.h \
 
 FORMS    += ../src/UI/QT/Form_MainWindow.ui \
     ../src/UI/QT/Form_FontDialog.ui \
+    ../src/UI/QT/Form_SendByte.ui \
     ../src/UI/QT/Form_Settings.ui \
     ../src/UI/QT/Form_NewConnection.ui \
     ../src/UI/QT/Form_DebugStats.ui \

@@ -1,14 +1,14 @@
 /*******************************************************************************
- * FILENAME: UIAddBookmark.h
+ * FILENAME: UISendByte.h
  * 
  * PROJECT:
  *    Whippy Term
  *
  * FILE DESCRIPTION:
- *    This file has the UI access functions for the add bookmark dialog in it.
+ *    This file has the UI access functions for the send byte dialog in it.
  *
  * COPYRIGHT:
- *    Copyright 2020 Paul Hutchinson.
+ *    Copyright 02 May 2024 Paul Hutchinson.
  *
  *    This program is free software: you can redistribute it and/or modify it
  *    under the terms of the GNU General Public License as published by the
@@ -24,48 +24,58 @@
  *    with this program. If not, see https://www.gnu.org/licenses/.
  *
  * HISTORY:
- *    Paul Hutchinson (16 Nov 2020)
+ *    Paul Hutchinson (02 May 2024)
  *       Created
  *
  *******************************************************************************/
-#ifndef __UIADDBOOKMARK_H_
-#define __UIADDBOOKMARK_H_
+#ifndef __UISENDBYTE_H_
+#define __UISENDBYTE_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
 #include "UI/UIControl.h"
+#include <stdint.h>
 
 /***  DEFINES                          ***/
 
 /***  MACROS                           ***/
 
 /***  TYPE DEFINITIONS                 ***/
-typedef enum
+enum e_SBD_TextInput
 {
-    e_UIABDBttn_NewFolder,
-    e_UIABDBttnMAX
-} e_UIABDBttnType;
-
-typedef enum
-{
-    e_ABDEvent_BttnTriggered,
-    e_ABDEventMAX
-} e_ABDEventType;
-
-struct ABDEventDataBttn
-{
-    e_UIABDBttnType BttnID;
+    e_SBD_TextInput_Dec,
+    e_SBD_TextInput_Hex,
+    e_SBD_TextInput_Oct,
+    e_SBD_TextInputMAX
 };
 
-union ABDEventData
+struct SBDEventDataText
 {
-    struct ABDEventDataBttn Bttn;
+    e_SBD_TextInput TxtID;
 };
 
-struct ABDEvent
+struct SBDEventDataAscII
 {
-    e_ABDEventType EventType;
+    uint8_t ByteValue;
+};
+
+union SBDEventData
+{
+    struct SBDEventDataText Txt;
+    struct SBDEventDataAscII AscII;
+};
+
+typedef enum
+{
+    e_SBDEvent_AscIISelected,
+    e_SBDEvent_TextEditDone,
+    e_SBDEventMAX
+} e_SBDEventType;
+
+struct SBDEvent
+{
+    e_SBDEventType EventType;
     uintptr_t ID;
-    union ABDEventData Info;
+    union SBDEventData Info;
 };
 
 /***  CLASS DEFINITIONS                ***/
@@ -73,14 +83,11 @@ struct ABDEvent
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
-bool UIAlloc_AddBookmark(void);
-bool UIShow_AddBookmark(void);
-void UIFree_AddBookmark(void);
-t_UITreeItem *UIAB_AddFolderName(const char *Name);
-void UIAB_SetBookmarkName(const char *Name);
-void UIAB_GetBookmarkName(std::string &Name);
-t_UITreeItem *UIAB_GetSelectedFolderItem(void);
+bool UIAlloc_SendByte(void);
+bool UIShow_SendByte(void);
+void UIFree_SendByte(void);
+t_UITextInputCtrl *UISBD_GetTextInput(e_SBD_TextInput UIObj);
 
-bool ABD_Event(const struct ABDEvent *Event);
+bool SBD_Event(const struct SBDEvent *Event);
 
-#endif
+#endif   /* end of "#ifndef __UISENDBYTE_H_" */

@@ -244,6 +244,22 @@ private slots:
     
     void on_actionReset_Zoom_triggered();
     
+    void on_actionSend_NULL_triggered();
+    
+    void on_actionSend_Backspace_triggered();
+    
+    void on_actionSend_Tab_triggered();
+    
+    void on_actionSend_Line_Feed_triggered();
+    
+    void on_actionSend_Form_Feed_triggered();
+    
+    void on_actionSend_Carriage_Return_triggered();
+    
+    void on_actionSend_Other_triggered();
+    
+    void on_actionSend_Escape_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

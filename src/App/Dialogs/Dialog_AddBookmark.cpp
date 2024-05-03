@@ -54,10 +54,10 @@ t_UITreeItem *m_ABD_NewFolderItem;
  *    RunAddBookmarkDialog
  *
  * SYNOPSIS:
- *    bool RunAddBookmarkDialog(void);
+ *    bool RunAddBookmarkDialog(struct Bookmark &BookmarkInfo);
  *
  * PARAMETERS:
- *    NONE
+ *    BookmarkInfo [I/O] -- The bookmark to add
  *
  * FUNCTION:
  *    This function shows the add bookmark dialog.

@@ -1675,6 +1675,15 @@
     <addaction name="actionInsert_Horizontal_Rule"/>
     <addaction name="actionInsert_Time_Stamp"/>
     <addaction name="separator"/>
+    <addaction name="actionSend_NULL"/>
+    <addaction name="actionSend_Backspace"/>
+    <addaction name="actionSend_Tab"/>
+    <addaction name="actionSend_Line_Feed"/>
+    <addaction name="actionSend_Form_Feed"/>
+    <addaction name="actionSend_Carriage_Return"/>
+    <addaction name="actionSend_Escape"/>
+    <addaction name="actionSend_Other"/>
+    <addaction name="separator"/>
     <addaction name="actionReset"/>
    </widget>
    <widget class="QMenu" name="menuBookmarks">
@@ -2454,6 +2463,46 @@
   <action name="actionReset_Zoom">
    <property name="text">
     <string>Reset Zoom</string>
+   </property>
+  </action>
+  <action name="actionSend_Backspace">
+   <property name="text">
+    <string>Send Backspace (0x08)</string>
+   </property>
+  </action>
+  <action name="actionSend_Tab">
+   <property name="text">
+    <string>Send Tab (0x09)</string>
+   </property>
+  </action>
+  <action name="actionSend_Line_Feed">
+   <property name="text">
+    <string>Send Line Feed (0x0A)</string>
+   </property>
+  </action>
+  <action name="actionSend_Form_Feed">
+   <property name="text">
+    <string>Send Form Feed (0x0C)</string>
+   </property>
+  </action>
+  <action name="actionSend_Carriage_Return">
+   <property name="text">
+    <string>Send Carriage Return (0x0D)</string>
+   </property>
+  </action>
+  <action name="actionSend_Escape">
+   <property name="text">
+    <string>Send Escape (0x1B)</string>
+   </property>
+  </action>
+  <action name="actionSend_NULL">
+   <property name="text">
+    <string>Send NULL (0x00)</string>
+   </property>
+  </action>
+  <action name="actionSend_Other">
+   <property name="text">
+    <string>Send Other...</string>
    </property>
   </action>
  </widget>

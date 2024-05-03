@@ -99,6 +99,7 @@ void Debug6(void);
         void GetListOfConnections(t_MainWindowConnectionList &List);
         bool GetBridgedStateInfo(class Connection **Con1,
                 class Connection **Con2);
+        void DoSendByte(uint8_t Byte);
 
         /* Panel handlers */
         class MWConnectionOptions ConnectionOptionsPanel;

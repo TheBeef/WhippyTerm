@@ -132,6 +132,14 @@ const char *m_CmdNames[]=
     "ZoomIn",                               // e_Cmd_ZoomIn
     "ZoomOut",                              // e_Cmd_ZoomOut
     "ResetZoom",                            // e_Cmd_ResetZoom
+    "SendNULL",                             // e_Cmd_Send_NULL
+    "SendBackspace",                        // e_Cmd_Send_Backspace
+    "SendTab",                              // e_Cmd_Send_Tab
+    "SendLineFeed",                         // e_Cmd_Send_Line_Feed
+    "SendFormFeed",                         // e_Cmd_Send_Form_Feed
+    "SendCarriageReturn",                   // e_Cmd_Send_Carriage_Return
+    "SendEscape",                           // e_Cmd_Send_Escape
+    "SendOther",                            // e_Cmd_Send_Other
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -186,6 +194,14 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_ZoomIn,                       // e_UIMWMenu_ZoomIn
     e_Cmd_ZoomOut,                      // e_UIMWMenu_ZoomOut
     e_Cmd_ResetZoom,                    // e_UIMWMenu_ResetZoom
+    e_Cmd_Send_NULL,                    // e_UIMWMenu_Send_NULL
+    e_Cmd_Send_Backspace,               // e_UIMWMenu_Send_Backspace
+    e_Cmd_Send_Tab,                     // e_UIMWMenu_Send_Tab
+    e_Cmd_Send_Line_Feed,               // e_UIMWMenu_Send_Line_Feed
+    e_Cmd_Send_Form_Feed,               // e_UIMWMenu_Send_Form_Feed
+    e_Cmd_Send_Carriage_Return,         // e_UIMWMenu_Send_Carriage_Return
+    e_Cmd_Send_Escape,                  // e_UIMWMenu_Send_Escape
+    e_Cmd_Send_Other,                   // e_UIMWMenu_Send_Other
 };
 
 e_CmdType m_Cmd2ToolbarMapping[]=
@@ -592,6 +608,13 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     SetKeySeq(&KeyMapping[e_Cmd_ZoomIn],KEYMOD_CONTROL,e_UIKeysMAX,'+');
     SetKeySeq(&KeyMapping[e_Cmd_ZoomOut],KEYMOD_CONTROL,e_UIKeysMAX,'-');
     SetKeySeq(&KeyMapping[e_Cmd_ResetZoom],KEYMOD_CONTROL,e_UIKeysMAX,'0');
+    SetKeySeq(&KeyMapping[e_Cmd_Send_Backspace],KEYMOD_NONE,e_UIKeys_Backspace,0);
+    SetKeySeq(&KeyMapping[e_Cmd_Send_Tab],KEYMOD_NONE,e_UIKeys_Tab,0);
+    SetKeySeq(&KeyMapping[e_Cmd_Send_Line_Feed],KEYMOD_NONE,e_UIKeys_Return,0);
+    SetKeySeq(&KeyMapping[e_Cmd_Send_Carriage_Return],KEYMOD_CONTROL,e_UIKeys_Return,0);
+//    SetKeySeq(&KeyMapping[e_Cmd_Send_Carriage_Return],KEYMOD_CONTROL,e_UIKeys_Enter,0);
+    SetKeySeq(&KeyMapping[e_Cmd_Send_Form_Feed],KEYMOD_CONTROL,e_UIKeysMAX,'l');
+    SetKeySeq(&KeyMapping[e_Cmd_Send_Escape],KEYMOD_NONE,e_UIKeys_Escape,0);
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A
@@ -612,8 +635,6 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
  * Tab 9            Alt-9
  * Tab 10           Alt-0
 */
-
-
 }
 
 e_CmdType KeySeq2CmdID(uint8_t Mod,e_UIKeys Key,char Letter)

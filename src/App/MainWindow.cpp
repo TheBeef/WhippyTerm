@@ -36,6 +36,7 @@
 #include "App/Dialogs/Dialog_ComTest.h"
 #include "App/Dialogs/Dialog_ManagePlugins.h"
 #include "App/Dialogs/Dialog_NewConnection.h"
+#include "App/Dialogs/Dialog_SendByte.h"
 #include "App/Dialogs/Dialog_Settings.h"
 #include "App/Dialogs/Dialog_TransmitDelay.h"
 #include "App/Bookmarks.h"
@@ -1174,6 +1175,14 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *ZoomIn;
     e_UIMenuCtrl *ZoomOut;
     e_UIMenuCtrl *ResetZoom;
+    e_UIMenuCtrl *Send_NULL;
+    e_UIMenuCtrl *Send_Backspace;
+    e_UIMenuCtrl *Send_Tab;
+    e_UIMenuCtrl *Send_Line_Feed;
+    e_UIMenuCtrl *Send_Form_Feed;
+    e_UIMenuCtrl *Send_Carriage_Return;
+    e_UIMenuCtrl *Send_Escape;
+    e_UIMenuCtrl *Send_Other;
 
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
     ConnectToggle=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_ConnectToggle);
@@ -1200,6 +1209,14 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     ZoomIn=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ZoomIn);
     ZoomOut=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ZoomOut);
     ResetZoom=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ResetZoom);
+    Send_NULL=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_NULL);
+    Send_Backspace=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Backspace);
+    Send_Tab=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Tab);
+    Send_Line_Feed=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Line_Feed);
+    Send_Form_Feed=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Form_Feed);
+    Send_Carriage_Return=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Carriage_Return);
+    Send_Escape=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Escape);
+    Send_Other=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Other);
 
     RestoreConnectionSettingsActive=false;
 
@@ -1229,6 +1246,14 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(ZoomIn,false);
         UIEnableMenu(ZoomOut,false);
         UIEnableMenu(ResetZoom,false);
+        UIEnableMenu(Send_NULL,false);
+        UIEnableMenu(Send_Backspace,false);
+        UIEnableMenu(Send_Tab,false);
+        UIEnableMenu(Send_Line_Feed,false);
+        UIEnableMenu(Send_Form_Feed,false);
+        UIEnableMenu(Send_Carriage_Return,false);
+        UIEnableMenu(Send_Escape,false);
+        UIEnableMenu(Send_Other,false);
 
         ActivatePanels=false;
     }
@@ -1255,6 +1280,14 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(ZoomIn,true);
         UIEnableMenu(ZoomOut,true);
         UIEnableMenu(ResetZoom,true);
+        UIEnableMenu(Send_NULL,true);
+        UIEnableMenu(Send_Backspace,true);
+        UIEnableMenu(Send_Tab,true);
+        UIEnableMenu(Send_Line_Feed,true);
+        UIEnableMenu(Send_Form_Feed,true);
+        UIEnableMenu(Send_Carriage_Return,true);
+        UIEnableMenu(Send_Escape,true);
+        UIEnableMenu(Send_Other,true);
 
         Con=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
         if(Con==NULL)
@@ -1934,6 +1967,36 @@ void TheMainWindow::ResetZoom(void)
     TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
     if(TabCon!=NULL)
         TabCon->ResetZoom();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::DoSendByte
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::DoSendByte(uint8_t Byte);
+ *
+ * PARAMETERS:
+ *    Byte [I] -- The byte to send
+ *
+ * FUNCTION:
+ *    This function sends a raw byte.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void TheMainWindow::DoSendByte(uint8_t Byte)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+        TabCon->WriteData(&Byte,1,e_ConWriteSource_Keyboard);
 }
 
 /*******************************************************************************
@@ -3277,6 +3340,14 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_ZoomIn -- Zoom in (make font bigger)
  *                  e_Cmd_ZoomOut -- Zoom out (make font smaller)
  *                  e_Cmd_ResetZoom -- Reset the zoom level to settings.
+ *                  e_Cmd_Send_NULL -- Send a 0x00
+ *                  e_Cmd_Send_Backspace -- Send a 0x08
+ *                  e_Cmd_Send_Tab -- Send a 0x09
+ *                  e_Cmd_Send_Line_Feed -- Send a 0x0A
+ *                  e_Cmd_Send_Form_Feed -- Send a 0x0C
+ *                  e_Cmd_Send_Carriage_Return -- Send a 0x0D
+ *                  e_Cmd_Send_Escape -- Send a 0x1B
+ *                  e_Cmd_Send_Other -- Send a byte
  *
  * FUNCTION:
  *    This function executes a command.
@@ -3588,6 +3659,30 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_ResetZoom:
             ResetZoom();
+        break;
+        case e_Cmd_Send_NULL:
+            DoSendByte(0x00);
+        break;
+        case e_Cmd_Send_Backspace:
+            DoSendByte(0x08);
+        break;
+        case e_Cmd_Send_Tab:
+            DoSendByte(0x09);
+        break;
+        case e_Cmd_Send_Line_Feed:
+            DoSendByte(0x0A);
+        break;
+        case e_Cmd_Send_Form_Feed:
+            DoSendByte(0x0C);
+        break;
+        case e_Cmd_Send_Carriage_Return:
+            DoSendByte(0x0D);
+        break;
+        case e_Cmd_Send_Escape:
+            DoSendByte(0x1B);
+        break;
+        case e_Cmd_Send_Other:
+            RunSendByteDialog(this);
         break;
 
         case e_CmdMAX:

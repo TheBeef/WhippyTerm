@@ -1382,9 +1382,48 @@ void Form_MainWindow::on_actionZoom_Out_triggered()
     DoMenuTriggered(e_UIMWMenu_ZoomOut);
 }
 
-
 void Form_MainWindow::on_actionReset_Zoom_triggered()
 {
     DoMenuTriggered(e_UIMWMenu_ResetZoom);
+}
+
+void Form_MainWindow::on_actionSend_NULL_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Send_NULL);
+}
+
+void Form_MainWindow::on_actionSend_Backspace_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Send_Backspace);
+}
+
+void Form_MainWindow::on_actionSend_Tab_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Send_Tab);
+}
+
+void Form_MainWindow::on_actionSend_Line_Feed_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Send_Line_Feed);
+}
+
+void Form_MainWindow::on_actionSend_Form_Feed_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Send_Form_Feed);
+}
+
+void Form_MainWindow::on_actionSend_Carriage_Return_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Send_Carriage_Return);
+}
+
+void Form_MainWindow::on_actionSend_Other_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Send_Other);
+}
+
+void Form_MainWindow::on_actionSend_Escape_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Send_Escape);
 }
 

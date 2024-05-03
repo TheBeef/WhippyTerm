@@ -126,6 +126,14 @@ typedef enum
     e_UIMWMenu_ZoomIn,
     e_UIMWMenu_ZoomOut,
     e_UIMWMenu_ResetZoom,
+    e_UIMWMenu_Send_NULL,
+    e_UIMWMenu_Send_Backspace,
+    e_UIMWMenu_Send_Tab,
+    e_UIMWMenu_Send_Line_Feed,
+    e_UIMWMenu_Send_Form_Feed,
+    e_UIMWMenu_Send_Carriage_Return,
+    e_UIMWMenu_Send_Escape,
+    e_UIMWMenu_Send_Other,
     e_UIMWMenuMAX
 } e_UIMWMenuType;
 

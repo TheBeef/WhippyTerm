@@ -227,6 +227,10 @@ t_UIToolbarCtrl *UIMW_GetToolbarHandle(t_UIMainWindow *win,
             return (t_UIToolbarCtrl *)realwin->ui->actionConnectToggle;
         case e_UIMWToolbar_URIGo:
             return (t_UIToolbarCtrl *)realwin->ui->actionactionURIGo;
+        case e_UIMWToolbar_Copy:
+            return (t_UIToolbarCtrl *)realwin->ui->actionCopy_toolbar;
+        case e_UIMWToolbar_Paste:
+            return (t_UIToolbarCtrl *)realwin->ui->actionPaste_toolbar;
         case e_UIMWToolbarMAX:
         default:
         break;

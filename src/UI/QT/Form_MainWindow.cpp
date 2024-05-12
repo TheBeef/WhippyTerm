@@ -857,10 +857,6 @@ void Form_MainWindow::on_actionClear_Screen_triggered()
     DoMenuTriggered(e_UIMWMenu_ClearScreen);
 }
 
-void Form_MainWindow::on_actionNew_Window_triggered()
-{
-}
-
 void Form_MainWindow::on_actionMenu_Change_Name_triggered()
 {
     DoMenuTriggered(e_UIMWMenu_ChangeConnectionName);
@@ -1432,3 +1428,13 @@ void Form_MainWindow::on_actionSend_Delete_triggered()
     DoMenuTriggered(e_UIMWMenu_Send_Delete);
 }
 
+
+void Form_MainWindow::on_actionCopy_toolbar_triggered()
+{
+    DoToolbarTriggered(e_UIMWToolbar_Copy);
+}
+
+void Form_MainWindow::on_actionPaste_toolbar_triggered()
+{
+    DoToolbarTriggered(e_UIMWToolbar_Paste);
+}

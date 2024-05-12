@@ -1152,6 +1152,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     bool RestoreConnectionSettingsActive;
     i_BookmarkList bm;
     t_UIToolbarCtrl *ConnectToggle;
+    t_UIToolbarCtrl *CopyTool;
+    t_UIToolbarCtrl *PasteTool;
     e_UIMenuCtrl *CloseTabMenu;
     e_UIMenuCtrl *CloseAllMenu;
     e_UIMenuCtrl *ConnectMenu;
@@ -1188,6 +1190,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
 
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
     ConnectToggle=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_ConnectToggle);
+    CopyTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_Copy);
+    PasteTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_Paste);
     CloseTabMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_CloseTab);
     CloseAllMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_CloseAll);
     ConnectMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Connect);
@@ -1247,6 +1251,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(GotoRow,false);
         UIEnableMenu(Copy,false);
         UIEnableMenu(Paste,false);
+        UIEnableToolbar(CopyTool,false);
+        UIEnableToolbar(PasteTool,false);
         UIEnableMenu(SelectAll,false);
         UIEnableMenu(ZoomIn,false);
         UIEnableMenu(ZoomOut,false);
@@ -1283,6 +1289,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(GotoRow,true);
         UIEnableMenu(Copy,true);
         UIEnableMenu(Paste,true);
+        UIEnableToolbar(CopyTool,true);
+        UIEnableToolbar(PasteTool,true);
         UIEnableMenu(SelectAll,true);
         UIEnableMenu(ZoomIn,true);
         UIEnableMenu(ZoomOut,true);
@@ -1313,9 +1321,15 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UICheckMenu(ShowEndOfLines,Con->GetShowEndOfLines());
 
         if(Con->IsThereASelection())
+        {
             UIEnableMenu(Copy,true);
+            UIEnableToolbar(CopyTool,true);
+        }
         else
+        {
             UIEnableMenu(Copy,false);
+            UIEnableToolbar(CopyTool,false);
+        }
 
         ActivatePanels=true;
     }

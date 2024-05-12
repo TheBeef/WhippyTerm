@@ -1544,12 +1544,6 @@
     </widget>
     <addaction name="actionNew_Tab"/>
     <addaction name="actionNew_Window"/>
-    <addaction name="actionOpen_Connection"/>
-    <addaction name="separator"/>
-    <addaction name="actionSave_Connection"/>
-    <addaction name="actionSave_Connection_As"/>
-    <addaction name="separator"/>
-    <addaction name="actionRecent_Connections"/>
     <addaction name="separator"/>
     <addaction name="menuCapture"/>
     <addaction name="menu_Upload"/>
@@ -1624,20 +1618,8 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
-    <widget class="QMenu" name="menuOther_Clipboards">
-     <property name="title">
-      <string>&amp;Other Clipboards</string>
-     </property>
-     <addaction name="actionCopy_to_Clipboard_2"/>
-     <addaction name="actionPaste_From_Clipboard_2"/>
-     <addaction name="separator"/>
-     <addaction name="actionCopy_to_Clipboard_3"/>
-     <addaction name="actionPaste_From_Clipboard_3"/>
-    </widget>
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
-    <addaction name="menuOther_Clipboards"/>
-    <addaction name="separator"/>
     <addaction name="actionFind"/>
     <addaction name="actionFind_Next"/>
     <addaction name="actionFind_First"/>
@@ -1735,11 +1717,11 @@
    <addaction name="actionNew_Tab_Toolbar"/>
    <addaction name="actionConnectToggle"/>
    <addaction name="separator"/>
+   <addaction name="actionCopy_toolbar"/>
+   <addaction name="actionPaste_toolbar"/>
+   <addaction name="separator"/>
    <addaction name="actionClear_Screen"/>
    <addaction name="separator"/>
-   <addaction name="actionTest1"/>
-   <addaction name="actionTest2"/>
-   <addaction name="actionTest4"/>
    <addaction name="actionactionURIGo"/>
   </widget>
   <action name="actionQuit">
@@ -2232,15 +2214,15 @@
    </property>
   </action>
   <action name="actionNew_Window">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="icon">
     <iconset resource="MainResource.qrc">
      <normaloff>:/G/Graphics/application_add.png</normaloff>:/G/Graphics/application_add.png</iconset>
    </property>
    <property name="text">
     <string>New &amp;Window...</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionMenu_Change_Name">
@@ -2510,6 +2492,30 @@
   <action name="actionSend_Delete">
    <property name="text">
     <string>Send Delete (0x7F)</string>
+   </property>
+  </action>
+  <action name="actionCopy_toolbar">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/page_copy.png</normaloff>:/G/Graphics/page_copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy</string>
+   </property>
+  </action>
+  <action name="actionPaste_toolbar">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/paste_plain.png</normaloff>:/G/Graphics/paste_plain.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste</string>
+   </property>
+   <property name="toolTip">
+    <string>Paste</string>
    </property>
   </action>
  </widget>

@@ -152,6 +152,8 @@ typedef enum
     e_UIMWToolbar_NewTab,
     e_UIMWToolbar_ConnectToggle,
     e_UIMWToolbar_URIGo,
+    e_UIMWToolbar_Copy,
+    e_UIMWToolbar_Paste,
     e_UIMWToolbarMAX
 } e_UIMWToolbarType;
 

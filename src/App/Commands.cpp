@@ -214,6 +214,8 @@ e_CmdType m_Cmd2ToolbarMapping[]=
     e_Cmd_NewTab,                       // e_UIMWToolbar_NewTab
     e_Cmd_ConnectToggle,                // e_UIMWToolbar_ConnectToggle
     e_Cmd_URIGo,                        // e_UIMWToolbar_URIGo
+    e_Cmd_Copy,                         // e_UIMWToolbar_Copy
+    e_Cmd_Paste,                        // e_UIMWToolbar_Paste
 };
 
 e_CmdType m_Cmd2ButtonMapping[]=

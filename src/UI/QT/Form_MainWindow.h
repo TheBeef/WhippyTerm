@@ -91,7 +91,6 @@ private slots:
     void on_actionNew_Tab_Toolbar_triggered();
     void on_actionInsert_Horizontal_Rule_triggered();
     void on_actionClear_Screen_triggered();
-    void on_actionNew_Window_triggered();
     void on_actionConnectToggle_triggered(bool checked);
     void on_actionMenu_Change_Name_triggered();
     void on_pushButton_SW_Start_clicked();
@@ -261,6 +260,10 @@ private slots:
     void on_actionSend_Escape_triggered();
     
     void on_actionSend_Delete_triggered();
+    
+    void on_actionCopy_toolbar_triggered();
+    
+    void on_actionPaste_toolbar_triggered();
     
 private:
     void resizeEvent(QResizeEvent *event);

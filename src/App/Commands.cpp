@@ -143,6 +143,10 @@ const char *m_CmdNames[]=
     "SendEscape",                           // e_Cmd_Send_Escape
     "SendDelete",                           // e_Cmd_Send_Delete
     "SendOther",                            // e_Cmd_Send_Other
+    "SettingsQuickJumpTermSize",            // e_Cmd_SettingsQuickJump_TermSize
+    "SettingsQuickJumpTermEmu",             // e_Cmd_SettingsQuickJump_TermEmu
+    "SettingsQuickJumpFont",                // e_Cmd_SettingsQuickJump_Font
+    "SettingsQuickJumpColors",              // e_Cmd_SettingsQuickJump_Colors
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -207,6 +211,10 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_Send_Escape,                  // e_UIMWMenu_Send_Escape
     e_Cmd_Send_Delete,                  // e_UIMWMenu_Send_Delete
     e_Cmd_Send_Other,                   // e_UIMWMenu_Send_Other
+    e_Cmd_SettingsQuickJump_TermSize,   // e_UIMWMenu_SettingsQuickJump_TermSize
+    e_Cmd_SettingsQuickJump_TermEmu,    // e_UIMWMenu_SettingsQuickJump_TermEmu
+    e_Cmd_SettingsQuickJump_Font,       // e_UIMWMenu_SettingsQuickJump_Font
+    e_Cmd_SettingsQuickJump_Colors,     // e_UIMWMenu_SettingsQuickJump_Colors
 };
 
 e_CmdType m_Cmd2ToolbarMapping[]=

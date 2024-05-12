@@ -135,6 +135,10 @@ typedef enum
     e_UIMWMenu_Send_Escape,
     e_UIMWMenu_Send_Delete,
     e_UIMWMenu_Send_Other,
+    e_UIMWMenu_SettingsQuickJump_TermSize,
+    e_UIMWMenu_SettingsQuickJump_TermEmu,
+    e_UIMWMenu_SettingsQuickJump_Font,
+    e_UIMWMenu_SettingsQuickJump_Colors,
     e_UIMWMenuMAX
 } e_UIMWMenuType;
 

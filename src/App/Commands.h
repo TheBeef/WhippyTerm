@@ -134,6 +134,10 @@ typedef enum
     e_Cmd_Send_Escape,
     e_Cmd_Send_Delete,
     e_Cmd_Send_Other,
+    e_Cmd_SettingsQuickJump_TermSize,
+    e_Cmd_SettingsQuickJump_TermEmu,
+    e_Cmd_SettingsQuickJump_Font,
+    e_Cmd_SettingsQuickJump_Colors,
     e_CmdMAX
 } e_CmdType;
 

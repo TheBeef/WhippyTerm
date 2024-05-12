@@ -1576,8 +1576,8 @@
     </property>
     <addaction name="actionSettings"/>
     <addaction name="separator"/>
-    <addaction name="actionTerminal_Size"/>
     <addaction name="actionTerminal_Emulation"/>
+    <addaction name="actionTerminal_Size"/>
     <addaction name="actionFont"/>
     <addaction name="actionColors"/>
     <addaction name="separator"/>

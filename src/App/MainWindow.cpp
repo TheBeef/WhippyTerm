@@ -2873,7 +2873,8 @@ void TheMainWindow::ShowConnectionSettings(void)
     if(ActiveCon==NULL)
         return;
 
-    if(RunSettingsDialog(this,&ActiveCon->CustomSettings))
+    if(RunSettingsDialog(this,&ActiveCon->CustomSettings,
+            e_SettingsJump2_Default))
     {
         /* Mark that we are using custom settings */
         ActiveCon->UsingCustomSettings=true;
@@ -3426,6 +3427,10 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_Send_Escape -- Send a 0x1B
  *                  e_Cmd_Send_Delete -- Send a 0x7F
  *                  e_Cmd_Send_Other -- Send a byte
+ *                  e_Cmd_SettingsQuickJump_TermSize -- Goto settings term size
+ *                  e_Cmd_SettingsQuickJump_TermEmu -- Goto settings term emu
+ *                  e_Cmd_SettingsQuickJump_Font -- Goto settings font
+ *                  e_Cmd_SettingsQuickJump_Colors -- Goto settings colors
  *
  * FUNCTION:
  *    This function executes a command.
@@ -3487,7 +3492,7 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
             RunAboutDialog();
         break;
         case e_Cmd_Settings:
-            RunSettingsDialog(this,NULL);
+            RunSettingsDialog(this,NULL,e_SettingsJump2_Default);
         break;
         case e_Cmd_ImportSettings:
             g_Settings.GetDefaultSettingsPathAndName(path,file);
@@ -3770,6 +3775,18 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_Send_Other:
             RunSendByteDialog(this);
+        break;
+        case e_Cmd_SettingsQuickJump_TermSize:
+            RunSettingsDialog(this,NULL,e_SettingsJump2_TermSize);
+        break;
+        case e_Cmd_SettingsQuickJump_TermEmu:
+            RunSettingsDialog(this,NULL,e_SettingsJump2_TermEmu);
+        break;
+        case e_Cmd_SettingsQuickJump_Font:
+            RunSettingsDialog(this,NULL,e_SettingsJump2_Font);
+        break;
+        case e_Cmd_SettingsQuickJump_Colors:
+            RunSettingsDialog(this,NULL,e_SettingsJump2_Colors);
         break;
 
         case e_CmdMAX:

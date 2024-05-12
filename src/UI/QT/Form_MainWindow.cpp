@@ -1441,24 +1441,20 @@ void Form_MainWindow::on_actionPaste_toolbar_triggered()
 
 void Form_MainWindow::on_actionTerminal_Size_triggered()
 {
-    
+    DoMenuTriggered(e_UIMWMenu_SettingsQuickJump_TermSize);
 }
-
 
 void Form_MainWindow::on_actionTerminal_Emulation_triggered()
 {
-    
+    DoMenuTriggered(e_UIMWMenu_SettingsQuickJump_TermEmu);
 }
-
 
 void Form_MainWindow::on_actionFont_triggered()
 {
-    
+    DoMenuTriggered(e_UIMWMenu_SettingsQuickJump_Font);
 }
-
 
 void Form_MainWindow::on_actionColors_triggered()
 {
-    
+    DoMenuTriggered(e_UIMWMenu_SettingsQuickJump_Colors);
 }
-

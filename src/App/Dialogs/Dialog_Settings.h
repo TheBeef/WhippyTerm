@@ -38,12 +38,21 @@
 /***  MACROS                           ***/
 
 /***  TYPE DEFINITIONS                 ***/
+typedef enum
+{
+    e_SettingsJump2_Default,
+    e_SettingsJump2_TermSize,
+    e_SettingsJump2_TermEmu,
+    e_SettingsJump2_Font,
+    e_SettingsJump2_Colors,
+    e_SettingsJump2MAX
+} e_SettingsJump2Type;
 
 /***  CLASS DEFINITIONS                ***/
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
-bool RunSettingsDialog(class TheMainWindow *MW,class ConSettings *SetConSettings);
+bool RunSettingsDialog(class TheMainWindow *MW,class ConSettings *SetConSettings,e_SettingsJump2Type Jump2);
 
 #endif

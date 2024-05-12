@@ -151,7 +151,7 @@ struct DPS_TextProInfo DS_DPSNoneEntry=
  *
  * SYNOPSIS:
  *    bool RunSettingsDialog(class TheMainWindow *MW,
- *          class ConSettings *SetConSettings);
+ *          class ConSettings *SetConSettings,e_SettingsJump2Type Jump2);
  *
  * PARAMETERS:
  *    MW [I] -- The main window to take info about (the main window that
@@ -160,6 +160,7 @@ struct DPS_TextProInfo DS_DPSNoneEntry=
  *                          the dialog will only set connection settings.
  *                          If this is set to NULL then it will set all
  *                          settings including the default connection settings.
+ *    Jump2 [I] -- What to display after opening the settings dialog
  *
  * FUNCTION:
  *    This function shows the new connection dialog and fill in all the
@@ -177,7 +178,7 @@ struct DPS_TextProInfo DS_DPSNoneEntry=
  *       Created
  ******************************************************************************/
 bool RunSettingsDialog(class TheMainWindow *MW,
-        class ConSettings *SetConSettings)
+        class ConSettings *SetConSettings,e_SettingsJump2Type Jump2)
 {
     bool RetValue;
     t_UIListViewCtrl *AreaList;
@@ -206,6 +207,8 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     t_UIGroupBox *Display_ClearScreen;
     unsigned int r;
     e_DS_SettingsArea FirstSelectedArea;
+    e_UIS_TabCtrl_Terminal_Page SelectTerminalPage;
+    e_UIS_TabCtrl_Display_Page SelectDisplayPage;
 
     m_SettingsMW=MW;
     m_DS_ConList=NULL;
@@ -247,11 +250,6 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         UIAddItem2ListView(AreaList,"Startup",e_DS_SettingsArea_Startup);
     }
     UIAddItem2ListView(AreaList,"Terminal",e_DS_SettingsArea_Terminal);
-
-    if(m_SettingConSettingsOnly)
-        FirstSelectedArea=e_DS_SettingsArea_Display;
-    else
-        FirstSelectedArea=e_DS_SettingsArea_Behaviour;
 
     WindowStartupPos=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_WindowStartupPos);
     UIClearComboBox(WindowStartupPos);
@@ -398,11 +396,12 @@ bool RunSettingsDialog(class TheMainWindow *MW,
 
 //    UIAddItem2ComboBox(WindowStartupPos,"None",e_WindowStartupPos_OSDefault);
 
+    TerminalTabCtrl=UIS_GetTabCtrlHandle(e_UIS_TabCtrl_Terminal);
+    DisplayTabCtrl=UIS_GetTabCtrlHandle(e_UIS_TabCtrl_Display);
+
     /* Hide anything we can't set if we are in Con Settings Only */
     if(m_SettingConSettingsOnly)
     {
-        TerminalTabCtrl=UIS_GetTabCtrlHandle(e_UIS_TabCtrl_Terminal);
-        DisplayTabCtrl=UIS_GetTabCtrlHandle(e_UIS_TabCtrl_Display);
         Display_Tabs=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_Tabs);
         Display_ClearScreen=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_ClearScreen);
 
@@ -419,6 +418,39 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     DS_SetSettingGUI();
 
     DS_RethinkGUI();
+
+    SelectTerminalPage=e_UIS_TabCtrl_Terminal_Page_Terminal;
+    SelectDisplayPage=e_UIS_TabCtrl_Display_Page_Display;
+    switch(Jump2)
+    {
+        case e_SettingsJump2_TermSize:
+            FirstSelectedArea=e_DS_SettingsArea_Terminal;
+            SelectTerminalPage=e_UIS_TabCtrl_Terminal_Page_Terminal;
+        break;
+        case e_SettingsJump2_TermEmu:
+            FirstSelectedArea=e_DS_SettingsArea_Terminal;
+            SelectTerminalPage=e_UIS_TabCtrl_Terminal_Page_DataProcessing;
+        break;
+        case e_SettingsJump2_Font:
+            FirstSelectedArea=e_DS_SettingsArea_Display;
+            SelectDisplayPage=e_UIS_TabCtrl_Display_Page_Display;
+        break;
+        case e_SettingsJump2_Colors:
+            FirstSelectedArea=e_DS_SettingsArea_Display;
+            SelectDisplayPage=e_UIS_TabCtrl_Display_Page_Colors;
+        break;
+        case e_SettingsJump2_Default:
+        case e_SettingsJump2MAX:
+        default:
+            if(m_SettingConSettingsOnly)
+                FirstSelectedArea=e_DS_SettingsArea_Display;
+            else
+                FirstSelectedArea=e_DS_SettingsArea_Behaviour;
+        break;
+    }
+
+    UITabCtrlMakeTabActiveUsingIndex(TerminalTabCtrl,SelectTerminalPage);
+    UITabCtrlMakeTabActiveUsingIndex(DisplayTabCtrl,SelectDisplayPage);
 
     UISetListViewSelectedEntry(AreaList,FirstSelectedArea);
     UIS_HandleAreaChanged(FirstSelectedArea);

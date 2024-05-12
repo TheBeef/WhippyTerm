@@ -206,6 +206,14 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionSend_Delete;
         case e_UIMWMenu_Send_Other:
             return (e_UIMenuCtrl *)realwin->ui->actionSend_Other;
+        case e_UIMWMenu_SettingsQuickJump_TermSize:
+            return (e_UIMenuCtrl *)realwin->ui->actionTerminal_Size;
+        case e_UIMWMenu_SettingsQuickJump_TermEmu:
+            return (e_UIMenuCtrl *)realwin->ui->actionTerminal_Emulation;
+        case e_UIMWMenu_SettingsQuickJump_Font:
+            return (e_UIMenuCtrl *)realwin->ui->actionFont;
+        case e_UIMWMenu_SettingsQuickJump_Colors:
+            return (e_UIMenuCtrl *)realwin->ui->actionColors;
 
         case e_UIMWMenuMAX:
         default:

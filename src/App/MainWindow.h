@@ -78,6 +78,7 @@ void Debug6(void);
         void FreeTab(class Connection *Con);
         void RethinkActiveConnectionUI(void);
         void CloseActiveConnection(void);
+        void CloseAllConnections(void);
         void ChangeConnectStatus(bool Connected);
         void Timer_CursorTimer(void);
         void ExeCmd(e_CmdType Cmd);
@@ -154,6 +155,7 @@ void Debug6(void);
         void ZoomIn(void);
         void ZoomOut(void);
         void ResetZoom(void);
+        void CloseConnection(class Connection *TabCon);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

@@ -791,7 +791,7 @@ void Form_MainWindow::on_actionClose_Tab_triggered()
 
 void Form_MainWindow::on_actionClose_All_triggered()
 {
-//    Menu_CloseAll();
+    DoMenuTriggered(e_UIMWMenu_CloseAll);
 }
 
 void Form_MainWindow::on_actionFont_Request_Test_triggered()

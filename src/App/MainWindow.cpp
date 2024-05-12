@@ -1153,6 +1153,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     i_BookmarkList bm;
     t_UIToolbarCtrl *ConnectToggle;
     e_UIMenuCtrl *CloseTabMenu;
+    e_UIMenuCtrl *CloseAllMenu;
     e_UIMenuCtrl *ConnectMenu;
     e_UIMenuCtrl *DisconnectMenu;
     e_UIMenuCtrl *ChangeConnectionNameMenu;
@@ -1188,6 +1189,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
     ConnectToggle=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_ConnectToggle);
     CloseTabMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_CloseTab);
+    CloseAllMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_CloseAll);
     ConnectMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Connect);
     DisconnectMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Disconnect);
     ChangeConnectionNameMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ChangeConnectionName);
@@ -1226,6 +1228,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     {
         UIEnableToolbar(ConnectToggle,false);
         UIEnableMenu(CloseTabMenu,false);
+        UIEnableMenu(CloseAllMenu,false);
         UICheckToolbar(ConnectToggle,false);
         UIEnableMenu(ConnectMenu,false);
         UIEnableMenu(DisconnectMenu,false);
@@ -1264,6 +1267,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     {
         UIEnableToolbar(ConnectToggle,true);
         UIEnableMenu(CloseTabMenu,true);
+        UIEnableMenu(CloseAllMenu,true);
         UIEnableMenu(ChangeConnectionNameMenu,true);
         UIEnableMenu(ConnectionOptionsMenu,true);
         UIEnableMenu(ConnectionSettingsMenu,true);
@@ -1358,10 +1362,68 @@ void TheMainWindow::CloseActiveConnection(void)
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
     TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
     if(TabCon!=NULL)
+        CloseConnection(TabCon);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::CloseConnection
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::CloseConnection(class Connection *TabCon);
+ *
+ * PARAMETERS:
+ *    TabCon [I] -- The connection to close
+ *
+ * FUNCTION:
+ *    This function closes a connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::CloseConnection(class Connection *TabCon)
+{
+    FreeTab(TabCon);
+    BridgePanel.ConnectionAddedRemoved();
+    RethinkBridgeMenu();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::CloseAllConnections
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::CloseAllConnections(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function closes all the tabs in this window.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::CloseAllConnections(void)
+{
+    t_UITabCtrl *MainTabs;
+    t_UITab *Tab;
+    class Connection *TabCon;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    if(MainTabs==NULL)
+        return;
+    while((Tab=UITabCtrlGetTabFromIndex(MainTabs,0))!=NULL)
     {
-        FreeTab(TabCon);
-        BridgePanel.ConnectionAddedRemoved();
-        RethinkBridgeMenu();
+        TabCon=(class Connection *)UITabCtrlGetID(MainTabs,Tab);
+        if(TabCon!=NULL)
+            CloseConnection(TabCon);
     }
 }
 
@@ -3321,6 +3383,7 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_ClearScreen -- Clear the screen.
  *                  e_Cmd_ClearScrollBackBuffer -- Clear the scroll back buffer
  *                  e_Cmd_CloseTab -- Close the active connection
+ *                  e_Cmd_CloseAll -- Close all the open tabs in this window
  *                  e_Cmd_Quit -- Quit the program
  *                  e_Cmd_About -- Show about dialog
  *                  e_Cmd_Settings -- Show the settings dialog
@@ -3393,6 +3456,9 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_CloseTab:
             CloseActiveConnection();
+        break;
+        case e_Cmd_CloseAll:
+            CloseAllConnections();
         break;
         case e_Cmd_Quit:
             if(m_MainWindowsList.size()>1)

@@ -1556,7 +1556,6 @@
     <addaction name="menu_Download"/>
     <addaction name="separator"/>
     <addaction name="actionClose_Tab"/>
-    <addaction name="actionClose_Window"/>
     <addaction name="actionClose_All"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
@@ -1855,9 +1854,6 @@
    </property>
   </action>
   <action name="actionClose_All">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="icon">
     <iconset resource="MainResource.qrc">
      <normaloff>:/G/Graphics/CloseAll.png</normaloff>:/G/Graphics/CloseAll.png</iconset>

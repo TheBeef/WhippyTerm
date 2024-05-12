@@ -76,12 +76,12 @@ typedef enum
 {
     e_UIMWMenu_NewTab,
 //    e_UIMWMenu_NewConnection,
-//    e_UIMWMenu_CloseAllConnections,
     e_UIMWMenu_ResetTerm,
     e_UIMWMenu_InsertHorizontalRule,
     e_UIMWMenu_ClearScreen,
     e_UIMWMenu_ClearScrollBackBuffer,
     e_UIMWMenu_CloseTab,
+    e_UIMWMenu_CloseAll,
     e_UIMWMenu_Quit,
     e_UIMWMenu_About,
     e_UIMWMenu_Settings,

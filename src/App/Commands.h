@@ -48,6 +48,7 @@ typedef enum
     e_Cmd_ClearScreen,
     e_Cmd_ClearScrollBackBuffer,
     e_Cmd_CloseTab,
+    e_Cmd_CloseAll,
     e_Cmd_Quit,
     e_Cmd_About,
     e_Cmd_Settings,

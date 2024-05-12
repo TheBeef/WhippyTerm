@@ -87,8 +87,8 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionNew_Tab;
         case e_UIMWMenu_CloseTab:
             return (e_UIMenuCtrl *)realwin->ui->actionClose_Tab;
-//        case e_UIMWMenu_CloseAllConnections:
-//            return (e_UIMenuCtrl *)realwin->ui->actionClose_All;
+        case e_UIMWMenu_CloseAll:
+            return (e_UIMenuCtrl *)realwin->ui->actionClose_All;
         case e_UIMWMenu_Quit:
             return (e_UIMenuCtrl *)realwin->ui->actionQuit;
         case e_UIMWMenu_About:

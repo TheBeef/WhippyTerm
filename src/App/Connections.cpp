@@ -63,9 +63,7 @@ using namespace std;
 //#define MAX_TIME_2_PROCESS_BYTES        1000  // 1000mS to process as many bytes as we can before we handle UI events again
 
 #define AUTOLAP_TIMEOUT                 500     // in ms
-
 #define TRANSMIT_DELAY_BUFFER_SIZE      4000    // A little under a page size
-
 #define SMART_CLIPBOARD_PASTE_TIME      250     // 250ms
 
 /*** MACROS                   ***/

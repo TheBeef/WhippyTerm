@@ -57,6 +57,7 @@ const char *m_CmdNames[]=
     "ClearScreen",                          // e_Cmd_ClearScreen
     "ClearScrollBackBuffer",                // e_Cmd_ClearScrollBackBuffer
     "CloseTab",                             // e_Cmd_CloseTab
+    "CloseAll",                             // e_Cmd_CloseAll
     "Quit",                                 // e_Cmd_Quit
     "About",                                // e_Cmd_About
     "Settings",                             // e_Cmd_Settings
@@ -152,6 +153,7 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_ClearScreen,                  // e_UIMWMenu_ClearScreen
     e_Cmd_ClearScrollBackBuffer,        // e_UIMWMenu_ClearScrollBackBuffer
     e_Cmd_CloseTab,                     // e_UIMWMenu_CloseTab
+    e_Cmd_CloseAll,                     // e_UIMWMenu_CloseAll
     e_Cmd_Quit,                         // e_UIMWMenu_Quit
     e_Cmd_About,                        // e_UIMWMenu_About
     e_Cmd_Settings,                     // e_UIMWMenu_Settings
@@ -538,6 +540,7 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     // e_Cmd_ClearScreen
     // e_Cmd_ClearScrollBackBuffer
     SetKeySeq(&KeyMapping[e_Cmd_CloseTab],KEYMOD_SHIFT|KEYMOD_CONTROL,e_UIKeysMAX,'W');
+    // e_Cmd_CloseAll
     SetKeySeq(&KeyMapping[e_Cmd_Quit],KEYMOD_SHIFT|KEYMOD_CONTROL,e_UIKeysMAX,'Q');
     // e_Cmd_About
     // e_Cmd_Settings

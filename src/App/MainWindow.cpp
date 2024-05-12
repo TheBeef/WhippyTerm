@@ -80,8 +80,7 @@ typedef enum
 /* Must match UI */
 typedef enum
 {
-    e_LeftPanelTabIndexes_Display=0,
-    e_LeftPanelTabIndexes_ConnectionOptions,
+    e_LeftPanelTabIndexes_ConnectionOptions=0,
     e_LeftPanelTabIndexes_Capture,
     e_LeftPanelTabIndexes_Upload,
     e_LeftPanelTabIndexes_Download,
@@ -2386,9 +2385,6 @@ void TheMainWindow::ShowPanel(e_MWPanelsType PanelID)
         break;
         case e_MWPanels_StopWatch:
             RightPanelTab=e_RightPanelTabIndexes_StopWatch;
-        break;
-        case e_MWPanels_Display:
-            LeftPanelTab=e_LeftPanelTabIndexes_Display;
         break;
         case e_MWPanels_Capture:
             LeftPanelTab=e_LeftPanelTabIndexes_Capture;

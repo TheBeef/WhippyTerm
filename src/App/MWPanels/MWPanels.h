@@ -42,14 +42,13 @@ typedef enum
 {
     e_MWPanels_ConnectionOptions,
     e_MWPanels_StopWatch,
-    e_MWPanels_Display,             // TBD
     e_MWPanels_Capture,
-    e_MWPanels_Upload,              // TBD
-    e_MWPanels_Downloadload,        // TBD
+    e_MWPanels_Upload,
+    e_MWPanels_Downloadload,
     e_MWPanels_Bridge,
     e_MWPanels_Hex,                 // TBD
     e_MWPanels_Injection,           // TBD
-    e_MWPanels_Buffers,             // TBD
+    e_MWPanels_Buffers,
     e_MWPanelsMAX
 } e_MWPanelsType;
 

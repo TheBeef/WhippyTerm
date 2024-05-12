@@ -179,11 +179,6 @@
                     <property name="currentIndex">
                      <number>0</number>
                     </property>
-                    <widget class="QWidget" name="Display_Tab">
-                     <attribute name="title">
-                      <string>Display</string>
-                     </attribute>
-                    </widget>
                     <widget class="QWidget" name="tab_ConnectionOptions">
                      <attribute name="title">
                       <string>Con Options</string>
@@ -1581,9 +1576,13 @@
     </property>
     <addaction name="actionSettings"/>
     <addaction name="separator"/>
+    <addaction name="actionTerminal_Size"/>
+    <addaction name="actionTerminal_Emulation"/>
+    <addaction name="actionFont"/>
+    <addaction name="actionColors"/>
+    <addaction name="separator"/>
     <addaction name="actionImport_Settings"/>
     <addaction name="actionExport_Settings"/>
-    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -2206,11 +2205,11 @@
    </property>
   </action>
   <action name="actionInsert_Time_Stamp">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="text">
     <string>I&amp;nsert Time Stamp</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionNew_Window">
@@ -2516,6 +2515,26 @@
    </property>
    <property name="toolTip">
     <string>Paste</string>
+   </property>
+  </action>
+  <action name="actionTerminal_Size">
+   <property name="text">
+    <string>Terminal Size...</string>
+   </property>
+  </action>
+  <action name="actionTerminal_Emulation">
+   <property name="text">
+    <string>Terminal Emulation...</string>
+   </property>
+  </action>
+  <action name="actionFont">
+   <property name="text">
+    <string>Font...</string>
+   </property>
+  </action>
+  <action name="actionColors">
+   <property name="text">
+    <string>Colors...</string>
    </property>
   </action>
  </widget>

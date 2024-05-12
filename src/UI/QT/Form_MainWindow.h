@@ -265,6 +265,14 @@ private slots:
     
     void on_actionPaste_toolbar_triggered();
     
+    void on_actionTerminal_Size_triggered();
+    
+    void on_actionTerminal_Emulation_triggered();
+    
+    void on_actionFont_triggered();
+    
+    void on_actionColors_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

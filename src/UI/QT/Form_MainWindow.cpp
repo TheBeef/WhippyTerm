@@ -1438,3 +1438,27 @@ void Form_MainWindow::on_actionPaste_toolbar_triggered()
 {
     DoToolbarTriggered(e_UIMWToolbar_Paste);
 }
+
+void Form_MainWindow::on_actionTerminal_Size_triggered()
+{
+    
+}
+
+
+void Form_MainWindow::on_actionTerminal_Emulation_triggered()
+{
+    
+}
+
+
+void Form_MainWindow::on_actionFont_triggered()
+{
+    
+}
+
+
+void Form_MainWindow::on_actionColors_triggered()
+{
+    
+}
+

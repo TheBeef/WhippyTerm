@@ -260,6 +260,8 @@ private slots:
     
     void on_actionSend_Escape_triggered();
     
+    void on_actionSend_Delete_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

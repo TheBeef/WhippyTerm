@@ -1515,7 +1515,7 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>Fi&amp;le</string>
+     <string>&amp;File</string>
     </property>
     <widget class="QMenu" name="menuCapture">
      <property name="title">
@@ -1563,7 +1563,7 @@
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="actionAbout_Whippy_Term"/>
    </widget>
@@ -1594,7 +1594,7 @@
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>&amp;View</string>
+     <string>V&amp;iew</string>
     </property>
     <widget class="QMenu" name="menuStop_Watch">
      <property name="title">
@@ -1623,7 +1623,7 @@
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
-     <string>Edit</string>
+     <string>&amp;Edit</string>
     </property>
     <widget class="QMenu" name="menuOther_Clipboards">
      <property name="title">
@@ -1650,7 +1650,7 @@
    </widget>
    <widget class="QMenu" name="menuConnection">
     <property name="title">
-     <string>&amp;Connection</string>
+     <string>C&amp;onnection</string>
     </property>
     <addaction name="actionConnect_Menu"/>
     <addaction name="actionDisconnect_Menu"/>
@@ -1667,7 +1667,7 @@
    </widget>
    <widget class="QMenu" name="menuTerminal">
     <property name="title">
-     <string>Te&amp;rminal</string>
+     <string>&amp;Terminal</string>
     </property>
     <addaction name="actionClear_Screen"/>
     <addaction name="actionClear_Scroll_Buffer"/>
@@ -1682,13 +1682,14 @@
     <addaction name="actionSend_Form_Feed"/>
     <addaction name="actionSend_Carriage_Return"/>
     <addaction name="actionSend_Escape"/>
+    <addaction name="actionSend_Delete"/>
     <addaction name="actionSend_Other"/>
     <addaction name="separator"/>
     <addaction name="actionReset"/>
    </widget>
    <widget class="QMenu" name="menuBookmarks">
     <property name="title">
-     <string>Boo&amp;kmarks</string>
+     <string>&amp;Bookmarks</string>
     </property>
     <addaction name="actionBookmark_this_connection"/>
     <addaction name="actionManage_Bookmarks"/>
@@ -1696,7 +1697,7 @@
    </widget>
    <widget class="QMenu" name="menuPlugins">
     <property name="title">
-     <string>Plugins</string>
+     <string>&amp;Plugins</string>
     </property>
     <addaction name="actionGet_Plugins"/>
     <addaction name="separator"/>
@@ -2508,6 +2509,11 @@
   <action name="actionSend_Other">
    <property name="text">
     <string>Send Other...</string>
+   </property>
+  </action>
+  <action name="actionSend_Delete">
+   <property name="text">
+    <string>Send Delete (0x7F)</string>
    </property>
   </action>
  </widget>

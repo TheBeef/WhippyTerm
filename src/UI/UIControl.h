@@ -175,6 +175,7 @@ void UIEnableCheckbox(t_UICheckboxCtrl *Checkbox,bool Enable);
 void UICheckCheckbox(t_UICheckboxCtrl *Checkbox,bool Checked);
 bool UIGetCheckboxCheckStatus(t_UICheckboxCtrl *Checkbox);
 void UISetCheckboxLabel(t_UICheckboxCtrl *Checkbox,const char *NewLabel);
+void UISetCheckboxVisible(t_UICheckboxCtrl *Checkbox,bool Show);
 
 /* Button */
 void UIEnableButton(t_UIButtonCtrl *Bttn,bool Enable);

@@ -3285,7 +3285,7 @@ bool DisplayText::ConvertScreenXY2Chars(int x,int y,int *CharX,int *CharY)
  *    false --- There was no selection and 'Clip' has been set to ""
  *
  * SEE ALSO:
- *    
+ *    IsThereASelection(), SelectAll(), ClearSelection()
  ******************************************************************************/
 bool DisplayText::GetSelectionString(std::string &Clip)
 {
@@ -3536,7 +3536,7 @@ bool DisplayText::GetSelectionString(std::string &Clip)
  *    false -- There is not selection (nothing to copy).
  *
  * SEE ALSO:
- *    
+ *    GetSelectionString()
  ******************************************************************************/
 bool DisplayText::IsThereASelection(void)
 {
@@ -3598,6 +3598,38 @@ void DisplayText::SelectAll(void)
         Selection_X=0;
         Selection_AnchorY=LinesCount-1;
     }
+
+    RedrawFullScreen();
+
+    SendEvent(e_DBEvent_SelectionChanged,NULL);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ClearSelection
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ClearSelection(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function sets the selection to nothing.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DisplayText::GetSelectionString()
+ ******************************************************************************/
+void DisplayText::ClearSelection(void)
+{
+    SelectionValid=false;
+    Selection_X=0;
+    Selection_Y=0;
+    Selection_AnchorX=0;
+    Selection_AnchorY=0;
 
     RedrawFullScreen();
 

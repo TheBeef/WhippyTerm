@@ -110,8 +110,8 @@ t_UIListViewCtrl *UIS_GetListViewHandle(e_UIS_ListView UIObj)
             return (t_UIListViewCtrl *)g_SettingsDialog->ui->TextHigh_listWidget;
         case e_UIS_ListView_InputProTextOther:
             return (t_UIListViewCtrl *)g_SettingsDialog->ui->Other_listWidget;
-        case e_UIS_ListView_Keyboard_CommandList:
-            return (t_UIListViewCtrl *)g_SettingsDialog->ui->Keyboard_CommandList_listWidget;
+        case e_UIS_ListView_KeyBinding_CommandList:
+            return (t_UIListViewCtrl *)g_SettingsDialog->ui->KeyBinding_CommandList_listWidget;
 
         case e_UIS_ListViewMAX:
         default:
@@ -146,8 +146,8 @@ t_UIButtonCtrl *UIS_GetButtonHandle(e_UIS_Button UIObj)
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->SelectFontPushButton;
         case e_UIS_Button_SelectCursorColor:
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->SelectCursorColor_pushButton;
-        case e_UIS_Button_KeyboardCmdSet:
-            return (t_UIButtonCtrl *)g_SettingsDialog->ui->Keyboard_CommandList_Set_pushButton;
+        case e_UIS_Button_KeyBindingCmdSet:
+            return (t_UIButtonCtrl *)g_SettingsDialog->ui->KeyBinding_CommandList_Set_pushButton;
         case e_UIS_Button_CaptureSelectFilename:
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->pushButton_CaptureSelectFilename;
         case e_UIS_Button_SelectHexDisplayFGColor:
@@ -293,7 +293,27 @@ t_UIRadioBttnCtrl *UIS_GetRadioBttnHandle(e_UIS_RadioBttns UIObj)
             return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->ClearScreen_ScrollAll_radioButton;
         case e_UIS_RadioBttn_Display_ClearScreen_ScrollWithHR:
             return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->ClearScreen_ScrollAndHR_radioButton;
-        case e_UIS_RadioBttn_SysColMAX:
+        case e_UIS_RadioBttn_Keyboard_Backspace_BS:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->Backspace_SendBS_radioButton;
+        case e_UIS_RadioBttn_Keyboard_Backspace_DEL:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->Backspace_SendDEL_radioButton;
+        case e_UIS_RadioBttn_Keyboard_Enter_CR:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->Enter_SendCR_radioButton;
+        case e_UIS_RadioBttn_Keyboard_Enter_LF:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->Enter_SendLF_radioButton;
+        case e_UIS_RadioBttn_Keyboard_Enter_CRLF:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->Enter_SendCRLF_radioButton;
+        case e_UIS_RadioBttn_Keyboard_Clipboard_None:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->ClipboardKeys_None_radioButton;
+        case e_UIS_RadioBttn_Keyboard_Clipboard_Normal:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->ClipboardKeys_Normal_radioButton;
+        case e_UIS_RadioBttn_Keyboard_Clipboard_ShiftCtrl:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->ClipboardKeys_ShiftCtrlClip_radioButton;
+        case e_UIS_RadioBttn_Keyboard_Clipboard_Alt:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->ClipboardKeys_AltClip_radioButton;
+        case e_UIS_RadioBttn_Keyboard_Clipboard_Smart:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->ClipboardKeys_SmartClip_radioButton;
+        case e_UIS_RadioBttnMAX:
         default:
         break;
     }
@@ -324,8 +344,8 @@ t_UITextInputCtrl *UIS_GetTextInputHandle(e_UIS_TextInput UIObj)
     {
         case e_UIS_TextInput_SysCol_Web:
             return (t_UITextInputCtrl *)g_SettingsDialog->ui->SysCol_Web_lineEdit;
-        case e_UIS_TextInput_Keyboard_Assigned2:
-            return (t_UITextInputCtrl *)g_SettingsDialog->ui->Keyboard_Assigned2_lineEdit;
+        case e_UIS_TextInput_KeyBinding_Assigned2:
+            return (t_UITextInputCtrl *)g_SettingsDialog->ui->KeyBinding_Assigned2_lineEdit;
         case e_UIS_TextInput_Capture_DefaultFilename:
             return (t_UITextInputCtrl *)g_SettingsDialog->ui->lineEdit_CaptureDefaultFilename;
 

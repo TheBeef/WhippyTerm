@@ -133,6 +133,7 @@ typedef enum
     e_UIMWMenu_Send_Form_Feed,
     e_UIMWMenu_Send_Carriage_Return,
     e_UIMWMenu_Send_Escape,
+    e_UIMWMenu_Send_Delete,
     e_UIMWMenu_Send_Other,
     e_UIMWMenuMAX
 } e_UIMWMenuType;

@@ -600,7 +600,7 @@ void DisplayBase::DoLineFeed(void)
  *    false --- There was no selection and 'Clip' has been set to ""
  *
  * SEE ALSO:
- *    DisplayBase::IsThereASelection(), DisplayBase::SelectAll()
+ *    IsThereASelection(), SelectAll(), ClearSelection()
  ******************************************************************************/
 bool DisplayBase::GetSelectionString(std::string &Clip)
 {
@@ -655,6 +655,30 @@ bool DisplayBase::IsThereASelection(void)
  *    DisplayBase::GetSelectionString()
  ******************************************************************************/
 void DisplayBase::SelectAll(void)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::ClearSelection
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::ClearSelection(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function sets the selection to nothing.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    GetSelectionString()
+ ******************************************************************************/
+void DisplayBase::ClearSelection(void)
 {
     /* Do nothing */
 }

@@ -1427,3 +1427,8 @@ void Form_MainWindow::on_actionSend_Escape_triggered()
     DoMenuTriggered(e_UIMWMenu_Send_Escape);
 }
 
+void Form_MainWindow::on_actionSend_Delete_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Send_Delete);
+}
+

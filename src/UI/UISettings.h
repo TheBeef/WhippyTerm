@@ -62,7 +62,7 @@ enum e_UIS_ListView
     e_UIS_ListView_AreaList=0,
     e_UIS_ListView_InputProTextHighlight,
     e_UIS_ListView_InputProTextOther,
-    e_UIS_ListView_Keyboard_CommandList,
+    e_UIS_ListView_KeyBinding_CommandList,
     e_UIS_ListViewMAX
 };
 
@@ -90,7 +90,7 @@ enum e_UIS_Button
     e_UIS_Button_SysCol_Apply,
     e_UIS_Button_SelectFont,
     e_UIS_Button_SelectCursorColor,
-    e_UIS_Button_KeyboardCmdSet,
+    e_UIS_Button_KeyBindingCmdSet,
     e_UIS_Button_CaptureSelectFilename,
     e_UIS_Button_SelectHexDisplayFGColor,
     e_UIS_Button_SelectHexDisplayBGColor,
@@ -148,7 +148,17 @@ enum e_UIS_RadioBttns
     e_UIS_RadioBttn_Display_ClearScreen_Scroll,
     e_UIS_RadioBttn_Display_ClearScreen_ScrollAll,
     e_UIS_RadioBttn_Display_ClearScreen_ScrollWithHR,
-    e_UIS_RadioBttn_SysColMAX
+    e_UIS_RadioBttn_Keyboard_Backspace_BS,
+    e_UIS_RadioBttn_Keyboard_Backspace_DEL,
+    e_UIS_RadioBttn_Keyboard_Enter_CR,
+    e_UIS_RadioBttn_Keyboard_Enter_LF,
+    e_UIS_RadioBttn_Keyboard_Enter_CRLF,
+    e_UIS_RadioBttn_Keyboard_Clipboard_None,
+    e_UIS_RadioBttn_Keyboard_Clipboard_Normal,
+    e_UIS_RadioBttn_Keyboard_Clipboard_ShiftCtrl,
+    e_UIS_RadioBttn_Keyboard_Clipboard_Alt,
+    e_UIS_RadioBttn_Keyboard_Clipboard_Smart,
+    e_UIS_RadioBttnMAX
 };
 
 enum e_UIS_ScrollBar
@@ -162,7 +172,7 @@ enum e_UIS_ScrollBar
 enum e_UIS_TextInput
 {
     e_UIS_TextInput_SysCol_Web,   // SysCol_Web_lineEdit
-    e_UIS_TextInput_Keyboard_Assigned2,
+    e_UIS_TextInput_KeyBinding_Assigned2,
     e_UIS_TextInput_Capture_DefaultFilename,
     e_UIS_TextInputMAX
 };
@@ -203,6 +213,7 @@ enum e_UIS_TabCtrl_Terminal_Page
     e_UIS_TabCtrl_Terminal_Page_Terminal,
     e_UIS_TabCtrl_Terminal_Page_DataProcessing,
     e_UIS_TabCtrl_Terminal_Page_Keyboard,
+    e_UIS_TabCtrl_Terminal_Page_KeyBinding,
     e_UIS_TabCtrl_Terminal_PageMAX
 };
 
@@ -226,8 +237,15 @@ typedef enum
     e_DSEvent_StringInputTextChange,
     e_DSEvent_ComboBoxIndexChange,
     e_DSEvent_ListViewChange,
+    e_DSEvent_TabChange,
     e_DSEventMAX
 } e_DSEventType;
+
+struct DSEventDataTab
+{
+    enum e_UIS_TabCtrl TabID;
+    e_UIS_TabCtrl_Terminal_Page Index;
+};
 
 struct DSEventDataBttn
 {
@@ -284,6 +302,7 @@ union DSEventData
     struct DSEventDataStringChange StrInput;
     struct DSEventDataComboBox ComboBox;
     struct DSEventDataListView ListView;
+    struct DSEventDataTab Tab;
 };
 
 struct DSEvent

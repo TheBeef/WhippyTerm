@@ -99,13 +99,13 @@ private slots:
     
     void on_SysColPrev_DefaultBG_radioButton_clicked();
     
-    void on_Keyboard_CommandList_listWidget_itemClicked(QListWidgetItem *item);
+    void on_KeyBinding_CommandList_listWidget_itemClicked(QListWidgetItem *item);
     
     void on_SelectCursorColor_pushButton_clicked();
     
-    void on_Keyboard_CommandList_Set_pushButton_clicked();
+    void on_KeyBinding_CommandList_Set_pushButton_clicked();
     
-    void on_Keyboard_CommandList_listWidget_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
+    void on_KeyBinding_CommandList_listWidget_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
     
     void on_pushButton_CaptureSelectFilename_clicked();
     
@@ -116,6 +116,28 @@ private slots:
     void on_HexDisplay_SelectBGColor_pushButton_clicked();
     
     void on_HexDisplay_SelectSelBGColor_pushButton_clicked();
+    
+    void on_Backspace_SendBS_radioButton_toggled(bool checked);
+    
+    void on_Backspace_SendDEL_radioButton_toggled(bool checked);
+    
+    void on_Enter_SendCR_radioButton_toggled(bool checked);
+    
+    void on_Enter_SendLF_radioButton_toggled(bool checked);
+    
+    void on_Enter_SendCRLF_radioButton_toggled(bool checked);
+    
+    void on_ClipboardKeys_None_radioButton_toggled(bool checked);
+    
+    void on_ClipboardKeys_Normal_radioButton_toggled(bool checked);
+    
+    void on_ClipboardKeys_ShiftCtrlClip_radioButton_toggled(bool checked);
+    
+    void on_ClipboardKeys_AltClip_radioButton_toggled(bool checked);
+    
+    void on_ClipboardKeys_SmartClip_radioButton_toggled(bool checked);
+    
+    void on_Terminal_tabWidget_currentChanged(int index);
     
 private:
     bool DoingEvent;

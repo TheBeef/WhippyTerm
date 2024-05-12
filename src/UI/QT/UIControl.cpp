@@ -176,6 +176,13 @@ void UISetCheckboxLabel(t_UICheckboxCtrl *Checkbox,const char *NewLabel)
     cb->setText(NewLabel);
 }
 
+void UISetCheckboxVisible(t_UICheckboxCtrl *Checkbox,bool Show)
+{
+    QCheckBox *cb=(QCheckBox *)Checkbox;
+
+    cb->setVisible(Show);
+}
+
 /*************************************/
 /* ComboBox                          */
 /*************************************/

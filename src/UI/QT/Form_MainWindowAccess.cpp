@@ -202,6 +202,8 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionSend_Carriage_Return;
         case e_UIMWMenu_Send_Escape:
             return (e_UIMenuCtrl *)realwin->ui->actionSend_Escape;
+        case e_UIMWMenu_Send_Delete:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Delete;
         case e_UIMWMenu_Send_Other:
             return (e_UIMenuCtrl *)realwin->ui->actionSend_Other;
 

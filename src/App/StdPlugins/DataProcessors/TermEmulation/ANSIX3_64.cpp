@@ -344,17 +344,12 @@ PG_BOOL ANSIX364Decoder_ProcessKeyPress(t_DataProcessorHandleType *DataHandle,
                 SendLen=1;
             break;
             case e_UIKeys_Backspace:
-                SendStr[0]=8;
-                SendLen=1;
-            break;
+                m_DPS->SendBackspace();
+            return true;
             case e_UIKeys_Return:
-                SendStr[0]=13;
-                SendLen=1;
-            break;
             case e_UIKeys_Enter:
-                SendStr[0]=10;
-                SendLen=1;
-            break;
+                m_DPS->SendEnter();
+            return true;
             case e_UIKeys_Delete:
                 SendStr[0]=127;
                 SendLen=1;

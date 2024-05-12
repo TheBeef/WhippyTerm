@@ -431,13 +431,11 @@ PG_BOOL BasicCtrlCharsDecoder_ProcessKeyPress(
                 c=9;
             break;
             case e_UIKeys_Backspace:
-                c=8;
+                m_DPS->SendBackspace();
             break;
             case e_UIKeys_Return:
-                c=13;
-            break;
             case e_UIKeys_Enter:
-                c=10;
+                m_DPS->SendEnter();
             break;
             case e_UIKeys_Delete:
                 c=127;

@@ -104,6 +104,8 @@ uint32_t DPS_GetSysColor(uint32_t SysColShade,uint32_t SysColor);
 uint32_t DPS_GetSysDefaultColor(uint32_t DefaultColor);
 void DPS_NoteNonPrintable(const char *CodeStr);
 void DPS_DoTab(void);
+void DPS_SendBackspace(void);
+void DPS_SendEnter(void);
 
 /*** VARIABLE DEFINITIONS     ***/
 
@@ -132,6 +134,8 @@ struct DPS_API g_DPSAPI=
     DPS_GetSysDefaultColor,
     DPS_NoteNonPrintable,
     DPS_DoTab,
+    DPS_SendBackspace,
+    DPS_SendEnter,
 };
 t_DPSDataProcessorsType m_DataProcessors;     // All available data processors
 
@@ -1324,5 +1328,55 @@ void DPS_NoteNonPrintable(const char *CodeStr)
 void DPS_DoTab(void)
 {
     Con_DoFunction(e_ConFunc_Tab);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_SendBackspace
+ *
+ * SYNOPSIS:
+ *    void DPS_SendBackspace(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function send the backspace char.  What the backspace char is
+ *    depends on what the user has selected.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DPS_SendBackspace(void)
+{
+    Con_DoFunction(e_ConFunc_SendBackspace);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_SendEnter
+ *
+ * SYNOPSIS:
+ *    void DPS_SendEnter(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function send the enter char.  What the enter char is
+ *    depends on what the user has selected.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DPS_SendEnter(void)
+{
+    Con_DoFunction(e_ConFunc_SendEnter);
 }
 

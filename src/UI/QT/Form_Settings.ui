@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>792</width>
+    <width>754</width>
     <height>654</height>
    </rect>
   </property>
@@ -36,7 +36,7 @@
       <item>
        <widget class="QStackedWidget" name="Editing_stackedWidget">
         <property name="currentIndex">
-         <number>2</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="page_Panel">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -11980,6 +11980,193 @@ p, li { white-space: pre-wrap; }
              <attribute name="title">
               <string>Keyboard</string>
              </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_38">
+              <item>
+               <widget class="QWidget" name="widget_4" native="true">
+                <layout class="QHBoxLayout" name="horizontalLayout_23">
+                 <item>
+                  <widget class="QGroupBox" name="groupBox_19">
+                   <property name="title">
+                    <string>Backspace Key</string>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_23">
+                    <item>
+                     <widget class="QRadioButton" name="Backspace_SendBS_radioButton">
+                      <property name="text">
+                       <string>Send BS (0x08)</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="Backspace_SendDEL_radioButton">
+                      <property name="text">
+                       <string>Send DEL (0x7F)</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_16">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QGroupBox" name="groupBox_21">
+                   <property name="title">
+                    <string>Enter Key</string>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_36">
+                    <item>
+                     <widget class="QRadioButton" name="Enter_SendLF_radioButton">
+                      <property name="text">
+                       <string>Send LF (0x0A)</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="Enter_SendCR_radioButton">
+                      <property name="text">
+                       <string>Send CR (0x0D)</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="Enter_SendCRLF_radioButton">
+                      <property name="text">
+                       <string>Send CR+LF (0x0D+0x0A)</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_17">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_22">
+                <property name="title">
+                 <string>Clipboard Keys</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_37">
+                 <item>
+                  <widget class="QLabel" name="label_11">
+                   <property name="text">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This controls how the clipboard keys (CTRL-C, CTRL-V, CTRL-X) behave.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="wordWrap">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="ClipboardKeys_None_radioButton">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;No clipboard handling.&lt;/p&gt;&lt;p&gt;Mouse and menus are the only way to copy and paste.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="text">
+                    <string>None</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="ClipboardKeys_Normal_radioButton">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The clipboard keys as the same in other programs.&lt;/p&gt;&lt;p&gt;CTRL+X to cut.&lt;/p&gt;&lt;p&gt;CTRL+C to copy.&lt;/p&gt;&lt;p&gt;CTRL+V to paste.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="text">
+                    <string>Normal</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="ClipboardKeys_ShiftCtrlClip_radioButton">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clipboard keys work the same as normal however SHIFT must also be held.&lt;/p&gt;&lt;p&gt;SHIFT+CTRL+X to cut.&lt;/p&gt;&lt;p&gt;SHIFT+CTRL+C to copy.&lt;/p&gt;&lt;p&gt;SHIFT+CTRL+V to paste.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="text">
+                    <string>Shift+Ctrl for clipboard</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="ClipboardKeys_AltClip_radioButton">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clipboard keys work the same as normal however ALT is used instead of CTRL.&lt;/p&gt;&lt;p&gt;ALT+X to cut.&lt;/p&gt;&lt;p&gt;ALT+C to copy.&lt;/p&gt;&lt;p&gt;ALT+V to paste.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="text">
+                    <string>Alt for clipboard</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="ClipboardKeys_SmartClip_radioButton">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use smart clipboard.&lt;/p&gt;&lt;p&gt;With smart clipboard, if you have a selection then CTRL-C will copy the selection. If there is no selection then a ^C (0x03) will be sent.&lt;/p&gt;&lt;p&gt;Pressing CTRL-X will work the same as CTRL-C&lt;/p&gt;&lt;p&gt;Pressing CTRL-V will send the clipboard, however if you press it 2 time fast it will send a ^V (0x16) instead of pasting from the clipboard.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="text">
+                    <string>Smart clipboard</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="verticalSpacer_18">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_15">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="KeyBindings_tab">
+             <attribute name="title">
+              <string>Key Bindings</string>
+             </attribute>
              <layout class="QVBoxLayout" name="verticalLayout_20">
               <item>
                <widget class="QGroupBox" name="groupBox_25">
@@ -11988,7 +12175,7 @@ p, li { white-space: pre-wrap; }
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_26">
                  <item>
-                  <widget class="QListWidget" name="Keyboard_CommandList_listWidget"/>
+                  <widget class="QListWidget" name="KeyBinding_CommandList_listWidget"/>
                  </item>
                 </layout>
                </widget>
@@ -12000,10 +12187,10 @@ p, li { white-space: pre-wrap; }
                 </property>
                 <layout class="QHBoxLayout" name="horizontalLayout_29">
                  <item>
-                  <widget class="QLineEdit" name="Keyboard_Assigned2_lineEdit"/>
+                  <widget class="QLineEdit" name="KeyBinding_Assigned2_lineEdit"/>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="Keyboard_CommandList_Set_pushButton">
+                  <widget class="QPushButton" name="KeyBinding_CommandList_Set_pushButton">
                    <property name="text">
                     <string>Set</string>
                    </property>

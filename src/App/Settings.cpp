@@ -459,7 +459,7 @@ class ScreenClearCFG : public TinyCFGBaseData
 };
 bool ScreenClearCFG::LoadData(string &LoadedString)
 {
-    *Ptr=e_ScreenClear_Clear;  /* Defaults to white */
+    *Ptr=e_ScreenClear_Clear;  /* Defaults to clear */
 
     if(strcmp(LoadedString.c_str(),"Clear")==0)
         *Ptr=e_ScreenClear_Clear;
@@ -584,6 +584,198 @@ bool Settings::RegisterKeyCommandType(class TinyCFG &cfg,const char *XmlName,
 
     return cfg.RegisterGeneric(NewDataClass);
 }
+///////////////////
+class BackspaceKeyCFG : public TinyCFGBaseData
+{
+   public:
+      e_BackspaceKeyType *Ptr;
+      bool LoadData(string &LoadedString);
+      bool SaveData(string &StoreString);
+};
+bool BackspaceKeyCFG::LoadData(string &LoadedString)
+{
+    *Ptr=e_BackspaceKey_BS;  /* Defaults to BS */
+
+    if(strcmp(LoadedString.c_str(),"BS")==0)
+        *Ptr=e_BackspaceKey_BS;
+    if(strcmp(LoadedString.c_str(),"DEL")==0)
+        *Ptr=e_BackspaceKey_DEL;
+
+    return true;
+}
+
+bool BackspaceKeyCFG::SaveData(string &StoreString)
+{
+    switch(*Ptr)
+    {
+        default:
+        case e_BackspaceKeyMAX:
+        case e_BackspaceKey_BS:
+            StoreString="BS";
+        break;
+        case e_BackspaceKey_DEL:
+            StoreString="DEL";
+        break;
+    }
+    return true;
+}
+
+bool ConSettings::RegisterBackspaceKey(class TinyCFG &cfg,const char *XmlName,
+      e_BackspaceKeyType &Data)
+{
+    class BackspaceKeyCFG *NewDataClass;
+
+    /* Make a new class to handle this new piece of data */
+    try
+    {
+        NewDataClass=new BackspaceKeyCFG;
+    }
+    catch(std::bad_alloc const &)
+    {
+        return false;
+    }
+
+    /* Setup the data */
+    NewDataClass->Ptr=&Data;
+    NewDataClass->XmlName=XmlName;
+
+    return cfg.RegisterGeneric(NewDataClass);
+}
+///////////////////
+class EnterKeyCFG : public TinyCFGBaseData
+{
+   public:
+      e_EnterKeyType *Ptr;
+      bool LoadData(string &LoadedString);
+      bool SaveData(string &StoreString);
+};
+bool EnterKeyCFG::LoadData(string &LoadedString)
+{
+    *Ptr=e_EnterKey_LF;  /* Defaults to LF */
+
+    if(strcmp(LoadedString.c_str(),"LF")==0)
+        *Ptr=e_EnterKey_LF;
+    if(strcmp(LoadedString.c_str(),"CR")==0)
+        *Ptr=e_EnterKey_CR;
+    if(strcmp(LoadedString.c_str(),"CRLF")==0)
+        *Ptr=e_EnterKey_CRLF;
+
+    return true;
+}
+
+bool EnterKeyCFG::SaveData(string &StoreString)
+{
+    switch(*Ptr)
+    {
+        default:
+        case e_EnterKeyMAX:
+        case e_EnterKey_LF:
+            StoreString="LF";
+        break;
+        case e_EnterKey_CR:
+            StoreString="CR";
+        break;
+        case e_EnterKey_CRLF:
+            StoreString="CRLF";
+        break;
+    }
+    return true;
+}
+
+bool ConSettings::RegisterEnterKey(class TinyCFG &cfg,const char *XmlName,
+      e_EnterKeyType &Data)
+{
+    class EnterKeyCFG *NewDataClass;
+
+    /* Make a new class to handle this new piece of data */
+    try
+    {
+        NewDataClass=new EnterKeyCFG;
+    }
+    catch(std::bad_alloc const &)
+    {
+        return false;
+    }
+
+    /* Setup the data */
+    NewDataClass->Ptr=&Data;
+    NewDataClass->XmlName=XmlName;
+
+    return cfg.RegisterGeneric(NewDataClass);
+}
+///////////////////
+class ClipboardModeCFG : public TinyCFGBaseData
+{
+   public:
+      e_ClipboardModeType *Ptr;
+      bool LoadData(string &LoadedString);
+      bool SaveData(string &StoreString);
+};
+bool ClipboardModeCFG::LoadData(string &LoadedString)
+{
+    *Ptr=e_ClipboardMode_Smart;  /* Defaults to smart */
+
+    if(strcmp(LoadedString.c_str(),"None")==0)
+        *Ptr=e_ClipboardMode_None;
+    if(strcmp(LoadedString.c_str(),"Normal")==0)
+        *Ptr=e_ClipboardMode_Normal;
+    if(strcmp(LoadedString.c_str(),"SHIFTCTRL")==0)
+        *Ptr=e_ClipboardMode_ShiftCtrl;
+    if(strcmp(LoadedString.c_str(),"ALT")==0)
+        *Ptr=e_ClipboardMode_Alt;
+    if(strcmp(LoadedString.c_str(),"Smart")==0)
+        *Ptr=e_ClipboardMode_Smart;
+
+    return true;
+}
+
+bool ClipboardModeCFG::SaveData(string &StoreString)
+{
+    switch(*Ptr)
+    {
+        default:
+        case e_ClipboardModeMAX:
+        case e_ClipboardMode_Smart:
+            StoreString="Smart";
+        break;
+        case e_ClipboardMode_None:
+            StoreString="None";
+        break;
+        case e_ClipboardMode_Normal:
+            StoreString="Normal";
+        break;
+        case e_ClipboardMode_ShiftCtrl:
+            StoreString="SHIFTCTRL";
+        break;
+        case e_ClipboardMode_Alt:
+            StoreString="ALT";
+        break;
+    }
+    return true;
+}
+
+bool ConSettings::RegisterClipboardMode(class TinyCFG &cfg,const char *XmlName,
+      e_ClipboardModeType &Data)
+{
+    class ClipboardModeCFG *NewDataClass;
+
+    /* Make a new class to handle this new piece of data */
+    try
+    {
+        NewDataClass=new ClipboardModeCFG;
+    }
+    catch(std::bad_alloc const &)
+    {
+        return false;
+    }
+
+    /* Setup the data */
+    NewDataClass->Ptr=&Data;
+    NewDataClass->XmlName=XmlName;
+
+    return cfg.RegisterGeneric(NewDataClass);
+}
+////////////////////
 
 /*******************************************************************************
  * NAME:
@@ -724,6 +916,12 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
     cfg.StartBlock("KeyPressProcessors");
     cfg.Register("EnabledKeyPressProcessors",EnabledKeyPressProcessors);
     cfg.EndBlock();
+
+    cfg.StartBlock("Keyboard");
+        RegisterBackspaceKey(cfg,"BackspaceKey",BackspaceKeyMode);
+        RegisterEnterKey(cfg,"EnterKey",EnterKeyMode);
+        RegisterClipboardMode(cfg,"ClipboardMode",ClipboardMode);
+    cfg.EndBlock();
 }
 
 bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
@@ -764,6 +962,14 @@ bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
         return false;
     if(Con1.DataProcessorType!=Con2.DataProcessorType)
         return false;
+    if(Con1.BackspaceKeyMode!=Con2.BackspaceKeyMode)
+        return false;
+    if(Con1.EnterKeyMode!=Con2.EnterKeyMode)
+        return false;
+    if(Con1.ClipboardMode!=Con2.ClipboardMode)
+        return false;
+
+
 
     if(Con1.EnabledTextDataProcessors!=Con2.EnabledTextDataProcessors)
         return false;
@@ -854,6 +1060,10 @@ void ConSettings::DefaultSettings(void)
     TermSizeHeight=25;
     ScrollBufferLines=10000;
     CenterTextInWindow=true;
+
+    BackspaceKeyMode=e_BackspaceKey_BS;
+    EnterKeyMode=e_EnterKey_LF;
+    ClipboardMode=e_ClipboardMode_Smart;
 
     DataProcessorType=e_DataProcessorType_Text;
     EnabledTextDataProcessors.clear();

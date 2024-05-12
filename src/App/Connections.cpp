@@ -58,13 +58,15 @@ using namespace std;
 
 /*** DEFINES                  ***/
 #define MAX_BYTES_PROCESSED_AT_1_TIME   1000    // Process up to 1k of data before redrawing the screen
-//#define MAX_TIME_2_PROCESS_BYTES        10      // 10mS to process as many bytes as we can before we handle UI events again
-#define MAX_TIME_2_PROCESS_BYTES        100      // 100mS to process as many bytes as we can before we handle UI events again
-//#define MAX_TIME_2_PROCESS_BYTES        1000      // 1000mS to process as many bytes as we can before we handle UI events again
+//#define MAX_TIME_2_PROCESS_BYTES        10    // 10mS to process as many bytes as we can before we handle UI events again
+#define MAX_TIME_2_PROCESS_BYTES        100     // 100mS to process as many bytes as we can before we handle UI events again
+//#define MAX_TIME_2_PROCESS_BYTES        1000  // 1000mS to process as many bytes as we can before we handle UI events again
 
-#define AUTOLAP_TIMEOUT                 500    // in ms
+#define AUTOLAP_TIMEOUT                 500     // in ms
 
-#define TRANSMIT_DELAY_BUFFER_SIZE      4000   // A little under a page size
+#define TRANSMIT_DELAY_BUFFER_SIZE      4000    // A little under a page size
+
+#define SMART_CLIPBOARD_PASTE_TIME      250     // 250ms
 
 /*** MACROS                   ***/
 
@@ -75,6 +77,7 @@ typedef t_ConnectionListType::iterator i_ConnectionListType;
 /*** FUNCTION PROTOTYPES      ***/
 void Con_ComTestTimeout(uintptr_t UserData);
 void Con_DelayTransmitTimeout(uintptr_t UserData);
+void Con_SmartClipTimeout(uintptr_t UserData);
 
 /*** VARIABLE DEFINITIONS     ***/
 t_ConnectionListType m_Connections;
@@ -292,6 +295,33 @@ void Con_DelayTransmitTimeout(uintptr_t UserData)
 
 /*******************************************************************************
  * NAME:
+ *    Con_SmartClipTimeout
+ *
+ * SYNOPSIS:
+ *    void Con_SmartClipTimeout(uintptr_t UserData);
+ *
+ * PARAMETERS:
+ *    UsedData [I] -- The connection that this timer is for
+ *
+ * FUNCTION:
+ *    This function is a call back from the UI that is called when the
+ *    smart clip timer goes off.  It just calls the InformOfSmartClipTimeout()
+ *    function.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Con_SmartClipTimeout(uintptr_t UserData)
+{
+    class Connection *Con=(class Connection *)UserData;
+    Con->InformOfSmartClipTimeout();
+}
+
+/*******************************************************************************
+ * NAME:
  *    Con_ApplySettings2AllConnections
  *
  * SYNOPSIS:
@@ -371,11 +401,16 @@ Connection::Connection(const char *URI)
     if(TransmitDelayTimer==NULL)
         throw("Failed to allocate delay timer");
 
+    SmartClipTimer=AllocUITimer();
+    if(SmartClipTimer==NULL)
+        throw("Failed to allocate smart clipboard timer");
+
     if(!SetConnectionBasedOnURI(URI))
         throw("Failed to setup the connection");
 
     SetupUITimer(TransmitDelayTimer,Con_DelayTransmitTimeout,(uintptr_t)this,
             false);
+    SetupUITimer(SmartClipTimer,Con_SmartClipTimeout,(uintptr_t)this,false);
 
     IsConnected=false;
     BlockSendDevice=false;
@@ -521,6 +556,12 @@ void Connection::FreeConnectionResources(bool FreeDB)
     {
         FreeUITimer(ComTest.Timer);
         ComTest.Timer=NULL;
+    }
+
+    if(SmartClipTimer!=NULL)
+    {
+        FreeUITimer(SmartClipTimer);
+        SmartClipTimer=NULL;
     }
 
     /* Free the hex buffer */
@@ -1294,6 +1335,7 @@ bool Connection::KeyPress(uint8_t Mods,e_UIKeys Key,const uint8_t *TextPtr,
         unsigned int TextLen)
 {
     bool RetValue;
+    e_CmdType DoCmd;
 
     if(IOHandle==NULL || Display==NULL || MW==NULL)
         return false;
@@ -1307,14 +1349,77 @@ bool Connection::KeyPress(uint8_t Mods,e_UIKeys Key,const uint8_t *TextPtr,
 
     Con_SetActiveConnection(this);
 
-    RetValue=false;
-    if(!DPS_ProcessorKeyPress(TextPtr,TextLen,Key,Mods))
+    /* Handle Cut/Copy/Paste */
+    DoCmd=e_CmdMAX;
+    if(Key==e_UIKeysMAX)
     {
-        /* Send the key out */
-        if(TextLen>0)
+        switch(CustomSettings.ClipboardMode)
         {
-            WriteData(TextPtr,TextLen,e_ConWriteSource_Keyboard);
-            RetValue=true;
+            case e_ClipboardMode_None:
+            break;
+            case e_ClipboardMode_Normal:
+                if(Mods&KEYMOD_CONTROL &&
+                        !(Mods&KEYMOD_SHIFT || Mods&KEYMOD_ALT))
+                {
+                    if(*TextPtr=='C')
+                        DoCmd=e_Cmd_Copy;
+                    if(*TextPtr=='X')
+                        DoCmd=e_Cmd_Copy;
+                    if(*TextPtr=='V')
+                        DoCmd=e_Cmd_Paste;
+                }
+            break;
+            case e_ClipboardMode_ShiftCtrl:
+                if(Mods&KEYMOD_CONTROL && Mods&KEYMOD_SHIFT &&
+                        !(Mods&KEYMOD_ALT))
+                {
+                    if(*TextPtr=='C')
+                        DoCmd=e_Cmd_Copy;
+                    if(*TextPtr=='X')
+                        DoCmd=e_Cmd_Copy;
+                    if(*TextPtr=='V')
+                        DoCmd=e_Cmd_Paste;
+                }
+            break;
+            case e_ClipboardMode_Alt:
+                if(Mods&KEYMOD_ALT && !(Mods&KEYMOD_CONTROL ||
+                        Mods&KEYMOD_SHIFT))
+                {
+                    if(*TextPtr=='C' || *TextPtr=='c')
+                        DoCmd=e_Cmd_Copy;
+                    if(*TextPtr=='X' || *TextPtr=='x')
+                        DoCmd=e_Cmd_Copy;
+                    if(*TextPtr=='V' || *TextPtr=='v')
+                        DoCmd=e_Cmd_Paste;
+                }
+            break;
+            case e_ClipboardMode_Smart:
+            case e_ClipboardModeMAX:
+            default:
+                if(Mods&KEYMOD_CONTROL && !(Mods&KEYMOD_ALT))
+                {
+                    DoCmd=HandleSmartClipboard(TextPtr[0]);
+                }
+            break;
+        }
+    }
+
+    if(DoCmd!=e_CmdMAX)
+    {
+        MW->ExeCmd(DoCmd);
+        RetValue=true;
+    }
+    else
+    {
+        RetValue=false;
+        if(!DPS_ProcessorKeyPress(TextPtr,TextLen,Key,Mods))
+        {
+            /* Send the key out */
+            if(TextLen>0)
+            {
+                WriteData(TextPtr,TextLen,e_ConWriteSource_Keyboard);
+                RetValue=true;
+            }
         }
     }
 
@@ -2070,6 +2175,9 @@ uint16_t Connection::GetAttribs(void)
 void Connection::DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
         uintptr_t Arg3,uintptr_t Arg4)
 {
+    uint8_t SendBuff[2];
+    int Len;
+
     if(Display==NULL)
         return;
 
@@ -2098,6 +2206,41 @@ void Connection::DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
         break;
         case e_ConFunc_NoteNonPrintable:
             Display->NoteNonPrintable((const char *)Arg1);
+        break;
+        case e_ConFunc_SendBackspace:
+            switch(CustomSettings.BackspaceKeyMode)
+            {
+                case e_BackspaceKey_DEL:
+                    SendBuff[0]=127;
+                break;
+                case e_BackspaceKey_BS:
+                case e_BackspaceKeyMAX:
+                default:
+                    SendBuff[0]=8;
+                break;
+            }
+            WriteData(SendBuff,1,e_ConWriteSource_Keyboard);
+        break;
+        case e_ConFunc_SendEnter:
+            switch(CustomSettings.EnterKeyMode)
+            {
+                case e_EnterKey_CRLF:
+                    SendBuff[0]=13;
+                    SendBuff[1]=10;
+                    Len=2;
+                break;
+                case e_EnterKey_CR:
+                    SendBuff[0]=13;
+                    Len=1;
+                break;
+                case e_EnterKey_LF:
+                case e_EnterKeyMAX:
+                default:
+                    SendBuff[0]=10;
+                    Len=1;
+                break;
+            }
+            WriteData(SendBuff,Len,e_ConWriteSource_Keyboard);
         break;
 
         case e_ConFuncMAX:
@@ -2338,6 +2481,9 @@ void Connection::CopySelectionToClipboard(void)
     {
         UI_SetClipboardText(SelectContents,e_Clipboard_Selection);
         UI_SetClipboardText(SelectContents,e_Clipboard_Clipboard);
+
+        /* We also clear the selection on success */
+        Display->ClearSelection();
     }
 }
 
@@ -6064,3 +6210,105 @@ void Connection::HandleMouseWheelZoom(int Steps)
         ZoomIn();
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Connection::HandleSmartClipboard
+ *
+ * SYNOPSIS:
+ *    e_CmdType Connection::HandleSmartClipboard(char key);
+ *
+ * PARAMETERS:
+ *    key [I] -- What key was pressed ('c','x','v').
+ *
+ * FUNCTION:
+ *    This function handles the smart clipboard function.
+ *
+ *    Smart clipboard:
+ *      * CTRL-C
+ *          * If there is a selection copy it and clear the selection.
+ *          * If there is no selected send ^C
+ *      * CTRL-X
+ *          * Same as CTRL-C
+ *      * CTRL-V
+ *          * Note that ^V pressed, wait .250 seconds if ^V not pressed
+ *            again, paste.  If it was press again in that time then
+ *            send ^V
+ *
+ * RETURNS:
+ *    The command to do or 'e_CmdMAX' for none.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+e_CmdType Connection::HandleSmartClipboard(char key)
+{
+    switch(key)
+    {
+        case 'X':
+        case 'C':
+        case 'x':
+        case 'c':
+            if(IsThereASelection())
+            {
+                return e_Cmd_Copy;
+            }
+            else
+            {
+                /* We are just sending the control code */
+                return e_CmdMAX;
+            }
+        break;
+        case 'V':
+        case 'v':
+            if(UITimerRunning(SmartClipTimer))
+            {
+                /* Timer already running, this means the user pressed ^V
+                   2 times and we should send ^V */
+                UITimerStop(SmartClipTimer);
+
+                /* We are just sending the control code */
+                return e_CmdMAX;
+            }
+            else
+            {
+                /* No timer means we need to start one */
+                UITimerSetTimeout(SmartClipTimer,SMART_CLIPBOARD_PASTE_TIME);
+                UITimerStart(SmartClipTimer);
+
+                /* Do nothing */
+                return e_Cmd_NOP;
+            }
+        break;
+        default:
+            return e_CmdMAX;
+    }
+    return e_CmdMAX;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::InformOfSmartClipTimeout
+ *
+ * SYNOPSIS:
+ *    void Connection::InformOfSmartClipTimeout(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called using the smart clipboard and the user has
+ *    pressed paste and didn't press it again.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::InformOfSmartClipTimeout(void)
+{
+    UITimerStop(SmartClipTimer);
+
+    /* User didn't press the ^V again so we do a paste */
+    MW->ExeCmd(e_Cmd_Paste);
+}

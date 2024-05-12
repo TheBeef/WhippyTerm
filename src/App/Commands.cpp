@@ -50,6 +50,7 @@ static void SetKeySeq(struct CommandKeySeq *KeyMapping,uint8_t Mod,
 /*** VARIABLE DEFINITIONS     ***/
 const char *m_CmdNames[]=
 {
+    "NOP",                                  // e_Cmd_NOP
     "NewTab",                               // e_Cmd_NewTab
     "ResetTerm",                            // e_Cmd_ResetTerm
     "InsertHorizontalRule",                 // e_Cmd_InsertHorizontalRule
@@ -139,6 +140,7 @@ const char *m_CmdNames[]=
     "SendFormFeed",                         // e_Cmd_Send_Form_Feed
     "SendCarriageReturn",                   // e_Cmd_Send_Carriage_Return
     "SendEscape",                           // e_Cmd_Send_Escape
+    "SendDelete",                           // e_Cmd_Send_Delete
     "SendOther",                            // e_Cmd_Send_Other
 };
 
@@ -201,6 +203,7 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_Send_Form_Feed,               // e_UIMWMenu_Send_Form_Feed
     e_Cmd_Send_Carriage_Return,         // e_UIMWMenu_Send_Carriage_Return
     e_Cmd_Send_Escape,                  // e_UIMWMenu_Send_Escape
+    e_Cmd_Send_Delete,                  // e_UIMWMenu_Send_Delete
     e_Cmd_Send_Other,                   // e_UIMWMenu_Send_Other
 };
 
@@ -542,9 +545,9 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     // e_Cmd_ExportSettings
     // e_Cmd_Connect
     // e_Cmd_Disconnect
-    SetKeySeq(&KeyMapping[e_Cmd_Copy],KEYMOD_SHIFT|KEYMOD_CONTROL,e_UIKeysMAX,'C');
-    SetKeySeq(&KeyMapping[e_Cmd_Paste],KEYMOD_SHIFT|KEYMOD_CONTROL,e_UIKeysMAX,'V');
-    SetKeySeq(&KeyMapping[e_Cmd_ConnectToggle],KEYMOD_SHIFT|KEYMOD_CONTROL,e_UIKeysMAX,'I');
+//    SetKeySeq(&KeyMapping[e_Cmd_Copy],KEYMOD_SHIFT|KEYMOD_CONTROL,e_UIKeysMAX,'C');
+//    SetKeySeq(&KeyMapping[e_Cmd_Paste],KEYMOD_SHIFT|KEYMOD_CONTROL,e_UIKeysMAX,'V');
+//    SetKeySeq(&KeyMapping[e_Cmd_ConnectToggle],KEYMOD_SHIFT|KEYMOD_CONTROL,e_UIKeysMAX,'I');
     // e_Cmd_ApplyConnectionOptions
     // e_Cmd_ChangeConnectionName
     // e_Cmd_ConnectionOptions
@@ -608,13 +611,6 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     SetKeySeq(&KeyMapping[e_Cmd_ZoomIn],KEYMOD_CONTROL,e_UIKeysMAX,'+');
     SetKeySeq(&KeyMapping[e_Cmd_ZoomOut],KEYMOD_CONTROL,e_UIKeysMAX,'-');
     SetKeySeq(&KeyMapping[e_Cmd_ResetZoom],KEYMOD_CONTROL,e_UIKeysMAX,'0');
-    SetKeySeq(&KeyMapping[e_Cmd_Send_Backspace],KEYMOD_NONE,e_UIKeys_Backspace,0);
-    SetKeySeq(&KeyMapping[e_Cmd_Send_Tab],KEYMOD_NONE,e_UIKeys_Tab,0);
-    SetKeySeq(&KeyMapping[e_Cmd_Send_Line_Feed],KEYMOD_NONE,e_UIKeys_Return,0);
-    SetKeySeq(&KeyMapping[e_Cmd_Send_Carriage_Return],KEYMOD_CONTROL,e_UIKeys_Return,0);
-//    SetKeySeq(&KeyMapping[e_Cmd_Send_Carriage_Return],KEYMOD_CONTROL,e_UIKeys_Enter,0);
-    SetKeySeq(&KeyMapping[e_Cmd_Send_Form_Feed],KEYMOD_CONTROL,e_UIKeysMAX,'l');
-    SetKeySeq(&KeyMapping[e_Cmd_Send_Escape],KEYMOD_NONE,e_UIKeys_Escape,0);
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A

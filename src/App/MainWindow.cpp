@@ -1182,6 +1182,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *Send_Form_Feed;
     e_UIMenuCtrl *Send_Carriage_Return;
     e_UIMenuCtrl *Send_Escape;
+    e_UIMenuCtrl *Send_Delete;
     e_UIMenuCtrl *Send_Other;
 
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
@@ -1216,6 +1217,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     Send_Form_Feed=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Form_Feed);
     Send_Carriage_Return=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Carriage_Return);
     Send_Escape=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Escape);
+    Send_Delete=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Delete);
     Send_Other=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Other);
 
     RestoreConnectionSettingsActive=false;
@@ -1253,6 +1255,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(Send_Form_Feed,false);
         UIEnableMenu(Send_Carriage_Return,false);
         UIEnableMenu(Send_Escape,false);
+        UIEnableMenu(Send_Delete,false);
         UIEnableMenu(Send_Other,false);
 
         ActivatePanels=false;
@@ -1287,6 +1290,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(Send_Form_Feed,true);
         UIEnableMenu(Send_Carriage_Return,true);
         UIEnableMenu(Send_Escape,true);
+        UIEnableMenu(Send_Delete,true);
         UIEnableMenu(Send_Other,true);
 
         Con=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
@@ -3347,6 +3351,7 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_Send_Form_Feed -- Send a 0x0C
  *                  e_Cmd_Send_Carriage_Return -- Send a 0x0D
  *                  e_Cmd_Send_Escape -- Send a 0x1B
+ *                  e_Cmd_Send_Delete -- Send a 0x7F
  *                  e_Cmd_Send_Other -- Send a byte
  *
  * FUNCTION:
@@ -3368,6 +3373,9 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
 
     switch(Cmd)
     {
+        case e_Cmd_NOP:
+            /* Does nothing */
+        break;
         case e_Cmd_NewTab:
             NewConnection();
         break;
@@ -3680,6 +3688,9 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_Send_Escape:
             DoSendByte(0x1B);
+        break;
+        case e_Cmd_Send_Delete:
+            DoSendByte(0x7F);
         break;
         case e_Cmd_Send_Other:
             RunSendByteDialog(this);

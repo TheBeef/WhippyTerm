@@ -62,6 +62,8 @@ typedef enum
     e_ConFunc_ClearArea,
     e_ConFunc_Tab,
     e_ConFunc_NoteNonPrintable,
+    e_ConFunc_SendBackspace,
+    e_ConFunc_SendEnter,
     e_ConFuncMAX
 } e_ConFuncType;
 
@@ -267,6 +269,7 @@ struct ConMWEvent
 class Connection
 {
     friend void Con_DelayTransmitTimeout(uintptr_t UserData);
+    friend void Con_SmartClipTimeout(uintptr_t UserData);
     friend void Con_ComTestTimeout(uintptr_t UserData);
     friend void Con_FileTransTick(void);
     friend bool Con_DisplayBufferEvent(const struct DBEvent *Event);
@@ -443,6 +446,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         unsigned int TransmitDelayBufferWritePos;
         unsigned int TransmitDelayBufferReadPos;
         struct UITimer *TransmitDelayTimer;
+        struct UITimer *SmartClipTimer;
         bool BlockSendDevice;
         bool WhenBridgedLockoutConnection;
         bool ConnectionLockedOut;
@@ -465,10 +469,12 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void RethinkLockOut(void);
         void RethinkCursor(void);
         void HandleMouseWheelZoom(int Steps);
+        e_CmdType HandleSmartClipboard(char key);
 
         /* Call backs */
         void InformOfDelayTransmitTimeout(void);
         void InformOfComTestTimeout(void);
+        void InformOfSmartClipTimeout(void);
         void FileTransTick(void);
         bool ProcessDisplayEvent(const struct DBEvent *Event);
 };

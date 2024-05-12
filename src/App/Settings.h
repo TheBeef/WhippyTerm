@@ -58,6 +58,31 @@ typedef enum
 typedef std::list<std::string> t_StringListType;
 typedef t_StringListType::iterator i_StringListType;
 
+typedef enum
+{
+    e_BackspaceKey_BS,
+    e_BackspaceKey_DEL,
+    e_BackspaceKeyMAX
+} e_BackspaceKeyType;
+
+typedef enum
+{
+    e_EnterKey_LF,
+    e_EnterKey_CR,
+    e_EnterKey_CRLF,
+    e_EnterKeyMAX
+} e_EnterKeyType;
+
+typedef enum
+{
+    e_ClipboardMode_None,
+    e_ClipboardMode_Normal,
+    e_ClipboardMode_ShiftCtrl,
+    e_ClipboardMode_Alt,
+    e_ClipboardMode_Smart,
+    e_ClipboardModeMAX
+} e_ClipboardModeType;
+
 /***  CLASS DEFINITIONS                ***/
 /* These are settings that can be changed per connection */
 class ConSettings
@@ -68,6 +93,11 @@ class ConSettings
         int FontSize;
         bool FontBold;
         bool FontItalic;
+
+        /* Keyboard */
+        e_BackspaceKeyType BackspaceKeyMode;
+        e_EnterKeyType EnterKeyMode;
+        e_ClipboardModeType ClipboardMode;
 
         /* Colors */
         uint32_t SysColors[e_SysColShadeMAX][e_SysColMAX];
@@ -89,6 +119,9 @@ class ConSettings
 
         void RegisterAllMembers(class TinyCFG &cfg);
         void DefaultSettings(void);
+        bool RegisterBackspaceKey(class TinyCFG &cfg,const char *XmlName,e_BackspaceKeyType &Data);
+        bool RegisterEnterKey(class TinyCFG &cfg,const char *XmlName,e_EnterKeyType &Data);
+        bool RegisterClipboardMode(class TinyCFG &cfg,const char *XmlName,e_ClipboardModeType &Data);
 };
 
 /* Global settings + connection settings defaults */
@@ -149,6 +182,8 @@ class Settings
 //        t_ConnectionsOptions DefaultConnectionsOptions;
 
         /* Keyboard */
+
+        /* Key bindings */
         struct CommandKeySeq KeyMapping[e_CmdMAX];
         bool DotInputStartsAt0;
 

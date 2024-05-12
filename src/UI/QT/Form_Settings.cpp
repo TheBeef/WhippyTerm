@@ -469,26 +469,26 @@ void Form_Settings::on_SelectCursorColor_pushButton_clicked()
     SendEvent(e_DSEvent_BttnTriggered,&EventData);
 }
 
-void Form_Settings::on_Keyboard_CommandList_listWidget_itemClicked(QListWidgetItem *item)
+void Form_Settings::on_KeyBinding_CommandList_listWidget_itemClicked(QListWidgetItem *item)
 {
     uintptr_t ID;   // The ID for this item
     union DSEventData EventData;
 
     ID=(uintptr_t)(item->data(Qt::UserRole).toULongLong());
 
-    EventData.ListView.InputID=e_UIS_ListView_Keyboard_CommandList;
+    EventData.ListView.InputID=e_UIS_ListView_KeyBinding_CommandList;
     SendEvent(e_DSEvent_ListViewChange,&EventData,ID);
 }
 
-void Form_Settings::on_Keyboard_CommandList_Set_pushButton_clicked()
+void Form_Settings::on_KeyBinding_CommandList_Set_pushButton_clicked()
 {
     union DSEventData EventData;
 
-    EventData.Bttn.InputID=e_UIS_Button_KeyboardCmdSet;
+    EventData.Bttn.InputID=e_UIS_Button_KeyBindingCmdSet;
     SendEvent(e_DSEvent_BttnTriggered,&EventData);
 }
 
-void Form_Settings::on_Keyboard_CommandList_listWidget_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous)
+void Form_Settings::on_KeyBinding_CommandList_listWidget_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous)
 {
     uintptr_t ID;   // The ID for this item
     union DSEventData EventData;
@@ -498,7 +498,7 @@ void Form_Settings::on_Keyboard_CommandList_listWidget_currentItemChanged(QListW
 
     ID=(uintptr_t)(current->data(Qt::UserRole).toULongLong());
 
-    EventData.ListView.InputID=e_UIS_ListView_Keyboard_CommandList;
+    EventData.ListView.InputID=e_UIS_ListView_KeyBinding_CommandList;
     SendEvent(e_DSEvent_ListViewChange,&EventData,ID);
 }
 
@@ -541,3 +541,129 @@ void Form_Settings::on_HexDisplay_SelectSelBGColor_pushButton_clicked()
     EventData.Bttn.InputID=e_UIS_Button_SelectHexDisplaySelBGColor;
     SendEvent(e_DSEvent_BttnTriggered,&EventData);
 }
+
+void Form_Settings::on_Backspace_SendBS_radioButton_toggled(bool checked)
+{
+    union DSEventData EventData;
+
+    if(checked)
+    {
+        EventData.RadioBttn.InputID=e_UIS_RadioBttn_Keyboard_Backspace_BS;
+        SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+    }
+}
+
+
+void Form_Settings::on_Backspace_SendDEL_radioButton_toggled(bool checked)
+{
+    union DSEventData EventData;
+
+    if(checked)
+    {
+        EventData.RadioBttn.InputID=e_UIS_RadioBttn_Keyboard_Backspace_DEL;
+        SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+    }
+}
+
+void Form_Settings::on_Enter_SendCR_radioButton_toggled(bool checked)
+{
+    union DSEventData EventData;
+
+    if(checked)
+    {
+        EventData.RadioBttn.InputID=e_UIS_RadioBttn_Keyboard_Enter_CR;
+        SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+    }
+}
+
+
+void Form_Settings::on_Enter_SendLF_radioButton_toggled(bool checked)
+{
+    union DSEventData EventData;
+
+    if(checked)
+    {
+        EventData.RadioBttn.InputID=e_UIS_RadioBttn_Keyboard_Enter_LF;
+        SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+    }
+}
+
+
+void Form_Settings::on_Enter_SendCRLF_radioButton_toggled(bool checked)
+{
+    union DSEventData EventData;
+
+    if(checked)
+    {
+        EventData.RadioBttn.InputID=e_UIS_RadioBttn_Keyboard_Enter_CRLF;
+        SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+    }
+}
+
+void Form_Settings::on_ClipboardKeys_None_radioButton_toggled(bool checked)
+{
+    union DSEventData EventData;
+
+    if(checked)
+    {
+        EventData.RadioBttn.InputID=e_UIS_RadioBttn_Keyboard_Clipboard_None;
+        SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+    }
+}
+
+
+void Form_Settings::on_ClipboardKeys_Normal_radioButton_toggled(bool checked)
+{
+    union DSEventData EventData;
+
+    if(checked)
+    {
+        EventData.RadioBttn.InputID=e_UIS_RadioBttn_Keyboard_Clipboard_Normal;
+        SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+    }
+}
+
+
+void Form_Settings::on_ClipboardKeys_ShiftCtrlClip_radioButton_toggled(bool checked)
+{
+    union DSEventData EventData;
+
+    if(checked)
+    {
+        EventData.RadioBttn.InputID=e_UIS_RadioBttn_Keyboard_Clipboard_ShiftCtrl;
+        SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+    }
+}
+
+void Form_Settings::on_ClipboardKeys_AltClip_radioButton_toggled(bool checked)
+{
+    union DSEventData EventData;
+
+    if(checked)
+    {
+        EventData.RadioBttn.InputID=e_UIS_RadioBttn_Keyboard_Clipboard_Alt;
+        SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+    }
+}
+
+void Form_Settings::on_ClipboardKeys_SmartClip_radioButton_toggled(bool checked)
+{
+    union DSEventData EventData;
+
+    if(checked)
+    {
+        EventData.RadioBttn.InputID=e_UIS_RadioBttn_Keyboard_Clipboard_Smart;
+        SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+    }
+}
+
+
+void Form_Settings::on_Terminal_tabWidget_currentChanged(int index)
+{
+    union DSEventData EventData;
+
+    EventData.Tab.TabID=e_UIS_TabCtrl_Terminal;
+    EventData.Tab.Index=(e_UIS_TabCtrl_Terminal_Page)index;
+    SendEvent(e_DSEvent_TabChange,&EventData);
+}
+

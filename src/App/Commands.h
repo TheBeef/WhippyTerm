@@ -41,6 +41,7 @@
 /***  TYPE DEFINITIONS                 ***/
 typedef enum
 {
+    e_Cmd_NOP,
     e_Cmd_NewTab,
     e_Cmd_ResetTerm,
     e_Cmd_InsertHorizontalRule,
@@ -130,6 +131,7 @@ typedef enum
     e_Cmd_Send_Form_Feed,
     e_Cmd_Send_Carriage_Return,
     e_Cmd_Send_Escape,
+    e_Cmd_Send_Delete,
     e_Cmd_Send_Other,
     e_CmdMAX
 } e_CmdType;

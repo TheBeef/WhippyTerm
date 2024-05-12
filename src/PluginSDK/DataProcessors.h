@@ -153,6 +153,8 @@ struct DPS_API
     uint32_t (*GetSysDefaultColor)(uint32_t DefaultColor);
     void (*NoteNonPrintable)(const char *CodeStr);
     void (*DoTab)(void);
+    void (*SendBackspace)(void);
+    void (*SendEnter)(void);
 };
 
 /***  CLASS DEFINITIONS                ***/

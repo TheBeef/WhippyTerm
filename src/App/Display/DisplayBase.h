@@ -136,6 +136,7 @@ class DisplayBase
         virtual bool GetSelectionString(std::string &Clip);
         virtual bool IsThereASelection(void);
         virtual void SelectAll(void);
+        virtual void ClearSelection(void);
         virtual void SetOverrideMessage(const char *Msg);
         virtual void ClearScreen(e_ScreenClearType Type);
         virtual void ClearScrollBackBuffer(void);

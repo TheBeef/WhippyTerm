@@ -130,6 +130,7 @@ class DisplayText : public DisplayBase
         bool GetSelectionString(std::string &Clip);
         bool IsThereASelection(void);
         void SelectAll(void);
+        void ClearSelection(void);
         void SetOverrideMessage(const char *Msg);
         void ClearScreen(e_ScreenClearType Type);
         void ClearScrollBackBuffer(void);

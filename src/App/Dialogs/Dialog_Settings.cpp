@@ -89,9 +89,9 @@ static void DS_UpdateColorPreview(bool UpdateWeb);
 static void DS_SetCurrentColor(uint32_t RGB);
 static uint32_t DS_GetCurrentColor(void);
 static void DS_SelectCaptureFilename(void);
-static void UIS_DoSelectFont(void);
-static void UIS_DoSelectHexDisplayFont(void);
-static void UIS_DoSysColApply(void);
+static void DS_DoSelectFont(void);
+static void DS_DoSelectHexDisplayFont(void);
+static void DS_DoSysColApply(void);
 static void UIS_HandleLeftPanelAutoHideClick(bool checked);
 static void UIS_HandleRightPanelAutoHideClick(bool checked);
 static void UIS_HandleBottomPanelAutoHideClick(bool checked);
@@ -104,8 +104,10 @@ static void UIS_HandleInputProcessingCharEncChange(void);
 static void UIS_HandleInputProcessingTermEmuChange(void);
 static void UIS_HandleSysColPresetChange(uintptr_t ID);
 static void UIS_HandleAreaChanged(uintptr_t ID);
-static void UIS_HandleKeyboardCmdListChange(uintptr_t ID);
-static void UIS_HandleKeyboardCmdShortCutChange(void);
+static void UIS_HandleKeyBindingsCmdListChange(uintptr_t ID);
+static void UIS_HandleKeyBindingsCmdShortCutChange(void);
+static void DS_SetKeyboardRadioBttns(void);
+static void DS_GetSettingsFromGUI_KeyboardRadioBttns(void);
 
 /*** VARIABLE DEFINITIONS     ***/
 t_DPS_TextProInfoType m_CharEncodingInputPros;
@@ -197,7 +199,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     t_UINumberInput *RedInput;
     t_UINumberInput *GreenInput;
     t_UINumberInput *BlueInput;
-    t_UIListViewCtrl *KeyboardCmdList;
+    t_UIListViewCtrl *KeyBindingsCmdList;
     t_UITabCtrl *TerminalTabCtrl;
     t_UITabCtrl *DisplayTabCtrl;
     t_UIGroupBox *Display_Tabs;
@@ -388,11 +390,11 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     UISetNumberInputCtrlMin(BlueInput,0);
     UISetNumberInputCtrlMax(BlueInput,255);
 
-    /* Keyboard */
-    KeyboardCmdList=UIS_GetListViewHandle(e_UIS_ListView_Keyboard_CommandList);
-    UIClearListView(KeyboardCmdList);
+    /* Key bindings */
+    KeyBindingsCmdList=UIS_GetListViewHandle(e_UIS_ListView_KeyBinding_CommandList);
+    UIClearListView(KeyBindingsCmdList);
     for(r=0;r<e_CmdMAX;r++)
-        UIAddItem2ListView(KeyboardCmdList,GetCmdName((e_CmdType)r),r);
+        UIAddItem2ListView(KeyBindingsCmdList,GetCmdName((e_CmdType)r),r);
 
 //    UIAddItem2ComboBox(WindowStartupPos,"None",e_WindowStartupPos_OSDefault);
 
@@ -405,7 +407,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         Display_ClearScreen=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_ClearScreen);
 
         UITabCtrlSetTabVisibleByIndex(TerminalTabCtrl,
-                e_UIS_TabCtrl_Terminal_Page_Keyboard,false);
+                e_UIS_TabCtrl_Terminal_Page_KeyBinding,false);
         UITabCtrlSetTabVisibleByIndex(DisplayTabCtrl,
                 e_UIS_TabCtrl_Display_Page_HexDumps,false);
 
@@ -605,6 +607,28 @@ static void DS_SetSettingGUI(void)
     ColorPreviewHandle=UIS_GetColorPreviewHandle(e_UIS_ColorPreview_CursorColor);
     UISetColorPreviewColor(ColorPreviewHandle,m_CursorColor);
 
+    memcpy(m_DS_SysColors,m_SettingConSettings->SysColors,sizeof(m_DS_SysColors));
+    memcpy(m_DS_DefaultColors,m_SettingConSettings->DefaultColors,sizeof(m_DS_DefaultColors));
+
+    DS_RethinkDisplayDisplay();
+    DS_RethinkHexDisplayDisplay();
+
+    /********************/
+    /* Terminal         */
+    /********************/
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_TerminalSize_FixedWidth);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->TermSizeFixedWidth);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_TerminalSize_FixedHeight);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->TermSizeFixedHeight);
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_TermSizeWidth);
+    UISetNumberInputCtrlValue(NumberInputHandle,m_SettingConSettings->TermSizeWidth);
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_TermSizeHeight);
+    UISetNumberInputCtrlValue(NumberInputHandle,m_SettingConSettings->TermSizeHeight);
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_ScrollBufferLines);
+    UISetNumberInputCtrlValue(NumberInputHandle,m_SettingConSettings->ScrollBufferLines);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CenterTextInWindow);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->CenterTextInWindow);
+
     ClearScreen_Clear=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Clear);
     ClearScreen_Scroll=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Scroll);
     ClearScreen_ScrollAll=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollAll);
@@ -628,28 +652,8 @@ static void DS_SetSettingGUI(void)
         break;
     }
 
-    memcpy(m_DS_SysColors,m_SettingConSettings->SysColors,sizeof(m_DS_SysColors));
-    memcpy(m_DS_DefaultColors,m_SettingConSettings->DefaultColors,sizeof(m_DS_DefaultColors));
-
-    DS_RethinkDisplayDisplay();
-    DS_RethinkHexDisplayDisplay();
-
-    /********************/
-    /* Terminal         */
-    /********************/
-    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_TerminalSize_FixedWidth);
-    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->TermSizeFixedWidth);
-    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_TerminalSize_FixedHeight);
-    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->TermSizeFixedHeight);
-    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_TermSizeWidth);
-    UISetNumberInputCtrlValue(NumberInputHandle,m_SettingConSettings->TermSizeWidth);
-    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_TermSizeHeight);
-    UISetNumberInputCtrlValue(NumberInputHandle,m_SettingConSettings->TermSizeHeight);
-    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_ScrollBufferLines);
-    UISetNumberInputCtrlValue(NumberInputHandle,m_SettingConSettings->ScrollBufferLines);
-    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CenterTextInWindow);
-    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->CenterTextInWindow);
-
+    /* Keyboard */
+    DS_SetKeyboardRadioBttns();
     DS_RethinkTerminalDisplay();
 
     /*******************/
@@ -900,19 +904,6 @@ static void DS_GetSettingsFromGUI(void)
         g_Settings.AlwaysShowTabs=UIGetCheckboxCheckStatus(CheckboxHandle);
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CloseButtonOnTabs);
         g_Settings.CloseButtonOnTabs=UIGetCheckboxCheckStatus(CheckboxHandle);
-
-        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Clear);
-        if(UIIsRadioBttnSelected(RadioHandle))
-            g_Settings.ScreenClear=e_ScreenClear_Clear;
-        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Scroll);
-        if(UIIsRadioBttnSelected(RadioHandle))
-            g_Settings.ScreenClear=e_ScreenClear_Scroll;
-        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollAll);
-        if(UIIsRadioBttnSelected(RadioHandle))
-            g_Settings.ScreenClear=e_ScreenClear_ScrollAll;
-        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollWithHR);
-        if(UIIsRadioBttnSelected(RadioHandle))
-            g_Settings.ScreenClear=e_ScreenClear_ScrollWithHR;
     }
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CursorBlink);
     m_SettingConSettings->CursorBlink=UIGetCheckboxCheckStatus(CheckboxHandle);
@@ -934,9 +925,25 @@ static void DS_GetSettingsFromGUI(void)
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CenterTextInWindow);
     m_SettingConSettings->CenterTextInWindow=UIGetCheckboxCheckStatus(CheckboxHandle);
 
+    /* Keyboard */
+    DS_GetSettingsFromGUI_KeyboardRadioBttns();
+
     if(!m_SettingConSettingsOnly)
     {
-        /* Keyboard */
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Clear);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.ScreenClear=e_ScreenClear_Clear;
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Scroll);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.ScreenClear=e_ScreenClear_Scroll;
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollAll);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.ScreenClear=e_ScreenClear_ScrollAll;
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollWithHR);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.ScreenClear=e_ScreenClear_ScrollWithHR;
+
+        /* KeyBindings */
         memcpy(&g_Settings.KeyMapping,&m_CopyOfKeyMapping,
                 sizeof(m_CopyOfKeyMapping));
     }
@@ -1157,10 +1164,10 @@ void UIS_HandleAreaChanged(uintptr_t ID)
 
 /*******************************************************************************
  * NAME:
- *    UIS_HandleKeyboardCmdListChange
+ *    UIS_HandleKeyBindingsCmdListChange
  *
  * SYNOPSIS:
- *    void UIS_HandleKeyboardCmdListChange(uintptr_t ID);
+ *    void UIS_HandleKeyBindingsCmdListChange(uintptr_t ID);
  *
  * PARAMETERS:
  *    ID [I] -- The command ID that has been selected
@@ -1174,7 +1181,7 @@ void UIS_HandleAreaChanged(uintptr_t ID)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UIS_HandleKeyboardCmdListChange(uintptr_t ID)
+void UIS_HandleKeyBindingsCmdListChange(uintptr_t ID)
 {
     e_CmdType Cmd;
     t_UITextInputCtrl *ShortcutInput;
@@ -1184,7 +1191,7 @@ void UIS_HandleKeyboardCmdListChange(uintptr_t ID)
     if(Cmd>=e_CmdMAX)
         return;
 
-    ShortcutInput=UIS_GetTextInputHandle(e_UIS_TextInput_Keyboard_Assigned2);
+    ShortcutInput=UIS_GetTextInputHandle(e_UIS_TextInput_KeyBinding_Assigned2);
     UISetTextCtrlText(ShortcutInput,
             ConvertKeySeq2String(&m_CopyOfKeyMapping[Cmd]));
 
@@ -1194,10 +1201,10 @@ void UIS_HandleKeyboardCmdListChange(uintptr_t ID)
 
 /*******************************************************************************
  * NAME:
- *    UIS_HandleKeyboardCmdShortCutChange
+ *    UIS_HandleKeyBindingsCmdShortCutChange
  *
  * SYNOPSIS:
- *    void UIS_HandleKeyboardCmdShortCutChange(void);
+ *    void UIS_HandleKeyBindingsCmdShortCutChange(void);
  *
  * PARAMETERS:
  *    NONE
@@ -1212,7 +1219,7 @@ void UIS_HandleKeyboardCmdListChange(uintptr_t ID)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UIS_HandleKeyboardCmdShortCutChange(void)
+void UIS_HandleKeyBindingsCmdShortCutChange(void)
 {
     struct CommandKeySeq KeySeq;
     t_UIListViewCtrl *KeyList;
@@ -1222,8 +1229,8 @@ void UIS_HandleKeyboardCmdShortCutChange(void)
     char buff[100];
     int r;
 
-    ShortcutInput=UIS_GetTextInputHandle(e_UIS_TextInput_Keyboard_Assigned2);
-    KeyList=UIS_GetListViewHandle(e_UIS_ListView_Keyboard_CommandList);
+    ShortcutInput=UIS_GetTextInputHandle(e_UIS_TextInput_KeyBinding_Assigned2);
+    KeyList=UIS_GetListViewHandle(e_UIS_ListView_KeyBinding_CommandList);
     if(ShortcutInput==NULL || KeyList==NULL)
         return;
 
@@ -1310,10 +1317,10 @@ void UIS_HandleWindowStartPosChanged(uintptr_t ID)
 
 /*******************************************************************************
  * NAME:
- *    UIS_DoSelectFont
+ *    DS_DoSelectFont
  *
  * SYNOPSIS:
- *    void UIS_DoSelectFont(void);
+ *    void DS_DoSelectFont(void);
  *
  * PARAMETERS:
  *    NONE
@@ -1328,7 +1335,7 @@ void UIS_HandleWindowStartPosChanged(uintptr_t ID)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UIS_DoSelectFont(void)
+void DS_DoSelectFont(void)
 {
     long FontStyle;
 
@@ -1349,10 +1356,10 @@ void UIS_DoSelectFont(void)
 
 /*******************************************************************************
  * NAME:
- *    UIS_DoSelectHexDisplayFont
+ *    DS_DoSelectHexDisplayFont
  *
  * SYNOPSIS:
- *    void UIS_DoSelectHexDisplayFont(void);
+ *    void DS_DoSelectHexDisplayFont(void);
  *
  * PARAMETERS:
  *    NONE
@@ -1366,7 +1373,7 @@ void UIS_DoSelectFont(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UIS_DoSelectHexDisplayFont(void)
+void DS_DoSelectHexDisplayFont(void)
 {
     long FontStyle;
 
@@ -1535,10 +1542,10 @@ void UIS_HandleSysColPresetChange(uintptr_t ID)
 
 /*******************************************************************************
  * NAME:
- *    UIS_DoSysColApply
+ *    DS_DoSysColApply
  *
  * SYNOPSIS:
- *    void UIS_DoSysColApply(void);
+ *    void DS_DoSysColApply(void);
  *
  * PARAMETERS:
  *    NONE
@@ -1553,7 +1560,7 @@ void UIS_HandleSysColPresetChange(uintptr_t ID)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UIS_DoSysColApply(void)
+void DS_DoSysColApply(void)
 {
     t_UIComboBoxCtrl *SysColPreset;
     e_SysColPresetType Preset;
@@ -2051,10 +2058,10 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Button_InputProOther_Settings:
                 break;
                 case e_UIS_Button_SysCol_Apply:
-                    UIS_DoSysColApply();
+                    DS_DoSysColApply();
                 break;
                 case e_UIS_Button_SelectFont:
-                    UIS_DoSelectFont();
+                    DS_DoSelectFont();
                 break;
                 case e_UIS_Button_SelectCursorColor:
                     SelColor=UIGetColor(m_CursorColor);
@@ -2067,8 +2074,8 @@ bool DS_Event(const struct DSEvent *Event)
                                 m_CursorColor);
                     }
                 break;
-                case e_UIS_Button_KeyboardCmdSet:
-                    UIS_HandleKeyboardCmdShortCutChange();
+                case e_UIS_Button_KeyBindingCmdSet:
+                    UIS_HandleKeyBindingsCmdShortCutChange();
                 break;
                 case e_UIS_Button_CaptureSelectFilename:
                     DS_SelectCaptureFilename();
@@ -2111,7 +2118,7 @@ bool DS_Event(const struct DSEvent *Event)
                 break;
 
                 case e_UIS_Button_SelectHexDisplayFont:
-                    UIS_DoSelectHexDisplayFont();
+                    DS_DoSelectHexDisplayFont();
                 break;
 
                 case e_UIS_ButtonMAX:
@@ -2191,14 +2198,21 @@ bool DS_Event(const struct DSEvent *Event)
                     UIS_HandleSysColDefaultColorClick();
                 break;
                 case e_UIS_RadioBttn_Display_ClearScreen_Clear:
-                break;
                 case e_UIS_RadioBttn_Display_ClearScreen_Scroll:
-                break;
                 case e_UIS_RadioBttn_Display_ClearScreen_ScrollAll:
-                break;
                 case e_UIS_RadioBttn_Display_ClearScreen_ScrollWithHR:
+                case e_UIS_RadioBttn_Keyboard_Backspace_BS:
+                case e_UIS_RadioBttn_Keyboard_Backspace_DEL:
+                case e_UIS_RadioBttn_Keyboard_Enter_CR:
+                case e_UIS_RadioBttn_Keyboard_Enter_LF:
+                case e_UIS_RadioBttn_Keyboard_Enter_CRLF:
+                case e_UIS_RadioBttn_Keyboard_Clipboard_None:
+                case e_UIS_RadioBttn_Keyboard_Clipboard_Normal:
+                case e_UIS_RadioBttn_Keyboard_Clipboard_ShiftCtrl:
+                case e_UIS_RadioBttn_Keyboard_Clipboard_Alt:
+                case e_UIS_RadioBttn_Keyboard_Clipboard_Smart:
                 break;
-                case e_UIS_RadioBttn_SysColMAX:
+                case e_UIS_RadioBttnMAX:
                 default:
                 break;
             }
@@ -2290,7 +2304,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_TextInput_SysCol_Web:
                     UIS_ProcessSysColWebInputValue(Event->Info.StrInput.NewText);
                 break;
-                case e_UIS_TextInput_Keyboard_Assigned2:
+                case e_UIS_TextInput_KeyBinding_Assigned2:
                 case e_UIS_TextInput_Capture_DefaultFilename:
                 case e_UIS_TextInputMAX:
                 default:
@@ -2339,10 +2353,22 @@ bool DS_Event(const struct DSEvent *Event)
 
                     UIEnableButton(InputProOther_Settings,false);
                 break;
-                case e_UIS_ListView_Keyboard_CommandList:
-                    UIS_HandleKeyboardCmdListChange(Event->ID);
+                case e_UIS_ListView_KeyBinding_CommandList:
+                    UIS_HandleKeyBindingsCmdListChange(Event->ID);
                 break;
                 case e_UIS_ListViewMAX:
+                default:
+                break;
+            }
+        break;
+        case e_DSEvent_TabChange:
+            switch(Event->Info.Tab.Index)
+            {
+                case e_UIS_TabCtrl_Terminal_Page_KeyBinding:
+                case e_UIS_TabCtrl_Terminal_Page_DataProcessing:
+                case e_UIS_TabCtrl_Terminal_Page_Terminal:
+                case e_UIS_TabCtrl_Terminal_Page_Keyboard:
+                case e_UIS_TabCtrl_Terminal_PageMAX:
                 default:
                 break;
             }
@@ -2393,4 +2419,186 @@ static void DS_SelectCaptureFilename(void)
         Filename=UI_ConcatFile2Path(Path,Filename);
         UISetTextCtrlText(TxtHandle,Filename.c_str());
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DS_SetKeyboardRadioBttns
+ *
+ * SYNOPSIS:
+ *    void DS_SetKeyboardRadioBttns(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function sets the GUI to settings for the keyboard radio buttons.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DS_GetSettingsFromGUI_KeyboardRadioBttns()
+ ******************************************************************************/
+static void DS_SetKeyboardRadioBttns(void)
+{
+    t_UIRadioBttnCtrl *Keyboard_Backspace_BS;
+    t_UIRadioBttnCtrl *Keyboard_Backspace_DEL;
+    t_UIRadioBttnCtrl *Keyboard_Enter_CR;
+    t_UIRadioBttnCtrl *Keyboard_Enter_LF;
+    t_UIRadioBttnCtrl *Keyboard_Enter_CRLF;
+    t_UIRadioBttnCtrl *Keyboard_Clipboard_None;
+    t_UIRadioBttnCtrl *Keyboard_Clipboard_Normal;
+    t_UIRadioBttnCtrl *Keyboard_Clipboard_ShiftCtrl;
+    t_UIRadioBttnCtrl *Keyboard_Clipboard_Alt;
+    t_UIRadioBttnCtrl *Keyboard_Clipboard_Smart;
+
+    Keyboard_Backspace_BS=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Backspace_BS);
+    Keyboard_Backspace_DEL=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Backspace_DEL);
+    Keyboard_Enter_CR=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Enter_CR);
+    Keyboard_Enter_LF=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Enter_LF);
+    Keyboard_Enter_CRLF=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Enter_CRLF);
+    Keyboard_Clipboard_None=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Clipboard_None);
+    Keyboard_Clipboard_Normal=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Clipboard_Normal);
+    Keyboard_Clipboard_ShiftCtrl=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Clipboard_ShiftCtrl);
+    Keyboard_Clipboard_Alt=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Clipboard_Alt);
+    Keyboard_Clipboard_Smart=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Clipboard_Smart);
+
+    if(Keyboard_Backspace_BS==NULL ||
+            Keyboard_Backspace_DEL==NULL ||
+            Keyboard_Enter_CR==NULL || Keyboard_Enter_LF==NULL ||
+            Keyboard_Enter_CRLF==NULL ||
+            Keyboard_Clipboard_None==NULL || Keyboard_Clipboard_Normal==NULL ||
+            Keyboard_Clipboard_ShiftCtrl==NULL ||
+            Keyboard_Clipboard_Alt==NULL || Keyboard_Clipboard_Smart==NULL)
+    {
+        return;
+    }
+
+    switch(m_SettingConSettings->BackspaceKeyMode)
+    {
+        default:
+        case e_BackspaceKeyMAX:
+        case e_BackspaceKey_BS:
+            UISelectRadioBttn(Keyboard_Backspace_BS);
+        break;
+        case e_BackspaceKey_DEL:
+            UISelectRadioBttn(Keyboard_Backspace_DEL);
+        break;
+    }
+
+    switch(m_SettingConSettings->EnterKeyMode)
+    {
+        default:
+        case e_EnterKeyMAX:
+        case e_EnterKey_LF:
+            UISelectRadioBttn(Keyboard_Enter_LF);
+        break;
+        case e_EnterKey_CR:
+            UISelectRadioBttn(Keyboard_Enter_CR);
+        break;
+        case e_EnterKey_CRLF:
+            UISelectRadioBttn(Keyboard_Enter_CRLF);
+        break;
+    }
+
+    switch(m_SettingConSettings->ClipboardMode)
+    {
+        default:
+        case e_ClipboardModeMAX:
+        case e_ClipboardMode_Smart:
+            UISelectRadioBttn(Keyboard_Clipboard_Smart);
+        break;
+        case e_ClipboardMode_None:
+            UISelectRadioBttn(Keyboard_Clipboard_None);
+        break;
+        case e_ClipboardMode_Normal:
+            UISelectRadioBttn(Keyboard_Clipboard_Normal);
+        break;
+        case e_ClipboardMode_ShiftCtrl:
+            UISelectRadioBttn(Keyboard_Clipboard_ShiftCtrl);
+        break;
+        case e_ClipboardMode_Alt:
+            UISelectRadioBttn(Keyboard_Clipboard_Alt);
+        break;
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DS_GetSettingsFromGUI_KeyboardRadioBttns
+ *
+ * SYNOPSIS:
+ *    static void DS_GetSettingsFromGUI_KeyboardRadioBttns(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function reads the values from the GUI and sets the settings
+ *    for the keyboard radio buttons.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DS_SetKeyboardRadioBttns()
+ ******************************************************************************/
+static void DS_GetSettingsFromGUI_KeyboardRadioBttns(void)
+{
+    t_UIRadioBttnCtrl *Keyboard_Backspace_BS;
+    t_UIRadioBttnCtrl *Keyboard_Backspace_DEL;
+    t_UIRadioBttnCtrl *Keyboard_Enter_CR;
+    t_UIRadioBttnCtrl *Keyboard_Enter_LF;
+    t_UIRadioBttnCtrl *Keyboard_Enter_CRLF;
+    t_UIRadioBttnCtrl *Keyboard_Clipboard_None;
+    t_UIRadioBttnCtrl *Keyboard_Clipboard_Normal;
+    t_UIRadioBttnCtrl *Keyboard_Clipboard_ShiftCtrl;
+    t_UIRadioBttnCtrl *Keyboard_Clipboard_Alt;
+    t_UIRadioBttnCtrl *Keyboard_Clipboard_Smart;
+
+    Keyboard_Backspace_BS=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Backspace_BS);
+    Keyboard_Backspace_DEL=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Backspace_DEL);
+    Keyboard_Enter_CR=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Enter_CR);
+    Keyboard_Enter_LF=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Enter_LF);
+    Keyboard_Enter_CRLF=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Enter_CRLF);
+    Keyboard_Clipboard_None=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Clipboard_None);
+    Keyboard_Clipboard_Normal=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Clipboard_Normal);
+    Keyboard_Clipboard_ShiftCtrl=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Clipboard_ShiftCtrl);
+    Keyboard_Clipboard_Alt=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Clipboard_Alt);
+    Keyboard_Clipboard_Smart=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_Clipboard_Smart);
+
+    if(Keyboard_Backspace_BS==NULL || Keyboard_Backspace_DEL==NULL ||
+            Keyboard_Enter_CR==NULL || Keyboard_Enter_LF==NULL ||
+            Keyboard_Enter_CRLF==NULL || Keyboard_Clipboard_None==NULL ||
+            Keyboard_Clipboard_Normal==NULL ||
+            Keyboard_Clipboard_ShiftCtrl==NULL ||
+            Keyboard_Clipboard_Alt==NULL || Keyboard_Clipboard_Smart==NULL)
+    {
+        return;
+    }
+
+    /* Backspace */
+    if(UIIsRadioBttnSelected(Keyboard_Backspace_BS))
+        m_SettingConSettings->BackspaceKeyMode=e_BackspaceKey_BS;
+    if(UIIsRadioBttnSelected(Keyboard_Backspace_DEL))
+        m_SettingConSettings->BackspaceKeyMode=e_BackspaceKey_DEL;
+
+    if(UIIsRadioBttnSelected(Keyboard_Enter_LF))
+        m_SettingConSettings->EnterKeyMode=e_EnterKey_LF;
+    if(UIIsRadioBttnSelected(Keyboard_Enter_CR))
+        m_SettingConSettings->EnterKeyMode=e_EnterKey_CR;
+    if(UIIsRadioBttnSelected(Keyboard_Enter_CRLF))
+        m_SettingConSettings->EnterKeyMode=e_EnterKey_CRLF;
+
+    if(UIIsRadioBttnSelected(Keyboard_Clipboard_None))
+        m_SettingConSettings->ClipboardMode=e_ClipboardMode_None;
+    if(UIIsRadioBttnSelected(Keyboard_Clipboard_Normal))
+        m_SettingConSettings->ClipboardMode=e_ClipboardMode_Normal;
+    if(UIIsRadioBttnSelected(Keyboard_Clipboard_ShiftCtrl))
+        m_SettingConSettings->ClipboardMode=e_ClipboardMode_ShiftCtrl;
+    if(UIIsRadioBttnSelected(Keyboard_Clipboard_Alt))
+        m_SettingConSettings->ClipboardMode=e_ClipboardMode_Alt;
+    if(UIIsRadioBttnSelected(Keyboard_Clipboard_Smart))
+        m_SettingConSettings->ClipboardMode=e_ClipboardMode_Smart;
 }

@@ -911,6 +911,7 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
     cfg.StartBlock("DataProcessors");
     Settings_RegisterDataProcessorType(cfg,"DataProcessorType",DataProcessorType);
     cfg.Register("EnabledTextDataProcessors",EnabledTextDataProcessors);
+    cfg.Register("EnabledBinaryDataProcessors",EnabledBinaryDataProcessors);
     cfg.EndBlock();
 
     cfg.StartBlock("KeyPressProcessors");
@@ -974,6 +975,8 @@ bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
     if(Con1.EnabledTextDataProcessors!=Con2.EnabledTextDataProcessors)
         return false;
     if(Con1.EnabledKeyPressProcessors!=Con2.EnabledKeyPressProcessors)
+        return false;
+    if(Con1.EnabledBinaryDataProcessors!=Con2.EnabledBinaryDataProcessors)
         return false;
 
     return true;
@@ -1071,4 +1074,6 @@ void ConSettings::DefaultSettings(void)
     EnabledTextDataProcessors.push_back("UnicodeDecoder");
 
     EnabledKeyPressProcessors.clear();
+
+    EnabledBinaryDataProcessors.clear();
 }

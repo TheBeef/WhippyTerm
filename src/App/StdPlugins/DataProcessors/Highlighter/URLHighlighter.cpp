@@ -70,7 +70,7 @@ struct DataProcessorInfo m_URLHighlighter_Info=
     "Underlines URL's starting with http://",
     &m_URLHighlighterCBs,
     e_DataProcessorType_Text,
-    e_DataProcessorClass_Highlighter
+    e_TextDataProcessorClass_Highlighter
 };
 
 static const struct PI_UIAPI *m_UIAPI;

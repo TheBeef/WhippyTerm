@@ -110,10 +110,11 @@ static void DS_SetKeyboardRadioBttns(void);
 static void DS_GetSettingsFromGUI_KeyboardRadioBttns(void);
 
 /*** VARIABLE DEFINITIONS     ***/
-t_DPS_TextProInfoType m_CharEncodingInputPros;
-t_DPS_TextProInfoType m_TermEmulationInputPros;
-t_DPS_TextProInfoType m_HighlighterInputPros;
-t_DPS_TextProInfoType m_OtherInputPros;
+t_DPS_ProInfoType m_CharEncodingInputPros;
+t_DPS_ProInfoType m_TermEmulationInputPros;
+t_DPS_ProInfoType m_HighlighterInputPros;
+t_DPS_ProInfoType m_OtherInputPros;
+t_DPS_ProInfoType m_BinaryDecoders;
 uint32_t m_DS_SysColors[e_SysColShadeMAX][e_SysColMAX];
 uint32_t m_DS_DefaultColors[e_DefaultColorsMAX];
 bool m_DS_UpdatingColorPreview;
@@ -129,15 +130,15 @@ struct CommandKeySeq m_CopyOfKeyMapping[e_CmdMAX];
 class ConSettings *m_SettingConSettings;
 bool m_SettingConSettingsOnly;
 
-struct TestProInfoSortCB
+struct ProInfoSortCB
 {
-    inline bool operator() (const struct DPS_TextProInfo &ent1,
-            const struct DPS_TextProInfo &ent2)
+    inline bool operator() (const struct DPS_ProInfo &ent1,
+            const struct DPS_ProInfo &ent2)
     {
         return strcasecmp(ent1.DisplayName,ent2.DisplayName)<0;
     }
 };
-struct DPS_TextProInfo DS_DPSNoneEntry=
+struct DPS_ProInfo DS_DPSNoneEntry=
 {
     NULL,
     "NONE",
@@ -184,6 +185,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     t_UIListViewCtrl *AreaList;
     t_UIListViewCtrl *InputProTextHighlight;
     t_UIListViewCtrl *InputProTextOther;
+    t_UIListViewCtrl *BinaryProcessorsDecoder;
     t_UIComboBoxCtrl *WindowStartupPos;
     t_UINumberInput *TermSize_Width;
     t_UINumberInput *TermSize_Height;
@@ -275,24 +277,25 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     UIAddItem2ComboBox(DataProcessor,"Binary",e_DataProcessorType_Binary);
 
     /* Fill in the available input processors */
-    DPS_GetListOfTextProcessors(e_DataProcessorClass_CharEncoding,
+    DPS_GetListOfTextProcessors(e_TextDataProcessorClass_CharEncoding,
             m_CharEncodingInputPros);
-    DPS_GetListOfTextProcessors(e_DataProcessorClass_TermEmulation,
+    DPS_GetListOfTextProcessors(e_TextDataProcessorClass_TermEmulation,
             m_TermEmulationInputPros);
-    DPS_GetListOfTextProcessors(e_DataProcessorClass_Highlighter,
+    DPS_GetListOfTextProcessors(e_TextDataProcessorClass_Highlighter,
             m_HighlighterInputPros);
-    DPS_GetListOfTextProcessors(e_DataProcessorClass_Other,
+    DPS_GetListOfTextProcessors(e_TextDataProcessorClass_Other,
             m_OtherInputPros);
+    DPS_GetListOfBinaryProcessors(m_BinaryDecoders);
 
     /* Sort them */
     std::sort(m_CharEncodingInputPros.begin(),m_CharEncodingInputPros.end(),
-            TestProInfoSortCB());
+            ProInfoSortCB());
     std::sort(m_TermEmulationInputPros.begin(),m_TermEmulationInputPros.end(),
-            TestProInfoSortCB());
+            ProInfoSortCB());
     std::sort(m_HighlighterInputPros.begin(),m_HighlighterInputPros.end(),
-            TestProInfoSortCB());
-    std::sort(m_OtherInputPros.begin(),m_OtherInputPros.end(),
-            TestProInfoSortCB());
+            ProInfoSortCB());
+    std::sort(m_OtherInputPros.begin(),m_OtherInputPros.end(),ProInfoSortCB());
+    std::sort(m_BinaryDecoders.begin(),m_BinaryDecoders.end(),ProInfoSortCB());
 
     /* Add NONE to the top */
     m_CharEncodingInputPros.insert(m_CharEncodingInputPros.begin(),
@@ -336,7 +339,6 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         UISetListViewEntryCheckable(InputProTextHighlight,r,true);
         UISetListViewEntryToolTip(InputProTextHighlight,r,
                 m_HighlighterInputPros[r].Tip);
-//        UISetListViewEntryCheckedState(InputProTextHighlight,0,true);
     }
 
     InputProTextOther=UIS_GetListViewHandle(e_UIS_ListView_InputProTextOther);
@@ -348,7 +350,20 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         UISetListViewEntryCheckable(InputProTextOther,r,true);
         UISetListViewEntryToolTip(InputProTextOther,r,
                 m_OtherInputPros[r].Tip);
-//        UISetListViewEntryCheckedState(InputProTextOther,0,true);
+    }
+
+    BinaryProcessorsDecoder=UIS_GetListViewHandle(e_UIS_ListView_BinaryProcessorDecoder);
+    UIClearListView(BinaryProcessorsDecoder);
+    for(r=0;r<m_BinaryDecoders.size();r++)
+    {
+        UIAddItem2ListView(BinaryProcessorsDecoder,
+                m_BinaryDecoders[r].DisplayName,r);
+
+        if(m_BinaryDecoders[r].Tip!=NULL)
+        {
+            UISetListViewEntryToolTip(BinaryProcessorsDecoder,r,
+                    m_BinaryDecoders[r].Tip);
+        }
     }
 
     SysColPreset=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_SysCol_Preset);
@@ -751,6 +766,22 @@ static void DS_SetSettingGUI(void)
             }
         }
     }
+
+    for(CurStr=m_SettingConSettings->EnabledBinaryDataProcessors.begin();
+            CurStr!=m_SettingConSettings->EnabledBinaryDataProcessors.end();
+            CurStr++)
+    {
+        for(r=0;r<m_BinaryDecoders.size();r++)
+        {
+            if(strcmp(m_BinaryDecoders[r].IDStr,CurStr->c_str())==0)
+            {
+                /* Found it */
+                ListViewHandle=UIS_GetListViewHandle(e_UIS_ListView_BinaryProcessorDecoder);
+                UISetListViewSelectedEntry(ListViewHandle,r);
+                break;
+            }
+        }
+    }
 }
 
 static void DS_RethinkTerminalDisplay(void)
@@ -1028,6 +1059,16 @@ static void DS_GetSettingsFromGUI(void)
             m_SettingConSettings->EnabledTextDataProcessors.
                     push_back(m_OtherInputPros[ID].IDStr);
         }
+    }
+
+    /* Binary Data Processors */
+    ListViewHandle=UIS_GetListViewHandle(e_UIS_ListView_BinaryProcessorDecoder);
+    ID=UIGetListViewSelectedEntry(ListViewHandle);
+    m_SettingConSettings->EnabledBinaryDataProcessors.clear();
+    if(ID<m_BinaryDecoders.size())
+    {
+        m_SettingConSettings->EnabledBinaryDataProcessors.
+                push_back(m_BinaryDecoders[ID].IDStr);
     }
 
     /********************/
@@ -2388,6 +2429,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_ListView_KeyBinding_CommandList:
                     UIS_HandleKeyBindingsCmdListChange(Event->ID);
                 break;
+                case e_UIS_ListView_BinaryProcessorDecoder:
                 case e_UIS_ListViewMAX:
                 default:
                 break;

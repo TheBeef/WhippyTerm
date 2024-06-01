@@ -74,7 +74,7 @@ void Debug6(void);
         void ShowWindow(void);
         void GetSizeAndPos(int &x,int &y,int &Width,int &Height);
         void NewConnection(void);
-        class Connection *AllocNewTab(const char *TabLabel,class ConSettings *UseSettings,const char *URI);
+        class Connection *AllocNewTab(const char *TabLabel,class ConSettings *UseSettings,const char *URI,t_KVList &Options);
         void FreeTab(class Connection *Con);
         void RethinkActiveConnectionUI(void);
         void CloseActiveConnection(void);

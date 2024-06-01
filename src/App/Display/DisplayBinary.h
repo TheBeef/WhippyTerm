@@ -33,8 +33,11 @@
 
 /***  HEADER FILES TO INCLUDE          ***/
 #include "App/Display/DisplayBase.h"
+#include "UI/UITextDisplay.h"
+#include <stdint.h>
 
 /***  DEFINES                          ***/
+#define MAX_BINARY_HEX_BYTES_PER_LINE                   64  // The max number of bytes we can have on a line
 
 /***  MACROS                           ***/
 
@@ -43,6 +46,8 @@
 /***  CLASS DEFINITIONS                ***/
 class DisplayBinary : public DisplayBase
 {
+    friend bool DisplayBinary_EventHandlerCB(const struct TextDisplayEvent *Event);
+
     public:
         DisplayBinary();
         ~DisplayBinary();
@@ -50,6 +55,34 @@ class DisplayBinary : public DisplayBase
         bool Init(void *ParentWidget,bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData);
         void Reparent(void *NewParentWidget);
         void WriteChar(uint8_t *Chr);
+
+    private:
+        bool InitCalled;
+        t_UITextDisplayCtrl *TextDisplayCtrl;
+
+        uint8_t *HexBuffer;             // This is a circular buffer
+        uint8_t *EndOfHexBuffer;
+        int HexBufferSize;
+
+        uint8_t *ProLine;               // Where we insert new data in 'HexBuffer'.  This points to the start of the line
+        uint8_t InsertPoint;            // The insert offset from 'ProLine' (ProLine[InsertPoint])
+        uint8_t *ConLine;               // Where we read data from 'HexBuffer'.  This is the oldest data
+        uint8_t *TopLine;               // The first line of the display window (where we are scrolled to)
+
+        int ScreenWidthPx;
+        int ScreenHeightPx;
+        int CharWidthPx;
+        int CharHeightPx;
+
+        bool DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event);
+        void RedrawCurrentLine(void);
+        void ScreenResize(void);
+        void SetupCanvas(void);
+        void RethinkScrollBars(void);
+        void RethinkWindowSize(void);
+        void RedrawScreen(void);
+        void DrawLine(const uint8_t *Line,int ScreenLine,int Bytes);
+        void MakeCurrentLineVisble(void);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

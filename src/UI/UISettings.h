@@ -63,6 +63,7 @@ enum e_UIS_ListView
     e_UIS_ListView_InputProTextHighlight,
     e_UIS_ListView_InputProTextOther,
     e_UIS_ListView_KeyBinding_CommandList,
+    e_UIS_ListView_BinaryProcessorDecoder,
     e_UIS_ListViewMAX
 };
 

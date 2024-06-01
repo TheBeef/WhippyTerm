@@ -86,13 +86,21 @@ typedef struct DataProcessorHandle t_DataProcessorHandleType;
 
 typedef enum
 {
-    e_DataProcessorClass_Other,
-    e_DataProcessorClass_CharEncoding,
-    e_DataProcessorClass_TermEmulation,
-    e_DataProcessorClass_Highlighter,
-    e_DataProcessorClass_Logger,
-    e_DataProcessorClassMAX
-} e_DataProcessorClassType;
+    e_TextDataProcessorClass_Other,
+    e_TextDataProcessorClass_CharEncoding,
+    e_TextDataProcessorClass_TermEmulation,
+    e_TextDataProcessorClass_Highlighter,
+    e_TextDataProcessorClass_Logger,
+    e_TextDataProcessorClassMAX
+} e_TextDataProcessorClassType;
+
+typedef enum
+{
+    e_BinaryDataProcessorMode_Text,
+    e_BinaryDataProcessorMode_Hex,
+//    e_BinaryDataProcessorMode_Table,
+    e_BinaryDataProcessorModeMAX
+} e_BinaryDataProcessorModeType;
 
 typedef enum
 {
@@ -109,8 +117,8 @@ struct DataProcessorInfo
     const char *Help;
     e_DataProcessorTypeType ProType;
 
-    /* Only applies to text processors */
-    e_DataProcessorClassType ProClass;
+    e_TextDataProcessorClassType TxtClass;      // Only applies to text processors
+    e_BinaryDataProcessorModeType BinMode;      // Only applies to binary processors
 };
 
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */
@@ -122,9 +130,11 @@ struct DataProcessorAPI
     PG_BOOL (*ProcessKeyPress)(t_DataProcessorHandleType *DataHandle,
             const uint8_t *KeyChar,int KeyCharLen,e_UIKeys ExtendedKey,
             uint8_t Mod);
-    void (*ProcessIncomingByte)(t_DataProcessorHandleType *DataHandle,
+    void (*ProcessIncomingTextByte)(t_DataProcessorHandleType *DataHandle,
             const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
             PG_BOOL *Consumed);
+    void (*ProcessIncomingBinaryByte)(t_DataProcessorHandleType *DataHandle,
+            const uint8_t Byte);
 };
 
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */
@@ -155,6 +165,8 @@ struct DPS_API
     void (*DoTab)(void);
     void (*SendBackspace)(void);
     void (*SendEnter)(void);
+    void (*BinaryAddText)(const char *Str);
+    void (*BinaryAddHex)(uint8_t Byte);
 };
 
 /***  CLASS DEFINITIONS                ***/

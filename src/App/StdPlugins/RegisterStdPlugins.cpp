@@ -70,6 +70,8 @@ extern "C"
     unsigned int TestLB_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
     unsigned int TestFile_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
 #endif
+    
+    unsigned int BASIC_HEX_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
 }
 
 /*** VARIABLE DEFINITIONS     ***/
@@ -102,10 +104,12 @@ void RegisterStdPlugins(void)
     ANSIX3_64_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
     BasicCtrlCharsDecoder_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
 
-    /* e_DataProcessorClass_CharEncoding */
+    /* e_TextDataProcessorClass_CharEncoding */
     CodePage437Decode_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
     UnicodeDecoder_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
-
+    
+    BASIC_HEX_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+    
     /* File Transfer Protocols */
     RAWFileUpload_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
     XModemUpload_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);

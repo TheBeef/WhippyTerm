@@ -116,6 +116,7 @@ class ConSettings
         e_DataProcessorTypeType DataProcessorType;
         t_StringListType EnabledTextDataProcessors;
         t_StringListType EnabledKeyPressProcessors;
+        t_StringListType EnabledBinaryDataProcessors;
 
         void RegisterAllMembers(class TinyCFG &cfg);
         void DefaultSettings(void);
@@ -178,8 +179,6 @@ class Settings
 
         /***** Connections *****/
         bool AutoConnectOnNewConnection;
-//        bool UseConnectionDefaults;
-//        t_ConnectionsOptions DefaultConnectionsOptions;
 
         /* Keyboard */
 

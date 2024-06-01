@@ -112,6 +112,8 @@ t_UIListViewCtrl *UIS_GetListViewHandle(e_UIS_ListView UIObj)
             return (t_UIListViewCtrl *)g_SettingsDialog->ui->Other_listWidget;
         case e_UIS_ListView_KeyBinding_CommandList:
             return (t_UIListViewCtrl *)g_SettingsDialog->ui->KeyBinding_CommandList_listWidget;
+        case e_UIS_ListView_BinaryProcessorDecoder:
+            return (t_UIListViewCtrl *)g_SettingsDialog->ui->Binary_Processor_Decoder_listWidget;
 
         case e_UIS_ListViewMAX:
         default:

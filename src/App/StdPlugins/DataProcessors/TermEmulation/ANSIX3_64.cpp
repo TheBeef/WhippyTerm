@@ -66,7 +66,7 @@ struct ANSIX364DecoderData
 t_DataProcessorHandleType *ANSIX364Decoder_AllocateData(void);
 void ANSIX364Decoder_FreeData(t_DataProcessorHandleType *DataHandle);
 const struct DataProcessorInfo *ANSIX364Decoder_GetProcessorInfo(unsigned int *SizeOfInfo);
-void ANSIX364Decoder_ProcessIncomingByte(t_DataProcessorHandleType *DataHandle,
+void ANSIX364Decoder_ProcessIncomingTextByte(t_DataProcessorHandleType *DataHandle,
         const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
         PG_BOOL *Consumed);
 void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data);
@@ -89,7 +89,8 @@ struct DataProcessorAPI m_ANSIX364DecoderAPI=
     ANSIX364Decoder_FreeData,
     ANSIX364Decoder_GetProcessorInfo,
     ANSIX364Decoder_ProcessKeyPress,
-    ANSIX364Decoder_ProcessIncomingByte,
+    ANSIX364Decoder_ProcessIncomingTextByte,
+    NULL, // ProcessIncomingBinaryByte
 };
 struct DataProcessorInfo m_ANSIX364Decoder_Info=
 {
@@ -97,7 +98,8 @@ struct DataProcessorInfo m_ANSIX364Decoder_Info=
     "ANSI escape sequences",
     "ANSI X3.64, ISO 6429, and Digital VT100 escape sequences", // NOTE: ISO/IEC 6429:1992 is the latest
     e_DataProcessorType_Text,
-    e_DataProcessorClass_TermEmulation
+    e_TextDataProcessorClass_TermEmulation,
+    e_BinaryDataProcessorModeMAX,
 };
 
 /*******************************************************************************
@@ -229,24 +231,24 @@ void ANSIX364Decoder_FreeData(t_DataProcessorHandleType *DataHandle)
  *                  e_DataProcessorType_Binary -- This is a binary processor.
  *                      These are processors for binary protocol.  This may
  *                      be something as simple as a hex dump.
- *          ProClass -- This only applies to 'e_DataProcessorType_Text' type
+ *          TxtClass -- This only applies to 'e_DataProcessorType_Text' type
  *              processors. This is what class of text processor is
  *              this.  Supported classes:
- *                      e_DataProcessorClass_Other -- This is a generic class
+ *                      e_TextDataProcessorClass_Other -- This is a generic class
  *                          more than one of these processors can be active
  *                          at a time but no other requirements exist.
- *                      e_DataProcessorClass_CharEncoding -- This is a
+ *                      e_TextDataProcessorClass_CharEncoding -- This is a
  *                          class that converts the raw stream into some kind
  *                          of char encoding.  For example unicode is converted
  *                          from a number of bytes to chars in the system.
- *                      e_DataProcessorClass_TermEmulation -- This is a
+ *                      e_TextDataProcessorClass_TermEmulation -- This is a
  *                          type of terminal emulator.  An example of a
  *                          terminal emulator is VT100.
- *                      e_DataProcessorClass_Highlighter -- This is a processor
+ *                      e_TextDataProcessorClass_Highlighter -- This is a processor
  *                          that highlights strings as they come in the input
  *                          stream.  For example a processor that underlines
  *                          URL's.
- *                      e_DataProcessorClass_Logger -- This is a processor
+ *                      e_TextDataProcessorClass_Logger -- This is a processor
  *                          that saves the input.  It may save to a file or
  *                          send out a debugging service.  And example is
  *                          a processor that saves all the raw bytes to a file.
@@ -614,7 +616,7 @@ PG_BOOL ANSIX364Decoder_ProcessKeyPress(t_DataProcessorHandleType *DataHandle,
  *    ANSIX364Decoder_ProcessByte
  *
  *  SYNOPSIS:
- *    void ANSIX364Decoder_ProcessIncomingByte(
+ *    void ANSIX364Decoder_ProcessIncomingTextByte(
  *              t_DataProcessorHandleType *DataHandle,const uint8_t RawByte,
  *              uint8_t *ProcessedChar,int *CharLen,PG_BOOL *Consumed);
  *
@@ -639,7 +641,7 @@ PG_BOOL ANSIX364Decoder_ProcessKeyPress(t_DataProcessorHandleType *DataHandle,
  * SEE ALSO:
  *    
  ******************************************************************************/
-void ANSIX364Decoder_ProcessIncomingByte(t_DataProcessorHandleType *DataHandle,
+void ANSIX364Decoder_ProcessIncomingTextByte(t_DataProcessorHandleType *DataHandle,
         const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
         PG_BOOL *Consumed)
 {

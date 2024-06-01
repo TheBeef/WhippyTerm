@@ -43,14 +43,14 @@
 
 /***  TYPE DEFINITIONS                 ***/
 
-struct DPS_TextProInfo
+struct DPS_ProInfo
 {
     const char *IDStr;
     const char *DisplayName;
     const char *Tip;
     const char *Help;
 };
-typedef std::vector<struct DPS_TextProInfo> t_DPS_TextProInfoType;
+typedef std::vector<struct DPS_ProInfo> t_DPS_ProInfoType;
 
 struct DataProcessor
 {
@@ -69,6 +69,7 @@ struct ProcessorConData
 {
     t_ProcessorsDataType ProcessorsData;
     t_DPSDataProcessorsType DataProcessorsList;
+    class ConSettings *Settings;
 };
 
 /***  CLASS DEFINITIONS                ***/
@@ -83,8 +84,9 @@ bool DPS_AllocProcessorConData(struct ProcessorConData *FData,
 void DPS_FreeProcessorConData(struct ProcessorConData *FData);
 bool DPS_ReapplyProcessor2Connection(struct ProcessorConData *FData,
         class ConSettings *CustomSettings);
-void DPS_GetListOfTextProcessors(e_DataProcessorClassType ProClass,
-        t_DPS_TextProInfoType &RetData);
+void DPS_GetListOfTextProcessors(e_TextDataProcessorClassType TxtClass,
+        t_DPS_ProInfoType &RetData);
+void DPS_GetListOfBinaryProcessors(t_DPS_ProInfoType &RetData);
 bool DPS_ProcessorKeyPress(const uint8_t *KeyChar,int KeyCharLen,
         e_UIKeys ExtendedKey,uint8_t Mod);
 void DPS_ProcessorIncomingBytes(const uint8_t *inbuff,int bytes);

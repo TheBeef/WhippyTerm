@@ -33,6 +33,7 @@ QMAKE_LFLAGS += -static -static-libgcc -static-libstdc++
 }
 
 SOURCES += ../src/UI/QT/main.cpp\
+    ../ExternPlugins/DataProcessors/TermEmulation/BasicHex/src/BasicHex.cpp \
     ../src/App/Dialogs/Dialog_SendByte.cpp \
     ../src/App/StdPlugins/IODrivers/TCPClient/src/TCPClient_Main.cpp \
     ../src/App/StdPlugins/IODrivers/TCPServer/src/TCPServer_Main.cpp \

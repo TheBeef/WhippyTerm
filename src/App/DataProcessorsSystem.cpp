@@ -106,8 +106,11 @@ void DPS_NoteNonPrintable(const char *CodeStr);
 void DPS_DoTab(void);
 void DPS_SendBackspace(void);
 void DPS_SendEnter(void);
+void DPS_BinaryAddText(const char *Str);
+void DPS_BinaryAddHex(uint8_t Byte);
 
 /*** VARIABLE DEFINITIONS     ***/
+static struct DataProcessor *m_ActiveDataProcessor;
 
 struct DPS_API g_DPSAPI=
 {
@@ -136,6 +139,8 @@ struct DPS_API g_DPSAPI=
     DPS_DoTab,
     DPS_SendBackspace,
     DPS_SendEnter,
+    DPS_BinaryAddText,
+    DPS_BinaryAddHex,
 };
 t_DPSDataProcessorsType m_DataProcessors;     // All available data processors
 
@@ -243,24 +248,24 @@ void DPS_Init(void)
  *                  e_DataProcessorType_Binary -- This is a binary processor.
  *                      These are processors for binary protocol.  This may
  *                      be something as simple as a hex dump.
- *          ProClass -- This only applies to 'e_DataProcessorType_Text' type
+ *          TxtClass -- This only applies to 'e_DataProcessorType_Text' type
  *              processors. This is what class of text processor is
  *              this.  Supported classes:
- *                      e_DataProcessorClass_Other -- This is a generic class
- *                          more than one of these processors can be active
- *                          at a time but no other requirements exist.
- *                      e_DataProcessorClass_CharEncoding -- This is a
+ *                      e_TextDataProcessorClass_Other -- This is a generic
+ *                          class more than one of these processors can be
+ *                          active at a time but no other requirements exist.
+ *                      e_TextDataProcessorClass_CharEncoding -- This is a
  *                          class that converts the raw stream into some kind
  *                          of char encoding.  For example unicode is converted
  *                          from a number of bytes to chars in the system.
- *                      e_DataProcessorClass_TermEmulation -- This is a
+ *                      e_TextDataProcessorClass_TermEmulation -- This is a
  *                          type of terminal emulator.  An example of a
  *                          terminal emulator is VT100.
- *                      e_DataProcessorClass_Highlighter -- This is a processor
- *                          that highlights strings as they come in the input
- *                          stream.  For example a processor that underlines
- *                          URL's.
- *                      e_DataProcessorClass_Logger -- This is a processor
+ *                      e_TextDataProcessorClass_Highlighter -- This is a
+ *                          processor that highlights strings as they come in
+ *                          the input stream.  For example a processor that
+ *                          underlines URL's.
+ *                      e_TextDataProcessorClass_Logger -- This is a processor
  *                          that saves the input.  It may save to a file or
  *                          send out a debugging service.  And example is
  *                          a processor that saves all the raw bytes to a file.
@@ -268,38 +273,64 @@ void DPS_Init(void)
  *    RETURNS:
  *      NONE
  *==============================================================================
-// *    NAME:
-// *      ProcessByte
-// *
-// *    SYNOPSIS:
-// *      void ProcessByte(t_DataProcessorHandleType *DataHandle,t_ConID ConnectionID,
-// *              const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
-// *              bool *Consumed,struct CharStyling *Style);
-// *
-// *    PARAMETERS:
-// *      DataHandle [I] -- The data handle to work on.  This is your internal
-// *                        data.
-// *      ConnectionID [I] -- The connection to work on
-// *      RawByte [I] -- The raw byte to process.  This is the byte that came in.
-// *      ProcessedChar [I/O] -- This is a unicode char that has already been
-// *                           processed by some of the other input filters.  You
-// *                           can change this as you need.  It must remain only
-// *                           one unicode char.
-// *      CharLen [I/O] -- This number of bytes in 'ProcessedChar'
-// *      Consumed [I/O] -- This tells the system (and other filters) if the
-// *                        char has been used up and will not be added to the
-// *                        screen.
-// *      Style [I/O] -- This is the current style that the char will be added
-// *                     with.  You can change this to change how the char will
-// *                     be added.
-// *
-// *    FUNCTION:
-// *      This function is called for each byte that comes in.
-//DEBUG PAUL: Fill in a lot more info.
-// *
-// *    RETURNS:
-// *      NONE
-// *
+ *    NAME:
+ *      ProcessIncomingTextByte
+ *
+ *    SYNOPSIS:
+ *      void ProcessIncomingTextByte(t_DataProcessorHandleType *DataHandle,
+ *          const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+ *          PG_BOOL *Consumed);
+ *
+ *    PARAMETERS:
+ *      DataHandle [I] -- The data handle to work on.  This is your internal
+ *                        data.
+ *      RawByte [I] -- This is the byte that came in.
+ *      ProcessedChar [I/O] -- This is a unicode char that has already been
+ *                           processed by some of the other input filters.  You
+ *                           can change this as you need.  It must remain only
+ *                           one unicode char.
+ *      CharLen [I/O] -- This number of bytes in 'ProcessedChar'
+ *      Consumed [I/O] -- This tells the system (and other filters) if the
+ *                        char has been used up and will not be added to the
+ *                        screen.
+ *
+ *    FUNCTION:
+ *      This function is called for each byte that comes in if you are a
+ *      'e_DataProcessorType_Text' type of processor.  You work on the
+ *      'ProcessedChar' to change the byte as needed.
+ *
+ *      If you set 'Consumed' to true then the 'ProcessedChar' will not be added
+ *      to the display (or passed to other processors).  If it is set to
+ *      false then it will be added to the screen.
+ *
+ *    RETURNS:
+ *      NONE
+ *
+ *==============================================================================
+ * NAME:
+ *    ProcessIncomingBinaryByte
+ *
+ * SYNOPSIS:
+ *    void ProcessIncomingBinaryByte(t_DataProcessorHandleType *DataHandle,
+ *          const uint8_t Byte);
+ *
+ * PARAMETERS:
+ *      DataHandle [I] -- The data handle to work on.  This is your internal
+ *                        data.
+ *      Byte [I] -- This is the byte that came in.
+ *
+ * FUNCTION:
+ *      This function is called for each byte that comes in if you are a
+ *      'e_DataProcessorType_Binary' type of processor.
+ *
+ *      You process this byte and call one of the add to screen functions (or
+ *      all of them if you like).  See BinaryAddText()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    BinaryAddText()
  *==============================================================================
  *    NAME:
  *      ProcessKeyPress
@@ -332,7 +363,7 @@ void DPS_Init(void)
  *      This function is called for each key pressed that would normally be
  *      sent out.  This includes extended keys like the arrows.  This is only
  *      called for data processors that are
- *      e_DataProcessorClass_TermEmulation only.
+ *      e_TextDataProcessorClass_TermEmulation only.
  *
  *    RETURNS:
  *      true -- This key was used up (do not pass to other key processors)
@@ -356,10 +387,8 @@ PG_BOOL DPS_RegisterDataProcessor(const char *ProID,
     {
         /* Check if this is already registered */
         for(pro=m_DataProcessors.begin();pro!=m_DataProcessors.end();pro++)
-        {
             if(strcmp(pro->ProID.c_str(),ProID)==0)
                 break;
-        }
         if(pro!=m_DataProcessors.end())
             throw(0);
 
@@ -430,20 +459,44 @@ bool DPS_AllocProcessorConData(struct ProcessorConData *FData,
     i_DPSDataProcessorsType CurProcessor;
     i_StringListType CurStr;
 
+    FData->Settings=CustomSettings;
+
     /* Copy the data processors list (based on settings) for this connection */
-    for(CurStr=CustomSettings->EnabledTextDataProcessors.begin();
-            CurStr!=CustomSettings->EnabledTextDataProcessors.end();
-            CurStr++)
+    if(CustomSettings->DataProcessorType==e_DataProcessorType_Text)
     {
-        /* Find this input processor */
-        for(Processor=m_DataProcessors.begin();
-                Processor!=m_DataProcessors.end();Processor++)
+        for(CurStr=CustomSettings->EnabledTextDataProcessors.begin();
+                CurStr!=CustomSettings->EnabledTextDataProcessors.end();
+                CurStr++)
         {
-            if(strcmp(Processor->ProID.c_str(),CurStr->c_str())==0)
+            /* Find this input processor */
+            for(Processor=m_DataProcessors.begin();
+                    Processor!=m_DataProcessors.end();Processor++)
             {
-                /* Found it */
-                FData->DataProcessorsList.push_back(*Processor);
-                break;
+                if(strcmp(Processor->ProID.c_str(),CurStr->c_str())==0)
+                {
+                    /* Found it */
+                    FData->DataProcessorsList.push_back(*Processor);
+                    break;
+                }
+            }
+        }
+    }
+    else
+    {
+        for(CurStr=CustomSettings->EnabledBinaryDataProcessors.begin();
+                CurStr!=CustomSettings->EnabledBinaryDataProcessors.end();
+                CurStr++)
+        {
+            /* Find this input processor */
+            for(Processor=m_DataProcessors.begin();
+                    Processor!=m_DataProcessors.end();Processor++)
+            {
+                if(strcmp(Processor->ProID.c_str(),CurStr->c_str())==0)
+                {
+                    /* Found it */
+                    FData->DataProcessorsList.push_back(*Processor);
+                    break;
+                }
             }
         }
     }
@@ -574,91 +627,61 @@ void DPS_ProcessorIncomingBytes(const uint8_t *inbuff,int bytes)
     if(FData==NULL)
         return;
 
-    for(byte=0;byte<bytes;byte++)
+    if(FData->Settings->DataProcessorType==e_DataProcessorType_Text)
     {
-        Consumed=false;
-        CharLen=1;
-        ProcessedChar[0]=inbuff[byte];
-
         /* Text mode data processors */
-        for(CurProcessor=FData->DataProcessorsList.begin(),Index=0;
-                CurProcessor!=FData->DataProcessorsList.end();
-                CurProcessor++,Index++)
+        for(byte=0;byte<bytes;byte++)
         {
-            if(CurProcessor->API.ProcessIncomingByte!=NULL)
+            Consumed=false;
+            CharLen=1;
+            ProcessedChar[0]=inbuff[byte];
+
+            for(CurProcessor=FData->DataProcessorsList.begin(),Index=0;
+                    CurProcessor!=FData->DataProcessorsList.end();
+                    CurProcessor++,Index++)
             {
-                CurProcessor->API.ProcessIncomingByte(FData->
-                        ProcessorsData[Index],inbuff[byte],ProcessedChar,
-                        &CharLen,&Consumed);
+                m_ActiveDataProcessor=&*CurProcessor;
+                if(CurProcessor->API.ProcessIncomingTextByte!=NULL)
+                {
+                    CurProcessor->API.ProcessIncomingTextByte(FData->
+                            ProcessorsData[Index],inbuff[byte],ProcessedChar,
+                            &CharLen,&Consumed);
+                }
+            }
+            m_ActiveDataProcessor=NULL;
+
+            if(!Consumed)
+            {
+                ProcessedChar[CharLen]=0;   // Make it a string
+DB_StartTimer(e_DBT_AddChar2Display);
+                Con_WriteChar2Display(ProcessedChar);
+DB_StopTimer(e_DBT_AddChar2Display);
             }
         }
-
-        if(!Consumed)
+    }
+    else
+    {
+        /* binary data processors */
+        CurProcessor=FData->DataProcessorsList.begin();
+        if(CurProcessor!=FData->DataProcessorsList.end())
         {
-            ProcessedChar[CharLen]=0;   // Make it a string
-DB_StartTimer(e_DBT_AddChar2Display);
-            Con_WriteChar2Display(ProcessedChar);
-DB_StopTimer(e_DBT_AddChar2Display);
+            m_ActiveDataProcessor=&*CurProcessor;
+            CharLen=0;
+            ProcessedChar[0]=0;
+            Consumed=true;
+            for(byte=0;byte<bytes;byte++)
+            {
+                /* Text mode data processors */
+                if(CurProcessor->API.ProcessIncomingBinaryByte!=NULL)
+                {
+                    CurProcessor->API.ProcessIncomingBinaryByte(
+                            FData->ProcessorsData[0],inbuff[byte]);
+                }
+            }
         }
+        m_ActiveDataProcessor=NULL;
     }
 }
-//            MW_AddString2Con(ConnectionID,ProcessedChar,CharLen,&FData->Style);
-
-
-///*******************************************************************************
-// * NAME:
-// *    DPS_ProcessorIncomingBytes
-// *
-// * SYNOPSIS:
-// *    void DPS_ProcessorIncomingBytes(t_ConID ConnectionID,const uint8_t *inbuff,
-// *          int bytes,struct ProcessorConData *FData);
-// *
-// * PARAMETERS:
-// *    ConnectionID [I] -- The connection this data is for
-// *    inbuff [I] -- The buffer with the data that was read.  This is raw data
-// *    bytes [I] -- The number of bytes that was read.
-// *    FData [I/O] -- The filter connection data for this connection.
-// *
-// * FUNCTION:
-// *    This function takes bytes that have come into a connection and passes
-// *    them into the filters.  As a last step it adds them to the main window.
-// *
-// * RETURNS:
-// *    NONE
-// *
-// * SEE ALSO:
-// *    
-// ******************************************************************************/
-//void DPS_ProcessorIncomingBytes(t_ConID ConnectionID,const uint8_t *inbuff,
-//        int bytes,struct ProcessorConData *FData)
-//{
-//    uint8_t ProcessedChar[10];  // Buffer for the char we will eventually output.  UTF8 seems to be limited to 4 maybe 6 bytes so 10 should be good (it's up the plugin not to go over 6)
-//    bool Consumed;
-//    int32_t byte;
-//    int CharLen;
-//    i_DPSDataProcessorsType CurProcessor;
-//    unsigned int Index;
-//
-//    for(byte=0;byte<bytes;byte++)
-//    {
-//        Consumed=false;
-//        CharLen=1;
-//        ProcessedChar[0]=inbuff[byte];
-//
-//        /* Text mode filters */
-//        for(CurProcessor=FData->DataProcessorsList.begin(),Index=0;
-//                CurProcessor!=FData->DataProcessorsList.end();
-//                CurProcessor++,Index++)
-//        {
-//            (*CurProcessor)->API->ProcessByte(FData->ProcessorsData[Index],
-//                    ConnectionID,inbuff[byte],ProcessedChar,&CharLen,
-//                    &Consumed,&FData->Style);
-//        }
-//
-////        if(!Consumed)
-////            MW_AddString2Con(ConnectionID,ProcessedChar,CharLen,&FData->Style);
-//    }
-//}
 
 /*******************************************************************************
  * NAME:
@@ -704,8 +727,9 @@ bool DPS_ProcessorKeyPress(const uint8_t *KeyChar,int KeyCharLen,
             CurProcessor!=FData->DataProcessorsList.end();
             CurProcessor++,Index++)
     {
-        if(CurProcessor->Info.ProType==e_DataProcessorType_Text &&
-                CurProcessor->Info.ProClass==e_DataProcessorClass_TermEmulation)
+        if((CurProcessor->Info.ProType==e_DataProcessorType_Text &&
+                CurProcessor->Info.TxtClass==e_TextDataProcessorClass_TermEmulation) ||
+                CurProcessor->Info.ProType==e_DataProcessorType_Binary)
         {
             if(CurProcessor->API.ProcessKeyPress!=NULL)
             {
@@ -726,11 +750,11 @@ bool DPS_ProcessorKeyPress(const uint8_t *KeyChar,int KeyCharLen,
  *    DPS_GetListOfTextProcessors
  *
  * SYNOPSIS:
- *    void DPS_GetListOfTextProcessors(e_DataProcessorClassType ProClass,
- *          t_DPS_TextProInfoType &RetData);
+ *    void DPS_GetListOfTextProcessors(e_TextDataProcessorClassType TxtClass,
+ *          t_DPS_ProInfoType &RetData);
  *
  * PARAMETERS:
- *    ProClass [I] -- What class of input processor to return a list of
+ *    TxtClass [I] -- What class of input processor to return a list of
  *    RetData [O] -- This is filled with info about the input processors.
  *                   The data return will be a vector of a structure with
  *                   the following fields:
@@ -754,13 +778,13 @@ bool DPS_ProcessorKeyPress(const uint8_t *KeyChar,int KeyCharLen,
  *    index.
  *
  * SEE ALSO:
- *    
+ *    DPS_GetListOfBinaryProcessors()
  ******************************************************************************/
-void DPS_GetListOfTextProcessors(e_DataProcessorClassType ProClass,
-        t_DPS_TextProInfoType &RetData)
+void DPS_GetListOfTextProcessors(e_TextDataProcessorClassType TxtClass,
+        t_DPS_ProInfoType &RetData)
 {
     i_DPSDataProcessorsType CurProcessor;
-    struct DPS_TextProInfo NewEntry;
+    struct DPS_ProInfo NewEntry;
 
     RetData.clear();
 
@@ -768,7 +792,61 @@ void DPS_GetListOfTextProcessors(e_DataProcessorClassType ProClass,
             CurProcessor!=m_DataProcessors.end();CurProcessor++)
     {
         if(CurProcessor->Info.ProType==e_DataProcessorType_Text &&
-                CurProcessor->Info.ProClass==ProClass)
+                CurProcessor->Info.TxtClass==TxtClass)
+        {
+            NewEntry.IDStr=CurProcessor->ProID.c_str();
+            NewEntry.DisplayName=CurProcessor->Info.DisplayName;
+            NewEntry.Tip=CurProcessor->Info.Tip;
+            NewEntry.Help=CurProcessor->Info.Help;
+
+            RetData.push_back(NewEntry);
+        }
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_GetListOfBinaryProcessors
+ *
+ * SYNOPSIS:
+ *    void DPS_GetListOfBinaryProcessors(t_DPS_ProInfoType &RetData);
+ *
+ * PARAMETERS:
+ *    RetData [O] -- This is filled with info about the input processors.
+ *                   The data return will be a vector of a structure with
+ *                   the following fields:
+ *                      IDStr -- The identifier string for this input
+ *                               processor.
+ *                      DisplayName -- The name to display to the user
+ *                      Tip -- A tool tip for this input processor
+ *                      Help -- Help for this input processor.  This is
+ *                              written in a text markup.
+ *
+ * FUNCTION:
+ *    This function gets a list of binary data processors.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    The order of the returned data will change from time to time so you
+ *    must use the 'IDStr' to identify the text data processor not the
+ *    index.
+ *
+ * SEE ALSO:
+ *    DPS_GetListOfTextProcessors()
+ ******************************************************************************/
+void DPS_GetListOfBinaryProcessors(t_DPS_ProInfoType &RetData)
+{
+    i_DPSDataProcessorsType CurProcessor;
+    struct DPS_ProInfo NewEntry;
+
+    RetData.clear();
+
+    for(CurProcessor=m_DataProcessors.begin();
+            CurProcessor!=m_DataProcessors.end();CurProcessor++)
+    {
+        if(CurProcessor->Info.ProType==e_DataProcessorType_Binary)
         {
             NewEntry.IDStr=CurProcessor->ProID.c_str();
             NewEntry.DisplayName=CurProcessor->Info.DisplayName;
@@ -1378,5 +1456,82 @@ void DPS_SendBackspace(void)
 void DPS_SendEnter(void)
 {
     Con_DoFunction(e_ConFunc_SendEnter);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_BinaryAddText
+ *
+ * SYNOPSIS:
+ *    void DPS_BinaryAddText(const char *Str);
+ *
+ * PARAMETERS:
+ *    Str [I] -- The string to add to the text display
+ *
+ * FUNCTION:
+ *    This function is called from ProcessIncomingBinaryByte() to add
+ *    a text to the text display.  If this plugin is not a
+ *    'e_BinaryDataProcessorMode_Text' then calls to this function are ignored.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_BinaryAddHex()
+ ******************************************************************************/
+void DPS_BinaryAddText(const char *Str)
+{
+    uint8_t buff[2];
+
+    if(m_ActiveDataProcessor==NULL)
+        return;
+
+    if(m_ActiveDataProcessor->Info.BinMode!=e_BinaryDataProcessorMode_Text)
+        return;
+
+    buff[1]=0;
+    while(*Str!=0)
+    {
+        buff[0]=*Str;
+        Str++;
+        Con_WriteChar2Display(buff);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_BinaryAddHex
+ *
+ * SYNOPSIS:
+ *    void DPS_BinaryAddHex(uint8_t Byte);
+ *
+ * PARAMETERS:
+ *    Byte [I] -- The byte to add to the hex display.
+ *
+ * FUNCTION:
+ *    This function is called from ProcessIncomingBinaryByte() to add
+ *    a hex value to the display.  If this plugin is not a
+ *    'e_BinaryDataProcessorMode_Hex' then calls to this function are ignored.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_BinaryAddText()
+ ******************************************************************************/
+void DPS_BinaryAddHex(uint8_t Byte)
+{
+    uint8_t buff[2];
+
+    if(m_ActiveDataProcessor==NULL)
+        return;
+
+    if(m_ActiveDataProcessor->Info.BinMode!=e_BinaryDataProcessorMode_Hex)
+        return;
+
+    buff[0]=Byte;
+    buff[1]=0;
+
+    Con_WriteChar2Display(buff);
 }
 

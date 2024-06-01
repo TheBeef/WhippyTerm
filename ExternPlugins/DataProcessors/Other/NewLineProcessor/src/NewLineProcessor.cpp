@@ -64,7 +64,7 @@ struct DataProcessorInfo m_NewLineProcessor_Info=
     "Added a '\\r' when it sees a '\\n'",
     "Does a cartridge return when a new line character is read",
     e_DataProcessorType_Text,
-    e_DataProcessorClass_Other
+    e_TextDataProcessorClass_Other
 };
 
 static const struct DPS_API *m_NLP_DPS;
@@ -141,24 +141,24 @@ extern "C"
  *                  e_DataProcessorType_Binary -- This is a binary processor.
  *                      These are processors for binary protocol.  This may
  *                      be something as simple as a hex dump.
- *          ProClass -- This only applies to 'e_DataProcessorType_Text' type
+ *          TxtClass -- This only applies to 'e_DataProcessorType_Text' type
  *              processors. This is what class of text processor is
  *              this.  Supported classes:
- *                      e_DataProcessorClass_Other -- This is a generic class
+ *                      e_TextDataProcessorClass_Other -- This is a generic class
  *                          more than one of these processors can be active
  *                          at a time but no other requirements exist.
- *                      e_DataProcessorClass_CharEncoding -- This is a
+ *                      e_TextDataProcessorClass_CharEncoding -- This is a
  *                          class that converts the raw stream into some kind
  *                          of char encoding.  For example unicode is converted
  *                          from a number of bytes to chars in the system.
- *                      e_DataProcessorClass_TermEmulation -- This is a
+ *                      e_TextDataProcessorClass_TermEmulation -- This is a
  *                          type of terminal emulator.  An example of a
  *                          terminal emulator is VT100.
- *                      e_DataProcessorClass_Highlighter -- This is a processor
+ *                      e_TextDataProcessorClass_Highlighter -- This is a processor
  *                          that highlights strings as they come in the input
  *                          stream.  For example a processor that underlines
  *                          URL's.
- *                      e_DataProcessorClass_Logger -- This is a processor
+ *                      e_TextDataProcessorClass_Logger -- This is a processor
  *                          that saves the input.  It may save to a file or
  *                          send out a debugging service.  And example is
  *                          a processor that saves all the raw bytes to a file.

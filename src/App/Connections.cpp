@@ -632,6 +632,7 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
     string UniqueID;
     struct ConnectionInfoList ConInfo;
     t_KVList Options;
+    bool UseText;
 
     Display=nullptr;
     try
@@ -662,10 +663,33 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
                this by looking at the first processor and seeing what type it
                is (if we don't have a processor then assume text). */
             FirstProcessor=ProcessorData.DataProcessorsList.begin();
-            if(FirstProcessor==ProcessorData.DataProcessorsList.end() ||
-                    FirstProcessor->Info.ProType==e_DataProcessorType_Text)
+            UseText=false;
+            if(FirstProcessor==ProcessorData.DataProcessorsList.end())
             {
-                /* We are text connection or there are no processors */
+                UseText=true;
+            }
+            else
+            {
+                switch(FirstProcessor->Info.ProType)
+                {
+                    case e_DataProcessorType_Binary:
+                        if(FirstProcessor->Info.
+                                BinMode==e_BinaryDataProcessorMode_Text)
+                        {
+                            UseText=true;
+                        }
+                    break;
+                    default:
+                    case e_DataProcessorTypeMAX:
+                    case e_DataProcessorType_Text:
+                        UseText=true;
+                    break;
+                }
+            }
+
+            if(UseText)
+            {
+                /* We are using a text display */
                 Display=new DisplayText();
             }
             else

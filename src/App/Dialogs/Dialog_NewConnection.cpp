@@ -636,7 +636,8 @@ static void DNC_OpenConnection(class TheMainWindow *MW)
         if(!IOS_MakeURIFromDetectedCon(Selected,*SelectedConOptions,URI))
             throw("Failed to make a URI for this connection");
 
-        NewConnection=MW->AllocNewTab(ConnectionName.c_str(),NULL,URI.c_str());
+        NewConnection=MW->AllocNewTab(ConnectionName.c_str(),NULL,URI.c_str(),
+                *SelectedConOptions);
         if(NewConnection==nullptr)
             throw(nullptr);    // We have already prompted
 

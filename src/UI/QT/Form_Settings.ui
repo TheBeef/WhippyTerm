@@ -11505,7 +11505,7 @@
           <item>
            <widget class="QTabWidget" name="Terminal_tabWidget">
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="Terminal_tab">
              <attribute name="title">
@@ -11811,7 +11811,7 @@ p, li { white-space: pre-wrap; }
                  <enum>QFrame::Plain</enum>
                 </property>
                 <property name="currentIndex">
-                 <number>0</number>
+                 <number>1</number>
                 </property>
                 <widget class="QWidget" name="TextProcessingSettings_page">
                  <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -11968,6 +11968,18 @@ p, li { white-space: pre-wrap; }
                     <property name="title">
                      <string>Binary Processing Settings</string>
                     </property>
+                    <layout class="QVBoxLayout" name="verticalLayout_39">
+                     <item>
+                      <widget class="QLabel" name="label_12">
+                       <property name="text">
+                        <string>Decoder</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QListWidget" name="Binary_Processor_Decoder_listWidget"/>
+                     </item>
+                    </layout>
                    </widget>
                   </item>
                  </layout>

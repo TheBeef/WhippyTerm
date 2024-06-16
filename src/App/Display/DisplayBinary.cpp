@@ -1,3 +1,4 @@
+#include "UI/UIDebug.h"
 /*******************************************************************************
  * FILENAME: DisplayBinary.cpp
  *
@@ -84,13 +85,16 @@ DisplayBinary::DisplayBinary()
     HexBuffer=NULL;
     HexBufferSize=0;
     TopLine=NULL;
-    ProLine=NULL;
-    ConLine=NULL;
+    BottomOfBufferLine=NULL;
+    TopOfBufferLine=NULL;
     EndOfHexBuffer=NULL;
     ScreenWidthPx=0;
     ScreenHeightPx=0;
+    DisplayLines=0;
     CharWidthPx=1;
     CharHeightPx=1;
+
+DEBUG_Kill=0;
 }
 
 bool DisplayBinary::Init(void *ParentWidget,bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData)
@@ -120,10 +124,10 @@ bool DisplayBinary::Init(void *ParentWidget,bool (*EventCallback)(const struct D
             throw(0);
 
         EndOfHexBuffer=HexBuffer+HexBufferSize;
-        ProLine=HexBuffer;
+        BottomOfBufferLine=HexBuffer;
         InsertPoint=0;
-        ConLine=HexBuffer;
-        TopLine=ConLine;
+        TopOfBufferLine=HexBuffer;
+        TopLine=TopOfBufferLine;
 
         /* Current Style */
         CurrentStyle.FGColor=Settings->DefaultColors[e_DefaultColors_FG];
@@ -138,6 +142,7 @@ bool DisplayBinary::Init(void *ParentWidget,bool (*EventCallback)(const struct D
 
         ScreenWidthPx=0;
         ScreenHeightPx=0;
+        DisplayLines=0;
 
         SetupCanvas();
 
@@ -215,34 +220,54 @@ void DisplayBinary::Reparent(void *NewParentWidget)
  ******************************************************************************/
 void DisplayBinary::WriteChar(uint8_t *Chr)
 {
-    ProLine[InsertPoint++]=*Chr;
+    bool WasAtBottom;
+    t_UIScrollBarCtrl *VertScroll;
+
+    BottomOfBufferLine[InsertPoint++]=*Chr;
     RedrawCurrentLine();
 
     if(InsertPoint>=HEX_BYTES_PER_LINE)
     {
         InsertPoint=0;
 
+        /* If we are scrolled all the way at the bottom then keep it that way */
+        WasAtBottom=ScrollBarAtBottom();
+
         /* Shift the buffer */
-        ProLine+=HEX_BYTES_PER_LINE;
-        if(ProLine>=EndOfHexBuffer)
-            ProLine=HexBuffer;
+        BottomOfBufferLine+=HEX_BYTES_PER_LINE;
+        if(BottomOfBufferLine>=EndOfHexBuffer)
+            BottomOfBufferLine=HexBuffer;
 
-        if(ProLine==ConLine)
+        if(BottomOfBufferLine==TopOfBufferLine)
         {
-            ConLine+=HEX_BYTES_PER_LINE;
-            if(ConLine>=EndOfHexBuffer)
-                ConLine=HexBuffer;
+            TopOfBufferLine+=HEX_BYTES_PER_LINE;
+            if(TopOfBufferLine>=EndOfHexBuffer)
+                TopOfBufferLine=HexBuffer;
+
+            if(TopLine==TopOfBufferLine || WasAtBottom)
+            {
+                /* Ok, we ran out of data, move topline too */
+                TopLine+=HEX_BYTES_PER_LINE;
+                if(TopLine>=EndOfHexBuffer)
+                    TopLine=HexBuffer;
+                RedrawScreen();
+            }
         }
 
-        if(TopLine==ProLine)
-        {
-            /* Ok, we ran out of data, move topline too */
-            TopLine=ProLine+HEX_BYTES_PER_LINE;
-            if(TopLine>=EndOfHexBuffer)
-                TopLine=HexBuffer;
-            RedrawScreen();
-        }
         RethinkScrollBars();
+
+        if(WasAtBottom)
+        {
+            int TotalLines;
+
+            VertScroll=UITC_GetVertSlider(TextDisplayCtrl);
+            TotalLines=UIGetScrollBarTotalSize(VertScroll);
+
+            if(TotalLines>=DisplayLines)
+            {
+                UISetScrollBarPos(VertScroll,TotalLines-DisplayLines);
+            }
+        }
     }
 
     MakeCurrentLineVisble();
@@ -285,10 +310,9 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
         case e_TextDisplayEvent_DisplayFrameScrollX:
         break;
         case e_TextDisplayEvent_DisplayFrameScrollY:
-            TopLine=ConLine+Event->Info.Scroll.Amount*HEX_BYTES_PER_LINE;
+            TopLine=TopOfBufferLine+Event->Info.Scroll.Amount*HEX_BYTES_PER_LINE;
             if(TopLine>EndOfHexBuffer)
                 TopLine=HexBuffer+(TopLine-EndOfHexBuffer);
-/* DEBUG PAUL: handle wrap of buffer */
             RedrawScreen();
         break;
         case e_TextDisplayEvent_MouseDown:
@@ -298,7 +322,8 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
         case e_TextDisplayEvent_MouseRightDown:
         break;
         case e_TextDisplayEvent_MouseRightUp:
-            RedrawScreen();
+            RethinkScrollBars();
+DEBUG_Kill=1;
         break;
         case e_TextDisplayEvent_MouseMiddleDown:
         break;
@@ -369,6 +394,11 @@ void DisplayBinary::ScreenResize(void)
 
     ScreenWidthPx=UITC_GetWidgetWidth(TextDisplayCtrl);
     ScreenHeightPx=UITC_GetWidgetHeight(TextDisplayCtrl);
+
+    if(Settings->TermSizeFixedHeight)
+        DisplayLines=Settings->TermSizeHeight;
+    else
+        DisplayLines=ScreenHeightPx/CharHeightPx;
 }
 
 /*******************************************************************************
@@ -401,49 +431,26 @@ void DisplayBinary::RethinkScrollBars(void)
     if(TextDisplayCtrl==nullptr)
         return;
 
-    if(ConLine>ProLine)
-        Bytes=(EndOfHexBuffer-ConLine)+(ProLine-HexBuffer);
+    /* Find the total number of lines */
+    if(TopOfBufferLine>BottomOfBufferLine)
+        Bytes=(EndOfHexBuffer-TopOfBufferLine)+(BottomOfBufferLine-HexBuffer);
     else
-        Bytes=ProLine-ConLine;
+        Bytes=BottomOfBufferLine-TopOfBufferLine;
     TotalLines=Bytes/HEX_BYTES_PER_LINE;
+    TotalLines++;
 
-    if(TopLine>ProLine)
-        Bytes=(EndOfHexBuffer-TopLine)+(ProLine-HexBuffer);
+    /* Figure out the current topline in lines */
+    if(TopLine>=TopOfBufferLine)
+        Bytes=TopLine-TopOfBufferLine;
     else
-        Bytes=ProLine-TopLine;
+        Bytes=(EndOfHexBuffer-TopOfBufferLine)+(TopLine-HexBuffer);
     TopLineY=Bytes/HEX_BYTES_PER_LINE;
+    TopLineY++;
 
     /* Vert */
     VertScroll=UITC_GetVertSlider(TextDisplayCtrl);
-
-    UISetScrollBarPageSizeAndMax(VertScroll,ScreenHeightPx/CharHeightPx,
-            TotalLines);
+    UISetScrollBarPageSizeAndMax(VertScroll,DisplayLines,TotalLines);
     UISetScrollBarPos(VertScroll,TopLineY);
-
-//    int MaxLength;
-//    int ScreenWidth;
-//    int ScreenWidthPx;
-//
-//    if(TextDisplayCtrl==nullptr)
-//        return;
-//
-//    /* Hozr */
-//    HorzScroll=UITC_GetHorzSlider(TextDisplayCtrl);
-//    ScreenWidthPx=ScreenWidthChars*CharWidthPx;
-//
-//    MaxLength=LongestLinePx;
-//    if(MaxLength<ScreenWidthChars*CharWidthPx)
-//        MaxLength=ScreenWidthChars*CharWidthPx;
-//
-//    ScreenWidth=TextAreaWidthPx;
-//    if(Settings->TermSizeFixedWidth && TextAreaWidthPx>ScreenWidthPx)
-//        ScreenWidth=ScreenWidthPx;
-//
-//    UISetScrollBarPageSizeAndMax(HorzScroll,ScreenWidth,MaxLength);
-//
-//    WindowXOffsetPx=UIGetScrollBarPos(HorzScroll);
-//
-//    UISetScrollBarStepSize(HorzScroll,CharWidthPx);
 }
 
 /*******************************************************************************
@@ -467,12 +474,41 @@ void DisplayBinary::RethinkScrollBars(void)
  ******************************************************************************/
 void DisplayBinary::RethinkWindowSize(void)
 {
+    int LeftEdge;
+    int TopEdge;
+    int Width;
+    int Height;
+
     /* Set the clipping and offset from the edge of the widget */
-    if(TextDisplayCtrl!=nullptr)
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    LeftEdge=0;
+    TopEdge=0;
+    Width=ScreenWidthPx;
+    Height=ScreenHeightPx;
+
+    if(Settings->TermSizeFixedWidth)
     {
-        UITC_SetClippingWindow(TextDisplayCtrl,0,0,ScreenWidthPx,
-                ScreenHeightPx);
+        Width=Settings->TermSizeWidth*CharWidthPx;
+        LeftEdge=ScreenWidthPx/2-Width/2;
+        if(LeftEdge<0)
+            LeftEdge=0;
     }
+
+    if(Settings->TermSizeFixedHeight)
+    {
+        Height=Settings->TermSizeHeight*CharHeightPx;
+        TopEdge=ScreenHeightPx/2-Height/2;
+        if(TopEdge<0)
+            TopEdge=0;
+    }
+
+    UITC_SetClippingWindow(TextDisplayCtrl,LeftEdge,TopEdge,Width,Height);
+    UITC_SetMaxLines(TextDisplayCtrl,DisplayLines);
+
+//        UITC_SetClippingWindow(TextDisplayCtrl,0,0,ScreenWidthPx,
+//                ScreenHeightPx);
 }
 
 /*******************************************************************************
@@ -511,6 +547,11 @@ void DisplayBinary::SetupCanvas(void)
     if(CharHeightPx<1)
         CharHeightPx=1;
 
+    if(Settings->TermSizeFixedHeight)
+        DisplayLines=Settings->TermSizeHeight;
+    else
+        DisplayLines=ScreenHeightPx/CharHeightPx;
+
     ScreenResize();
     RethinkWindowSize();
     RethinkScrollBars();
@@ -537,25 +578,22 @@ void DisplayBinary::SetupCanvas(void)
  ******************************************************************************/
 void DisplayBinary::RedrawCurrentLine(void)
 {
-    int DisplayLines;
     const uint8_t *StartOfLine;
     int y;
     int Bytes2Draw;
     int Bytes;
 
-    DisplayLines=ScreenHeightPx/CharHeightPx;
-
-    if(TopLine>ProLine)
-        Bytes=(EndOfHexBuffer-TopLine)+(ProLine-HexBuffer);
+    if(TopLine>BottomOfBufferLine)
+        Bytes=(EndOfHexBuffer-TopLine)+(BottomOfBufferLine-HexBuffer);
     else
-        Bytes=ProLine-TopLine;
+        Bytes=BottomOfBufferLine-TopLine;
     y=Bytes/HEX_BYTES_PER_LINE;
 
     /* Don't do anything if the insert line is not on the screen */
-    if(y>DisplayLines)
+    if(y>=DisplayLines)
         return;
 
-    DrawLine(ProLine,y,InsertPoint);
+    DrawLine(BottomOfBufferLine,y,InsertPoint);
 }
 
 /*******************************************************************************
@@ -579,19 +617,17 @@ void DisplayBinary::RedrawCurrentLine(void)
  ******************************************************************************/
 void DisplayBinary::RedrawScreen(void)
 {
-    int DisplayLines;
     const uint8_t *StartOfLine;
     int y;
     int Bytes2Draw;
 
-    DisplayLines=ScreenHeightPx/CharHeightPx;
     StartOfLine=TopLine;
     for(y=0;y<DisplayLines;y++)
     {
         if(StartOfLine>=EndOfHexBuffer)
             StartOfLine=HexBuffer;
         Bytes2Draw=HEX_BYTES_PER_LINE;
-        if(StartOfLine==ProLine)
+        if(StartOfLine==BottomOfBufferLine)
             Bytes2Draw=InsertPoint;
 
         DrawLine(StartOfLine,y,Bytes2Draw);
@@ -631,12 +667,14 @@ void DisplayBinary::DrawLine(const uint8_t *Line,int ScreenLine,int Bytes)
     uint8_t c;
     int x;
 
+if(DEBUG_Kill)
+    return;
+
 struct CharStyling AltStyle;
 AltStyle.FGColor=Settings->DefaultColors[e_DefaultColors_FG];
 AltStyle.BGColor=0x0000FF;
 AltStyle.Attribs=0;
 AltStyle.ULineColor=CurrentStyle.FGColor;
-
 
     for(x=0;x<Bytes;x++)
     {
@@ -649,6 +687,30 @@ AltStyle.ULineColor=CurrentStyle.FGColor;
     memset(&LineBuff[x*3],' ',(HEX_BYTES_PER_LINE*3+3)-(x*3));
     memset(&LineBuff[HEX_BYTES_PER_LINE*3+3+x],' ',HEX_BYTES_PER_LINE-x);
     LineBuff[HEX_BYTES_PER_LINE*3+HEX_BYTES_PER_LINE+3]=0;
+{
+    char tbuff[100];
+    int q;
+    int w;
+    const uint8_t *Search;
+    q=0;
+    w=0;
+    Search=HexBuffer;
+    while(Search!=Line)
+    {
+        q++;
+        Search+=HEX_BYTES_PER_LINE;
+    }
+    Search=TopLine;
+    while(Search!=Line)
+    {
+        w++;
+        Search+=HEX_BYTES_PER_LINE;
+        if(Search>=EndOfHexBuffer)
+            Search=HexBuffer;
+    }
+    sprintf(tbuff,"%03d,%03d:",q,w);
+    memcpy(LineBuff,tbuff,strlen(tbuff));
+}
 
     DisplayFrag.FragType=e_TextCanvasFrag_String;
     DisplayFrag.Text=LineBuff;
@@ -669,3 +731,42 @@ void DisplayBinary::MakeCurrentLineVisble(void)
 {
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ScrollBarAtBottom
+ *
+ * SYNOPSIS:
+ *    bool DisplayBinary::ScrollBarAtBottom(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function figures out if the vert scroll bar is at the bottom (can't
+ *    scroll any farther down).
+ *
+ * RETURNS:
+ *    true -- Scroll bar is at the bottom
+ *    false -- User could scroll down more
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayBinary::ScrollBarAtBottom(void)
+{
+    t_UIScrollBarCtrl *VertScroll;
+    int CurrentPos;
+    int TotalLines;
+
+    if(TextDisplayCtrl==nullptr)
+        return false;
+
+    VertScroll=UITC_GetVertSlider(TextDisplayCtrl);
+
+    CurrentPos=UIGetScrollBarPos(VertScroll);
+    TotalLines=UIGetScrollBarTotalSize(VertScroll);
+
+    if(CurrentPos>=TotalLines-DisplayLines)
+        return true;
+    return false;
+}

@@ -57,6 +57,7 @@ class DisplayBinary : public DisplayBase
         void WriteChar(uint8_t *Chr);
 
     private:
+int DEBUG_Kill;
         bool InitCalled;
         t_UITextDisplayCtrl *TextDisplayCtrl;
 
@@ -64,15 +65,16 @@ class DisplayBinary : public DisplayBase
         uint8_t *EndOfHexBuffer;
         int HexBufferSize;
 
-        uint8_t *ProLine;               // Where we insert new data in 'HexBuffer'.  This points to the start of the line
-        uint8_t InsertPoint;            // The insert offset from 'ProLine' (ProLine[InsertPoint])
-        uint8_t *ConLine;               // Where we read data from 'HexBuffer'.  This is the oldest data
-        uint8_t *TopLine;               // The first line of the display window (where we are scrolled to)
+        uint8_t *BottomOfBufferLine;    // Where we insert new data in 'HexBuffer'.  This points to the start of the line
+        uint8_t InsertPoint;            // The insert offset from 'BottomOfBufferLine' (BottomOfBufferLine[InsertPoint])
+        uint8_t *TopOfBufferLine;       // Where we read data from 'HexBuffer'.  This is the oldest data
+        uint8_t *TopLine;               // The first line of the display window (where we are scrolled to).  This is relitive to 'Top of Buffer'
 
         int ScreenWidthPx;
         int ScreenHeightPx;
         int CharWidthPx;
         int CharHeightPx;
+        int DisplayLines;
 
         bool DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event);
         void RedrawCurrentLine(void);
@@ -83,6 +85,7 @@ class DisplayBinary : public DisplayBase
         void RedrawScreen(void);
         void DrawLine(const uint8_t *Line,int ScreenLine,int Bytes);
         void MakeCurrentLineVisble(void);
+        bool ScrollBarAtBottom(void);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

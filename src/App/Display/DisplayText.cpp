@@ -215,8 +215,8 @@ bool DisplayText::Init(void *ParentWidget,
         Lines.clear();
         LinesCount=0;
         FirstLine.LineWidthPx=0;
-        FirstLine.LineBackgroundColor=Settings->
-                DefaultColors[e_DefaultColors_BG];
+        FirstLine.LineBackgroundColor=
+                Settings->DefaultColors[e_DefaultColors_BG];
         FirstLine.EOL=e_DTEOL_Hard;
         Lines.push_back(FirstLine);
         LinesCount++;

@@ -1017,7 +1017,8 @@ void DisplayText::RedrawFullScreen(void)
         }
     }
 
-    UITC_SetMaxLines(TextDisplayCtrl,y);
+    UITC_SetMaxLines(TextDisplayCtrl,y,
+            Settings->DefaultColors[e_DefaultColors_BG]);
 
     if(LineLenChanged)
         ReFindLongestLineLength();

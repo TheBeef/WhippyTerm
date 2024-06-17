@@ -835,11 +835,13 @@ void UITC_SetXOffset(t_UITextDisplayCtrl *ctrl,int XOffsetPx)
  *    UITC_SetMaxLines
  *
  * SYNOPSIS:
- *    void UITC_SetMaxLines(t_UITextDisplayCtrl *ctrl,int MaxLines);
+ *    void UITC_SetMaxLines(t_UITextDisplayCtrl *ctrl,int MaxLines,
+ *          uint32_t BGColor);
  *
  * PARAMETERS:
  *    ctrl [I] -- The control to work on
  *    MaxLiners [I] -- The max number of lines to draw.
+ *    BGColor [I] -- The background color for these lines.
  *
  * FUNCTION:
  *    This function sets the max number of lines that we will drawn on repaint.
@@ -850,11 +852,11 @@ void UITC_SetXOffset(t_UITextDisplayCtrl *ctrl,int XOffsetPx)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UITC_SetMaxLines(t_UITextDisplayCtrl *ctrl,int MaxLines)
+void UITC_SetMaxLines(t_UITextDisplayCtrl *ctrl,int MaxLines,uint32_t BGColor)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->SetMaxLines(MaxLines);
+    TextDisplay->ui->TextDisplay->SetMaxLines(MaxLines,BGColor);
 }
 
 /*******************************************************************************

@@ -93,8 +93,6 @@ DisplayBinary::DisplayBinary()
     DisplayLines=0;
     CharWidthPx=1;
     CharHeightPx=1;
-
-DEBUG_Kill=0;
 }
 
 bool DisplayBinary::Init(void *ParentWidget,bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData)
@@ -323,7 +321,6 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
         break;
         case e_TextDisplayEvent_MouseRightUp:
             RethinkScrollBars();
-DEBUG_Kill=1;
         break;
         case e_TextDisplayEvent_MouseMiddleDown:
         break;
@@ -505,10 +502,8 @@ void DisplayBinary::RethinkWindowSize(void)
     }
 
     UITC_SetClippingWindow(TextDisplayCtrl,LeftEdge,TopEdge,Width,Height);
-    UITC_SetMaxLines(TextDisplayCtrl,DisplayLines);
-
-//        UITC_SetClippingWindow(TextDisplayCtrl,0,0,ScreenWidthPx,
-//                ScreenHeightPx);
+    UITC_SetMaxLines(TextDisplayCtrl,DisplayLines,
+            Settings->DefaultColors[e_DefaultColors_BG]);
 }
 
 /*******************************************************************************
@@ -666,9 +661,6 @@ void DisplayBinary::DrawLine(const uint8_t *Line,int ScreenLine,int Bytes)
     char LineBuff[MAX_BINARY_HEX_BYTES_PER_LINE*3+3+MAX_BINARY_HEX_BYTES_PER_LINE+1];
     uint8_t c;
     int x;
-
-if(DEBUG_Kill)
-    return;
 
 struct CharStyling AltStyle;
 AltStyle.FGColor=Settings->DefaultColors[e_DefaultColors_FG];

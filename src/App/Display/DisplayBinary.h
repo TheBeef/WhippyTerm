@@ -57,7 +57,6 @@ class DisplayBinary : public DisplayBase
         void WriteChar(uint8_t *Chr);
 
     private:
-int DEBUG_Kill;
         bool InitCalled;
         t_UITextDisplayCtrl *TextDisplayCtrl;
 

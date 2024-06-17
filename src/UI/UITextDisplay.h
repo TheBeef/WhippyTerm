@@ -169,7 +169,7 @@ void UITC_End(t_UITextDisplayCtrl *ctrl);
 void UITC_ClearLine(t_UITextDisplayCtrl *ctrl,uint32_t BGColor);
 void UITC_AddFragment(t_UITextDisplayCtrl *ctrl,const struct TextCanvasFrag *Frag);
 void UITC_SetXOffset(t_UITextDisplayCtrl *ctrl,int XOffsetPx);
-void UITC_SetMaxLines(t_UITextDisplayCtrl *ctrl,int MaxLines);
+void UITC_SetMaxLines(t_UITextDisplayCtrl *ctrl,int MaxLines,uint32_t BGColor);
 void UITC_RedrawScreen(t_UITextDisplayCtrl *ctrl);
 
 #endif

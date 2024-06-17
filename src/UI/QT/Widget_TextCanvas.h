@@ -119,7 +119,7 @@ public:
     void SetCursorPos(int NewCursorX,int NewCursorY);
 
     void SetXOffsetPx(int XOffsetPx);
-    void SetMaxLines(int MaxLines);
+    void SetMaxLines(int MaxLines,uint32_t BGColor);
     void SetDisplaySize(int LeftEdge,int TopEdge,int Width,int Height);
     void SetDisplayBackgroundColor(uint32_t BgColor,bool DrawBackground);
 

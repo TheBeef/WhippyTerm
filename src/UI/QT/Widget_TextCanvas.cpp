@@ -1372,9 +1372,12 @@ void Widget_TextCanvas::SetXOffsetPx(int XOffsetPx)
     ScrollOffsetX=XOffsetPx;
 }
 
-void Widget_TextCanvas::SetMaxLines(int MaxLines)
+void Widget_TextCanvas::SetMaxLines(int MaxLines,uint32_t BGColor)
 {
-    Lines.resize(MaxLines);
+    struct WTCLine NewLine;
+
+    NewLine.BGFillColor=BGColor;
+    Lines.resize(MaxLines,NewLine);
 }
 
 void Widget_TextCanvas::SetDisplaySize(int LeftEdge,int TopEdge,int Width,int Height)

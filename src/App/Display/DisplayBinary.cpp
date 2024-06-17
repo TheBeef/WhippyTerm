@@ -662,11 +662,11 @@ void DisplayBinary::DrawLine(const uint8_t *Line,int ScreenLine,int Bytes)
     uint8_t c;
     int x;
 
-struct CharStyling AltStyle;
-AltStyle.FGColor=Settings->DefaultColors[e_DefaultColors_FG];
-AltStyle.BGColor=0x0000FF;
-AltStyle.Attribs=0;
-AltStyle.ULineColor=CurrentStyle.FGColor;
+//struct CharStyling AltStyle;
+//AltStyle.FGColor=Settings->DefaultColors[e_DefaultColors_FG];
+//AltStyle.BGColor=0x0000FF;
+//AltStyle.Attribs=0;
+//AltStyle.ULineColor=CurrentStyle.FGColor;
 
     for(x=0;x<Bytes;x++)
     {
@@ -679,36 +679,36 @@ AltStyle.ULineColor=CurrentStyle.FGColor;
     memset(&LineBuff[x*3],' ',(HEX_BYTES_PER_LINE*3+3)-(x*3));
     memset(&LineBuff[HEX_BYTES_PER_LINE*3+3+x],' ',HEX_BYTES_PER_LINE-x);
     LineBuff[HEX_BYTES_PER_LINE*3+HEX_BYTES_PER_LINE+3]=0;
-{
-    char tbuff[100];
-    int q;
-    int w;
-    const uint8_t *Search;
-    q=0;
-    w=0;
-    Search=HexBuffer;
-    while(Search!=Line)
-    {
-        q++;
-        Search+=HEX_BYTES_PER_LINE;
-    }
-    Search=TopLine;
-    while(Search!=Line)
-    {
-        w++;
-        Search+=HEX_BYTES_PER_LINE;
-        if(Search>=EndOfHexBuffer)
-            Search=HexBuffer;
-    }
-    sprintf(tbuff,"%03d,%03d:",q,w);
-    memcpy(LineBuff,tbuff,strlen(tbuff));
-}
+//{
+//    char tbuff[100];
+//    int q;
+//    int w;
+//    const uint8_t *Search;
+//    q=0;
+//    w=0;
+//    Search=HexBuffer;
+//    while(Search!=Line)
+//    {
+//        q++;
+//        Search+=HEX_BYTES_PER_LINE;
+//    }
+//    Search=TopLine;
+//    while(Search!=Line)
+//    {
+//        w++;
+//        Search+=HEX_BYTES_PER_LINE;
+//        if(Search>=EndOfHexBuffer)
+//            Search=HexBuffer;
+//    }
+//    sprintf(tbuff,"%03d,%03d:",q,w);
+//    memcpy(LineBuff,tbuff,strlen(tbuff));
+//}
 
     DisplayFrag.FragType=e_TextCanvasFrag_String;
     DisplayFrag.Text=LineBuff;
-    if(Line==HexBuffer)
-        DisplayFrag.Styling=AltStyle;
-    else
+//    if(Line==HexBuffer)
+//        DisplayFrag.Styling=AltStyle;
+//    else
         DisplayFrag.Styling=CurrentStyle;
     DisplayFrag.Value=0;
     DisplayFrag.Data=0;

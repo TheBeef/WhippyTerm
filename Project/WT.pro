@@ -30,6 +30,7 @@ win32 {
 DEFINES += __STDC_FORMAT_MACROS
 DEFINES += DEBUGWINDOWSBUILD
 QMAKE_LFLAGS += -static -static-libgcc -static-libstdc++
+RC_ICONS = ..\WindowsInstaller\WhippyTerm.ico
 }
 
 SOURCES += ../src/UI/QT/main.cpp\

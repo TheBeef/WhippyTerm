@@ -64,6 +64,11 @@ class DisplayBinary : public DisplayBase
         uint8_t *EndOfHexBuffer;
         int HexBufferSize;
 
+        struct CharStyling *ColorBuffer;    // This is a circular buffer with the styling info for 'HexBuffer' in it
+        struct CharStyling *ColorBottomOfBufferLine;
+        struct CharStyling *ColorTopOfBufferLine;
+        struct CharStyling *ColorTopLine;
+
         uint8_t *BottomOfBufferLine;    // Where we insert new data in 'HexBuffer'.  This points to the start of the line
         uint8_t InsertPoint;            // The insert offset from 'BottomOfBufferLine' (BottomOfBufferLine[InsertPoint])
         uint8_t *TopOfBufferLine;       // Where we read data from 'HexBuffer'.  This is the oldest data
@@ -82,8 +87,8 @@ class DisplayBinary : public DisplayBase
         void RethinkScrollBars(void);
         void RethinkWindowSize(void);
         void RedrawScreen(void);
-        void DrawLine(const uint8_t *Line,int ScreenLine,int Bytes);
-        void MakeCurrentLineVisble(void);
+        void DrawLine(const uint8_t *Line,const struct CharStyling *ColorLine,
+                int ScreenLine,unsigned int Bytes);
         bool ScrollBarAtBottom(void);
 };
 

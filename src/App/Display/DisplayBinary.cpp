@@ -82,12 +82,19 @@ bool DisplayBinary_EventHandlerCB(const struct TextDisplayEvent *Event)
 DisplayBinary::DisplayBinary()
 {
     TextDisplayCtrl=NULL;
-    HexBuffer=NULL;
+
     HexBufferSize=0;
-    TopLine=NULL;
+    HexBuffer=NULL;
+    EndOfHexBuffer=NULL;
     BottomOfBufferLine=NULL;
     TopOfBufferLine=NULL;
-    EndOfHexBuffer=NULL;
+    TopLine=NULL;
+
+    ColorBuffer=NULL;
+    ColorBottomOfBufferLine=NULL;
+    ColorTopOfBufferLine=NULL;
+    ColorTopLine=NULL;
+
     ScreenWidthPx=0;
     ScreenHeightPx=0;
     DisplayLines=0;
@@ -127,6 +134,15 @@ bool DisplayBinary::Init(void *ParentWidget,bool (*EventCallback)(const struct D
         TopOfBufferLine=HexBuffer;
         TopLine=TopOfBufferLine;
 
+        ColorBuffer=(struct CharStyling *)malloc(HexBufferSize*
+                sizeof(struct CharStyling));
+        if(ColorBuffer==NULL)
+            throw(0);
+
+        ColorBottomOfBufferLine=ColorBuffer;
+        ColorTopOfBufferLine=ColorBuffer;
+        ColorTopLine=ColorTopOfBufferLine;
+
         /* Current Style */
         CurrentStyle.FGColor=Settings->DefaultColors[e_DefaultColors_FG];
         CurrentStyle.BGColor=Settings->DefaultColors[e_DefaultColors_BG];
@@ -150,6 +166,8 @@ bool DisplayBinary::Init(void *ParentWidget,bool (*EventCallback)(const struct D
     {
         if(HexBuffer!=NULL)
             free(HexBuffer);
+        if(ColorBuffer!=NULL)
+            free(ColorBuffer);
         if(TextDisplayCtrl!=NULL)
         {
             UITC_FreeTextDisplay(TextDisplayCtrl);
@@ -167,6 +185,8 @@ DisplayBinary::~DisplayBinary()
 
     if(HexBuffer!=NULL)
         free(HexBuffer);
+    if(ColorBuffer!=NULL)
+        free(ColorBuffer);
 
     if(TextDisplayCtrl!=NULL)
         UITC_FreeTextDisplay(TextDisplayCtrl);
@@ -221,7 +241,10 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
     bool WasAtBottom;
     t_UIScrollBarCtrl *VertScroll;
 
-    BottomOfBufferLine[InsertPoint++]=*Chr;
+    BottomOfBufferLine[InsertPoint]=*Chr;
+    ColorBottomOfBufferLine[InsertPoint]=CurrentStyle;
+    InsertPoint++;
+
     RedrawCurrentLine();
 
     if(InsertPoint>=HEX_BYTES_PER_LINE)
@@ -233,21 +256,33 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
 
         /* Shift the buffer */
         BottomOfBufferLine+=HEX_BYTES_PER_LINE;
+        ColorBottomOfBufferLine+=HEX_BYTES_PER_LINE;
         if(BottomOfBufferLine>=EndOfHexBuffer)
+        {
             BottomOfBufferLine=HexBuffer;
+            ColorBottomOfBufferLine=ColorBuffer;
+        }
 
         if(BottomOfBufferLine==TopOfBufferLine)
         {
             TopOfBufferLine+=HEX_BYTES_PER_LINE;
+            ColorTopOfBufferLine+=HEX_BYTES_PER_LINE;
             if(TopOfBufferLine>=EndOfHexBuffer)
+            {
                 TopOfBufferLine=HexBuffer;
+                ColorTopOfBufferLine=ColorBuffer;
+            }
 
             if(TopLine==TopOfBufferLine || WasAtBottom)
             {
                 /* Ok, we ran out of data, move topline too */
                 TopLine+=HEX_BYTES_PER_LINE;
+                ColorTopLine+=HEX_BYTES_PER_LINE;
                 if(TopLine>=EndOfHexBuffer)
+                {
                     TopLine=HexBuffer;
+                    ColorTopLine=ColorBuffer;
+                }
                 RedrawScreen();
             }
         }
@@ -267,8 +302,6 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
             }
         }
     }
-
-    MakeCurrentLineVisble();
 }
 
 /*******************************************************************************
@@ -309,8 +342,13 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
         break;
         case e_TextDisplayEvent_DisplayFrameScrollY:
             TopLine=TopOfBufferLine+Event->Info.Scroll.Amount*HEX_BYTES_PER_LINE;
+            ColorTopLine=ColorTopOfBufferLine+
+                    (Event->Info.Scroll.Amount*HEX_BYTES_PER_LINE);
             if(TopLine>EndOfHexBuffer)
+            {
                 TopLine=HexBuffer+(TopLine-EndOfHexBuffer);
+                ColorTopLine=ColorBuffer+(TopLine-EndOfHexBuffer);
+            }
             RedrawScreen();
         break;
         case e_TextDisplayEvent_MouseDown:
@@ -422,7 +460,6 @@ void DisplayBinary::RethinkScrollBars(void)
     int TotalLines;
     int Bytes;
     int TopLineY;
-    t_UIScrollBarCtrl *HorzScroll;
     t_UIScrollBarCtrl *VertScroll;
 
     if(TextDisplayCtrl==nullptr)
@@ -573,9 +610,7 @@ void DisplayBinary::SetupCanvas(void)
  ******************************************************************************/
 void DisplayBinary::RedrawCurrentLine(void)
 {
-    const uint8_t *StartOfLine;
     int y;
-    int Bytes2Draw;
     int Bytes;
 
     if(TopLine>BottomOfBufferLine)
@@ -588,7 +623,7 @@ void DisplayBinary::RedrawCurrentLine(void)
     if(y>=DisplayLines)
         return;
 
-    DrawLine(BottomOfBufferLine,y,InsertPoint);
+    DrawLine(BottomOfBufferLine,ColorBottomOfBufferLine,y,InsertPoint);
 }
 
 /*******************************************************************************
@@ -613,23 +648,29 @@ void DisplayBinary::RedrawCurrentLine(void)
 void DisplayBinary::RedrawScreen(void)
 {
     const uint8_t *StartOfLine;
+    const struct CharStyling *ColorStartOfLine;
     int y;
     int Bytes2Draw;
 
     StartOfLine=TopLine;
+    ColorStartOfLine=ColorTopLine;
     for(y=0;y<DisplayLines;y++)
     {
         if(StartOfLine>=EndOfHexBuffer)
+        {
             StartOfLine=HexBuffer;
+            ColorStartOfLine=ColorBuffer;
+        }
         Bytes2Draw=HEX_BYTES_PER_LINE;
         if(StartOfLine==BottomOfBufferLine)
             Bytes2Draw=InsertPoint;
 
-        DrawLine(StartOfLine,y,Bytes2Draw);
+        DrawLine(StartOfLine,ColorStartOfLine,y,Bytes2Draw);
         if(Bytes2Draw!=HEX_BYTES_PER_LINE)
             break;
 
         StartOfLine+=HEX_BYTES_PER_LINE;
+        ColorStartOfLine+=HEX_BYTES_PER_LINE;
     }
 }
 
@@ -638,10 +679,13 @@ void DisplayBinary::RedrawScreen(void)
  *    DisplayBinary::DrawLine
  *
  * SYNOPSIS:
- *    void DisplayBinary::DrawLine(const uint8_t *Line,int ScreenLine,int Bytes);
+ *    void DisplayBinary::DrawLine(const uint8_t *Line,
+ *          const struct CharStyling *ColorLine,int ScreenLine,
+ *          unsigned int Bytes);
  *
  * PARAMETERS:
  *    Line [I] -- The start of the line to draw
+ *    ColorLine [I] -- The color info for this line
  *    ScreenLine [I] -- Where on the screen are we going to put this line.
  *                      (0 = top of the screen)
  *    Bytes [I] -- The number of bytes to draw from this line.
@@ -655,72 +699,86 @@ void DisplayBinary::RedrawScreen(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void DisplayBinary::DrawLine(const uint8_t *Line,int ScreenLine,int Bytes)
+void DisplayBinary::DrawLine(const uint8_t *Line,
+        const struct CharStyling *ColorLine,int ScreenLine,unsigned int Bytes)
 {
     struct TextCanvasFrag DisplayFrag;
     char LineBuff[MAX_BINARY_HEX_BYTES_PER_LINE*3+3+MAX_BINARY_HEX_BYTES_PER_LINE+1];
+    struct CharStyling ColorBuff[MAX_BINARY_HEX_BYTES_PER_LINE*3+3+MAX_BINARY_HEX_BYTES_PER_LINE+1];
     uint8_t c;
-    int x;
+    unsigned int x;
+    unsigned int r;
+    struct CharStyling SpaceStyle;
+    int StartOfStr;
 
-//struct CharStyling AltStyle;
-//AltStyle.FGColor=Settings->DefaultColors[e_DefaultColors_FG];
-//AltStyle.BGColor=0x0000FF;
-//AltStyle.Attribs=0;
-//AltStyle.ULineColor=CurrentStyle.FGColor;
+    /* Make sure the padding is all 0x00's */
+    memset(ColorBuff,0x00,sizeof(ColorBuff));
+    memset(&SpaceStyle,0x00,sizeof(SpaceStyle));
+
+    SpaceStyle.FGColor=Settings->DefaultColors[e_DefaultColors_FG];
+    SpaceStyle.BGColor=Settings->DefaultColors[e_DefaultColors_BG];
+    SpaceStyle.Attribs=0;
+    SpaceStyle.ULineColor=SpaceStyle.FGColor;
 
     for(x=0;x<Bytes;x++)
     {
         c=Line[x];
+
         sprintf(&LineBuff[x*3],"%02X ",c);
+        ColorBuff[x*3+0]=ColorLine[x];
+        ColorBuff[x*3+1]=ColorLine[x];
+        ColorBuff[x*3+2]=ColorLine[x];
+
         if(c<32 || c>127)
             c='.';
         LineBuff[HEX_BYTES_PER_LINE*3+3+x]=c;
+        ColorBuff[HEX_BYTES_PER_LINE*3+3+x]=ColorLine[x];
     }
     memset(&LineBuff[x*3],' ',(HEX_BYTES_PER_LINE*3+3)-(x*3));
+    for(r=0;r<(HEX_BYTES_PER_LINE*3+3)-(x*3);r++)
+        ColorBuff[x*3+r]=SpaceStyle;
+
     memset(&LineBuff[HEX_BYTES_PER_LINE*3+3+x],' ',HEX_BYTES_PER_LINE-x);
+    for(r=0;r<HEX_BYTES_PER_LINE-x;r++)
+        ColorBuff[HEX_BYTES_PER_LINE*3+3+x+r]=SpaceStyle;
+
     LineBuff[HEX_BYTES_PER_LINE*3+HEX_BYTES_PER_LINE+3]=0;
-//{
-//    char tbuff[100];
-//    int q;
-//    int w;
-//    const uint8_t *Search;
-//    q=0;
-//    w=0;
-//    Search=HexBuffer;
-//    while(Search!=Line)
-//    {
-//        q++;
-//        Search+=HEX_BYTES_PER_LINE;
-//    }
-//    Search=TopLine;
-//    while(Search!=Line)
-//    {
-//        w++;
-//        Search+=HEX_BYTES_PER_LINE;
-//        if(Search>=EndOfHexBuffer)
-//            Search=HexBuffer;
-//    }
-//    sprintf(tbuff,"%03d,%03d:",q,w);
-//    memcpy(LineBuff,tbuff,strlen(tbuff));
-//}
 
     DisplayFrag.FragType=e_TextCanvasFrag_String;
     DisplayFrag.Text=LineBuff;
-//    if(Line==HexBuffer)
-//        DisplayFrag.Styling=AltStyle;
-//    else
-        DisplayFrag.Styling=CurrentStyle;
+    DisplayFrag.Styling=ColorBuff[0];
     DisplayFrag.Value=0;
     DisplayFrag.Data=0;
 
     UITC_Begin(TextDisplayCtrl,ScreenLine);
     UITC_ClearLine(TextDisplayCtrl,Settings->DefaultColors[e_DefaultColors_BG]);
-    UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
-    UITC_End(TextDisplayCtrl);
-}
 
-void DisplayBinary::MakeCurrentLineVisble(void)
-{
+    /* Add the different fragments based on styling */
+    StartOfStr=0;
+    for(r=0;r<HEX_BYTES_PER_LINE*3+HEX_BYTES_PER_LINE+3;r++)
+    {
+        if(memcmp(&ColorBuff[StartOfStr],&ColorBuff[r],
+                sizeof(struct CharStyling))!=0)
+        {
+            /* Style changed, output the last string and start again */
+            c=LineBuff[r];
+            LineBuff[r]=0;  // Make it a smaller string
+            DisplayFrag.Text=&LineBuff[StartOfStr];
+            DisplayFrag.Styling=ColorBuff[StartOfStr];
+            UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
+
+            LineBuff[r]=c;  // Restore the string
+
+            /* Mark the start of the next fragment */
+            StartOfStr=r;
+        }
+    }
+    /* Add the last fragment */
+    DisplayFrag.Text=&LineBuff[StartOfStr];
+    DisplayFrag.Styling=ColorBuff[StartOfStr];
+    UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
+
+    UITC_End(TextDisplayCtrl);
 }
 
 /*******************************************************************************

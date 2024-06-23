@@ -263,6 +263,7 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
             ColorBottomOfBufferLine=ColorBuffer;
         }
 
+        /* See if we need to move the start of buffer */
         if(BottomOfBufferLine==TopOfBufferLine)
         {
             TopOfBufferLine+=HEX_BYTES_PER_LINE;

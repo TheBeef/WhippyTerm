@@ -569,6 +569,15 @@ void BasicHexDecoder_ProcessIncomingBinaryByte(t_DataProcessorHandleType *DataHa
 
     sprintf(buff,"%02X ",Byte);
 
+//    if(Byte=='A')
+//        m_DPS->SetFGColor(0xFF0000);
+//    else if(Byte=='1')
+//        m_DPS->SetFGColor(0x00FF00);
+//    else if(Byte=='.')
+//        m_DPS->SetFGColor(0x0000FF);
+//    else
+//        m_DPS->SetFGColor(0xFFFFFF);
+
     m_DPS->BinaryAddText(buff);
     m_DPS->BinaryAddHex(Byte);
 }

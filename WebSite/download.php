@@ -146,7 +146,10 @@ $PageTitle="Download";
             if(substr($File,-4)==".zip")
                 $Version=substr($File,11,-4);
             else if(substr($File,-4)==".exe")
-                $Version=substr($File,11,-4);
+            {
+                $Version=substr($File,0,-4);
+                $Version=substr($Version,strpos($Version,"_")+1);
+            }
 
             if($Version!="")
             {

@@ -57,6 +57,7 @@ $PageTitle="Download";
     // WhippyTerm_0.9.1.0.tar.gz
     // WhippyTerm_0.9.1.0.deb
     $Files=scandir("Downloads/WhippyTerm/Linux");
+    $Downloads=array();
     if(count($Files)>2)
     {
         echo "<h2>Linux</h2>";
@@ -65,20 +66,36 @@ $PageTitle="Download";
             if($File=="." || $File=="..")
                 continue;
 
+            $Version="";
             if(substr($File,-7)==".tar.gz")
                 $Version=substr($File,11,-7);
             else if(substr($File,-4)==".deb")
                 $Version=substr($File,11,-4);
-            else
-                $Version=$File;
 
-            echo "<a href='/Downloads/WhippyTerm/Linux/$File' download='$File'>Version $Version</a><br/>";
+            if($Version!="")
+            {
+                $Downloads[$Version]=array
+                (
+                        "Target"=>"/Downloads/WhippyTerm/Linux/$File",
+                        "FileName"=>$File,
+                        "DisplayName"=>"Version $Version",
+                );
+            }
         }
     }
+    krsort($Downloads,SORT_NATURAL);
+    foreach($Downloads as $Download)
+    {
+        echo "<a href='{$Download["Target"]}' download='{$Download["FileName"]}'>{$Download["DisplayName"]}</a></br/>";
+    }
+
+//            echo "<a href='/Downloads/WhippyTerm/Linux/$File' download='$File'>Version $Version</a><br/>";
+
 ?>
 <?php
     // WhippyTerm_0.9.1.0.tar.gz
     $Files=scandir("Downloads/WhippyTerm/RaspberryPI");
+    $Downloads=array();
     if(count($Files)>2)
     {
         echo "<h2>Raspberry PI</h2>";
@@ -86,18 +103,37 @@ $PageTitle="Download";
         {
             if($File=="." || $File=="..")
                 continue;
+
+            $Version="";
             if(substr($File,-7)==".tar.gz")
                 $Version=substr($File,11,-7);
             else
                 $Version=$File;
-            echo "<a href='/Downloads/WhippyTerm/RaspberryPI/$File' download='$File'>Version $Version</a><br/>";
+
+            if($Version!="")
+            {
+                $Downloads[$Version]=array
+                (
+                        "Target"=>"/Downloads/WhippyTerm/RaspberryPI/$File",
+                        "FileName"=>$File,
+                        "DisplayName"=>"Version $Version",
+                );
+            }
+
+//            echo "<a href='/Downloads/WhippyTerm/RaspberryPI/$File' download='$File'>Version $Version</a><br/>";
         }
+    }
+    krsort($Downloads,SORT_NATURAL);
+    foreach($Downloads as $Download)
+    {
+        echo "<a href='{$Download["Target"]}' download='{$Download["FileName"]}'>{$Download["DisplayName"]}</a></br/>";
     }
 ?>
 
 <?php
     // WhippyTerm_0.9.1.0.zip
     $Files=scandir("Downloads/WhippyTerm/Windows");
+    $Downloads=array();
     if(count($Files)>2)
     {
         echo "<h2>Windows</h2>";
@@ -105,12 +141,30 @@ $PageTitle="Download";
         {
             if($File=="." || $File=="..")
                 continue;
+
+            $Version="";
             if(substr($File,-4)==".zip")
                 $Version=substr($File,11,-4);
-            else
-                $Version=$File;
-            echo "<a href='/Downloads/WhippyTerm/Windows/$File' download='$File'>Version $Version</a><br/>";
+            else if(substr($File,-4)==".exe")
+                $Version=substr($File,11,-4);
+
+            if($Version!="")
+            {
+                $Downloads[$Version]=array
+                (
+                        "Target"=>"/Downloads/WhippyTerm/Windows/$File",
+                        "FileName"=>$File,
+                        "DisplayName"=>str_replace("_",".","Version $Version"),
+                );
+            }
+
+//            echo "<a href='/Downloads/WhippyTerm/Windows/$File' download='$File'>Version $Version</a><br/>";
         }
+    }
+    krsort($Downloads,SORT_NATURAL);
+    foreach($Downloads as $Download)
+    {
+        echo "<a href='{$Download["Target"]}' download='{$Download["FileName"]}'>{$Download["DisplayName"]}</a></br/>";
     }
 ?>
 

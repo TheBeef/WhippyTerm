@@ -74,6 +74,8 @@ class DisplayBinary : public DisplayBase
         uint8_t *TopOfBufferLine;       // Where we read data from 'HexBuffer'.  This is the oldest data
         uint8_t *TopLine;               // The first line of the display window (where we are scrolled to).  This is relitive to 'Top of Buffer'
 
+//        int HozScroll;                  // How much has the display been scrolled in the X dir
+
         int ScreenWidthPx;
         int ScreenHeightPx;
         int CharWidthPx;
@@ -84,7 +86,7 @@ class DisplayBinary : public DisplayBase
         void RedrawCurrentLine(void);
         void ScreenResize(void);
         void SetupCanvas(void);
-        void RethinkScrollBars(void);
+        void RethinkYScrollBar(void);
         void RethinkWindowSize(void);
         void RedrawScreen(void);
         void DrawLine(const uint8_t *Line,const struct CharStyling *ColorLine,

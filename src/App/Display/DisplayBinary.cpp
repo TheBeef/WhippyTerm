@@ -1,4 +1,12 @@
 #include "UI/UIDebug.h"
+
+/*
+
+Still to do:
+ * Selection
+
+*/
+
 /*******************************************************************************
  * FILENAME: DisplayBinary.cpp
  *
@@ -288,7 +296,7 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
             }
         }
 
-        RethinkScrollBars();
+        RethinkYScrollBar();
 
         if(WasAtBottom)
         {
@@ -340,6 +348,10 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
     switch(Event->EventType)
     {
         case e_TextDisplayEvent_DisplayFrameScrollX:
+            if(TextDisplayCtrl==nullptr)
+                break;
+            UITC_SetXOffset(TextDisplayCtrl,Event->Info.Scroll.Amount*CharWidthPx);
+            UITC_RedrawScreen(TextDisplayCtrl);
         break;
         case e_TextDisplayEvent_DisplayFrameScrollY:
             TopLine=TopOfBufferLine+Event->Info.Scroll.Amount*HEX_BYTES_PER_LINE;
@@ -359,7 +371,7 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
         case e_TextDisplayEvent_MouseRightDown:
         break;
         case e_TextDisplayEvent_MouseRightUp:
-            RethinkScrollBars();
+            RethinkYScrollBar();
         break;
         case e_TextDisplayEvent_MouseMiddleDown:
         break;
@@ -372,7 +384,7 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
         case e_TextDisplayEvent_Resize:
             ScreenResize();
             RethinkWindowSize();
-            RethinkScrollBars();
+            RethinkYScrollBar();
             RedrawScreen();
         break;
         case e_TextDisplayEvent_LostFocus:
@@ -425,6 +437,10 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
  ******************************************************************************/
 void DisplayBinary::ScreenResize(void)
 {
+    t_UIScrollBarCtrl *HozScroll;
+    int ScreenChars;
+    int TotalChars;
+
     if(TextDisplayCtrl==nullptr)
         return;
 
@@ -435,14 +451,20 @@ void DisplayBinary::ScreenResize(void)
         DisplayLines=Settings->TermSizeHeight;
     else
         DisplayLines=ScreenHeightPx/CharHeightPx;
+
+    /* Horizontal */
+    HozScroll=UITC_GetHorzSlider(TextDisplayCtrl);
+    ScreenChars=ScreenWidthPx/CharWidthPx;
+    TotalChars=HEX_BYTES_PER_LINE*3+3+HEX_BYTES_PER_LINE;   // 3 bytes per char, and 3 chars space between hex and ASCII
+    UISetScrollBarPageSizeAndMax(HozScroll,ScreenChars,TotalChars);
 }
 
 /*******************************************************************************
  * NAME:
- *    DisplayBinary::RethinkScrollBars
+ *    DisplayBinary::RethinkYScrollBar
  *
  * SYNOPSIS:
- *    void DisplayBinary::RethinkScrollBars(void);
+ *    void DisplayBinary::RethinkYScrollBar(void);
  *
  * PARAMETERS:
  *    NONE
@@ -456,7 +478,7 @@ void DisplayBinary::ScreenResize(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void DisplayBinary::RethinkScrollBars(void)
+void DisplayBinary::RethinkYScrollBar(void)
 {
     int TotalLines;
     int Bytes;
@@ -587,7 +609,7 @@ void DisplayBinary::SetupCanvas(void)
 
     ScreenResize();
     RethinkWindowSize();
-    RethinkScrollBars();
+    RethinkYScrollBar();
 }
 
 /*******************************************************************************

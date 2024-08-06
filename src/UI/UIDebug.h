@@ -73,4 +73,8 @@ void UIDBD_Update(void);
 void DB_StartTimer(e_DBTType Timer);
 void DB_StopTimer(e_DBTType Timer);
 
+void DB_printf(const char *fmt,...);
+void DB_ShowDebugPrintLogForm(void);
+void DB_printf_clear(void);
+
 #endif

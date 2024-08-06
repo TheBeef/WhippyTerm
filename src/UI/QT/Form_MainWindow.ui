@@ -1569,6 +1569,7 @@
     <addaction name="actionFont_Request_Test"/>
     <addaction name="separator"/>
     <addaction name="actionStats"/>
+    <addaction name="actionShow_printf_log"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
@@ -2535,6 +2536,11 @@
   <action name="actionColors">
    <property name="text">
     <string>Colors...</string>
+   </property>
+  </action>
+  <action name="actionShow_printf_log">
+   <property name="text">
+    <string>Show printf log</string>
    </property>
   </action>
  </widget>

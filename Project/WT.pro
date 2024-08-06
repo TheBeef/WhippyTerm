@@ -40,6 +40,8 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/StdPlugins/IODrivers/TCPServer/src/TCPServer_Main.cpp \
     ../src/App/StdPlugins/IODrivers/UDPClient/src/UDPClient_Main.cpp \
     ../src/App/StdPlugins/IODrivers/UDPServer/src/UDPServer_Main.cpp \
+    ../src/UI/QT/Form_DebugPrintLog.cpp \
+    ../src/UI/QT/Form_DebugPrintLogAccess.cpp \
     ../src/UI/QT/Form_MainWindow.cpp \
     ../src/UI/QT/Form_SendByte.cpp \
     ../src/UI/QT/Form_SendByteAccess.cpp \
@@ -214,6 +216,7 @@ macx {
 }
 
 HEADERS  += ../src/UI/QT/Form_MainWindow.h \
+    ../src/UI/QT/Form_DebugPrintLog.h \
     ../src/UI/QT/Form_SendByte.h \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.h \
     ../src/UI/QT/VerPanelHandle.h \
@@ -249,6 +252,7 @@ HEADERS  += ../src/UI/QT/Form_MainWindow.h \
     ../src/UI/QT/Widget_TextCanvas.h
 
 FORMS    += ../src/UI/QT/Form_MainWindow.ui \
+    ../src/UI/QT/Form_DebugPrintLog.ui \
     ../src/UI/QT/Form_FontDialog.ui \
     ../src/UI/QT/Form_SendByte.ui \
     ../src/UI/QT/Form_Settings.ui \

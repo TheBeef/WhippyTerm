@@ -273,6 +273,8 @@ private slots:
     
     void on_actionColors_triggered();
     
+    void on_actionShow_printf_log_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

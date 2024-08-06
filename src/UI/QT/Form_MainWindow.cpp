@@ -1458,3 +1458,9 @@ void Form_MainWindow::on_actionColors_triggered()
 {
     DoMenuTriggered(e_UIMWMenu_SettingsQuickJump_Colors);
 }
+
+void Form_MainWindow::on_actionShow_printf_log_triggered()
+{
+    DB_ShowDebugPrintLogForm();
+}
+

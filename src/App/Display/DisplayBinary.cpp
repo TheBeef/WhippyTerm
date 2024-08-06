@@ -147,6 +147,8 @@ bool DisplayBinary::Init(void *ParentWidget,bool (*EventCallback)(const struct D
         if(ColorBuffer==NULL)
             throw(0);
 
+memset(ColorBuffer,0x00,HexBufferSize*sizeof(struct CharStyling));
+
         ColorBottomOfBufferLine=ColorBuffer;
         ColorTopOfBufferLine=ColorBuffer;
         ColorTopLine=ColorTopOfBufferLine;
@@ -341,6 +343,7 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
 bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
 {
     union DBEventData Info;
+    int Offset;
 
     if(!InitCalled)
         return false;
@@ -359,8 +362,9 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
                     (Event->Info.Scroll.Amount*HEX_BYTES_PER_LINE);
             if(TopLine>EndOfHexBuffer)
             {
-                TopLine=HexBuffer+(TopLine-EndOfHexBuffer);
-                ColorTopLine=ColorBuffer+(TopLine-EndOfHexBuffer);
+                Offset=TopLine-EndOfHexBuffer;
+                TopLine=HexBuffer+Offset;
+                ColorTopLine=ColorBuffer+Offset;
             }
             RedrawScreen();
         break;
@@ -371,7 +375,7 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
         case e_TextDisplayEvent_MouseRightDown:
         break;
         case e_TextDisplayEvent_MouseRightUp:
-            RethinkYScrollBar();
+//            RethinkYScrollBar();
         break;
         case e_TextDisplayEvent_MouseMiddleDown:
         break;

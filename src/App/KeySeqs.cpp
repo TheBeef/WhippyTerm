@@ -29,6 +29,7 @@
  ******************************************************************************/
 
 /*** HEADER FILES TO INCLUDE  ***/
+#include "UI/UISystem.h"
 #include "KeySeqs.h"
 #include <string.h>
 
@@ -300,7 +301,7 @@ e_UIKeys ConvertKeyName2ENum(const char *Name)
 
     for(r=0;r<e_UIKeysMAX;r++)
     {
-        if(strcmp(m_KeyNames[r],Name)==0)
+        if(caseinsensitivestrcmp(m_KeyNames[r],Name)==0)
             return (e_UIKeys)r;
     }
     return e_UIKeysMAX;

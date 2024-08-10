@@ -15,6 +15,7 @@
 #include "Form_MainWindow.h"
 #include "main.h"
 #include <stdint.h>
+#include <strings.h>
 
 #include <QKeyEvent>
 #include <QTimer>
@@ -258,3 +259,7 @@ void UI_GotoWebPage(const char *WebSite)
     QDesktopServices::openUrl(QUrl(WebSite));
 }
 
+int caseinsensitivestrcmp(const char *a,const char *b)
+{
+    return strcasecmp(a,b);
+}

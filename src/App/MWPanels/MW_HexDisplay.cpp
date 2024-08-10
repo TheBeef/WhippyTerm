@@ -225,19 +225,25 @@ void MWHexDisplay::ConnectionChanged(void)
     int BufferSize;
 
     if(MW->ActiveCon==NULL)
-        return;
+    {
+        /* We are removing the active connection.  Clear the hex display */
+        IncomingHistoryHexDisplay->ClearSelection();
+        IncomingHistoryHexDisplay->SetBuffer((uint8_t *)NULL,0);
+    }
+    else
+    {
+        EnabledCheckbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_HexDisplay_Paused);
 
-    EnabledCheckbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_HexDisplay_Paused);
+        UICheckCheckbox(EnabledCheckbox,MW->ActiveCon->GetHexDisplayPaused());
 
-    UICheckCheckbox(EnabledCheckbox,MW->ActiveCon->GetHexDisplayPaused());
+        /* Connect this hex display buffer to the data buffers */
+        MW->ActiveCon->HexDisplayGetBufferInfo(&Buffer,&InsertPos,&BufferIsCircular,
+                &BufferSize);
+        IncomingHistoryHexDisplay->SetBuffer(Buffer,BufferSize);
+        IncomingHistoryHexDisplay->SetDisplayParms(InsertPos,BufferIsCircular);
 
-    /* Connect this hex display buffer to the data buffers */
-    MW->ActiveCon->HexDisplayGetBufferInfo(&Buffer,&InsertPos,&BufferIsCircular,
-            &BufferSize);
-    IncomingHistoryHexDisplay->SetBuffer(Buffer,BufferSize);
-    IncomingHistoryHexDisplay->SetDisplayParms(InsertPos,BufferIsCircular);
-
-    /* DEBUG PAUL: We need to set the last top byte for this hex display */
+        /* DEBUG PAUL: We need to set the last top byte for this hex display */
+    }
 
     IncomingHistoryHexDisplay->RebuildDisplay();
 

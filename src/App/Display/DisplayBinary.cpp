@@ -3,7 +3,10 @@
 /*
 
 Still to do:
- * Selection
+ * Selection / clipboard
+ * Mouse wheel
+ * Right click menus
+ * Remove the "send" button on the bottom if not a block connection (the same as text display)
 
 */
 
@@ -344,6 +347,8 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
 {
     union DBEventData Info;
     int Offset;
+    int TotalLines;
+    int Delta;
 
     if(!InitCalled)
         return false;
@@ -375,13 +380,40 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
         case e_TextDisplayEvent_MouseRightDown:
         break;
         case e_TextDisplayEvent_MouseRightUp:
-//            RethinkYScrollBar();
         break;
         case e_TextDisplayEvent_MouseMiddleDown:
         break;
         case e_TextDisplayEvent_MouseMiddleUp:
         break;
         case e_TextDisplayEvent_MouseWheel:
+            if(TextDisplayCtrl==NULL)
+                return false;
+
+            if(Event->Info.MouseWheel.Mods)
+            {
+                Info.MouseWheel.Mods=Event->Info.MouseWheel.Mods;
+                Info.MouseWheel.Steps=Event->Info.MouseWheel.Steps;
+                SendEvent(e_DBEvent_MouseMouseWheel,&Info);
+            }
+            else
+            {
+                Delta=-Event->Info.MouseWheel.Steps;
+
+                if(Delta!=0)
+                {
+                    /* Add to the scroll bar */
+                    t_UIScrollBarCtrl *VertScroll;
+                    VertScroll=UITC_GetVertSlider(TextDisplayCtrl);
+                    Offset=UIGetScrollBarPos(VertScroll);
+                    TotalLines=UIGetScrollBarTotalSize(VertScroll);
+                    Offset+=Delta;
+                    if(Offset<0)
+                        Offset=0;
+                    if(Offset>=TotalLines)
+                        Offset=TotalLines;
+                    UISetScrollBarPos(VertScroll,Offset);
+                }
+            }
         break;
         case e_TextDisplayEvent_MouseMove:
         break;

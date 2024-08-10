@@ -455,6 +455,8 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         class Connection *BridgedTo;        // We send data to this one
         class Connection *BridgedFrom;      // We are getting data from this one
         int Bookmark;   // What bookmark is connected to this connection
+        int ZoomLevel;
+        int FontSize;
 
         void FreeConnectionResources(bool FreeDB);
         void HandleCaptureIncomingData(const uint8_t *Inbuff,int bytes);

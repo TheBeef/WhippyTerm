@@ -386,6 +386,7 @@ Connection::Connection(const char *URI)
     BridgedFrom=NULL;
 
     Bookmark=0;
+    ZoomLevel=0;
 
     /* Copy the default settings for this connection from settings */
     UsingCustomSettings=false;
@@ -717,6 +718,8 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
             if(Display!=nullptr)
                 Display->SetBlockDeviceMode(BlockSendDevice);
         }
+
+        ResetZoom();
     }
     catch(...)
     {
@@ -957,6 +960,8 @@ void Connection::SetCustomSettings(class ConSettings &NewSettings)
  ******************************************************************************/
 void Connection::ApplyCustomSettings(void)
 {
+    int NewFontSize;
+
     if(!UsingCustomSettings)
     {
         /* Restore the globals */
@@ -967,8 +972,7 @@ void Connection::ApplyCustomSettings(void)
         return;
 
     /* Free the processor data and then reallocate it (so we switch) */
-    if(!DPS_ReapplyProcessor2Connection(&ProcessorData,
-            &CustomSettings))
+    if(!DPS_ReapplyProcessor2Connection(&ProcessorData,&CustomSettings))
     {
         UIAsk("Error","Failed to reallocate data processor data",
                 e_AskBox_Error,e_AskBttns_Ok);
@@ -976,9 +980,18 @@ void Connection::ApplyCustomSettings(void)
         return;
     }
 
-    /* Set the cursor color */
     if(Display!=nullptr)
         Display->ApplySettings();
+
+    /* Apply the zoom */
+    FontSize=CustomSettings.FontSize;
+
+    NewFontSize=FontSize+ZoomLevel;
+    if(NewFontSize>3)
+    {
+        Display->SetFont(CustomSettings.FontName,NewFontSize,
+                CustomSettings.FontBold,CustomSettings.FontItalic);
+    }
 }
 
 /*******************************************************************************
@@ -5960,16 +5973,17 @@ bool Connection::IsThereASelection(void)
 void Connection::ZoomIn(void)
 {
     std::string FontName;
-    int FontSize;
+    int CurrentFontSize;
     bool FontBold;
     bool FontItalic;
 
     if(Display==NULL)
         return;
 
-    Display->GetFont(FontName,FontSize,FontBold,FontItalic);
-    FontSize++;
-    Display->SetFont(FontName,FontSize,FontBold,FontItalic);
+    ZoomLevel++;
+
+    Display->GetFont(FontName,CurrentFontSize,FontBold,FontItalic);
+    Display->SetFont(FontName,FontSize+ZoomLevel,FontBold,FontItalic);
 }
 
 /*******************************************************************************
@@ -5994,18 +6008,20 @@ void Connection::ZoomIn(void)
 void Connection::ZoomOut(void)
 {
     std::string FontName;
-    int FontSize;
+    int CurrentFontSize;
+    int NewFontSize;
     bool FontBold;
     bool FontItalic;
 
     if(Display==NULL)
         return;
 
-    Display->GetFont(FontName,FontSize,FontBold,FontItalic);
-    if(FontSize>3)
+    NewFontSize=FontSize+(ZoomLevel-1);
+    if(NewFontSize>3)
     {
-        FontSize--;
-        Display->SetFont(FontName,FontSize,FontBold,FontItalic);
+        ZoomLevel--;
+        Display->GetFont(FontName,CurrentFontSize,FontBold,FontItalic);
+        Display->SetFont(FontName,NewFontSize,FontBold,FontItalic);
     }
 }
 
@@ -6036,6 +6052,9 @@ void Connection::ResetZoom(void)
         return;
 
     ConSettings=Display->GetCustomSettings();
+
+    ZoomLevel=0;
+    FontSize=ConSettings->FontSize;
 
     Display->SetFont(ConSettings->FontName,ConSettings->FontSize,
             ConSettings->FontBold,ConSettings->FontItalic);

@@ -34,9 +34,12 @@ private slots:
 private:
     Ui::Form_FontDialog *ui;
     QFontDatabase FontDatabase;
-    int LastPointSizeSelected;
-    void UpdatePreview(void);
     QString DefaultFontName;
+    int LastPointSizeSelected;
+    bool DoingEvent;
+
+    void UpdatePreview(void);
+    void FillInSizeList();
 };
 
 #endif // MAINWINDOW_H

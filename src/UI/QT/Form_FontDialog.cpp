@@ -11,6 +11,8 @@ Form_FontDialog::Form_FontDialog(QWidget *parent) :
 
     ui->setupUi(this);
 
+    DoingEvent=false;
+
     First=true;
 
     foreach(const QString &family,FontDatabase.families())
@@ -42,79 +44,41 @@ Form_FontDialog::~Form_FontDialog()
 
 void Form_FontDialog::on_FontlistWidget_itemSelectionChanged()
 {
+    if(DoingEvent)
+        return;
+
     if(ui->FontlistWidget->currentRow()>=0)
         ui->FontlineEdit->setText(ui->FontlistWidget->currentItem()->text());
 }
 
 void Form_FontDialog::on_StylelistWidget_itemSelectionChanged()
 {
-    int LastPoint;
-    QListWidgetItem *NewItem;
-    bool Found;
-
     ui->StylelineEdit->setText(ui->StylelistWidget->currentItem()->text());
 
-    LastPoint=ui->SizelineEdit->text().toInt();
-    if(LastPoint!=0)
-        LastPointSizeSelected=LastPoint;
-
-    Found=false;
-    ui->SizelistWidget->clear();
-    foreach (int points, FontDatabase.smoothSizes(ui->FontlineEdit->text(), ui->StylelistWidget->currentItem()->text()))
-    {
-        if(LastPointSizeSelected==points)
-        {
-            NewItem=new QListWidgetItem(QString::number(points),ui->SizelistWidget);
-            ui->SizelistWidget->setCurrentItem(NewItem);
-            Found=true;
-        }
-    }
-    if(!Found)
-    {
-        if(ui->SizelistWidget->count()>0)
-            ui->SizelistWidget->setCurrentRow(0);
-        else
-            ui->SizelineEdit->clear();
-    }
+    FillInSizeList();
     UpdatePreview();
 }
 
 void Form_FontDialog::on_FontlineEdit_textChanged(const QString &arg1)
 {
-    QList<QListWidgetItem *> FoundItems;
-    bool IncludeAllStyles;
+    int r;
 
     (void)arg1; // Shut up the compiler
 
-    FoundItems=ui->FontlistWidget->findItems(ui->FontlineEdit->text(),Qt::MatchExactly);
-    if(!FoundItems.empty())
+    /* Find the first entry in the list of fonts that matches this input */
+    for(r=0;r<ui->FontlistWidget->count();r++)
     {
-        IncludeAllStyles=false; // Fixed pitch only
-        if(ui->FontlistWidget->currentItem()==NULL ||
-                ui->FontlistWidget->currentItem()->text()!=
-                ui->FontlineEdit->text())
-        {
-            ui->FontlistWidget->setCurrentItem(FoundItems.first());
-        }
+        if(ui->FontlistWidget->item(r)->text().contains(ui->FontlineEdit->text(),Qt::CaseInsensitive))
+            break;
     }
-    else
+    if(r!=ui->FontlistWidget->count())
     {
-        /* The item is not in the list of fonts, user has typed their own font name */
-
-        /* Clear the font list selection */
-        ui->FontlistWidget->setCurrentRow(-1);
-        IncludeAllStyles=true;
+        DoingEvent=true;
+        ui->FontlistWidget->setCurrentRow(r);
+        DoingEvent=false;
     }
 
-    ui->StylelistWidget->clear();
-    foreach(const QString &style,FontDatabase.styles(ui->FontlineEdit->text()))
-    {
-        if(IncludeAllStyles || FontDatabase.isFixedPitch(ui->FontlineEdit->text(),style))
-        {
-            new QListWidgetItem(style,ui->StylelistWidget);
-        }
-    }
-    ui->StylelistWidget->setCurrentItem(ui->StylelistWidget->item(0));
+    FillInSizeList();
     UpdatePreview();
 }
 
@@ -230,3 +194,54 @@ void Form_FontDialog::GetFontInfo(std::string &FontName,
         FontStyle|=UIFONT_STYLE_ITALIC;
 }
 
+void Form_FontDialog::FillInSizeList()
+{
+    int LastPoint;
+    QListWidgetItem *NewItem;
+    bool Found;
+    QString StyleStr;
+    unsigned int r;
+    int DefaultFontSizes[]=
+    {
+        8,
+        10,
+        12,
+        14,
+        18,
+        24,
+        36,
+        72
+    };
+
+    LastPoint=ui->SizelineEdit->text().toInt();
+    if(LastPoint!=0)
+        LastPointSizeSelected=LastPoint;
+
+    if(ui->StylelistWidget->currentItem()!=NULL)
+        StyleStr=ui->StylelistWidget->currentItem()->text();
+    else
+        StyleStr="";
+
+    Found=false;
+    ui->SizelistWidget->clear();
+    foreach (int points, FontDatabase.smoothSizes(ui->FontlineEdit->text(),StyleStr))
+    {
+        NewItem=new QListWidgetItem(QString::number(points),ui->SizelistWidget);
+        ui->SizelistWidget->addItem(NewItem);
+        if(LastPointSizeSelected==points)
+            ui->SizelistWidget->setCurrentItem(NewItem);
+        Found=true;
+    }
+    if(!Found)
+    {
+        /* Fill in a default set */
+        for(r=0;r<sizeof(DefaultFontSizes)/sizeof(int);r++)
+        {
+            NewItem=new QListWidgetItem(QString::number(DefaultFontSizes[r]),
+                    ui->SizelistWidget);
+            ui->SizelistWidget->addItem(NewItem);
+            if(LastPointSizeSelected==DefaultFontSizes[r])
+                ui->SizelistWidget->setCurrentItem(NewItem);
+        }
+    }
+}

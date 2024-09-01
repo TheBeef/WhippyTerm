@@ -45,6 +45,7 @@
 #include "MWPanels/MW_HexDisplay.h"
 #include "MWPanels/MW_SendBuffers.h"
 #include "MWPanels/MW_Bridge.h"
+#include "MWPanels/MW_AuxControls.h"
 #include "UI/UIMainWindow.h"
 #include "PluginSDK/Plugin.h"
 #include <stdint.h>
@@ -110,6 +111,7 @@ void Debug6(void);
         class MWDownload DownloadPanel;
         class MWHexDisplay HexDisplayPanel;
         class MWSendBuffers SendBuffersPanel;
+        class MWAuxControls AuxControlsPanel;
 
         class MWBridge BridgePanel;
 

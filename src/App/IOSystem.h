@@ -54,6 +54,7 @@ struct ConnectionInfoList
 };
 
 typedef struct PrivateConnectionOptionsData {int PrivateDataHere;} t_ConnectionOptionsDataType;    // Fake type holder
+typedef struct PrivateConnectionAuxCtrlsDataType {int PrivateDataHere;} t_ConnectionAuxCtrlsDataType;    // Fake type holder
 
 typedef enum
 {
@@ -81,6 +82,7 @@ bool IOS_MakeURIFromDetectedCon(struct ConnectionInfoList *CInfoEntry,
         const t_KVList &Options,std::string &URI);
 struct ConnectionInfoList *IOS_FindConnectionFromDetectedID(
         struct ConnectionInfoList *CInfo,const char *UniqueID);
+
 t_ConnectionOptionsDataType *IOS_AllocConnectionOptions(
         struct ConnectionInfoList *CInfoEntry,
         t_UIContainerCtrl *ContainerWidget,t_KVList &OptionsKeyValues,
@@ -94,6 +96,10 @@ void IOS_StoreConnectionOptions(t_ConnectionOptionsDataType *ConOptionsHandle,
         t_KVList &OptionsKeyValues);
 void IOS_SetUI2ConnectionOptions(t_ConnectionOptionsDataType *ConOptionsHandle,
         t_KVList &OptionsKeyValues);
+
+t_ConnectionAuxCtrlsDataType *IOS_AllocConnectionAuxCtrls(t_IOSystemHandle *Handle,t_UIContainerCtrl *ContainerWidget);
+void IOS_FreeConnectionAuxCtrls(t_ConnectionAuxCtrlsDataType *ConAuxCtrlsHandle);
+void IOS_ConnectionAuxCtrlsShow(t_ConnectionAuxCtrlsDataType *ConAuxCtrlsHandle,bool Show);
 
 bool IOS_GetUniqueIDFromURI(const char *URI,std::string &UniqueID);
 bool IOS_GetURIFromUniqueID(const char *UniqueID,const t_KVList &Options,
@@ -116,4 +122,5 @@ void IOS_InformOfNewDataEvent(t_IOSystemHandle *IOHandle);
 bool IOS_GetDeviceURI(t_IOSystemHandle *Handle,std::string &URI);
 bool IOS_UpdateOptionsFromURI(const char *URI,t_KVList &Options);
 e_IOSysIOErrorType IOS_TransmitQueuedData(t_IOSystemHandle *Handle);
+
 #endif

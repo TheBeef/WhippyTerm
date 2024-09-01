@@ -97,6 +97,22 @@ struct PI_UIAPI m_PIUSDefault_UIAPI=
     PIUSDefault_EnableTextInput,
     PIUSDefault_EnableNumberInput,
     PIUSDefault_EnableDoubleInput,
+
+    PIUSDefault_AddColumnViewInput,
+    PIUSDefault_FreeColumnViewInput,
+    PIUSDefault_ColumnViewInputClear,
+    PIUSDefault_ColumnViewInputRemoveRow,
+    PIUSDefault_ColumnViewInputAddRow,
+    PIUSDefault_ColumnViewInputSetColumnText,
+    PIUSDefault_ColumnViewInputSelectRow,
+    PIUSDefault_ColumnViewInputClearSelection,
+
+    PIUSDefault_AddButtonInput,
+    PIUSDefault_FreeButtonInput,
+
+    PIUSDefault_AddIndicator,
+    PIUSDefault_FreeIndicator,
+    PIUSDefault_SetIndicator,
 };
 
 /*******************************************************************************
@@ -175,7 +191,7 @@ void PIUSDefault_EnableComboBox(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCt
     UIEnableComboBox(RealComboBox,Enabled);
 }
 
-t_PI_RadioBttnGroup *PIUSDefault_AllocRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,const char *Label)
+struct PI_RadioBttnGroup *PIUSDefault_AllocRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,const char *Label)
 {
     return UIPI_AllocRadioBttnGroup((t_UIContainerCtrl *)WidgetHandle,Label);
 }
@@ -186,7 +202,7 @@ t_PI_RadioBttnGroup *PIUSDefault_AllocRadioBttnGroup(t_WidgetSysHandle *WidgetHa
  *
  * SYNOPSIS:
  *    static void PIUSDefault_FreeRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,
- *              t_PI_RadioBttnGroup *UICtrl);
+ *              struct PI_RadioBttnGroup *UICtrl);
  *
  * PARAMETERS:
  *    WidgetHandle [I] -- The handle to the widget data we allocated in
@@ -202,12 +218,12 @@ t_PI_RadioBttnGroup *PIUSDefault_AllocRadioBttnGroup(t_WidgetSysHandle *WidgetHa
  * SEE ALSO:
  *    
  ******************************************************************************/
-void PIUSDefault_FreeRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,t_PI_RadioBttnGroup *UICtrl)
+void PIUSDefault_FreeRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttnGroup *UICtrl)
 {
     UIPI_FreeRadioBttnGroup(UICtrl);
 }
 
-struct PI_RadioBttn *PIUSDefault_AddRadioBttn(t_WidgetSysHandle *WidgetHandle,t_PI_RadioBttnGroup *RBGroup,const char *Label,void (*EventCB)(const struct PIRBEvent *Event,void *UserData),void *UserData)
+struct PI_RadioBttn *PIUSDefault_AddRadioBttn(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttnGroup *RBGroup,const char *Label,void (*EventCB)(const struct PIRBEvent *Event,void *UserData),void *UserData)
 {
     return UIPI_AddRadioBttn(RBGroup,Label,EventCB,UserData);
 }
@@ -414,3 +430,94 @@ void PIUSDefault_SetDoubleInputDecimals(t_WidgetSysHandle *WidgetHandle,t_PIUIDo
 
     UISetDoubleInputCtrlDecimals(RealDoubleInput,Points);
 }
+
+struct PI_ColumnViewInput *PIUSDefault_AddColumnViewInput(t_WidgetSysHandle *WidgetHandle,
+        const char *Label,int Columns,const char *ColumnNames[],
+        void (*EventCB)(const struct PICVEvent *Event,void *UserData),
+        void *UserData)
+{
+    return UIPI_AddColumnViewInput((t_UIContainerCtrl *)WidgetHandle,Label,
+            Columns,ColumnNames,EventCB,UserData);
+}
+
+void PIUSDefault_FreeColumnViewInput(t_WidgetSysHandle *WidgetHandle,
+        struct PI_ColumnViewInput *UICtrl)
+{
+    UIPI_FreeColumnViewInput(UICtrl);
+}
+
+void PIUSDefault_ColumnViewInputClear(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl)
+{
+    t_UIColumnView *RealColumnViewInput=(t_UIColumnView *)UICtrl;
+
+    UIColumnViewClear(RealColumnViewInput);
+}
+
+void PIUSDefault_ColumnViewInputRemoveRow(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl,int Row)
+{
+    t_UIColumnView *RealColumnViewInput=(t_UIColumnView *)UICtrl;
+
+    UIColumnViewRemoveRow(RealColumnViewInput,Row);
+}
+
+int PIUSDefault_ColumnViewInputAddRow(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl)
+{
+    t_UIColumnView *RealColumnViewInput=(t_UIColumnView *)UICtrl;
+
+    return UIColumnViewAddRow(RealColumnViewInput);
+}
+
+void PIUSDefault_ColumnViewInputSetColumnText(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl,int Column,int Row,const char *Str)
+{
+    t_UIColumnView *RealColumnViewInput=(t_UIColumnView *)UICtrl;
+
+    UIColumnViewSetColumnText(RealColumnViewInput,Column,Row,Str);
+}
+
+void PIUSDefault_ColumnViewInputSelectRow(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl,int Row)
+{
+    t_UIColumnView *RealColumnViewInput=(t_UIColumnView *)UICtrl;
+
+    UIColumnViewSelectRow(RealColumnViewInput,Row);
+}
+
+void PIUSDefault_ColumnViewInputClearSelection(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl)
+{
+    t_UIColumnView *RealColumnViewInput=(t_UIColumnView *)UICtrl;
+
+    UIColumnViewClearSelection(RealColumnViewInput);
+}
+
+struct PI_ButtonInput *PIUSDefault_AddButtonInput(t_WidgetSysHandle *WidgetHandle,
+        const char *Label,
+        void (*EventCB)(const struct PIButtonEvent *Event,void *UserData),
+        void *UserData)
+{
+    return UIPI_AddButtonInput((t_UIContainerCtrl *)WidgetHandle,Label,
+            EventCB,UserData);
+}
+
+void PIUSDefault_FreeButtonInput(t_WidgetSysHandle *WidgetHandle,
+        struct PI_ButtonInput *UICtrl)
+{
+    UIPI_FreeButtonInput(UICtrl);
+}
+
+struct PI_Indicator *PIUSDefault_AddIndicator(t_WidgetSysHandle *WidgetHandle,
+        const char *Label)
+{
+    return UIPI_AddIndicator((t_UIContainerCtrl *)WidgetHandle,Label);
+}
+
+void PIUSDefault_FreeIndicator(t_WidgetSysHandle *WidgetHandle,
+        struct PI_Indicator *UICtrl)
+{
+    UIPI_FreeIndicator(UICtrl);
+}
+
+void PIUSDefault_SetIndicator(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIIndicatorCtrl *UICtrl,bool On)
+{
+    UIPI_SetIndicator(UICtrl,On);
+}
+

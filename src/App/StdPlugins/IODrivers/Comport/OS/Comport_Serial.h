@@ -74,5 +74,13 @@ PG_BOOL Comport_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,
 PG_BOOL Comport_Convert_Options_To_URI(const char *DeviceUniqueID,
             t_PIKVList *Options,char *URI,unsigned int MaxURILen);
 PG_BOOL Comport_GetConnectionInfo(const char *DeviceUniqueID,t_PIKVList *Options,struct IODriverDetectedInfo *RetInfo);
+t_ConnectionWidgetsType *Comport_ConnectionAuxCtrlWidgets_AllocWidgets(t_DriverIOHandleType *DriverIO,t_WidgetSysHandle *WidgetHandle);
+void Comport_ConnectionAuxCtrlWidgets_FreeWidgets(t_DriverIOHandleType *DriverIO,t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConAuxCtrls);
+void Comport_UpdateDTR(t_DriverIOHandleType *DriverIO,bool DTR);
+void Comport_UpdateRTS(t_DriverIOHandleType *DriverIO,bool RTS);
+void Comport_SendBreak(t_DriverIOHandleType *DriverIO);
+bool Comport_ReadAuxDTRCheckbox(struct Comport_ConAuxWidgets *ConAuxWidgets);
+bool Comport_ReadAuxRTSCheckbox(struct Comport_ConAuxWidgets *ConAuxWidgets);
+void Comport_AddLogMsg(struct Comport_ConAuxWidgets *ConAuxWidgets,const char *Msg);
 
 #endif

@@ -442,6 +442,7 @@ t_UIProgressBarCtrl *UIMW_GetProgressBarHandle(t_UIMainWindow *win,e_UIMWProgres
 t_UIContainerCtrl *UIMW_GetOptionsFrameContainer(t_UIMainWindow *win);
 t_UIContainerCtrl *UIMW_GetUploadOptionsFrameContainer(t_UIMainWindow *win);
 t_UIContainerCtrl *UIMW_GetDownloadOptionsFrameContainer(t_UIMainWindow *win);
+t_UIContainerCtrl *UIMW_GetConAuxControlsFrameContainer(t_UIMainWindow *win);
 
 void UIMW_EnableStopWatchTimer(t_UIMainWindow *win,bool Enable);
 

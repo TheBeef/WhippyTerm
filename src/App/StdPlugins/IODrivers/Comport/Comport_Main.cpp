@@ -53,6 +53,10 @@ PG_BOOL Comport_Init(void);
 const struct IODriverInfo *Comport_GetDriverInfo(unsigned int *SizeOfInfo);
 const struct IODriverDetectedInfo *Comport_DetectDevices(void);
 void Comport_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices);
+static void Comport_DTRCheckboxCallBack(const struct PICheckboxEvent *Event,void *UserData);
+static void Comport_RTSCheckboxCallBack(const struct PICheckboxEvent *Event,void *UserData);
+static void Comport_SendBreakButton(const struct PIButtonEvent *Event,void *UserData);
+static void Comport_InfoClearButton(const struct PIButtonEvent *Event,void *UserData);
 
 /*** VARIABLE DEFINITIONS     ***/
 const struct IODriverAPI g_ComportPluginAPI=
@@ -78,6 +82,8 @@ const struct IODriverAPI g_ComportPluginAPI=
     Comport_Write,
     Comport_ChangeOptions,
     NULL,                                               // Transmit
+    Comport_ConnectionAuxCtrlWidgets_AllocWidgets,
+    Comport_ConnectionAuxCtrlWidgets_FreeWidgets,
 };
 
 struct IODriverInfo m_ComportInfo=
@@ -548,7 +554,6 @@ bool Comport_SetOptionsFromURI(const char *OptionsURIStart,t_PIKVList *KVList,
     PosStart++;
     StopBitChar=*PosStart;
 
-
     Options.BitRate=Baud;
     if(DataBitsChar=='7')
         Options.DataBits=e_ComportDataBits_7;
@@ -570,4 +575,183 @@ bool Comport_SetOptionsFromURI(const char *OptionsURIStart,t_PIKVList *KVList,
     Comport_Convert2KVList(&Options,KVList);
 
     return true;
+}
+
+struct Comport_ConAuxWidgets *Comport_AllocAuxWidgets(t_DriverIOHandleType *IOHandle,t_WidgetSysHandle *WidgetHandle)
+{
+    struct Comport_ConAuxWidgets *ConAuxWidgets;
+    static const char *InfoViewColumnsNames[]={"Event"};
+
+    ConAuxWidgets=NULL;
+    try
+    {
+        ConAuxWidgets=new struct Comport_ConAuxWidgets;
+        ConAuxWidgets->IOHandle=IOHandle;
+        ConAuxWidgets->WidgetHandle=WidgetHandle;
+
+        /* DTR -> DSR */
+        ConAuxWidgets->DTR_Checkbox=g_CP_UI->AddCheckbox(WidgetHandle,
+                "DTR",Comport_DTRCheckboxCallBack,ConAuxWidgets);
+        if(ConAuxWidgets->DTR_Checkbox==NULL)
+            throw(0);
+        g_CP_UI->SetCheckboxChecked(ConAuxWidgets->WidgetHandle,
+                ConAuxWidgets->DTR_Checkbox->Ctrl,true);
+
+        /* RTS -> CTS */
+        ConAuxWidgets->RTS_Checkbox=g_CP_UI->AddCheckbox(WidgetHandle,
+                "RTS",Comport_RTSCheckboxCallBack,ConAuxWidgets);
+        if(ConAuxWidgets->RTS_Checkbox==NULL)
+            throw(0);
+        g_CP_UI->SetCheckboxChecked(ConAuxWidgets->WidgetHandle,
+                ConAuxWidgets->RTS_Checkbox->Ctrl,true);
+
+        ConAuxWidgets->DSR_Indicator=g_CP_UI->AddIndicator(WidgetHandle,"DSR");
+        if(ConAuxWidgets->DSR_Indicator==NULL)
+            throw(0);
+        ConAuxWidgets->CTS_Indicator=g_CP_UI->AddIndicator(WidgetHandle,"CTS");
+        if(ConAuxWidgets->CTS_Indicator==NULL)
+            throw(0);
+
+        ConAuxWidgets->CD_Indicator=g_CP_UI->AddIndicator(WidgetHandle,"CD");
+        if(ConAuxWidgets->CD_Indicator==NULL)
+            throw(0);
+        ConAuxWidgets->RI_Indicator=g_CP_UI->AddIndicator(WidgetHandle,"RI");
+        if(ConAuxWidgets->RI_Indicator==NULL)
+            throw(0);
+
+        ConAuxWidgets->SendBreakButton=g_CP_UI->AddButtonInput(WidgetHandle,
+                "Send Break",Comport_SendBreakButton,ConAuxWidgets);
+        if(ConAuxWidgets->SendBreakButton==NULL)
+            throw(0);
+
+        ConAuxWidgets->InfoView=g_CP_UI->AddColumnViewInput(WidgetHandle,
+                "Logs",1,InfoViewColumnsNames,NULL,NULL);
+        if(ConAuxWidgets->InfoView==NULL)
+            throw(0);
+
+        ConAuxWidgets->InfoClearButton=g_CP_UI->AddButtonInput(WidgetHandle,
+                "Clear",Comport_InfoClearButton,ConAuxWidgets);
+        if(ConAuxWidgets->InfoClearButton==NULL)
+            throw(0);
+    }
+    catch(...)
+    {
+        if(ConAuxWidgets!=NULL)
+            Comport_FreeAuxWidgets(WidgetHandle,ConAuxWidgets);
+        ConAuxWidgets=NULL;
+    }
+
+    return ConAuxWidgets;
+}
+
+void Comport_FreeAuxWidgets(t_WidgetSysHandle *WidgetHandle,struct Comport_ConAuxWidgets *ConAuxWidgets)
+{
+    if(ConAuxWidgets->DTR_Checkbox!=NULL)
+        g_CP_UI->FreeCheckbox(WidgetHandle,ConAuxWidgets->DTR_Checkbox);
+    if(ConAuxWidgets->RTS_Checkbox!=NULL)
+        g_CP_UI->FreeCheckbox(WidgetHandle,ConAuxWidgets->RTS_Checkbox);
+    if(ConAuxWidgets->CD_Indicator!=NULL)
+        g_CP_UI->FreeIndicator(WidgetHandle,ConAuxWidgets->CD_Indicator);
+    if(ConAuxWidgets->RI_Indicator!=NULL)
+        g_CP_UI->FreeIndicator(WidgetHandle,ConAuxWidgets->RI_Indicator);
+    if(ConAuxWidgets->DSR_Indicator!=NULL)
+        g_CP_UI->FreeIndicator(WidgetHandle,ConAuxWidgets->DSR_Indicator);
+    if(ConAuxWidgets->CTS_Indicator!=NULL)
+        g_CP_UI->FreeIndicator(WidgetHandle,ConAuxWidgets->CTS_Indicator);
+    if(ConAuxWidgets->SendBreakButton!=NULL)
+        g_CP_UI->FreeButtonInput(WidgetHandle,ConAuxWidgets->SendBreakButton);
+    if(ConAuxWidgets->InfoView!=NULL)
+        g_CP_UI->FreeColumnViewInput(WidgetHandle,ConAuxWidgets->InfoView);
+    if(ConAuxWidgets->InfoClearButton!=NULL)
+        g_CP_UI->FreeButtonInput(WidgetHandle,ConAuxWidgets->InfoClearButton);
+
+    delete ConAuxWidgets;
+}
+
+void Comport_NotifyOfModemBitsChange(struct Comport_ConAuxWidgets *ConAuxWidgets,bool CD, bool RI, bool DSR, bool CTS)
+{
+    /* Update the UI here */
+    g_CP_UI->SetIndicator(ConAuxWidgets->WidgetHandle,ConAuxWidgets->CD_Indicator->Ctrl,CD);
+    g_CP_UI->SetIndicator(ConAuxWidgets->WidgetHandle,ConAuxWidgets->RI_Indicator->Ctrl,RI);
+    g_CP_UI->SetIndicator(ConAuxWidgets->WidgetHandle,ConAuxWidgets->DSR_Indicator->Ctrl,DSR);
+    g_CP_UI->SetIndicator(ConAuxWidgets->WidgetHandle,ConAuxWidgets->CTS_Indicator->Ctrl,CTS);
+}
+
+void Comport_DTRCheckboxCallBack(const struct PICheckboxEvent *Event,void *UserData)
+{
+    struct Comport_ConAuxWidgets *ConAuxWidgets=(struct Comport_ConAuxWidgets *)UserData;
+
+    switch(Event->EventType)
+    {
+        case e_PIECheckbox_Changed:
+            Comport_UpdateDTR(ConAuxWidgets->IOHandle,Event->Checked);
+        break;
+        case e_PIECheckboxMAX:
+        default:
+        break;
+    }
+}
+
+void Comport_RTSCheckboxCallBack(const struct PICheckboxEvent *Event,void *UserData)
+{
+    struct Comport_ConAuxWidgets *ConAuxWidgets=(struct Comport_ConAuxWidgets *)UserData;
+
+    switch(Event->EventType)
+    {
+        case e_PIECheckbox_Changed:
+            Comport_UpdateRTS(ConAuxWidgets->IOHandle,Event->Checked);
+        break;
+        case e_PIECheckboxMAX:
+        default:
+        break;
+    }
+}
+
+void Comport_SendBreakButton(const struct PIButtonEvent *Event,void *UserData)
+{
+    struct Comport_ConAuxWidgets *ConAuxWidgets=(struct Comport_ConAuxWidgets *)UserData;
+
+    switch(Event->EventType)
+    {
+        case e_PIEButton_Press:
+            Comport_SendBreak(ConAuxWidgets->IOHandle);
+        break;
+        case e_PIEButtonMAX:
+        default:
+        break;
+    }
+}
+
+void Comport_InfoClearButton(const struct PIButtonEvent *Event,void *UserData)
+{
+    struct Comport_ConAuxWidgets *ConAuxWidgets=(struct Comport_ConAuxWidgets *)UserData;
+
+    switch(Event->EventType)
+    {
+        case e_PIEButton_Press:
+            g_CP_UI->ColumnViewInputClear(ConAuxWidgets->WidgetHandle,
+                    ConAuxWidgets->InfoView->Ctrl);
+        break;
+        case e_PIEButtonMAX:
+        default:
+        break;
+    }
+}
+
+bool Comport_ReadAuxDTRCheckbox(struct Comport_ConAuxWidgets *ConAuxWidgets)
+{
+    return g_CP_UI->IsCheckboxChecked(ConAuxWidgets->WidgetHandle,ConAuxWidgets->DTR_Checkbox->Ctrl);
+}
+
+bool Comport_ReadAuxRTSCheckbox(struct Comport_ConAuxWidgets *ConAuxWidgets)
+{
+    return g_CP_UI->IsCheckboxChecked(ConAuxWidgets->WidgetHandle,ConAuxWidgets->RTS_Checkbox->Ctrl);
+}
+
+void Comport_AddLogMsg(struct Comport_ConAuxWidgets *ConAuxWidgets,const char *Msg)
+{
+    int NewRow;
+
+    NewRow=g_CP_UI->ColumnViewInputAddRow(ConAuxWidgets->WidgetHandle,ConAuxWidgets->InfoView->Ctrl);
+    g_CP_UI->ColumnViewInputSetColumnText(ConAuxWidgets->WidgetHandle,ConAuxWidgets->InfoView->Ctrl,0,NewRow,Msg);
 }

@@ -45,15 +45,15 @@
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
-t_ConnectionOptionsWidgetsType *Comport_ConnectionOptionsWidgets_AllocWidgets(
+t_ConnectionWidgetsType *Comport_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle);
-void Comport_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *ConOptions,
+void Comport_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle);
-void Comport_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *ConOptions,
+void Comport_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options);
 void Comport_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionOptionsWidgetsType *ConOptions,
+        t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options);
 

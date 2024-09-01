@@ -82,6 +82,21 @@ struct ComportPortOptions
     e_ComportFlowControlType FlowControl;
 };
 
+struct Comport_ConAuxWidgets
+{
+    t_WidgetSysHandle *WidgetHandle;
+    t_DriverIOHandleType *IOHandle;
+    struct PI_Checkbox *DTR_Checkbox;
+    struct PI_Checkbox *RTS_Checkbox;
+    struct PI_Indicator *CD_Indicator;
+    struct PI_Indicator *RI_Indicator;
+    struct PI_Indicator *DSR_Indicator;
+    struct PI_Indicator *CTS_Indicator;
+    struct PI_ButtonInput *SendBreakButton;
+    struct PI_ColumnViewInput *InfoView;
+    struct PI_ButtonInput *InfoClearButton;
+};
+
 /* DEBUG PAUL: Die */
 struct ComportDetectData
 {
@@ -103,5 +118,8 @@ void Comport_Convert2KVList(const struct ComportPortOptions *Options,
         t_PIKVList *KVList);
 bool Comport_SetOptionsFromURI(const char *OptionsURIStart,t_PIKVList *KVList,
         bool Update);
+struct Comport_ConAuxWidgets *Comport_AllocAuxWidgets(t_DriverIOHandleType *IOHandle,t_WidgetSysHandle *WidgetHandle);
+void Comport_FreeAuxWidgets(t_WidgetSysHandle *WidgetHandle,struct Comport_ConAuxWidgets *ConAuxCtrls);
+void Comport_NotifyOfModemBitsChange(struct Comport_ConAuxWidgets *ConAuxWidgets,bool CD, bool RI, bool DSR, bool CTS);
 
 #endif

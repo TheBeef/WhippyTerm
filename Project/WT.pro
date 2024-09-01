@@ -26,6 +26,11 @@ DEFINES += BUILT_IN_PLUGINS=1
 QMAKE_CXXFLAGS += -Wall
 QMAKE_CFLAGS += -Wall
 
+CONFIG(debug, debug|release)
+{
+    DEFINES += DEBUG=1
+}
+
 win32 {
 DEFINES += __STDC_FORMAT_MACROS
 DEFINES += DEBUGWINDOWSBUILD
@@ -36,6 +41,7 @@ RC_ICONS = ..\WindowsInstaller\WhippyTerm.ico
 SOURCES += ../src/UI/QT/main.cpp\
     ../ExternPlugins/DataProcessors/TermEmulation/BasicHex/src/BasicHex.cpp \
     ../src/App/Dialogs/Dialog_SendByte.cpp \
+    ../src/App/MWPanels/MW_AuxControls.cpp \
     ../src/App/StdPlugins/IODrivers/TCPClient/src/TCPClient_Main.cpp \
     ../src/App/StdPlugins/IODrivers/TCPServer/src/TCPServer_Main.cpp \
     ../src/App/StdPlugins/IODrivers/UDPClient/src/UDPClient_Main.cpp \
@@ -203,6 +209,12 @@ unix:!macx {
     ../src/App/StdPlugins/IODrivers/TCPServer/src/OS/Linux/TCPServer_OS_Socket.cpp \
     ../src/App/StdPlugins/IODrivers/UDPClient/src/OS/Linux/UDPClient_OS_Socket.cpp \
     ../src/App/StdPlugins/IODrivers/UDPServer/src/OS/Linux/UDPServer_OS_Socket.cpp \
+
+    CONFIG(debug, debug|release)
+    {
+        SOURCES += \
+            ../ExternPlugins/IODrivers/TestLoopback/src/LB2_Main.cpp \
+    }
 }
 
 macx {

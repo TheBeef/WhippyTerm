@@ -78,7 +78,7 @@ typedef enum
 
 typedef struct DetectedDevices {int PrivateDataHere;} t_DetectedDevices;    // Fake type holder
 
-typedef struct ConnectionOptionsWidgets {int PrivateDataHere;} t_ConnectionOptionsWidgetsType;    // Fake type holder
+typedef struct ConnectionWidgets {int PrivateDataHere;} t_ConnectionWidgetsType;    // Fake type holder
 
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */
 struct IODriverInfo
@@ -99,10 +99,12 @@ struct IODriverAPI
     void (*FreeDetectedDevices)(const struct IODriverDetectedInfo *Devices);
     PG_BOOL (*GetConnectionInfo)(const char *DeviceUniqueID,t_PIKVList *Options,struct IODriverDetectedInfo *RetInfo);
 
-    t_ConnectionOptionsWidgetsType *(*ConnectionOptionsWidgets_AllocWidgets)(t_WidgetSysHandle *WidgetHandle);
-    void (*ConnectionOptionsWidgets_FreeWidgets)(t_ConnectionOptionsWidgetsType *ConOptions,t_WidgetSysHandle *WidgetHandle);
-    void (*ConnectionOptionsWidgets_StoreUI)(t_ConnectionOptionsWidgetsType *ConOptions,t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,t_PIKVList *Options);
-    void (*ConnectionOptionsWidgets_UpdateUI)(t_ConnectionOptionsWidgetsType *ConOptions,t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,t_PIKVList *Options);
+/* DEBUG PAUL: Swap the t_WidgetSysHandle *WidgetHandle and t_ConnectionWidgetsType *ConOptions as part of
+               1.0 release API clean up */
+    t_ConnectionWidgetsType *(*ConnectionOptionsWidgets_AllocWidgets)(t_WidgetSysHandle *WidgetHandle);
+    void (*ConnectionOptionsWidgets_FreeWidgets)(t_ConnectionWidgetsType *ConOptions,t_WidgetSysHandle *WidgetHandle);
+    void (*ConnectionOptionsWidgets_StoreUI)(t_ConnectionWidgetsType *ConOptions,t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,t_PIKVList *Options);
+    void (*ConnectionOptionsWidgets_UpdateUI)(t_ConnectionWidgetsType *ConOptions,t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,t_PIKVList *Options);
 
     PG_BOOL (*Convert_URI_To_Options)(const char *URI,t_PIKVList *Options,char *DeviceUniqueID,unsigned int MaxDeviceUniqueIDLen,PG_BOOL Update);
     PG_BOOL (*Convert_Options_To_URI)(const char *DeviceUniqueID,t_PIKVList *Options,char *URI,unsigned int MaxURILen);
@@ -115,6 +117,9 @@ struct IODriverAPI
     int (*Write)(t_DriverIOHandleType *DriverIO,const uint8_t *Data,int Bytes);
     PG_BOOL (*ChangeOptions)(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options);
     int (*Transmit)(t_DriverIOHandleType *DriverIO);
+
+    t_ConnectionWidgetsType *(*ConnectionAuxCtrlWidgets_AllocWidgets)(t_DriverIOHandleType *DriverIO,t_WidgetSysHandle *WidgetHandle);
+    void (*ConnectionAuxCtrlWidgets_FreeWidgets)(t_DriverIOHandleType *DriverIO,t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConAuxCtrls);
 };
 
 struct IOS_API

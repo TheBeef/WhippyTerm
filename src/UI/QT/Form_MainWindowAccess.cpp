@@ -936,6 +936,33 @@ t_UIContainerCtrl *UIMW_GetDownloadOptionsFrameContainer(t_UIMainWindow *win)
     return (t_UIContainerCtrl *)realwin->ui->formLayout_DownloadOptions;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    UIMW_GetConAuxControlsFrameContainer
+ *
+ * SYNOPSIS:
+ *    t_UIContainerCtrl *UIMW_GetConAuxControlsFrameContainer(t_UIMainWindow *win);
+ *
+ * PARAMETERS:
+ *    win [I] -- The main window that has the control in it.
+ *
+ * FUNCTION:
+ *    This function gets the frame for the connection aux controls tab (where
+ *    you place the widgets for connection options).
+ *
+ * RETURNS:
+ *    A handle to the connection aux controls frame.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIContainerCtrl *UIMW_GetConAuxControlsFrameContainer(t_UIMainWindow *win)
+{
+    Form_MainWindow *realwin=(Form_MainWindow *)win;
+
+    return (t_UIContainerCtrl *)realwin->ui->formLayout_ConAux;
+}
+
 void UIMW_SetWindowTitle(t_UIMainWindow *win,const char *Title)
 {
     Form_MainWindow *realwin=(Form_MainWindow *)win;

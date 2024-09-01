@@ -109,7 +109,7 @@ struct IOSystemDrvHandle
 typedef list<t_IOSystemHandle *> t_ActiveHandlesListType;
 typedef t_ActiveHandlesListType::iterator i_ActiveHandlesListType;
 
-struct COD_WidgetData
+struct CWD_WidgetData
 {
     struct PI_ComboBox *ComboBox;
     struct PI_TextInput *TextInput;
@@ -117,21 +117,28 @@ struct COD_WidgetData
     struct PI_DoubleInput *DoubleInput;
     struct PI_Checkbox *CheckboxInput;
     struct PI_RadioBttn *RadioBttnInput;
-    struct ConnectionOptionsData *ConOptionData;
+    struct PI_RadioBttnGroup *RadioBttnGroup;
+    struct PI_ColumnViewInput *ColumnViewInput;
+    struct PI_ButtonInput *ButtonInput;
+    struct PI_Indicator *Indicator;
+    struct ConnectionWidgetData *Owner;
     void *UserData;
     void (*EventCB)(const struct PICBEvent *Event,void *UserData);
     void (*CheckboxEventCB)(const struct PICheckboxEvent *Event,void *UserData);
     void (*RadioBttnEventCB)(const struct PIRBEvent *Event,void *UserData);
-    struct COD_WidgetData *Next;
+    void (*ColumnViewEventCB)(const struct PICVEvent *Event,void *UserData);
+    void (*ButtonEventCB)(const struct PIButtonEvent *Event,void *UserData);
+    struct CWD_WidgetData *Next;
 };
 
-struct ConnectionOptionsData
+struct ConnectionWidgetData
 {
-    t_ConnectionOptionsWidgetsType *ConOptions;
-    i_IODriverListType drv;
+    t_ConnectionWidgetsType *ConWidgets;
+    struct IODriver *IOdrv;
     string DeviceUniqueID;
     t_UIContainerCtrl *ContainerWidget;
-    struct COD_WidgetData *WidgetExtraData;
+    struct IOSystemDrvHandle *DrvHandle;
+    struct CWD_WidgetData *WidgetExtraData;
     void (*UIChangedCB)(void *UserData);
     void *UserData;
 };
@@ -174,6 +181,14 @@ static void IOS_FreeDoubleInput(t_WidgetSysHandle *WidgetHandle,
         struct PI_DoubleInput *UICtrl);
 static void IOS_DoubleInputEventHandler(const struct PICBEvent *Event,
         void *UserData);
+static struct PI_ColumnViewInput *IOS_AddColumnViewInput(t_WidgetSysHandle *WidgetHandle,
+        const char *Label,int Columns,const char *ColumnNames[],
+        void (*EventCB)(const struct PICVEvent *Event,void *UserData),
+        void *UserData);
+static void IOS_FreeColumnViewInput(t_WidgetSysHandle *WidgetHandle,
+        struct PI_ColumnViewInput *UICtrl);
+static void IOS_ColumnViewInputEventHandler(const struct PICVEvent *Event,
+        void *UserData);
 static struct PI_Checkbox *IOS_AddCheckboxInput(t_WidgetSysHandle *WidgetHandle,
         const char *Label,
         void (*EventCB)(const struct PICheckboxEvent *Event,void *UserData),
@@ -182,18 +197,29 @@ static void IOS_CheckboxInputEventHandler(const struct PICheckboxEvent *Event,
         void *UserData);
 static void IOS_FreeCheckboxInput(t_WidgetSysHandle *WidgetHandle,
         struct PI_Checkbox *UICtrl);
-static t_PI_RadioBttnGroup *IOS_AllocRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,
+static struct PI_RadioBttnGroup *IOS_AllocRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,
         const char *Label);
 static void IOS_RadioBttnInputEventHandler(const struct PIRBEvent *Event,
         void *UserData);
 static void IOS_FreeRadioBttnInput(t_WidgetSysHandle *WidgetHandle,
         struct PI_RadioBttn *UICtrl);
 static struct PI_RadioBttn *IOS_AddRadioBttnInput(t_WidgetSysHandle *WidgetHandle,
-        t_PI_RadioBttnGroup *RBGroup,const char *Label,
+        struct PI_RadioBttnGroup *RBGroup,const char *Label,
         void (*EventCB)(const struct PIRBEvent *Event,void *UserData),
         void *UserData);
 static void IOS_FreeRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,
-        t_PI_RadioBttnGroup *UICtrl);
+        struct PI_RadioBttnGroup *UICtrl);
+static struct PI_ButtonInput *IOS_AddButtonInput(t_WidgetSysHandle *WidgetHandle,
+        const char *Label,void (*EventCB)(const struct PIButtonEvent *Event,void *UserData),
+        void *UserData);
+static void IOS_FreeButtonInput(t_WidgetSysHandle *WidgetHandle,
+        struct PI_ButtonInput *UICtrl);
+static void IOS_ButtonInputEventHandler(const struct PIButtonEvent *Event,
+        void *UserData);
+static struct PI_Indicator *IOS_AddIndicator(t_WidgetSysHandle *WidgetHandle,
+        const char *Label);
+static void IOS_FreeIndicator(t_WidgetSysHandle *WidgetHandle,
+        struct PI_Indicator *UICtrl);
 
 /*** VARIABLE DEFINITIONS     ***/
 const struct IOS_API g_IOS_API=
@@ -247,6 +273,22 @@ static struct PI_UIAPI IOS_UIAPI=
     PIUSDefault_EnableTextInput,
     PIUSDefault_EnableNumberInput,
     PIUSDefault_EnableDoubleInput,
+
+    IOS_AddColumnViewInput,
+    IOS_FreeColumnViewInput,
+    PIUSDefault_ColumnViewInputClear,
+    PIUSDefault_ColumnViewInputRemoveRow,
+    PIUSDefault_ColumnViewInputAddRow,
+    PIUSDefault_ColumnViewInputSetColumnText,
+    PIUSDefault_ColumnViewInputSelectRow,
+    PIUSDefault_ColumnViewInputClearSelection,
+
+    IOS_AddButtonInput,
+    IOS_FreeButtonInput,
+
+    IOS_AddIndicator,
+    IOS_FreeIndicator,
+    PIUSDefault_SetIndicator,
 };
 
 bool m_NeverScanned4Connections;
@@ -464,7 +506,7 @@ t_ActiveHandlesListType m_ActiveHandlesList;    // A list of active handles
  *    ConnectionOptionsWidgets_AllocWidgets
  *
  * SYNOPSIS:
- *    t_ConnectionOptionsWidgetsType *ConnectionOptionsWidgets_AllocWidgets(
+ *    t_ConnectionWidgetsType *ConnectionOptionsWidgets_AllocWidgets(
  *          t_WidgetSysHandle *WidgetHandle);
  *
  * PARAMETERS:
@@ -481,11 +523,14 @@ t_ActiveHandlesListType m_ActiveHandlesList;    // A list of active handles
  * RETURNS:
  *    The private options data that you want to use.  This is a private
  *    structure that you allocate and then cast to
- *    (t_ConnectionOptionsWidgetsType *) when you return.
+ *    (t_ConnectionWidgetsType *) when you return.
  *
  * NOTES:
  *    This function must be reentrant.  The system may allocate many sets
  *    of option widgets and free them in any order.
+ *
+ *    These widgets can only be accessed in the main thread.  They are not
+ *    thread safe.
  *
  * SEE ALSO:
  *    ConnectionOptionsWidgets_UpdateUI(), ConnectionOptionsWidgets_StoreUI()
@@ -494,11 +539,12 @@ t_ActiveHandlesListType m_ActiveHandlesList;    // A list of active handles
  *    ConnectionOptionsWidgets_FreeWidgets
  *
  * SYNOPSIS:
- *    void ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *
- *              ConOptions,t_WidgetSysHandle *WidgetHandle);
+ *    void ConnectionOptionsWidgets_FreeWidgets(
+ *              t_ConnectionWidgetsType *ConWidgets,
+ *              t_WidgetSysHandle *WidgetHandle);
  *
  * PARAMETERS:
- *    ConOptions [I] -- The options data that was allocated with
+ *    ConWidgets [I] -- The options data that was allocated with
  *          ConnectionOptionsWidgets_AllocWidgets().
  *    WidgetHandle [I] -- The handle to send to the widgets
  *
@@ -516,12 +562,12 @@ t_ActiveHandlesListType m_ActiveHandlesList;    // A list of active handles
  *
  * SYNOPSIS:
  *    void ConnectionOptionsWidgets_StoreUI(
- *          t_ConnectionOptionsWidgetsType *ConOptions,
+ *          t_ConnectionWidgetsType *ConWidgets,
  *          t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
  *          t_PIKVList *Options);
  *
  * PARAMETERS:
- *    ConOptions [I] -- The options data that was allocated with
+ *    ConWidgets [I] -- The options data that was allocated with
  *          ConnectionOptionsWidgets_AllocWidgets().
  *    WidgetHandle [I] -- The handle to send to the widgets
  *    DeviceUniqueID [I] -- This is the unique ID for the device we are working
@@ -544,12 +590,12 @@ t_ActiveHandlesListType m_ActiveHandlesList;    // A list of active handles
  *
  * SYNOPSIS:
  *    void ConnectionOptionsWidgets_UpdateUI(
- *          t_ConnectionOptionsWidgetsType *ConOptions,
+ *          t_ConnectionWidgetsType *ConWidgets,
  *          t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
  *          t_PIKVList *Options);
  *
  * PARAMETERS:
- *    ConOptions [I] -- The options data that was allocated with
+ *    ConWidgets [I] -- The options data that was allocated with
  *                      ConnectionOptionsWidgets_AllocWidgets().
  *    WidgetHandle [I] -- The handle to send to the widgets
  *    DeviceUniqueID [I] -- This is the unique ID for the device we are working
@@ -566,6 +612,61 @@ t_ActiveHandlesListType m_ActiveHandlesList;    // A list of active handles
  *
  * SEE ALSO:
  *    ConnectionOptionsWidgets_StoreUI()
+ *==============================================================================
+ * NAME:
+ *    ConnectionAuxCtrlWidgets_AllocWidgets
+ *
+ * SYNOPSIS:
+ *    t_ConnectionWidgetsType *ConnectionAuxCtrlWidgets_AllocWidgets(
+ *          t_DriverIOHandleType *DriverIO,t_WidgetSysHandle *WidgetHandle);
+ *
+ * PARAMETERS:
+ *    DriverIO [I] -- The handle to this connection
+ *    WidgetHandle [I] -- The handle to send to the widgets
+ *
+ * FUNCTION:
+ *    This function adds aux control widgets to the aux control tab in the
+ *    main window.  The aux controls are for extra controls that do things /
+ *    display things going on with the driver.  For example there are things
+ *    like the status of the CTS line and to set the RTS line.
+ *
+ *    The device driver needs to keep handles to the widgets added because it
+ *    needs to free them when ConnectionAuxCtrlWidgets_FreeWidgets() called.
+ *
+ * RETURNS:
+ *    The private options data that you want to use.  This is a private
+ *    structure that you allocate and then cast to
+ *    (t_ConnectionAuxCtrlWidgetsType *) when you return.
+ *
+ * NOTES:
+ *    These widgets can only be accessed in the main thread.  They are not
+ *    thread safe.
+ *
+ * SEE ALSO:
+ *    ConnectionAuxCtrlWidgets_FreeWidgets()
+ *==============================================================================
+ * NAME:
+ *    ConnectionAuxCtrlWidgets_FreeWidgets
+ *
+ * SYNOPSIS:
+ *    void ConnectionAuxCtrlWidgets_FreeWidgets(t_DriverIOHandleType *DriverIO,
+ *          t_WidgetSysHandle *WidgetHandle,
+ *          t_ConnectionWidgetsType *ConAuxCtrls);
+ *
+ * PARAMETERS:
+ *    DriverIO [I] -- The handle to this connection
+ *    WidgetHandle [I] -- The handle to send to the widgets
+ *    ConAuxCtrls [I] -- The aux controls data that was allocated with
+ *          ConnectionAuxCtrlWidgets_AllocWidgets().
+ *
+ * FUNCTION:
+ *    Frees the widgets added with ConnectionAuxCtrlWidgets_AllocWidgets()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    ConnectionAuxCtrlWidgets_AllocWidgets()
  *==============================================================================
  * NAME:
  *    Convert_URI_To_Options
@@ -1595,59 +1696,59 @@ t_ConnectionOptionsDataType *IOS_AllocConnectionOptions(
         void (*UIChanged)(void *UserData),void *UserData)
 {
     struct ConnectionInfoInternal *ConInfo=(struct ConnectionInfoInternal *)CInfoEntry;
-    t_ConnectionOptionsWidgetsType *ConOptions;
-    struct ConnectionOptionsData *ConOptionData;
+    t_ConnectionWidgetsType *ConWidgets;
+    struct ConnectionWidgetData *ConWidgetData;
     string DriverName;
     string DeviceUniqueID;
-    
 
-    ConOptions=NULL;
+    ConWidgets=NULL;
     try
     {
         IOS_SplitID(CInfoEntry->UniqueID.c_str(),DriverName,DeviceUniqueID);
 
-        ConOptionData=new struct ConnectionOptionsData;
-        ConOptionData->ContainerWidget=ContainerWidget;
-        ConOptionData->WidgetExtraData=NULL;
-        ConOptionData->UIChangedCB=UIChanged;
-        ConOptionData->UserData=UserData;
+        ConWidgetData=new struct ConnectionWidgetData;
+        ConWidgetData->ContainerWidget=ContainerWidget;
+        ConWidgetData->WidgetExtraData=NULL;
+        ConWidgetData->UIChangedCB=UIChanged;
+        ConWidgetData->UserData=UserData;
+        ConWidgetData->DrvHandle=NULL;
+        ConWidgetData->IOdrv=&(*ConInfo->drv);
+        ConWidgetData->DeviceUniqueID=DeviceUniqueID;
 
         if(ConInfo->drv->API.ConnectionOptionsWidgets_AllocWidgets!=NULL)
         {
-            ConOptions=ConInfo->drv->API.ConnectionOptionsWidgets_AllocWidgets(
-                    (t_WidgetSysHandle *)ConOptionData);
-            if(ConOptions==NULL)
+            ConWidgets=ConInfo->drv->API.ConnectionOptionsWidgets_AllocWidgets(
+                    (t_WidgetSysHandle *)ConWidgetData);
+            if(ConWidgets==NULL)
                 throw(false);
 
             if(ConInfo->drv->API.ConnectionOptionsWidgets_UpdateUI!=NULL)
             {
-                ConInfo->drv->API.ConnectionOptionsWidgets_UpdateUI(ConOptions,
-                        (t_WidgetSysHandle *)ConOptionData,
+                ConInfo->drv->API.ConnectionOptionsWidgets_UpdateUI(ConWidgets,
+                        (t_WidgetSysHandle *)ConWidgetData,
                         DeviceUniqueID.c_str(),
                         PIS_ConvertKVList2PIKVList(OptionsKeyValues));
             }
         }
-        ConOptionData->ConOptions=ConOptions;
-        ConOptionData->drv=ConInfo->drv;
-        ConOptionData->DeviceUniqueID=DeviceUniqueID;
+        ConWidgetData->ConWidgets=ConWidgets;
     }
     catch(...)
     {
-        if(ConOptions!=NULL)
+        if(ConWidgets!=NULL)
         {
             if(ConInfo->drv->API.ConnectionOptionsWidgets_FreeWidgets!=NULL)
             {
                 ConInfo->drv->API.ConnectionOptionsWidgets_FreeWidgets(
-                        ConOptions,(t_WidgetSysHandle *)ConOptionData);
+                        ConWidgets,(t_WidgetSysHandle *)ConWidgetData);
             }
-            ConOptions=NULL;
+            ConWidgets=NULL;
         }
         UIAsk("Error","Failed to add options to UI.",e_AskBox_Error,
                 e_AskBttns_Ok);
         return NULL;
     }
 
-    return (t_ConnectionOptionsDataType *)ConOptionData;
+    return (t_ConnectionOptionsDataType *)ConWidgetData;
 }
 
 /*******************************************************************************
@@ -1688,20 +1789,21 @@ t_ConnectionOptionsDataType *IOS_AllocConnectionOptionsFromUniqueID(
         t_KVList &OptionsKeyValues,void (*UIChanged)(void *UserData),
         void *UserData)
 {
-    t_ConnectionOptionsWidgetsType *ConOptions;
-    struct ConnectionOptionsData *ConOptionData;
+    t_ConnectionWidgetsType *ConWidgets;
+    struct ConnectionWidgetData *ConWidgetData;
     string SearchDriverName;
     string DeviceUniqueID;
     i_IODriverListType drv;
 
-    ConOptions=NULL;
+    ConWidgets=NULL;
     try
     {
-        ConOptionData=new struct ConnectionOptionsData;
-        ConOptionData->ContainerWidget=ContainerWidget;
-        ConOptionData->WidgetExtraData=NULL;
-        ConOptionData->UIChangedCB=UIChanged;
-        ConOptionData->UserData=UserData;
+        ConWidgetData=new struct ConnectionWidgetData;
+        ConWidgetData->ContainerWidget=ContainerWidget;
+        ConWidgetData->WidgetExtraData=NULL;
+        ConWidgetData->UIChangedCB=UIChanged;
+        ConWidgetData->UserData=UserData;
+        ConWidgetData->DrvHandle=NULL;
 
         /* First find the driver */
         IOS_SplitID(UniqueID,SearchDriverName,DeviceUniqueID);
@@ -1718,47 +1820,47 @@ t_ConnectionOptionsDataType *IOS_AllocConnectionOptionsFromUniqueID(
         if(drv==m_IODriverList.end())
         {
             /* Driver not found */
-            delete ConOptionData;
+            delete ConWidgetData;
             return NULL;
         }
 
         if(drv->API.ConnectionOptionsWidgets_AllocWidgets!=NULL)
         {
-            ConOptions=drv->API.ConnectionOptionsWidgets_AllocWidgets(
-                    (t_WidgetSysHandle *)ConOptionData);
-            if(ConOptions==NULL)
+            ConWidgets=drv->API.ConnectionOptionsWidgets_AllocWidgets(
+                    (t_WidgetSysHandle *)ConWidgetData);
+            if(ConWidgets==NULL)
                 throw(false);
 
             if(drv->API.ConnectionOptionsWidgets_UpdateUI!=NULL)
             {
-                drv->API.ConnectionOptionsWidgets_UpdateUI(ConOptions,
-                        (t_WidgetSysHandle *)ConOptionData,
+                drv->API.ConnectionOptionsWidgets_UpdateUI(ConWidgets,
+                        (t_WidgetSysHandle *)ConWidgetData,
                         DeviceUniqueID.c_str(),
                         PIS_ConvertKVList2PIKVList(OptionsKeyValues));
             }
         }
-        ConOptionData->ConOptions=ConOptions;
-        ConOptionData->drv=drv;
-        ConOptionData->DeviceUniqueID=DeviceUniqueID;
+        ConWidgetData->ConWidgets=ConWidgets;
+        ConWidgetData->IOdrv=&(*drv);
+        ConWidgetData->DeviceUniqueID=DeviceUniqueID;
     }
     catch(...)
     {
-        if(ConOptions!=NULL)
+        if(ConWidgets!=NULL)
         {
             if(drv->API.ConnectionOptionsWidgets_FreeWidgets!=NULL)
             {
-                drv->API.ConnectionOptionsWidgets_FreeWidgets(ConOptions,
-                        (t_WidgetSysHandle *)ConOptionData);
+                drv->API.ConnectionOptionsWidgets_FreeWidgets(ConWidgets,
+                        (t_WidgetSysHandle *)ConWidgetData);
             }
-            ConOptions=NULL;
+            ConWidgets=NULL;
         }
-        delete ConOptionData;
+        delete ConWidgetData;
         UIAsk("Error","Failed to add options to UI.",e_AskBox_Error,
                 e_AskBttns_Ok);
         return NULL;
     }
 
-    return (t_ConnectionOptionsDataType *)ConOptionData;
+    return (t_ConnectionOptionsDataType *)ConWidgetData;
 }
 
 /*******************************************************************************
@@ -1767,7 +1869,7 @@ t_ConnectionOptionsDataType *IOS_AllocConnectionOptionsFromUniqueID(
  *
  * SYNOPSIS:
  *    void IOS_FreeConnectionOptions(
- *          t_ConnectionOptionsDataType *ConOptionsHandle);
+ *          t_ConnectionOptionsDataType *ConWidgetsHandle);
  *
  * PARAMETERS:
  *    NONE
@@ -1782,21 +1884,21 @@ t_ConnectionOptionsDataType *IOS_AllocConnectionOptionsFromUniqueID(
  * SEE ALSO:
  *    IOS_AllocConnectionOptions()
  ******************************************************************************/
-void IOS_FreeConnectionOptions(t_ConnectionOptionsDataType *ConOptionsHandle)
+void IOS_FreeConnectionOptions(t_ConnectionOptionsDataType *ConWidgetsHandle)
 {
-    struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)ConOptionsHandle;
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)ConWidgetsHandle;
 
     /* Ok we need to find this connection */
     try
     {
-        if(ConOptionData->drv->API.ConnectionOptionsWidgets_FreeWidgets!=NULL)
+        if(ConWidgetData->IOdrv->API.ConnectionOptionsWidgets_FreeWidgets!=NULL)
         {
-            ConOptionData->drv->API.ConnectionOptionsWidgets_FreeWidgets(
-                    ConOptionData->ConOptions,
-                    (t_WidgetSysHandle *)ConOptionData);
+            ConWidgetData->IOdrv->API.ConnectionOptionsWidgets_FreeWidgets(
+                    ConWidgetData->ConWidgets,
+                    (t_WidgetSysHandle *)ConWidgetData);
         }
 
-        delete ConOptionData;
+        delete ConWidgetData;
     }
     catch(...)
     {
@@ -1812,11 +1914,11 @@ void IOS_FreeConnectionOptions(t_ConnectionOptionsDataType *ConOptionsHandle)
  *
  * SYNOPSIS:
  *    void IOS_StoreConnectionOptions(
- *          t_ConnectionOptionsDataType *ConOptionsHandle,
+ *          t_ConnectionOptionsDataType *ConWidgetsHandle,
  *          t_KVList &OptionsKeyValues);
  *
  * PARAMETERS:
- *    ConOptionsHandle [I] -- The handle that was allocated with
+ *    ConWidgetsHandle [I] -- The handle that was allocated with
  *                              IOS_AllocConnectionOptions()
  *    OptionsKeyValues [O] -- The options to set to the UI values.
  *
@@ -1830,17 +1932,17 @@ void IOS_FreeConnectionOptions(t_ConnectionOptionsDataType *ConOptionsHandle)
  * SEE ALSO:
  *    IOS_SetUI2ConnectionOptions(), IOS_AllocConnectionOptions()
  ******************************************************************************/
-void IOS_StoreConnectionOptions(t_ConnectionOptionsDataType *ConOptionsHandle,
+void IOS_StoreConnectionOptions(t_ConnectionOptionsDataType *ConWidgetsHandle,
         t_KVList &OptionsKeyValues)
 {
-    struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)ConOptionsHandle;
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)ConWidgetsHandle;
 
-    if(ConOptionData->drv->API.ConnectionOptionsWidgets_StoreUI!=NULL)
+    if(ConWidgetData->IOdrv->API.ConnectionOptionsWidgets_StoreUI!=NULL)
     {
-        ConOptionData->drv->API.ConnectionOptionsWidgets_StoreUI(
-                ConOptionData->ConOptions,
-                (t_WidgetSysHandle *)ConOptionData,
-                ConOptionData->DeviceUniqueID.c_str(),
+        ConWidgetData->IOdrv->API.ConnectionOptionsWidgets_StoreUI(
+                ConWidgetData->ConWidgets,
+                (t_WidgetSysHandle *)ConWidgetData,
+                ConWidgetData->DeviceUniqueID.c_str(),
                 PIS_ConvertKVList2PIKVList(OptionsKeyValues));
     }
 }
@@ -1851,11 +1953,11 @@ void IOS_StoreConnectionOptions(t_ConnectionOptionsDataType *ConOptionsHandle,
  *
  * SYNOPSIS:
  *    void IOS_SetUI2ConnectionOptions(
- *          t_ConnectionOptionsDataType *ConOptionsHandle,
+ *          t_ConnectionOptionsDataType *ConWidgetsHandle,
  *          t_KVList &OptionsKeyValues);
  *
  * PARAMETERS:
- *    ConOptionsHandle [I] -- The handle that was allocated with
+ *    ConWidgetsHandle [I] -- The handle that was allocated with
  *                              IOS_AllocConnectionOptions()
  *    OptionsKeyValues [I] -- The options to set to the UI values.
  *
@@ -1868,17 +1970,17 @@ void IOS_StoreConnectionOptions(t_ConnectionOptionsDataType *ConOptionsHandle,
  * SEE ALSO:
  *    IOS_StoreConnectionOptions()
  ******************************************************************************/
-void IOS_SetUI2ConnectionOptions(t_ConnectionOptionsDataType *ConOptionsHandle,
+void IOS_SetUI2ConnectionOptions(t_ConnectionOptionsDataType *ConWidgetsHandle,
         t_KVList &OptionsKeyValues)
 {
-    struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)ConOptionsHandle;
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)ConWidgetsHandle;
 
-    if(ConOptionData->drv->API.ConnectionOptionsWidgets_UpdateUI!=NULL)
+    if(ConWidgetData->IOdrv->API.ConnectionOptionsWidgets_UpdateUI!=NULL)
     {
-        ConOptionData->drv->API.ConnectionOptionsWidgets_UpdateUI(
-                ConOptionData->ConOptions,
-                (t_WidgetSysHandle *)ConOptionData,
-                ConOptionData->DeviceUniqueID.c_str(),
+        ConWidgetData->IOdrv->API.ConnectionOptionsWidgets_UpdateUI(
+                ConWidgetData->ConWidgets,
+                (t_WidgetSysHandle *)ConWidgetData,
+                ConWidgetData->DeviceUniqueID.c_str(),
                 PIS_ConvertKVList2PIKVList(OptionsKeyValues));
     }
 }
@@ -2999,30 +3101,30 @@ static struct PI_ComboBox *IOS_AddComboBox(t_WidgetSysHandle *WidgetHandle,
         void (*EventCB)(const struct PICBEvent *Event,void *UserData),
         void *UserData)
 {
-    struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)WidgetHandle;
-    struct COD_WidgetData *ExtraData;
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
     struct PI_ComboBox *NewComboBox;
 
     NewComboBox=NULL;
     ExtraData=NULL;
     try
     {
-        ExtraData=(struct COD_WidgetData *)
-                malloc(sizeof(struct COD_WidgetData));
-        memset(ExtraData,0x00,sizeof(struct COD_WidgetData));
+        ExtraData=(struct CWD_WidgetData *)
+                malloc(sizeof(struct CWD_WidgetData));
+        memset(ExtraData,0x00,sizeof(struct CWD_WidgetData));
         ExtraData->EventCB=EventCB;
         ExtraData->UserData=UserData;
-        ExtraData->ConOptionData=ConOptionData;
+        ExtraData->Owner=ConWidgetData;
 
-        NewComboBox=UIPI_AddComboBox(ConOptionData->ContainerWidget,
+        NewComboBox=UIPI_AddComboBox(ConWidgetData->ContainerWidget,
                 UserEditable,Label,IOS_ComboBoxEventHandler,ExtraData);
         if(NewComboBox==NULL)
             throw(0);
         ExtraData->ComboBox=NewComboBox;
 
         /* Link in */
-        ExtraData->Next=ConOptionData->WidgetExtraData;
-        ConOptionData->WidgetExtraData=ExtraData;
+        ExtraData->Next=ConWidgetData->WidgetExtraData;
+        ConWidgetData->WidgetExtraData=ExtraData;
     }
     catch(...)
     {
@@ -3061,20 +3163,20 @@ static struct PI_ComboBox *IOS_AddComboBox(t_WidgetSysHandle *WidgetHandle,
 static void IOS_FreeComboBox(t_WidgetSysHandle *WidgetHandle,
         struct PI_ComboBox *UICtrl)
 {
-    struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)WidgetHandle;
-    struct COD_WidgetData *ExtraData;
-    struct COD_WidgetData *PrevExtraData;
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct CWD_WidgetData *PrevExtraData;
 
     /* Find and unlink (and free) this combox box */
     PrevExtraData=NULL;
-    for(ExtraData=ConOptionData->WidgetExtraData;ExtraData!=NULL;
+    for(ExtraData=ConWidgetData->WidgetExtraData;ExtraData!=NULL;
             ExtraData=ExtraData->Next)
     {
         if(ExtraData->ComboBox==UICtrl)
         {
             /* Found it, unlink and free */
             if(PrevExtraData==NULL)
-                ConOptionData->WidgetExtraData=ExtraData->Next;
+                ConWidgetData->WidgetExtraData=ExtraData->Next;
             else
                 PrevExtraData->Next=ExtraData->Next;
 
@@ -3097,7 +3199,7 @@ static void IOS_FreeComboBox(t_WidgetSysHandle *WidgetHandle,
  *
  * PARAMETERS:
  *    Event [I] -- The event that got us here
- *    UserData [I] -- A handle to the 'struct COD_WidgetData'
+ *    UserData [I] -- A handle to the 'struct CWD_WidgetData'
  *                      for this combox box.
  *
  * FUNCTION:
@@ -3113,17 +3215,14 @@ static void IOS_FreeComboBox(t_WidgetSysHandle *WidgetHandle,
 static void IOS_ComboBoxEventHandler(const struct PICBEvent *Event,
         void *UserData)
 {
-    struct COD_WidgetData *ExtraData=(struct COD_WidgetData *)UserData;
+    struct CWD_WidgetData *ExtraData=(struct CWD_WidgetData *)UserData;
 
     /* Handle the user provided event handler */
     if(ExtraData->EventCB!=NULL)
         ExtraData->EventCB(Event,ExtraData->UserData);
 
-    if(ExtraData->ConOptionData->UIChangedCB!=NULL)
-    {
-        ExtraData->ConOptionData->UIChangedCB(ExtraData->ConOptionData->
-                UserData);
-    }
+    if(ExtraData->Owner->UIChangedCB!=NULL)
+        ExtraData->Owner->UIChangedCB(ExtraData->Owner->UserData);
 }
 
 /*******************************************************************************
@@ -3156,30 +3255,30 @@ struct PI_TextInput *IOS_AddTextInput(t_WidgetSysHandle *WidgetHandle,
         const char *Label,void (*EventCB)(const struct PICBEvent *Event,void *UserData),
         void *UserData)
 {
-    struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)WidgetHandle;
-    struct COD_WidgetData *ExtraData;
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
     struct PI_TextInput *NewTextInput;
 
     NewTextInput=NULL;
     ExtraData=NULL;
     try
     {
-        ExtraData=(struct COD_WidgetData *)
-                malloc(sizeof(struct COD_WidgetData));
-        memset(ExtraData,0x00,sizeof(struct COD_WidgetData));
+        ExtraData=(struct CWD_WidgetData *)
+                malloc(sizeof(struct CWD_WidgetData));
+        memset(ExtraData,0x00,sizeof(struct CWD_WidgetData));
         ExtraData->EventCB=EventCB;
         ExtraData->UserData=UserData;
-        ExtraData->ConOptionData=ConOptionData;
+        ExtraData->Owner=ConWidgetData;
 
-        NewTextInput=UIPI_AddTextInput(ConOptionData->ContainerWidget,
+        NewTextInput=UIPI_AddTextInput(ConWidgetData->ContainerWidget,
                 Label,IOS_TextInputEventHandler,ExtraData);
         if(NewTextInput==NULL)
             throw(0);
         ExtraData->TextInput=NewTextInput;
 
         /* Link in */
-        ExtraData->Next=ConOptionData->WidgetExtraData;
-        ConOptionData->WidgetExtraData=ExtraData;
+        ExtraData->Next=ConWidgetData->WidgetExtraData;
+        ConWidgetData->WidgetExtraData=ExtraData;
     }
     catch(...)
     {
@@ -3218,20 +3317,20 @@ struct PI_TextInput *IOS_AddTextInput(t_WidgetSysHandle *WidgetHandle,
 void IOS_FreeTextInput(t_WidgetSysHandle *WidgetHandle,
         struct PI_TextInput *UICtrl)
 {
-    struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)WidgetHandle;
-    struct COD_WidgetData *ExtraData;
-    struct COD_WidgetData *PrevExtraData;
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct CWD_WidgetData *PrevExtraData;
 
     /* Find and unlink (and free) this combox box */
     PrevExtraData=NULL;
-    for(ExtraData=ConOptionData->WidgetExtraData;ExtraData!=NULL;
+    for(ExtraData=ConWidgetData->WidgetExtraData;ExtraData!=NULL;
             ExtraData=ExtraData->Next)
     {
         if(ExtraData->TextInput==UICtrl)
         {
             /* Found it, unlink and free */
             if(PrevExtraData==NULL)
-                ConOptionData->WidgetExtraData=ExtraData->Next;
+                ConWidgetData->WidgetExtraData=ExtraData->Next;
             else
                 PrevExtraData->Next=ExtraData->Next;
 
@@ -3255,7 +3354,7 @@ void IOS_FreeTextInput(t_WidgetSysHandle *WidgetHandle,
  *
  * PARAMETERS:
  *    Event [I] -- The event that got us here
- *    UserData [I] -- A handle to the 'struct COD_WidgetData'
+ *    UserData [I] -- A handle to the 'struct CWD_WidgetData'
  *                      for this combox box.
  *
  * FUNCTION:
@@ -3271,17 +3370,14 @@ void IOS_FreeTextInput(t_WidgetSysHandle *WidgetHandle,
 static void IOS_TextInputEventHandler(const struct PICBEvent *Event,
         void *UserData)
 {
-    struct COD_WidgetData *ExtraData=(struct COD_WidgetData *)UserData;
+    struct CWD_WidgetData *ExtraData=(struct CWD_WidgetData *)UserData;
 
     /* Handle the user provided event handler */
     if(ExtraData->EventCB!=NULL)
         ExtraData->EventCB(Event,ExtraData->UserData);
 
-    if(ExtraData->ConOptionData->UIChangedCB!=NULL)
-    {
-        ExtraData->ConOptionData->UIChangedCB(ExtraData->ConOptionData->
-                UserData);
-    }
+    if(ExtraData->Owner->UIChangedCB!=NULL)
+        ExtraData->Owner->UIChangedCB(ExtraData->Owner->UserData);
 }
 
 /*******************************************************************************
@@ -3314,30 +3410,30 @@ struct PI_NumberInput *IOS_AddNumberInput(t_WidgetSysHandle *WidgetHandle,
         const char *Label,void (*EventCB)(const struct PICBEvent *Event,void *UserData),
         void *UserData)
 {
-    struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)WidgetHandle;
-    struct COD_WidgetData *ExtraData;
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
     struct PI_NumberInput *NewNumberInput;
 
     NewNumberInput=NULL;
     ExtraData=NULL;
     try
     {
-        ExtraData=(struct COD_WidgetData *)
-                malloc(sizeof(struct COD_WidgetData));
-        memset(ExtraData,0x00,sizeof(struct COD_WidgetData));
+        ExtraData=(struct CWD_WidgetData *)
+                malloc(sizeof(struct CWD_WidgetData));
+        memset(ExtraData,0x00,sizeof(struct CWD_WidgetData));
         ExtraData->EventCB=EventCB;
         ExtraData->UserData=UserData;
-        ExtraData->ConOptionData=ConOptionData;
+        ExtraData->Owner=ConWidgetData;
 
-        NewNumberInput=UIPI_AddNumberInput(ConOptionData->ContainerWidget,
+        NewNumberInput=UIPI_AddNumberInput(ConWidgetData->ContainerWidget,
                 Label,IOS_NumberInputEventHandler,ExtraData);
         if(NewNumberInput==NULL)
             throw(0);
         ExtraData->NumberInput=NewNumberInput;
 
         /* Link in */
-        ExtraData->Next=ConOptionData->WidgetExtraData;
-        ConOptionData->WidgetExtraData=ExtraData;
+        ExtraData->Next=ConWidgetData->WidgetExtraData;
+        ConWidgetData->WidgetExtraData=ExtraData;
     }
     catch(...)
     {
@@ -3376,20 +3472,20 @@ struct PI_NumberInput *IOS_AddNumberInput(t_WidgetSysHandle *WidgetHandle,
 void IOS_FreeNumberInput(t_WidgetSysHandle *WidgetHandle,
         struct PI_NumberInput *UICtrl)
 {
-    struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)WidgetHandle;
-    struct COD_WidgetData *ExtraData;
-    struct COD_WidgetData *PrevExtraData;
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct CWD_WidgetData *PrevExtraData;
 
     /* Find and unlink (and free) this combox box */
     PrevExtraData=NULL;
-    for(ExtraData=ConOptionData->WidgetExtraData;ExtraData!=NULL;
+    for(ExtraData=ConWidgetData->WidgetExtraData;ExtraData!=NULL;
             ExtraData=ExtraData->Next)
     {
         if(ExtraData->NumberInput==UICtrl)
         {
             /* Found it, unlink and free */
             if(PrevExtraData==NULL)
-                ConOptionData->WidgetExtraData=ExtraData->Next;
+                ConWidgetData->WidgetExtraData=ExtraData->Next;
             else
                 PrevExtraData->Next=ExtraData->Next;
 
@@ -3413,7 +3509,7 @@ void IOS_FreeNumberInput(t_WidgetSysHandle *WidgetHandle,
  *
  * PARAMETERS:
  *    Event [I] -- The event that got us here
- *    UserData [I] -- A handle to the 'struct COD_WidgetData'
+ *    UserData [I] -- A handle to the 'struct CWD_WidgetData'
  *                      for this combox box.
  *
  * FUNCTION:
@@ -3429,17 +3525,14 @@ void IOS_FreeNumberInput(t_WidgetSysHandle *WidgetHandle,
 static void IOS_NumberInputEventHandler(const struct PICBEvent *Event,
         void *UserData)
 {
-    struct COD_WidgetData *ExtraData=(struct COD_WidgetData *)UserData;
+    struct CWD_WidgetData *ExtraData=(struct CWD_WidgetData *)UserData;
 
     /* Handle the user provided event handler */
     if(ExtraData->EventCB!=NULL)
         ExtraData->EventCB(Event,ExtraData->UserData);
 
-    if(ExtraData->ConOptionData->UIChangedCB!=NULL)
-    {
-        ExtraData->ConOptionData->UIChangedCB(ExtraData->ConOptionData->
-                UserData);
-    }
+    if(ExtraData->Owner->UIChangedCB!=NULL)
+        ExtraData->Owner->UIChangedCB(ExtraData->Owner->UserData);
 }
 
 /*******************************************************************************
@@ -3472,30 +3565,30 @@ struct PI_DoubleInput *IOS_AddDoubleInput(t_WidgetSysHandle *WidgetHandle,
         const char *Label,void (*EventCB)(const struct PICBEvent *Event,void *UserData),
         void *UserData)
 {
-    struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)WidgetHandle;
-    struct COD_WidgetData *ExtraData;
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
     struct PI_DoubleInput *NewDoubleInput;
 
     NewDoubleInput=NULL;
     ExtraData=NULL;
     try
     {
-        ExtraData=(struct COD_WidgetData *)
-                malloc(sizeof(struct COD_WidgetData));
-        memset(ExtraData,0x00,sizeof(struct COD_WidgetData));
+        ExtraData=(struct CWD_WidgetData *)
+                malloc(sizeof(struct CWD_WidgetData));
+        memset(ExtraData,0x00,sizeof(struct CWD_WidgetData));
         ExtraData->EventCB=EventCB;
         ExtraData->UserData=UserData;
-        ExtraData->ConOptionData=ConOptionData;
+        ExtraData->Owner=ConWidgetData;
 
-        NewDoubleInput=UIPI_AddDoubleInput(ConOptionData->ContainerWidget,
+        NewDoubleInput=UIPI_AddDoubleInput(ConWidgetData->ContainerWidget,
                 Label,IOS_DoubleInputEventHandler,ExtraData);
         if(NewDoubleInput==NULL)
             throw(0);
         ExtraData->DoubleInput=NewDoubleInput;
 
         /* Link in */
-        ExtraData->Next=ConOptionData->WidgetExtraData;
-        ConOptionData->WidgetExtraData=ExtraData;
+        ExtraData->Next=ConWidgetData->WidgetExtraData;
+        ConWidgetData->WidgetExtraData=ExtraData;
     }
     catch(...)
     {
@@ -3519,7 +3612,7 @@ struct PI_DoubleInput *IOS_AddDoubleInput(t_WidgetSysHandle *WidgetHandle,
  * PARAMETERS:
  *    WidgetHandle [I] -- The handle to the widget data we allocated in
  *                        IOS_AllocConnectionOptions()
- *    UICtrl [I] -- The text input to free.
+ *    UICtrl [I] -- The input to free.
  *
  * FUNCTION:
  *    This function frees a text input allocated with the IO system version
@@ -3534,20 +3627,20 @@ struct PI_DoubleInput *IOS_AddDoubleInput(t_WidgetSysHandle *WidgetHandle,
 void IOS_FreeDoubleInput(t_WidgetSysHandle *WidgetHandle,
         struct PI_DoubleInput *UICtrl)
 {
-    struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)WidgetHandle;
-    struct COD_WidgetData *ExtraData;
-    struct COD_WidgetData *PrevExtraData;
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct CWD_WidgetData *PrevExtraData;
 
     /* Find and unlink (and free) this combox box */
     PrevExtraData=NULL;
-    for(ExtraData=ConOptionData->WidgetExtraData;ExtraData!=NULL;
+    for(ExtraData=ConWidgetData->WidgetExtraData;ExtraData!=NULL;
             ExtraData=ExtraData->Next)
     {
         if(ExtraData->DoubleInput==UICtrl)
         {
             /* Found it, unlink and free */
             if(PrevExtraData==NULL)
-                ConOptionData->WidgetExtraData=ExtraData->Next;
+                ConWidgetData->WidgetExtraData=ExtraData->Next;
             else
                 PrevExtraData->Next=ExtraData->Next;
 
@@ -3571,7 +3664,7 @@ void IOS_FreeDoubleInput(t_WidgetSysHandle *WidgetHandle,
  *
  * PARAMETERS:
  *    Event [I] -- The event that got us here
- *    UserData [I] -- A handle to the 'struct COD_WidgetData'
+ *    UserData [I] -- A handle to the 'struct CWD_WidgetData'
  *                      for this combox box.
  *
  * FUNCTION:
@@ -3587,17 +3680,443 @@ void IOS_FreeDoubleInput(t_WidgetSysHandle *WidgetHandle,
 static void IOS_DoubleInputEventHandler(const struct PICBEvent *Event,
         void *UserData)
 {
-    struct COD_WidgetData *ExtraData=(struct COD_WidgetData *)UserData;
+    struct CWD_WidgetData *ExtraData=(struct CWD_WidgetData *)UserData;
 
     /* Handle the user provided event handler */
     if(ExtraData->EventCB!=NULL)
         ExtraData->EventCB(Event,ExtraData->UserData);
 
-    if(ExtraData->ConOptionData->UIChangedCB!=NULL)
+    if(ExtraData->Owner->UIChangedCB!=NULL)
+        ExtraData->Owner->UIChangedCB(ExtraData->Owner->UserData);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_AddColumnViewInput
+ *
+ * SYNOPSIS:
+ *    struct PI_ColumnViewInput *IOS_AddColumnViewInput(t_WidgetSysHandle *WidgetHandle,
+ *          const char *Label,int Columns,const char *ColumnNames[],
+ *          void (*EventCB)(const struct PICVEvent *Event,void *UserData),
+ *          void *UserData)
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data we allocated in
+ *                        IOS_AllocConnectionOptions()
+ *    Label [I] -- The label to apply to this input
+ *    Columns [I] -- The number of columns this widget will have
+ *    ColumnNames [I] -- This is an array of pointers to the names of
+ *                       the columns.  This will be in a header at the top.
+ *    EventCB [I] -- A callback for events.
+ *    UserData [I] -- User data that will be sent to the 'EventCB'
+ *
+ * FUNCTION:
+ *    This is a version of add a number input for the IO system.  It connects
+ *    into the event system so we know when a number input has changed.
+ *
+ * RETURNS:
+ *    The number input handle.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+struct PI_ColumnViewInput *IOS_AddColumnViewInput(t_WidgetSysHandle *WidgetHandle,
+        const char *Label,int Columns,const char *ColumnNames[],
+        void (*EventCB)(const struct PICVEvent *Event,void *UserData),
+        void *UserData)
+{
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct PI_ColumnViewInput *NewColumnViewInput;
+
+    NewColumnViewInput=NULL;
+    ExtraData=NULL;
+    try
     {
-        ExtraData->ConOptionData->UIChangedCB(ExtraData->ConOptionData->
-                UserData);
+        ExtraData=(struct CWD_WidgetData *)
+                malloc(sizeof(struct CWD_WidgetData));
+        memset(ExtraData,0x00,sizeof(struct CWD_WidgetData));
+        ExtraData->ColumnViewEventCB=EventCB;
+        ExtraData->UserData=UserData;
+        ExtraData->Owner=ConWidgetData;
+
+        NewColumnViewInput=UIPI_AddColumnViewInput(ConWidgetData->ContainerWidget,
+                Label,Columns,ColumnNames,IOS_ColumnViewInputEventHandler,
+                ExtraData);
+        if(NewColumnViewInput==NULL)
+            throw(0);
+        ExtraData->ColumnViewInput=NewColumnViewInput;
+
+        /* Link in */
+        ExtraData->Next=ConWidgetData->WidgetExtraData;
+        ConWidgetData->WidgetExtraData=ExtraData;
     }
+    catch(...)
+    {
+        if(NewColumnViewInput!=NULL)
+            UIPI_FreeColumnViewInput(NewColumnViewInput);
+        if(ExtraData==NULL)
+            free(ExtraData);
+        NewColumnViewInput=NULL;
+    }
+    return NewColumnViewInput;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_FreeColumnViewInput
+ *
+ * SYNOPSIS:
+ *    static void IOS_FreeColumnViewInput(t_WidgetSysHandle *WidgetHandle,
+ *          struct PI_ColumnViewInput *UICtrl);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data we allocated in
+ *                        IOS_AllocConnectionOptions()
+ *    UICtrl [I] -- The input to free.
+ *
+ * FUNCTION:
+ *    This function frees a text input allocated with the IO system version
+ *    of add text input.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void IOS_FreeColumnViewInput(t_WidgetSysHandle *WidgetHandle,
+        struct PI_ColumnViewInput *UICtrl)
+{
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct CWD_WidgetData *PrevExtraData;
+
+    /* Find and unlink (and free) this combox box */
+    PrevExtraData=NULL;
+    for(ExtraData=ConWidgetData->WidgetExtraData;ExtraData!=NULL;
+            ExtraData=ExtraData->Next)
+    {
+        if(ExtraData->ColumnViewInput==UICtrl)
+        {
+            /* Found it, unlink and free */
+            if(PrevExtraData==NULL)
+                ConWidgetData->WidgetExtraData=ExtraData->Next;
+            else
+                PrevExtraData->Next=ExtraData->Next;
+
+            free(ExtraData);
+
+            break;
+        }
+        PrevExtraData=ExtraData;
+    }
+
+    UIPI_FreeColumnViewInput(UICtrl);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_ColumnViewInputEventHandler
+ *
+ * SYNOPSIS:
+ *    static void IOS_ColumnViewInputEventHandler(const struct PICVEvent *Event,
+ *              void *UserData);
+ *
+ * PARAMETERS:
+ *    Event [I] -- The event that got us here
+ *    UserData [I] -- A handle to the 'struct CWD_WidgetData'
+ *                      for this combox box.
+ *
+ * FUNCTION:
+ *    This function is called when there is an event from the UI.  We use
+ *    it to flag the upper level that something has changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void IOS_ColumnViewInputEventHandler(const struct PICVEvent *Event,
+        void *UserData)
+{
+    struct CWD_WidgetData *ExtraData=(struct CWD_WidgetData *)UserData;
+
+    /* Handle the user provided event handler */
+    if(ExtraData->ColumnViewEventCB!=NULL)
+        ExtraData->ColumnViewEventCB(Event,ExtraData->UserData);
+
+    if(ExtraData->Owner->UIChangedCB!=NULL)
+        ExtraData->Owner->UIChangedCB(ExtraData->Owner->UserData);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_AddButtonInput
+ *
+ * SYNOPSIS:
+ *    struct PI_ButtonInput *IOS_AddButtonInput(t_WidgetSysHandle *WidgetHandle,
+ *          const char *Label,
+ *          void (*EventCB)(const struct PIButtonEvent *Event,void *UserData),
+ *          void *UserData)
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data we allocated in
+ *                        IOS_AllocConnectionOptions()
+ *    Label [I] -- The label to apply to this input
+ *    EventCB [I] -- A callback for events.
+ *    UserData [I] -- User data that will be sent to the 'EventCB'
+ *
+ * FUNCTION:
+ *    This is a version of add a button input for the IO system.  It connects
+ *    into the event system so we know when a button clicked.
+ *
+ * RETURNS:
+ *    The button input handle.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+struct PI_ButtonInput *IOS_AddButtonInput(t_WidgetSysHandle *WidgetHandle,
+        const char *Label,
+        void (*EventCB)(const struct PIButtonEvent *Event,void *UserData),
+        void *UserData)
+{
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct PI_ButtonInput *NewButtonInput;
+
+    NewButtonInput=NULL;
+    ExtraData=NULL;
+    try
+    {
+        ExtraData=(struct CWD_WidgetData *)
+                malloc(sizeof(struct CWD_WidgetData));
+        memset(ExtraData,0x00,sizeof(struct CWD_WidgetData));
+        ExtraData->ButtonEventCB=EventCB;
+        ExtraData->UserData=UserData;
+        ExtraData->Owner=ConWidgetData;
+
+        NewButtonInput=UIPI_AddButtonInput(ConWidgetData->ContainerWidget,
+                Label,IOS_ButtonInputEventHandler,ExtraData);
+        if(NewButtonInput==NULL)
+            throw(0);
+        ExtraData->ButtonInput=NewButtonInput;
+
+        /* Link in */
+        ExtraData->Next=ConWidgetData->WidgetExtraData;
+        ConWidgetData->WidgetExtraData=ExtraData;
+    }
+    catch(...)
+    {
+        if(NewButtonInput!=NULL)
+            UIPI_FreeButtonInput(NewButtonInput);
+        if(ExtraData==NULL)
+            free(ExtraData);
+        NewButtonInput=NULL;
+    }
+    return NewButtonInput;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_FreeButtonInput
+ *
+ * SYNOPSIS:
+ *    static void IOS_FreeButtonInput(t_WidgetSysHandle *WidgetHandle,
+ *          struct PI_ButtonInput *UICtrl);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data we allocated in
+ *                        IOS_AllocConnectionOptions()
+ *    UICtrl [I] -- The input to free.
+ *
+ * FUNCTION:
+ *    This function frees a text input allocated with the IO system version
+ *    of add text input.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void IOS_FreeButtonInput(t_WidgetSysHandle *WidgetHandle,
+        struct PI_ButtonInput *UICtrl)
+{
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct CWD_WidgetData *PrevExtraData;
+
+    /* Find and unlink (and free) this combox box */
+    PrevExtraData=NULL;
+    for(ExtraData=ConWidgetData->WidgetExtraData;ExtraData!=NULL;
+            ExtraData=ExtraData->Next)
+    {
+        if(ExtraData->ButtonInput==UICtrl)
+        {
+            /* Found it, unlink and free */
+            if(PrevExtraData==NULL)
+                ConWidgetData->WidgetExtraData=ExtraData->Next;
+            else
+                PrevExtraData->Next=ExtraData->Next;
+
+            free(ExtraData);
+
+            break;
+        }
+        PrevExtraData=ExtraData;
+    }
+
+    UIPI_FreeButtonInput(UICtrl);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_ButtonInputEventHandler
+ *
+ * SYNOPSIS:
+ *    static void IOS_ButtonInputEventHandler(const struct PIButtonEvent *Event,
+ *              void *UserData);
+ *
+ * PARAMETERS:
+ *    Event [I] -- The event that got us here
+ *    UserData [I] -- A handle to the 'struct CWD_WidgetData'
+ *                      for this combox box.
+ *
+ * FUNCTION:
+ *    This function is called when there is an event from the UI.  We use
+ *    it to flag the upper level that something has changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void IOS_ButtonInputEventHandler(const struct PIButtonEvent *Event,
+        void *UserData)
+{
+    struct CWD_WidgetData *ExtraData=(struct CWD_WidgetData *)UserData;
+
+    /* Handle the user provided event handler */
+    if(ExtraData->ButtonEventCB!=NULL)
+        ExtraData->ButtonEventCB(Event,ExtraData->UserData);
+
+    if(ExtraData->Owner->UIChangedCB!=NULL)
+        ExtraData->Owner->UIChangedCB(ExtraData->Owner->UserData);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_AddIndicator
+ *
+ * SYNOPSIS:
+ *    struct PI_Indicator *IOS_AddIndicator(t_WidgetSysHandle *WidgetHandle,
+ *          const char *Label)
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data we allocated in
+ *                        IOS_AllocConnectionOptions()
+ *    Label [I] -- The label to apply to this input
+ *
+ * FUNCTION:
+ *    This is a version of add an indicator for the IO system.
+ *
+ * RETURNS:
+ *    The indicator handle.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+struct PI_Indicator *IOS_AddIndicator(t_WidgetSysHandle *WidgetHandle,
+        const char *Label)
+{
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct PI_Indicator *NewIndicator;
+
+    NewIndicator=NULL;
+    ExtraData=NULL;
+    try
+    {
+        ExtraData=(struct CWD_WidgetData *)
+                malloc(sizeof(struct CWD_WidgetData));
+        memset(ExtraData,0x00,sizeof(struct CWD_WidgetData));
+        ExtraData->Owner=ConWidgetData;
+
+        NewIndicator=UIPI_AddIndicator(ConWidgetData->ContainerWidget,Label);
+        if(NewIndicator==NULL)
+            throw(0);
+        ExtraData->Indicator=NewIndicator;
+
+        /* Link in */
+        ExtraData->Next=ConWidgetData->WidgetExtraData;
+        ConWidgetData->WidgetExtraData=ExtraData;
+    }
+    catch(...)
+    {
+        if(NewIndicator!=NULL)
+            UIPI_FreeIndicator(NewIndicator);
+        if(ExtraData==NULL)
+            free(ExtraData);
+        NewIndicator=NULL;
+    }
+    return NewIndicator;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_FreeIndicator
+ *
+ * SYNOPSIS:
+ *    static void IOS_FreeIndicator(t_WidgetSysHandle *WidgetHandle,
+ *          struct PI_Indicator *UICtrl);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data we allocated in
+ *                        IOS_AllocConnectionOptions()
+ *    UICtrl [I] -- The input to free.
+ *
+ * FUNCTION:
+ *    This function frees an indicator allocated with the IO system version
+ *    of add indicator.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void IOS_FreeIndicator(t_WidgetSysHandle *WidgetHandle,
+        struct PI_Indicator *UICtrl)
+{
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct CWD_WidgetData *PrevExtraData;
+
+    /* Find and unlink (and free) this combox box */
+    PrevExtraData=NULL;
+    for(ExtraData=ConWidgetData->WidgetExtraData;ExtraData!=NULL;
+            ExtraData=ExtraData->Next)
+    {
+        if(ExtraData->Indicator==UICtrl)
+        {
+            /* Found it, unlink and free */
+            if(PrevExtraData==NULL)
+                ConWidgetData->WidgetExtraData=ExtraData->Next;
+            else
+                PrevExtraData->Next=ExtraData->Next;
+
+            free(ExtraData);
+
+            break;
+        }
+        PrevExtraData=ExtraData;
+    }
+
+    UIPI_FreeIndicator(UICtrl);
 }
 
 /*******************************************************************************
@@ -3632,30 +4151,30 @@ static struct PI_Checkbox *IOS_AddCheckboxInput(t_WidgetSysHandle *WidgetHandle,
         void (*EventCB)(const struct PICheckboxEvent *Event,void *UserData),
         void *UserData)
 {
-    struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)WidgetHandle;
-    struct COD_WidgetData *ExtraData;
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
     struct PI_Checkbox *NewCheckboxInput;
 
     NewCheckboxInput=NULL;
     ExtraData=NULL;
     try
     {
-        ExtraData=(struct COD_WidgetData *)
-                malloc(sizeof(struct COD_WidgetData));
-        memset(ExtraData,0x00,sizeof(struct COD_WidgetData));
+        ExtraData=(struct CWD_WidgetData *)
+                malloc(sizeof(struct CWD_WidgetData));
+        memset(ExtraData,0x00,sizeof(struct CWD_WidgetData));
         ExtraData->CheckboxEventCB=EventCB;
         ExtraData->UserData=UserData;
-        ExtraData->ConOptionData=ConOptionData;
+        ExtraData->Owner=ConWidgetData;
 
-        NewCheckboxInput=UIPI_AddCheckbox(ConOptionData->ContainerWidget,
+        NewCheckboxInput=UIPI_AddCheckbox(ConWidgetData->ContainerWidget,
                 Label,IOS_CheckboxInputEventHandler,ExtraData);
         if(NewCheckboxInput==NULL)
             throw(0);
         ExtraData->CheckboxInput=NewCheckboxInput;
 
         /* Link in */
-        ExtraData->Next=ConOptionData->WidgetExtraData;
-        ConOptionData->WidgetExtraData=ExtraData;
+        ExtraData->Next=ConWidgetData->WidgetExtraData;
+        ConWidgetData->WidgetExtraData=ExtraData;
     }
     catch(...)
     {
@@ -3694,20 +4213,20 @@ static struct PI_Checkbox *IOS_AddCheckboxInput(t_WidgetSysHandle *WidgetHandle,
 static void IOS_FreeCheckboxInput(t_WidgetSysHandle *WidgetHandle,
         struct PI_Checkbox *UICtrl)
 {
-    struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)WidgetHandle;
-    struct COD_WidgetData *ExtraData;
-    struct COD_WidgetData *PrevExtraData;
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct CWD_WidgetData *PrevExtraData;
 
     /* Find and unlink (and free) this combox box */
     PrevExtraData=NULL;
-    for(ExtraData=ConOptionData->WidgetExtraData;ExtraData!=NULL;
+    for(ExtraData=ConWidgetData->WidgetExtraData;ExtraData!=NULL;
             ExtraData=ExtraData->Next)
     {
         if(ExtraData->CheckboxInput==UICtrl)
         {
             /* Found it, unlink and free */
             if(PrevExtraData==NULL)
-                ConOptionData->WidgetExtraData=ExtraData->Next;
+                ConWidgetData->WidgetExtraData=ExtraData->Next;
             else
                 PrevExtraData->Next=ExtraData->Next;
 
@@ -3731,7 +4250,7 @@ static void IOS_FreeCheckboxInput(t_WidgetSysHandle *WidgetHandle,
  *
  * PARAMETERS:
  *    Event [I] -- The event that got us here
- *    UserData [I] -- A handle to the 'struct COD_WidgetData'
+ *    UserData [I] -- A handle to the 'struct CWD_WidgetData'
  *                      for this combox box.
  *
  * FUNCTION:
@@ -3747,17 +4266,14 @@ static void IOS_FreeCheckboxInput(t_WidgetSysHandle *WidgetHandle,
 static void IOS_CheckboxInputEventHandler(const struct PICheckboxEvent *Event,
         void *UserData)
 {
-    struct COD_WidgetData *ExtraData=(struct COD_WidgetData *)UserData;
+    struct CWD_WidgetData *ExtraData=(struct CWD_WidgetData *)UserData;
 
     /* Handle the user provided event handler */
     if(ExtraData->CheckboxEventCB!=NULL)
         ExtraData->CheckboxEventCB(Event,ExtraData->UserData);
 
-    if(ExtraData->ConOptionData->UIChangedCB!=NULL)
-    {
-        ExtraData->ConOptionData->UIChangedCB(ExtraData->ConOptionData->
-                UserData);
-    }
+    if(ExtraData->Owner->UIChangedCB!=NULL)
+        ExtraData->Owner->UIChangedCB(ExtraData->Owner->UserData);
 }
 
 /*******************************************************************************
@@ -3765,7 +4281,7 @@ static void IOS_CheckboxInputEventHandler(const struct PICheckboxEvent *Event,
  *    IOS_AllocRadioBttnGroup
  *
  * SYNOPSIS:
- *    static t_PI_RadioBttnGroup *IOS_AllocRadioBttnGroup(
+ *    static struct PI_RadioBttnGroup *IOS_AllocRadioBttnGroup(
  *          t_WidgetSysHandle *WidgetHandle,const char *Label);
  *
  * PARAMETERS:
@@ -3783,22 +4299,38 @@ static void IOS_CheckboxInputEventHandler(const struct PICheckboxEvent *Event,
  * SEE ALSO:
  *    
  ******************************************************************************/
-static t_PI_RadioBttnGroup *IOS_AllocRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,
+static struct PI_RadioBttnGroup *IOS_AllocRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,
         const char *Label)
 {
-    struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)WidgetHandle;
-    t_PI_RadioBttnGroup *NewRadioBttnGroup;
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct PI_RadioBttnGroup *NewRadioBttnGroup;
 
     NewRadioBttnGroup=NULL;
+    ExtraData=NULL;
     try
     {
+        ExtraData=(struct CWD_WidgetData *)
+                malloc(sizeof(struct CWD_WidgetData));
+        memset(ExtraData,0x00,sizeof(struct CWD_WidgetData));
+        ExtraData->Owner=ConWidgetData;
+
         NewRadioBttnGroup=
-                UIPI_AllocRadioBttnGroup(ConOptionData->ContainerWidget,Label);
+                UIPI_AllocRadioBttnGroup(ConWidgetData->ContainerWidget,Label);
         if(NewRadioBttnGroup==NULL)
             throw(0);
+        ExtraData->RadioBttnGroup=NewRadioBttnGroup;
+
+        /* Link in */
+        ExtraData->Next=ConWidgetData->WidgetExtraData;
+        ConWidgetData->WidgetExtraData=ExtraData;
     }
     catch(...)
     {
+        if(NewRadioBttnGroup!=NULL)
+            UIPI_FreeRadioBttnGroup(NewRadioBttnGroup);
+        if(ExtraData==NULL)
+            free(ExtraData);
         NewRadioBttnGroup=NULL;
     }
     return NewRadioBttnGroup;
@@ -3810,7 +4342,7 @@ static t_PI_RadioBttnGroup *IOS_AllocRadioBttnGroup(t_WidgetSysHandle *WidgetHan
  *
  * SYNOPSIS:
  *    static void IOS_FreeRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,
- *              t_PI_RadioBttnGroup *UICtrl);
+ *              struct PI_RadioBttnGroup *UICtrl);
  *
  * PARAMETERS:
  *    WidgetHandle [I] -- The handle to the widget data we allocated in
@@ -3827,8 +4359,32 @@ static t_PI_RadioBttnGroup *IOS_AllocRadioBttnGroup(t_WidgetSysHandle *WidgetHan
  *    
  ******************************************************************************/
 static void IOS_FreeRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,
-        t_PI_RadioBttnGroup *UICtrl)
+        struct PI_RadioBttnGroup *UICtrl)
 {
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct CWD_WidgetData *PrevExtraData;
+
+    /* Find and unlink (and free) this combox box */
+    PrevExtraData=NULL;
+    for(ExtraData=ConWidgetData->WidgetExtraData;ExtraData!=NULL;
+            ExtraData=ExtraData->Next)
+    {
+        if(ExtraData->RadioBttnGroup==UICtrl)
+        {
+            /* Found it, unlink and free */
+            if(PrevExtraData==NULL)
+                ConWidgetData->WidgetExtraData=ExtraData->Next;
+            else
+                PrevExtraData->Next=ExtraData->Next;
+
+            free(ExtraData);
+
+            break;
+        }
+        PrevExtraData=ExtraData;
+    }
+
     UIPI_FreeRadioBttnGroup(UICtrl);
 }
 
@@ -3838,7 +4394,7 @@ static void IOS_FreeRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,
  *
  * SYNOPSIS:
  *    struct PI_RadioBttn *IOS_AddRadioBttnInput(t_WidgetSysHandle *WidgetHandle,
- *          t_PI_RadioBttnGroup *RBGroup,const char *Label,
+ *          struct PI_RadioBttnGroup *RBGroup,const char *Label,
  *          void (*EventCB)(const struct PIRBEvent *Event,void *UserData),
  *          void *UserData)
  *
@@ -3861,24 +4417,24 @@ static void IOS_FreeRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,
  *    
  ******************************************************************************/
 static struct PI_RadioBttn *IOS_AddRadioBttnInput(t_WidgetSysHandle *WidgetHandle,
-        t_PI_RadioBttnGroup *RBGroup,const char *Label,
+        struct PI_RadioBttnGroup *RBGroup,const char *Label,
         void (*EventCB)(const struct PIRBEvent *Event,void *UserData),
         void *UserData)
 {
-    struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)WidgetHandle;
-    struct COD_WidgetData *ExtraData;
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
     struct PI_RadioBttn *NewRadioBttnInput;
 
     NewRadioBttnInput=NULL;
     ExtraData=NULL;
     try
     {
-        ExtraData=(struct COD_WidgetData *)
-                malloc(sizeof(struct COD_WidgetData));
-        memset(ExtraData,0x00,sizeof(struct COD_WidgetData));
+        ExtraData=(struct CWD_WidgetData *)
+                malloc(sizeof(struct CWD_WidgetData));
+        memset(ExtraData,0x00,sizeof(struct CWD_WidgetData));
         ExtraData->RadioBttnEventCB=EventCB;
         ExtraData->UserData=UserData;
-        ExtraData->ConOptionData=ConOptionData;
+        ExtraData->Owner=ConWidgetData;
 
         NewRadioBttnInput=UIPI_AddRadioBttn(RBGroup,Label,
                 IOS_RadioBttnInputEventHandler,ExtraData);
@@ -3887,8 +4443,8 @@ static struct PI_RadioBttn *IOS_AddRadioBttnInput(t_WidgetSysHandle *WidgetHandl
         ExtraData->RadioBttnInput=NewRadioBttnInput;
 
         /* Link in */
-        ExtraData->Next=ConOptionData->WidgetExtraData;
-        ConOptionData->WidgetExtraData=ExtraData;
+        ExtraData->Next=ConWidgetData->WidgetExtraData;
+        ConWidgetData->WidgetExtraData=ExtraData;
     }
     catch(...)
     {
@@ -3927,20 +4483,20 @@ static struct PI_RadioBttn *IOS_AddRadioBttnInput(t_WidgetSysHandle *WidgetHandl
 static void IOS_FreeRadioBttnInput(t_WidgetSysHandle *WidgetHandle,
         struct PI_RadioBttn *UICtrl)
 {
-    struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)WidgetHandle;
-    struct COD_WidgetData *ExtraData;
-    struct COD_WidgetData *PrevExtraData;
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct CWD_WidgetData *PrevExtraData;
 
     /* Find and unlink (and free) this combox box */
     PrevExtraData=NULL;
-    for(ExtraData=ConOptionData->WidgetExtraData;ExtraData!=NULL;
+    for(ExtraData=ConWidgetData->WidgetExtraData;ExtraData!=NULL;
             ExtraData=ExtraData->Next)
     {
         if(ExtraData->RadioBttnInput==UICtrl)
         {
             /* Found it, unlink and free */
             if(PrevExtraData==NULL)
-                ConOptionData->WidgetExtraData=ExtraData->Next;
+                ConWidgetData->WidgetExtraData=ExtraData->Next;
             else
                 PrevExtraData->Next=ExtraData->Next;
 
@@ -3964,7 +4520,7 @@ static void IOS_FreeRadioBttnInput(t_WidgetSysHandle *WidgetHandle,
  *
  * PARAMETERS:
  *    Event [I] -- The event that got us here
- *    UserData [I] -- A handle to the 'struct COD_WidgetData'
+ *    UserData [I] -- A handle to the 'struct CWD_WidgetData'
  *                      for this combox box.
  *
  * FUNCTION:
@@ -3980,16 +4536,190 @@ static void IOS_FreeRadioBttnInput(t_WidgetSysHandle *WidgetHandle,
 static void IOS_RadioBttnInputEventHandler(const struct PIRBEvent *Event,
         void *UserData)
 {
-    struct COD_WidgetData *ExtraData=(struct COD_WidgetData *)UserData;
+    struct CWD_WidgetData *ExtraData=(struct CWD_WidgetData *)UserData;
 
     /* Handle the user provided event handler */
     if(ExtraData->RadioBttnEventCB!=NULL)
         ExtraData->RadioBttnEventCB(Event,ExtraData->UserData);
 
-    if(ExtraData->ConOptionData->UIChangedCB!=NULL)
+    if(ExtraData->Owner->UIChangedCB!=NULL)
+        ExtraData->Owner->UIChangedCB(ExtraData->Owner->UserData);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_AllocConnectionAuxCtrls
+ *
+ * SYNOPSIS:
+ *    t_ConnectionAuxCtrlsDataType *IOS_AllocConnectionAuxCtrls(
+ *              t_IOSystemHandle *Handle,t_UIContainerCtrl *ContainerWidget);
+ *
+ * PARAMETERS:
+ *    Handle [I] -- The IO handle for the connection to work with
+ *    ContainerWidget [I] -- The widget to add the controls to
+ *
+ * FUNCTION:
+ *    This function adds controls for adjusting the aux controls for a
+ *    connection to the UI.
+ *
+ * RETURNS:
+ *    The handle to the allocated aux control data or NULL if there was an
+ *    error.
+ *
+ * SEE ALSO:
+ *    IOS_FreeConnectionAuxCtrls()
+ ******************************************************************************/
+t_ConnectionAuxCtrlsDataType *IOS_AllocConnectionAuxCtrls(
+        t_IOSystemHandle *Handle,t_UIContainerCtrl *ContainerWidget)
+{
+    struct IOSystemDrvHandle *DrvHandle=(struct IOSystemDrvHandle *)Handle;
+    t_ConnectionWidgetsType *ConAuxCtrlWidgets;
+    struct ConnectionWidgetData *ConAuxCtrlData;
+    string SearchDriverName;
+    string DeviceUniqueID;
+    i_IODriverListType drv;
+
+    ConAuxCtrlWidgets=NULL;
+    try
     {
-        ExtraData->ConOptionData->UIChangedCB(ExtraData->ConOptionData->
-                UserData);
+        ConAuxCtrlData=new struct ConnectionWidgetData;
+        ConAuxCtrlData->ContainerWidget=ContainerWidget;
+        ConAuxCtrlData->WidgetExtraData=NULL;
+        ConAuxCtrlData->UIChangedCB=NULL;
+        ConAuxCtrlData->UserData=NULL;
+        ConAuxCtrlData->IOdrv=DrvHandle->IOdrv;
+        ConAuxCtrlData->DrvHandle=DrvHandle;
+        ConAuxCtrlData->DeviceUniqueID=DeviceUniqueID;
+
+        if(ConAuxCtrlData->IOdrv->API.ConnectionAuxCtrlWidgets_AllocWidgets!=NULL)
+        {
+            ConAuxCtrlWidgets=
+                    ConAuxCtrlData->IOdrv->API.ConnectionAuxCtrlWidgets_AllocWidgets(
+                    (t_DriverIOHandleType *)DrvHandle->DriverData,
+                    (t_WidgetSysHandle *)ConAuxCtrlData);
+            if(ConAuxCtrlWidgets==NULL)
+                throw(false);
+        }
+        ConAuxCtrlData->ConWidgets=ConAuxCtrlWidgets;
+    }
+    catch(...)
+    {
+        if(ConAuxCtrlWidgets!=NULL)
+        {
+            if(ConAuxCtrlData->IOdrv->API.ConnectionAuxCtrlWidgets_FreeWidgets!=NULL)
+            {
+                ConAuxCtrlData->IOdrv->API.ConnectionAuxCtrlWidgets_FreeWidgets(
+                        (t_DriverIOHandleType *)DrvHandle->DriverData,
+                        (t_WidgetSysHandle *)ConAuxCtrlData,
+                        ConAuxCtrlWidgets);
+            }
+            ConAuxCtrlWidgets=NULL;
+        }
+        delete ConAuxCtrlData;
+        UIAsk("Error","Failed to add options to UI.",e_AskBox_Error,
+                e_AskBttns_Ok);
+        return NULL;
+    }
+
+    return (t_ConnectionAuxCtrlsDataType *)ConAuxCtrlData;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_FreeConnectionAuxCtrls
+ *
+ * SYNOPSIS:
+ *    void IOS_FreeConnectionAuxCtrls(
+ *          t_ConnectionAuxCtrlsDataType *ConAuxCtrlsHandle);
+ *
+ * PARAMETERS:
+ *    ConAuxCtrlsHandle [I] -- The aux control handle to work on
+ *
+ * FUNCTION:
+ *    This function removes the options that were added with
+ *    IOS_AllocConnectionAuxCtrls().
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    IOS_AllocConnectionAuxCtrls()
+ ******************************************************************************/
+void IOS_FreeConnectionAuxCtrls(t_ConnectionAuxCtrlsDataType *ConAuxCtrlsHandle)
+{
+    struct ConnectionWidgetData *ConAuxCtrlData=(struct ConnectionWidgetData *)ConAuxCtrlsHandle;
+
+    /* Ok we need to find this connection */
+    try
+    {
+        if(ConAuxCtrlData->IOdrv->API.ConnectionAuxCtrlWidgets_FreeWidgets!=NULL)
+        {
+            ConAuxCtrlData->IOdrv->API.ConnectionAuxCtrlWidgets_FreeWidgets(
+                    (t_DriverIOHandleType *)ConAuxCtrlData->DrvHandle->DriverData,
+                    (t_WidgetSysHandle *)ConAuxCtrlData,
+                    ConAuxCtrlData->ConWidgets);
+        }
+
+        delete ConAuxCtrlData;
+    }
+    catch(...)
+    {
+        string ErrorMsg;
+        ErrorMsg="Failed to free options from UI.";
+        UIAsk("Error",ErrorMsg,e_AskBox_Error,e_AskBttns_Ok);
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    IOS_ConnectionAuxCtrlsShow
+ *
+ * SYNOPSIS:
+ *    void IOS_ConnectionAuxCtrlsShow(
+ *          t_ConnectionAuxCtrlsDataType *ConAuxCtrlsHandle,bool Show);
+ *
+ * PARAMETERS:
+ *    ConAuxCtrlsHandle [I] -- The aux control handle to work on
+ *
+ * FUNCTION:
+ *    This function shows/hides all the controls in this handle.  It does
+ *    not delete / deactivate then just show / hide them.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void IOS_ConnectionAuxCtrlsShow(t_ConnectionAuxCtrlsDataType *ConAuxCtrlsHandle,
+        bool Show)
+{
+    struct ConnectionWidgetData *ConAuxCtrlData=(struct ConnectionWidgetData *)ConAuxCtrlsHandle;
+    struct CWD_WidgetData *ExtraData;
+
+    /* Show/hide all the widgets */
+    for(ExtraData=ConAuxCtrlData->WidgetExtraData;ExtraData!=NULL;
+            ExtraData=ExtraData->Next)
+    {
+        if(ExtraData->ComboBox!=NULL)
+            UIPI_ShowComboBox(ExtraData->ComboBox,Show);
+        if(ExtraData->TextInput!=NULL)
+            UIPI_ShowTextInput(ExtraData->TextInput,Show);
+        if(ExtraData->NumberInput!=NULL)
+            UIPI_ShowNumberInput(ExtraData->NumberInput,Show);
+        if(ExtraData->DoubleInput!=NULL)
+            UIPI_ShowDoubleInput(ExtraData->DoubleInput,Show);
+        if(ExtraData->CheckboxInput!=NULL)
+            UIPI_ShowCheckboxInput(ExtraData->CheckboxInput,Show);
+        if(ExtraData->RadioBttnInput!=NULL)
+            UIPI_ShowRadioBttnInput(ExtraData->RadioBttnInput,Show);
+        if(ExtraData->RadioBttnGroup!=NULL)
+            UIPI_ShowRadioBttnGroup(ExtraData->RadioBttnGroup,Show);
+        if(ExtraData->ColumnViewInput!=NULL)
+            UIPI_ShowColumnViewInput(ExtraData->ColumnViewInput,Show);
+        if(ExtraData->ButtonInput!=NULL)
+            UIPI_ShowButtonInput(ExtraData->ButtonInput,Show);
+        if(ExtraData->Indicator!=NULL)
+            UIPI_ShowIndicator(ExtraData->Indicator,Show);
+    }
+}

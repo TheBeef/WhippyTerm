@@ -370,6 +370,8 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void ToggleConnectedState(void);
         void SendResizeEvent2Siblings(int Width,int Height);
         class TheMainWindow *GetMainWindowHandle(void);
+        t_IOSystemHandle *GetIOHandle(void);
+
         void GiveFocus(void);
         void CopySelectionToClipboard(void);
         void PasteFromClipboard(void);

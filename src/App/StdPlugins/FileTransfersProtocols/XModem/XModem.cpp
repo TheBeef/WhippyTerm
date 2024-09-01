@@ -153,7 +153,7 @@ struct XModem_Widgets
 {
     t_WidgetSysHandle *WidgetHandle;
     struct PI_ComboBox *Padding;
-    t_PI_RadioBttnGroup *ModeGroup;
+    struct PI_RadioBttnGroup *ModeGroup;
     struct PI_RadioBttn *ModeBttnBasic;
     struct PI_RadioBttn *ModeBttnCRC;
     struct PI_RadioBttn *ModeBttn1K;

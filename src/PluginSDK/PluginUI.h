@@ -57,6 +57,15 @@ typedef struct PIUINumberInputCtrl t_PIUINumberInputCtrl;
 struct PIUIDoubleInputCtrl {int PrivateData;};
 typedef struct PIUIDoubleInputCtrl t_PIUIDoubleInputCtrl;
 
+struct PIUIColumnViewInputCtrl {int PrivateData;};
+typedef struct PIUIColumnViewInputCtrl t_PIUIColumnViewInputCtrl;
+
+struct PIUIButtonInputCtrl {int PrivateData;};
+typedef struct PIUIButtonInputCtrl t_PIUIButtonInputCtrl;
+
+struct PIUIIndicatorCtrl {int PrivateData;};
+typedef struct PIUIIndicatorCtrl t_PIUIIndicatorCtrl;
+
 struct PIUILabelCtrl {int PrivateData;};
 typedef struct PIUILabelCtrl t_PIUILabelCtrl;
 
@@ -66,6 +75,7 @@ typedef struct PIUIRadioBttnCtrl t_PIUIRadioBttnCtrl;
 struct PIUICheckboxCtrl {int PrivateData;};
 typedef struct PIUICheckboxCtrl t_PIUICheckboxCtrl;
 
+/* PI_Event_ComboxBox */
 typedef enum
 {
     e_PIECB_IndexChanged,
@@ -78,6 +88,7 @@ struct PICBEvent
     e_PIECBType EventType;
 };
 
+/* PI_Event_RadioBox */
 typedef enum
 {
     e_PIERB_Changed,
@@ -90,6 +101,7 @@ struct PIRBEvent
     struct PI_RadioBttn *Bttn;
 };
 
+/* PI_Event_Checkbox */
 typedef enum
 {
     e_PIECheckbox_Changed,
@@ -101,6 +113,32 @@ struct PICheckboxEvent
     e_PIECheckboxType EventType;
     struct PI_Checkbox *CheckBox;
     PG_BOOL Checked;
+};
+
+/* PI_Event_ColumnView */
+typedef enum
+{
+    e_PIECV_IndexChanged,
+    e_PIECVMAX
+} e_PIECVType;
+
+struct PICVEvent
+{
+    e_PIECVType EventType;
+    int Index;
+};
+
+/* PI_Event_Button */
+typedef enum
+{
+    e_PIEButton_Press,
+    e_PIEButtonMAX
+} e_PIEButtonType;
+
+struct PIButtonEvent
+{
+    e_PIEButtonType EventType;
+    int Index;
 };
 
 struct PI_ComboBox
@@ -124,7 +162,6 @@ struct PI_Checkbox
 };
 
 struct PI_RadioBttnGroup {int PrivateData;};
-typedef struct PI_RadioBttnGroup t_PI_RadioBttnGroup;
 
 struct PI_TextInput
 {
@@ -143,6 +180,27 @@ struct PI_NumberInput
 struct PI_DoubleInput
 {
     t_PIUIDoubleInputCtrl *Ctrl;
+    t_PIUILabelCtrl *Label;
+    void *UIData;
+};
+
+struct PI_ColumnViewInput
+{
+    t_PIUIColumnViewInputCtrl *Ctrl;
+    t_PIUILabelCtrl *Label;
+    void *UIData;
+};
+
+struct PI_ButtonInput
+{
+    t_PIUIButtonInputCtrl *Ctrl;
+    t_PIUILabelCtrl *Label;
+    void *UIData;
+};
+
+struct PI_Indicator
+{
+    t_PIUIIndicatorCtrl *Ctrl;
     t_PIUILabelCtrl *Label;
     void *UIData;
 };
@@ -172,9 +230,9 @@ struct PI_UIAPI
     uintptr_t (*GetComboBoxSelectedEntry)(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox);
 
     /* Radio button Input */
-    t_PI_RadioBttnGroup *(*AllocRadioBttnGroup)(t_WidgetSysHandle *WidgetHandle,const char *Label);
-    void (*FreeRadioBttnGroup)(t_WidgetSysHandle *WidgetHandle,t_PI_RadioBttnGroup *UICtrl);
-    struct PI_RadioBttn *(*AddRadioBttn)(t_WidgetSysHandle *WidgetHandle,t_PI_RadioBttnGroup *RBGroup,const char *Label,void (*EventCB)(const struct PIRBEvent *Event,void *UserData),void *UserData);
+    struct PI_RadioBttnGroup *(*AllocRadioBttnGroup)(t_WidgetSysHandle *WidgetHandle,const char *Label);
+    void (*FreeRadioBttnGroup)(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttnGroup *UICtrl);
+    struct PI_RadioBttn *(*AddRadioBttn)(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttnGroup *RBGroup,const char *Label,void (*EventCB)(const struct PIRBEvent *Event,void *UserData),void *UserData);
     void (*FreeRadioBttn)(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttn *UICtrl);
     PG_BOOL (*IsRadioBttnChecked)(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttn *Bttn);
     void (*SetRadioBttnChecked)(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttn *Bttn,PG_BOOL Checked);
@@ -230,6 +288,25 @@ struct PI_UIAPI
     void (*EnableNumberInput)(t_WidgetSysHandle *WidgetHandle,t_PIUINumberInputCtrl *NumberInput,PG_BOOL Enabled);
     /* Double Input */
     void (*EnableDoubleInput)(t_WidgetSysHandle *WidgetHandle,t_PIUIDoubleInputCtrl *DoubleInput,PG_BOOL Enabled);
+
+    /* List View */
+    struct PI_ColumnViewInput *(*AddColumnViewInput)(t_WidgetSysHandle *WidgetHandle,const char *Label,int Columns,const char *ColumnNames[],void (*EventCB)(const struct PICVEvent *Event,void *UserData),void *UserData);
+    void (*FreeColumnViewInput)(t_WidgetSysHandle *WidgetHandle,struct PI_ColumnViewInput *UICtrl);
+    void (*ColumnViewInputClear)(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl);
+    void (*ColumnViewInputRemoveRow)(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl,int Row);
+    int (*ColumnViewInputAddRow)(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl);
+    void (*ColumnViewInputSetColumnText)(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl,int Column,int Row,const char *Str);
+    void (*ColumnViewInputSelectRow)(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl,int Row);
+    void (*ColumnViewInputClearSelection)(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl);
+
+    /* Button */
+    struct PI_ButtonInput *(*AddButtonInput)(t_WidgetSysHandle *WidgetHandle,const char *Label,void (*EventCB)(const struct PIButtonEvent *Event,void *UserData),void *UserData);
+    void (*FreeButtonInput)(t_WidgetSysHandle *WidgetHandle,struct PI_ButtonInput *UICtrl);
+
+    /* Indicator */
+    struct PI_Indicator *(*AddIndicator)(t_WidgetSysHandle *WidgetHandle,const char *Label);
+    void (*FreeIndicator)(t_WidgetSysHandle *WidgetHandle,struct PI_Indicator *UICtrl);
+    void (*SetIndicator)(t_WidgetSysHandle *WidgetHandle,t_PIUIIndicatorCtrl *UICtrl,bool On);
 };
 
 /***  CLASS DEFINITIONS                ***/

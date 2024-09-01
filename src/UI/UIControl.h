@@ -137,6 +137,9 @@ typedef struct UITreeItem t_UITreeItem;
 struct UITreeView {int x;};
 typedef struct UITreeView t_UITreeView;
 
+struct UIColumnView {int x;};
+typedef struct UIColumnView t_UIColumnView;
+
 struct UIProgressBarCtrl {int x;};
 typedef struct UIProgressBarCtrl t_UIProgressBarCtrl;
 
@@ -335,5 +338,13 @@ void UIPagePanelCtrlEnable(t_UIPagePanelCtrl *PagePanel,bool Enable);
 void UIPagePanelCtrlVisible(t_UIPagePanelCtrl *PagePanel,bool Show);
 void UIPagePanelCtrlSetPage(t_UIPagePanelCtrl *PagePanel,int Page);
 int UIPagePanelCtrlGetPage(t_UIPagePanelCtrl *PagePanel);
+
+/* UIColumnViewCtrl */
+void UIColumnViewClear(t_UIColumnView *ColumnView);
+void UIColumnViewRemoveRow(t_UIColumnView *ColumnView,int Row);
+int UIColumnViewAddRow(t_UIColumnView *ColumnView);
+void UIColumnViewSetColumnText(t_UIColumnView *ColumnView,int Column,int Row,const char *Str);
+void UIColumnViewSelectRow(t_UIColumnView *ColumnView,int Row);
+void UIColumnViewClearSelection(t_UIColumnView *ColumnView);
 
 #endif   /* end of "#ifndef __UICONTROL_H_" */

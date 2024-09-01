@@ -67,9 +67,15 @@ struct OpenComportInfo
     t_IOSystemHandle *DriverIO;
     string DriverName;
     pthread_t ThreadInfo;
+    pthread_mutex_t UpdateMutex;
     volatile bool RequestThreadQuit;
     volatile bool ThreadHasQuit;
     volatile bool Opened;
+    volatile int ModemBits;
+    int LastModemBits;
+    int SetModemBits;
+    struct Comport_ConAuxWidgets *AuxWidgets;
+    int ReadEsc;   // Did we see the 0xFF esc values and are in esc bytes?
 };
 
 typedef list<string> t_PossibleComPortList;
@@ -305,6 +311,14 @@ t_DriverIOHandleType *Comport_AllocateHandle(const char *DeviceUniqueID,
         NewComInfo->ThreadHasQuit=false;
         NewComInfo->Opened=false;
         NewComInfo->DriverName=DeviceUniqueID;
+        NewComInfo->ModemBits=0;
+        NewComInfo->LastModemBits=0;
+        NewComInfo->SetModemBits=0;
+        NewComInfo->AuxWidgets=NULL;
+        NewComInfo->ReadEsc=0;
+
+        if(pthread_mutex_init(&NewComInfo->UpdateMutex,NULL)!=0)
+            throw(0);
 
         /* Startup the thread for polling if we have data available */
         if(pthread_create(&NewComInfo->ThreadInfo,NULL,
@@ -356,6 +370,9 @@ void Comport_FreeHandle(t_DriverIOHandleType *DriverIO)
 
     if(ComInfo->fd>=0)
         close(ComInfo->fd);
+
+    pthread_mutex_destroy(&ComInfo->UpdateMutex);
+
     delete ComInfo;
 }
 
@@ -381,8 +398,6 @@ void Comport_FreeHandle(t_DriverIOHandleType *DriverIO)
  * SEE ALSO:
  *    Close(), Read(), Write(), ChangeOptions()
  ******************************************************************************/
-
-//FILE *TmpCap=NULL;
 PG_BOOL Comport_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
@@ -391,6 +406,9 @@ PG_BOOL Comport_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
     ComInfo->fd=open(ComInfo->DriverName.c_str(),O_RDWR|O_NOCTTY|O_NONBLOCK);
     if(ComInfo->fd<0)
         return false;
+
+    Comport_UpdateRTS(DriverIO,Comport_ReadAuxRTSCheckbox(ComInfo->AuxWidgets));
+    Comport_UpdateDTR(DriverIO,Comport_ReadAuxDTRCheckbox(ComInfo->AuxWidgets));
 
 //    if(ioctl(ComInfo->fd,TIOCEXCL))
 //    {
@@ -411,8 +429,6 @@ PG_BOOL Comport_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
     g_CP_IOSystem->DrvDataEvent(ComInfo->DriverIO,e_DataEventCode_Connected);
 
     ComInfo->Opened=true;
-
-//TmpCap=fopen("/ram/Grab.txt","wb");
 
     return true;
 }
@@ -485,9 +501,6 @@ void Comport_Close(t_DriverIOHandleType *DriverIO)
 
     ComInfo->Opened=false;
 
-//if(TmpCap!=NULL)
-//    fclose(TmpCap);
-
     g_CP_IOSystem->DrvDataEvent(ComInfo->DriverIO,e_DataEventCode_Disconnected);
 }
 
@@ -521,6 +534,23 @@ int Comport_Read(t_DriverIOHandleType *DriverIO,uint8_t *Data,int Bytes)
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
     int ReadBytes;
     struct serial_struct serialinfo;
+    int TmpModemBits;
+    int r;
+    int RetBytes;
+    uint8_t *Dest;
+    uint8_t *Src;
+
+    if(ComInfo->ModemBits!=ComInfo->LastModemBits)
+    {
+        /* Update the indicators */
+        /* See https://man7.org/linux/man-pages/man2/TIOCMSET.2const.html 
+           for bits */
+        TmpModemBits=ComInfo->ModemBits;
+        Comport_NotifyOfModemBitsChange(ComInfo->AuxWidgets,
+                TmpModemBits&TIOCM_CD,TmpModemBits&TIOCM_RI,
+                TmpModemBits&TIOCM_DSR,TmpModemBits&TIOCM_CTS);
+        ComInfo->LastModemBits=ComInfo->ModemBits;
+    }
 
     ReadBytes=read(ComInfo->fd,Data,Bytes);
     if(ReadBytes==0)
@@ -535,22 +565,86 @@ int Comport_Read(t_DriverIOHandleType *DriverIO,uint8_t *Data,int Bytes)
             ComInfo->Opened=false;
             g_CP_IOSystem->DrvDataEvent(ComInfo->DriverIO,e_DataEventCode_Disconnected);
         }
+        RetBytes=0;
     }
-    if(ReadBytes<0)
+    else if(ReadBytes<0)
     {
         if(errno==EWOULDBLOCK)
         {
             /* Not really an error */
-            ReadBytes=0;
+            RetBytes=0;
+        }
+        else
+        {
+            RetBytes=RETERROR_IOERROR;
         }
     }
-else
-{
-//if(TmpCap!=NULL)
-//    fwrite(Data,1,Bytes,TmpCap);
-}
+    else
+    {
+        /* We need to walk all the bytes looking for 0xFF because the driver
+           uses these to mark breaks and errors */
+        RetBytes=ReadBytes;
+        Dest=Data;
+        Src=Data;
+        for(r=0;r<ReadBytes;r++)
+        {
+            switch(ComInfo->ReadEsc)
+            {
+                case 0: // Normal
+                    if(*Src==0xFF)
+                    {
+                        /* Esc */
+                        ComInfo->ReadEsc=1;
+                        RetBytes--;
+                    }
+                    else
+                    {
+                        *Dest++=*Src;
+                    }
+                break;
+                case 1: // Byte 1 of esc
+                    if(*Src==0xFF)
+                    {
+                        /* It was a real 0xFF byte */
+                        /* Esc */
+                        ComInfo->ReadEsc=0;
+                        *Dest++=0xFF;
+                    }
+                    else if(*Src==0x00)
+                    {
+                        ComInfo->ReadEsc=2;
+                        RetBytes--;
+                    }
+                    else
+                    {
+                        /* We don't know what this means... */
+                        ComInfo->ReadEsc=0;
+                        RetBytes--;
+                    }
+                break;
+                case 2: // Byte 2 of esc
+                    if(*Src==0)
+                    {
+                        /* It was a break */
+                        Comport_AddLogMsg(ComInfo->AuxWidgets,"BREAK");
+                    }
+                    else
+                    {
+                        /* Framing / parity errors */
+                        Comport_AddLogMsg(ComInfo->AuxWidgets,"Framing / parity error");
+                    }
+                    ComInfo->ReadEsc=0;
+                    RetBytes--;
+                break;
+                default:
+                    ComInfo->ReadEsc=0;
+                break;
+            }
+            Src++;
+        }
+    }
 
-    return ReadBytes;
+    return RetBytes;
 }
 
 /*******************************************************************************
@@ -613,6 +707,120 @@ int Comport_Write(t_DriverIOHandleType *DriverIO,const uint8_t *Data,int Bytes)
     }
 
     return RetBytes;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    ConnectionAuxCtrlWidgets_AllocWidgets
+ *
+ * SYNOPSIS:
+ *    t_ConnectionWidgetsType *ConnectionAuxCtrlWidgets_AllocWidgets(
+ *          t_DriverIOHandleType *DriverIO,t_WidgetSysHandle *WidgetHandle);
+ *
+ * PARAMETERS:
+ *    DriverIO [I] -- The handle to this connection
+ *    WidgetHandle [I] -- The handle to send to the widgets
+ *
+ * FUNCTION:
+ *    This function adds aux control widgets to the aux control tab in the
+ *    main window.  The aux controls are for extra controls that do things /
+ *    display things going on with the driver.  For example there are things
+ *    like the status of the CTS line and to set the RTS line.
+ *
+ *    The device driver needs to keep handles to the widgets added because it
+ *    needs to free them when ConnectionAuxCtrlWidgets_FreeWidgets() called.
+ *
+ * RETURNS:
+ *    The private options data that you want to use.  This is a private
+ *    structure that you allocate and then cast to
+ *    (t_ConnectionAuxCtrlWidgetsType *) when you return.
+ *
+ * NOTES:
+ *    These widgets can only be accessed in the main thread.  They are not
+ *    thread safe.
+ *
+ * SEE ALSO:
+ *    ConnectionAuxCtrlWidgets_FreeWidgets()
+ ******************************************************************************/
+t_ConnectionWidgetsType *Comport_ConnectionAuxCtrlWidgets_AllocWidgets(t_DriverIOHandleType *DriverIO,t_WidgetSysHandle *WidgetHandle)
+{
+    struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    ComInfo->AuxWidgets=Comport_AllocAuxWidgets(DriverIO,WidgetHandle);
+
+    return (t_ConnectionWidgetsType *)ComInfo->AuxWidgets;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    ConnectionAuxCtrlWidgets_FreeWidgets
+ *
+ * SYNOPSIS:
+ *    void ConnectionAuxCtrlWidgets_FreeWidgets(t_DriverIOHandleType *DriverIO,
+ *          t_WidgetSysHandle *WidgetHandle,
+ *          t_ConnectionWidgetsType *ConAuxCtrls);
+ *
+ * PARAMETERS:
+ *    DriverIO [I] -- The handle to this connection
+ *    WidgetHandle [I] -- The handle to send to the widgets
+ *    ConAuxCtrls [I] -- The aux controls data that was allocated with
+ *          ConnectionAuxCtrlWidgets_AllocWidgets().
+ *
+ * FUNCTION:
+ *    Frees the widgets added with ConnectionAuxCtrlWidgets_AllocWidgets()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    ConnectionAuxCtrlWidgets_AllocWidgets()
+ ******************************************************************************/
+void Comport_ConnectionAuxCtrlWidgets_FreeWidgets(t_DriverIOHandleType *DriverIO,t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConAuxCtrls)
+{
+    struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    Comport_FreeAuxWidgets(WidgetHandle,(struct Comport_ConAuxWidgets *)ConAuxCtrls);
+    ComInfo->AuxWidgets=NULL;
+}
+
+void Comport_UpdateDTR(t_DriverIOHandleType *DriverIO,bool DTR)
+{
+    struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    if(ComInfo->fd<0)
+        return;
+
+    if(DTR)
+        ComInfo->SetModemBits|=TIOCM_DTR;
+    else
+        ComInfo->SetModemBits&=~TIOCM_DTR;
+
+    ioctl(ComInfo->fd,TIOCMSET,&ComInfo->SetModemBits);
+}
+
+void Comport_UpdateRTS(t_DriverIOHandleType *DriverIO,bool RTS)
+{
+    struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    if(ComInfo->fd<0)
+        return;
+
+    if(RTS)
+        ComInfo->SetModemBits|=TIOCM_RTS;
+    else
+        ComInfo->SetModemBits&=~TIOCM_RTS;
+
+    ioctl(ComInfo->fd,TIOCMSET,&ComInfo->SetModemBits);
+}
+
+void Comport_SendBreak(t_DriverIOHandleType *DriverIO)
+{
+    struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    if(ComInfo->fd<0)
+        return;
+
+    ioctl(ComInfo->fd,TCSBRK,0);
 }
 
 /*******************************************************************************
@@ -770,13 +978,16 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
             case e_ComportFlowControl_None:
                 tio.c_iflag&=~(IXON|IXOFF);
                 tio.c_iflag&=~CRTSCTS;
+                tio.c_cflag|=CLOCAL;
             break;
             case e_ComportFlowControl_XONXOFF:
                 tio.c_iflag|=IXON|IXOFF;
                 tio.c_iflag&=~CRTSCTS;
+                tio.c_cflag|=CLOCAL;
             break;
             case e_ComportFlowControl_Hardware:
                 tio.c_iflag&=~(IXON|IXOFF);
+                tio.c_cflag&=~CLOCAL;
                 tio.c_iflag|=CRTSCTS;
             break;
             case e_ComportFlowControlMAX:
@@ -802,24 +1013,29 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
         {
             case e_ComportParity_none:
                 tio.c_cflag&=~PARENB;
+                tio.c_iflag&=~INPCK;
             break;
             case e_ComportParity_odd:
                 tio.c_cflag|=PARENB;
                 tio.c_cflag|=PARODD;
+                tio.c_iflag|=INPCK;
             break;
             case e_ComportParity_even:
                 tio.c_cflag|=PARENB;
                 tio.c_cflag&=~PARODD;
+                tio.c_iflag|=INPCK;
             break;
             case e_ComportParity_mark:
                 tio.c_cflag|=PARENB;
-                tio.c_cflag&=~CMSPAR;
+                tio.c_cflag&=~CMSPAR;   // DEBUG PAUL: Not sure
                 tio.c_cflag|=PARODD;
+                tio.c_iflag|=INPCK;
             break;
             case e_ComportParity_space:
                 tio.c_cflag|=PARENB;
-                tio.c_cflag&=~CMSPAR;
+                tio.c_cflag&=~CMSPAR;   // DEBUG PAUL: Not sure
                 tio.c_cflag&=~PARODD;
+                tio.c_iflag|=INPCK;
             break;
             case e_ComportParityMAX:
             default:
@@ -839,6 +1055,13 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
                 throw(0);
         }
 
+        /* We want break's in the stream */
+        tio.c_iflag&=~BRKINT;
+        tio.c_iflag&=~IGNBRK;
+
+        /* We want to know about framing / parity errors */
+        tio.c_iflag|=PARMRK;
+
         if(tcsetattr(ComInfo->fd,TCSANOW,&tio)<0)
             throw(0);
     }
@@ -856,6 +1079,8 @@ static void *Comport_OS_PollThread(void *arg)
     fd_set rfds;
     struct timeval tv;
     int retval;
+    int ReadModemBits;
+    int LastModemBits=0;
 
     ComInfo=(struct OpenComportInfo *)arg;
 
@@ -892,6 +1117,29 @@ static void *Comport_OS_PollThread(void *arg)
             /* Give the main thead some time to read out all the bytes */
             usleep(1000);   // Wait 1ms
         }
+
+        /* Check the CD (Carrier Detect) (1) */
+        /* Check the DSR (Data Set Ready) (6) */
+        /* Check the CTS (Clear to Send) (8) */
+        /* Check the RI (Ring Indicator) (9) */
+        ioctl(ComInfo->fd,TIOCMGET,&ReadModemBits);
+
+        if(ReadModemBits!=LastModemBits)
+        {
+            pthread_mutex_lock(&ComInfo->UpdateMutex);
+            ComInfo->ModemBits=ReadModemBits;
+            pthread_mutex_unlock(&ComInfo->UpdateMutex);
+
+            /* Data available */
+            g_CP_IOSystem->DrvDataEvent(ComInfo->DriverIO,
+                    e_DataEventCode_BytesAvailable);
+
+            LastModemBits=ReadModemBits;
+        }
+        /* DEBUG PAUL: We need to set DTR (4) and RTS (7) (although not here) */
+        /* DSR -> DTR */
+        /* CTS -> RTS */
+
     }
 
     ComInfo->ThreadHasQuit=true;

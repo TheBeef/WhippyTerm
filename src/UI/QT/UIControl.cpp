@@ -1550,3 +1550,80 @@ int UIPagePanelCtrlGetPage(t_UIPagePanelCtrl *PagePanel)
     return stack->currentIndex();
 }
 
+/*************************************/
+/* UIColumnViewCtrl                  */
+/*************************************/
+void UIColumnViewClear(t_UIColumnView *ColumnView)
+{
+    QTreeWidget *TreeWidget=(QTreeWidget *)ColumnView;
+    TreeWidget->clear();
+}
+
+void UIColumnViewRemoveRow(t_UIColumnView *ColumnView,int Row)
+{
+    QTreeWidget *TreeWidget=(QTreeWidget *)ColumnView;
+    QTreeWidgetItem *TreeItem;
+
+    TreeItem=TreeWidget->takeTopLevelItem(Row);
+    if(TreeItem!=NULL)
+        delete TreeItem;
+}
+
+int UIColumnViewAddRow(t_UIColumnView *ColumnView)
+{
+    QTreeWidget *TreeWidget=(QTreeWidget *)ColumnView;
+    QTreeWidgetItem *TreeItem;
+    int RetValue;
+
+    try
+    {
+        TreeItem=new QTreeWidgetItem(TreeWidget);
+
+        TreeWidget->addTopLevelItem(TreeItem);
+
+        RetValue=TreeWidget->topLevelItemCount()-1;
+    }
+    catch(...)
+    {
+        RetValue=-1;
+    }
+
+    return RetValue;
+}
+
+void UIColumnViewSetColumnText(t_UIColumnView *ColumnView,int Column,int Row,const char *Str)
+{
+    QTreeWidget *TreeWidget=(QTreeWidget *)ColumnView;
+    QTreeWidgetItem *TreeItem;
+
+    if(Row>=TreeWidget->topLevelItemCount())
+        return;
+
+    TreeItem=TreeWidget->topLevelItem(Row);
+
+    TreeItem->setText(Column,Str);
+}
+
+void UIColumnViewSelectRow(t_UIColumnView *ColumnView,int Row)
+{
+    QTreeWidget *TreeWidget=(QTreeWidget *)ColumnView;
+    QTreeWidgetItem *TreeItem;
+
+    if(Row>=TreeWidget->topLevelItemCount())
+        return;
+
+    TreeItem=TreeWidget->topLevelItem(Row);
+
+    TreeWidget->blockSignals(true);
+    TreeWidget->setCurrentItem(TreeItem);
+    TreeWidget->blockSignals(false);
+}
+
+void UIColumnViewClearSelection(t_UIColumnView *ColumnView)
+{
+    QTreeWidget *TreeWidget=(QTreeWidget *)ColumnView;
+
+    TreeWidget->blockSignals(true);
+    TreeWidget->selectionModel()->clearSelection();
+    TreeWidget->blockSignals(false);
+}

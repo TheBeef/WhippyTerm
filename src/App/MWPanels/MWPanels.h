@@ -46,11 +46,29 @@ typedef enum
     e_MWPanels_Upload,
     e_MWPanels_Downloadload,
     e_MWPanels_Bridge,
-    e_MWPanels_Hex,                 // TBD
+    e_MWPanels_Hex,
     e_MWPanels_Injection,           // TBD
     e_MWPanels_Buffers,
+    e_MWPanels_AuxControls,
     e_MWPanelsMAX
 } e_MWPanelsType;
+
+/*
+== Panel design thoughts ==
+This is the basic rules WhippyTerm tries to follow (these are guide lines
+not "can never break these rules").
+
+Left:
+    This are things that effect the connection it's self.  This includes
+    things that send in/out of the byte stream.
+
+Right:
+    The right panel is for tools / misc stuff.
+
+Bottom:
+    The bottom panel is for messing / monitoring the byte stream.
+
+*/
 
 /***  CLASS DEFINITIONS                ***/
 

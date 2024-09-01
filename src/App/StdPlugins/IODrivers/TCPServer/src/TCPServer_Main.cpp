@@ -72,15 +72,15 @@ PG_BOOL TCPServer_Init(void);
 const struct IODriverInfo *TCPServer_GetDriverInfo(unsigned int *SizeOfInfo);
 const struct IODriverDetectedInfo *TCPServer_DetectDevices(void);
 void TCPServer_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices);
-t_ConnectionOptionsWidgetsType *TCPServer_ConnectionOptionsWidgets_AllocWidgets(
+t_ConnectionWidgetsType *TCPServer_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle);
-void TCPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *ConOptions,
+void TCPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle);
-void TCPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *ConOptions,
+void TCPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
             t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
             t_PIKVList *Options);
 void TCPServer_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionOptionsWidgetsType *ConOptions,
+        t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options);
 PG_BOOL TCPServer_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,
@@ -114,6 +114,8 @@ const struct IODriverAPI g_TCPServerPluginAPI=
     TCPServer_Write,
     TCPServer_ChangeOptions,
     NULL,                                               // Transmit
+    NULL,                                               // ConnectionAuxCtrlWidgets_AllocWidgets
+    NULL,                                               // ConnectionAuxCtrlWidgets_FreeWidgets
 };
 extern const struct IODriverAPI g_TCPServerPluginAPI;
 
@@ -321,7 +323,7 @@ void TCPServer_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices)
  *    TCPServer_ConnectionOptionsWidgets_AllocWidgets
  *
  * SYNOPSIS:
- *    t_ConnectionOptionsWidgetsType *TCPServer_ConnectionOptionsWidgets_AllocWidgets(
+ *    t_ConnectionWidgetsType *TCPServer_ConnectionOptionsWidgets_AllocWidgets(
  *          t_WidgetSysHandle *WidgetHandle);
  *
  * PARAMETERS:
@@ -338,7 +340,7 @@ void TCPServer_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices)
  * RETURNS:
  *    The private options data that you want to use.  This is a private
  *    structure that you allocate and then cast to
- *    (t_ConnectionOptionsWidgetsType *) when you return.
+ *    (t_ConnectionWidgetsType *) when you return.
  *
  * NOTES:
  *    This function must be reentrant.  The system may allocate many sets
@@ -347,7 +349,7 @@ void TCPServer_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_ConnectionOptionsWidgetsType *TCPServer_ConnectionOptionsWidgets_AllocWidgets(
+t_ConnectionWidgetsType *TCPServer_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle)
 {
     struct TCPServer_ConWidgets *ConWidgets;
@@ -397,7 +399,7 @@ t_ConnectionOptionsWidgetsType *TCPServer_ConnectionOptionsWidgets_AllocWidgets(
         return NULL;
     }
 
-    return (t_ConnectionOptionsWidgetsType *)ConWidgets;
+    return (t_ConnectionWidgetsType *)ConWidgets;
 }
 
 /*******************************************************************************
@@ -405,7 +407,7 @@ t_ConnectionOptionsWidgetsType *TCPServer_ConnectionOptionsWidgets_AllocWidgets(
  *    TCPServer_ConnectionOptionsWidgets_FreeWidgets
  *
  * SYNOPSIS:
- *    void TCPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *
+ *    void TCPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *
  *              ConOptions,t_WidgetSysHandle *WidgetHandle);
  *
  * PARAMETERS:
@@ -422,7 +424,7 @@ t_ConnectionOptionsWidgetsType *TCPServer_ConnectionOptionsWidgets_AllocWidgets(
  * SEE ALSO:
  *    
  ******************************************************************************/
-void TCPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *ConOptions,
+void TCPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle)
 {
     struct TCPServer_ConWidgets *ConWidgets=(struct TCPServer_ConWidgets *)ConOptions;
@@ -443,7 +445,7 @@ void TCPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsTy
  *
  * SYNOPSIS:
  *      void TCPServer_ConnectionOptionsWidgets_StoreUI(
- *              t_ConnectionOptionsWidgetsType *ConOptions,
+ *              t_ConnectionWidgetsType *ConOptions,
  *              t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
  *              t_PIKVList *Options);
  *
@@ -466,7 +468,7 @@ void TCPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsTy
  * SEE ALSO:
  *    
  ******************************************************************************/
-void TCPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *ConOptions,
+void TCPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options)
 {
@@ -510,7 +512,7 @@ void TCPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *
  *
  * SYNOPSIS:
  *    void TCPServer_ConnectionOptionsWidgets_UpdateUI(
- *          t_ConnectionOptionsWidgetsType *ConOptions,
+ *          t_ConnectionWidgetsType *ConOptions,
  *          t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
  *          t_PIKVList *Options);
  *
@@ -534,7 +536,7 @@ void TCPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *
  *    ConnectionOptionsWidgets_StoreUI()
  ******************************************************************************/
 void TCPServer_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionOptionsWidgetsType *ConOptions,
+        t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options)
 {

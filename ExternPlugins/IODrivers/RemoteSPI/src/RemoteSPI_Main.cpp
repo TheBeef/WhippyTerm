@@ -120,15 +120,15 @@ PG_BOOL RemoteSPI_Init(void);
 const struct IODriverInfo *RemoteSPI_GetDriverInfo(unsigned int *SizeOfInfo);
 const struct IODriverDetectedInfo *RemoteSPI_DetectDevices(void);
 void RemoteSPI_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices);
-t_ConnectionOptionsWidgetsType *RemoteSPI_ConnectionOptionsWidgets_AllocWidgets(
+t_ConnectionWidgetsType *RemoteSPI_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle);
-void RemoteSPI_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *ConOptions,
+void RemoteSPI_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle);
-void RemoteSPI_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *ConOptions,
+void RemoteSPI_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
             t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
             t_PIKVList *Options);
 void RemoteSPI_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionOptionsWidgetsType *ConOptions,
+        t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options);
 PG_BOOL RemoteSPI_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,
@@ -379,7 +379,7 @@ void RemoteSPI_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices)
  *    RemoteSPI_ConnectionOptionsWidgets_AllocWidgets
  *
  * SYNOPSIS:
- *    t_ConnectionOptionsWidgetsType *RemoteSPI_ConnectionOptionsWidgets_AllocWidgets(
+ *    t_ConnectionWidgetsType *RemoteSPI_ConnectionOptionsWidgets_AllocWidgets(
  *          t_WidgetSysHandle *WidgetHandle);
  *
  * PARAMETERS:
@@ -396,7 +396,7 @@ void RemoteSPI_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices)
  * RETURNS:
  *    The private options data that you want to use.  This is a private
  *    structure that you allocate and then cast to
- *    (t_ConnectionOptionsWidgetsType *) when you return.
+ *    (t_ConnectionWidgetsType *) when you return.
  *
  * NOTES:
  *    This function must be reentrant.  The system may allocate many sets
@@ -405,7 +405,7 @@ void RemoteSPI_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_ConnectionOptionsWidgetsType *RemoteSPI_ConnectionOptionsWidgets_AllocWidgets(
+t_ConnectionWidgetsType *RemoteSPI_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle)
 {
     struct RemoteSPI_ConWidgets *ConWidgets;
@@ -531,7 +531,7 @@ t_ConnectionOptionsWidgetsType *RemoteSPI_ConnectionOptionsWidgets_AllocWidgets(
         return NULL;
     }
 
-    return (t_ConnectionOptionsWidgetsType *)ConWidgets;
+    return (t_ConnectionWidgetsType *)ConWidgets;
 }
 
 /*******************************************************************************
@@ -539,7 +539,7 @@ t_ConnectionOptionsWidgetsType *RemoteSPI_ConnectionOptionsWidgets_AllocWidgets(
  *    RemoteSPI_ConnectionOptionsWidgets_FreeWidgets
  *
  * SYNOPSIS:
- *    void RemoteSPI_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *
+ *    void RemoteSPI_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *
  *              ConOptions,t_WidgetSysHandle *WidgetHandle);
  *
  * PARAMETERS:
@@ -556,7 +556,7 @@ t_ConnectionOptionsWidgetsType *RemoteSPI_ConnectionOptionsWidgets_AllocWidgets(
  * SEE ALSO:
  *    
  ******************************************************************************/
-void RemoteSPI_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *ConOptions,
+void RemoteSPI_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle)
 {
     struct RemoteSPI_ConWidgets *ConWidgets=(struct RemoteSPI_ConWidgets *)ConOptions;
@@ -591,7 +591,7 @@ void RemoteSPI_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsTy
  *
  * SYNOPSIS:
  *      void RemoteSPI_ConnectionOptionsWidgets_StoreUI(
- *              t_ConnectionOptionsWidgetsType *ConOptions,
+ *              t_ConnectionWidgetsType *ConOptions,
  *              t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
  *              t_PIKVList *Options);
  *
@@ -614,7 +614,7 @@ void RemoteSPI_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsTy
  * SEE ALSO:
  *    
  ******************************************************************************/
-void RemoteSPI_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *ConOptions,
+void RemoteSPI_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options)
 {
@@ -692,7 +692,7 @@ void RemoteSPI_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *
  *
  * SYNOPSIS:
  *    void RemoteSPI_ConnectionOptionsWidgets_UpdateUI(
- *          t_ConnectionOptionsWidgetsType *ConOptions,
+ *          t_ConnectionWidgetsType *ConOptions,
  *          t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
  *          t_PIKVList *Options);
  *
@@ -716,7 +716,7 @@ void RemoteSPI_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *
  *    ConnectionOptionsWidgets_StoreUI()
  ******************************************************************************/
 void RemoteSPI_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionOptionsWidgetsType *ConOptions,
+        t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options)
 {

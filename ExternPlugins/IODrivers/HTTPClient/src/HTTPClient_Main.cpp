@@ -67,15 +67,15 @@ PG_BOOL HTTPClient_Init(void);
 const struct IODriverInfo *HTTPClient_GetDriverInfo(unsigned int *SizeOfInfo);
 const struct IODriverDetectedInfo *HTTPClient_DetectDevices(void);
 void HTTPClient_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices);
-t_ConnectionOptionsWidgetsType *HTTPClient_ConnectionOptionsWidgets_AllocWidgets(
+t_ConnectionWidgetsType *HTTPClient_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle);
-void HTTPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *ConOptions,
+void HTTPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle);
-void HTTPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *ConOptions,
+void HTTPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
             t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
             t_PIKVList *Options);
 void HTTPClient_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionOptionsWidgetsType *ConOptions,
+        t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options);
 PG_BOOL HTTPClient_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,
@@ -315,7 +315,7 @@ void HTTPClient_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices)
  *    HTTPClient_ConnectionOptionsWidgets_AllocWidgets
  *
  * SYNOPSIS:
- *    t_ConnectionOptionsWidgetsType *HTTPClient_ConnectionOptionsWidgets_AllocWidgets(
+ *    t_ConnectionWidgetsType *HTTPClient_ConnectionOptionsWidgets_AllocWidgets(
  *          t_WidgetSysHandle *WidgetHandle);
  *
  * PARAMETERS:
@@ -332,7 +332,7 @@ void HTTPClient_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices)
  * RETURNS:
  *    The private options data that you want to use.  This is a private
  *    structure that you allocate and then cast to
- *    (t_ConnectionOptionsWidgetsType *) when you return.
+ *    (t_ConnectionWidgetsType *) when you return.
  *
  * NOTES:
  *    This function must be reentrant.  The system may allocate many sets
@@ -341,7 +341,7 @@ void HTTPClient_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_ConnectionOptionsWidgetsType *HTTPClient_ConnectionOptionsWidgets_AllocWidgets(
+t_ConnectionWidgetsType *HTTPClient_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle)
 {
     struct HTTPClient_ConWidgets *ConWidgets;
@@ -413,7 +413,7 @@ t_ConnectionOptionsWidgetsType *HTTPClient_ConnectionOptionsWidgets_AllocWidgets
         return NULL;
     }
 
-    return (t_ConnectionOptionsWidgetsType *)ConWidgets;
+    return (t_ConnectionWidgetsType *)ConWidgets;
 }
 
 /*******************************************************************************
@@ -421,7 +421,7 @@ t_ConnectionOptionsWidgetsType *HTTPClient_ConnectionOptionsWidgets_AllocWidgets
  *    HTTPClient_ConnectionOptionsWidgets_FreeWidgets
  *
  * SYNOPSIS:
- *    void HTTPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *
+ *    void HTTPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *
  *              ConOptions,t_WidgetSysHandle *WidgetHandle);
  *
  * PARAMETERS:
@@ -438,7 +438,7 @@ t_ConnectionOptionsWidgetsType *HTTPClient_ConnectionOptionsWidgets_AllocWidgets
  * SEE ALSO:
  *    
  ******************************************************************************/
-void HTTPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *ConOptions,
+void HTTPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle)
 {
     struct HTTPClient_ConWidgets *ConWidgets=(struct HTTPClient_ConWidgets *)ConOptions;
@@ -465,7 +465,7 @@ void HTTPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsT
  *
  * SYNOPSIS:
  *      void HTTPClient_ConnectionOptionsWidgets_StoreUI(
- *              t_ConnectionOptionsWidgetsType *ConOptions,
+ *              t_ConnectionWidgetsType *ConOptions,
  *              t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
  *              t_PIKVList *Options);
  *
@@ -488,7 +488,7 @@ void HTTPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsT
  * SEE ALSO:
  *    
  ******************************************************************************/
-void HTTPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *ConOptions,
+void HTTPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options)
 {
@@ -541,7 +541,7 @@ void HTTPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType 
  *
  * SYNOPSIS:
  *    void HTTPClient_ConnectionOptionsWidgets_UpdateUI(
- *          t_ConnectionOptionsWidgetsType *ConOptions,
+ *          t_ConnectionWidgetsType *ConOptions,
  *          t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
  *          t_PIKVList *Options);
  *
@@ -565,7 +565,7 @@ void HTTPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType 
  *    ConnectionOptionsWidgets_StoreUI()
  ******************************************************************************/
 void HTTPClient_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionOptionsWidgetsType *ConOptions,
+        t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options)
 {

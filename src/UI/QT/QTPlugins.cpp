@@ -37,6 +37,7 @@
 #include <QButtonGroup>
 #include <QRadioButton>
 #include <QVBoxLayout>
+#include <QPainter>
 
 /*** DEFINES                  ***/
 
@@ -137,6 +138,18 @@ void UIPI_FreeComboBox(struct PI_ComboBox *UICtrl)
     delete UICtrl;
 }
 
+void UIPI_ShowComboBox(struct PI_ComboBox *UICtrl,bool Show)
+{
+    PIQComboBox *Ctrl;
+    QLabel *Label;
+
+    Ctrl=(PIQComboBox *)UICtrl->Ctrl;
+    Label=(QLabel *)UICtrl->Label;
+
+    Ctrl->setVisible(Show);
+    Label->setVisible(Show);
+}
+
 void PIQComboBox::ComboBoxChanged(int index)
 {
     struct PICBEvent Event;
@@ -166,7 +179,7 @@ void PIQComboBox::ComboBoxTextChanged(const QString &NewText)
  *    UIPI_AllocRadioBttnGroup
  *
  * SYNOPSIS:
- *    static t_PI_RadioBttnGroup *UIPI_AllocRadioBttnGroup(
+ *    static struct PI_RadioBttnGroup *UIPI_AllocRadioBttnGroup(
  *          t_UIContainerCtrl *ContainerWidget,const char *Label);
  *
  * PARAMETERS:
@@ -183,7 +196,7 @@ void PIQComboBox::ComboBoxTextChanged(const QString &NewText)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_PI_RadioBttnGroup *UIPI_AllocRadioBttnGroup(
+struct PI_RadioBttnGroup *UIPI_AllocRadioBttnGroup(
         t_UIContainerCtrl *ContainerWidget,const char *Label)
 {
     QFormLayout *Layout=(QFormLayout *)ContainerWidget;
@@ -224,10 +237,10 @@ t_PI_RadioBttnGroup *UIPI_AllocRadioBttnGroup(
         return NULL;
     }
 
-    return (t_PI_RadioBttnGroup *)NewGroup;
+    return (struct PI_RadioBttnGroup *)NewGroup;
 }
 
-void UIPI_FreeRadioBttnGroup(t_PI_RadioBttnGroup *UICtrl)
+void UIPI_FreeRadioBttnGroup(struct PI_RadioBttnGroup *UICtrl)
 {
     struct RadioBttnGroup *Group=(struct RadioBttnGroup *)UICtrl;
 
@@ -238,7 +251,15 @@ void UIPI_FreeRadioBttnGroup(t_PI_RadioBttnGroup *UICtrl)
     delete Group;
 }
 
-struct PI_RadioBttn *UIPI_AddRadioBttn(t_PI_RadioBttnGroup *RBGroup,
+void UIPI_ShowRadioBttnGroup(struct PI_RadioBttnGroup *UICtrl,bool Show)
+{
+    struct RadioBttnGroup *Group=(struct RadioBttnGroup *)UICtrl;
+
+    Group->GroupWidget->setVisible(Show);
+    Group->Label->setVisible(Show);
+}
+
+struct PI_RadioBttn *UIPI_AddRadioBttn(struct PI_RadioBttnGroup *RBGroup,
             const char *Label,void (*EventCB)(const struct PIRBEvent *Event,void *UserData),void *UserData)
 {
     struct RadioBttnGroup *Group=(struct RadioBttnGroup *)RBGroup;
@@ -285,6 +306,16 @@ void UIPI_FreeRadioBttn(struct PI_RadioBttn *UICtrl)
     delete Ctrl;
     delete UICtrl;
 }
+
+void UIPI_ShowRadioBttnInput(struct PI_RadioBttn *UICtrl,bool Show)
+{
+    PIQRadioButton *Ctrl;
+
+    Ctrl=(PIQRadioButton *)UICtrl->Ctrl;
+
+    Ctrl->setVisible(Show);
+}
+
 
 PG_BOOL UIPI_IsRadioBttnChecked(struct PI_RadioBttn *Bttn)
 {
@@ -374,6 +405,18 @@ void UIPI_FreeCheckbox(struct PI_Checkbox *UICtrl)
     delete Label;
     delete Ctrl;
     delete UICtrl;
+}
+
+void UIPI_ShowCheckboxInput(struct PI_Checkbox *UICtrl,bool Show)
+{
+    PIQCheckbox *Ctrl;
+    QLabel *Label;
+
+    Ctrl=(PIQCheckbox *)UICtrl->Ctrl;
+    Label=(QLabel *)UICtrl->Label;
+
+    Ctrl->setVisible(Show);
+    Label->setVisible(Show);
 }
 
 void PIQCheckbox::ButtonClicked(bool checked)
@@ -473,6 +516,18 @@ void UIPI_FreeTextInput(struct PI_TextInput *UICtrl)
     delete UICtrl;
 }
 
+void UIPI_ShowTextInput(struct PI_TextInput *UICtrl,bool Show)
+{
+    PIQTextInput *Ctrl;
+    QLabel *Label;
+
+    Ctrl=(PIQTextInput *)UICtrl->Ctrl;
+    Label=(QLabel *)UICtrl->Label;
+
+    Ctrl->setVisible(Show);
+    Label->setVisible(Show);
+}
+
 void PIQTextInput::TextInputTextChanged(const QString &NewText)
 {
     struct PICBEvent Event;
@@ -565,6 +620,18 @@ void UIPI_FreeNumberInput(struct PI_NumberInput *UICtrl)
     delete Ctrl;
     delete Label;
     delete UICtrl;
+}
+
+void UIPI_ShowNumberInput(struct PI_NumberInput *UICtrl,bool Show)
+{
+    PIQNumberInput *Ctrl;
+    QLabel *Label;
+
+    Ctrl=(PIQNumberInput *)UICtrl->Ctrl;
+    Label=(QLabel *)UICtrl->Label;
+
+    Ctrl->setVisible(Show);
+    Label->setVisible(Show);
 }
 
 void PIQNumberInput::NumberInputChanged(int NewNumber)
@@ -661,6 +728,18 @@ void UIPI_FreeDoubleInput(struct PI_DoubleInput *UICtrl)
     delete UICtrl;
 }
 
+void UIPI_ShowDoubleInput(struct PI_DoubleInput *UICtrl,bool Show)
+{
+    PIQDoubleInput *Ctrl;
+    QLabel *Label;
+
+    Ctrl=(PIQDoubleInput *)UICtrl->Ctrl;
+    Label=(QLabel *)UICtrl->Label;
+
+    Ctrl->setVisible(Show);
+    Label->setVisible(Show);
+}
+
 void PIQDoubleInput::DoubleInputChanged(double NewDouble)
 {
     struct PICBEvent Event;
@@ -672,3 +751,432 @@ void PIQDoubleInput::DoubleInputChanged(double NewDouble)
         EventCB(&Event,UserData);
     }
 }
+
+/*******************************************************************************
+ * NAME:
+ *    UIPI_AddColumnViewInput
+ *
+ * SYNOPSIS:
+ *    struct PI_ColumnViewInput *UIPI_AddColumnViewInput(
+ *              t_UIContainerCtrl *ContainerWidget,const char *Label,
+ *              int Columns,const char *ColumnNames[],
+ *              void (*EventCB)(const struct PICVEvent *Event,void *UserData),
+ *              void *UserData);
+ *
+ * PARAMETERS:
+ *    ContainerWidget [I] -- The parent widget to add this combox box to
+ *    Label [I] -- The label to apply to this box
+ *    Columns [I] -- The number of columns this widget will have
+ *    ColumnNames [I] -- This is an array of pointers to the names of
+ *                       the columns.  This will be in a header at the top.
+ *    EventCB [I] -- A callback for events.
+ *    UserData [I] -- User data that will be sent to the 'EventCB'
+ *
+ * FUNCTION:
+ *    This is standard version of double input box.
+ *
+ * RETURNS:
+ *    The double input handle.
+ *
+ * SEE ALSO:
+ *    UIPI_FreeColumnViewInput()
+ ******************************************************************************/
+struct PI_ColumnViewInput *UIPI_AddColumnViewInput(t_UIContainerCtrl *ContainerWidget,
+        const char *Label,int Columns,const char *ColumnNames[],
+        void (*EventCB)(const struct PICVEvent *Event,void *UserData),
+        void *UserData)
+{
+    struct PI_ColumnViewInput *NewPIC;
+    QFormLayout *Layout=(QFormLayout *)ContainerWidget;
+    PIQColumnViewInput *NewCtrl;
+    QLabel *NewLabel;
+    int col;
+    QTreeWidgetItem *HeaderItem;
+
+    NewCtrl=NULL;
+    NewLabel=NULL;
+    try
+    {
+        if(Columns<1)
+            throw(0);
+
+        NewPIC=new PI_ColumnViewInput();
+        NewCtrl=new PIQColumnViewInput(Layout->parentWidget());
+
+        HeaderItem=NewCtrl->headerItem();
+        for(col=0;col<Columns;col++)
+            HeaderItem->setText(col,ColumnNames[col]);
+
+        NewCtrl->EventCB=EventCB;
+        NewCtrl->UserData=UserData;
+        NewLabel=new QLabel(Layout->parentWidget());
+
+        NewLabel->setText(Label);
+
+        Layout->addRow(NewLabel,NewCtrl);
+
+        QObject::connect(NewCtrl,SIGNAL(itemSelectionChanged()),NewCtrl,SLOT(ColumnViewInputSelectionChanged()));
+
+        NewPIC->Ctrl=(t_PIUIColumnViewInputCtrl *)NewCtrl;
+        NewPIC->Label=(t_PIUILabelCtrl *)NewLabel;
+        NewPIC->UIData=NULL;
+    }
+    catch(...)
+    {
+        if(NewCtrl!=NULL)
+            delete NewCtrl;
+        if(NewLabel!=NULL)
+            delete NewLabel;
+
+        return NULL;
+    }
+
+    return (struct PI_ColumnViewInput *)NewPIC;
+}
+
+void UIPI_FreeColumnViewInput(struct PI_ColumnViewInput *UICtrl)
+{
+    PIQColumnViewInput *Ctrl;
+    QLabel *Label;
+
+    Ctrl=(PIQColumnViewInput *)UICtrl->Ctrl;
+    Label=(QLabel *)UICtrl->Label;
+
+    delete Ctrl;
+    delete Label;
+    delete UICtrl;
+}
+
+void UIPI_ShowColumnViewInput(struct PI_ColumnViewInput *UICtrl,bool Show)
+{
+    PIQColumnViewInput *Ctrl;
+    QLabel *Label;
+
+    Ctrl=(PIQColumnViewInput *)UICtrl->Ctrl;
+    Label=(QLabel *)UICtrl->Label;
+
+    Ctrl->setVisible(Show);
+    Label->setVisible(Show);
+}
+
+void PIQColumnViewInput::ColumnViewInputSelectionChanged()
+{
+    QList<QTreeWidgetItem *> Sel;
+    struct PICVEvent Event;
+    int Row;
+
+    Sel=this->selectedItems();
+    if(!Sel.isEmpty())
+        Row=this->indexOfTopLevelItem(Sel.first());
+    else
+        Row=-1;
+
+    if(EventCB!=NULL)
+    {
+        Event.EventType=e_PIECV_IndexChanged;
+        Event.Index=Row;
+
+        EventCB(&Event,UserData);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIPI_AddButtonInput
+ *
+ * SYNOPSIS:
+ *    struct PI_ButtonInput *UIPI_AddButtonInput(
+ *              t_UIContainerCtrl *ContainerWidget,const char *Label,
+ *              void (*EventCB)(const struct PIButtonEvent *Event,void *UserData),
+ *              void *UserData);
+ *
+ * PARAMETERS:
+ *    ContainerWidget [I] -- The parent widget to add this combox box to
+ *    Label [I] -- The label to apply to this box
+ *    EventCB [I] -- A callback for events.
+ *    UserData [I] -- User data that will be sent to the 'EventCB'
+ *
+ * FUNCTION:
+ *    This is standard version of button box.
+ *
+ * RETURNS:
+ *    The button input handle.
+ *
+ * SEE ALSO:
+ *    UIPI_FreeButtonInput()
+ ******************************************************************************/
+struct PI_ButtonInput *UIPI_AddButtonInput(t_UIContainerCtrl *ContainerWidget,
+        const char *Label,
+        void (*EventCB)(const struct PIButtonEvent *Event,void *UserData),
+        void *UserData)
+{
+    struct PI_ButtonInput *NewPIC;
+    QFormLayout *Layout=(QFormLayout *)ContainerWidget;
+    PIQPushButtonInput *NewCtrl;
+    QLabel *NewLabel;
+    QSizePolicy sizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
+
+    NewCtrl=NULL;
+    NewLabel=NULL;
+    try
+    {
+        NewPIC=new PI_ButtonInput();
+        NewCtrl=new PIQPushButtonInput(Label,Layout->parentWidget());
+
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(NewCtrl->sizePolicy().hasHeightForWidth());
+        NewCtrl->setSizePolicy(sizePolicy);
+
+        NewCtrl->EventCB=EventCB;
+        NewCtrl->UserData=UserData;
+        NewLabel=new QLabel(Layout->parentWidget());
+
+        NewLabel->setText("");
+
+        Layout->addRow(NewLabel,NewCtrl);
+
+        QObject::connect(NewCtrl,SIGNAL(clicked(bool)),NewCtrl,SLOT(Buttonclicked(bool)));
+
+        NewPIC->Ctrl=(t_PIUIButtonInputCtrl *)NewCtrl;
+        NewPIC->Label=(t_PIUILabelCtrl *)NewLabel;
+        NewPIC->UIData=NULL;
+    }
+    catch(...)
+    {
+        if(NewCtrl!=NULL)
+            delete NewCtrl;
+        if(NewLabel!=NULL)
+            delete NewLabel;
+
+        return NULL;
+    }
+
+    return (struct PI_ButtonInput *)NewPIC;
+}
+
+void UIPI_FreeButtonInput(struct PI_ButtonInput *UICtrl)
+{
+    PIQPushButtonInput *Ctrl;
+    QLabel *Label;
+
+    Ctrl=(PIQPushButtonInput *)UICtrl->Ctrl;
+    Label=(QLabel *)UICtrl->Label;
+
+    delete Ctrl;
+    delete Label;
+    delete UICtrl;
+}
+
+void UIPI_ShowButtonInput(struct PI_ButtonInput *UICtrl,bool Show)
+{
+    PIQPushButtonInput *Ctrl;
+    QLabel *Label;
+
+    Ctrl=(PIQPushButtonInput *)UICtrl->Ctrl;
+    Label=(QLabel *)UICtrl->Label;
+
+    Ctrl->setVisible(Show);
+    Label->setVisible(Show);
+}
+
+void PIQPushButtonInput::Buttonclicked(bool checked)
+{
+    struct PIButtonEvent Event;
+
+    if(EventCB!=NULL)
+    {
+        Event.EventType=e_PIEButton_Press;
+
+        EventCB(&Event,UserData);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIPI_AddIndicator
+ *
+ * SYNOPSIS:
+ *    struct PI_Indicator *UIPI_AddIndicator(
+ *              t_UIContainerCtrl *ContainerWidget,const char *Label);
+ *
+ * PARAMETERS:
+ *    ContainerWidget [I] -- The parent widget to add this combox box to
+ *    Label [I] -- The label to apply to this box
+ *
+ * FUNCTION:
+ *    This is standard version of an indicator.
+ *
+ * RETURNS:
+ *    The indicator handle.
+ *
+ * SEE ALSO:
+ *    UIPI_FreeIndicator()
+ ******************************************************************************/
+struct PI_Indicator *UIPI_AddIndicator(t_UIContainerCtrl *ContainerWidget,
+        const char *Label)
+{
+    struct PI_Indicator *NewPIC;
+    QFormLayout *Layout=(QFormLayout *)ContainerWidget;
+    PIQIndicator *NewCtrl;
+    QLabel *NewLabel;
+
+    NewCtrl=NULL;
+    NewLabel=NULL;
+    try
+    {
+        NewPIC=new PI_Indicator();
+        NewCtrl=new PIQIndicator(Layout->parentWidget());
+        NewCtrl->On=false;
+//NewCtrl->On=true;
+
+        NewLabel=new QLabel(Layout->parentWidget());
+
+        NewLabel->setText(Label);
+
+        Layout->addRow(NewLabel,NewCtrl);
+
+        NewPIC->Ctrl=(t_PIUIIndicatorCtrl *)NewCtrl;
+        NewPIC->Label=(t_PIUILabelCtrl *)NewLabel;
+        NewPIC->UIData=NULL;
+    }
+    catch(...)
+    {
+        if(NewCtrl!=NULL)
+            delete NewCtrl;
+        if(NewLabel!=NULL)
+            delete NewLabel;
+
+        return NULL;
+    }
+
+    return (struct PI_Indicator *)NewPIC;
+}
+
+void UIPI_FreeIndicator(struct PI_Indicator *UICtrl)
+{
+    PIQIndicator *Ctrl;
+    QLabel *Label;
+
+    Ctrl=(PIQIndicator *)UICtrl->Ctrl;
+    Label=(QLabel *)UICtrl->Label;
+
+    delete Ctrl;
+    delete Label;
+    delete UICtrl;
+}
+
+void UIPI_SetIndicator(t_PIUIIndicatorCtrl *UICtrl,bool On)
+{
+    PIQIndicator *Ctrl=(PIQIndicator *)UICtrl;
+
+    Ctrl->On=On;
+    Ctrl->update();
+}
+
+void UIPI_ShowIndicator(struct PI_Indicator *UICtrl,bool Show)
+{
+    PIQIndicator *Ctrl;
+    QLabel *Label;
+
+    Ctrl=(PIQIndicator *)UICtrl->Ctrl;
+    Label=(QLabel *)UICtrl->Label;
+
+    Ctrl->setVisible(Show);
+    Label->setVisible(Show);
+}
+
+void PIQIndicator::paintEvent(QPaintEvent *event)
+{
+    QPainter painter(this);
+    QBrush brush;
+    int BarWidth;
+    int BarHeight;
+    int Left;
+    int Right;
+    int Top;
+    int Bottom;
+    QColor BgColor;
+    QColor TopColor;
+    QColor BottomColor;
+    int BaseColor;
+
+    brush=painter.brush();
+
+    BarWidth=this->width()-1;
+    BarHeight=this->height()-1;
+
+    Left=0;
+    Top=0;
+    Right=25;
+    Bottom=10;
+
+//    Left+=BarWidth/2-Right/2;
+//    Right+=BarWidth/2-Right/2;
+
+    Top+=BarHeight/2-Bottom/2;
+    Bottom+=BarHeight/2-Bottom/2;
+
+//FF -> E4 -> C9
+//89 -> 6e -> 53
+    if(On)
+    {
+        BaseColor=0xE4;
+        BgColor.setRgb(BaseColor,0x00,0x00);
+        TopColor.setRgb(BaseColor+0x1B,0x00,0x00);
+        BottomColor.setRgb(BaseColor-0x1B,0x00,0x00);
+    }
+    else
+    {
+        BaseColor=0x6E;
+        BgColor.setRgb(BaseColor,BaseColor,BaseColor);
+        TopColor.setRgb(BaseColor+0x1B,BaseColor+0x1B,BaseColor+0x1B);
+        BottomColor.setRgb(BaseColor-0x1B,BaseColor-0x1B,BaseColor-0x1B);
+    }
+
+    painter.setPen(QColor(0x00,0x00,0x00));
+    painter.drawRect(Left,Top,Right-Left,Bottom-Top);
+
+    brush.setColor(BgColor);
+    brush.setStyle(Qt::SolidPattern);
+    painter.fillRect(Left+2,Top+2,      Right-Left-3,Bottom-Top-3,brush);
+
+    /* Draw the border */
+    painter.setPen(TopColor);
+    painter.drawLine(Left+1,Bottom-1,   Left+1,Top+1);
+    painter.drawLine(Left+1,Top+1,      Right-1,Top+1);
+
+    painter.setPen(BottomColor);
+    painter.drawLine(Right-1,Top+2,     Right-1,Bottom-1);
+    painter.drawLine(Left+2,Bottom-1,   Right-1,Bottom-1);
+
+//        brush.setColor(QColor(0xE4,0x00,0x00));
+//        brush.setStyle(Qt::SolidPattern);
+//        painter.fillRect(Left+2,Top+2,      Right-Left-3,Bottom-Top-3,brush);
+//
+//        /* Draw the border */
+//        painter.setPen(QColor(0xFF,0x00,0x00));
+//        painter.drawLine(Left+1,Bottom-1,   Left+1,Top+1);
+//        painter.drawLine(Left+1,Top+1,      Right-1,Top+1);
+//
+//        painter.setPen(QColor(0xC9,0x00,0x00));
+//        painter.drawLine(Right-1,Top+2,     Right-1,Bottom-1);
+//        painter.drawLine(Left+2,Bottom-1,   Right-1,Bottom-1);
+//    }
+//    else
+//    {
+//        brush.setColor(QColor(0x9E,0x9E,0x9E));
+//        brush.setStyle(Qt::SolidPattern);
+//        painter.fillRect(Left+2,Top+2,      Right-Left-3,Bottom-Top-3,brush);
+//
+//        /* Draw the border */
+//        painter.setPen(QColor(0xB9,0xB9,0xB9));
+//        painter.drawLine(Left+1,Bottom-1,   Left+1,Top+1);
+//        painter.drawLine(Left+1,Top+1,      Right-1,Top+1);
+//
+//        painter.setPen(QColor(0x83,0x83,0x83));
+//        painter.drawLine(Right-1,Top+2,     Right-1,Bottom-1);
+//        painter.drawLine(Left+2,Bottom-1,   Right-1,Bottom-1);
+//    }
+}
+

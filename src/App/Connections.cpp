@@ -2462,6 +2462,31 @@ class TheMainWindow *Connection::GetMainWindowHandle(void)
 
 /*******************************************************************************
  * NAME:
+ *    Connection::GetIOHandle
+ *
+ * SYNOPSIS:
+ *    t_IOSystemHandle *Connection::GetIOHandle(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets access to the IO handle that is being used with
+ *    this connection.
+ *
+ * RETURNS:
+ *    The IO handle used by this connection.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_IOSystemHandle *Connection::GetIOHandle(void)
+{
+    return IOHandle;
+}
+
+/*******************************************************************************
+ * NAME:
  *    Connection::GiveFocus
  *
  * SYNOPSIS:

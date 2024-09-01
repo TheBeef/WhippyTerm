@@ -179,83 +179,6 @@
                     <property name="currentIndex">
                      <number>0</number>
                     </property>
-                    <widget class="QWidget" name="tab_ConnectionOptions">
-                     <attribute name="title">
-                      <string>Con Options</string>
-                     </attribute>
-                     <layout class="QVBoxLayout" name="verticalLayout_5">
-                      <item>
-                       <layout class="QFormLayout" name="formLayout_ConOptions">
-                        <property name="horizontalSpacing">
-                         <number>6</number>
-                        </property>
-                        <property name="verticalSpacing">
-                         <number>6</number>
-                        </property>
-                        <property name="leftMargin">
-                         <number>9</number>
-                        </property>
-                        <property name="rightMargin">
-                         <number>9</number>
-                        </property>
-                        <property name="bottomMargin">
-                         <number>9</number>
-                        </property>
-                       </layout>
-                      </item>
-                      <item>
-                       <spacer name="verticalSpacer">
-                        <property name="orientation">
-                         <enum>Qt::Vertical</enum>
-                        </property>
-                        <property name="sizeHint" stdset="0">
-                         <size>
-                          <width>20</width>
-                          <height>40</height>
-                         </size>
-                        </property>
-                       </spacer>
-                      </item>
-                      <item>
-                       <widget class="QWidget" name="widget_3" native="true">
-                        <layout class="QHBoxLayout" name="horizontalLayout_10">
-                         <property name="leftMargin">
-                          <number>0</number>
-                         </property>
-                         <property name="topMargin">
-                          <number>0</number>
-                         </property>
-                         <property name="rightMargin">
-                          <number>0</number>
-                         </property>
-                         <property name="bottomMargin">
-                          <number>0</number>
-                         </property>
-                         <item>
-                          <widget class="QPushButton" name="pushButton_CO_Apply">
-                           <property name="text">
-                            <string>Apply</string>
-                           </property>
-                          </widget>
-                         </item>
-                         <item>
-                          <spacer name="horizontalSpacer">
-                           <property name="orientation">
-                            <enum>Qt::Horizontal</enum>
-                           </property>
-                           <property name="sizeHint" stdset="0">
-                            <size>
-                             <width>40</width>
-                             <height>20</height>
-                            </size>
-                           </property>
-                          </spacer>
-                         </item>
-                        </layout>
-                       </widget>
-                      </item>
-                     </layout>
-                    </widget>
                     <widget class="QWidget" name="Capture_Tab">
                      <attribute name="title">
                       <string>Capture</string>
@@ -718,6 +641,140 @@
                          </item>
                          <item>
                           <widget class="QProgressBar" name="progressBar_DownloadProgress"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                    <widget class="QWidget" name="tab_ConnectionOptions">
+                     <attribute name="title">
+                      <string>Options</string>
+                     </attribute>
+                     <layout class="QVBoxLayout" name="verticalLayout_5">
+                      <item>
+                       <widget class="QGroupBox" name="groupBox_8">
+                        <property name="title">
+                         <string>Connection Options</string>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_18">
+                         <item>
+                          <layout class="QFormLayout" name="formLayout_ConOptions">
+                           <property name="horizontalSpacing">
+                            <number>6</number>
+                           </property>
+                           <property name="verticalSpacing">
+                            <number>6</number>
+                           </property>
+                           <property name="leftMargin">
+                            <number>9</number>
+                           </property>
+                           <property name="rightMargin">
+                            <number>9</number>
+                           </property>
+                           <property name="bottomMargin">
+                            <number>9</number>
+                           </property>
+                          </layout>
+                         </item>
+                         <item>
+                          <spacer name="verticalSpacer">
+                           <property name="orientation">
+                            <enum>Qt::Vertical</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>20</width>
+                             <height>40</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                         <item>
+                          <widget class="QWidget" name="widget_3" native="true">
+                           <layout class="QHBoxLayout" name="horizontalLayout_10">
+                            <property name="leftMargin">
+                             <number>0</number>
+                            </property>
+                            <property name="topMargin">
+                             <number>0</number>
+                            </property>
+                            <property name="rightMargin">
+                             <number>0</number>
+                            </property>
+                            <property name="bottomMargin">
+                             <number>0</number>
+                            </property>
+                            <item>
+                             <widget class="QPushButton" name="pushButton_CO_Apply">
+                              <property name="text">
+                               <string>Apply</string>
+                              </property>
+                             </widget>
+                            </item>
+                            <item>
+                             <spacer name="horizontalSpacer">
+                              <property name="orientation">
+                               <enum>Qt::Horizontal</enum>
+                              </property>
+                              <property name="sizeHint" stdset="0">
+                               <size>
+                                <width>40</width>
+                                <height>20</height>
+                               </size>
+                              </property>
+                             </spacer>
+                            </item>
+                           </layout>
+                          </widget>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                    <widget class="QWidget" name="AuxControl_Tab">
+                     <attribute name="title">
+                      <string>Aux Control</string>
+                     </attribute>
+                     <layout class="QVBoxLayout" name="verticalLayout_19">
+                      <item>
+                       <widget class="QGroupBox" name="groupBox_9">
+                        <property name="title">
+                         <string>Connection Aux Controls</string>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_20">
+                         <item>
+                          <layout class="QFormLayout" name="formLayout_ConAux">
+                           <property name="horizontalSpacing">
+                            <number>6</number>
+                           </property>
+                           <property name="verticalSpacing">
+                            <number>0</number>
+                           </property>
+                           <property name="leftMargin">
+                            <number>9</number>
+                           </property>
+                           <property name="rightMargin">
+                            <number>9</number>
+                           </property>
+                           <property name="bottomMargin">
+                            <number>9</number>
+                           </property>
+                          </layout>
+                         </item>
+                         <item>
+                          <spacer name="verticalSpacer_7">
+                           <property name="orientation">
+                            <enum>Qt::Vertical</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>20</width>
+                             <height>40</height>
+                            </size>
+                           </property>
+                          </spacer>
                          </item>
                         </layout>
                        </widget>

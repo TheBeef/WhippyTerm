@@ -67,10 +67,13 @@ extern "C"
     /* For testing we do all plugins */
     unsigned int HTTPClient_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
     unsigned int RemoteSPI_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
-    unsigned int TestLB_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
     unsigned int TestFile_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
 #endif
-    
+
+#ifdef DEBUG
+    unsigned int TestLB_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+#endif
+
     unsigned int BASIC_HEX_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
 }
 
@@ -124,7 +127,10 @@ void RegisterStdPlugins(void)
     /* For testing we do all plugins */
     HTTPClient_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
     RemoteSPI_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
-    TestLB_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
     TestFile_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+#endif
+
+#ifdef DEBUG
+    TestLB_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
 #endif
 }

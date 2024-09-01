@@ -63,15 +63,15 @@ PG_BOOL UDPClient_Init(void);
 const struct IODriverInfo *UDPClient_GetDriverInfo(unsigned int *SizeOfInfo);
 const struct IODriverDetectedInfo *UDPClient_DetectDevices(void);
 void UDPClient_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices);
-t_ConnectionOptionsWidgetsType *UDPClient_ConnectionOptionsWidgets_AllocWidgets(
+t_ConnectionWidgetsType *UDPClient_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle);
-void UDPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *ConOptions,
+void UDPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle);
-void UDPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *ConOptions,
+void UDPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
             t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
             t_PIKVList *Options);
 void UDPClient_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionOptionsWidgetsType *ConOptions,
+        t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options);
 PG_BOOL UDPClient_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,
@@ -106,6 +106,8 @@ const struct IODriverAPI g_UDPClientPluginAPI=
     UDPClient_Write,
     UDPClient_ChangeOptions,
     UDPClient_Transmit,
+    NULL,                                               // ConnectionAuxCtrlWidgets_AllocWidgets
+    NULL,                                               // ConnectionAuxCtrlWidgets_FreeWidgets
 };
 
 struct IODriverInfo m_UDPClientInfo=
@@ -312,7 +314,7 @@ void UDPClient_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices)
  *    UDPClient_ConnectionOptionsWidgets_AllocWidgets
  *
  * SYNOPSIS:
- *    t_ConnectionOptionsWidgetsType *UDPClient_ConnectionOptionsWidgets_AllocWidgets(
+ *    t_ConnectionWidgetsType *UDPClient_ConnectionOptionsWidgets_AllocWidgets(
  *          t_WidgetSysHandle *WidgetHandle);
  *
  * PARAMETERS:
@@ -329,7 +331,7 @@ void UDPClient_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices)
  * RETURNS:
  *    The private options data that you want to use.  This is a private
  *    structure that you allocate and then cast to
- *    (t_ConnectionOptionsWidgetsType *) when you return.
+ *    (t_ConnectionWidgetsType *) when you return.
  *
  * NOTES:
  *    This function must be reentrant.  The system may allocate many sets
@@ -338,7 +340,7 @@ void UDPClient_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_ConnectionOptionsWidgetsType *UDPClient_ConnectionOptionsWidgets_AllocWidgets(
+t_ConnectionWidgetsType *UDPClient_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle)
 {
     struct UDPClient_ConWidgets *ConWidgets;
@@ -398,7 +400,7 @@ t_ConnectionOptionsWidgetsType *UDPClient_ConnectionOptionsWidgets_AllocWidgets(
         return NULL;
     }
 
-    return (t_ConnectionOptionsWidgetsType *)ConWidgets;
+    return (t_ConnectionWidgetsType *)ConWidgets;
 }
 
 /*******************************************************************************
@@ -406,7 +408,7 @@ t_ConnectionOptionsWidgetsType *UDPClient_ConnectionOptionsWidgets_AllocWidgets(
  *    UDPClient_ConnectionOptionsWidgets_FreeWidgets
  *
  * SYNOPSIS:
- *    void UDPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *
+ *    void UDPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *
  *              ConOptions,t_WidgetSysHandle *WidgetHandle);
  *
  * PARAMETERS:
@@ -423,7 +425,7 @@ t_ConnectionOptionsWidgetsType *UDPClient_ConnectionOptionsWidgets_AllocWidgets(
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UDPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *ConOptions,
+void UDPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle)
 {
     struct UDPClient_ConWidgets *ConWidgets=(struct UDPClient_ConWidgets *)ConOptions;
@@ -448,7 +450,7 @@ void UDPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsTy
  *
  * SYNOPSIS:
  *      void UDPClient_ConnectionOptionsWidgets_StoreUI(
- *              t_ConnectionOptionsWidgetsType *ConOptions,
+ *              t_ConnectionWidgetsType *ConOptions,
  *              t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
  *              t_PIKVList *Options);
  *
@@ -471,7 +473,7 @@ void UDPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsTy
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UDPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *ConOptions,
+void UDPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options)
 {
@@ -523,7 +525,7 @@ void UDPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *
  *
  * SYNOPSIS:
  *    void UDPClient_ConnectionOptionsWidgets_UpdateUI(
- *          t_ConnectionOptionsWidgetsType *ConOptions,
+ *          t_ConnectionWidgetsType *ConOptions,
  *          t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
  *          t_PIKVList *Options);
  *
@@ -547,7 +549,7 @@ void UDPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *
  *    ConnectionOptionsWidgets_StoreUI()
  ******************************************************************************/
 void UDPClient_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionOptionsWidgetsType *ConOptions,
+        t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options)
 {

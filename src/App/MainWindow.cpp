@@ -80,10 +80,11 @@ typedef enum
 /* Must match UI */
 typedef enum
 {
-    e_LeftPanelTabIndexes_ConnectionOptions=0,
-    e_LeftPanelTabIndexes_Capture,
+    e_LeftPanelTabIndexes_Capture=0,
     e_LeftPanelTabIndexes_Upload,
     e_LeftPanelTabIndexes_Download,
+    e_LeftPanelTabIndexes_ConnectionOptions=0,
+    e_LeftPanelTabIndexes_AuxControls,
     e_LeftPanelTabIndexes_Bridge,
     e_LeftPanelTabIndexesMAX
 } e_LeftPanelTabIndexesType;
@@ -267,6 +268,7 @@ TheMainWindow::TheMainWindow()
     HexDisplayPanel.Setup(this,UIWin);
     SendBuffersPanel.Setup(this,UIWin);
     BridgePanel.Setup(this,UIWin);
+    AuxControlsPanel.Setup(this,UIWin);
 
     EarlyRestoreWindowSize();   // Must be at the end because it (may) call Init()
 }
@@ -343,6 +345,8 @@ void TheMainWindow::ShowWindow(void)
  ******************************************************************************/
 void TheMainWindow::Init(void)
 {
+    t_UITabCtrl *PanelCtrl;
+
     /* Restore the session data */
     RestoreFromSession();
     RestoreFromSettings();
@@ -390,6 +394,17 @@ void TheMainWindow::Init(void)
     HexDisplayPanel.ActivateCtrls(false);
     SendBuffersPanel.ActivateCtrls(false);
     BridgePanel.ActivateCtrls(false);
+    AuxControlsPanel.ActivateCtrls(false);
+
+    /* Force us to the default selected tabs */
+    PanelCtrl=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_LeftPanel);
+    UITabCtrlMakeTabActiveUsingIndex(PanelCtrl,e_LeftPanelTabIndexes_Capture);
+
+    PanelCtrl=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_BottomPanel);
+    UITabCtrlMakeTabActiveUsingIndex(PanelCtrl,e_BottomPanelTabIndexes_Hex);
+
+    PanelCtrl=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_RightPanel);
+    UITabCtrlMakeTabActiveUsingIndex(PanelCtrl,e_RightPanelTabIndexes_StopWatch);
 }
 
 /*******************************************************************************
@@ -739,8 +754,6 @@ class Connection *TheMainWindow::AllocNewTab(const char *TabLabel,
         if(NewConnection==NULL)
             throw("Failed to allocate a new connection");
 
-        
-
         if(UseContainer)
         {
             UIShowHideTabCtrl(MainTabs,false);
@@ -764,6 +777,8 @@ class Connection *TheMainWindow::AllocNewTab(const char *TabLabel,
         SetActiveTab(NewConnection);
 
         NewConnection->SetConnectionOptions(Options);
+
+        AuxControlsPanel.NewConnection(NewConnection);
 
         NewConnection->FinalizeNewConnection();
     }
@@ -944,6 +959,9 @@ void TheMainWindow::FreeTab(class Connection *Con)
        when we remove the tab the next tab over will become the active
        tab (because we get a tab changed event when we free the tab) */
     SetActiveConnection(NULL);
+
+    AuxControlsPanel.RemoveConnection(Con);
+
     Con_FreeConnection(Con);
     UITabCtrlRemoveTab(MainTabs,(uintptr_t)Con);
 
@@ -1351,6 +1369,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     HexDisplayPanel.ActivateCtrls(ActivatePanels);
     SendBuffersPanel.ActivateCtrls(ActivatePanels);
     BridgePanel.ActivateCtrls(ActivatePanels);
+    AuxControlsPanel.ActivateCtrls(ActivatePanels);
 }
 
 /*******************************************************************************
@@ -1714,6 +1733,7 @@ void TheMainWindow::RemoveAllTabPanelControls(void)
     HexDisplayPanel.ActivateCtrls(false);
     SendBuffersPanel.ActivateCtrls(false);
     BridgePanel.ActivateCtrls(false);
+    AuxControlsPanel.ActivateCtrls(false);
 }
 
 /*******************************************************************************
@@ -2390,9 +2410,6 @@ void TheMainWindow::ShowPanel(e_MWPanelsType PanelID)
         case e_MWPanels_ConnectionOptions:
             LeftPanelTab=e_LeftPanelTabIndexes_ConnectionOptions;
         break;
-        case e_MWPanels_StopWatch:
-            RightPanelTab=e_RightPanelTabIndexes_StopWatch;
-        break;
         case e_MWPanels_Capture:
             LeftPanelTab=e_LeftPanelTabIndexes_Capture;
         break;
@@ -2405,6 +2422,14 @@ void TheMainWindow::ShowPanel(e_MWPanelsType PanelID)
         case e_MWPanels_Bridge:
             LeftPanelTab=e_LeftPanelTabIndexes_Bridge;
         break;
+        case e_MWPanels_AuxControls:
+            LeftPanelTab=e_LeftPanelTabIndexes_AuxControls;
+        break;
+
+        case e_MWPanels_StopWatch:
+            RightPanelTab=e_RightPanelTabIndexes_StopWatch;
+        break;
+
         case e_MWPanels_Hex:
             BottomPanelTab=e_BottomPanelTabIndexes_Hex;
         break;
@@ -2579,6 +2604,7 @@ void TheMainWindow::SetActiveConnection(class Connection *NewCon)
     SendBuffersPanel.ConnectionAbout2Changed();
     BridgePanel.ConnectionAbout2Changed();
     ConnectionOptionsPanel.ConnectionAbout2Changed();
+    AuxControlsPanel.ConnectionAbout2Changed();
 
     ActiveCon=NewCon;
 
@@ -2591,6 +2617,7 @@ void TheMainWindow::SetActiveConnection(class Connection *NewCon)
     SendBuffersPanel.ConnectionChanged();
     BridgePanel.ConnectionChanged();
     ConnectionOptionsPanel.ConnectionChanged();
+    AuxControlsPanel.ConnectionChanged();
 
     RethinkActiveTabControls();
 }

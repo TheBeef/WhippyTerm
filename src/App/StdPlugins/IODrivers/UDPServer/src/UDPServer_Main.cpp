@@ -75,15 +75,15 @@ PG_BOOL UDPServer_Init(void);
 const struct IODriverInfo *UDPServer_GetDriverInfo(unsigned int *SizeOfInfo);
 const struct IODriverDetectedInfo *UDPServer_DetectDevices(void);
 void UDPServer_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices);
-t_ConnectionOptionsWidgetsType *UDPServer_ConnectionOptionsWidgets_AllocWidgets(
+t_ConnectionWidgetsType *UDPServer_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle);
-void UDPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *ConOptions,
+void UDPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle);
-void UDPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *ConOptions,
+void UDPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
             t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
             t_PIKVList *Options);
 void UDPServer_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionOptionsWidgetsType *ConOptions,
+        t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options);
 PG_BOOL UDPServer_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,
@@ -118,6 +118,8 @@ const struct IODriverAPI g_UDPServerPluginAPI=
     UDPServer_Write,
     UDPServer_ChangeOptions,
     NULL,                                               // Transmit
+    NULL,                                               // ConnectionAuxCtrlWidgets_AllocWidgets
+    NULL,                                               // ConnectionAuxCtrlWidgets_FreeWidgets
 };
 extern const struct IODriverAPI g_UDPServerPluginAPI;
 
@@ -325,7 +327,7 @@ void UDPServer_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices)
  *    UDPServer_ConnectionOptionsWidgets_AllocWidgets
  *
  * SYNOPSIS:
- *    t_ConnectionOptionsWidgetsType *UDPServer_ConnectionOptionsWidgets_AllocWidgets(
+ *    t_ConnectionWidgetsType *UDPServer_ConnectionOptionsWidgets_AllocWidgets(
  *          t_WidgetSysHandle *WidgetHandle);
  *
  * PARAMETERS:
@@ -344,7 +346,7 @@ void UDPServer_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices)
  * RETURNS:
  *    The private options data that you want to use.  This is a private
  *    structure that you allocate and then cast to
- *    (t_ConnectionOptionsWidgetsType *) when you return.
+ *    (t_ConnectionWidgetsType *) when you return.
  *
  * NOTES:
  *    This function must be reentrant.  The system may allocate many sets
@@ -353,7 +355,7 @@ void UDPServer_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_ConnectionOptionsWidgetsType *UDPServer_ConnectionOptionsWidgets_AllocWidgets(
+t_ConnectionWidgetsType *UDPServer_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle)
 {
     struct UDPServer_ConWidgets *ConWidgets;
@@ -421,7 +423,7 @@ t_ConnectionOptionsWidgetsType *UDPServer_ConnectionOptionsWidgets_AllocWidgets(
         return NULL;
     }
 
-    return (t_ConnectionOptionsWidgetsType *)ConWidgets;
+    return (t_ConnectionWidgetsType *)ConWidgets;
 }
 
 /*******************************************************************************
@@ -429,7 +431,7 @@ t_ConnectionOptionsWidgetsType *UDPServer_ConnectionOptionsWidgets_AllocWidgets(
  *    UDPServer_ConnectionOptionsWidgets_FreeWidgets
  *
  * SYNOPSIS:
- *    void UDPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *
+ *    void UDPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *
  *              ConOptions,t_WidgetSysHandle *WidgetHandle);
  *
  * PARAMETERS:
@@ -446,7 +448,7 @@ t_ConnectionOptionsWidgetsType *UDPServer_ConnectionOptionsWidgets_AllocWidgets(
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UDPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsType *ConOptions,
+void UDPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle)
 {
     struct UDPServer_ConWidgets *ConWidgets=(struct UDPServer_ConWidgets *)ConOptions;
@@ -471,7 +473,7 @@ void UDPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsTy
  *
  * SYNOPSIS:
  *      void UDPServer_ConnectionOptionsWidgets_StoreUI(
- *              t_ConnectionOptionsWidgetsType *ConOptions,
+ *              t_ConnectionWidgetsType *ConOptions,
  *              t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
  *              t_PIKVList *Options);
  *
@@ -494,7 +496,7 @@ void UDPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionOptionsWidgetsTy
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UDPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *ConOptions,
+void UDPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options)
 {
@@ -548,7 +550,7 @@ void UDPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *
  *
  * SYNOPSIS:
  *    void UDPServer_ConnectionOptionsWidgets_UpdateUI(
- *          t_ConnectionOptionsWidgetsType *ConOptions,
+ *          t_ConnectionWidgetsType *ConOptions,
  *          t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
  *          t_PIKVList *Options);
  *
@@ -572,7 +574,7 @@ void UDPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionOptionsWidgetsType *
  *    ConnectionOptionsWidgets_StoreUI()
  ******************************************************************************/
 void UDPServer_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionOptionsWidgetsType *ConOptions,
+        t_ConnectionWidgetsType *ConOptions,
         t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
         t_PIKVList *Options)
 {

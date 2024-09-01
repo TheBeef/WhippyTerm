@@ -39,6 +39,9 @@
 #include <QLineEdit>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
+#include <QTreeWidget>
+#include <QPushButton>
+#include <QWidget>
 
 /***  DEFINES                          ***/
 
@@ -134,6 +137,46 @@ public:
 
 public slots:
     void DoubleInputChanged(double i);
+};
+
+class PIQColumnViewInput : public QTreeWidget
+{
+    Q_OBJECT
+
+public:
+    PIQColumnViewInput(QWidget *parent=0) : QTreeWidget(parent) {}
+
+    void (*EventCB)(const struct PICVEvent *Event,void *UserData);
+    void *UserData;
+
+public slots:
+    void ColumnViewInputSelectionChanged();
+};
+
+class PIQPushButtonInput : public QPushButton
+{
+    Q_OBJECT
+
+public:
+    PIQPushButtonInput(const QString &text,QWidget *parent=0) : QPushButton(text,parent) {}
+
+    void (*EventCB)(const struct PIButtonEvent *Event,void *UserData);
+    void *UserData;
+
+public slots:
+    void Buttonclicked(bool checked);
+};
+
+class PIQIndicator : public QFrame
+{
+    Q_OBJECT
+
+public:
+    PIQIndicator(QWidget *parent=0) : QFrame(parent) {}
+    bool On;
+
+protected:
+    void paintEvent(QPaintEvent *event);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

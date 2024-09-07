@@ -346,5 +346,7 @@ int UIColumnViewAddRow(t_UIColumnView *ColumnView);
 void UIColumnViewSetColumnText(t_UIColumnView *ColumnView,int Column,int Row,const char *Str);
 void UIColumnViewSelectRow(t_UIColumnView *ColumnView,int Row);
 void UIColumnViewClearSelection(t_UIColumnView *ColumnView);
+bool UIColumnViewHasSelectedEntry(t_UIColumnView *ColumnView);
+int UIGetColumnViewSelectedEntry(t_UIColumnView *ColumnView);
 
 #endif   /* end of "#ifndef __UICONTROL_H_" */

@@ -1627,3 +1627,20 @@ void UIColumnViewClearSelection(t_UIColumnView *ColumnView)
     TreeWidget->selectionModel()->clearSelection();
     TreeWidget->blockSignals(false);
 }
+
+int UIGetColumnViewSelectedEntry(t_UIColumnView *ColumnView)
+{
+    QTreeWidget *TreeWidget=(QTreeWidget *)ColumnView;
+    QTreeWidgetItem *TreeItem;
+
+    if(TreeWidget->selectedItems().isEmpty())
+        return -1;
+    TreeItem=TreeWidget->selectedItems().first();
+    return TreeWidget->indexOfTopLevelItem(TreeItem);
+}
+
+bool UIColumnViewHasSelectedEntry(t_UIColumnView *ColumnView)
+{
+    return UIGetColumnViewSelectedEntry(ColumnView)>=0;
+}
+

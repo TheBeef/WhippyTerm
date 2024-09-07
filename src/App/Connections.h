@@ -412,6 +412,8 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void SetTransmitDelayPerByte(unsigned int ms);
         void SetTransmitDelayPerLine(unsigned int ms);
 
+        bool IsConnectionBinary(void);
+
         /* Com Test */
         void SetupComTest(bool Sender,uint32_t PacketLen,uint32_t PacketsCount,uint32_t Delay,uint8_t *PacketData);
         bool StartComTest(void);
@@ -459,6 +461,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         int Bookmark;   // What bookmark is connected to this connection
         int ZoomLevel;
         int FontSize;
+        bool BinaryConnection;
 
         void FreeConnectionResources(bool FreeDB);
         void HandleCaptureIncomingData(const uint8_t *Inbuff,int bytes);

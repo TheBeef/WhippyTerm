@@ -384,6 +384,7 @@ Connection::Connection(const char *URI)
     MW=NULL;
     BridgedTo=NULL;
     BridgedFrom=NULL;
+    BinaryConnection=false;
 
     Bookmark=0;
     ZoomLevel=0;
@@ -688,6 +689,7 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
                 }
             }
 
+            BinaryConnection=!UseText;
             if(UseText)
             {
                 /* We are using a text display */
@@ -6377,4 +6379,30 @@ void Connection::InformOfSmartClipTimeout(void)
 
     /* User didn't press the ^V again so we do a paste */
     MW->ExeCmd(e_Cmd_Paste);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::IsConnectionBinary
+ *
+ * SYNOPSIS:
+ *    bool Connection::IsConnectionBinary(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets if a connection is a text connection or a binary
+ *    connection.
+ *
+ * RETURNS:
+ *    true -- The connection is binary
+ *    false -- The connection is text
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::IsConnectionBinary(void)
+{
+    return BinaryConnection;
 }

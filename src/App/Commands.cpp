@@ -147,6 +147,10 @@ const char *m_CmdNames[]=
     "SettingsQuickJumpTermEmu",             // e_Cmd_SettingsQuickJump_TermEmu
     "SettingsQuickJumpFont",                // e_Cmd_SettingsQuickJump_Font
     "SettingsQuickJumpColors",              // e_Cmd_SettingsQuickJump_Colors
+    "LoadSendBufferSet",                    // e_Cmd_LoadSendBufferSet
+    "SaveSendBufferSet",                    // e_Cmd_SaveSendBufferSet
+    "SendBufferSendSelectedBuffer",         // e_Cmd_SendBuffer_SendSelectedBuffer
+    "SendBufferClearAllBuffers",            // e_Cmd_SendBuffer_ClearAllBuffers
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -215,6 +219,22 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_SettingsQuickJump_TermEmu,    // e_UIMWMenu_SettingsQuickJump_TermEmu
     e_Cmd_SettingsQuickJump_Font,       // e_UIMWMenu_SettingsQuickJump_Font
     e_Cmd_SettingsQuickJump_Colors,     // e_UIMWMenu_SettingsQuickJump_Colors
+    e_Cmd_SendBuffer_Send1,             // e_UIMWMenu_Buffers_SendBuffer1
+    e_Cmd_SendBuffer_Send2,             // e_UIMWMenu_Buffers_SendBuffer2
+    e_Cmd_SendBuffer_Send3,             // e_UIMWMenu_Buffers_SendBuffer3
+    e_Cmd_SendBuffer_Send4,             // e_UIMWMenu_Buffers_SendBuffer4
+    e_Cmd_SendBuffer_Send5,             // e_UIMWMenu_Buffers_SendBuffer5
+    e_Cmd_SendBuffer_Send6,             // e_UIMWMenu_Buffers_SendBuffer6
+    e_Cmd_SendBuffer_Send7,             // e_UIMWMenu_Buffers_SendBuffer7
+    e_Cmd_SendBuffer_Send8,             // e_UIMWMenu_Buffers_SendBuffer8
+    e_Cmd_SendBuffer_Send9,             // e_UIMWMenu_Buffers_SendBuffer9
+    e_Cmd_SendBuffer_Send10,            // e_UIMWMenu_Buffers_SendBuffer10
+    e_Cmd_SendBuffer_Send11,            // e_UIMWMenu_Buffers_SendBuffer11
+    e_Cmd_SendBuffer_Send12,            // e_UIMWMenu_Buffers_SendBuffer12
+    e_Cmd_LoadSendBufferSet,            // e_UIMWMenu_Buffers_LoadBufferSet
+    e_Cmd_SaveSendBufferSet,            // e_UIMWMenu_Buffers_SaveBufferSet
+    e_CmdMAX,                                  // e_UIMWMenu_Buffers_DelayedSend TBD
+    e_Cmd_SendBuffer_ClearAllBuffers,   // e_UIMWMenu_Buffers_ClearAllBuffers
 };
 
 e_CmdType m_Cmd2ToolbarMapping[]=

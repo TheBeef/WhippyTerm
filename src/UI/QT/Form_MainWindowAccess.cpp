@@ -214,6 +214,36 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionFont;
         case e_UIMWMenu_SettingsQuickJump_Colors:
             return (e_UIMenuCtrl *)realwin->ui->actionColors;
+        case e_UIMWMenu_Buffers_SendBuffer1:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Buffer_1;
+        case e_UIMWMenu_Buffers_SendBuffer2:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Buffer_2;
+        case e_UIMWMenu_Buffers_SendBuffer3:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Buffer_3;
+        case e_UIMWMenu_Buffers_SendBuffer4:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Buffer_4;
+        case e_UIMWMenu_Buffers_SendBuffer5:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Buffer_5;
+        case e_UIMWMenu_Buffers_SendBuffer6:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Buffer_6;
+        case e_UIMWMenu_Buffers_SendBuffer7:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Buffer_7;
+        case e_UIMWMenu_Buffers_SendBuffer8:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Buffer_8;
+        case e_UIMWMenu_Buffers_SendBuffer9:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Buffer_9;
+        case e_UIMWMenu_Buffers_SendBuffer10:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Buffer_10;
+        case e_UIMWMenu_Buffers_SendBuffer11:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Buffer_11;
+        case e_UIMWMenu_Buffers_SendBuffer12:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Buffer_12;
+        case e_UIMWMenu_Buffers_LoadBufferSet:
+            return (e_UIMenuCtrl *)realwin->ui->actionLoad_Buffer_Set;
+        case e_UIMWMenu_Buffers_SaveBufferSet:
+            return (e_UIMenuCtrl *)realwin->ui->actionSave_Buffer_Set;
+        case e_UIMWMenu_Buffers_DelayedSend:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Buffer;
 
         case e_UIMWMenuMAX:
         default:
@@ -359,10 +389,24 @@ t_UIListViewCtrl *UIMW_GetListViewHandle(t_UIMainWindow *win,e_UIMWListViewType 
     {
         case e_UIMWListView_StopWatch_Laps:
             return (t_UIListViewCtrl *)realwin->ui->listWidget_SW_Laps;
-        case e_UIMWListView_Buffers_List:
-            return (t_UIListViewCtrl *)realwin->ui->listWidget_Buffer_BufferList;
 
         case e_UIMWListViewMAX:
+        default:
+        break;
+    }
+    return NULL;
+}
+
+t_UIColumnView *UIMW_GetColumnViewHandle(t_UIMainWindow *win,e_UIMWColumnViewType UIObj)
+{
+    Form_MainWindow *realwin=(Form_MainWindow *)win;
+
+    switch(UIObj)
+    {
+        case e_UIMWColumnView_Buffers_List:
+            return (t_UIColumnView *)realwin->ui->treeWidget_Buffer_BufferList;
+
+        case e_UIMWColumnViewMAX:
         default:
         break;
     }

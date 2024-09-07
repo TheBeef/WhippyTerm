@@ -35,7 +35,8 @@
 #include <stdint.h>
 
 /***  DEFINES                          ***/
-#define MAX_SEND_BUFFERS    12          // We support up to 12 buffers (12 because there are 12 function keys)
+#define MAX_SEND_BUFFERS            (12+26)  // We support up to 38 buffers (12 Fn keys, and a-z)
+#define MAX_QUICK_SEND_BUFFERS      12  // The number of buffers that are used for the quick send (12 because of the number of function keys we have).  Must be smaller than 'MAX_SEND_BUFFERS'
 
 /***  MACROS                           ***/
 
@@ -53,6 +54,7 @@ class SendBuffer
                 const uint8_t *Data,uint32_t DataSize);
         static bool LoadBufferFromFile(const char *Filename,char **BufferName,
                 uint8_t **Data,uint32_t *DataSize);
+        void ClearAllBuffers(void);
 
         void SetBuffer(int BufferIndex,const uint8_t *Memory,uint32_t BSize);
         void SetBufferName(int BufferIndex,const char *NewName);

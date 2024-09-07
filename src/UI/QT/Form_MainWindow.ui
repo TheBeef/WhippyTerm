@@ -1342,7 +1342,7 @@
               <item>
                <widget class="QTabWidget" name="BottomPanel_tabWidget">
                 <property name="currentIndex">
-                 <number>0</number>
+                 <number>2</number>
                 </property>
                 <widget class="QWidget" name="Hex_Tab">
                  <attribute name="title">
@@ -1452,13 +1452,29 @@
                  </attribute>
                  <layout class="QHBoxLayout" name="horizontalLayout_20">
                   <item>
-                   <widget class="QListWidget" name="listWidget_Buffer_BufferList">
+                   <widget class="QTreeWidget" name="treeWidget_Buffer_BufferList">
                     <property name="sizePolicy">
-                     <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                       <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
                     </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>375</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <column>
+                     <property name="text">
+                      <string>Buffer</string>
+                     </property>
+                    </column>
+                    <column>
+                     <property name="text">
+                      <string>Key</string>
+                     </property>
+                    </column>
                    </widget>
                   </item>
                   <item>
@@ -1748,12 +1764,37 @@
     </property>
     <addaction name="actionCom_Test"/>
    </widget>
+   <widget class="QMenu" name="menuBuffers">
+    <property name="title">
+     <string>Buffers</string>
+    </property>
+    <addaction name="actionSend_Buffer"/>
+    <addaction name="separator"/>
+    <addaction name="actionSend_Buffer_1"/>
+    <addaction name="actionSend_Buffer_2"/>
+    <addaction name="actionSend_Buffer_3"/>
+    <addaction name="actionSend_Buffer_4"/>
+    <addaction name="actionSend_Buffer_5"/>
+    <addaction name="actionSend_Buffer_6"/>
+    <addaction name="actionSend_Buffer_7"/>
+    <addaction name="actionSend_Buffer_8"/>
+    <addaction name="actionSend_Buffer_9"/>
+    <addaction name="actionSend_Buffer_10"/>
+    <addaction name="actionSend_Buffer_11"/>
+    <addaction name="actionSend_Buffer_12"/>
+    <addaction name="separator"/>
+    <addaction name="actionLoad_Buffer_Set"/>
+    <addaction name="actionSave_Buffer_Set"/>
+    <addaction name="separator"/>
+    <addaction name="actionClear_All_Buffers"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
    <addaction name="menuTerminal"/>
    <addaction name="menuBookmarks"/>
    <addaction name="menuConnection"/>
+   <addaction name="menuBuffers"/>
    <addaction name="menuPlugins"/>
    <addaction name="menuTools"/>
    <addaction name="menuSettings"/>
@@ -2598,6 +2639,86 @@
   <action name="actionShow_printf_log">
    <property name="text">
     <string>Show printf log</string>
+   </property>
+  </action>
+  <action name="actionSend_Buffer_1">
+   <property name="text">
+    <string>Send Buffer 1</string>
+   </property>
+  </action>
+  <action name="actionSend_Buffer_2">
+   <property name="text">
+    <string>Send Buffer 2</string>
+   </property>
+  </action>
+  <action name="actionSend_Buffer_3">
+   <property name="text">
+    <string>Send Buffer 3</string>
+   </property>
+  </action>
+  <action name="actionSend_Buffer_4">
+   <property name="text">
+    <string>Send Buffer 4</string>
+   </property>
+  </action>
+  <action name="actionSend_Buffer_5">
+   <property name="text">
+    <string>Send Buffer 5</string>
+   </property>
+  </action>
+  <action name="actionSend_Buffer_6">
+   <property name="text">
+    <string>Send Buffer 6</string>
+   </property>
+  </action>
+  <action name="actionSend_Buffer_7">
+   <property name="text">
+    <string>Send Buffer 7</string>
+   </property>
+  </action>
+  <action name="actionSend_Buffer_8">
+   <property name="text">
+    <string>Send Buffer 8</string>
+   </property>
+  </action>
+  <action name="actionSend_Buffer_9">
+   <property name="text">
+    <string>Send Buffer 9</string>
+   </property>
+  </action>
+  <action name="actionSend_Buffer_10">
+   <property name="text">
+    <string>Send Buffer 10</string>
+   </property>
+  </action>
+  <action name="actionSend_Buffer_11">
+   <property name="text">
+    <string>Send Buffer 11</string>
+   </property>
+  </action>
+  <action name="actionSend_Buffer_12">
+   <property name="text">
+    <string>Send Buffer 12</string>
+   </property>
+  </action>
+  <action name="actionSave_Buffer_Set">
+   <property name="text">
+    <string>Save Buffer Set...</string>
+   </property>
+  </action>
+  <action name="actionLoad_Buffer_Set">
+   <property name="text">
+    <string>Load Buffer Set...</string>
+   </property>
+  </action>
+  <action name="actionSend_Buffer">
+   <property name="text">
+    <string>Send Buffer...</string>
+   </property>
+  </action>
+  <action name="actionClear_All_Buffers">
+   <property name="text">
+    <string>Clear All Buffers...</string>
    </property>
   </action>
  </widget>

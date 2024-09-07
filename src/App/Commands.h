@@ -138,6 +138,10 @@ typedef enum
     e_Cmd_SettingsQuickJump_TermEmu,
     e_Cmd_SettingsQuickJump_Font,
     e_Cmd_SettingsQuickJump_Colors,
+    e_Cmd_LoadSendBufferSet,
+    e_Cmd_SaveSendBufferSet,
+    e_Cmd_SendBuffer_SendSelectedBuffer,
+    e_Cmd_SendBuffer_ClearAllBuffers,
     e_CmdMAX
 } e_CmdType;
 

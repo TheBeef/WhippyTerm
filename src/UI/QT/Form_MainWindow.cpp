@@ -127,6 +127,8 @@ DebugInsertTimer=new QTimer(this);
     StopWatchTimer=new QTimer(this);
     StopWatchTimer->setInterval(13);   // 13ms so the updates look like they are coming in faster
     connect(StopWatchTimer, SIGNAL(timeout()), this, SLOT(StopWatchTimer_triggered()));
+
+    ui->treeWidget_Buffer_BufferList->header()->resizeSection(0,256);
 }
 
 Form_MainWindow::~Form_MainWindow()
@@ -1223,17 +1225,6 @@ void Form_MainWindow::on_pushButton_Buffer_Send_clicked()
     DoBttnTriggered(e_UIMWBttn_SendBuffers_Send);
 }
 
-void Form_MainWindow::on_listWidget_Buffer_BufferList_currentRowChanged(int currentRow)
-{
-    union MWEventData EventData;
-
-    EventData.ListView.InputID=e_UIMWListView_Buffers_List;
-
-    SendEvent(e_MWEvent_ListViewChange,&EventData,
-            (uintptr_t)(ui->listWidget_Buffer_BufferList->item(currentRow)->
-            data(Qt::UserRole).toULongLong()));
-}
-
 void Form_MainWindow::on_actionConnection_Options_triggered()
 {
     DoMenuTriggered(e_UIMWMenu_ConnectionOptions);
@@ -1462,5 +1453,106 @@ void Form_MainWindow::on_actionColors_triggered()
 void Form_MainWindow::on_actionShow_printf_log_triggered()
 {
     DB_ShowDebugPrintLogForm();
+}
+
+
+void Form_MainWindow::on_actionSend_Buffer_1_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_SendBuffer1);
+}
+
+void Form_MainWindow::on_actionSend_Buffer_2_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_SendBuffer2);
+}
+
+void Form_MainWindow::on_actionSend_Buffer_3_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_SendBuffer3);
+}
+
+void Form_MainWindow::on_actionSend_Buffer_4_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_SendBuffer4);
+}
+
+void Form_MainWindow::on_actionSend_Buffer_5_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_SendBuffer5);
+}
+
+void Form_MainWindow::on_actionSend_Buffer_6_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_SendBuffer6);
+}
+
+void Form_MainWindow::on_actionSend_Buffer_7_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_SendBuffer7);
+}
+
+void Form_MainWindow::on_actionSend_Buffer_8_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_SendBuffer8);
+}
+
+void Form_MainWindow::on_actionSend_Buffer_9_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_SendBuffer9);
+}
+
+void Form_MainWindow::on_actionSend_Buffer_10_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_SendBuffer10);
+}
+
+void Form_MainWindow::on_actionSend_Buffer_11_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_SendBuffer11);
+}
+
+void Form_MainWindow::on_actionSend_Buffer_12_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_SendBuffer12);
+}
+
+void Form_MainWindow::on_actionSave_Buffer_Set_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_SaveBufferSet);
+}
+
+void Form_MainWindow::on_actionLoad_Buffer_Set_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_LoadBufferSet);
+}
+
+
+void Form_MainWindow::on_treeWidget_Buffer_BufferList_itemSelectionChanged()
+{
+    union MWEventData EventData;
+    QTreeWidgetItem *TreeItem;
+    int Row;
+
+    if(ui->treeWidget_Buffer_BufferList->selectedItems().isEmpty())
+        Row=-1;
+    else
+    {
+        TreeItem=ui->treeWidget_Buffer_BufferList->selectedItems().first();
+        Row=ui->treeWidget_Buffer_BufferList->indexOfTopLevelItem(TreeItem);
+    }
+
+    EventData.ColumnView.InputID=e_UIMWColumnView_Buffers_List;
+    EventData.ColumnView.NewRow=Row;
+
+    SendEvent(e_MWEvent_ColumnViewChange,&EventData,0);
+//    SendEvent(e_MWEvent_ListViewChange,&EventData,
+//            (uintptr_t)(ui->listWidget_Buffer_BufferList->item(currentRow)->
+//            data(Qt::UserRole).toULongLong()));
+}
+
+
+void Form_MainWindow::on_actionClear_All_Buffers_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_ClearAllBuffers);
 }
 

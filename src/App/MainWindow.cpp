@@ -44,6 +44,7 @@
 #include "App/MainApp.h"
 #include "App/MainWindow.h"
 #include "App/PluginSupport/ExternPluginsSystem.h"
+#include "App/SendBuffer.h"
 #include "App/Session.h"
 #include "App/Settings.h"
 #include "UI/UIAsk.h"
@@ -1210,6 +1211,19 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *Send_Escape;
     e_UIMenuCtrl *Send_Delete;
     e_UIMenuCtrl *Send_Other;
+    e_UIMenuCtrl *SendBuffer1;
+    e_UIMenuCtrl *SendBuffer2;
+    e_UIMenuCtrl *SendBuffer3;
+    e_UIMenuCtrl *SendBuffer4;
+    e_UIMenuCtrl *SendBuffer5;
+    e_UIMenuCtrl *SendBuffer6;
+    e_UIMenuCtrl *SendBuffer7;
+    e_UIMenuCtrl *SendBuffer8;
+    e_UIMenuCtrl *SendBuffer9;
+    e_UIMenuCtrl *SendBuffer10;
+    e_UIMenuCtrl *SendBuffer11;
+    e_UIMenuCtrl *SendBuffer12;
+    e_UIMenuCtrl *SendBufferDelayedSend;
 
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
     ConnectToggle=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_ConnectToggle);
@@ -1248,6 +1262,20 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     Send_Escape=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Escape);
     Send_Delete=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Delete);
     Send_Other=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Other);
+
+    SendBuffer1=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer1);
+    SendBuffer2=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer2);
+    SendBuffer3=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer3);
+    SendBuffer4=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer4);
+    SendBuffer5=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer5);
+    SendBuffer6=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer6);
+    SendBuffer7=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer7);
+    SendBuffer8=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer8);
+    SendBuffer9=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer9);
+    SendBuffer10=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer10);
+    SendBuffer11=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer11);
+    SendBuffer12=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer12);
+    SendBufferDelayedSend=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_DelayedSend);
 
     RestoreConnectionSettingsActive=false;
 
@@ -1289,6 +1317,19 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(Send_Escape,false);
         UIEnableMenu(Send_Delete,false);
         UIEnableMenu(Send_Other,false);
+        UIEnableMenu(SendBuffer1,false);
+        UIEnableMenu(SendBuffer2,false);
+        UIEnableMenu(SendBuffer3,false);
+        UIEnableMenu(SendBuffer4,false);
+        UIEnableMenu(SendBuffer5,false);
+        UIEnableMenu(SendBuffer6,false);
+        UIEnableMenu(SendBuffer7,false);
+        UIEnableMenu(SendBuffer8,false);
+        UIEnableMenu(SendBuffer9,false);
+        UIEnableMenu(SendBuffer10,false);
+        UIEnableMenu(SendBuffer11,false);
+        UIEnableMenu(SendBuffer12,false);
+        UIEnableMenu(SendBufferDelayedSend,false);
 
         ActivatePanels=false;
     }
@@ -1336,6 +1377,20 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UICheckToolbar(ConnectToggle,Connected);
         UIEnableMenu(ConnectMenu,!Connected);
         UIEnableMenu(DisconnectMenu,Connected);
+
+        UIEnableMenu(SendBuffer1,Connected);
+        UIEnableMenu(SendBuffer2,Connected);
+        UIEnableMenu(SendBuffer3,Connected);
+        UIEnableMenu(SendBuffer4,Connected);
+        UIEnableMenu(SendBuffer5,Connected);
+        UIEnableMenu(SendBuffer6,Connected);
+        UIEnableMenu(SendBuffer7,Connected);
+        UIEnableMenu(SendBuffer8,Connected);
+        UIEnableMenu(SendBuffer9,Connected);
+        UIEnableMenu(SendBuffer10,Connected);
+        UIEnableMenu(SendBuffer11,Connected);
+        UIEnableMenu(SendBuffer12,Connected);
+        UIEnableMenu(SendBufferDelayedSend,Connected);
 
         if(Con->UsingCustomSettings)
             RestoreConnectionSettingsActive=true;
@@ -3396,11 +3451,19 @@ bool MW_Event(const struct MWEvent *Event)
             {
                 case e_UIMWListView_StopWatch_Laps:
                 break;
-                case e_UIMWListView_Buffers_List:
-                    Event->MW->SendBuffersPanel.
-                            SelectedBufferChanged(Event->ID);
-                break;
                 case e_UIMWListViewMAX:
+                default:
+                break;
+            }
+        break;
+        case e_MWEvent_ColumnViewChange:
+            switch(Event->Info.ColumnView.InputID)
+            {
+                case e_UIMWColumnView_Buffers_List:
+                    Event->MW->SendBuffersPanel.
+                            SelectedBufferChanged(Event->Info.ColumnView.NewRow);
+                break;
+                case e_UIMWColumnViewMAX:
                 default:
                 break;
             }
@@ -3465,6 +3528,8 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_SettingsQuickJump_TermEmu -- Goto settings term emu
  *                  e_Cmd_SettingsQuickJump_Font -- Goto settings font
  *                  e_Cmd_SettingsQuickJump_Colors -- Goto settings colors
+ *                  e_Cmd_SaveSendBufferSet -- Prompt and save a send buffer set to disk
+ *                  e_Cmd_LoadSendBufferSet -- Prompt and load a send buffer set from disk
  *
  * FUNCTION:
  *    This function executes a command.
@@ -3709,6 +3774,43 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_SendBuffer_Send12:
             SendBuffersPanel.SendBuffer(11);
+        break;
+        case e_Cmd_SendBuffer_SendSelectedBuffer:
+            SendBuffersPanel.SendCurrentBuffer();
+        break;
+        case e_Cmd_SendBuffer_ClearAllBuffers:
+            if(UIAsk("Clear all send buffers",
+                    "Are you sure you want to clear (erase) all send buffers?",
+                    e_AskBox_Question,e_AskBttns_YesNo)==e_AskRet_Yes)
+            {
+                g_SendBuffers.ClearAllBuffers();
+                SendBuffersPanel.NewSendBufferSetLoaded();
+                g_SendBuffers.SaveBuffers();
+            }
+        break;
+        case e_Cmd_SaveSendBufferSet:
+            path="";
+            file="SendBufferSet.wtb";
+            if(UI_SaveFileReq("Save Send Buffer Set",path,file,
+                    "All Files|*.*\nWhippy Term Send Buffer Set|*.wtb",1))
+            {
+                FullFilename=UI_ConcatFile2Path(path,file);
+                g_SendBuffers.SaveBuffers(FullFilename.c_str());
+            }
+        break;
+        case e_Cmd_LoadSendBufferSet:
+            path="";
+            file="SendBufferSet.wtb";
+            if(UI_LoadFileReq("Load Send Buffer Set",path,file,
+                    "All Files|*.*\nWhippy Term Send Buffer Set|*.wtb",1))
+            {
+                FullFilename=UI_ConcatFile2Path(path,file);
+                g_SendBuffers.LoadBuffers(FullFilename.c_str());
+                SendBuffersPanel.NewSendBufferSetLoaded();
+
+                /* Save out the newly loaded set as the default set */
+                g_SendBuffers.SaveBuffers();
+            }
         break;
         case e_Cmd_Tools_ComTest:
             RunComTestDialog();

@@ -63,6 +63,8 @@ class MWSendBuffers
         void SendBttn2Cmd(void);
         void SendBuffer(int Buffer);
         void EditCurrentBuffer(void);
+        void NewSendBufferSetLoaded(void);
+        void SendCurrentBuffer(void);
 
     private:
         t_UIMainWindow *UIWin;
@@ -74,6 +76,7 @@ class MWSendBuffers
 
         void RethinkUI(void);
         void RethinkBuffer(void);
+        void RethinkBufferList(void);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

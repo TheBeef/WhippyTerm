@@ -189,8 +189,6 @@ private slots:
     
     void on_pushButton_Buffer_Send_clicked();
     
-    void on_listWidget_Buffer_BufferList_currentRowChanged(int currentRow);
-    
     void on_actionConnection_Options_triggered();
     
     void on_actionCom_Test_triggered();
@@ -274,6 +272,38 @@ private slots:
     void on_actionColors_triggered();
     
     void on_actionShow_printf_log_triggered();
+    
+    void on_actionSend_Buffer_1_triggered();
+    
+    void on_actionSend_Buffer_2_triggered();
+    
+    void on_actionSend_Buffer_3_triggered();
+    
+    void on_actionSend_Buffer_4_triggered();
+    
+    void on_actionSend_Buffer_5_triggered();
+    
+    void on_actionSend_Buffer_6_triggered();
+    
+    void on_actionSend_Buffer_7_triggered();
+    
+    void on_actionSend_Buffer_8_triggered();
+    
+    void on_actionSend_Buffer_9_triggered();
+    
+    void on_actionSend_Buffer_10_triggered();
+    
+    void on_actionSend_Buffer_11_triggered();
+    
+    void on_actionSend_Buffer_12_triggered();
+    
+    void on_actionSave_Buffer_Set_triggered();
+    
+    void on_actionLoad_Buffer_Set_triggered();
+    
+    void on_treeWidget_Buffer_BufferList_itemSelectionChanged();
+    
+    void on_actionClear_All_Buffers_triggered();
     
 private:
     void resizeEvent(QResizeEvent *event);

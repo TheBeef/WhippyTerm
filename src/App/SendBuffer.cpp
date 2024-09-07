@@ -741,3 +741,37 @@ bool SendBuffer::GetBufferInfo(int BufferIndex,const uint8_t **Memory,
 
     return true;
 }
+
+/*******************************************************************************
+ * NAME:
+ *    SendBuffer::ClearAllBuffers
+ *
+ * SYNOPSIS:
+ *    void SendBuffer::ClearAllBuffers(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function resets all the send buffers to blank and resets their names.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void SendBuffer::ClearAllBuffers(void)
+{
+    int r;
+
+    for(r=0;r<MAX_SEND_BUFFERS;r++)
+    {
+        free(Buffer[r]);
+        free(BufferName[r]);
+        Buffer[r]=NULL;
+        BufferSize[r]=0;
+        BufferName[r]=NULL;
+    }
+}
+

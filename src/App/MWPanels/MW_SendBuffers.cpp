@@ -121,10 +121,6 @@ MWSendBuffers::~MWSendBuffers()
  ******************************************************************************/
 void MWSendBuffers::Setup(class TheMainWindow *Parent,t_UIMainWindow *Win)
 {
-    t_UIListViewCtrl *BufferList;
-    int b;
-    char *Name;
-
     MW=Parent;
     UIWin=Win;
 
@@ -145,16 +141,8 @@ void MWSendBuffers::Setup(class TheMainWindow *Parent,t_UIMainWindow *Win)
     Buffer2SendHexDisplay->SetColors(g_Settings.HexDisplaysFGColor,
             g_Settings.HexDisplaysBGColor,g_Settings.HexDisplaysSelBGColor);
 
-    BufferList=UIMW_GetListViewHandle(UIWin,e_UIMWListView_Buffers_List);
-
-    for(b=0;b<MAX_SEND_BUFFERS;b++)
-    {
-        Name=g_SendBuffers.GetBufferName(b);
-        if(Name!=NULL)
-            UIAddItem2ListView(BufferList,Name,b);
-        else
-            UIAddItem2ListView(BufferList,"ERROR",b);
-    }
+    RethinkBufferList();
+    RethinkBuffer();
 }
 
 /*******************************************************************************
@@ -260,6 +248,7 @@ void MWSendBuffers::ConnectionChanged(void)
 //
 //    Buffer2SendHexDisplay->RebuildDisplay();
 
+    RethinkBufferList();
     RethinkUI();
 }
 
@@ -316,15 +305,15 @@ void MWSendBuffers::RethinkUI(void)
     t_UIButtonCtrl *SendBttn;
     bool EditEnabled;
     bool SendEnabled;
-    t_UIListViewCtrl *BufferList;
+    t_UIColumnView *BufferList;
     bool BufferSeleced;
     bool HexDisplayEnabled;
 
     EditBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_SendBuffers_Edit);
     SendBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_SendBuffers_Send);
-    BufferList=UIMW_GetListViewHandle(UIWin,e_UIMWListView_Buffers_List);
+    BufferList=UIMW_GetColumnViewHandle(UIWin,e_UIMWColumnView_Buffers_List);
 
-    BufferSeleced=UIListViewHasSelectedEntry(BufferList);
+    BufferSeleced=UIColumnViewHasSelectedEntry(BufferList);
 
     SendEnabled=PanelActive;
     EditEnabled=true;
@@ -334,6 +323,8 @@ void MWSendBuffers::RethinkUI(void)
     {
         if(MW->ActiveCon==NULL)
             return;
+        if(!MW->ActiveCon->GetConnectedStatus())
+            SendEnabled=false;
     }
 
     if(!BufferSeleced)
@@ -464,7 +455,7 @@ void MWSendBuffers::SelectedBufferChanged(int BufferIndex)
  ******************************************************************************/
 void MWSendBuffers::RethinkBuffer(void)
 {
-    t_UIListViewCtrl *BufferList;
+    t_UIColumnView *BufferList;
     t_UIButtonCtrl *SendBttn;
     int SelectedBuffer;
     const uint8_t *BuffMem;
@@ -473,10 +464,13 @@ void MWSendBuffers::RethinkBuffer(void)
     const char *KeyStr;
     char buff[100];
 
-    BufferList=UIMW_GetListViewHandle(UIWin,e_UIMWListView_Buffers_List);
+    BufferList=UIMW_GetColumnViewHandle(UIWin,e_UIMWColumnView_Buffers_List);
     SendBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_SendBuffers_Send);
 
-    SelectedBuffer=UIGetListViewSelectedEntry(BufferList);
+    if(!UIColumnViewHasSelectedEntry(BufferList))
+        return;
+
+    SelectedBuffer=UIGetColumnViewSelectedEntry(BufferList);
 
     if(!g_SendBuffers.GetBufferInfo(SelectedBuffer,&BuffMem,&BuffSize))
         Buffer2SendHexDisplay->SetBuffer((uint8_t *)NULL,0);
@@ -485,10 +479,13 @@ void MWSendBuffers::RethinkBuffer(void)
 
     Buffer2SendHexDisplay->RebuildDisplay();
 
-    cmd=ConvertBuffer2Cmd(SelectedBuffer);
+    if(SelectedBuffer>=0 && SelectedBuffer<12)
+        cmd=(e_CmdType)((int)e_Cmd_SendBuffer_Send1+SelectedBuffer);
+    else
+        cmd=e_CmdMAX;
 
     /* Find the key mapping for this command */
-    if(!KeySeqMapped(&g_Settings.KeyMapping[cmd]))
+    if(cmd==e_CmdMAX || !KeySeqMapped(&g_Settings.KeyMapping[cmd]))
     {
         strcpy(buff,"Send");
     }
@@ -524,86 +521,27 @@ void MWSendBuffers::RethinkBuffer(void)
  ******************************************************************************/
 void MWSendBuffers::SendBttn2Cmd(void)
 {
-    t_UIListViewCtrl *BufferList;
+    t_UIColumnView *BufferList;
     int SelectedBuffer;
     e_CmdType cmd;
 
-    BufferList=UIMW_GetListViewHandle(UIWin,e_UIMWListView_Buffers_List);
+    BufferList=UIMW_GetColumnViewHandle(UIWin,e_UIMWColumnView_Buffers_List);
 
-    if(!UIListViewHasSelectedEntry(BufferList))
+    if(!UIColumnViewHasSelectedEntry(BufferList))
         return;
 
-    SelectedBuffer=UIGetListViewSelectedEntry(BufferList);
+    SelectedBuffer=UIGetColumnViewSelectedEntry(BufferList);
 
-    cmd=ConvertBuffer2Cmd(SelectedBuffer);
-    if(cmd!=e_CmdMAX)
-        MW->ExeCmd(cmd);
-}
-
-/*******************************************************************************
- * NAME:
- *    MWSendBuffers::ConvertBuffer2Cmd
- *
- * SYNOPSIS:
- *    e_CmdType MWSendBuffers::ConvertBuffer2Cmd(int Buffer);
- *
- * PARAMETERS:
- *    Buffer [I] -- The buffer number to convert
- *
- * FUNCTION:
- *    This function takes a buffer number and converts it to the command needed
- *    to send this buffer.
- *
- * RETURNS:
- *    The command to send this buffer or e_CmdMAX if there isn't one.
- *
- * SEE ALSO:
- *    
- ******************************************************************************/
-e_CmdType MWSendBuffers::ConvertBuffer2Cmd(int Buffer)
-{
-    switch(Buffer)
+    if(SelectedBuffer<0 || SelectedBuffer>=MAX_QUICK_SEND_BUFFERS)
     {
-        case 0:
-            return e_Cmd_SendBuffer_Send1;
-        break;
-        case 1:
-            return e_Cmd_SendBuffer_Send2;
-        break;
-        case 2:
-            return e_Cmd_SendBuffer_Send3;
-        break;
-        case 3:
-            return e_Cmd_SendBuffer_Send4;
-        break;
-        case 4:
-            return e_Cmd_SendBuffer_Send5;
-        break;
-        case 5:
-            return e_Cmd_SendBuffer_Send6;
-        break;
-        case 6:
-            return e_Cmd_SendBuffer_Send7;
-        break;
-        case 7:
-            return e_Cmd_SendBuffer_Send8;
-        break;
-        case 8:
-            return e_Cmd_SendBuffer_Send9;
-        break;
-        case 9:
-            return e_Cmd_SendBuffer_Send10;
-        break;
-        case 10:
-            return e_Cmd_SendBuffer_Send11;
-        break;
-        case 11:
-            return e_Cmd_SendBuffer_Send12;
-        break;
-        default:
-        break;
+        /* Just send it directly */
+        cmd=e_Cmd_SendBuffer_SendSelectedBuffer;
     }
-    return e_CmdMAX;
+    else
+    {
+        cmd=(e_CmdType)((int)e_Cmd_SendBuffer_Send1+SelectedBuffer);
+    }
+    MW->ExeCmd(cmd);
 }
 
 /*******************************************************************************
@@ -674,24 +612,163 @@ void MWSendBuffers::SendBuffer(int Buffer)
  ******************************************************************************/
 void MWSendBuffers::EditCurrentBuffer(void)
 {
-    t_UIListViewCtrl *BufferList;
+    t_UIColumnView *BufferList;
     int SelectedBuffer;
     char *Name;
 
-    BufferList=UIMW_GetListViewHandle(UIWin,e_UIMWListView_Buffers_List);
+    BufferList=UIMW_GetColumnViewHandle(UIWin,e_UIMWColumnView_Buffers_List);
 
-    if(!UIListViewHasSelectedEntry(BufferList))
+    if(!UIColumnViewHasSelectedEntry(BufferList))
         return;
 
-    SelectedBuffer=UIGetListViewSelectedEntry(BufferList);
+    SelectedBuffer=UIGetColumnViewSelectedEntry(BufferList);
 
     if(RunEditSendBufferDialog(SelectedBuffer))
     {
         /* Update the UI with any changes */
         Name=g_SendBuffers.GetBufferName(SelectedBuffer);
         if(Name!=NULL)
-            UIReplaceItemInListView(BufferList,SelectedBuffer,Name);
+            UIColumnViewSetColumnText(BufferList,0,SelectedBuffer,Name);
 
         RethinkBuffer();
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWSendBuffers::NewSendBufferSetLoaded
+ *
+ * SYNOPSIS:
+ *    void MWSendBuffers::NewSendBufferSetLoaded(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function will refresh the display after a new command set is loaded.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWSendBuffers::NewSendBufferSetLoaded(void)
+{
+    RethinkBufferList();
+    RethinkBuffer();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWSendBuffers::RethinkBufferList
+ *
+ * SYNOPSIS:
+ *    void MWSendBuffers::RethinkBufferList(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function rebuilds the list of buffers and the keys they map to.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWSendBuffers::RethinkBufferList(void)
+{
+    int b;
+    char *Name;
+    t_UIColumnView *BufferList;
+    int SelectedBuffer;
+    char KeyNameBuff[100];
+    e_CmdType cmd;
+    const char *KeyStr;
+
+    BufferList=UIMW_GetColumnViewHandle(UIWin,e_UIMWColumnView_Buffers_List);
+
+    SelectedBuffer=0;
+    if(UIColumnViewHasSelectedEntry(BufferList))
+        SelectedBuffer=UIGetColumnViewSelectedEntry(BufferList);
+
+    UIColumnViewClear(BufferList);
+    for(b=0;b<MAX_SEND_BUFFERS;b++)
+    {
+        UIColumnViewAddRow(BufferList);
+        Name=g_SendBuffers.GetBufferName(b);
+        if(Name!=NULL)
+            UIColumnViewSetColumnText(BufferList,0,b,Name);
+        else
+            UIColumnViewSetColumnText(BufferList,0,b,"ERROR");
+
+        /* Find the key that this buffer is connected to */
+        if(MW->ActiveCon==NULL)
+        {
+            KeyNameBuff[0]=0;
+        }
+        else
+        {
+            if(b<MAX_QUICK_SEND_BUFFERS)
+            {
+                cmd=(e_CmdType)((int)e_Cmd_SendBuffer_Send1+b);
+
+                /* Find the key mapping for this command */
+                if(cmd==e_CmdMAX || !KeySeqMapped(&g_Settings.KeyMapping[cmd]))
+                {
+                    KeyNameBuff[0]=0;
+                }
+                else
+                {
+                    KeyStr=ConvertKeySeq2String(&g_Settings.KeyMapping[cmd]);
+                    sprintf(KeyNameBuff,"%s",KeyStr);
+                }
+            }
+            else
+            {
+                if(MW->ActiveCon->IsConnectionBinary())
+                    sprintf(KeyNameBuff,"%c",b-MAX_QUICK_SEND_BUFFERS+'A');
+                else
+                    KeyNameBuff[0]=0;
+            }
+        }
+        UIColumnViewSetColumnText(BufferList,1,b,KeyNameBuff);
+    }
+
+    UIColumnViewSelectRow(BufferList,SelectedBuffer);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWSendBuffers::SendCurrentBuffer
+ *
+ * SYNOPSIS:
+ *    void MWSendBuffers::SendCurrentBuffer(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function sends whatever buffer is currently selected.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWSendBuffers::SendCurrentBuffer(void)
+{
+    t_UIColumnView *BufferList;
+    int SelectedBuffer;
+
+    BufferList=UIMW_GetColumnViewHandle(UIWin,e_UIMWColumnView_Buffers_List);
+
+    if(UIColumnViewHasSelectedEntry(BufferList))
+    {
+        SelectedBuffer=UIGetColumnViewSelectedEntry(BufferList);
+        SendBuffer(SelectedBuffer);
     }
 }

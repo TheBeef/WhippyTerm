@@ -139,6 +139,22 @@ typedef enum
     e_UIMWMenu_SettingsQuickJump_TermEmu,
     e_UIMWMenu_SettingsQuickJump_Font,
     e_UIMWMenu_SettingsQuickJump_Colors,
+    e_UIMWMenu_Buffers_SendBuffer1,
+    e_UIMWMenu_Buffers_SendBuffer2,
+    e_UIMWMenu_Buffers_SendBuffer3,
+    e_UIMWMenu_Buffers_SendBuffer4,
+    e_UIMWMenu_Buffers_SendBuffer5,
+    e_UIMWMenu_Buffers_SendBuffer6,
+    e_UIMWMenu_Buffers_SendBuffer7,
+    e_UIMWMenu_Buffers_SendBuffer8,
+    e_UIMWMenu_Buffers_SendBuffer9,
+    e_UIMWMenu_Buffers_SendBuffer10,
+    e_UIMWMenu_Buffers_SendBuffer11,
+    e_UIMWMenu_Buffers_SendBuffer12,
+    e_UIMWMenu_Buffers_LoadBufferSet,
+    e_UIMWMenu_Buffers_SaveBufferSet,
+    e_UIMWMenu_Buffers_DelayedSend,
+    e_UIMWMenu_Buffers_ClearAllBuffers,
     e_UIMWMenuMAX
 } e_UIMWMenuType;
 
@@ -212,9 +228,14 @@ typedef enum
 typedef enum
 {
     e_UIMWListView_StopWatch_Laps,
-    e_UIMWListView_Buffers_List,
     e_UIMWListViewMAX
 } e_UIMWListViewType;
+
+typedef enum
+{
+    e_UIMWColumnView_Buffers_List,
+    e_UIMWColumnViewMAX
+} e_UIMWColumnViewType;
 
 typedef enum
 {
@@ -268,6 +289,7 @@ typedef enum
     e_MWEvent_DownloadMenuTriggered,
     e_MWEvent_PanelTabChange,
     e_MWEvent_ListViewChange,
+    e_MWEvent_ColumnViewChange,
     e_MWEventMAX
 } e_MWEventType;
 
@@ -346,6 +368,12 @@ struct MWEventDataListView
     e_UIMWListViewType InputID;
 };
 
+struct MWEventDataColumnView
+{
+    e_UIMWColumnViewType InputID;
+    int NewRow;
+};
+
 union MWEventData
 {
     struct MWEventDataMenu Menu;
@@ -361,6 +389,7 @@ union MWEventData
     struct MWEventDataComboBox ComboBox;
     struct MWEventDataPanelTab PanelTab;
     struct MWEventDataListView ListView;
+    struct MWEventDataColumnView ColumnView;
 };
 
 struct MWEvent
@@ -434,6 +463,7 @@ t_UIToolbarCtrl *UIMW_GetToolbarHandle(t_UIMainWindow *win,e_UIMWToolbarType UIO
 t_UIButtonCtrl *UIMW_GetButtonHandle(t_UIMainWindow *win,e_UIMWBttnType UIObj);
 t_UICheckboxCtrl *UIMW_GetCheckboxHandle(t_UIMainWindow *win,e_UIMWCheckboxType UIObj);
 t_UIListViewCtrl *UIMW_GetListViewHandle(t_UIMainWindow *win,e_UIMWListViewType UIObj);
+t_UIColumnView *UIMW_GetColumnViewHandle(t_UIMainWindow *win,e_UIMWColumnViewType UIObj);
 t_UITextInputCtrl *UIMW_GetTxtInputHandle(t_UIMainWindow *win,e_UIMWTxtInputType UIObj);
 t_UILabelCtrl *UIMW_GetLabelHandle(t_UIMainWindow *win,e_UIMWLabelType UIObj);
 t_UIComboBoxCtrl *UIMW_GetComboBoxHandle(t_UIMainWindow *win,e_UIMWComboBoxType UIObj);

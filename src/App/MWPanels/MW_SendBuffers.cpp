@@ -481,7 +481,7 @@ void MWSendBuffers::RethinkBuffer(void)
 
     Buffer2SendHexDisplay->RebuildDisplay();
 
-    if(SelectedBuffer>=0 && SelectedBuffer<12)
+    if(SelectedBuffer>=0 && SelectedBuffer<MAX_QUICK_SEND_BUFFERS)
         cmd=(e_CmdType)((int)e_Cmd_SendBuffer_Send1+SelectedBuffer);
     else
         cmd=e_CmdMAX;

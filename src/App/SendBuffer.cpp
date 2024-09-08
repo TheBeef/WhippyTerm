@@ -6,7 +6,7 @@
  *
  * FILE DESCRIPTION:
  *    This file has the send buffer system in it.  A send buffer allocates
- *    12 buffer that can be sent out a connection.
+ *    'MAX_SEND_BUFFERS' buffer that can be sent out a connection.
  *
  * COPYRIGHT:
  *    Copyright 2021 Paul Hutchinson.
@@ -798,11 +798,11 @@ void SendBuffer::ClearAllBuffers(void)
  ******************************************************************************/
 bool SendBuffer::Send(class Connection *Con,int BufferIndex)
 {
-    if(BufferIndex>=MAX_SEND_BUFFERS || Buffer[BufferIndex]==NULL ||
-            BufferSize[BufferIndex]==0)
-    {
+    if(BufferIndex>=MAX_SEND_BUFFERS)
         return false;
-    }
+
+    if(Buffer[BufferIndex]==NULL || BufferSize[BufferIndex]==0)
+        return true;
 
     if(Con->WriteData(Buffer[BufferIndex],BufferSize[BufferIndex],
             e_ConWriteSource_Buffers)!=e_ConWrite_Success)

@@ -38,9 +38,10 @@
 #include "App/MainWindow.h"
 #include "App/DataProcessorsSystem.h"
 #include "App/FileTransferProtocolSystem.h"
-#include "App/Settings.h"
 #include "App/Display/DisplayText.h"
 #include "App/Display/DisplayBinary.h"
+#include "App/Settings.h"
+#include "App/SendBuffer.h"
 #include "OS/OSTime.h"
 #include "UI/UIAsk.h"
 #include "UI/UIClipboard.h"
@@ -1383,6 +1384,23 @@ bool Connection::KeyPress(uint8_t Mods,e_UIKeys Key,const uint8_t *TextPtr,
 
     if(MW->KeyPress(Mods,Key,TextPtr,TextLen))
         return true;
+
+    if(BinaryConnection)
+    {
+        /* Key presses are converted to send buffers */
+        if(TextPtr==NULL)
+            return true;
+        if(*TextPtr<'a' || *TextPtr>'z')
+            return true;
+
+        if(!g_SendBuffers.Send(this,*TextPtr-'a'+MAX_QUICK_SEND_BUFFERS))
+        {
+            UIAsk("Error","Failed to send the buffer.",e_AskBox_Error,
+                    e_AskBttns_Ok);
+        }
+
+        return true;
+    }
 
     Con_SetActiveConnection(this);
 

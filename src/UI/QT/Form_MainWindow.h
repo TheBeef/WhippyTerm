@@ -305,6 +305,10 @@ private slots:
     
     void on_actionClear_All_Buffers_triggered();
     
+    void on_actionSend_Buffer_triggered();
+    
+    void on_actionEdit_Send_Buffer_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

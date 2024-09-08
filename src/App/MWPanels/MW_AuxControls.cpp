@@ -192,8 +192,6 @@ bool MWAuxControls::NewConnection(class Connection *Con)
  ******************************************************************************/
 void MWAuxControls::RemoveConnection(class Connection *Con)
 {
-    t_IOSystemHandle *IOHandle;
-    t_ConnectionAuxCtrlsDataType *AuxControlsWidgets;
     i_MWAuxControlsConWidgets ConWids;
 
     if(Con==NULL || UIWin==NULL)
@@ -260,8 +258,6 @@ void MWAuxControls::RemoveConnection(class Connection *Con)
  ******************************************************************************/
 void MWAuxControls::ConnectionChanged(void)
 {
-    t_IOSystemHandle *IOHandle;
-    t_ConnectionAuxCtrlsDataType *AuxControlsWidgets;
     i_MWAuxControlsConWidgets ConWids;
 
     if(UIWin==NULL)

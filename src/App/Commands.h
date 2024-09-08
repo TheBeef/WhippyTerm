@@ -142,6 +142,8 @@ typedef enum
     e_Cmd_SaveSendBufferSet,
     e_Cmd_SendBuffer_SendSelectedBuffer,
     e_Cmd_SendBuffer_ClearAllBuffers,
+    e_Cmd_SendBufferSendGeneric,
+    e_Cmd_SendBuffer_EditPrompted,
     e_CmdMAX
 } e_CmdType;
 

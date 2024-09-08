@@ -1769,6 +1769,11 @@
      <string>Buffers</string>
     </property>
     <addaction name="actionSend_Buffer"/>
+    <addaction name="actionEdit_Send_Buffer"/>
+    <addaction name="actionClear_All_Buffers"/>
+    <addaction name="separator"/>
+    <addaction name="actionLoad_Buffer_Set"/>
+    <addaction name="actionSave_Buffer_Set"/>
     <addaction name="separator"/>
     <addaction name="actionSend_Buffer_1"/>
     <addaction name="actionSend_Buffer_2"/>
@@ -1782,11 +1787,6 @@
     <addaction name="actionSend_Buffer_10"/>
     <addaction name="actionSend_Buffer_11"/>
     <addaction name="actionSend_Buffer_12"/>
-    <addaction name="separator"/>
-    <addaction name="actionLoad_Buffer_Set"/>
-    <addaction name="actionSave_Buffer_Set"/>
-    <addaction name="separator"/>
-    <addaction name="actionClear_All_Buffers"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -2719,6 +2719,11 @@
   <action name="actionClear_All_Buffers">
    <property name="text">
     <string>Clear All Buffers...</string>
+   </property>
+  </action>
+  <action name="actionEdit_Send_Buffer">
+   <property name="text">
+    <string>Edit Buffer...</string>
    </property>
   </action>
  </widget>

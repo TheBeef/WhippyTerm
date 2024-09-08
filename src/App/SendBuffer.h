@@ -32,6 +32,7 @@
 #define __SENDBUFFER_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
+#include "App/Connections.h"
 #include <stdint.h>
 
 /***  DEFINES                          ***/
@@ -61,6 +62,8 @@ class SendBuffer
         char *GetBufferName(int BufferIndex);
         bool GetBufferInfo(int BufferIndex,const uint8_t **Memory,
                 uint32_t *BSize);
+
+        bool Send(class Connection *Con,int BufferIndex);
 
     private:
         uint8_t *Buffer[MAX_SEND_BUFFERS];

@@ -1534,7 +1534,9 @@ void Form_MainWindow::on_treeWidget_Buffer_BufferList_itemSelectionChanged()
     int Row;
 
     if(ui->treeWidget_Buffer_BufferList->selectedItems().isEmpty())
+    {
         Row=-1;
+    }
     else
     {
         TreeItem=ui->treeWidget_Buffer_BufferList->selectedItems().first();
@@ -1554,5 +1556,17 @@ void Form_MainWindow::on_treeWidget_Buffer_BufferList_itemSelectionChanged()
 void Form_MainWindow::on_actionClear_All_Buffers_triggered()
 {
     DoMenuTriggered(e_UIMWMenu_Buffers_ClearAllBuffers);
+}
+
+
+void Form_MainWindow::on_actionSend_Buffer_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_SendBufferSendGeneric);
+}
+
+
+void Form_MainWindow::on_actionEdit_Send_Buffer_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Buffers_EditSenderBuffer);
 }
 

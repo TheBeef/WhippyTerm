@@ -39,6 +39,7 @@
 #include "App/Dialogs/Dialog_SendByte.h"
 #include "App/Dialogs/Dialog_Settings.h"
 #include "App/Dialogs/Dialog_TransmitDelay.h"
+#include "App/Dialogs/Dialog_SendBufferSelect.h"
 #include "App/Bookmarks.h"
 #include "App/Connections.h"
 #include "App/MainApp.h"
@@ -1223,7 +1224,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *SendBuffer10;
     e_UIMenuCtrl *SendBuffer11;
     e_UIMenuCtrl *SendBuffer12;
-    e_UIMenuCtrl *SendBufferDelayedSend;
+    e_UIMenuCtrl *SendBufferSendGeneric;
 
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
     ConnectToggle=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_ConnectToggle);
@@ -1275,7 +1276,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     SendBuffer10=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer10);
     SendBuffer11=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer11);
     SendBuffer12=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer12);
-    SendBufferDelayedSend=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_DelayedSend);
+    SendBufferSendGeneric=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBufferSendGeneric);
 
     RestoreConnectionSettingsActive=false;
 
@@ -1329,7 +1330,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(SendBuffer10,false);
         UIEnableMenu(SendBuffer11,false);
         UIEnableMenu(SendBuffer12,false);
-        UIEnableMenu(SendBufferDelayedSend,false);
+        UIEnableMenu(SendBufferSendGeneric,false);
 
         ActivatePanels=false;
     }
@@ -1390,7 +1391,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(SendBuffer10,Connected);
         UIEnableMenu(SendBuffer11,Connected);
         UIEnableMenu(SendBuffer12,Connected);
-        UIEnableMenu(SendBufferDelayedSend,Connected);
+        UIEnableMenu(SendBufferSendGeneric,Connected);
 
         if(Con->UsingCustomSettings)
             RestoreConnectionSettingsActive=true;
@@ -3530,6 +3531,8 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_SettingsQuickJump_Colors -- Goto settings colors
  *                  e_Cmd_SaveSendBufferSet -- Prompt and save a send buffer set to disk
  *                  e_Cmd_LoadSendBufferSet -- Prompt and load a send buffer set from disk
+ *                  e_Cmd_SendBufferSendGeneric -- Prompt user for what buffer to send
+ *                  e_Cmd_SendBuffer_EditPrompted -- Prompt and edit a send buffer
  *
  * FUNCTION:
  *    This function executes a command.
@@ -3811,6 +3814,12 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
                 /* Save out the newly loaded set as the default set */
                 g_SendBuffers.SaveBuffers();
             }
+        break;
+        case e_Cmd_SendBufferSendGeneric:
+            RunSendBufferSelectDialog(this,e_SBSD_Send);
+        break;
+        case e_Cmd_SendBuffer_EditPrompted:
+            RunSendBufferSelectDialog(this,e_SBSD_Edit);
         break;
         case e_Cmd_Tools_ComTest:
             RunComTestDialog();

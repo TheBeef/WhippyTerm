@@ -40,6 +40,7 @@ RC_ICONS = ..\WindowsInstaller\WhippyTerm.ico
 
 SOURCES += ../src/UI/QT/main.cpp\
     ../ExternPlugins/DataProcessors/TermEmulation/BasicHex/src/BasicHex.cpp \
+    ../src/App/Dialogs/Dialog_SendBufferSelect.cpp \
     ../src/App/Dialogs/Dialog_SendByte.cpp \
     ../src/App/MWPanels/MW_AuxControls.cpp \
     ../src/App/StdPlugins/IODrivers/TCPClient/src/TCPClient_Main.cpp \
@@ -49,6 +50,8 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/UI/QT/Form_DebugPrintLog.cpp \
     ../src/UI/QT/Form_DebugPrintLogAccess.cpp \
     ../src/UI/QT/Form_MainWindow.cpp \
+    ../src/UI/QT/Form_SendBufferSelect.cpp \
+    ../src/UI/QT/Form_SendBufferSelectAccess.cpp \
     ../src/UI/QT/Form_SendByte.cpp \
     ../src/UI/QT/Form_SendByteAccess.cpp \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.cpp \
@@ -229,6 +232,7 @@ macx {
 
 HEADERS  += ../src/UI/QT/Form_MainWindow.h \
     ../src/UI/QT/Form_DebugPrintLog.h \
+    ../src/UI/QT/Form_SendBufferSelect.h \
     ../src/UI/QT/Form_SendByte.h \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.h \
     ../src/UI/QT/VerPanelHandle.h \
@@ -266,6 +270,7 @@ HEADERS  += ../src/UI/QT/Form_MainWindow.h \
 FORMS    += ../src/UI/QT/Form_MainWindow.ui \
     ../src/UI/QT/Form_DebugPrintLog.ui \
     ../src/UI/QT/Form_FontDialog.ui \
+    ../src/UI/QT/Form_SendBufferSelect.ui \
     ../src/UI/QT/Form_SendByte.ui \
     ../src/UI/QT/Form_Settings.ui \
     ../src/UI/QT/Form_NewConnection.ui \

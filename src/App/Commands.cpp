@@ -151,6 +151,8 @@ const char *m_CmdNames[]=
     "SaveSendBufferSet",                    // e_Cmd_SaveSendBufferSet
     "SendBufferSendSelectedBuffer",         // e_Cmd_SendBuffer_SendSelectedBuffer
     "SendBufferClearAllBuffers",            // e_Cmd_SendBuffer_ClearAllBuffers
+    "SendBufferSendGeneric",                // e_Cmd_SendBufferSendGeneric
+    "SendBufferEditPrompted",               // e_Cmd_SendBuffer_EditPrompted
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -233,8 +235,9 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_SendBuffer_Send12,            // e_UIMWMenu_Buffers_SendBuffer12
     e_Cmd_LoadSendBufferSet,            // e_UIMWMenu_Buffers_LoadBufferSet
     e_Cmd_SaveSendBufferSet,            // e_UIMWMenu_Buffers_SaveBufferSet
-    e_CmdMAX,                                  // e_UIMWMenu_Buffers_DelayedSend TBD
+    e_Cmd_SendBufferSendGeneric,        // e_UIMWMenu_Buffers_SendBufferSendGeneric
     e_Cmd_SendBuffer_ClearAllBuffers,   // e_UIMWMenu_Buffers_ClearAllBuffers
+    e_Cmd_SendBuffer_EditPrompted,      // e_UIMWMenu_Buffers_EditSenderBuffer
 };
 
 e_CmdType m_Cmd2ToolbarMapping[]=
@@ -644,6 +647,25 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     SetKeySeq(&KeyMapping[e_Cmd_ZoomIn],KEYMOD_CONTROL,e_UIKeysMAX,'+');
     SetKeySeq(&KeyMapping[e_Cmd_ZoomOut],KEYMOD_CONTROL,e_UIKeysMAX,'-');
     SetKeySeq(&KeyMapping[e_Cmd_ResetZoom],KEYMOD_CONTROL,e_UIKeysMAX,'0');
+    // e_Cmd_Send_NULL
+    // e_Cmd_Send_Backspace
+    // e_Cmd_Send_Tab
+    // e_Cmd_Send_Line_Feed
+    // e_Cmd_Send_Form_Feed
+    // e_Cmd_Send_Carriage_Return
+    // e_Cmd_Send_Escape
+    // e_Cmd_Send_Delete
+    // e_Cmd_Send_Other
+    // e_Cmd_SettingsQuickJump_TermSize
+    // e_Cmd_SettingsQuickJump_TermEmu
+    // e_Cmd_SettingsQuickJump_Font
+    // e_Cmd_SettingsQuickJump_Colors
+    // e_Cmd_LoadSendBufferSet
+    // e_Cmd_SaveSendBufferSet
+    // e_Cmd_SendBuffer_SendSelectedBuffer
+    // e_Cmd_SendBuffer_ClearAllBuffers
+    // e_Cmd_SendBufferSendGeneric
+    // e_Cmd_SendBuffer_EditPrompted
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A

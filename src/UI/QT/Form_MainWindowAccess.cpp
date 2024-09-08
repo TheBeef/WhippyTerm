@@ -242,7 +242,9 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionLoad_Buffer_Set;
         case e_UIMWMenu_Buffers_SaveBufferSet:
             return (e_UIMenuCtrl *)realwin->ui->actionSave_Buffer_Set;
-        case e_UIMWMenu_Buffers_DelayedSend:
+        case e_UIMWMenu_Buffers_ClearAllBuffers:
+            return (e_UIMenuCtrl *)realwin->ui->actionClear_All_Buffers;
+        case e_UIMWMenu_Buffers_SendBufferSendGeneric:
             return (e_UIMenuCtrl *)realwin->ui->actionSend_Buffer;
 
         case e_UIMWMenuMAX:

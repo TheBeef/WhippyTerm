@@ -172,6 +172,8 @@ void MWSendBuffers::ActivateCtrls(bool Active)
     if(UIWin==NULL)
         return;
 
+    RethinkBufferList();
+    RethinkBuffer();
     RethinkUI();
 }
 
@@ -565,29 +567,14 @@ void MWSendBuffers::SendBttn2Cmd(void)
  ******************************************************************************/
 void MWSendBuffers::SendBuffer(int Buffer)
 {
-    const uint8_t *BuffMem;
-    uint32_t BuffSize;
-
     if(MW->ActiveCon==NULL)
         return;
 
-    if(!g_SendBuffers.GetBufferInfo(Buffer,&BuffMem,&BuffSize))
+    if(!g_SendBuffers.Send(MW->ActiveCon,Buffer))
     {
-        UIAsk("Error","Failed to send the buffer.  Buffer not valid",
-                e_AskBox_Error,e_AskBttns_Ok);
-        return;
+        UIAsk("Error","Failed to send the buffer.",e_AskBox_Error,
+                e_AskBttns_Ok);
     }
-
-    if(MW->ActiveCon->WriteData(BuffMem,BuffSize,e_ConWriteSource_Buffers)!=
-            e_ConWrite_Success)
-    {
-        UIAsk("Error","Failed to send the buffer.  Write error",
-                e_AskBox_Error,e_AskBttns_Ok);
-    }
-
-    /* Force the send as if we are doing a block send device we want to send
-       everything we just queued */
-    MW->ActiveCon->TransmitQueuedData();
 }
 
 /*******************************************************************************

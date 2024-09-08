@@ -775,3 +775,44 @@ void SendBuffer::ClearAllBuffers(void)
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    SendBuffer::SendBuffer
+ *
+ * SYNOPSIS:
+ *    bool SendBuffer::Send(class Connection *Con,int BufferIndex);
+ *
+ * PARAMETERS:
+ *    Con [I] -- The connection to send the buffer out
+ *    BufferIndex [I] -- The buffer number to send
+ *
+ * FUNCTION:
+ *    This function sends a buffer out a connection.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool SendBuffer::Send(class Connection *Con,int BufferIndex)
+{
+    if(BufferIndex>=MAX_SEND_BUFFERS || Buffer[BufferIndex]==NULL ||
+            BufferSize[BufferIndex]==0)
+    {
+        return false;
+    }
+
+    if(Con->WriteData(Buffer[BufferIndex],BufferSize[BufferIndex],
+            e_ConWriteSource_Buffers)!=e_ConWrite_Success)
+    {
+        return false;
+    }
+
+    /* Force the send as if we are doing a block send device we want to send
+       everything we just queued */
+    Con->TransmitQueuedData();
+
+    return true;
+}

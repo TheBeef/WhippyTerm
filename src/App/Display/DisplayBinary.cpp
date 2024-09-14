@@ -150,8 +150,6 @@ bool DisplayBinary::Init(void *ParentWidget,bool (*EventCallback)(const struct D
         if(ColorBuffer==NULL)
             throw(0);
 
-memset(ColorBuffer,0x00,HexBufferSize*sizeof(struct CharStyling));
-
         ColorBottomOfBufferLine=ColorBuffer;
         ColorTopOfBufferLine=ColorBuffer;
         ColorTopLine=ColorTopOfBufferLine;
@@ -878,4 +876,50 @@ bool DisplayBinary::ScrollBarAtBottom(void)
     if(CurrentPos>=TotalLines-DisplayLines)
         return true;
     return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ClearScreen
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::ClearScreen(e_ScreenClearType Type);
+ *
+ * PARAMETERS:
+ *    Type [I] -- The type of clearing we want to do.  Supported types:
+ *                  e_ScreenClear_Clear -- Normal clearing.  Throw away
+ *                          anything that's on the screen area.
+ *                  e_ScreenClear_Scroll -- Move any non blank lines to the
+ *                          scroll back buffer before clearing.
+ *                  e_ScreenClear_ScrollAll -- Move all the screen area lines
+ *                          to the scroll back buffer.
+ *                  e_ScreenClear_ScrollWithHR -- Move any non blank lines to
+ *                          the scroll back buffer and then add a marker to
+ *                          show that's where the new screen starts.
+ *
+ * FUNCTION:
+ *    This function clears the screen area.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::ClearScreen(e_ScreenClearType Type)
+{
+    TopOfBufferLine=HexBuffer;
+    BottomOfBufferLine=HexBuffer;
+    TopLine=TopOfBufferLine;
+
+    ColorTopOfBufferLine=ColorBuffer;
+    ColorBottomOfBufferLine=ColorBuffer;
+    ColorTopLine=ColorTopOfBufferLine;
+
+    InsertPoint=0;
+
+    UITC_ClearAllLines(TextDisplayCtrl);
+    RethinkYScrollBar();
+    RedrawScreen();
+    UITC_RedrawScreen(TextDisplayCtrl);
 }

@@ -55,6 +55,7 @@ class DisplayBinary : public DisplayBase
         bool Init(void *ParentWidget,bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData);
         void Reparent(void *NewParentWidget);
         void WriteChar(uint8_t *Chr);
+        void ClearScreen(e_ScreenClearType Type);
 
     private:
         bool InitCalled;

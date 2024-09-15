@@ -34,6 +34,7 @@
 #include "App/PluginSupport/ExternPluginsSystem.h"
 #include "App/PluginSupport/SystemSupport.h"
 #include "App/IOSystem.h"
+#include "BuildOptions/BuildOptions.h"
 #include "OS/Directorys.h"
 #include "OS/FilePaths.h"
 #include "OS/System.h"
@@ -49,8 +50,6 @@
 using namespace std;
 
 /*** DEFINES                  ***/
-#define PLUGIN_DIR              "Plugins"
-#define PLUGIN_LIST_FILENAME    "Plugins.cfg"
 
 /*** MACROS                   ***/
 
@@ -116,7 +115,6 @@ void RegisterExternPlugins(void)
     const char *LoadFilename;
     char buff[200];
 
-//    TmpSavePluginData();
     LoadPluginList();
     if(m_ExternPlugins.size()==0)
     {
@@ -132,7 +130,7 @@ void RegisterExternPlugins(void)
         return;
     }
 
-    PluginDir+=PLUGIN_DIR;
+    PluginDir+=BuildOption_GetPluginPath();
 
     if(!PathExists(PluginDir.c_str()))
     {
@@ -214,7 +212,7 @@ static void LoadPluginList(void)
         }
 
         PluginListFilename=Path;
-        PluginListFilename+=PLUGIN_LIST_FILENAME;
+        PluginListFilename+=BuildOption_GetPluginListFilename();
 
         RegisterExternPluginInfoList(cfg,"Plugins",m_ExternPlugins);
         cfg.LoadCFGFile(PluginListFilename.c_str());
@@ -275,7 +273,7 @@ static void SavePluginList(void)
         }
 
         PluginListFilename=Path;
-        PluginListFilename+=PLUGIN_LIST_FILENAME;
+        PluginListFilename+=BuildOption_GetPluginListFilename();
 
         RegisterExternPluginInfoList(cfg,"Plugins",m_ExternPlugins);
         if(!cfg.SaveCFGFile(PluginListFilename.c_str()))
@@ -665,7 +663,7 @@ void UninstallExternPlugin(int Index)
         return;
     }
 
-    PluginDir+=PLUGIN_DIR;
+    PluginDir+=BuildOption_GetPluginPath();
 
     if(!PathExists(PluginDir.c_str()))
     {
@@ -772,7 +770,7 @@ bool InstallNewExternPlugin(const char *Filename)
         return false;
     }
 
-    PluginDir+=PLUGIN_DIR;
+    PluginDir+=BuildOption_GetPluginPath();
 
     if(!PathExists(PluginDir.c_str()))
     {
@@ -1107,7 +1105,7 @@ static void ExternPluginInstallDLL(class RIFF &PluginFile,
     if(!GetAppDataPath(PluginDir))
         throw("App data path unknown.");
 
-    PluginDir+=PLUGIN_DIR;
+    PluginDir+=BuildOption_GetPluginPath();
 
     /* See if this path exists */
     if(!PathExists(PluginDir.c_str()))

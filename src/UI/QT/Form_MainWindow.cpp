@@ -120,15 +120,16 @@ Form_MainWindow::Form_MainWindow(QWidget *parent) :
 
     connect(ToolBarURI_LineEdit, SIGNAL(returnPressed()), this, SLOT(URIreturnPressed()));
 
-//    App1SecTimer=new QTimer(this);
-//    AppCursorSecTimer=new QTimer(this);
-DebugInsertTimer=new QTimer(this);
-
     StopWatchTimer=new QTimer(this);
     StopWatchTimer->setInterval(13);   // 13ms so the updates look like they are coming in faster
     connect(StopWatchTimer, SIGNAL(timeout()), this, SLOT(StopWatchTimer_triggered()));
 
     ui->treeWidget_Buffer_BufferList->header()->resizeSection(0,256);
+
+#ifndef DEBUG
+    /* Hide anything that shouldn't be in the release build */
+    ui->menuDebug->menuAction()->setVisible(false);
+#endif
 }
 
 Form_MainWindow::~Form_MainWindow()

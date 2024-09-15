@@ -26,9 +26,15 @@ DEFINES += BUILT_IN_PLUGINS=1
 QMAKE_CXXFLAGS += -Wall
 QMAKE_CFLAGS += -Wall
 
-CONFIG(debug, debug|release)
-{
+CONFIG(debug, debug|release){
     DEFINES += DEBUG=1
+    SOURCES += \
+        ../src/BuildOptions/Debug/BuildOptions.cpp \
+
+} else {
+    SOURCES += \
+        ../src/BuildOptions/Release/BuildOptions.cpp \
+
 }
 
 win32 {
@@ -213,8 +219,7 @@ unix:!macx {
     ../src/App/StdPlugins/IODrivers/UDPClient/src/OS/Linux/UDPClient_OS_Socket.cpp \
     ../src/App/StdPlugins/IODrivers/UDPServer/src/OS/Linux/UDPServer_OS_Socket.cpp \
 
-    CONFIG(debug, debug|release)
-    {
+    CONFIG(debug, debug|release){
         SOURCES += \
             ../ExternPlugins/IODrivers/TestLoopback/src/LB2_Main.cpp \
     }

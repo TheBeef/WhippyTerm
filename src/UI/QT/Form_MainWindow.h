@@ -67,8 +67,6 @@ private slots:
     void on_actionAbout_Whippy_Term_triggered();
     void on_actionTest1_triggered();
     void on_actionTest2_triggered();
-//    void App1SecTimerTick();
-//    void AppCursorSecTimerTick();
     void GlobalCloseTabBttnClicked(void);
     void StopWatchTimer_triggered();
 
@@ -322,8 +320,6 @@ private:
     void DoTextInputChanged(e_UIMWTxtInputType InputID,const char *FinalText);
     bool FirstShow;
     bool IgnoreResize;
-//    QTimer *App1SecTimer;
-//    QTimer *AppCursorSecTimer;
     QLabel *ToolbarURILabel_Label;
     QAction *ToolBarURI;
     QAction *ToolBarURILabel;
@@ -333,7 +329,6 @@ private:
     bool SendEvent(e_MWEventType EventType);
     class TheMainWindow *MainWindowClassPtr;
 
-QTimer *DebugInsertTimer;
 void Debug_Send2DebugFn(void (*fn)(uintptr_t ID));
 };
 

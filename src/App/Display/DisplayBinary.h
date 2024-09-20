@@ -56,9 +56,11 @@ class DisplayBinary : public DisplayBase
         void Reparent(void *NewParentWidget);
         void WriteChar(uint8_t *Chr);
         void ClearScreen(e_ScreenClearType Type);
+        void SetCursorStyle(e_TextCursorStyleType Style);
 
     private:
         bool InitCalled;
+        e_TextCursorStyleType CursorStyle;
         t_UITextDisplayCtrl *TextDisplayCtrl;
 
         uint8_t *HexBuffer;             // This is a circular buffer
@@ -74,8 +76,6 @@ class DisplayBinary : public DisplayBase
         uint8_t InsertPoint;            // The insert offset from 'BottomOfBufferLine' (BottomOfBufferLine[InsertPoint])
         uint8_t *TopOfBufferLine;       // Where we read data from 'HexBuffer'.  This is the oldest data
         uint8_t *TopLine;               // The first line of the display window (where we are scrolled to).  This is relitive to 'Top of Buffer'
-
-//        int HozScroll;                  // How much has the display been scrolled in the X dir
 
         int ScreenWidthPx;
         int ScreenHeightPx;
@@ -93,6 +93,7 @@ class DisplayBinary : public DisplayBase
         void DrawLine(const uint8_t *Line,const struct CharStyling *ColorLine,
                 int ScreenLine,unsigned int Bytes);
         bool ScrollBarAtBottom(void);
+        void RethinkCursor(void);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

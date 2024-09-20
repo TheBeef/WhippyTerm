@@ -6,7 +6,7 @@ Still to do:
  * Selection / clipboard
  * Mouse wheel
  * Right click menus
- * Remove the "send" button on the bottom if not a block connection (the same as text display)
+ * Remove the "send" button on the bottom if not a block connection (the same as text display)????
 
 */
 
@@ -49,7 +49,7 @@ Still to do:
 /*** DEFINES                  ***/
 #define HEX_BYTES_PER_LINE              16
 //#define HEX_MIN_LINES                   24
-#define HEX_MIN_LINES                   3
+#define HEX_MIN_LINES                   3   /* DEBUG PAUL: Should be above, just for test */
 
 /*** MACROS                   ***/
 
@@ -111,6 +111,8 @@ DisplayBinary::DisplayBinary()
     DisplayLines=0;
     CharWidthPx=1;
     CharHeightPx=1;
+
+    CursorStyle=e_TextCursorStyle_Block;
 }
 
 bool DisplayBinary::Init(void *ParentWidget,bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData)
@@ -124,7 +126,7 @@ bool DisplayBinary::Init(void *ParentWidget,bool (*EventCallback)(const struct D
         /* Allocate the text canvas */
         TextDisplayCtrl=UITC_AllocTextDisplay(ParentWidget,
                 DisplayBinary_EventHandlerCB,(uintptr_t)this);
-        if(TextDisplayCtrl==nullptr)
+        if(TextDisplayCtrl==NULL)
             throw(0);
 
         HexBufferSize=Settings->ScrollBufferLines*HEX_BYTES_PER_LINE;
@@ -314,6 +316,8 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
             }
         }
     }
+
+    RethinkCursor();
 }
 
 /*******************************************************************************
@@ -354,7 +358,7 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
     switch(Event->EventType)
     {
         case e_TextDisplayEvent_DisplayFrameScrollX:
-            if(TextDisplayCtrl==nullptr)
+            if(TextDisplayCtrl==NULL)
                 break;
             UITC_SetXOffset(TextDisplayCtrl,Event->Info.Scroll.Amount*CharWidthPx);
             UITC_RedrawScreen(TextDisplayCtrl);
@@ -370,6 +374,7 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
                 ColorTopLine=ColorBuffer+Offset;
             }
             RedrawScreen();
+            RethinkCursor();
         break;
         case e_TextDisplayEvent_MouseDown:
         break;
@@ -410,6 +415,7 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
                     if(Offset>=TotalLines)
                         Offset=TotalLines;
                     UISetScrollBarPos(VertScroll,Offset);
+                    RethinkCursor();
                 }
             }
         break;
@@ -420,6 +426,7 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
             RethinkWindowSize();
             RethinkYScrollBar();
             RedrawScreen();
+            RethinkCursor();
         break;
         case e_TextDisplayEvent_LostFocus:
             HasFocus=false;
@@ -475,7 +482,7 @@ void DisplayBinary::ScreenResize(void)
     int ScreenChars;
     int TotalChars;
 
-    if(TextDisplayCtrl==nullptr)
+    if(TextDisplayCtrl==NULL)
         return;
 
     ScreenWidthPx=UITC_GetWidgetWidth(TextDisplayCtrl);
@@ -519,7 +526,7 @@ void DisplayBinary::RethinkYScrollBar(void)
     int TopLineY;
     t_UIScrollBarCtrl *VertScroll;
 
-    if(TextDisplayCtrl==nullptr)
+    if(TextDisplayCtrl==NULL)
         return;
 
     /* Find the total number of lines */
@@ -865,7 +872,7 @@ bool DisplayBinary::ScrollBarAtBottom(void)
     int CurrentPos;
     int TotalLines;
 
-    if(TextDisplayCtrl==nullptr)
+    if(TextDisplayCtrl==NULL)
         return false;
 
     VertScroll=UITC_GetVertSlider(TextDisplayCtrl);
@@ -920,6 +927,104 @@ void DisplayBinary::ClearScreen(e_ScreenClearType Type)
 
     UITC_ClearAllLines(TextDisplayCtrl);
     RethinkYScrollBar();
+    RethinkCursor();
     RedrawScreen();
     UITC_RedrawScreen(TextDisplayCtrl);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::RethinkCursor
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::RethinkCursor(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves the cursor to the insert point.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::RethinkCursor(void)
+{
+    unsigned int x;
+    unsigned int y;
+    int TotalLines;
+    int Bytes;
+    int TopLineY;
+
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    /* Find the total number of lines */
+    if(TopOfBufferLine>BottomOfBufferLine)
+        Bytes=(EndOfHexBuffer-TopOfBufferLine)+(BottomOfBufferLine-HexBuffer);
+    else
+        Bytes=BottomOfBufferLine-TopOfBufferLine;
+    TotalLines=Bytes/HEX_BYTES_PER_LINE;
+    TotalLines++;
+
+    /* Figure out the current topline in lines */
+    if(TopLine>=TopOfBufferLine)
+        Bytes=TopLine-TopOfBufferLine;
+    else
+        Bytes=(EndOfHexBuffer-TopOfBufferLine)+(TopLine-HexBuffer);
+    TopLineY=Bytes/HEX_BYTES_PER_LINE;
+    TopLineY++;
+
+    if(TotalLines<DisplayLines)
+    {
+        /* Simple cal's all line are visible */
+        y=(BottomOfBufferLine-TopOfBufferLine)/HEX_BYTES_PER_LINE;
+    }
+    else
+    {
+        /* More lines than are visible, we need to see if the cursor should
+           be shown */
+        y=DisplayLines-1;
+        if(!ScrollBarAtBottom())
+        {
+            /* Bottom line is not on screen, turn cursor off and return */
+            UITC_SetCursorStyle(TextDisplayCtrl,e_TextCursorStyle_Hidden);
+            return;
+        }
+    }
+
+    /* Now figure out the X */
+    x=InsertPoint;
+    x*=3;   // 3 because a hex number is 2 digits + a space
+
+    UITC_SetCursorPos(TextDisplayCtrl,x,y);
+    UITC_SetCursorStyle(TextDisplayCtrl,CursorStyle);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::SetCursorStyle
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::SetCursorStyle(e_TextCursorStyleType Style)
+ *
+ * PARAMETERS:
+ *    Style [I] -- What style to draw the cursor in
+ *
+ * FUNCTION:
+ *    This function changes what style the cursor is drawen as in this display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::SetCursorStyle(e_TextCursorStyleType Style)
+{
+    CursorStyle=Style;
+    RethinkCursor();
 }

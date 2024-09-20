@@ -1630,7 +1630,7 @@
    </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="title">
-     <string>Deb&amp;ug</string>
+     <string>Debug</string>
     </property>
     <addaction name="actionTest1"/>
     <addaction name="actionTest2"/>
@@ -1766,7 +1766,7 @@
    </widget>
    <widget class="QMenu" name="menuBuffers">
     <property name="title">
-     <string>Buffers</string>
+     <string>B&amp;uffers</string>
     </property>
     <addaction name="actionSend_Buffer"/>
     <addaction name="actionEdit_Send_Buffer"/>

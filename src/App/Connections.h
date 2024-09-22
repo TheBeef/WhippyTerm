@@ -427,6 +427,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         class ConSettings CustomSettings;
 
     private:
+        void *OurParentWidget;
         t_IOSystemHandle *IOHandle;
         class DisplayBase *Display;
         class TheMainWindow *MW;
@@ -477,6 +478,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void RethinkCursor(void);
         void HandleMouseWheelZoom(int Steps);
         e_CmdType HandleSmartClipboard(char key);
+        bool IsProcessorATextProcessor(struct ProcessorConData &PData);
 
         /* Call backs */
         void InformOfDelayTransmitTimeout(void);

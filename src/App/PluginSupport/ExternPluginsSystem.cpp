@@ -34,6 +34,7 @@
 #include "App/PluginSupport/ExternPluginsSystem.h"
 #include "App/PluginSupport/SystemSupport.h"
 #include "App/IOSystem.h"
+#include "App/MainWindow.h"
 #include "BuildOptions/BuildOptions.h"
 #include "OS/Directorys.h"
 #include "OS/FilePaths.h"
@@ -83,6 +84,7 @@ static void ExternPluginInstallDLL(class RIFF &PluginFile,
         const char *DescFilename,uint32_t ChunkLen);
 static bool LoadInfoAboutExternPlugin(const char *Filename,
         struct ExternPluginInfo &Info,bool InstallDLL);
+static void ImformOfNewPluginInstalled(struct ExternPluginInfo *Info);
 
 /*** VARIABLE DEFINITIONS     ***/
 t_DLLLoadedListType m_DLLLoaded;
@@ -799,12 +801,7 @@ bool InstallNewExternPlugin(const char *Filename)
 
     SavePluginList();
 
-    if(Info.PluginClass==e_ExtPluginClass_IODriver)
-    {
-        /* We just installed a IO Driver we need to tell the IO system
-           to rescan so this new entries from this driver show up */
-        IOS_ScanForConnections();
-    }
+    ImformOfNewPluginInstalled(&Info);
 
     return true;
 }
@@ -1198,5 +1195,38 @@ void PromptAndInstallPlugin(void)
         PathFilename=UI_ConcatFile2Path(Path,Filename);
         RunInstallPluginDialog(PathFilename.c_str());
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    ImformOfNewPluginInstalled
+ *
+ * SYNOPSIS:
+ *    void ImformOfNewPluginInstalled(struct ExternPluginInfo *Info);
+ *
+ * PARAMETERS:
+ *    Info [I] -- The info about this plugin
+ *
+ * FUNCTION:
+ *    This function is called when a new plugin is installed in the system.
+ *    This is not when a plugin is loaded, but instead when a plug is first
+ *    installed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void ImformOfNewPluginInstalled(struct ExternPluginInfo *Info)
+{
+    if(Info->PluginClass==e_ExtPluginClass_IODriver)
+    {
+        /* We just installed a IO Driver we need to tell the IO system
+           to rescan so this new entries from this driver show up */
+        IOS_ScanForConnections();
+    }
+
+    MW_InformOfNewPluginInstalled(Info);
 }
 

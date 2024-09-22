@@ -36,6 +36,7 @@
 #include "App/Display/HexDisplayBuffers.h"
 #include "App/IOSystem.h"
 #include "App/Util/KeyValue.h"
+#include "App/PluginSupport/ExternPluginsSystem.h"
 #include "MWPanels/MWPanels.h"
 #include "MWPanels/MW_ConnectionOptions.h"
 #include "MWPanels/MW_Capture.h"
@@ -102,6 +103,8 @@ void Debug6(void);
         bool GetBridgedStateInfo(class Connection **Con1,
                 class Connection **Con2);
         void DoSendByte(uint8_t Byte);
+        void ApplyTerminalEmulationMenuTriggered(uint64_t ID);
+        void InformOfNewPluginInstalled(const struct ExternPluginInfo *Info);
 
         /* Panel handlers */
         class MWConnectionOptions ConnectionOptionsPanel;
@@ -158,6 +161,7 @@ void Debug6(void);
         void ZoomOut(void);
         void ResetZoom(void);
         void CloseConnection(class Connection *TabCon);
+        void RebuildTerminalEmulationMenu(void);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
@@ -166,5 +170,6 @@ void Debug6(void);
 bool MW_AllocNewMainWindow(void);
 void MW_ApplySettings(void);
 void MW_RebuildAllBookmarkMenus(void);
+void MW_InformOfNewPluginInstalled(const struct ExternPluginInfo *Info);
 
 #endif

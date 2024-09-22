@@ -1028,3 +1028,51 @@ void DisplayBinary::SetCursorStyle(e_TextCursorStyleType Style)
     CursorStyle=Style;
     RethinkCursor();
 }
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ResetTerm
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::ResetTerm(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function does an reset term on the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::ResetTerm(void)
+{
+    ClearScreen(e_ScreenClear_Clear);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ClearScrollBackBuffer
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::ClearScrollBackBuffer(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function clears the scroll back buffer.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::ClearScrollBackBuffer(void)
+{
+    ClearScreen(e_ScreenClear_Clear);
+}

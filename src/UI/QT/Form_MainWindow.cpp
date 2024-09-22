@@ -1571,3 +1571,13 @@ void Form_MainWindow::on_actionEdit_Send_Buffer_triggered()
     DoMenuTriggered(e_UIMWMenu_Buffers_EditSenderBuffer);
 }
 
+void Form_MainWindow::actionApplyTerminalEmulationMenuItem_triggered()
+{
+    uintptr_t ID;
+    QObject *MenuAction;
+
+    MenuAction=sender();
+    ID=MenuAction->objectName().toULongLong();
+
+    SendEvent(e_MWEvent_ApplyTerminalEmulationMenuTriggered,NULL,ID);
+}

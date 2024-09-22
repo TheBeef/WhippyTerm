@@ -363,7 +363,7 @@ void Con_ApplySettings2AllConnections(void)
  *    Connection::Connection
  *
  * SYNOPSIS:
- *    Connection::Connection(void *ParentWidget,const char *URI);
+ *    Connection::Connection(const char *URI);
  *
  * PARAMETERS:
  *    URI [I] -- The URI to use to open the connection.  This will figure out
@@ -631,16 +631,16 @@ void Connection::FreeConnectionResources(bool FreeDB)
 bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
         class ConSettings *SourceSettings)
 {
-    i_DPSDataProcessorsType FirstProcessor;
     string UniqueID;
     struct ConnectionInfoList ConInfo;
     t_KVList Options;
-    bool UseText;
+    bool NewIsBinary;
 
     Display=nullptr;
     try
     {
         MW=MainWindow;
+        OurParentWidget=ParentWidget;
 
         /* Setup what settings we are using */
         if(SourceSettings==nullptr)
@@ -656,53 +656,26 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
 
         /* We only setup the data processors and display if we have a parent
            widget */
-        if(ParentWidget!=nullptr)
+        if(OurParentWidget!=NULL)
         {
             /* Allocate the data processors based on the settings */
             if(!DPS_AllocProcessorConData(&ProcessorData,&CustomSettings))
                 throw(0);
 
-            /* Check if this is a text connection or a binary connection.  Do
-               this by looking at the first processor and seeing what type it
-               is (if we don't have a processor then assume text). */
-            FirstProcessor=ProcessorData.DataProcessorsList.begin();
-            UseText=false;
-            if(FirstProcessor==ProcessorData.DataProcessorsList.end())
-            {
-                UseText=true;
-            }
-            else
-            {
-                switch(FirstProcessor->Info.ProType)
-                {
-                    case e_DataProcessorType_Binary:
-                        if(FirstProcessor->Info.
-                                BinMode==e_BinaryDataProcessorMode_Text)
-                        {
-                            UseText=true;
-                        }
-                    break;
-                    default:
-                    case e_DataProcessorTypeMAX:
-                    case e_DataProcessorType_Text:
-                        UseText=true;
-                    break;
-                }
-            }
-
-            BinaryConnection=!UseText;
-            if(UseText)
-            {
-                /* We are using a text display */
-                Display=new DisplayText();
-            }
-            else
+            NewIsBinary=!IsProcessorATextProcessor(ProcessorData);
+            BinaryConnection=NewIsBinary;
+            if(NewIsBinary)
             {
                 /* We are binary */
                 Display=new DisplayBinary();
             }
+            else
+            {
+                /* We are using a text display */
+                Display=new DisplayText();
+            }
 
-            if(!Display->Init(ParentWidget,Con_DisplayBufferEvent,
+            if(!Display->Init(OurParentWidget,Con_DisplayBufferEvent,
                     (uintptr_t)this))
             {
                 throw(0);
@@ -964,6 +937,7 @@ void Connection::SetCustomSettings(class ConSettings &NewSettings)
 void Connection::ApplyCustomSettings(void)
 {
     int NewFontSize;
+    bool NewIsBinary;
 
     if(!UsingCustomSettings)
     {
@@ -974,7 +948,7 @@ void Connection::ApplyCustomSettings(void)
     if(Display==NULL)
         return;
 
-    /* Free the processor data and then reallocate it (so we switch) */
+    /* Switch processor data */
     if(!DPS_ReapplyProcessor2Connection(&ProcessorData,&CustomSettings))
     {
         UIAsk("Error","Failed to reallocate data processor data",
@@ -983,8 +957,42 @@ void Connection::ApplyCustomSettings(void)
         return;
     }
 
-    if(Display!=nullptr)
-        Display->ApplySettings();
+    NewIsBinary=!IsProcessorATextProcessor(ProcessorData);
+    if(BinaryConnection!=NewIsBinary)
+    {
+        /* We are changing from binary to text or vice versa */
+        BinaryConnection=NewIsBinary;
+
+        if(Display!=NULL)
+            delete Display;
+        Display=NULL;
+
+        if(NewIsBinary)
+        {
+            /* We are binary */
+            Display=new DisplayBinary();
+        }
+        else
+        {
+            /* We are using a text display */
+            Display=new DisplayText();
+        }
+
+        if(!Display->Init(OurParentWidget,Con_DisplayBufferEvent,
+                (uintptr_t)this))
+        {
+            throw(0);
+        }
+
+        /* Use our copy of the settings */
+        Display->SetCustomSettings(&CustomSettings);
+        Display->SetBlockDeviceMode(BlockSendDevice);
+    }
+    else
+    {
+        if(Display!=nullptr)
+            Display->ApplySettings();
+    }
 
     /* Apply the zoom */
     FontSize=CustomSettings.FontSize;
@@ -1107,6 +1115,8 @@ struct ProcessorConData *Connection::GetCurrentProcessorData(void)
  ******************************************************************************/
 void Connection::ReParentWidget(void *NewParentWidget)
 {
+    OurParentWidget=NewParentWidget;
+
     if(Display!=nullptr)
         Display->Reparent(NewParentWidget);
 }
@@ -6423,4 +6433,60 @@ void Connection::InformOfSmartClipTimeout(void)
 bool Connection::IsConnectionBinary(void)
 {
     return BinaryConnection;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::IsProcessorATextProcessor
+ *
+ * SYNOPSIS:
+ *    bool Connection::IsProcessorATextProcessor(struct ProcessorConData &PData);
+ *
+ * PARAMETERS:
+ *    PData [I] -- The processor to check
+ *
+ * FUNCTION:
+ *    This function checks to see if a processor is a text or binary processor.
+ *
+ * RETURNS:
+ *    true -- This is a text processor
+ *    false -- This is a binary processor
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::IsProcessorATextProcessor(struct ProcessorConData &PData)
+{
+    i_DPSDataProcessorsType FirstProcessor;
+    bool RetValue;
+
+    /* Check if this is a text connection or a binary connection.  Do
+       this by looking at the first processor and seeing what type it
+       is (if we don't have a processor then assume text). */
+    FirstProcessor=PData.DataProcessorsList.begin();
+
+    RetValue=false;
+    if(FirstProcessor==PData.DataProcessorsList.end())
+    {
+        RetValue=true;
+    }
+    else
+    {
+        switch(FirstProcessor->Info.ProType)
+        {
+            case e_DataProcessorType_Binary:
+                if(FirstProcessor->Info.
+                        BinMode==e_BinaryDataProcessorMode_Text)
+                {
+                    RetValue=true;
+                }
+            break;
+            default:
+            case e_DataProcessorTypeMAX:
+            case e_DataProcessorType_Text:
+                RetValue=true;
+            break;
+        }
+    }
+    return RetValue;
 }

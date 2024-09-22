@@ -55,6 +55,7 @@ public:
     t_MWListOfMenusType BookmarkMenus;
     t_MWListOfActionsType FTPUploadMenuItems;
     t_MWListOfActionsType FTPDownloadMenuItems;
+    t_MWListOfActionsType ApplyTerminalEmulationMenuItems;
     QTimer *StopWatchTimer;
 
 public slots:
@@ -104,6 +105,7 @@ private slots:
     void on_actionBookmark_this_connection_triggered();
     void actionBookmarkMenuItem_triggered();
     void actionFTPUploadMenuItem_triggered();
+    void actionApplyTerminalEmulationMenuItem_triggered();
     void actionFTPDownloadMenuItem_triggered();
     void on_actionManage_Bookmarks_triggered();
     

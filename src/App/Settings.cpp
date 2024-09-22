@@ -911,6 +911,7 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
     cfg.StartBlock("DataProcessors");
     Settings_RegisterDataProcessorType(cfg,"DataProcessorType",DataProcessorType);
     cfg.Register("EnabledTextDataProcessors",EnabledTextDataProcessors);
+    cfg.Register("EnabledTermEmuDataProcessors",EnabledTermEmuDataProcessors);
     cfg.Register("EnabledBinaryDataProcessors",EnabledBinaryDataProcessors);
     cfg.EndBlock();
 
@@ -973,6 +974,8 @@ bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
 
 
     if(Con1.EnabledTextDataProcessors!=Con2.EnabledTextDataProcessors)
+        return false;
+    if(Con1.EnabledTermEmuDataProcessors!=Con2.EnabledTermEmuDataProcessors)
         return false;
     if(Con1.EnabledKeyPressProcessors!=Con2.EnabledKeyPressProcessors)
         return false;
@@ -1068,10 +1071,12 @@ void ConSettings::DefaultSettings(void)
     EnterKeyMode=e_EnterKey_LF;
     ClipboardMode=e_ClipboardMode_Smart;
 
-    DataProcessorType=e_DataProcessorType_Text;
     EnabledTextDataProcessors.clear();
-    EnabledTextDataProcessors.push_back("ANSIX364Decoder");
-    EnabledTextDataProcessors.push_back("UnicodeDecoder");
+
+    DataProcessorType=e_DataProcessorType_Text;
+    EnabledTermEmuDataProcessors.clear();
+    EnabledTermEmuDataProcessors.push_back("ANSIX364Decoder");
+    EnabledTermEmuDataProcessors.push_back("UnicodeDecoder");
 
     EnabledKeyPressProcessors.clear();
 

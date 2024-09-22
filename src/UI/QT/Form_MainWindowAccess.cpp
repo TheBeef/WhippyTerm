@@ -246,6 +246,8 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionClear_All_Buffers;
         case e_UIMWMenu_Buffers_SendBufferSendGeneric:
             return (e_UIMenuCtrl *)realwin->ui->actionSend_Buffer;
+        case e_UIMWMenu_Buffers_EditSenderBuffer:
+            return (e_UIMenuCtrl *)realwin->ui->actionEdit_Send_Buffer;
 
         case e_UIMWMenuMAX:
         default:
@@ -1279,4 +1281,76 @@ void UIMW_EnableStopWatchTimer(t_UIMainWindow *win,bool Enable)
         realwin->StopWatchTimer->start();
     else
         realwin->StopWatchTimer->stop();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIMW_Add2ApplyTerminalEmulationMenu
+ *
+ * SYNOPSIS:
+ *    e_UIMenuCtrl *UIMW_Add2ApplyTerminalEmulationMenu(t_UIMainWindow *win,
+ *              const char *Title,bool Binary,uintptr_t ID);
+ *
+ * PARAMETERS:
+ *    win [I] -- The main window to add to the menu for
+ *    Title [I] -- The name of menu
+ *    Binary [I] -- Is this is a binary emulation or text?
+ *    ID [I] -- The ID that is send when the event is triggered.
+ *
+ * FUNCTION:
+ *    This function adds a new entry to the apply terminal emulation menu.
+ *
+ * RETURNS:
+ *    NULL if there was an error, else a pointer to the menu control
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+e_UIMenuCtrl *UIMW_Add2ApplyTerminalEmulationMenu(t_UIMainWindow *win,const char *Title,
+        bool Binary,uintptr_t ID)
+{
+    Form_MainWindow *realwin=(Form_MainWindow *)win;
+    QAction *NewAction;
+    QMenu *UseParent;
+
+    try
+    {
+        if(Binary)
+            UseParent=realwin->ui->menuBinary_Emulation;
+        else
+            UseParent=realwin->ui->menuText_Emulation;
+
+        NewAction=UseParent->addAction(Title);
+        NewAction->setObjectName(QString::number(ID));
+
+        realwin->connect(NewAction, SIGNAL(triggered()), realwin,
+                SLOT(actionApplyTerminalEmulationMenuItem_triggered()));
+
+        realwin->ApplyTerminalEmulationMenuItems.push_back(NewAction);
+    }
+    catch(...)
+    {
+        return NULL;
+    }
+    return (e_UIMenuCtrl *)NewAction;
+}
+
+void UIMW_EnableApplyTerminalEmulationMenu(t_UIMainWindow *win,bool Enabled)
+{
+    Form_MainWindow *realwin=(Form_MainWindow *)win;
+
+    realwin->ui->menuApply_Terminal_Emulation->setEnabled(Enabled);
+}
+
+void UIMW_ApplyTerminalEmulationMenuClearAll(t_UIMainWindow *win)
+{
+    Form_MainWindow *realwin=(Form_MainWindow *)win;
+    t_MWListOfActionsType::iterator a;
+
+    for(a=realwin->ApplyTerminalEmulationMenuItems.begin();
+            a!=realwin->ApplyTerminalEmulationMenuItems.end();a++)
+    {
+        delete *a;
+    }
+    realwin->ApplyTerminalEmulationMenuItems.clear();
 }

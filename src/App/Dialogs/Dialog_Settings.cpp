@@ -727,21 +727,6 @@ static void DS_SetSettingGUI(void)
             }
         }
 
-        /* Term Emulation */
-        for(r=0;r<m_TermEmulationInputPros.size();r++)
-        {
-            if(m_TermEmulationInputPros[r].IDStr==NULL)
-                continue;
-
-            if(strcmp(m_TermEmulationInputPros[r].IDStr,CurStr->c_str())==0)
-            {
-                /* Found it */
-                ComboBoxHandle=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_TextProTermEmu);
-                UISetComboBoxSelectedEntry(ComboBoxHandle,r);
-                break;
-            }
-        }
-
         /* Highlighter */
         for(r=0;r<m_HighlighterInputPros.size();r++)
         {
@@ -762,6 +747,25 @@ static void DS_SetSettingGUI(void)
                 /* Found it */
                 ListViewHandle=UIS_GetListViewHandle(e_UIS_ListView_InputProTextOther);
                 UISetListViewEntryCheckedState(ListViewHandle,r,true);
+                break;
+            }
+        }
+    }
+
+    for(CurStr=m_SettingConSettings->EnabledTermEmuDataProcessors.begin();
+            CurStr!=m_SettingConSettings->EnabledTermEmuDataProcessors.end();CurStr++)
+    {
+        /* Term Emulation */
+        for(r=0;r<m_TermEmulationInputPros.size();r++)
+        {
+            if(m_TermEmulationInputPros[r].IDStr==NULL)
+                continue;
+
+            if(strcmp(m_TermEmulationInputPros[r].IDStr,CurStr->c_str())==0)
+            {
+                /* Found it */
+                ComboBoxHandle=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_TextProTermEmu);
+                UISetComboBoxSelectedEntry(ComboBoxHandle,r);
                 break;
             }
         }
@@ -1030,15 +1034,6 @@ static void DS_GetSettingsFromGUI(void)
                 push_back(m_CharEncodingInputPros[ID].IDStr);
     }
 
-    /* Term Emulation */
-    ComboBoxHandle=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_TextProTermEmu);
-    ID=UIGetComboBoxSelectedEntry(ComboBoxHandle);
-    if(m_TermEmulationInputPros[ID].IDStr!=NULL)
-    {
-        m_SettingConSettings->EnabledTextDataProcessors.
-                push_back(m_TermEmulationInputPros[ID].IDStr);
-    }
-
     /* Highlighter */
     ListViewHandle=UIS_GetListViewHandle(e_UIS_ListView_InputProTextHighlight);
     for(ID=0;ID<m_HighlighterInputPros.size();ID++)
@@ -1059,6 +1054,16 @@ static void DS_GetSettingsFromGUI(void)
             m_SettingConSettings->EnabledTextDataProcessors.
                     push_back(m_OtherInputPros[ID].IDStr);
         }
+    }
+
+    /* Term Emulation */
+    m_SettingConSettings->EnabledTermEmuDataProcessors.clear();
+    ComboBoxHandle=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_TextProTermEmu);
+    ID=UIGetComboBoxSelectedEntry(ComboBoxHandle);
+    if(m_TermEmulationInputPros[ID].IDStr!=NULL)
+    {
+        m_SettingConSettings->EnabledTermEmuDataProcessors.
+                push_back(m_TermEmulationInputPros[ID].IDStr);
     }
 
     /* Binary Data Processors */

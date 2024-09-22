@@ -291,6 +291,7 @@ typedef enum
     e_MWEvent_PanelTabChange,
     e_MWEvent_ListViewChange,
     e_MWEvent_ColumnViewChange,
+    e_MWEvent_ApplyTerminalEmulationMenuTriggered,
     e_MWEventMAX
 } e_MWEventType;
 
@@ -458,6 +459,9 @@ e_UIMenuCtrl *UIMW_AddFTPDownloadMenuItem(t_UIMainWindow *win,const char *Title,
         uintptr_t ID);
 void UIMW_AddFTPUploadClearAllMenus(t_UIMainWindow *win);
 void UIMW_AddFTPDownloadClearAllMenus(t_UIMainWindow *win);
+e_UIMenuCtrl *UIMW_Add2ApplyTerminalEmulationMenu(t_UIMainWindow *win,const char *Title,bool Binary,uintptr_t ID);
+void UIMW_ApplyTerminalEmulationMenuClearAll(t_UIMainWindow *win);
+void UIMW_EnableApplyTerminalEmulationMenu(t_UIMainWindow *win,bool Enabled);
 
 e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj);
 t_UIToolbarCtrl *UIMW_GetToolbarHandle(t_UIMainWindow *win,e_UIMWToolbarType UIObj);

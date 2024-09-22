@@ -116,6 +116,7 @@ class ConSettings
         e_DataProcessorTypeType DataProcessorType;
         t_StringListType EnabledTextDataProcessors;
         t_StringListType EnabledKeyPressProcessors;
+        t_StringListType EnabledTermEmuDataProcessors;
         t_StringListType EnabledBinaryDataProcessors;
 
         void RegisterAllMembers(class TinyCFG &cfg);

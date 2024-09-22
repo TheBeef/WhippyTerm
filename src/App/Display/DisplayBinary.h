@@ -57,6 +57,8 @@ class DisplayBinary : public DisplayBase
         void WriteChar(uint8_t *Chr);
         void ClearScreen(e_ScreenClearType Type);
         void SetCursorStyle(e_TextCursorStyleType Style);
+        void ClearScrollBackBuffer(void);
+        void ResetTerm(void);
 
     private:
         bool InitCalled;

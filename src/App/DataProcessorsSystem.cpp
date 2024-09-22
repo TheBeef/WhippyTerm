@@ -480,6 +480,24 @@ bool DPS_AllocProcessorConData(struct ProcessorConData *FData,
                 }
             }
         }
+
+        /* Handle the Term Emu */
+        for(CurStr=CustomSettings->EnabledTermEmuDataProcessors.begin();
+                CurStr!=CustomSettings->EnabledTermEmuDataProcessors.end();
+                CurStr++)
+        {
+            /* Find this input processor */
+            for(Processor=m_DataProcessors.begin();
+                    Processor!=m_DataProcessors.end();Processor++)
+            {
+                if(strcmp(Processor->ProID.c_str(),CurStr->c_str())==0)
+                {
+                    /* Found it */
+                    FData->DataProcessorsList.push_back(*Processor);
+                    break;
+                }
+            }
+        }
     }
     else
     {
@@ -759,7 +777,10 @@ bool DPS_ProcessorKeyPress(const uint8_t *KeyChar,int KeyCharLen,
  *                   The data return will be a vector of a structure with
  *                   the following fields:
  *                      IDStr -- The identifier string for this input
- *                               processor.
+ *                               processor.  This will remain static until
+ *                               a plugin is removed (currently not
+ *                               possible, so it's static, but that may
+ *                               change in the future).
  *                      DisplayName -- The name to display to the user
  *                      Tip -- A tool tip for this input processor
  *                      Help -- Help for this input processor.  This is
@@ -856,6 +877,44 @@ void DPS_GetListOfBinaryProcessors(t_DPS_ProInfoType &RetData)
             RetData.push_back(NewEntry);
         }
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_GetProcessorsInfo
+ *
+ * SYNOPSIS:
+ *    const struct DataProcessor *DPS_GetProcessorsInfo(const char *IDStr);
+ *
+ * PARAMETERS:
+ *    IDStr [I] -- The ID string for this processor to lookup
+ *
+ * FUNCTION:
+ *    This function finds a data processor from the list of available data
+ *    processors.
+ *
+ * RETURNS:
+ *    A pointer to the data process or NULL if it was not found.  This will
+ *    be valid until another call to a data processor system call.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+const struct DataProcessor *DPS_GetProcessorsInfo(const char *IDStr)
+{
+    i_DPSDataProcessorsType CurProcessor;
+
+    /* See if we can find this data processor */
+    for(CurProcessor=m_DataProcessors.begin();
+            CurProcessor!=m_DataProcessors.end();CurProcessor++)
+    {
+        if(strcmp(CurProcessor->ProID.c_str(),IDStr)==0)
+        {
+            /* Found it */
+            return &*CurProcessor;
+        }
+    }
+    return NULL;
 }
 
 /*******************************************************************************

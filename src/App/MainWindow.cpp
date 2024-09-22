@@ -217,6 +217,62 @@ void MW_ApplySettings(void)
 
 /*******************************************************************************
  * NAME:
+ *    MW_InformOfNewPluginInstalled
+ *
+ * SYNOPSIS:
+ *    void MW_InformOfNewPluginInstalled(const struct ExternPluginInfo *Info);
+ *
+ * PARAMETERS:
+ *    Info [I] -- The info about this plugin
+ *
+ * FUNCTION:
+ *    This function is called when a new plugin is installed.  It tells all
+ *    the mains windows that the plugin has been installed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MW_InformOfNewPluginInstalled(const struct ExternPluginInfo *Info)
+{
+    i_MainWindowsListType MW;
+
+    for(MW=m_MainWindowsList.begin();MW!=m_MainWindowsList.end();MW++)
+        (*MW)->InformOfNewPluginInstalled(Info);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MW_RebuildAllBookmarkMenus
+ *
+ * SYNOPSIS:
+ *    void MW_RebuildAllBookmarkMenus(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function rebuilds all the bookmark menus on all the main windows.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void MW_RebuildAllBookmarkMenus(void)
+{
+    i_MainWindowsListType MW;
+
+    /* Update all the main windows */
+    for(MW=m_MainWindowsList.begin();MW!=m_MainWindowsList.end();MW++)
+        (*MW)->RebuildBookmarkMenu();
+}
+
+/*******************************************************************************
+ * NAME:
  *    TheMainWindow::TheMainWindow
  *
  * SYNOPSIS:
@@ -407,6 +463,9 @@ void TheMainWindow::Init(void)
 
     PanelCtrl=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_RightPanel);
     UITabCtrlMakeTabActiveUsingIndex(PanelCtrl,e_RightPanelTabIndexes_StopWatch);
+
+    /* Add all the terminal emulations to the menu */
+    RebuildTerminalEmulationMenu();
 }
 
 /*******************************************************************************
@@ -1332,6 +1391,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(SendBuffer12,false);
         UIEnableMenu(SendBufferSendGeneric,false);
 
+        UIMW_EnableApplyTerminalEmulationMenu(UIWin,false);
+
         ActivatePanels=false;
     }
     else
@@ -1346,7 +1407,6 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(AddBookmark,true);
         UIEnableMenu(ShowNonPrintable,true);
         UIEnableMenu(ShowEndOfLines,true);
-        UIEnableMenu(InsertHorizontalRule,true);
         UIEnableMenu(ResetTerm,true);
         UIEnableMenu(ClearScreen,true);
         UIEnableMenu(ClearScrollBackBuffer,true);
@@ -1369,6 +1429,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(Send_Escape,true);
         UIEnableMenu(Send_Delete,true);
         UIEnableMenu(Send_Other,true);
+
+        UIMW_EnableApplyTerminalEmulationMenu(UIWin,true);
 
         Con=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
         if(Con==NULL)
@@ -1409,6 +1471,11 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
             UIEnableMenu(Copy,false);
             UIEnableToolbar(CopyTool,false);
         }
+
+        if(Con->IsConnectionBinary())
+            UIEnableMenu(InsertHorizontalRule,false);
+        else
+            UIEnableMenu(InsertHorizontalRule,true);
 
         ActivatePanels=true;
     }
@@ -3046,34 +3113,6 @@ void TheMainWindow::ResetConnectionCustomSettings(void)
 
 /*******************************************************************************
  * NAME:
- *    MW_RebuildAllBookmarkMenus
- *
- * SYNOPSIS:
- *    void MW_RebuildAllBookmarkMenus(void);
- *
- * PARAMETERS:
- *    NONE
- *
- * FUNCTION:
- *    This function rebuilds all the bookmark menus on all the main windows.
- *
- * RETURNS:
- *    NONE
- *
- * SEE ALSO:
- *
- ******************************************************************************/
-void MW_RebuildAllBookmarkMenus(void)
-{
-    i_MainWindowsListType MW;
-
-    /* Update all the main windows */
-    for(MW=m_MainWindowsList.begin();MW!=m_MainWindowsList.end();MW++)
-        (*MW)->RebuildBookmarkMenu();
-}
-
-/*******************************************************************************
- * NAME:
  *    MW_DoMainWindowClose
  *
  * SYNOPSIS:
@@ -3241,6 +3280,137 @@ void TheMainWindow::ResetTerm(void)
     TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
     if(TabCon!=NULL)
         TabCon->ResetTerm();
+}
+
+struct TermEmuSortCB
+{
+    inline bool operator() (const struct DPS_ProInfo &ent1,
+            const struct DPS_ProInfo &ent2)
+    {
+        return strcasecmp(ent1.DisplayName,ent2.DisplayName)<0;
+    }
+};
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::RebuildTerminalEmulationMenu
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::RebuildTerminalEmulationMenu(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function clears and fills in the quick change terminal emulation
+ *    menu.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::RebuildTerminalEmulationMenu(void)
+{
+    t_DPS_ProInfoType TxtTerms;
+    t_DPS_ProInfoType BinTerms;
+    unsigned int r;
+
+    UIMW_ApplyTerminalEmulationMenuClearAll(UIWin);
+
+    DPS_GetListOfTextProcessors(e_TextDataProcessorClass_TermEmulation,
+            TxtTerms);
+    DPS_GetListOfBinaryProcessors(BinTerms);
+
+    /* Sort them */
+    std::sort(TxtTerms.begin(),TxtTerms.end(),
+            TermEmuSortCB());
+    std::sort(BinTerms.begin(),BinTerms.end(),TermEmuSortCB());
+
+    for(r=0;r<TxtTerms.size();r++)
+    {
+        UIMW_Add2ApplyTerminalEmulationMenu(UIWin,TxtTerms[r].DisplayName,false,
+                (uintptr_t)TxtTerms[r].IDStr);
+    }
+
+    for(r=0;r<BinTerms.size();r++)
+    {
+        UIMW_Add2ApplyTerminalEmulationMenu(UIWin,BinTerms[r].DisplayName,true,
+                (uintptr_t)BinTerms[r].IDStr);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::ApplyTerminalEmulationMenuTriggered
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::ApplyTerminalEmulationMenuTriggered(uint64_t ID);
+ *
+ * PARAMETERS:
+ *    ID [I] -- The ID of the menu that was triggered (this was added with
+ *              UIMW_AddFTPUploadMenuItem()
+ *
+ * FUNCTION:
+ *    This function is called when the user selects an item in the apply
+ *    terminal emulation menu.  It changes the terminal emulation.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::ApplyTerminalEmulationMenuTriggered(uint64_t ID)
+{
+    const char *TermIdStr=(const char *)ID;
+    const struct DataProcessor *DPro;
+
+    if(TermIdStr==NULL)
+        return;
+
+    /* See if this new processor is binary or text */
+    DPro=DPS_GetProcessorsInfo(TermIdStr);
+    if(DPro==NULL)
+        return;
+    /* See if it's binary */
+    if(DPro->Info.ProType==e_DataProcessorType_Binary)
+        ActiveCon->CustomSettings.DataProcessorType=e_DataProcessorType_Binary;
+    else
+        ActiveCon->CustomSettings.DataProcessorType=e_DataProcessorType_Text;
+
+    /* Replace the term emulator with the one selected */
+    ActiveCon->CustomSettings.EnabledTermEmuDataProcessors.clear();
+    ActiveCon->CustomSettings.EnabledTermEmuDataProcessors.push_back(TermIdStr);
+
+    /* Now apply this change */
+    ActiveCon->SetCustomSettings(ActiveCon->CustomSettings);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::InformOfNewPluginInstalled
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::InformOfNewPluginInstalled(const struct ExternPluginInfo *Info)
+ *
+ * PARAMETERS:
+ *    Info [I] -- The info about this plugin
+ *
+ * FUNCTION:
+ *    This function rebuilds the apply terminal emulation menu after a new
+ *    plugin is installed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::InformOfNewPluginInstalled(const struct ExternPluginInfo *Info)
+{
+    RebuildTerminalEmulationMenu();
 }
 
 /*******************************************************************************
@@ -3468,6 +3638,9 @@ bool MW_Event(const struct MWEvent *Event)
                 default:
                 break;
             }
+        break;
+        case e_MWEvent_ApplyTerminalEmulationMenuTriggered:
+            Event->MW->ApplyTerminalEmulationMenuTriggered(Event->ID);
         break;
         case e_MWEventMAX:
         default:
@@ -3939,3 +4112,4 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
     }
 }
+

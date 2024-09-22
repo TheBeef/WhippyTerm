@@ -1723,12 +1723,26 @@
     <property name="title">
      <string>&amp;Terminal</string>
     </property>
-    <addaction name="actionClear_Screen"/>
-    <addaction name="actionClear_Scroll_Buffer"/>
+    <widget class="QMenu" name="menuApply_Terminal_Emulation">
+     <property name="title">
+      <string>Change Terminal Emulation</string>
+     </property>
+     <widget class="QMenu" name="menuText_Emulation">
+      <property name="title">
+       <string>Text Emulation</string>
+      </property>
+     </widget>
+     <widget class="QMenu" name="menuBinary_Emulation">
+      <property name="title">
+       <string>Binary Emulation</string>
+      </property>
+     </widget>
+     <addaction name="menuText_Emulation"/>
+     <addaction name="menuBinary_Emulation"/>
+    </widget>
+    <addaction name="menuApply_Terminal_Emulation"/>
     <addaction name="separator"/>
-    <addaction name="actionInsert_Horizontal_Rule"/>
     <addaction name="actionInsert_Time_Stamp"/>
-    <addaction name="separator"/>
     <addaction name="actionSend_NULL"/>
     <addaction name="actionSend_Backspace"/>
     <addaction name="actionSend_Tab"/>
@@ -1738,6 +1752,11 @@
     <addaction name="actionSend_Escape"/>
     <addaction name="actionSend_Delete"/>
     <addaction name="actionSend_Other"/>
+    <addaction name="separator"/>
+    <addaction name="actionInsert_Horizontal_Rule"/>
+    <addaction name="separator"/>
+    <addaction name="actionClear_Screen"/>
+    <addaction name="actionClear_Scroll_Buffer"/>
     <addaction name="separator"/>
     <addaction name="actionReset"/>
    </widget>
@@ -2286,7 +2305,7 @@
     </iconset>
    </property>
    <property name="text">
-    <string>&amp;Reset</string>
+    <string>&amp;Reset Terminal</string>
    </property>
   </action>
   <action name="actionInsert_Horizontal_Rule">

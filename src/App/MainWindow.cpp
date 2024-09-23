@@ -3386,6 +3386,8 @@ void TheMainWindow::ApplyTerminalEmulationMenuTriggered(uint64_t ID)
 
     /* Now apply this change */
     ActiveCon->SetCustomSettings(ActiveCon->CustomSettings);
+
+    SendBuffersPanel.ConnectionChanged();   // The connection may have changed (kinda, the type may have)
 }
 
 /*******************************************************************************

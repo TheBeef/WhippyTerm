@@ -3,6 +3,9 @@
 // Also see:https://stackoverflow.com/questions/44116977/get-mouse-position-in-pixels-using-escape-sequences
 // http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
 // https://godoc.org/github.com/pborman/ansi
+// https://ecma-international.org/publications-and-standards/standards/ecma-48/
+
+// DEBUG PAUL: Rename this to ECMA-48?  Seems that ANSIX3.64 was withdrawn because it's basicly ECMA-48.
 
 /*******************************************************************************
  * FILENAME: ANSIX3_64.c

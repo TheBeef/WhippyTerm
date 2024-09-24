@@ -59,6 +59,7 @@ private:
     bool SendEvent(e_ESBEventType EventType);
     void SendBttnEvent(e_ESB_Button Bttn);
     void SendContextEvent(e_ESB_ContextMenu Menu);
+
     QMenu *MoreMenu;
     QAction *LoadBufferMenu;
     QAction *SaveBufferMenu;

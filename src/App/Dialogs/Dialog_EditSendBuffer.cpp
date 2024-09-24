@@ -1115,58 +1115,25 @@ static void DESB_RethinkButtons(void)
 static void DESB_DoInsertFromClipboard(void)
 {
     e_PasteDataType DataFormat;
-    uint8_t *Buffer;
-    string ClipboardText;
-    const uint8_t *StartOfBuffPtr;
-    int BuffSize;
-    int InsertPos;
-    const uint8_t *SelStartPtr;
-    const uint8_t *SelEndPtr;
-    bool DoReplace;
-    unsigned int MaxLen;
-    unsigned int Len;
+    e_HDBCFormatType ClipFormat;
 
     DataFormat=RunPasteDataDialog();
-    if(DataFormat>=e_PasteData_Cancel)
+    switch(DataFormat)
+    {
+        case e_PasteData_Text:
+            ClipFormat=e_HDBCFormat_AscII;
+        break;
+        case e_PasteData_HexDump:
+            ClipFormat=e_HDBCFormat_Hex;
+        break;
+        case e_PasteData_Cancel:
+        case e_PasteDataMAX:
+        default:
         return;
-
-    UI_GetClipboardText(ClipboardText,e_Clipboard_Clipboard);
-
-    Buffer=ConvertClipboardData2Format(ClipboardText,DataFormat,&Len);
-    if(Buffer==NULL)
-    {
-        UIAsk("Error","Could not paste data from clipboard",
-                e_AskBox_Error,e_AskBttns_Ok);
-        return;
     }
 
-    if(m_DESB_HexDisplay->GetSelectionBounds(&SelStartPtr,&SelEndPtr))
-    {
-        /* Replacing the selection */
-        MaxLen=SelEndPtr-SelStartPtr;
-        if(!m_DESB_HexDisplay->GetBufferInfo(&StartOfBuffPtr,&BuffSize))
-            return;
-        InsertPos=SelStartPtr-StartOfBuffPtr;
-        DoReplace=true;
-
-        /* Fill with zero's so if it's short it will be padded with 0's */
-        m_DESB_HexDisplay->FillSelectionWithValue(0x00);
-    }
-    else
-    {
-        /* Inserting the bytes */
-        MaxLen=~0;
-        InsertPos=m_DESB_HexDisplay->GetCursorPos();
-        DoReplace=false;
-    }
-
-    if(Len>MaxLen)
-        Len=MaxLen;
-
-    m_DESB_HexDisplay->FillWithValue(InsertPos,Buffer,Len,DoReplace);
+    m_DESB_HexDisplay->DoInsertFromClipboard(ClipFormat);
     m_DESB_HexDisplay->GiveFocus();
-
-    free(Buffer);
 }
 
 /*******************************************************************************

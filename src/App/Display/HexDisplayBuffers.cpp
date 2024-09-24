@@ -33,11 +33,14 @@
 
 /*** HEADER FILES TO INCLUDE  ***/
 #include "App/Display/HexDisplayBuffers.h"
+#include "App/Util/ClipboardHelpers.h"
 #include "App/Settings.h"
+#include "UI/UIAsk.h"
 #include <string.h>
 #include <stdlib.h>
+#include <string>
 
-//#include "UI/UIDebug.h"
+using namespace std;
 
 /*** DEFINES                  ***/
 #define BYTESPERLINE                    16  // Number bytes per line to display
@@ -1438,6 +1441,31 @@ bool HexDisplayBuffer::KeyPress(uint8_t Mods,e_UIKeys Key,
     if(RetValue)
         return RetValue;
 
+    /* Handle copy & paste */
+    if(Mods&KEYMOD_CONTROL)
+    {
+        RetValue=false;
+        if(Key==e_UIKeysMAX)
+        {
+            if(TextLen==1)
+            {
+                if(TextPtr[0]=='C' || TextPtr[0]=='c')
+                {
+                    /* Copy out */
+                    SendSelection2Clipboard(e_Clipboard_Clipboard,
+                            e_HDBCFormat_Default);
+                    RetValue=true;
+                }
+                if(TextPtr[0]=='V' || TextPtr[0]=='v')
+                {
+                    DoInsertFromClipboard(e_HDBCFormat_Default);
+                    RetValue=true;
+                }
+            }
+        }
+        return RetValue;
+    }
+
     if(InEditMode)
     {
         RetValue=true;
@@ -1447,7 +1475,6 @@ bool HexDisplayBuffer::KeyPress(uint8_t Mods,e_UIKeys Key,
                 if(SelectionValid)
                 {
                     /* Erase the selection */
-
                     const uint8_t *SelStart;
                     const uint8_t *SelEnd;
                     int Bytes2Del;
@@ -1784,59 +1811,56 @@ bool HexDisplayBuffer::KeyPress(uint8_t Mods,e_UIKeys Key,
             case e_UIKeysMAX:
             default:
                 RetValue=false;
-                if(InEditMode)
+                if(TextLen==1)
                 {
-                    if(TextLen==1)
+                    RetValue=true;
+                    if(TextPtr[0]>='0' && TextPtr[0]<='9' && !InAscIIArea)
                     {
-                        RetValue=true;
-                        if(TextPtr[0]>='0' && TextPtr[0]<='9' && !InAscIIArea)
+                        EditHandleNibbleInput(TextPtr[0]-'0');
+                    }
+                    else if(TextPtr[0]>='a' && TextPtr[0]<='f' &&
+                            !InAscIIArea)
+                    {
+                        AbortDotInput();
+                        EditHandleNibbleInput(TextPtr[0]-'a'+10);
+                    }
+                    else if(TextPtr[0]>='A' && TextPtr[0]<='F' &&
+                            !InAscIIArea)
+                    {
+                        AbortDotInput();
+                        EditHandleNibbleInput(TextPtr[0]-'A'+10);
+                    }
+                    else if(TextPtr[0]=='.' && !InAscIIArea)
+                    {
+                        DoingDotInputChar=!DoingDotInputChar;
+                        RethinkCursorLook();
+                    }
+                    else if(TextPtr[0]=='+' && !InAscIIArea)
+                    {
+                        AbortDotInput();
+                        EditHandleNibbleCycle(1);
+                    }
+                    else if(TextPtr[0]=='-' && !InAscIIArea)
+                    {
+                        AbortDotInput();
+                        EditHandleNibbleCycle(-1);
+                    }
+                    else if(InAscIIArea)
+                    {
+                        /* Add this char (all bytes of it) */
+                        for(r=0;r<TextLen;r++)
                         {
-                            EditHandleNibbleInput(TextPtr[0]-'0');
+                            if(!ReadyForAddingChar())
+                                return true;
+                            StartOfData[Cursor_Pos]=TextPtr[r];
+                            Cursor_Pos++;
+                            ClipCursorPos(false);
                         }
-                        else if(TextPtr[0]>='a' && TextPtr[0]<='f' &&
-                                !InAscIIArea)
-                        {
-                            AbortDotInput();
-                            EditHandleNibbleInput(TextPtr[0]-'a'+10);
-                        }
-                        else if(TextPtr[0]>='A' && TextPtr[0]<='F' &&
-                                !InAscIIArea)
-                        {
-                            AbortDotInput();
-                            EditHandleNibbleInput(TextPtr[0]-'A'+10);
-                        }
-                        else if(TextPtr[0]=='.' && !InAscIIArea)
-                        {
-                            DoingDotInputChar=!DoingDotInputChar;
-                            RethinkCursorLook();
-                        }
-                        else if(TextPtr[0]=='+' && !InAscIIArea)
-                        {
-                            AbortDotInput();
-                            EditHandleNibbleCycle(1);
-                        }
-                        else if(TextPtr[0]=='-' && !InAscIIArea)
-                        {
-                            AbortDotInput();
-                            EditHandleNibbleCycle(-1);
-                        }
-                        else if(InAscIIArea)
-                        {
-                            /* Add this char (all bytes of it) */
-                            for(r=0;r<TextLen;r++)
-                            {
-                                if(!ReadyForAddingChar())
-                                    return true;
-                                StartOfData[Cursor_Pos]=TextPtr[r];
-                                Cursor_Pos++;
-                                ClipCursorPos(false);
-                            }
-                        }
-                        else
-                        {
-                            AbortDotInput();
-                            RetValue=false;
-                        }
+                    }
+                    else
+                    {
+                        AbortDotInput();
+                        RetValue=false;
                     }
                 }
             break;
@@ -3393,7 +3417,8 @@ int HexDisplayBuffer::GetSizeOfSelection(e_HDBCFormatType ClipFormat)
  *
  * SEE ALSO:
  *    HexDisplayBuffer::GetSizeOfSelection(),
- *    HexDisplayBuffer::GetSelectionBounds()
+ *    HexDisplayBuffer::GetSelectionBounds(),
+ *    HexDisplayBuffer::DoInsertFromClipboard()
  ******************************************************************************/
 void HexDisplayBuffer::CopySelection2Buffer(uint8_t *OutBuff,
         e_HDBCFormatType ClipFormat)
@@ -3544,7 +3569,9 @@ void HexDisplayBuffer::CopySelection2Buffer(uint8_t *OutBuff,
  *              e_HDBCFormatType Format);
  *
  * PARAMETERS:
- *    Clip [I] -- What clipboard to send the text to
+ *    Clip [I] -- What clipboard to send the text to.  Supported values:
+ *                  e_Clipboard_Selection -- Linux only.  Always paste when the selection changes
+ *                  e_Clipboard_Clipboard -- All.  Copy on CTRL-C
  *    Format [I] -- What format to apply to the copy.  See
  *                  CopySelection2Buffer()
  *
@@ -4004,4 +4031,108 @@ void HexDisplayBuffer::FillWithValue(int InsertOffset,const uint8_t *Data,
 void HexDisplayBuffer::GiveFocus(void)
 {
     UITC_SetFocus(TextDisplayCtrl);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    HexDisplayBuffer::DoInsertFromClipboard
+ *
+ * SYNOPSIS:
+ *    void HexDisplayBuffer::DoInsertFromClipboard(e_HDBCFormatType ClipFormat);
+ *
+ * PARAMETERS:
+ *    ClipFormat [I] -- What format do you want the selection formated as.
+ *                      Valid options:
+ *                          e_HDBCFormat_Default -- Format based on where the
+ *                              user is editing (AscII vs hex dump)
+ *                          e_HDBCFormat_HexDump -- Not supported.
+ *                          e_HDBCFormat_Hex -- Assume clipboard has hex values
+ *                          e_HDBCFormat_AscII -- Assume clipboard is text
+ *                          e_HDBCFormat_RAW -- Not supported.
+ *
+ * FUNCTION:
+ *    This function pastes the clipboard into the hex display (only if in
+ *    edit mode)
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    HexDisplayBuffer::CopySelection2Buffer()
+ ******************************************************************************/
+void HexDisplayBuffer::DoInsertFromClipboard(e_HDBCFormatType ClipFormat)
+{
+    e_PasteDataType DataFormat;
+    uint8_t *Buffer;
+    string ClipboardText;
+    const uint8_t *StartOfBuffPtr;
+    int BuffSize;
+    int InsertPos;
+    const uint8_t *SelStartPtr;
+    const uint8_t *SelEndPtr;
+    bool DoReplace;
+    unsigned int MaxLen;
+    unsigned int Len;
+
+    if(!InEditMode)
+        return;
+
+    switch(ClipFormat)
+    {
+        case e_HDBCFormat_Default:
+            if(InAscIIArea)
+                DataFormat=e_PasteData_Text;
+            else
+                DataFormat=e_PasteData_HexDump;
+        break;
+        case e_HDBCFormat_Hex:
+            DataFormat=e_PasteData_HexDump;
+        break;
+        case e_HDBCFormat_AscII:
+            DataFormat=e_PasteData_Text;
+        break;
+
+        case e_HDBCFormat_HexDump:
+        case e_HDBCFormat_RAW:
+        case e_HDBCFormatMAX:
+        default:
+            return;
+    }
+
+    UI_GetClipboardText(ClipboardText,e_Clipboard_Clipboard);
+
+    Buffer=ConvertClipboardData2Format(ClipboardText,DataFormat,&Len);
+    if(Buffer==NULL)
+    {
+        UIAsk("Error","Could not paste data from clipboard",e_AskBox_Error,
+                e_AskBttns_Ok);
+        return;
+    }
+
+    if(GetSelectionBounds(&SelStartPtr,&SelEndPtr))
+    {
+        /* Replacing the selection */
+        MaxLen=SelEndPtr-SelStartPtr;
+        if(!GetBufferInfo(&StartOfBuffPtr,&BuffSize))
+            return;
+        InsertPos=SelStartPtr-StartOfBuffPtr;
+        DoReplace=true;
+
+        /* Fill with zero's so if it's short it will be padded with 0's */
+        FillSelectionWithValue(0x00);
+    }
+    else
+    {
+        /* Inserting the bytes */
+        MaxLen=~0;
+        InsertPos=GetCursorPos();
+        DoReplace=false;
+    }
+
+    if(Len>MaxLen)
+        Len=MaxLen;
+
+    FillWithValue(InsertPos,Buffer,Len,DoReplace);
+
+    free(Buffer);
 }

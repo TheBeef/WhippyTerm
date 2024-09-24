@@ -146,6 +146,7 @@ class HexDisplayBuffer
         bool SetEditMode(void);
         void FillSelectionWithValue(uint8_t Value);
         void FillWithValue(int InsertOffset,const uint8_t *Data,int Bytes,bool Replace);
+        void DoInsertFromClipboard(e_HDBCFormatType ClipFormat);
 
     private:
         t_UITextDisplayCtrl *TextDisplayCtrl;

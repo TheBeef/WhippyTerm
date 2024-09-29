@@ -119,6 +119,7 @@ Form_MainWindow::Form_MainWindow(QWidget *parent) :
     ToolBarURILabel=ui->mainToolBar->insertWidget(ToolBarURI,ToolbarURILabel_Label);
 
     connect(ToolBarURI_LineEdit, SIGNAL(returnPressed()), this, SLOT(URIreturnPressed()));
+    connect(ToolBarURI_LineEdit, SIGNAL(textEdited(const QString &)), this, SLOT(URIEdited(const QString &)));
 
     StopWatchTimer=new QTimer(this);
     StopWatchTimer->setInterval(13);   // 13ms so the updates look like they are coming in faster
@@ -921,6 +922,12 @@ void Form_MainWindow::URIreturnPressed()
 {
     DoToolbarTriggered(e_UIMWToolbar_URIGo);
     IgnoreNextKeyEvent=true;
+}
+
+void Form_MainWindow::URIEdited(const QString &text)
+{
+    DoTextInputChanged(e_UIMWTxtInput_URI,
+            qPrintable(ToolBarURI_LineEdit->text()));
 }
 
 void Form_MainWindow::on_actionactionURIGo_triggered()

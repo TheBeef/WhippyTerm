@@ -105,6 +105,7 @@ void Debug6(void);
         void DoSendByte(uint8_t Byte);
         void ApplyTerminalEmulationMenuTriggered(uint64_t ID);
         void InformOfNewPluginInstalled(const struct ExternPluginInfo *Info);
+        void HandleGoURIToolBttnEnabled(void);
 
         /* Panel handlers */
         class MWConnectionOptions ConnectionOptionsPanel;

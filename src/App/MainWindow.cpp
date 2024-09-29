@@ -1482,6 +1482,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
 
     UIEnableMenu(RestoreConnectionSettings,RestoreConnectionSettingsActive);
 
+    HandleGoURIToolBttnEnabled();
+
     RethinkBridgeMenu();
 
     ConnectionOptionsPanel.ActivateCtrls(ActivatePanels);
@@ -1493,6 +1495,47 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     SendBuffersPanel.ActivateCtrls(ActivatePanels);
     BridgePanel.ActivateCtrls(ActivatePanels);
     AuxControlsPanel.ActivateCtrls(ActivatePanels);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::HandleGoURIToolBttnEnabled
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::HandleGoURIToolBttnEnabled(void)
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function enables / disables the Go URI button.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::HandleGoURIToolBttnEnabled(void)
+{
+    char buff[100];
+    char *pos;
+    t_UIToolbarCtrl *GoURL;
+    t_UITextInputCtrl *URIInput;
+
+    GoURL=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_URIGo);
+    URIInput=UIMW_GetTxtInputHandle(UIWin,e_UIMWTxtInput_URI);
+
+    UIGetTextCtrlText(URIInput,buff,sizeof(buff));
+    pos=buff;
+    while(*pos==' ')
+        pos++;
+
+    /* Check for empty URI */
+    if(*pos==0)
+        UIEnableToolbar(GoURL,false);
+    else
+        UIEnableToolbar(GoURL,true);
 }
 
 /*******************************************************************************
@@ -3490,6 +3533,7 @@ bool MW_Event(const struct MWEvent *Event)
             switch(Event->Info.Txt.InputID)
             {
                 case e_UIMWTxtInput_URI:
+                    Event->MW->HandleGoURIToolBttnEnabled();
                 break;
                 case e_UIMWTxtInput_Capture_Filename:
                     Event->MW->CapturePanel.NoteFilenameChanged();

@@ -64,6 +64,7 @@ public slots:
 
 private slots:
     void URIreturnPressed();
+    void URIEdited(const QString &arg1);
     void on_actionQuit_triggered();
     void on_actionAbout_Whippy_Term_triggered();
     void on_actionTest1_triggered();

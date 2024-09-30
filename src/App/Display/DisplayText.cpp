@@ -2462,6 +2462,9 @@ void DisplayText::RethinkWindowSize(void)
             LeftEdge=TextAreaWidthPx/2-Width/2;
             if(LeftEdge<0)
                 LeftEdge=0;
+
+            if(!Settings->CenterTextInWindow)
+                LeftEdge=0;
         }
 
         if(Settings->TermSizeFixedHeight)
@@ -2469,6 +2472,9 @@ void DisplayText::RethinkWindowSize(void)
             Height=ScreenHeightChars*CharHeightPx;
             TopEdge=TextAreaHeightPx/2-Height/2;
             if(TopEdge<0)
+                TopEdge=0;
+
+            if(!Settings->CenterTextInWindow)
                 TopEdge=0;
         }
 

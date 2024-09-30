@@ -592,6 +592,9 @@ void DisplayBinary::RethinkWindowSize(void)
         LeftEdge=ScreenWidthPx/2-Width/2;
         if(LeftEdge<0)
             LeftEdge=0;
+
+        if(!Settings->CenterTextInWindow)
+            LeftEdge=0;
     }
 
     if(Settings->TermSizeFixedHeight)
@@ -599,6 +602,9 @@ void DisplayBinary::RethinkWindowSize(void)
         Height=Settings->TermSizeHeight*CharHeightPx;
         TopEdge=ScreenHeightPx/2-Height/2;
         if(TopEdge<0)
+            TopEdge=0;
+
+        if(!Settings->CenterTextInWindow)
             TopEdge=0;
     }
 

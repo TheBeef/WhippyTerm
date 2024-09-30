@@ -163,6 +163,8 @@ void Debug6(void);
         void ResetZoom(void);
         void CloseConnection(class Connection *TabCon);
         void RebuildTerminalEmulationMenu(void);
+        void MoveToNextTab(void);
+        void MoveToPrevTab(void);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

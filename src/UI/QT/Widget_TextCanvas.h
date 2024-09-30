@@ -103,6 +103,7 @@ public:
     ~Widget_TextCanvas();
     void SetEventHandler(bool (*EventHandler)(const struct WTCEvent *Event),uintptr_t UserData);
     void keyPressEvent(QKeyEvent *event);
+    bool event(QEvent *event);
     void RedrawScreen(void);
     bool SetFont(const char *FontName,int PointSize,bool Bold,bool Italic);
     void SetCursorBlinking(bool Blinking);

@@ -144,6 +144,8 @@ typedef enum
     e_Cmd_SendBuffer_ClearAllBuffers,
     e_Cmd_SendBufferSendGeneric,
     e_Cmd_SendBuffer_EditPrompted,
+    e_Cmd_NextConnectionTab,
+    e_Cmd_PrevConnectionTab,
     e_CmdMAX
 } e_CmdType;
 

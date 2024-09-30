@@ -153,6 +153,8 @@ const char *m_CmdNames[]=
     "SendBufferClearAllBuffers",            // e_Cmd_SendBuffer_ClearAllBuffers
     "SendBufferSendGeneric",                // e_Cmd_SendBufferSendGeneric
     "SendBufferEditPrompted",               // e_Cmd_SendBuffer_EditPrompted
+    "NextConnectionTab",                    // e_Cmd_NextConnectionTab
+    "PrevConnectionTab",                    // e_Cmd_PrevConnectionTab
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -666,6 +668,8 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     // e_Cmd_SendBuffer_ClearAllBuffers
     // e_Cmd_SendBufferSendGeneric
     // e_Cmd_SendBuffer_EditPrompted
+    SetKeySeq(&KeyMapping[e_Cmd_NextConnectionTab],KEYMOD_CONTROL,e_UIKeys_Tab,0);
+    SetKeySeq(&KeyMapping[e_Cmd_PrevConnectionTab],KEYMOD_CONTROL|KEYMOD_SHIFT,e_UIKeys_Backtab,0);
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A

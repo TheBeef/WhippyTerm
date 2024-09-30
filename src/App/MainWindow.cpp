@@ -2300,10 +2300,8 @@ bool TheMainWindow::KeyPress(uint8_t Mods,e_UIKeys Key,const uint8_t *TextPtr,
 {
     e_CmdType KeyShortCutCmd;
     char Letter;
-//    t_UITabCtrl *MainTabs;
-//    class Connection *TabCon;
 
-    /* This is not the correct spot for this */
+    /* DEBUG PAUL: This is not the correct spot for this */
     Letter=0;
     if(TextLen>0)
         Letter=TextPtr[0];
@@ -3460,6 +3458,82 @@ void TheMainWindow::InformOfNewPluginInstalled(const struct ExternPluginInfo *In
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::MoveToNextTab
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::MoveToNextTab(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves to the next tab after the active tab in the
+ *    connection tab control.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    TheMainWindow::MoveToPrevTab()
+ ******************************************************************************/
+void TheMainWindow::MoveToNextTab(void)
+{
+    t_UITabCtrl *MainTabs;
+    int TotalTabs;
+    int CurrentTab;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+
+    TotalTabs=UITabCtrlGetTabCount(MainTabs);
+    CurrentTab=UITabCtrlGetActiveTabIndex(MainTabs);
+
+    CurrentTab++;
+    if(CurrentTab>=TotalTabs)
+        CurrentTab=0;
+
+    UITabCtrlMakeTabActiveUsingIndex(MainTabs,CurrentTab);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::MoveToPrevTab
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::MoveToPrevTab(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves to the next tab after the active tab in the
+ *    connection tab control.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    TheMainWindow::MoveToNextTab()
+ ******************************************************************************/
+void TheMainWindow::MoveToPrevTab(void)
+{
+    t_UITabCtrl *MainTabs;
+    int TotalTabs;
+    int CurrentTab;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+
+    TotalTabs=UITabCtrlGetTabCount(MainTabs);
+    CurrentTab=UITabCtrlGetActiveTabIndex(MainTabs);
+
+    CurrentTab--;
+    if(CurrentTab<0)
+        CurrentTab=TotalTabs-1;
+
+    UITabCtrlMakeTabActiveUsingIndex(MainTabs,CurrentTab);
+}
+
+/*******************************************************************************
+ * NAME:
  *    MW_Event
  *
  * SYNOPSIS:
@@ -4152,7 +4226,12 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         case e_Cmd_SettingsQuickJump_Colors:
             RunSettingsDialog(this,NULL,e_SettingsJump2_Colors);
         break;
-
+        case e_Cmd_NextConnectionTab:
+            MoveToNextTab();
+        break;
+        case e_Cmd_PrevConnectionTab:
+            MoveToPrevTab();
+        break;
         case e_CmdMAX:
         default:
         break;

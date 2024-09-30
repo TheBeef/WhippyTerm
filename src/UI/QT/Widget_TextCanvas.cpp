@@ -333,6 +333,22 @@ void Widget_TextCanvas::keyPressEvent(QKeyEvent *event)
     }
 }
 
+bool Widget_TextCanvas::event(QEvent *event)
+{
+    if(event->type()==QEvent::KeyPress)
+    {
+        QKeyEvent *KeyEvent;
+        KeyEvent=(QKeyEvent *)event;
+        if(KeyEvent->key()==Qt::Key_Tab || KeyEvent->key()==Qt::Key_Backtab)
+        {
+            keyPressEvent(KeyEvent);
+            event->accept();
+            return true;
+        }
+    }
+    return QWidget::event(event);
+}
+
 void Widget_TextCanvas::resizeEvent(QResizeEvent *event)
 {
     union WTCEventData EventData;

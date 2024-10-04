@@ -1206,7 +1206,7 @@ int Widget_TextCanvas::DrawHRFrag(QPainter *painter,QFontMetrics *fm,
 
     painter->setFont(RenderFont);
 
-    DrawWidth=DisplayWidth;
+    DrawWidth=DisplayWidth+ScrollOffsetX;
 
     /* Clear background (we need to do this because sometimes QT drops the
        Qt::TransparentMode when drawing Unicode chars (like U+2302 on

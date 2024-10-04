@@ -123,6 +123,13 @@ struct TextDisplayEvent
     union TextDisplayEventData Info;
 };
 
+typedef enum
+{
+    e_UITCSetFocus_Main,
+    e_UITCSetFocus_SendPanel,
+    e_UITCSetFocusMAX
+} e_UITCSetFocusType;
+
 /***  CLASS DEFINITIONS                ***/
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
@@ -139,7 +146,7 @@ void UITC_Reparent(t_UITextDisplayCtrl *ctrl,void *NewParentWidget);
 void UITC_ShowSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible);
 void UITC_SetCursorBlinking(t_UITextDisplayCtrl *ctrl,bool Blinking);
 void UITC_SetCursorPos(t_UITextDisplayCtrl *ctrl,unsigned int x,unsigned int y);
-void UITC_SetFocus(t_UITextDisplayCtrl *ctrl);
+void UITC_SetFocus(t_UITextDisplayCtrl *ctrl,e_UITCSetFocusType What);
 
 /* Sub-Widgets */
 t_UIScrollBarCtrl *UITC_GetHorzSlider(t_UITextDisplayCtrl *ctrl);

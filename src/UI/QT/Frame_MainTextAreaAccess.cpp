@@ -585,7 +585,7 @@ void UITC_SetCursorPos(t_UITextDisplayCtrl *ctrl,unsigned int x,unsigned int y)
  *    UITC_SetFocus
  *
  * SYNOPSIS:
- *    void UITC_SetFocus(t_UITextDisplayCtrl *ctrl);
+ *    void UITC_SetFocus(t_UITextDisplayCtrl *ctrl,e_UITCSetFocusType What);
  *
  * PARAMETERS:
  *    ctrl [I] -- The control to work on
@@ -599,11 +599,22 @@ void UITC_SetCursorPos(t_UITextDisplayCtrl *ctrl,unsigned int x,unsigned int y)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UITC_SetFocus(t_UITextDisplayCtrl *ctrl)
+void UITC_SetFocus(t_UITextDisplayCtrl *ctrl,e_UITCSetFocusType What)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->setFocus(Qt::OtherFocusReason);
+    switch(What)
+    {
+        case e_UITCSetFocus_Main:
+            TextDisplay->ui->TextDisplay->setFocus(Qt::OtherFocusReason);
+        break;
+        case e_UITCSetFocus_SendPanel:
+            TextDisplay->ui->BlockSend_textEdit->setFocus(Qt::OtherFocusReason);
+        break;
+        case e_UITCSetFocusMAX:
+        default:
+        break;
+    }
 }
 
 /*******************************************************************************

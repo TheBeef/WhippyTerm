@@ -1466,6 +1466,37 @@ void DisplayText::SetCursorStyle(e_TextCursorStyleType Style)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayBase::SetInFocus
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetInFocus(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gives focus to this display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    GetInFocus()
+ ******************************************************************************/
+void DisplayText::SetInFocus(void)
+{
+    union DBEventData Info;
+
+    HasFocus=true;
+
+    UITC_SetFocus(TextDisplayCtrl,e_UITCSetFocus_Main);
+
+    Info.Focus.HasFocus=HasFocus;
+    SendEvent(e_DBEvent_FocusChange,&Info);
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayText::SetCursorXY
  *
  * SYNOPSIS:

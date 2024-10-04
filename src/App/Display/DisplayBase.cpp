@@ -438,6 +438,30 @@ bool DisplayBase::GetInFocus(void)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayBase::SetInFocus
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetInFocus(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gives focus to this display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    GetInFocus()
+ ******************************************************************************/
+void DisplayBase::SetInFocus(void)
+{
+    HasFocus=true;
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayBase::SetCursorXY
  *
  * SYNOPSIS:

@@ -4030,7 +4030,7 @@ void HexDisplayBuffer::FillWithValue(int InsertOffset,const uint8_t *Data,
  ******************************************************************************/
 void HexDisplayBuffer::GiveFocus(void)
 {
-    UITC_SetFocus(TextDisplayCtrl);
+    UITC_SetFocus(TextDisplayCtrl,e_UITCSetFocus_Main);
 }
 
 /*******************************************************************************

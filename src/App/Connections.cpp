@@ -749,7 +749,6 @@ void Connection::FinalizeNewConnection(void)
     /* DEBUG PAUL: Set show non-printables based on settings */
     //SetShowNonPrintable(xxx);
 
-
     /* Give this connection focus */
     GiveFocus();
 }
@@ -1121,74 +1120,6 @@ void Connection::ReParentWidget(void *NewParentWidget)
         Display->Reparent(NewParentWidget);
 }
 
-///*******************************************************************************
-// * NAME:
-// *    Connection::AddTab
-// *
-// * SYNOPSIS:
-// *    bool Connection::AddTab(void);
-// *
-// * PARAMETERS:
-// *    NONE
-// *
-// * FUNCTION:
-// *    This function tells the main window to add a new tab to the system.
-// *
-// *    What a "tab" is the connection system doesn't care.
-// *
-// * RETURNS:
-// *    true -- Things worked out
-// *    false -- There was an error
-// *
-// * SEE ALSO:
-// *    
-// ******************************************************************************/
-//bool Connection::AddTab(void)
-//{
-//    void *ParentWidget;
-//    string UniqueID;
-//    struct ConnectionInfoList ConInfo;
-//
-//    if(MW==NULL)
-//        return false;
-//
-//    /* Ok, we need to tell the main window to add a tab (or whatever it's
-//       actually using) */
-//    ParentWidget=MW->AllocTab(this);
-//    if(ParentWidget==NULL)
-//        return NULL;
-//
-////    if(!DB->Init(ParentWidget,&CustomSettings,Con_DisplayBufferEvent,
-////            (uintptr_t)this))
-////    {
-////        MW->FreeTab(this);
-////        return false;
-////    }
-//
-//    MW->SetActiveTab(this);
-//    SendMWEvent(ConMWEvent_StatusChange);
-//    SendMWEvent(ConMWEvent_NewConnection);
-//
-//    if(IOHandle!=NULL)
-//    {
-//        IOS_GetUniqueID(IOHandle,UniqueID);
-//        if(IOS_GetConnectionInfo(UniqueID.c_str(),NULL,&ConInfo))
-//        {
-//            if(ConInfo.BlockDevice)
-//            {
-////                DB->SetBlockDeviceMode(true);
-//                BlockSendDevice=true;
-//            }
-//        }
-//
-//        /* We auto open this when we open the tab */
-//        if(g_Settings.AutoConnectOnNewConnection)
-//            IOS_Open(IOHandle);
-//    }
-//
-//    return true;
-//}
-
 /*******************************************************************************
  * NAME:
  *    Connection::SetMainWindow
@@ -1212,32 +1143,6 @@ void Connection::SetMainWindow(class TheMainWindow *MainWindow)
 {
     MW=MainWindow;
 }
-
-///*******************************************************************************
-// * NAME:
-// *    Connection::GetDisplayFrameCtrl
-// *
-// * SYNOPSIS:
-// *    t_UIDisplayFrameCtrl *Connection::GetDisplayFrameCtrl(void);
-// *
-// * PARAMETERS:
-// *    NONE
-// *
-// * FUNCTION:
-// *    This function gets access to the display frame that was allocated when
-// *    the tab was added.
-// *
-// * RETURNS:
-// *    A pointer to the DisplayFrame or NULL if it has not been set.
-// *
-// * SEE ALSO:
-// *    
-// ******************************************************************************/
-//t_UIDisplayFrameCtrl *Connection::GetDisplayFrameCtrl(void)
-//{
-////    return DB->GetDisplayFrameCtrl();
-//return NULL;
-//}
 
 /*******************************************************************************
  * NAME:
@@ -2536,8 +2441,10 @@ t_IOSystemHandle *Connection::GetIOHandle(void)
  ******************************************************************************/
 void Connection::GiveFocus(void)
 {
-//    if(DB!=NULL)
-//        DB->GiveFocus();
+    if(Display==NULL)
+        return;
+
+    Display->SetInFocus();
 }
 
 /*******************************************************************************
@@ -2707,76 +2614,6 @@ void Connection::GetConnectionUniqueID(std::string &UniqueID)
 
     IOS_GetUniqueID(IOHandle,UniqueID);
 }
-
-///*******************************************************************************
-// * NAME:
-// *    Connection::ReopenConnectionBasedOnURI
-// *
-// * SYNOPSIS:
-// *    bool Connection::ReopenConnectionBasedOnURI(const char *URI);
-// *
-// * PARAMETERS:
-// *    URI [I] -- The URI to open the connection for.
-// *
-// * FUNCTION:
-// *    This function opens a new connection based on a URI.  It will close
-// *    and free all the resources of the existing URI (except the UI tab).
-// *
-// * RETURNS:
-// *    true -- Things worked out
-// *    false -- There was an error
-// *
-// * SEE ALSO:
-// *    
-// ******************************************************************************/
-//bool Connection::ReopenConnectionBasedOnURI(const char *URI)
-//{
-//    string ConnectionName;
-//    const char *p;
-//    bool RetValue;
-//    string UniqueID;
-//    struct ConnectionInfoList ConInfo;
-//
-//    //` DEBUG PAUL: This needs to be reworked as I am not sure it handles processors correctly (and should be calling FinishInit())
-//    RetValue=false;
-//    try
-//    {
-//        FreeConnectionResources(false);
-//
-//        IOHandle=IOS_AllocIOSystemHandleFromURI(URI,(uintptr_t)this);
-//        if(IOHandle==NULL)
-//            return false;
-//
-//        p=URI;
-//        while(*p!=':' && *p!=0)
-//            p++;
-//        if(*p==0)
-//            return false;
-//        ConnectionName.assign(URI,p-URI);
-//
-//        if(IOS_GetUniqueIDFromURI(URI,UniqueID))
-//            if(IOS_GetConnectionInfo(UniqueID.c_str(),NULL,&ConInfo))
-//                ConnectionName=ConInfo.ShortName;
-//
-//        SetDisplayName(ConnectionName.c_str());
-//
-//        /* Clear the display buffer */
-////        DB->ResetBuffer();
-//
-//        /* We auto open this when we open the tab */
-//        if(g_Settings.AutoConnectOnNewConnection)
-//            IOS_Open(IOHandle);
-//
-//        SendMWEvent(ConMWEvent_StatusChange);
-//        RetValue=true;
-//    }
-//    catch(...)
-//    {
-//        RetValue=false;
-//    }
-//
-//    return RetValue;
-//}
 
 /*******************************************************************************
  * NAME:

@@ -121,6 +121,7 @@ class DisplayText : public DisplayBase
         void ApplySettings(void);
         void SetCursorBlinking(bool Blinking);
         void SetCursorStyle(e_TextCursorStyleType Style);
+        void SetInFocus(void);
         void SetCursorXY(unsigned int x,unsigned y);
         void GetCursorXY(unsigned int *x,unsigned int *y);
         void AddTab(void);

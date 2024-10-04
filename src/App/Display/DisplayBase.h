@@ -127,6 +127,7 @@ class DisplayBase
         virtual void SetCursorBlinking(bool Blinking);
         virtual void SetCursorStyle(e_TextCursorStyleType Style);
         virtual bool GetInFocus(void);
+        virtual void SetInFocus(void);
         virtual void SetCursorXY(unsigned int x,unsigned y);
         virtual void GetCursorXY(unsigned int *x,unsigned int *y);
         virtual void AddTab(void);

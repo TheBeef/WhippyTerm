@@ -9,6 +9,8 @@ Tools/ExternPluginMaker/build-ExternPluginMaker-Desktop5-Debug
 *.wtp
 *.deb
 LinuxInstaller/WhippyTerm_*
+DownloadedDocs
+tt
 
 # Prerequisites
 *.d

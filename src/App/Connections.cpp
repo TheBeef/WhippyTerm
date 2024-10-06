@@ -636,14 +636,14 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
     t_KVList Options;
     bool NewIsBinary;
 
-    Display=nullptr;
+    Display=NULL;
     try
     {
         MW=MainWindow;
         OurParentWidget=ParentWidget;
 
         /* Setup what settings we are using */
-        if(SourceSettings==nullptr)
+        if(SourceSettings==NULL)
         {
             UsingCustomSettings=false;
             CustomSettings=g_Settings.DefaultConSettings;
@@ -691,7 +691,7 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
         if(IOS_GetConnectionInfo(UniqueID.c_str(),Options,&ConInfo))
         {
             BlockSendDevice=ConInfo.BlockDevice;
-            if(Display!=nullptr)
+            if(Display!=NULL)
                 Display->SetBlockDeviceMode(BlockSendDevice);
         }
 
@@ -699,7 +699,7 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
     }
     catch(...)
     {
-        if(Display!=nullptr)
+        if(Display!=NULL)
             delete Display;
 
         return false;
@@ -937,6 +937,7 @@ void Connection::ApplyCustomSettings(void)
 {
     int NewFontSize;
     bool NewIsBinary;
+    uint16_t DrawMask;
 
     if(!UsingCustomSettings)
     {
@@ -989,7 +990,7 @@ void Connection::ApplyCustomSettings(void)
     }
     else
     {
-        if(Display!=nullptr)
+        if(Display!=NULL)
             Display->ApplySettings();
     }
 
@@ -1002,6 +1003,25 @@ void Connection::ApplyCustomSettings(void)
         Display->SetFont(CustomSettings.FontName,NewFontSize,
                 CustomSettings.FontBold,CustomSettings.FontItalic);
     }
+
+    DrawMask=~0;    // Draw everything
+    if(!CustomSettings.BoldEnabled)
+        DrawMask&=~UITC_DRAWMASK_BOLD;
+    if(!CustomSettings.ItalicEnabled)
+        DrawMask&=~UITC_DRAWMASK_ITALIC;
+    if(!CustomSettings.UnderlineEnabled)
+        DrawMask&=~(UITC_DRAWMASK_UNDERLINE|UITC_DRAWMASK_UNDERLINE_DOUBLE|UITC_DRAWMASK_UNDERLINE_DOTTED);
+    if(!CustomSettings.OverlineEnabled)
+        DrawMask&=~UITC_DRAWMASK_OVERLINE;
+    if(!CustomSettings.ReverseEnabled)
+        DrawMask&=~UITC_DRAWMASK_REVERSE;
+    if(!CustomSettings.LineThroughEnabled)
+        DrawMask&=~UITC_DRAWMASK_LINETHROUGH;
+    if(!CustomSettings.ColorsEnabled)
+        DrawMask&=~UITC_DRAWMASK_COLOR_ATTRIB;
+
+    if(Display!=NULL)
+        Display->SetDrawMask(DrawMask);
 }
 
 /*******************************************************************************
@@ -1116,7 +1136,7 @@ void Connection::ReParentWidget(void *NewParentWidget)
 {
     OurParentWidget=NewParentWidget;
 
-    if(Display!=nullptr)
+    if(Display!=NULL)
         Display->Reparent(NewParentWidget);
 }
 
@@ -1867,7 +1887,7 @@ void Connection::HandleMiddleMousePress(int x,int y)
  ******************************************************************************/
 void Connection::WriteChar2Display(uint8_t *Chr)
 {
-    if(Display==nullptr)
+    if(Display==NULL)
         return;
 
     Display->WriteChar(Chr);
@@ -2059,21 +2079,10 @@ uint32_t Connection::GetULineColor(void)
  *    Connection::SetAttribs
  *
  * SYNOPSIS:
- *    void Connection::SetAttribs(uint16_t Attribs);
+ *    void Connection::SetAttribs(uint32_t Attribs);
  *
  * PARAMETERS:
- *    Attribs [I] -- The new attribs to use.  These are bit values where
- *                   the following bits are supported:
- *                      TXT_ATTRIB_UNDERLINE -- Underline the text
- *                      TXT_ATTRIB_UNDERLINE_DOUBLE -- Double underline the text
- *                      TXT_ATTRIB_UNDERLINE_DOTTED -- Dotted underline
- *                      TXT_ATTRIB_UNDERLINE_DASHED -- Dashed underline
- *                      TXT_ATTRIB_UNDERLINE_WAVY -- A wavy underline
- *                      TXT_ATTRIB_OVERLINE -- Put a line over the text
- *                      TXT_ATTRIB_LINETHROUGHT -- Put a line though the text
- *                      TXT_ATTRIB_BOLD -- Bold Text
- *                      TXT_ATTRIB_ITALIC -- Italic Text
- *                      TXT_ATTRIB_OUTLINE -- Draw an outline around the leters.
+ *    Attribs [I] -- The new attribs to use.  See DPS_SetAttribs()
  *
  * FUNCTION:
  *    This function sets the underline color.
@@ -2082,9 +2091,9 @@ uint32_t Connection::GetULineColor(void)
  *    NONE
  *
  * SEE ALSO:
- *    Connection::GetAttribs()
+ *    Connection::GetAttribs(), DPS_SetAttribs()
  ******************************************************************************/
-void Connection::SetAttribs(uint16_t Attribs)
+void Connection::SetAttribs(uint32_t Attribs)
 {
     if(Display!=NULL)
         Display->CurrentStyle.Attribs=Attribs;
@@ -2095,7 +2104,7 @@ void Connection::SetAttribs(uint16_t Attribs)
  *    Connection::GetAttribs
  *
  * SYNOPSIS:
- *    uint16_t Connection::GetAttribs(void);
+ *    uint32_t Connection::GetAttribs(void);
  *
  * PARAMETERS:
  *    NONE
@@ -2109,7 +2118,7 @@ void Connection::SetAttribs(uint16_t Attribs)
  * SEE ALSO:
  *    Connection::SetAttribs()
  ******************************************************************************/
-uint16_t Connection::GetAttribs(void)
+uint32_t Connection::GetAttribs(void)
 {
     if(Display!=NULL)
         return Display->CurrentStyle.Attribs;
@@ -2245,7 +2254,7 @@ void Connection::DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
  ******************************************************************************/
 void Connection::GetCursorXY(int *RetCursorX,int *RetCursorY)
 {
-    if(Display==nullptr)
+    if(Display==NULL)
     {
         *RetCursorX=0;
         *RetCursorY=0;
@@ -5706,7 +5715,7 @@ void Connection::SetShowNonPrintable(bool Show)
 {
     ShowNonPrintables=Show;
 
-    if(Display!=nullptr)
+    if(Display!=NULL)
         Display->SetShowNonPrintable(ShowNonPrintables);
 }
 
@@ -5760,7 +5769,7 @@ void Connection::SetShowEndOfLines(bool Show)
 {
     ShowEndOfLines=Show;
 
-    if(Display!=nullptr)
+    if(Display!=NULL)
         Display->SetShowEndOfLines(ShowEndOfLines);
 }
 
@@ -5976,7 +5985,7 @@ void Connection::RethinkCursor(void)
     bool CursorBlinking;
     e_TextCursorStyleType CursorStyle;
 
-    if(Display==nullptr)
+    if(Display==NULL)
         return;
 
     CursorBlinking=false;

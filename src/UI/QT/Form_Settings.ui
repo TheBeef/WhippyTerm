@@ -36,7 +36,7 @@
       <item>
        <widget class="QStackedWidget" name="Editing_stackedWidget">
         <property name="currentIndex">
-         <number>4</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="page_Panel">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -9934,6 +9934,84 @@
                     <string>Apply</string>
                    </property>
                   </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="Attributes_tab">
+             <attribute name="title">
+              <string>Attributes</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_40">
+              <item>
+               <widget class="QGroupBox" name="groupBox_29">
+                <property name="title">
+                 <string>Attribute Enable / Disable</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_41">
+                 <item>
+                  <widget class="QCheckBox" name="BoldFontEnable_checkBox">
+                   <property name="text">
+                    <string>Bold font enable</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="ItalicFontEnable_checkBox">
+                   <property name="text">
+                    <string>Italic font enable</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="UnderlineEnable_checkBox">
+                   <property name="text">
+                    <string>Underline enable</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="OverlineEnable_checkBox">
+                   <property name="text">
+                    <string>Overline enable</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="ReverseEnable_checkBox">
+                   <property name="text">
+                    <string>Reverse enable</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="StrikeThroughEnable_checkBox">
+                   <property name="text">
+                    <string>Strike through enable</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="ColorEnable_checkBox">
+                   <property name="text">
+                    <string>Color enable</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="verticalSpacer_19">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
                  </item>
                 </layout>
                </widget>

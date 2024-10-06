@@ -928,3 +928,30 @@ void DisplayBase::SetupCanvas(void)
 {
     /* Does nothing */
 }
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetupCanvas
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetupCanvas(uint16_t Mask);
+ *
+ * PARAMETERS:
+ *    Mask [I] -- What mask to apply to drawing attributes.  If the bit is
+ *                set then this is drawen.  These are the bits from
+ *                UITC_SetDrawMask() UI control.
+ *
+ * FUNCTION:
+ *    This function sets the draw mask for this display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SetDrawMask(uint16_t Mask)
+{
+    /* Does nothing */
+}
+

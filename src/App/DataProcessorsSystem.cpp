@@ -89,8 +89,8 @@ void DPS_SetBGColor(uint32_t BGColor);
 uint32_t DPS_GetBGColor(void);
 void DPS_SetULineColor(uint32_t ULineColor);
 uint32_t DPS_GetULineColor(void);
-void DPS_SetAttribs(uint16_t Attribs);
-uint16_t DPS_GetAttribs(void);
+void DPS_SetAttribs(uint32_t Attribs);
+uint32_t DPS_GetAttribs(void);
 void DPS_DoNewLine(void);
 void DPS_DoReturn(void);
 void DPS_DoBackspace(void);
@@ -1066,7 +1066,7 @@ uint32_t DPS_GetULineColor(void)
  *    DPS_SetAttribs
  *
  * SYNOPSIS:
- *    void DPS_SetAttribs(uint16_t Attribs);
+ *    void DPS_SetAttribs(uint32_t Attribs);
  *
  * PARAMETERS:
  *    Attribs [I] -- The new attribs to use.  These are bit values where
@@ -1074,13 +1074,20 @@ uint32_t DPS_GetULineColor(void)
  *                      TXT_ATTRIB_UNDERLINE -- Underline the text
  *                      TXT_ATTRIB_UNDERLINE_DOUBLE -- Double underline the text
  *                      TXT_ATTRIB_UNDERLINE_DOTTED -- Dotted underline
- *                      TXT_ATTRIB_UNDERLINE_DASHED -- Dashed underline
- *                      TXT_ATTRIB_UNDERLINE_WAVY -- A wavy underline
+ *                      TXT_ATTRIB_UNDERLINE_DASHED -- Dashed underline.  This
+ *                              is not effected by turning off general
+ *                              underlining.
+ *                      TXT_ATTRIB_UNDERLINE_WAVY -- A wavy underline.  This
+ *                              is not effected by turning off general
+ *                              underlining.
  *                      TXT_ATTRIB_OVERLINE -- Put a line over the text
  *                      TXT_ATTRIB_LINETHROUGHT -- Put a line though the text
  *                      TXT_ATTRIB_BOLD -- Bold Text
  *                      TXT_ATTRIB_ITALIC -- Italic Text
  *                      TXT_ATTRIB_OUTLINE -- Draw an outline around the leters.
+ *                      TXT_ATTRIB_REVERSE -- Reverse video
+ *                      TXT_ATTRIB_FORCE -- Ignore the user settings and apply
+ *                                          all the attributes.
  *
  * FUNCTION:
  *    This function sets the underline color.
@@ -1091,7 +1098,7 @@ uint32_t DPS_GetULineColor(void)
  * SEE ALSO:
  *    DPS_GetAttribs()
  ******************************************************************************/
-void DPS_SetAttribs(uint16_t Attribs)
+void DPS_SetAttribs(uint32_t Attribs)
 {
     Con_SetAttribs(Attribs);
 }
@@ -1101,7 +1108,7 @@ void DPS_SetAttribs(uint16_t Attribs)
  *    DPS_GetAttribs
  *
  * SYNOPSIS:
- *    uint16_t DPS_GetAttribs(void);
+ *    uint32_t DPS_GetAttribs(void);
  *
  * PARAMETERS:
  *    NONE
@@ -1115,7 +1122,7 @@ void DPS_SetAttribs(uint16_t Attribs)
  * SEE ALSO:
  *    DPS_SetAttribs()
  ******************************************************************************/
-uint16_t DPS_GetAttribs(void)
+uint32_t DPS_GetAttribs(void)
 {
     return Con_GetAttribs();
 }

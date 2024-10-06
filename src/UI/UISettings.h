@@ -54,6 +54,13 @@ enum e_UIS_Checkbox
     e_UIS_Checkbox_CaptureHexDump,
     e_UIS_Checkbox_CaptureShowPanel,
     e_UIS_Checkbox_HexDisplayEnabled,
+    e_UIS_Checkbox_BoldFontEnable,
+    e_UIS_Checkbox_ItalicFontEnable,
+    e_UIS_Checkbox_UnderlineEnable,
+    e_UIS_Checkbox_OverlineEnable,
+    e_UIS_Checkbox_ReverseEnable,
+    e_UIS_Checkbox_StrikeThroughEnable,
+    e_UIS_Checkbox_ColorEnable,
     e_UIS_CheckboxMAX
 };
 
@@ -223,6 +230,7 @@ enum e_UIS_TabCtrl_Display_Page
 {
     e_UIS_TabCtrl_Display_Page_Display,
     e_UIS_TabCtrl_Display_Page_Colors,
+    e_UIS_TabCtrl_Display_Page_Attrib,
     e_UIS_TabCtrl_Display_Page_HexDumps,
     e_UIS_TabCtrl_Display_PageMAX
 };

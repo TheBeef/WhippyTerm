@@ -1,5 +1,6 @@
 #include "UI/UIDebug.h"
 
+#include "UI/UITextDisplay.h"
 #include "Widget_TextCanvas.h"
 #include "main.h"
 #include "UI/UIDebug.h"
@@ -29,6 +30,7 @@ Widget_TextCanvas::Widget_TextCanvas(QWidget *parent) : QWidget(parent)
     DisplayHeight=200;
 
     TextAreaBackgroundColor.setRgb(0,0,0);
+    TextAreaDefaultColor.setRgb(255,255,255);
 
     DisplayBackgroundColor.setRgb(0,0,0);
     FillDisplayBackground=false;
@@ -44,6 +46,8 @@ Widget_TextCanvas::Widget_TextCanvas(QWidget *parent) : QWidget(parent)
     OverrideWidget=new Frame_TextCavnasOverrideBox(this);
     OverrideWidget->setVisible(false);
     OverrideActive=false;
+
+    DrawAttribMask=~0;  // Draw everything
 }
 
 Widget_TextCanvas::~Widget_TextCanvas()
@@ -389,7 +393,8 @@ void Widget_TextCanvas::ClearLine(unsigned int Line,uint32_t BGColor)
     Lines[Line]=BlankLine;
 }
 
-void Widget_TextCanvas::AppendTextFrag(unsigned int Line,const struct TextCanvasFrag *Frag)
+void Widget_TextCanvas::AppendTextFrag(unsigned int Line,
+        const struct TextCanvasFrag *Frag)
 {
     struct WTCFrag NewFrag;
     struct WTCFrag *AddedFrag;
@@ -406,6 +411,7 @@ void Widget_TextCanvas::AppendTextFrag(unsigned int Line,const struct TextCanvas
     AddedFrag->Styling=Frag->Styling;
     AddedFrag->Value=Frag->Value;
     AddedFrag->Data=Frag->Data;
+    AddedFrag->CursorFrag=false;
 }
 
 void Widget_TextCanvas::RedrawLine(unsigned int Line)
@@ -522,7 +528,7 @@ int Widget_TextCanvas::DrawFrag(QPainter *painter,QFontMetrics *fm,
         int ScreenX,int ScreenY,struct WTCFrag *Frag)
 {
     int px;
-    struct WTCFrag EOLFrag;
+//    struct WTCFrag EOLFrag;
 
     switch(Frag->FragType)
     {
@@ -594,9 +600,10 @@ void Widget_TextCanvas::RethinkCursor(void)
         /* We are in virtual space */
         CursorFrag.FragType=e_TextCanvasFrag_String;
         CursorFrag.Text=" ";
-        CursorFrag.Styling.FGColor=0xFFFFFF;
+        CursorFrag.Styling.FGColor=UseTextAreaDefaultColor.rgb();
         CursorFrag.Styling.BGColor=UseTextAreaBackgroundColor.rgb();
-        CursorFrag.Styling.ULineColor=0xFFFFFF;
+        CursorFrag.Styling.ULineColor=CursorFrag.Styling.FGColor;
+        CursorFrag.CursorFrag=true;
         CursorFrag.Styling.Attribs=0;
 
         /* Move the cursor by the number of virtual char's times the size of a
@@ -703,9 +710,10 @@ void Widget_TextCanvas::RethinkCursor(void)
     /* Ok, we ran out of text so the cursor is in eol virtual space */
     CursorFrag.FragType=e_TextCanvasFrag_String;
     CursorFrag.Text=" ";
-    CursorFrag.Styling.FGColor=0xFFFFFF;
+    CursorFrag.Styling.FGColor=UseTextAreaDefaultColor.rgb();
     CursorFrag.Styling.BGColor=Lines[CursorY].BGFillColor;
-    CursorFrag.Styling.ULineColor=0xFFFFFF;
+    CursorFrag.Styling.ULineColor=CursorFrag.Styling.FGColor;
+    CursorFrag.CursorFrag=true;
     CursorFrag.Styling.Attribs=0;
 
     /* Move the cursor by the number of virtual char's times the size of a
@@ -720,14 +728,31 @@ int Widget_TextCanvas::CalTextFragWidth(QFontMetrics *fm,
     int TextWidth;
     bool FontWasBold;
     bool FontWasItalic;
+    bool ForcedAttrib;
+    bool Bold;
+    bool Italic;
 
     FontWasBold=RenderFont.bold();
     FontWasItalic=RenderFont.italic();
 
-    if(Frag->Styling.Attribs&TXT_ATTRIB_BOLD)
+    ForcedAttrib=Frag->Styling.Attribs&TXT_ATTRIB_FORCE;
+    Bold=Frag->Styling.Attribs&TXT_ATTRIB_BOLD;
+    Italic=Frag->Styling.Attribs&TXT_ATTRIB_ITALIC;
+
+    if(!ForcedAttrib)
+    {
+        if(Bold)
+            if(!(DrawAttribMask&UITC_DRAWMASK_BOLD))
+                Bold=false;
+        if(Italic)
+            if(!(DrawAttribMask&UITC_DRAWMASK_ITALIC))
+                Italic=false;
+    }
+
+    if(Bold)
         RenderFont.setBold(true);
 
-    if(Frag->Styling.Attribs&TXT_ATTRIB_ITALIC)
+    if(Italic)
         RenderFont.setItalic(true);
 
     /* See what the width of the drawen text will be */
@@ -757,13 +782,109 @@ int Widget_TextCanvas::DrawTextFrag(QPainter *painter,QFontMetrics *fm,
     QColor FgColor;
     QColor BgColor;
     QColor UlColor;
+    QColor TmpColor;
     bool FontWasBold;
     bool FontWasItalic;
     int Bottom;
+    bool ForcedAttrib;
+    bool LineThough;
+    bool Overline;
+    bool Underline;
+    bool DoubleUnderline;
+    bool DottedUnderline;
+    bool DashedUnderline;
+    bool WavyUnderline;
+    bool Bold;
+    bool Italic;
+    bool Outline;
+    bool RoundBox;
+    bool ReverseAttrib;
+    bool ColorAttrib;
 
-    FgColor=QColor(QRgb(Frag->Styling.FGColor));
-    BgColor=QColor(QRgb(Frag->Styling.BGColor));
-    UlColor=QColor(QRgb(Frag->Styling.ULineColor));
+    ForcedAttrib=Frag->Styling.Attribs&TXT_ATTRIB_FORCE;
+    LineThough=Frag->Styling.Attribs&TXT_ATTRIB_LINETHROUGHT;
+    Bold=Frag->Styling.Attribs&TXT_ATTRIB_BOLD;
+    Italic=Frag->Styling.Attribs&TXT_ATTRIB_ITALIC;
+    Outline=Frag->Styling.Attribs&TXT_ATTRIB_OUTLINE;
+    RoundBox=Frag->Styling.Attribs&TXT_ATTRIB_ROUNDBOX;
+    Overline=Frag->Styling.Attribs&TXT_ATTRIB_OVERLINE;
+    Underline=Frag->Styling.Attribs&TXT_ATTRIB_UNDERLINE;
+    DoubleUnderline=Frag->Styling.Attribs&TXT_ATTRIB_UNDERLINE_DOUBLE;
+    DottedUnderline=Frag->Styling.Attribs&TXT_ATTRIB_UNDERLINE_DOTTED;
+    DashedUnderline=Frag->Styling.Attribs&TXT_ATTRIB_UNDERLINE_DASHED;
+    WavyUnderline=Frag->Styling.Attribs&TXT_ATTRIB_UNDERLINE_WAVY;
+    ReverseAttrib=Frag->Styling.Attribs&TXT_ATTRIB_REVERSE;
+    ColorAttrib=true;
+
+    if(!ForcedAttrib)
+    {
+        if(LineThough)
+            if(!(DrawAttribMask&UITC_DRAWMASK_LINETHROUGH))
+                LineThough=false;
+        if(Bold)
+            if(!(DrawAttribMask&UITC_DRAWMASK_BOLD))
+                Bold=false;
+        if(Italic)
+            if(!(DrawAttribMask&UITC_DRAWMASK_ITALIC))
+                Italic=false;
+        if(Outline)
+            if(!(DrawAttribMask&UITC_DRAWMASK_OUTLINE))
+                Outline=false;
+        if(RoundBox)
+            if(!(DrawAttribMask&UITC_DRAWMASK_ROUNDBOX))
+                RoundBox=false;
+        if(Overline)
+            if(!(DrawAttribMask&UITC_DRAWMASK_OVERLINE))
+                Overline=false;
+        if(Underline)
+            if(!(DrawAttribMask&UITC_DRAWMASK_UNDERLINE))
+                Underline=false;
+        if(DoubleUnderline)
+            if(!(DrawAttribMask&UITC_DRAWMASK_UNDERLINE_DOUBLE))
+                DoubleUnderline=false;
+        if(DottedUnderline)
+            if(!(DrawAttribMask&UITC_DRAWMASK_UNDERLINE_DOTTED))
+                DottedUnderline=false;
+        if(DashedUnderline)
+            if(!(DrawAttribMask&UITC_DRAWMASK_UNDERLINE_DASHED))
+                DashedUnderline=false;
+        if(WavyUnderline)
+            if(!(DrawAttribMask&UITC_DRAWMASK_UNDERLINE_WAVY))
+                WavyUnderline=false;
+        if(ReverseAttrib)
+            if(!(DrawAttribMask&UITC_DRAWMASK_REVERSE))
+                ReverseAttrib=false;
+        if(ColorAttrib)
+            if(!(DrawAttribMask&UITC_DRAWMASK_COLOR_ATTRIB))
+                ColorAttrib=false;
+    }
+
+    if(Frag->CursorFrag)
+        ColorAttrib=true;
+
+    if(ColorAttrib)
+    {
+        FgColor=QColor(QRgb(Frag->Styling.FGColor));
+        BgColor=QColor(QRgb(Frag->Styling.BGColor));
+        UlColor=QColor(QRgb(Frag->Styling.ULineColor));
+    }
+    else
+    {
+        /* We are not drawing attribute colors so we use defaults */
+        FgColor=UseTextAreaDefaultColor;
+        BgColor=UseTextAreaBackgroundColor;
+        UlColor=FgColor;
+    }
+
+    if(ReverseAttrib)
+    {
+        if(!Frag->CursorFrag)
+        {
+            TmpColor=BgColor;
+            BgColor=FgColor;
+            FgColor=TmpColor;
+        }
+    }
 
     if(OverrideActive)
     {
@@ -784,10 +905,10 @@ int Widget_TextCanvas::DrawTextFrag(QPainter *painter,QFontMetrics *fm,
     FontWasBold=RenderFont.bold();
     FontWasItalic=RenderFont.italic();
 
-    if(Frag->Styling.Attribs&TXT_ATTRIB_BOLD)
+    if(Bold)
         RenderFont.setBold(true);
 
-    if(Frag->Styling.Attribs&TXT_ATTRIB_ITALIC)
+    if(Italic)
         RenderFont.setItalic(true);
 
     painter->setFont(RenderFont);
@@ -803,7 +924,7 @@ int Widget_TextCanvas::DrawTextFrag(QPainter *painter,QFontMetrics *fm,
        Windows)) */
     painter->fillRect(ScreenX,ScreenY,TextWidth,GUICharHeight,BgColor);
 
-    if(Frag->Styling.Attribs&TXT_ATTRIB_OUTLINE)
+    if(Outline)
     {
         painter->setBackgroundMode(Qt::TransparentMode);
         painter->drawText(ScreenX-1,ScreenY,TextWidth,GUICharHeight,
@@ -820,7 +941,7 @@ int Widget_TextCanvas::DrawTextFrag(QPainter *painter,QFontMetrics *fm,
         painter->setPen(DrawPen);
     }
 
-    if(Frag->Styling.Attribs&TXT_ATTRIB_ROUNDBOX)
+    if(RoundBox)
     {
         /* We swap the forground and background colors because this is
            inverted */
@@ -855,7 +976,7 @@ int Widget_TextCanvas::DrawTextFrag(QPainter *painter,QFontMetrics *fm,
                 Qt::AlignLeft|Qt::AlignTop|Qt::TextSingleLine,Frag->Text);
     }
 
-    if(Frag->Styling.Attribs&TXT_ATTRIB_OUTLINE)
+    if(Outline)
     {
         painter->setBackgroundMode(Qt::OpaqueMode);
         DrawPen.setColor(FgColor);
@@ -866,10 +987,8 @@ int Widget_TextCanvas::DrawTextFrag(QPainter *painter,QFontMetrics *fm,
     painter->setPen(DrawPen);
 
     /* See if we need to draw a line (under,over,through,etc) */
-    if(Frag->Styling.Attribs&(TXT_ATTRIB_LINETHROUGHT|TXT_ATTRIB_OVERLINE|
-            TXT_ATTRIB_UNDERLINE|TXT_ATTRIB_UNDERLINE_DOUBLE|
-            TXT_ATTRIB_UNDERLINE_DOTTED|TXT_ATTRIB_UNDERLINE_DASHED|
-            TXT_ATTRIB_UNDERLINE_WAVY))
+    if(LineThough || Overline || Underline || DoubleUnderline ||
+            DottedUnderline || DashedUnderline || WavyUnderline)
     {
         UL_X1=ScreenX;
         UL_X2=ScreenX+TextWidth;
@@ -878,7 +997,7 @@ int Widget_TextCanvas::DrawTextFrag(QPainter *painter,QFontMetrics *fm,
         MaxScreenCharY=ScreenY+GUICharHeight;
 
         /* Strike Out */
-        if(Frag->Styling.Attribs&TXT_ATTRIB_LINETHROUGHT)
+        if(LineThough)
         {
             UL_Y1=ScreenBaseLineY-StrikeOutPos+ScreenThickAdjust;
 
@@ -886,7 +1005,7 @@ int Widget_TextCanvas::DrawTextFrag(QPainter *painter,QFontMetrics *fm,
         }
 
         /* Over line */
-        if(Frag->Styling.Attribs&TXT_ATTRIB_OVERLINE)
+        if(Overline)
         {
             UL_Y1=ScreenBaseLineY-(OverLinePos-1)+ScreenThickAdjust;
 
@@ -901,11 +1020,10 @@ int Widget_TextCanvas::DrawTextFrag(QPainter *painter,QFontMetrics *fm,
         if(UL_Y1>=MaxScreenCharY)
             UL_Y1=MaxScreenCharY-1;
 
-        if(Frag->Styling.Attribs&TXT_ATTRIB_UNDERLINE)
-        {
+        if(Underline)
             DrawUnderLine=true;
-        }
-        if(Frag->Styling.Attribs&TXT_ATTRIB_UNDERLINE_DOUBLE)
+
+        if(DoubleUnderline)
         {
             /* Draw a line 1 above the underline pos and 1 below */
             if(UL_Y1+UnderLineHeight>=MaxScreenCharY)
@@ -929,7 +1047,8 @@ int Widget_TextCanvas::DrawTextFrag(QPainter *painter,QFontMetrics *fm,
                     UL_X2,
                     UL_Y1);
         }
-        if(Frag->Styling.Attribs&TXT_ATTRIB_UNDERLINE_DOTTED)
+
+        if(DottedUnderline)
         {
             DrawPen.setDashPattern(dotted);
             DrawPen.setStyle(Qt::CustomDashLine);
@@ -937,7 +1056,8 @@ int Widget_TextCanvas::DrawTextFrag(QPainter *painter,QFontMetrics *fm,
 
             DrawUnderLine=true;
         }
-        if(Frag->Styling.Attribs&TXT_ATTRIB_UNDERLINE_DASHED)
+
+        if(DashedUnderline)
         {
             DrawPen.setDashPattern(dashed);
             DrawPen.setStyle(Qt::CustomDashLine);
@@ -945,7 +1065,8 @@ int Widget_TextCanvas::DrawTextFrag(QPainter *painter,QFontMetrics *fm,
 
             DrawUnderLine=true;
         }
-        if(Frag->Styling.Attribs&TXT_ATTRIB_UNDERLINE_WAVY)
+
+        if(WavyUnderline)
         {
             DrawPen.setDashPattern(dashed);
             DrawPen.setStyle(Qt::CustomDashLine);
@@ -993,9 +1114,6 @@ void Widget_TextCanvas::DrawCursor(QPainter *painter,QFontMetrics *fm)
     int CursorHeight;
     QColor UseCursorColor;
 
-//    if(CursorFrag.Text=="")
-//        return;
-
     x=CursorPx;
     y=CursorY*GUICharHeight;
 
@@ -1016,10 +1134,12 @@ void Widget_TextCanvas::DrawCursor(QPainter *painter,QFontMetrics *fm)
 
         CursorFrag.Styling.FGColor=SavedBGColor;
         CursorFrag.Styling.BGColor=UseCursorColor.rgb();
+        CursorFrag.CursorFrag=true;
 
         DrawFrag(painter,fm,DisplayLeftEdgePx+x-ScrollOffsetX,
                 DisplayTopEdgePx+y,&CursorFrag);
 
+        CursorFrag.CursorFrag=false;
         CursorFrag.Styling.FGColor=SavedFGColor;
         CursorFrag.Styling.BGColor=SavedBGColor;
     }
@@ -1301,6 +1421,7 @@ int Widget_TextCanvas::GetTextWidth(const struct TextCanvasFrag *Frag)
     NewFrag.Styling=Frag->Styling;
     NewFrag.Value=Frag->Value;
     NewFrag.Data=Frag->Data;
+    NewFrag.CursorFrag=false;
 
     switch(Frag->FragType)
     {
@@ -1396,7 +1517,8 @@ void Widget_TextCanvas::SetMaxLines(int MaxLines,uint32_t BGColor)
     Lines.resize(MaxLines,NewLine);
 }
 
-void Widget_TextCanvas::SetDisplaySize(int LeftEdge,int TopEdge,int Width,int Height)
+void Widget_TextCanvas::SetDisplaySize(int LeftEdge,int TopEdge,int Width,
+        int Height)
 {
     DisplayLeftEdgePx=LeftEdge;
     DisplayTopEdgePx=TopEdge;
@@ -1451,6 +1573,15 @@ void Widget_TextCanvas::SetTextAreaBackgroundColor(uint32_t BgColor)
     RethinkCursor();
 }
 
+void Widget_TextCanvas::SetTextDefaultColor(uint32_t FgColor)
+{
+    TextAreaDefaultColor=QColor(QRgb(FgColor));
+
+    RethinkColors();
+    RethinkCursor();
+}
+
+
 void Widget_TextCanvas::SetOverrideMsg(const char *Msg,bool OnOff)
 {
     OverrideWidget->setVisible(OnOff);
@@ -1489,10 +1620,19 @@ void Widget_TextCanvas::RethinkColors(void)
     {
         UseDisplayBackgroundColor=DisplayBackgroundColor.darker(200); // 1/2 bright;
         UseTextAreaBackgroundColor=TextAreaBackgroundColor.darker(200); // 1/2 bright;
+        UseTextAreaDefaultColor=TextAreaDefaultColor.darker(200); // 1/2 bright;
     }
     else
     {
         UseDisplayBackgroundColor=DisplayBackgroundColor;
         UseTextAreaBackgroundColor=TextAreaBackgroundColor;
+        UseTextAreaDefaultColor=TextAreaDefaultColor;
     }
 }
+
+void Widget_TextCanvas::SetDrawMask(uint16_t Mask)
+{
+    DrawAttribMask=Mask;
+    update();
+}
+

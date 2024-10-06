@@ -92,6 +92,20 @@ t_UICheckboxCtrl *UIS_GetCheckboxHandle(e_UIS_Checkbox UIObj)
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->checkBox_CaptureShowPanel;
         case e_UIS_Checkbox_HexDisplayEnabled:
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->HexDisplay_Enable_checkBox;
+        case e_UIS_Checkbox_BoldFontEnable:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->BoldFontEnable_checkBox;
+        case e_UIS_Checkbox_ItalicFontEnable:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->ItalicFontEnable_checkBox;
+        case e_UIS_Checkbox_UnderlineEnable:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->UnderlineEnable_checkBox;
+        case e_UIS_Checkbox_OverlineEnable:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->OverlineEnable_checkBox;
+        case e_UIS_Checkbox_ReverseEnable:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->ReverseEnable_checkBox;
+        case e_UIS_Checkbox_StrikeThroughEnable:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->StrikeThroughEnable_checkBox;
+        case e_UIS_Checkbox_ColorEnable:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->ColorEnable_checkBox;
 
         case e_UIS_CheckboxMAX:
         default:

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * FILENAME: Connections.h
- * 
+ *
  * PROJECT:
  *    Whippy Term
  *
@@ -359,8 +359,8 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         uint32_t GetBGColor(void);
         void SetULineColor(uint32_t ULineColor);
         uint32_t GetULineColor(void);
-        void SetAttribs(uint16_t Attribs);
-        uint16_t GetAttribs(void);
+        void SetAttribs(uint32_t Attribs);
+        uint32_t GetAttribs(void);
         void DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
                 uintptr_t Arg3,uintptr_t Arg4);
         void GetCursorXY(int *RetCursorX,int *RetCursorY);

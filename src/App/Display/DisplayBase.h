@@ -144,6 +144,7 @@ class DisplayBase
         virtual void InsertHorizontalRule(void);
         virtual void ResetTerm(void);
         virtual void SetupCanvas(void);
+        virtual void SetDrawMask(uint16_t Mask);
 
         void SetCustomSettings(class ConSettings *NewSettingsPtr);
         class ConSettings *GetCustomSettings(void);

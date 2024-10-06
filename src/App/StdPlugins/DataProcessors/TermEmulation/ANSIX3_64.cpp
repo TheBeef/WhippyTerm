@@ -58,7 +58,6 @@ struct ANSIX364DecoderData
     int CSIArg[10];
     unsigned int CSIArgCount;
     int CurrentNum;
-    bool DoingReverseVideo;
     bool DoingDim;
     bool DoingBright;
     int32_t SavedCursorX;
@@ -1109,7 +1108,7 @@ void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data)
     unsigned int r;
     uint32_t TmpCol;
     e_SysColShadeType Shade;
-    uint16_t Attribs;
+    uint32_t Attribs;
     uint32_t FGColor;
     uint32_t BGColor;
     uint32_t ULineColor;
@@ -1142,24 +1141,14 @@ void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data)
             break;
             case 4: // singly underlined
                 Attribs|=TXT_ATTRIB_UNDERLINE;
-                if(Data->DoingReverseVideo)
-                    ULineColor=FGColor;
-                else
-                    ULineColor=BGColor;
+                ULineColor=FGColor;
             break;
             case 5: // slowly blinking (less then 150 per minute)
             break;
             case 6: // rapidly blinking (150 per minute or more)
             break;
             case 7: // negative image
-                if(!Data->DoingReverseVideo)
-                {
-                    Data->DoingReverseVideo=true;
-                    TmpCol=FGColor;
-                    FGColor=BGColor;
-                    BGColor=TmpCol;
-                    ULineColor=FGColor;
-                }
+                Attribs|=TXT_ATTRIB_REVERSE;
             break;
             case 8: // concealed characters
             break;
@@ -1180,10 +1169,7 @@ void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data)
             break;
             case 21: // doubly underlined
                 Attribs|=TXT_ATTRIB_UNDERLINE_DOUBLE;
-                if(Data->DoingReverseVideo)
-                    ULineColor=FGColor;
-                else
-                    ULineColor=BGColor;
+                ULineColor=FGColor;
             break;
             case 22: // normal colour or normal intensity (neither bold nor faint)
                 Attribs&=~TXT_ATTRIB_BOLD;
@@ -1200,14 +1186,7 @@ void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data)
             case 26: // (reserved for proportional spacing as specified in CCITT Recommendation T.61)
             break;
             case 27: // positive image
-                if(Data->DoingReverseVideo)
-                {
-                    Data->DoingReverseVideo=false;
-                    TmpCol=FGColor;
-                    FGColor=BGColor;
-                    BGColor=TmpCol;
-                    ULineColor=FGColor;
-                }
+                Attribs&=~TXT_ATTRIB_REVERSE;
             break;
             case 28: // revealed characters
             break;
@@ -1228,10 +1207,7 @@ void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data)
                 if(Data->DoingBright)
                     Shade=e_SysColShade_Bright;
                 TmpCol=m_DPS->GetSysColor(Shade,Data->CSIArg[r]-30);
-                if(Data->DoingReverseVideo)
-                    BGColor=TmpCol;
-                else
-                    FGColor=TmpCol;
+                FGColor=TmpCol;
             break;
             case 38: // (reserved for future standardization; intended for setting character foreground colour as specified in ISO 8613-6 [CCITT Recommendation T.416])
             break;
@@ -1247,10 +1223,7 @@ void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data)
             case 46: // cyan background
             case 47: // whitebackground
                 TmpCol=m_DPS->GetSysColor(e_SysColShade_Normal,Data->CSIArg[r]-40);
-                if(Data->DoingReverseVideo)
-                    FGColor=TmpCol;
-                else
-                    BGColor=TmpCol;
+                BGColor=TmpCol;
             break;
             case 48: // (reserved for future standardization; intended for setting character background colour as specified in ISO 8613-6 [CCITT Recommendation T.416])
             break;
@@ -1264,10 +1237,7 @@ void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data)
             break;
             case 53: // overlined
                 Attribs|=TXT_ATTRIB_OVERLINE;
-                if(Data->DoingReverseVideo)
-                    ULineColor=FGColor;
-                else
-                    ULineColor=BGColor;
+                ULineColor=FGColor;
             break;
             case 54: // not framed, not encircled
             break;
@@ -1285,6 +1255,28 @@ void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data)
             case 64: // ideogram stress marking
             case 65: // cancels the effect of the rendition aspects established by parameter values 60 to 64
             break;
+            case 90: // bright black display
+            case 91: // bright red display
+            case 92: // bright green display
+            case 93: // bright yellow display
+            case 94: // bright blue display
+            case 95: // bright magenta display
+            case 96: // bright cyan display
+            case 97: // bright white display
+                TmpCol=m_DPS->GetSysColor(e_SysColShade_Bright,Data->CSIArg[r]-90);
+                FGColor=TmpCol;
+            break;
+            case 100: // bright background black display
+            case 101: // bright background red display
+            case 102: // bright background green display
+            case 103: // bright background yellow display
+            case 104: // bright background blue display
+            case 105: // bright background magenta display
+            case 106: // bright background cyan display
+            case 107: // bright background white display
+                TmpCol=m_DPS->GetSysColor(e_SysColShade_Bright,Data->CSIArg[r]-100);
+                BGColor=TmpCol;
+            break;
             default:
             break;
         }
@@ -1297,7 +1289,6 @@ void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data)
 
 void ANSIX364Decoder_ResetSGR(struct ANSIX364DecoderData *Data)
 {
-    Data->DoingReverseVideo=false;
     Data->DoingDim=false;
     Data->DoingBright=false;
 }

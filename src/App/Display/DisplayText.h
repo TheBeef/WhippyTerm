@@ -138,6 +138,7 @@ class DisplayText : public DisplayBase
         void InsertHorizontalRule(void);
         void ResetTerm(void);
         void SetupCanvas(void);
+        void SetDrawMask(uint16_t Mask);
 
         void SetBlockDeviceMode(bool On);
 

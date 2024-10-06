@@ -641,6 +641,8 @@ void DisplayBinary::SetupCanvas(void)
 
     UITC_SetTextAreaBackgroundColor(TextDisplayCtrl,Settings->
             DefaultColors[e_DefaultColors_BG]);
+    UITC_SetTextDefaultColor(TextDisplayCtrl,Settings->
+            DefaultColors[e_DefaultColors_FG]);
 
     CharWidthPx=UITC_GetCharPxWidth(TextDisplayCtrl);
     CharHeightPx=UITC_GetCharPxHeight(TextDisplayCtrl);

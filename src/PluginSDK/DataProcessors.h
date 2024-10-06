@@ -49,6 +49,8 @@
 #define TXT_ATTRIB_OUTLINE                  0x0200
 #define TXT_ATTRIB_BOX                      0x0400  // Future
 #define TXT_ATTRIB_ROUNDBOX                 0x0800
+#define TXT_ATTRIB_REVERSE                  0x1000
+#define TXT_ATTRIB_FORCE                    0x2000
 
 /***  MACROS                           ***/
 
@@ -148,8 +150,8 @@ struct DPS_API
     uint32_t (*GetBGColor)(void);
     void (*SetULineColor)(uint32_t ULineColor);
     uint32_t (*GetULineColor)(void);
-    void (*SetAttribs)(uint16_t Attribs);
-    uint16_t (*GetAttribs)(void);
+    void (*SetAttribs)(uint32_t Attribs);
+    uint32_t (*GetAttribs)(void);
     void (*DoNewLine)(void);
     void (*DoReturn)(void);
     void (*DoBackspace)(void);

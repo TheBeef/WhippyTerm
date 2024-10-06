@@ -115,7 +115,7 @@ void DisplayText_ScrollTimer_Timeout(uintptr_t UserData)
 
 DisplayText::DisplayText()
 {
-    TextDisplayCtrl=nullptr;
+    TextDisplayCtrl=NULL;
 
     InitCalled=false;
 
@@ -146,15 +146,15 @@ DisplayText::DisplayText()
     Selection_AnchorX=0;
     Selection_AnchorY=0;
 
-    ScrollTimer=nullptr;
+    ScrollTimer=NULL;
 }
 
 DisplayText::~DisplayText()
 {
-    if(ScrollTimer!=nullptr)
+    if(ScrollTimer!=NULL)
         FreeUITimer(ScrollTimer);
 
-    if(TextDisplayCtrl!=nullptr)
+    if(TextDisplayCtrl!=NULL)
     {
         UITC_FreeTextDisplay(TextDisplayCtrl);
     }
@@ -187,7 +187,7 @@ DisplayText::~DisplayText()
 bool DisplayText::Init(void *ParentWidget,
         bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData)
 {
-    TextDisplayCtrl=nullptr;
+    TextDisplayCtrl=NULL;
     try
     {
         struct TextLine FirstLine;
@@ -198,7 +198,7 @@ bool DisplayText::Init(void *ParentWidget,
         /* Allocate the text canvas */
         TextDisplayCtrl=UITC_AllocTextDisplay(ParentWidget,
                 DisplayText_EventHandlerCB,(uintptr_t)this);
-        if(TextDisplayCtrl==nullptr)
+        if(TextDisplayCtrl==NULL)
             throw(0);
 
         /* Current Style */
@@ -231,7 +231,7 @@ bool DisplayText::Init(void *ParentWidget,
         SetupCanvas();
 
         ScrollTimer=AllocUITimer();
-        if(ScrollTimer==nullptr)
+        if(ScrollTimer==NULL)
             throw(0);
 
         SetupUITimer(ScrollTimer,DisplayText_ScrollTimer_Timeout,
@@ -243,10 +243,10 @@ bool DisplayText::Init(void *ParentWidget,
     }
     catch(...)
     {
-        if(TextDisplayCtrl!=nullptr)
+        if(TextDisplayCtrl!=NULL)
         {
             UITC_FreeTextDisplay(TextDisplayCtrl);
-            TextDisplayCtrl=nullptr;
+            TextDisplayCtrl=NULL;
         }
         return false;
     }
@@ -318,7 +318,7 @@ bool DisplayText::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
         case e_TextDisplayEvent_DisplayFrameScrollX:
             WindowXOffsetPx=Event->Info.Scroll.Amount;
 
-            if(TextDisplayCtrl!=nullptr)
+            if(TextDisplayCtrl!=NULL)
                 UITC_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
 
             RedrawFullScreen();
@@ -631,6 +631,8 @@ void DisplayText::SetupCanvas(void)
 
     UITC_SetTextAreaBackgroundColor(TextDisplayCtrl,Settings->
             DefaultColors[e_DefaultColors_BG]);
+    UITC_SetTextDefaultColor(TextDisplayCtrl,Settings->
+            DefaultColors[e_DefaultColors_FG]);
 
     CharWidthPx=UITC_GetCharPxWidth(TextDisplayCtrl);
     CharHeightPx=UITC_GetCharPxHeight(TextDisplayCtrl);
@@ -669,7 +671,7 @@ void DisplayText::RedrawActiveLine(void)
     int LineLenPx;
     bool LookupLongest;
 
-    if(ActiveLine==nullptr || TextDisplayCtrl==nullptr)
+    if(ActiveLine==NULL || TextDisplayCtrl==NULL)
         return;
 
     if(!CursorLineVisible())
@@ -744,6 +746,7 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
     int CharsLeft;
     uint32_t SavedFGColor;
     uint32_t SavedBGColor;
+    uint32_t SavedAttribs;
     string::iterator StartOfStr;
 
     FragSelected=false;
@@ -912,15 +915,18 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
             /* Make it the highlight color */
             SavedFGColor=DisplayFrag.Styling.FGColor;
             SavedBGColor=DisplayFrag.Styling.BGColor;
+            SavedAttribs=DisplayFrag.Styling.Attribs;
             DisplayFrag.Styling.FGColor=
                     Settings->DefaultColors[e_DefaultColors_BG];
             DisplayFrag.Styling.BGColor=
                     Settings->DefaultColors[e_DefaultColors_FG];
+            DisplayFrag.Styling.Attribs=TXT_ATTRIB_FORCE;
             UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
 
             /* Restore the color */
             DisplayFrag.Styling.FGColor=SavedFGColor;
             DisplayFrag.Styling.BGColor=SavedBGColor;
+            DisplayFrag.Styling.Attribs=SavedAttribs;
             /* Place things so the end of the string is in this fragment */
             DisplayFrag.Text=TmpStr2.c_str();
 
@@ -933,6 +939,7 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
                     Settings->DefaultColors[e_DefaultColors_BG];
             DisplayFrag.Styling.BGColor=
                     Settings->DefaultColors[e_DefaultColors_FG];
+            DisplayFrag.Styling.Attribs=TXT_ATTRIB_FORCE;
         }
 
         UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
@@ -948,7 +955,7 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
         DisplayFrag.Text="";
         DisplayFrag.Styling=CurrentStyle;
         DisplayFrag.Value=0;
-        DisplayFrag.Data=nullptr;
+        DisplayFrag.Data=NULL;
 
         switch(Line->EOL)
         {
@@ -1002,7 +1009,7 @@ void DisplayText::RedrawFullScreen(void)
     int LineLenPx;
     int y;
 
-    if(ActiveLine==nullptr || TextDisplayCtrl==nullptr)
+    if(ActiveLine==NULL || TextDisplayCtrl==NULL)
         return;
 
     LineLenChanged=false;
@@ -1070,7 +1077,7 @@ void DisplayText::NoteNonPrintable(const char *NoteStr)
 
         AddedFrag->Styling.Attribs|=TXT_ATTRIB_ROUNDBOX;
         AddedFrag->Value=0;
-        AddedFrag->Data=nullptr;
+        AddedFrag->Data=NULL;
         AddedFrag->WidthPx=0;
         RethinkFragWidth(AddedFrag);
 
@@ -1253,7 +1260,7 @@ i_TextLineFrags DisplayText::AddSpecialFrag(struct TextLineFrag &SpecialFrag)
 {
     i_TextLineFrags AddedFrag;
 
-    if(ActiveLine==nullptr)
+    if(ActiveLine==NULL)
         throw(0);
 
     if(ActiveLine->Frags.back().FragType==e_TextCanvasFrag_String &&
@@ -1433,7 +1440,7 @@ void DisplayText::ApplySettings(void)
  ******************************************************************************/
 void DisplayText::SetCursorBlinking(bool Blinking)
 {
-    if(TextDisplayCtrl==nullptr)
+    if(TextDisplayCtrl==NULL)
         return;
 
     UITC_SetCursorBlinking(TextDisplayCtrl,Blinking);
@@ -1517,7 +1524,7 @@ void DisplayText::SetInFocus(void)
  ******************************************************************************/
 void DisplayText::SetCursorXY(unsigned int x,unsigned y)
 {
-    if(ActiveLine!=nullptr)
+    if(ActiveLine!=NULL)
         ActiveLine->EOL=e_DTEOL_Hard;
 
     MoveCursor(x,y,false);
@@ -1646,7 +1653,7 @@ bool DisplayText::RethinkInsertFrag(void)
         Had2Change=true;
     }
 
-    if(ActiveLine==nullptr)
+    if(ActiveLine==NULL)
         return Had2Change;
 
     if(ActiveLine->Frags.empty())
@@ -1743,7 +1750,7 @@ void DisplayText::WriteChar(uint8_t *Chr)
 {
     try
     {
-        if(ActiveLine==nullptr)
+        if(ActiveLine==NULL)
             return;
 
         if(!ActiveLine->Frags.empty() &&
@@ -2137,7 +2144,7 @@ void DisplayText::AdjustCursorAfterWriteChar(uint8_t *Chr)
     }
 
     /* Move the Px by the width of the char we just added */
-    if(TextDisplayCtrl!=nullptr)
+    if(TextDisplayCtrl!=NULL)
     {
         DisplayFrag.FragType=e_TextCanvasFrag_String;
         DisplayFrag.Text=(const char *)Chr;
@@ -2189,7 +2196,7 @@ void DisplayText::RethinkFragWidth(i_TextLineFrags Frag)
 
     Frag->WidthPx=0;
 
-    if(TextDisplayCtrl==nullptr)
+    if(TextDisplayCtrl==NULL)
         return;
 
     if(!ShowNonPrintables && Frag->FragType==e_TextCanvasFrag_NonPrintableChar)
@@ -2354,7 +2361,7 @@ void DisplayText::AddTab(void)
  ******************************************************************************/
 void DisplayText::RethinkTextAreaSize(void)
 {
-    if(TextDisplayCtrl==nullptr)
+    if(TextDisplayCtrl==NULL)
         return;
 
     TextAreaWidthPx=UITC_GetWidgetWidth(TextDisplayCtrl);
@@ -2455,7 +2462,7 @@ void DisplayText::RethinkWindowSize(void)
             RethinkScrollBars();
             if(Force2Bottom)
             {
-                if(TextDisplayCtrl!=nullptr)
+                if(TextDisplayCtrl!=NULL)
                 {
                     /* Force 'TopLine' to be 'ScreenFirstLine' */
                     TopLine=ScreenFirstLine;
@@ -2480,7 +2487,7 @@ void DisplayText::RethinkWindowSize(void)
     MoveCursor(NewX,NewY,false);
 
     /* Set the clipping and offset from the edge of the widget */
-    if(TextDisplayCtrl!=nullptr)
+    if(TextDisplayCtrl!=NULL)
     {
         LeftEdge=0;
         TopEdge=0;
@@ -2545,7 +2552,7 @@ void DisplayText::RethinkScrollBars(void)
     t_UIScrollBarCtrl *HorzScroll;
     t_UIScrollBarCtrl *VertScroll;
 
-    if(TextDisplayCtrl==nullptr)
+    if(TextDisplayCtrl==NULL)
         return;
 
     /* Hozr */
@@ -2623,7 +2630,7 @@ void DisplayText::MoveCursor(unsigned int x,unsigned y,bool CursorXPxPrecaled)
     if(!CursorXPxPrecaled)
         CursorXPx=CalcCursorXPx();
 
-    if(TextDisplayCtrl==nullptr)
+    if(TextDisplayCtrl==NULL)
     {
         CursorXPx=-1;
         return;
@@ -2760,7 +2767,7 @@ void DisplayText::DoBackspace(void)
  ******************************************************************************/
 void DisplayText::DoReturn(void)
 {
-    if(ActiveLine!=nullptr)
+    if(ActiveLine!=NULL)
         ActiveLine->EOL=e_DTEOL_Hard;
 
     /* Redraw any changes to the current line before we move on */
@@ -2792,7 +2799,7 @@ void DisplayText::DoLineFeed(void)
 {
     int NewCursorY;
 
-    if(ActiveLine!=nullptr)
+    if(ActiveLine!=NULL)
         ActiveLine->EOL=e_DTEOL_Hard;
 
     /* Redraw any changes to the current line before we move on */
@@ -2842,7 +2849,7 @@ int DisplayText::GetLineEndSize(struct TextLine *Line)
     else
         DisplayFrag.Styling=Line->Frags.back().Styling;
     DisplayFrag.Value=0;
-    DisplayFrag.Data=nullptr;
+    DisplayFrag.Data=NULL;
 
     return UITC_GetFragWidth(TextDisplayCtrl,&DisplayFrag);
 }
@@ -3004,7 +3011,7 @@ void DisplayText::RethinkCursorHidden(void)
 {
     bool IsCursorVisible;
 
-    if(TextDisplayCtrl==nullptr)
+    if(TextDisplayCtrl==NULL)
         return;
 
     IsCursorVisible=CursorLineVisible();
@@ -3100,7 +3107,7 @@ bool DisplayText::ScrollBarAtBottom(void)
     t_UIScrollBarCtrl *VertScroll;
     int CurrentPos;
 
-    if(TextDisplayCtrl==nullptr)
+    if(TextDisplayCtrl==NULL)
         return false;
 
     VertScroll=UITC_GetVertSlider(TextDisplayCtrl);
@@ -3704,7 +3711,7 @@ void DisplayText::ScrollScreen(int dxpx,int dy)
     int MaxLength;
     int NewPos;
 
-    if(TextDisplayCtrl==nullptr)
+    if(TextDisplayCtrl==NULL)
         return;
 
     HorzScroll=UITC_GetHorzSlider(TextDisplayCtrl);
@@ -3803,7 +3810,7 @@ void DisplayText::ScrollScreen2MakeCursorVisible(void)
     int LastWindowXOffsetPx;
     int CharUnderCursorPx;
 
-    if(TextDisplayCtrl==nullptr)
+    if(TextDisplayCtrl==NULL)
         return;
 
     LastTopLineY=TopLineY;
@@ -3902,7 +3909,7 @@ int DisplayText::CalcCursorXPx(void)
     string::iterator EndPos;
     int Chars;
 
-    if(TextDisplayCtrl==nullptr || ActiveLine==nullptr)
+    if(TextDisplayCtrl==NULL || ActiveLine==NULL)
         return 0;
 
     /* We need to walk this line looking for the px point */
@@ -4071,12 +4078,12 @@ void DisplayText::SetOverrideMessage(const char *Msg)
     if(TextDisplayCtrl==NULL)
         return;
 
-    if(Msg==nullptr)
+    if(Msg==NULL)
         UITC_SetOverrideMsg(TextDisplayCtrl,Msg,false);
     else
         UITC_SetOverrideMsg(TextDisplayCtrl,Msg,true);
 
-    if(TextDisplayCtrl!=nullptr)
+    if(TextDisplayCtrl!=NULL)
         UITC_RedrawScreen(TextDisplayCtrl);
 }
 
@@ -4218,7 +4225,7 @@ void DisplayText::ClearScreen(e_ScreenClearType Type)
 
         RethinkScrollBars();
 
-        if(TextDisplayCtrl!=nullptr)
+        if(TextDisplayCtrl!=NULL)
             UITC_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
 
         /* Now we have to move the cursor to the top/left */
@@ -4491,4 +4498,33 @@ bool DisplayText::IsLineBlank(i_TextLines Line)
         }
     }
     return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::SetupCanvas
+ *
+ * SYNOPSIS:
+ *    void DisplayText::SetupCanvas(uint16_t Mask);
+ *
+ * PARAMETERS:
+ *    Mask [I] -- What mask to apply to drawing attributes.  If the bit is
+ *                set then this is drawen.  These are the bits from
+ *                UITC_SetDrawMask() UI control.
+ *
+ * FUNCTION:
+ *    This function sets the draw mask for this display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::SetDrawMask(uint16_t Mask)
+{
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    UITC_SetDrawMask(TextDisplayCtrl,Mask);
 }

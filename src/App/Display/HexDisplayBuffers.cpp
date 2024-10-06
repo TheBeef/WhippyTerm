@@ -825,9 +825,10 @@ void HexDisplayBuffer::SetupCanvas(void)
 {
     UITC_SetFont(TextDisplayCtrl,FontName.c_str(),FontSize,FontBold,FontItalic);
 
-    UITC_SetCursorColor(TextDisplayCtrl,0xFFFFFF);
+    UITC_SetCursorColor(TextDisplayCtrl,0xFFFFFF);  /* DEBUG PAUL: Should this be cursor color? */
 
     UITC_SetTextAreaBackgroundColor(TextDisplayCtrl,BGColor);
+    UITC_SetTextDefaultColor(TextDisplayCtrl,FGColor);
 
     UITC_ShowSendPanel(TextDisplayCtrl,false);
 

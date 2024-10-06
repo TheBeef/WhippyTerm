@@ -934,6 +934,33 @@ void UITC_SetTextAreaBackgroundColor(t_UITextDisplayCtrl *ctrl,uint32_t BgColor)
 
 /*******************************************************************************
  * NAME:
+ *    UITC_SetTextDefaultColor
+ *
+ * SYNOPSIS:
+ *    void UITC_SetTextDefaultColor(t_UITextDisplayCtrl *ctrl,
+ *              uint32_t FgColor);
+ *
+ * PARAMETERS:
+ *    BgColor [I] -- The background fill color
+ *
+ * FUNCTION:
+ *    This function sets the default color that will be used for the text.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UITC_SetTextDefaultColor(t_UITextDisplayCtrl *ctrl,uint32_t FgColor)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    TextDisplay->ui->TextDisplay->SetTextDefaultColor(FgColor);
+}
+
+/*******************************************************************************
+ * NAME:
  *    UITC_SetBorderBackgroundColor
  *
  * SYNOPSIS:
@@ -1016,3 +1043,32 @@ void UITC_RedrawScreen(t_UITextDisplayCtrl *ctrl)
 
     TextDisplay->ui->TextDisplay->RedrawScreen();
 }
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_SetDrawMask
+ *
+ * SYNOPSIS:
+ *    void UITC_SetDrawMask(t_UITextDisplayCtrl *ctrl,uint16_t Mask);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- The control to work on
+ *    Mask [I] -- What mask to apply to drawing attributes.  If the bit is
+ *                set then this is drawen.
+ *
+ * FUNCTION:
+ *    This function sets the mask of what attributes are drawen.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UITC_SetDrawMask(t_UITextDisplayCtrl *ctrl,uint16_t Mask)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    TextDisplay->ui->TextDisplay->SetDrawMask(Mask);
+}
+

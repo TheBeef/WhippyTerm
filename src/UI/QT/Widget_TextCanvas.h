@@ -81,6 +81,7 @@ struct WTCFrag
     struct CharStyling Styling;
     int Value;
     void *Data;
+    bool CursorFrag;
 };
 
 typedef std::list<struct WTCFrag> t_WTCLineFrags;
@@ -107,6 +108,7 @@ public:
     void RedrawScreen(void);
     bool SetFont(const char *FontName,int PointSize,bool Bold,bool Italic);
     void SetCursorBlinking(bool Blinking);
+    void SetDrawMask(uint16_t Mask);
 
     void ClearLine(unsigned int Line,uint32_t BGColor);
     void AppendTextFrag(unsigned int Line,const struct TextCanvasFrag *Frag);
@@ -125,13 +127,13 @@ public:
     void SetDisplayBackgroundColor(uint32_t BgColor,bool DrawBackground);
 
     void SetTextAreaBackgroundColor(uint32_t BgColor);
+    void SetTextDefaultColor(uint32_t FgColor);
     void SetOverrideMsg(const char *Msg,bool OnOff);
 
     int GetWidgetWidth(void);
     int GetWidgetHeight(void);
     int GetCharPxWidth(void);
     int GetCharPxHeight(void);
-
 
     QColor CursorColor;
 
@@ -175,6 +177,8 @@ private:
     bool OverrideActive;
 
     QFont RenderFont;
+    QColor TextAreaDefaultColor;
+    QColor UseTextAreaDefaultColor;
     QColor TextAreaBackgroundColor;
     QColor UseTextAreaBackgroundColor;
     bool (*WTCEventHandler)(const struct WTCEvent *Event);
@@ -189,6 +193,7 @@ private:
     QColor DisplayBackgroundColor;
     QColor UseDisplayBackgroundColor;
     bool FillDisplayBackground;
+    uint16_t DrawAttribMask;
 
     bool SendEvent(e_WTCEventType EventType,union WTCEventData *Info);
     bool SendEvent(e_WTCEventType EventType);

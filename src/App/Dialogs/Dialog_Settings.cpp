@@ -654,6 +654,22 @@ static void DS_SetSettingGUI(void)
     ColorPreviewHandle=UIS_GetColorPreviewHandle(e_UIS_ColorPreview_CursorColor);
     UISetColorPreviewColor(ColorPreviewHandle,m_CursorColor);
 
+    /* Attributes */
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_BoldFontEnable);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->BoldEnabled);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ItalicFontEnable);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->ItalicEnabled);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_UnderlineEnable);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->UnderlineEnabled);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_OverlineEnable);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->OverlineEnabled);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ReverseEnable);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->ReverseEnabled);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_StrikeThroughEnable);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->LineThroughEnabled);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ColorEnable);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->ColorsEnabled);
+
     memcpy(m_DS_SysColors,m_SettingConSettings->SysColors,sizeof(m_DS_SysColors));
     memcpy(m_DS_DefaultColors,m_SettingConSettings->DefaultColors,sizeof(m_DS_DefaultColors));
 
@@ -975,6 +991,22 @@ static void DS_GetSettingsFromGUI(void)
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CursorBlink);
     m_SettingConSettings->CursorBlink=UIGetCheckboxCheckStatus(CheckboxHandle);
     m_SettingConSettings->CursorColor=m_CursorColor;
+
+    /* Attributes */
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_BoldFontEnable);
+    m_SettingConSettings->BoldEnabled=UIGetCheckboxCheckStatus(CheckboxHandle);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ItalicFontEnable);
+    m_SettingConSettings->ItalicEnabled=UIGetCheckboxCheckStatus(CheckboxHandle);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_UnderlineEnable);
+    m_SettingConSettings->UnderlineEnabled=UIGetCheckboxCheckStatus(CheckboxHandle);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_OverlineEnable);
+    m_SettingConSettings->OverlineEnabled=UIGetCheckboxCheckStatus(CheckboxHandle);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ReverseEnable);
+    m_SettingConSettings->ReverseEnabled=UIGetCheckboxCheckStatus(CheckboxHandle);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_StrikeThroughEnable);
+    m_SettingConSettings->LineThroughEnabled=UIGetCheckboxCheckStatus(CheckboxHandle);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ColorEnable);
+    m_SettingConSettings->ColorsEnabled=UIGetCheckboxCheckStatus(CheckboxHandle);
 
     /********************/
     /* Terminal         */
@@ -2247,6 +2279,13 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Checkbox_CaptureHexDump:
                 case e_UIS_Checkbox_CaptureShowPanel:
                 case e_UIS_Checkbox_HexDisplayEnabled:
+                case e_UIS_Checkbox_BoldFontEnable:
+                case e_UIS_Checkbox_ItalicFontEnable:
+                case e_UIS_Checkbox_UnderlineEnable:
+                case e_UIS_Checkbox_OverlineEnable:
+                case e_UIS_Checkbox_ReverseEnable:
+                case e_UIS_Checkbox_StrikeThroughEnable:
+                case e_UIS_Checkbox_ColorEnable:
                 case e_UIS_CheckboxMAX:
                 default:
                 break;

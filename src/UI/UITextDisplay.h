@@ -40,6 +40,20 @@
 #include <stdint.h>
 
 /***  DEFINES                          ***/
+#define UITC_DRAWMASK_BOLD                  0x0001
+#define UITC_DRAWMASK_UNDERLINE             0x0002
+#define UITC_DRAWMASK_UNDERLINE_DOUBLE      0x0004
+#define UITC_DRAWMASK_UNDERLINE_DOTTED      0x0008
+#define UITC_DRAWMASK_UNDERLINE_DASHED      0x0010
+#define UITC_DRAWMASK_UNDERLINE_WAVY        0x0020
+#define UITC_DRAWMASK_OVERLINE              0x0040
+#define UITC_DRAWMASK_LINETHROUGH           0x0080
+#define UITC_DRAWMASK_ITALIC                0x0100
+#define UITC_DRAWMASK_REVERSE               0x0200
+#define UITC_DRAWMASK_OUTLINE               0x0400
+#define UITC_DRAWMASK_BOX                   0x0800
+#define UITC_DRAWMASK_ROUNDBOX              0x1000
+#define UITC_DRAWMASK_COLOR_ATTRIB          0x2000
 
 /***  MACROS                           ***/
 
@@ -166,6 +180,7 @@ void UITC_SetCursorStyle(t_UITextDisplayCtrl *ctrl,e_TextCursorStyleType Style);
 void UITC_SetClippingWindow(t_UITextDisplayCtrl *ctrl,int LeftEdge,int TopEdge,
         int Width,int Height);
 void UITC_SetTextAreaBackgroundColor(t_UITextDisplayCtrl *ctrl,uint32_t BgColor);
+void UITC_SetTextDefaultColor(t_UITextDisplayCtrl *ctrl,uint32_t FgColor);
 void UITC_SetBorderBackgroundColor(t_UITextDisplayCtrl *ctrl,uint32_t BgColor,bool Fill);
 void UITC_SetOverrideMsg(t_UITextDisplayCtrl *ctrl,const char *Msg,bool OnOff);
 
@@ -178,5 +193,6 @@ void UITC_AddFragment(t_UITextDisplayCtrl *ctrl,const struct TextCanvasFrag *Fra
 void UITC_SetXOffset(t_UITextDisplayCtrl *ctrl,int XOffsetPx);
 void UITC_SetMaxLines(t_UITextDisplayCtrl *ctrl,int MaxLines,uint32_t BGColor);
 void UITC_RedrawScreen(t_UITextDisplayCtrl *ctrl);
+void UITC_SetDrawMask(t_UITextDisplayCtrl *ctrl,uint16_t Mask);
 
 #endif

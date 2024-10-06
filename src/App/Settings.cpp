@@ -924,6 +924,16 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
         RegisterEnterKey(cfg,"EnterKey",EnterKeyMode);
         RegisterClipboardMode(cfg,"ClipboardMode",ClipboardMode);
     cfg.EndBlock();
+
+    cfg.StartBlock("AttribEnable");
+    cfg.Register("BoldEnabled",BoldEnabled);
+    cfg.Register("ItalicEnabled",ItalicEnabled);
+    cfg.Register("UnderlineEnabled",UnderlineEnabled);
+    cfg.Register("OverlineEnabled",OverlineEnabled);
+    cfg.Register("ReverseEnabled",ReverseEnabled);
+    cfg.Register("LineThroughEnabled",LineThroughEnabled);
+    cfg.Register("ColorsEnabled",ColorsEnabled);
+    cfg.EndBlock();
 }
 
 bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
@@ -971,8 +981,6 @@ bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
     if(Con1.ClipboardMode!=Con2.ClipboardMode)
         return false;
 
-
-
     if(Con1.EnabledTextDataProcessors!=Con2.EnabledTextDataProcessors)
         return false;
     if(Con1.EnabledTermEmuDataProcessors!=Con2.EnabledTermEmuDataProcessors)
@@ -980,6 +988,21 @@ bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
     if(Con1.EnabledKeyPressProcessors!=Con2.EnabledKeyPressProcessors)
         return false;
     if(Con1.EnabledBinaryDataProcessors!=Con2.EnabledBinaryDataProcessors)
+        return false;
+
+    if(Con1.BoldEnabled!=Con2.BoldEnabled)
+        return false;
+    if(Con1.ItalicEnabled!=Con2.ItalicEnabled)
+        return false;
+    if(Con1.UnderlineEnabled!=Con2.UnderlineEnabled)
+        return false;
+    if(Con1.OverlineEnabled!=Con2.OverlineEnabled)
+        return false;
+    if(Con1.ReverseEnabled!=Con2.ReverseEnabled)
+        return false;
+    if(Con1.LineThroughEnabled!=Con2.LineThroughEnabled)
+        return false;
+    if(Con1.ColorsEnabled!=Con2.ColorsEnabled)
         return false;
 
     return true;
@@ -1081,4 +1104,12 @@ void ConSettings::DefaultSettings(void)
     EnabledKeyPressProcessors.clear();
 
     EnabledBinaryDataProcessors.clear();
+
+    BoldEnabled=true;
+    ItalicEnabled=true;
+    UnderlineEnabled=true;
+    OverlineEnabled=true;
+    ReverseEnabled=true;
+    LineThroughEnabled=true;
+    ColorsEnabled=true;
 }

@@ -119,6 +119,15 @@ class ConSettings
         t_StringListType EnabledTermEmuDataProcessors;
         t_StringListType EnabledBinaryDataProcessors;
 
+        /* Attribs on/off */
+        bool BoldEnabled;
+        bool ItalicEnabled;
+        bool UnderlineEnabled;
+        bool OverlineEnabled;
+        bool ReverseEnabled;
+        bool LineThroughEnabled;
+        bool ColorsEnabled;
+
         void RegisterAllMembers(class TinyCFG &cfg);
         void DefaultSettings(void);
         bool RegisterBackspaceKey(class TinyCFG &cfg,const char *XmlName,e_BackspaceKeyType &Data);

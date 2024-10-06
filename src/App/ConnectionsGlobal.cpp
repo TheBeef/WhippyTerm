@@ -497,21 +497,7 @@ uint32_t Con_GetULineColor(void)
  *    void Con_SetAttribs(uint16_t Attribs);
  *
  * PARAMETERS:
- *    Attribs [I] -- The new attribs to use.  These are bit values where
- *                   the following bits are supported:
- *                      TXT_ATTRIB_UNDERLINE -- Underline the text
- *                      TXT_ATTRIB_UNDERLINE_DOUBLE -- Double underline the text
- *                      TXT_ATTRIB_UNDERLINE_DOTTED -- Dotted underline
- *                      TXT_ATTRIB_UNDERLINE_DASHED -- Dashed underline
- *                      TXT_ATTRIB_UNDERLINE_WAVY -- A wavy underline
- *                      TXT_ATTRIB_OVERLINE -- Put a line over the text
- *                      TXT_ATTRIB_LINETHROUGHT -- Put a line though the text
- *                      TXT_ATTRIB_BOLD -- Bold Text
- *                      TXT_ATTRIB_ITALIC -- Italic Text
- *                      TXT_ATTRIB_OUTLINE -- Draw an outline around the leters.
- *                      TXT_ATTRIB_ROUNDBOX -- Draw a inverted rounded box
- *                                             around the text (invert the
- *                                             colors)
+ *    Attribs [I] -- The new attribs to use.  See DPS_SetAttribs()
  *
  * FUNCTION:
  *    This function sets the underline color.
@@ -520,7 +506,7 @@ uint32_t Con_GetULineColor(void)
  *    NONE
  *
  * SEE ALSO:
- *    Con_GetAttribs()
+ *    Con_GetAttribs(), DPS_SetAttribs()
  ******************************************************************************/
 void Con_SetAttribs(uint16_t Attribs)
 {

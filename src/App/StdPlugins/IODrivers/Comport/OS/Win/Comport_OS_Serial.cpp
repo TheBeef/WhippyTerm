@@ -63,6 +63,9 @@ struct OpenComportInfo
     volatile bool RequestThreadQuit;
     volatile bool ThreadHasQuit;
     volatile bool Opened;
+    struct Comport_ConAuxWidgets *AuxWidgets;
+    bool RTSSet;
+    bool DTRSet;
 };
 
 /*** FUNCTION PROTOTYPES      ***/
@@ -370,6 +373,11 @@ PG_BOOL Comport_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
         return false;
     }
 
+    ComInfo->RTSSet=true;
+    ComInfo->DTRSet=true;
+    EscapeCommFunction(ComInfo->hComm,SETRTS);
+    EscapeCommFunction(ComInfo->hComm,SETDTR);
+
     g_CP_IOSystem->DrvDataEvent(ComInfo->DriverIO,e_DataEventCode_Connected);
 
     ComInfo->Opened=true;
@@ -578,6 +586,114 @@ int Comport_Write(t_DriverIOHandleType *DriverIO,const uint8_t *Data,int Bytes)
 
 /*******************************************************************************
  * NAME:
+ *    ConnectionAuxCtrlWidgets_AllocWidgets
+ *
+ * SYNOPSIS:
+ *    t_ConnectionWidgetsType *ConnectionAuxCtrlWidgets_AllocWidgets(
+ *          t_DriverIOHandleType *DriverIO,t_WidgetSysHandle *WidgetHandle);
+ *
+ * PARAMETERS:
+ *    DriverIO [I] -- The handle to this connection
+ *    WidgetHandle [I] -- The handle to send to the widgets
+ *
+ * FUNCTION:
+ *    This function adds aux control widgets to the aux control tab in the
+ *    main window.  The aux controls are for extra controls that do things /
+ *    display things going on with the driver.  For example there are things
+ *    like the status of the CTS line and to set the RTS line.
+ *
+ *    The device driver needs to keep handles to the widgets added because it
+ *    needs to free them when ConnectionAuxCtrlWidgets_FreeWidgets() called.
+ *
+ * RETURNS:
+ *    The private options data that you want to use.  This is a private
+ *    structure that you allocate and then cast to
+ *    (t_ConnectionAuxCtrlWidgetsType *) when you return.
+ *
+ * NOTES:
+ *    These widgets can only be accessed in the main thread.  They are not
+ *    thread safe.
+ *
+ * SEE ALSO:
+ *    ConnectionAuxCtrlWidgets_FreeWidgets()
+ ******************************************************************************/
+t_ConnectionWidgetsType *Comport_ConnectionAuxCtrlWidgets_AllocWidgets(t_DriverIOHandleType *DriverIO,t_WidgetSysHandle *WidgetHandle)
+{
+    struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    ComInfo->AuxWidgets=Comport_AllocAuxWidgets(DriverIO,WidgetHandle);
+
+    return (t_ConnectionWidgetsType *)ComInfo->AuxWidgets;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    ConnectionAuxCtrlWidgets_FreeWidgets
+ *
+ * SYNOPSIS:
+ *    void ConnectionAuxCtrlWidgets_FreeWidgets(t_DriverIOHandleType *DriverIO,
+ *          t_WidgetSysHandle *WidgetHandle,
+ *          t_ConnectionWidgetsType *ConAuxCtrls);
+ *
+ * PARAMETERS:
+ *    DriverIO [I] -- The handle to this connection
+ *    WidgetHandle [I] -- The handle to send to the widgets
+ *    ConAuxCtrls [I] -- The aux controls data that was allocated with
+ *          ConnectionAuxCtrlWidgets_AllocWidgets().
+ *
+ * FUNCTION:
+ *    Frees the widgets added with ConnectionAuxCtrlWidgets_AllocWidgets()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    ConnectionAuxCtrlWidgets_AllocWidgets()
+ ******************************************************************************/
+void Comport_ConnectionAuxCtrlWidgets_FreeWidgets(t_DriverIOHandleType *DriverIO,t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConAuxCtrls)
+{
+    struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    Comport_FreeAuxWidgets(WidgetHandle,(struct Comport_ConAuxWidgets *)ConAuxCtrls);
+    ComInfo->AuxWidgets=NULL;
+}
+
+void Comport_UpdateDTR(t_DriverIOHandleType *DriverIO,bool DTR)
+{
+    struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    if(ComInfo->hComm==INVALID_HANDLE_VALUE)
+        return;
+
+    EscapeCommFunction(ComInfo->hComm,DTR?SETDTR:CLRDTR);
+    ComInfo->DTRSet=DTR;
+}
+
+void Comport_UpdateRTS(t_DriverIOHandleType *DriverIO,bool RTS)
+{
+    struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    if(ComInfo->hComm==INVALID_HANDLE_VALUE)
+        return;
+
+    EscapeCommFunction(ComInfo->hComm,RTS?SETRTS:CLRRTS);
+    ComInfo->RTSSet=RTS;
+}
+
+void Comport_SendBreak(t_DriverIOHandleType *DriverIO)
+{
+    struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    if(ComInfo->hComm==INVALID_HANDLE_VALUE)
+        return;
+
+    SetCommBreak(ComInfo->hComm);
+    Sleep(100);
+    ClearCommBreak(ComInfo->hComm);
+}
+
+/*******************************************************************************
+ * NAME:
  *    Comport_OS_ConfigPort
  *
  * SYNOPSIS:
@@ -707,6 +823,10 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
 
         if(!SetCommState(ComInfo->hComm,&dcb))
             return false;
+
+        /* Restore RTS and DTR lines */
+        EscapeCommFunction(ComInfo->hComm,ComInfo->RTSSet?SETRTS:CLRRTS);
+        EscapeCommFunction(ComInfo->hComm,ComInfo->DTRSet?SETDTR:CLRDTR);
 
         GetCommTimeouts(ComInfo->hComm,&timeouts);
 

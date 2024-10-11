@@ -202,6 +202,11 @@ win32 {
     ../src/App/StdPlugins/IODrivers/TCPServer/src/OS/Win/TCPServer_OS_Socket.cpp \
     ../src/App/StdPlugins/IODrivers/UDPClient/src/OS/Win/UDPClient_OS_Socket.cpp \
     ../src/App/StdPlugins/IODrivers/UDPServer/src/OS/Win/UDPServer_OS_Socket.cpp \
+
+    CONFIG(debug, debug|release){
+        SOURCES += \
+            ../ExternPlugins/IODrivers/TestLoopback/src/LB2_Main.cpp \
+    }
 }
 
 unix:!macx {

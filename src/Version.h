@@ -99,7 +99,7 @@
 #define WHIPPYTERM_NAME     "Whippy Term"
 
 #define WHIPPYTERM_VERSION_MAJOR       0
-#define WHIPPYTERM_VERSION_MINOR       12
+#define WHIPPYTERM_VERSION_MINOR       13
 #define WHIPPYTERM_VERSION_REV         0
 #define WHIPPYTERM_VERSION_PATCH       0
 

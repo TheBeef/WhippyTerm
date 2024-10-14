@@ -66,6 +66,10 @@ struct OpenComportInfo
     struct Comport_ConAuxWidgets *AuxWidgets;
     bool RTSSet;
     bool DTRSet;
+    DWORD LastModemBits;
+    volatile DWORD ModemBits;
+    volatile DWORD CommErrors;
+    DWORD LastCommErrors;
 };
 
 /*** FUNCTION PROTOTYPES      ***/
@@ -266,6 +270,11 @@ t_DriverIOHandleType *Comport_AllocateHandle(const char *DeviceUniqueID,
         NewComInfo->InBufferSize=INBUFFER_GROW_SIZE;
         NewComInfo->InBufferHead=0;
         NewComInfo->InBufferTail=0;
+        NewComInfo->LastModemBits=0;
+        NewComInfo->ModemBits=0;
+        NewComInfo->AuxWidgets=NULL;
+        NewComInfo->CommErrors=0;
+        NewComInfo->LastCommErrors=0;
 
         NewComInfo->ThreadMutex=CreateMutex(NULL,FALSE,NULL);
         if(NewComInfo->ThreadMutex==NULL)
@@ -372,6 +381,8 @@ PG_BOOL Comport_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
         CloseHandle(ComInfo->hComm);
         return false;
     }
+
+//    SetCommMask(ComInfo->hComm,EV_BREAK|EV_ERR|EV_RING|EV_RLSD);
 
     ComInfo->RTSSet=true;
     ComInfo->DTRSet=true;
@@ -486,6 +497,8 @@ int Comport_Read(t_DriverIOHandleType *DriverIO,uint8_t *Data,int Bytes)
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
     int ReadBytes;
     bool HaveMutex;
+    DWORD TmpModemBits;
+    DWORD TmpErrorBits;
 
     HaveMutex=false;
     try
@@ -494,12 +507,53 @@ int Comport_Read(t_DriverIOHandleType *DriverIO,uint8_t *Data,int Bytes)
         WaitForSingleObject(ComInfo->ThreadMutex,INFINITE);
         HaveMutex=true;
 
+        if(ComInfo->ModemBits!=ComInfo->LastModemBits)
+        {
+            /* Update the indicators */
+            TmpModemBits=ComInfo->ModemBits;
+            Comport_NotifyOfModemBitsChange(ComInfo->AuxWidgets,
+                    TmpModemBits&MS_RLSD_ON,TmpModemBits&MS_RING_ON,
+                    TmpModemBits&MS_DSR_ON,TmpModemBits&MS_CTS_ON);
+            ComInfo->LastModemBits=ComInfo->ModemBits;
+        }
+
+        if(ComInfo->CommErrors!=ComInfo->LastCommErrors)
+        {
+            /* Update the any errors we support */
+            TmpErrorBits=ComInfo->CommErrors;
+            if(ComInfo->CommErrors&CE_BREAK &&
+                    !(ComInfo->LastCommErrors&CE_BREAK))
+            {
+                Comport_AddLogMsg(ComInfo->AuxWidgets,"BREAK");
+            }
+            if(ComInfo->CommErrors&CE_FRAME &&
+                    !(ComInfo->LastCommErrors&CE_FRAME))
+            {
+                Comport_AddLogMsg(ComInfo->AuxWidgets,"Framing error");
+            }
+            if(ComInfo->CommErrors&CE_RXPARITY &&
+                    !(ComInfo->LastCommErrors&CE_RXPARITY))
+            {
+                Comport_AddLogMsg(ComInfo->AuxWidgets,"Parity error");
+            }
+            if(ComInfo->CommErrors&CE_RXOVER &&
+                    !(ComInfo->LastCommErrors&CE_RXOVER))
+            {
+                Comport_AddLogMsg(ComInfo->AuxWidgets,"Overrun error");
+            }
+            if(ComInfo->CommErrors&CE_OVERRUN &&
+                    !(ComInfo->LastCommErrors&CE_OVERRUN))
+            {
+                Comport_AddLogMsg(ComInfo->AuxWidgets,"Overrun error");
+            }
+            ComInfo->LastCommErrors=ComInfo->CommErrors;
+        }
+
         ReadBytes=RETERROR_NOBYTES;
 
         if(ComInfo->InBufferTail!=ComInfo->InBufferHead)
         {
             /* We have bytes available */
-
             if(ComInfo->InBufferHead>=ComInfo->InBufferTail)
             {
                 ReadBytes=ComInfo->InBufferHead-ComInfo->InBufferTail;
@@ -858,6 +912,7 @@ static DWORD WINAPI Comport_OS_PollThread(LPVOID lpParameter)
     uint8_t *NewBuffer;
     unsigned int NextHead;
     unsigned int Bytes2Copy;
+    DWORD dwModemStatus;
 
     ComInfo=(struct OpenComportInfo *)lpParameter;
 
@@ -871,7 +926,25 @@ static DWORD WINAPI Comport_OS_PollThread(LPVOID lpParameter)
 
         /* Grab com port while we wait for incoming bytes */
         WaitForSingleObject(ComInfo->ThreadMutex,INFINITE);
+Errors=0xFFFF;
         Ret=ClearCommError(ComInfo->hComm,&Errors,&Stat);
+
+        /* Check the Line Status */
+        if(Ret)
+        {
+            if(Errors!=0)
+            {
+                Sleep(1);
+            }
+            if(Errors!=ComInfo->CommErrors)
+            {
+                ComInfo->CommErrors=Errors;
+
+                /* Data available */
+                g_CP_IOSystem->DrvDataEvent(ComInfo->DriverIO,
+                        e_DataEventCode_BytesAvailable);
+            }
+        }
 
         /* Read any bytes into our InBuffer */
         if(Ret && Stat.cbInQue>0)
@@ -948,6 +1021,19 @@ static DWORD WINAPI Comport_OS_PollThread(LPVOID lpParameter)
             ComInfo->InBufferHead+=BytesRead;
             if(ComInfo->InBufferHead>=ComInfo->InBufferSize)
                 ComInfo->InBufferHead=0;
+        }
+
+        /* Check the Line Status */
+        if(GetCommModemStatus(ComInfo->hComm,&dwModemStatus))
+        {
+            if(dwModemStatus!=ComInfo->ModemBits)
+            {
+                ComInfo->ModemBits=dwModemStatus;
+
+                /* Data available */
+                g_CP_IOSystem->DrvDataEvent(ComInfo->DriverIO,
+                        e_DataEventCode_BytesAvailable);
+            }
         }
 
         ReleaseMutex(ComInfo->ThreadMutex);

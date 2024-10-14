@@ -382,8 +382,6 @@ PG_BOOL Comport_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
         return false;
     }
 
-//    SetCommMask(ComInfo->hComm,EV_BREAK|EV_ERR|EV_RING|EV_RLSD);
-
     ComInfo->RTSSet=true;
     ComInfo->DTRSet=true;
     EscapeCommFunction(ComInfo->hComm,SETRTS);
@@ -926,16 +924,11 @@ static DWORD WINAPI Comport_OS_PollThread(LPVOID lpParameter)
 
         /* Grab com port while we wait for incoming bytes */
         WaitForSingleObject(ComInfo->ThreadMutex,INFINITE);
-Errors=0xFFFF;
         Ret=ClearCommError(ComInfo->hComm,&Errors,&Stat);
 
         /* Check the Line Status */
         if(Ret)
         {
-            if(Errors!=0)
-            {
-                Sleep(1);
-            }
             if(Errors!=ComInfo->CommErrors)
             {
                 ComInfo->CommErrors=Errors;

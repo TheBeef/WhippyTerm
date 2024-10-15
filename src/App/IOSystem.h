@@ -123,4 +123,6 @@ bool IOS_GetDeviceURI(t_IOSystemHandle *Handle,std::string &URI);
 bool IOS_UpdateOptionsFromURI(const char *URI,t_KVList &Options);
 e_IOSysIOErrorType IOS_TransmitQueuedData(t_IOSystemHandle *Handle);
 
+int IOS_Ask(const char *Message,int Type);
+
 #endif

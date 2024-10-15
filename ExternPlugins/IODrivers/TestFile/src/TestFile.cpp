@@ -101,7 +101,7 @@ static const struct IODriverDetectedInfo g_TestFile_DeviceInfo=
  *    SysAPI [I] -- The main API to WhippyTerm
  *    Version [I] -- What version of WhippyTerm is running.  This is used
  *                   to make sure we are compatible.  This is in the
- *                   Major<<24 | Minor<<16 | Patch<<8 | Letter format
+ *                   Major<<24 | Minor<<16 | Rev<<8 | Patch format
  *
  * FUNCTION:
  *    This function registers this plugin with the system.
@@ -131,6 +131,13 @@ extern "C"
         m_TestFile_SysAPI=SysAPI;
         m_TestFile_IOSAPI=SysAPI->GetAPI_IO();
         m_TestFile_UIAPI=m_TestFile_IOSAPI->GetAPI_UI();
+
+        /* If we are have the correct experimental API */
+        if(m_TestFile_SysAPI->GetExperimentalID()>0 &&
+                m_TestFile_SysAPI->GetExperimentalID()<1)
+        {
+            return 0xFFFFFFFF;
+        }
 
         m_TestFile_IOSAPI->RegisterDriver("TestFile","FILE",
                 &g_TestFilePluginAPI,sizeof(g_TestFilePluginAPI));

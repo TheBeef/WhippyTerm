@@ -30,6 +30,7 @@
 
 /*** HEADER FILES TO INCLUDE  ***/
 #include "App/Dialogs/Dialog_About.h"
+#include "App/MainApp.h"
 #include "UI/UIAbout.h"
 #include "Version.h"
 #include <stdio.h>
@@ -70,7 +71,7 @@ void RunAboutDialog(void)
     if(!UIAlloc_About())
         return;
 
-    UISetAboutName(WHIPPYTERM_NAME " " VER_STR(WHIPPYTERM_VERSION_MAJOR) "." VER_STR(WHIPPYTERM_VERSION_MINOR));
+    UISetAboutName(WHIPPYTERM_TITLE " " VER_STR(WHIPPYTERM_VERSION_MAJOR) "." VER_STR(WHIPPYTERM_VERSION_MINOR));
 
 /* DEBUG PAUL: At some point:
     * Fix up this program is text

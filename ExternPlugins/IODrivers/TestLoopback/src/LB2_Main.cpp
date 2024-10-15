@@ -156,7 +156,7 @@ struct IODriverInfo m_LB2Info=
  *    SysAPI [I] -- The main API to WhippyTerm
  *    Version [I] -- What version of WhippyTerm is running.  This is used
  *                   to make sure we are compatible.  This is in the
- *                   Major<<24 | Minor<<16 | Patch<<8 | Letter format
+ *                   Major<<24 | Minor<<16 | Rev<<8 | Patch format
  *
  * FUNCTION:
  *    This function registers this plugin with the system.
@@ -186,6 +186,13 @@ extern "C"
         m_LB2_SysAPI=SysAPI;
         m_LB2_IOSAPI=SysAPI->GetAPI_IO();
         m_LB2_UIAPI=m_LB2_IOSAPI->GetAPI_UI();
+
+        /* If we are have the correct experimental API */
+        if(m_LB2_SysAPI->GetExperimentalID()>0 &&
+                m_LB2_SysAPI->GetExperimentalID()<1)
+        {
+            return 0xFFFFFFFF;
+        }
 
         m_LB2_IOSAPI->RegisterDriver("TestLB",LB2_URI_PREFIX,
                 &g_LB2PluginAPI,sizeof(g_LB2PluginAPI));
@@ -756,12 +763,13 @@ void LB2_ConnectionAuxCtrlWidgets_FreeWidgets(t_DriverIOHandleType *DriverIO,t_W
 
 void TestColumnView_EventCB(const struct PICVEvent *Event,void *UserData)
 {
-    struct LB2_ConAuxWidgets *ConAuxWidgets=(struct LB2_ConAuxWidgets *)UserData;
+//    struct LB2_ConAuxWidgets *ConAuxWidgets=(struct LB2_ConAuxWidgets *)UserData;
 
     switch(Event->EventType)
     {
         case e_PIECV_IndexChanged:
         break;
+        case e_PIECVMAX:
         default:
         break;
     }
@@ -769,12 +777,13 @@ void TestColumnView_EventCB(const struct PICVEvent *Event,void *UserData)
 
 void TestButton_EventCB(const struct PIButtonEvent *Event,void *UserData)
 {
-    struct LB2_ConAuxWidgets *ConAuxWidgets=(struct LB2_ConAuxWidgets *)UserData;
+//    struct LB2_ConAuxWidgets *ConAuxWidgets=(struct LB2_ConAuxWidgets *)UserData;
 
     switch(Event->EventType)
     {
         case e_PIEButton_Press:
         break;
+        case e_PIEButtonMAX:
         default:
         break;
     }

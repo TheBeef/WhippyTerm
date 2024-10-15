@@ -96,7 +96,18 @@
 /***  HEADER FILES TO INCLUDE          ***/
 
 /***  DEFINES                          ***/
-#define WHIPPYTERM_NAME     "Whippy Term"
+
+/* This is used to mark the build as an official release.  If this is 0 then we
+   are being an experimental version that is not ment for general availablility.
+   This are normally DEBUG builds with debug symbols turned on.
+   When a build is NOT an official release then:
+    * The build is clearly marked as an unofficial build (test build)
+    * The plugin API is not fixed and can break backward compatibility (back
+      to the last official release)
+    * The version number does not have any meaning and some other mechanism
+      (like the build date and time) is used to know what is in this build.
+*/
+#define OFFICIAL_RELEASE    0               // 1=official, 0=developer build (don't forget to update ExperimentalID.h on release)
 
 #define WHIPPYTERM_VERSION_MAJOR       0
 #define WHIPPYTERM_VERSION_MINOR       13

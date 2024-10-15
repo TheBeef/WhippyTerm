@@ -16,8 +16,16 @@
 #define __MAINAPP_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
+#include "Version.h"
 
 /***  DEFINES                          ***/
+#define WHIPPYTERM_NAME                 "Whippy Term"
+
+#if OFFICIAL_RELEASE==1
+ #define WHIPPYTERM_TITLE               WHIPPYTERM_NAME
+#else
+ #define WHIPPYTERM_TITLE               WHIPPYTERM_NAME " (Developer build)"
+#endif
 
 /***  MACROS                           ***/
 

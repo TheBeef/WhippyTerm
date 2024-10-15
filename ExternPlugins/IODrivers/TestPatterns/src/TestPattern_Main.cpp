@@ -321,7 +321,7 @@ struct IODriverInfo m_TestPatternInfo=
  *    SysAPI [I] -- The main API to WhippyTerm
  *    Version [I] -- What version of WhippyTerm is running.  This is used
  *                   to make sure we are compatible.  This is in the
- *                   Major<<24 | Minor<<16 | Patch<<8 | Letter format
+ *                   Major<<24 | Minor<<16 | Rev<<8 | Patch format
  *
  * FUNCTION:
  *    This function registers this plugin with the system.
@@ -351,6 +351,13 @@ extern "C"
         m_TP_SysAPI=SysAPI;
         m_TP_IOSAPI=SysAPI->GetAPI_IO();
         m_TP_UIAPI=m_TP_IOSAPI->GetAPI_UI();
+
+        /* If we are have the correct experimental API */
+        if(m_TP_SysAPI->GetExperimentalID()>0 &&
+                m_TP_SysAPI->GetExperimentalID()<1)
+        {
+            return 0xFFFFFFFF;
+        }
 
         m_TP_IOSAPI->RegisterDriver("TestFilePattern",TP_URI_PREFIX,
                 &g_TestPatternPluginAPI,sizeof(g_TestPatternPluginAPI));

@@ -33,6 +33,7 @@
 #include "App/Dialogs/Dialog_InstallPlugin.h"
 #include "App/PluginSupport/ExternPluginsSystem.h"
 #include "App/PluginSupport/SystemSupport.h"
+#include "App/MainApp.h"
 #include "App/IOSystem.h"
 #include "App/MainWindow.h"
 #include "BuildOptions/BuildOptions.h"
@@ -349,8 +350,8 @@ bool LoadPlugin(const char *File,const char *Name)
     unsigned int ReqVer;
     uint8_t Maj;
     uint8_t Min;
+    uint8_t Rev;
     uint8_t Patch;
-    uint8_t Letter;
     const char *Msg;
 
     Plugin=LoadDLL(File);
@@ -382,17 +383,24 @@ bool LoadPlugin(const char *File,const char *Name)
     if(ReqVer!=0)
     {
         /* Tell user what version of WhippyTerm is needed */
-        Maj=(ReqVer>>24)&0xFF;
-        Min=(ReqVer>>16)&0xFF;
-        Patch=(ReqVer>>8)&0xFF;
-        Letter=ReqVer&0xFF;
-        if(Patch==0 && Letter==0)
-            Msg="The plugin %s requires version %d.%d of WhippyTerm";
-        else if(Letter==0)
-            Msg="The plugin %s requires version %d.%d.%d of WhippyTerm";
+        if(ReqVer==0xFFFFFFFF)
+        {
+            Msg="The plugin %s used the experimental plugin API and is not supported by this version of " WHIPPYTERM_NAME;
+        }
         else
-            Msg="The plugin %s requires version %d.%d.%d%c of WhippyTerm";
-        snprintf(buff,sizeof(buff),Msg,Name,Maj,Min,Patch,Letter+'A'-1);
+        {
+            Maj=(ReqVer>>24)&0xFF;
+            Min=(ReqVer>>16)&0xFF;
+            Rev=(ReqVer>>8)&0xFF;
+            Patch=ReqVer&0xFF;
+            if(Rev==0 && Patch==0)
+                Msg="The plugin %s requires version %d.%d of " WHIPPYTERM_NAME;
+            else if(Patch==0)
+                Msg="The plugin %s requires version %d.%d.%d of " WHIPPYTERM_NAME;
+            else
+                Msg="The plugin %s requires version %d.%d.%d%c of " WHIPPYTERM_NAME;
+        }
+        snprintf(buff,sizeof(buff),Msg,Name,Maj,Min,Rev,Patch+'A'-1);
         UIAsk("Error",buff,e_AskBox_Error);
         return false;
     }
@@ -724,8 +732,8 @@ bool InstallNewExternPlugin(const char *Filename)
     char Verbuff[100];
     uint8_t Maj;
     uint8_t Min;
+    uint8_t Rev;
     uint8_t Patch;
-    uint8_t Letter;
 
     if(!LoadInfoAboutExternPlugin(Filename,Info,false))
         return false;
@@ -734,14 +742,14 @@ bool InstallNewExternPlugin(const char *Filename)
     {
         Maj=(Info.APIVersion>>24)&0xFF;
         Min=(Info.APIVersion>>16)&0xFF;
-        Patch=(Info.APIVersion>>8)&0xFF;
-        Letter=(Info.APIVersion>>0)&0xFF;
-        if(Patch==0 && Letter==0)
+        Rev=(Info.APIVersion>>8)&0xFF;
+        Patch=(Info.APIVersion>>0)&0xFF;
+        if(Rev==0 && Patch==0)
             sprintf(Verbuff,"%d.%d",Maj,Min);
-        else if(Letter==0)
-            sprintf(Verbuff,"%d.%d.%d",Maj,Min,Patch);
+        else if(Patch==0)
+            sprintf(Verbuff,"%d.%d.%d",Maj,Min,Rev);
         else
-            sprintf(Verbuff,",%d.%d.%d%c",Maj,Min,Patch,Letter+'A'-1);
+            sprintf(Verbuff,",%d.%d.%d%c",Maj,Min,Rev,Patch+'A'-1);
 
         snprintf(buff,sizeof(buff),"Failed to install plugin.\n\n"
                 "This plugin requires a newer version of WhippyTerm.\n\n"

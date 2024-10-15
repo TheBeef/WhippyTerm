@@ -36,7 +36,9 @@
  ******************************************************************************/
 
 /*** HEADER FILES TO INCLUDE  ***/
+#include "App/MainApp.h"
 #include "App/PluginSupport/PluginUISupport.h"
+#include "UI/UIAsk.h"
 #include "UI/UIPlugins.h"
 #include "UI/UIControl.h"
 #include <string>
@@ -113,6 +115,8 @@ struct PI_UIAPI m_PIUSDefault_UIAPI=
     PIUSDefault_AddIndicator,
     PIUSDefault_FreeIndicator,
     PIUSDefault_SetIndicator,
+
+    PIUSDefault_Ask,
 };
 
 /*******************************************************************************
@@ -521,3 +525,83 @@ void PIUSDefault_SetIndicator(t_WidgetSysHandle *WidgetHandle,
     UIPI_SetIndicator(UICtrl,On);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    IOS_Ask
+ *
+ * SYNOPSIS:
+ *    static int IOS_Ask(const char *Message,int Type);
+ *
+ * PARAMETERS:
+ *    Message [I] -- The message to show to the user
+ *    Type [I] -- The type of the message box.  Supported values:
+ *                  PIUI_ASK_OK -- Just an OK button
+ *                  PIUI_ASK_OKCANCEL -- An Ok and cancel buttons
+ *                  PIUI_ASK_YESNO -- Yes and no buttons
+ *                  PIUI_ASK_RETRYCANCEL -- Retry and cancel buttons
+ *                  PIUI_ASK_IGNORECANCEL -- Ignore and cancel buttons
+ *
+ * FUNCTION:
+ *    This function prompts the user with a message box.
+ *
+ * RETURNS:
+ *    -1 -- There was an error
+ *    PIUI_ASK_OK_BTTN -- User pressed ok
+ *    PIUI_ASK_CANCEL_BTTN -- User pressed cancel
+ *    PIUI_ASK_YES_BTTN -- User pressed yes
+ *    PIUI_ASK_NO_BTTN -- User pressed no
+ *    PIUI_ASK_RETRY_BTTN -- User pressed retry
+ *    PIUI_ASK_IGNORE_BTTN -- User pressed ignore
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+int PIUSDefault_Ask(const char *Message,int Type)
+{
+    e_AskBttnsType Buttons;
+
+    switch(Type)
+    {
+        case PIUI_ASK_OK:
+            Buttons=e_AskBttns_Ok;
+        break;
+        case PIUI_ASK_OKCANCEL:
+            Buttons=e_AskBttns_OkCancel;
+        break;
+        case PIUI_ASK_YESNO:
+            Buttons=e_AskBttns_YesNo;
+        break;
+        case PIUI_ASK_RETRYCANCEL:
+            Buttons=e_AskBttns_RetryCancel;
+        break;
+        case PIUI_ASK_IGNORECANCEL:
+            Buttons=e_AskBttns_IgnoreCancel;
+        break;
+        default:
+            return -1;
+    }
+
+    switch(UIAsk(WHIPPYTERM_NAME,Message,e_AskBox_Info,Buttons))
+    {
+        case e_AskRet_Cancel:
+            return PIUI_ASK_CANCEL_BTTN;
+        case e_AskRet_Ok:
+            return PIUI_ASK_OK_BTTN;
+        case e_AskRet_Retry:
+            return PIUI_ASK_RETRY_BTTN;
+        case e_AskRet_Ignore:
+            return PIUI_ASK_IGNORE_BTTN;
+        case e_AskRet_Yes:
+            return PIUI_ASK_YES_BTTN;
+        case e_AskRet_No:
+            return PIUI_ASK_NO_BTTN;
+        case e_AskRet_YesAll:
+            return PIUI_ASK_YES_BTTN;
+        case e_AskRet_NoAll:
+            return e_AskRet_No;
+        break;
+        case e_AskRetMAX:
+        default:
+        return -1;
+    }
+}

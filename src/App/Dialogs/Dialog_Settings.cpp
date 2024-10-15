@@ -35,6 +35,7 @@
 #include "App/Settings.h"
 #include "App/Session.h"
 #include "App/IOSystem.h"
+#include "App/MainApp.h"
 #include "UI/UIAsk.h"
 #include "UI/UISettings.h"
 #include "UI/UIMainWindow.h"

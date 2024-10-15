@@ -154,7 +154,7 @@ static const struct IODriverDetectedInfo g_UDPS_DeviceInfo=
  *    SysAPI [I] -- The main API to WhippyTerm
  *    Version [I] -- What version of WhippyTerm is running.  This is used
  *                   to make sure we are compatible.  This is in the
- *                   Major<<24 | Minor<<16 | Patch<<8 | Letter format
+ *                   Major<<24 | Minor<<16 | Rev<<8 | Patch format
  *
  * FUNCTION:
  *    This function registers this plugin with the system.
@@ -184,6 +184,13 @@ extern "C"
         g_UDPS_System=SysAPI;
         g_UDPS_IOSystem=g_UDPS_System->GetAPI_IO();
         g_UDPS_UI=g_UDPS_IOSystem->GetAPI_UI();
+
+        /* If we are have the correct experimental API */
+        if(g_UDPS_System->GetExperimentalID()>0 &&
+                g_UDPS_System->GetExperimentalID()<1)
+        {
+            return 0xFFFFFFFF;
+        }
 
         g_UDPS_IOSystem->RegisterDriver("UDPServer",UDPSERVER_URI_PREFIX,
                 &g_UDPServerPluginAPI,sizeof(g_UDPServerPluginAPI));

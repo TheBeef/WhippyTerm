@@ -27,7 +27,9 @@
 #include "App/Util/CRCSystem.h"
 #include "App/Dialogs/Dialog_EditSendBuffer.h"
 #include "OS/System.h"
+#include "UI/UIAsk.h"
 #include "PluginSupport/ExternPluginsSystem.h"
+#include "Version.h"
 
 /* Temp external plugins */
 //#include "App/PluginSupport/SystemSupport.h"
@@ -75,6 +77,12 @@ bool AppMain(int argc,char *argv[])
     CmdCheck();
 
     InitOS();
+
+#if OFFICIAL_RELEASE!=1
+    UIAsk("This is a developer build.  The version number can not be trusted.\n\n"
+            "Look at build date in ABOUT to differentiate between builds.\n\n"
+            "Goto WhippyTerm.com for an official version.");
+#endif
 
     /* Startup code */
     InitSessionSystem();

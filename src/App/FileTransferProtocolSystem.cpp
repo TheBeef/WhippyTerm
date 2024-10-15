@@ -37,6 +37,7 @@
 /*** HEADER FILES TO INCLUDE  ***/
 #include "App/Connections.h"
 #include "App/FileTransferProtocolSystem.h"
+#include "App/MainApp.h"
 #include "App/PluginSupport/KeyValueSupport.h"
 #include "App/Settings.h"
 #include "App/PluginSupport/PluginUISupport.h"

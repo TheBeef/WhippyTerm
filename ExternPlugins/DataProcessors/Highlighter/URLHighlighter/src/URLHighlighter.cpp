@@ -92,7 +92,7 @@ static const struct DPS_API *m_DPS;
  *    SysAPI [I] -- The main API to WhippyTerm
  *    Version [I] -- What version of WhippyTerm is running.  This is used
  *                   to make sure we are compatible.  This is in the
- *                   Major<<24 | Minor<<16 | Patch<<8 | Letter format
+ *                   Major<<24 | Minor<<16 | Rev<<8 | Patch format
  *
  * FUNCTION:
  *    This function registers this plugin with the system.
@@ -122,6 +122,13 @@ extern "C"
         m_System=SysAPI;
         m_DPS=SysAPI->GetAPI_DataProcessors();
         m_UIAPI=m_DPS->GetAPI_UI();
+
+        /* If we are have the correct experimental API */
+        if(g_CP_System->GetExperimentalID()>0 &&
+                g_CP_System->GetExperimentalID()<1)
+        {
+            return 0xFFFFFFFF;
+        }
 
         m_DPS->RegisterDataProcessor("URLHighlighter",
                 &m_URLHighlighterCBs,sizeof(m_URLHighlighterCBs));

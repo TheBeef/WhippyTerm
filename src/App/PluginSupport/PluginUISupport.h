@@ -105,4 +105,6 @@ struct PI_Indicator *PIUSDefault_AddIndicator(t_WidgetSysHandle *WidgetHandle,co
 void PIUSDefault_FreeIndicator(t_WidgetSysHandle *WidgetHandle,struct PI_Indicator *UICtrl);
 void PIUSDefault_SetIndicator(t_WidgetSysHandle *WidgetHandle,t_PIUIIndicatorCtrl *UICtrl,bool On);
 
+int PIUSDefault_Ask(const char *Message,int Type);
+
 #endif

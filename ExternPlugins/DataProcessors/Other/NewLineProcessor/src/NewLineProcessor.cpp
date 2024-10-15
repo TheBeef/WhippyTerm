@@ -81,7 +81,7 @@ static const struct DPS_API *m_NLP_DPS;
  *    SysAPI [I] -- The main API to WhippyTerm
  *    Version [I] -- What version of WhippyTerm is running.  This is used
  *                   to make sure we are compatible.  This is in the
- *                   Major<<24 | Minor<<16 | Patch<<8 | Letter format
+ *                   Major<<24 | Minor<<16 | Rev<<8 | Patch format
  *
  * FUNCTION:
  *    This function registers this plugin with the system.
@@ -109,6 +109,13 @@ extern "C"
             return NEEDED_MIN_API_VERSION;
 
         m_NLP_DPS=SysAPI->GetAPI_DataProcessors();
+
+        /* If we are have the correct experimental API */
+        if(SysAPI->GetExperimentalID()>0 &&
+                SysAPI->GetExperimentalID()<1)
+        {
+            return 0xFFFFFFFF;
+        }
 
         m_NLP_DPS->RegisterDataProcessor("NewLineProcessor",
                 &m_NewLineProcessorCBs,sizeof(m_NewLineProcessorCBs));

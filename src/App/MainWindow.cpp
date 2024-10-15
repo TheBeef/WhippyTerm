@@ -315,7 +315,7 @@ TheMainWindow::TheMainWindow()
     UIMW_SetContainerFrameVisible(ContainerFrame,false);
     UIShowHideTabCtrl(MainTabs,false);
 
-    UIMW_SetWindowTitle(UIWin,WHIPPYTERM_NAME);
+    UIMW_SetWindowTitle(UIWin,WHIPPYTERM_TITLE);
     UIMW_SwitchTabControlCloseBttnPos(UIWin,g_Settings.CloseButtonOnTabs);
 
     ConnectionOptionsPanel.Setup(this,UIWin);
@@ -1157,7 +1157,7 @@ void TheMainWindow::AllTabsClosed(void)
 {
     SetURIText("");
     RemoveAllTabPanelControls();
-    UIMW_SetWindowTitle(UIWin,WHIPPYTERM_NAME);
+    UIMW_SetWindowTitle(UIWin,WHIPPYTERM_TITLE);
 
     ActiveCon=NULL;
     RethinkActiveConnectionUI();
@@ -2676,7 +2676,7 @@ void TheMainWindow::RethinkActiveTabControls(void)
     /* Change the windows title */
     ActiveCon->GetDisplayName(WinTitle);
     WinTitle+=" - ";
-    WinTitle+=WHIPPYTERM_NAME;
+    WinTitle+=WHIPPYTERM_TITLE;
     UIMW_SetWindowTitle(UIWin,WinTitle.c_str());
 
     /* Tell the panels the connection has changed */

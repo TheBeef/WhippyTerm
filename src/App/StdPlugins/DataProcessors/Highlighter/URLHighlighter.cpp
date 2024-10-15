@@ -106,6 +106,13 @@ void URLHighlighter_RegisterPlugin(const struct PI_SystemAPI *SysAPI)
     m_System=SysAPI;
     m_DPS=SysAPI->GetAPI_DataProcessors();
     m_UIAPI=m_DPS->GetAPI_UI();
+`
+    /* If we are have the correct experimental API */
+    if(m_System->GetExperimentalID()>0 &&
+            m_System->GetExperimentalID()<1)
+    {
+        return 0xFFFFFFFF;
+    }
 
     m_DPS->RegisterDataProcessor(&m_URLHighlighter_Info);
 }

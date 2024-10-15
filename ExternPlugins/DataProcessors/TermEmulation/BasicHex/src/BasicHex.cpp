@@ -29,6 +29,7 @@
 
 /*** DEFINES                  ***/
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      BASIC_HEX // The name to append on the RegisterPlugin() function for built in version
+#define NEEDED_MIN_API_VERSION                  0x000B0000
 
 /*** MACROS                   ***/
 
@@ -81,22 +82,26 @@ struct DataProcessorInfo m_BasicHexDecoder_Info=
  *    BASIC_HEX_RegisterPlugin
  *
  * SYNOPSIS:
- *    void BASIC_HEX_RegisterPlugin(const struct PI_SystemAPI *SysAPI);
+ *    unsigned int BASIC_HEX_RegisterPlugin(const struct PI_SystemAPI *SysAPI,
+ *          unsigned int Version);
  *
  * PARAMETERS:
- *    NONE
+ *    SysAPI [I] -- The main API to WhippyTerm
+ *    Version [I] -- What version of WhippyTerm is running.  This is used
+ *                   to make sure we are compatible.  This is in the
+ *                   Major<<24 | Minor<<16 | Rev<<8 | Patch
  *
  * FUNCTION:
  *    This function registers this plugin with the system.
  *
  * RETURNS:
- *    NONE
+ *    0 if we support this version of WhippyTerm, and the minimum version
+ *    we need if we are not.
  *
  * NOTES:
- *    This function name comes from PluginSDK/Plugin.h.  It will make it
- *    a built in plugin or an extern plugin depending on the build env.
- *    The name comes from 'REGISTER_PLUGIN_FUNCTION_PRIV_NAME' if it's
- *    build in, or is RegisterPlugin() if it's extern.
+ *    This function is normally is called from the RegisterPlugin() when
+ *    it is being used as a normal plugin.  As a std plugin it is called
+ *    from RegisterStdPlugins() instead.
  *
  * SEE ALSO:
  *    
@@ -105,14 +110,27 @@ struct DataProcessorInfo m_BasicHexDecoder_Info=
    plugin system */
 extern "C"
 {
-    void REGISTER_PLUGIN_FUNCTION(const struct PI_SystemAPI *SysAPI)
+    unsigned int REGISTER_PLUGIN_FUNCTION(const struct PI_SystemAPI *SysAPI,
+            unsigned int Version)
     {
+        if(Version<NEEDED_MIN_API_VERSION)
+            return NEEDED_MIN_API_VERSION;
+
         m_System=SysAPI;
         m_DPS=SysAPI->GetAPI_DataProcessors();
         m_UIAPI=m_DPS->GetAPI_UI();
 
+        /* If we are have the correct experimental API */
+        if(m_System->GetExperimentalID()>0 &&
+                m_System->GetExperimentalID()<1)
+        {
+            return 0xFFFFFFFF;
+        }
+
         m_DPS->RegisterDataProcessor("BasicHexDecoder",&m_BasicHexDecoderAPI,
                 sizeof(m_BasicHexDecoderAPI));
+
+        return 0;
     }
 }
 

@@ -32,6 +32,7 @@
 
 /*** HEADER FILES TO INCLUDE  ***/
 #include "App/IOSystem.h"
+#include "App/MainApp.h"
 #include "App/PluginSupport/PluginUISupport.h"
 #include "App/PluginSupport/SystemSupport.h"
 #include "App/PluginSupport/KeyValueSupport.h"
@@ -289,6 +290,8 @@ static struct PI_UIAPI IOS_UIAPI=
     IOS_AddIndicator,
     IOS_FreeIndicator,
     PIUSDefault_SetIndicator,
+
+    PIUSDefault_Ask,
 };
 
 bool m_NeverScanned4Connections;

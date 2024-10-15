@@ -36,6 +36,20 @@
 #include <stdint.h>
 
 /***  DEFINES                          ***/
+/* Ask Types */
+#define PIUI_ASK_OK             0x0001
+#define PIUI_ASK_OKCANCEL       0x0002
+#define PIUI_ASK_YESNO          0x0003
+#define PIUI_ASK_RETRYCANCEL    0x0004
+#define PIUI_ASK_IGNORECANCEL   0x0005
+
+/* Ask return values */
+#define PIUI_ASK_OK_BTTN        1
+#define PIUI_ASK_CANCEL_BTTN    0
+#define PIUI_ASK_YES_BTTN       1
+#define PIUI_ASK_NO_BTTN        0
+#define PIUI_ASK_RETRY_BTTN     1
+#define PIUI_ASK_IGNORE_BTTN    1
 
 /***  MACROS                           ***/
 
@@ -307,6 +321,9 @@ struct PI_UIAPI
     struct PI_Indicator *(*AddIndicator)(t_WidgetSysHandle *WidgetHandle,const char *Label);
     void (*FreeIndicator)(t_WidgetSysHandle *WidgetHandle,struct PI_Indicator *UICtrl);
     void (*SetIndicator)(t_WidgetSysHandle *WidgetHandle,t_PIUIIndicatorCtrl *UICtrl,bool On);
+
+    /* Ask */
+    int (*Ask)(const char *Message,int Type);
 };
 
 /***  CLASS DEFINITIONS                ***/

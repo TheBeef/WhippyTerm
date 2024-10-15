@@ -150,7 +150,7 @@ static const struct IODriverDetectedInfo g_TCPS_DeviceInfo=
  *    SysAPI [I] -- The main API to WhippyTerm
  *    Version [I] -- What version of WhippyTerm is running.  This is used
  *                   to make sure we are compatible.  This is in the
- *                   Major<<24 | Minor<<16 | Patch<<8 | Letter format
+ *                   Major<<24 | Minor<<16 | Rev<<8 | Patch format
  *
  * FUNCTION:
  *    This function registers this plugin with the system.
@@ -180,6 +180,13 @@ extern "C"
         g_TCPS_System=SysAPI;
         g_TCPS_IOSystem=g_TCPS_System->GetAPI_IO();
         g_TCPS_UI=g_TCPS_IOSystem->GetAPI_UI();
+
+        /* If we are have the correct experimental API */
+        if(g_TCPS_System->GetExperimentalID()>0 &&
+                g_TCPS_System->GetExperimentalID()<1)
+        {
+            return 0xFFFFFFFF;
+        }
 
         g_TCPS_IOSystem->RegisterDriver("TCPServer",TCPSERVER_URI_PREFIX,
                 &g_TCPServerPluginAPI,sizeof(g_TCPServerPluginAPI));

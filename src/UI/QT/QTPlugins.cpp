@@ -1090,7 +1090,7 @@ void PIQIndicator::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     QBrush brush;
-    int BarWidth;
+//    int BarWidth;
     int BarHeight;
     int Left;
     int Right;
@@ -1103,7 +1103,7 @@ void PIQIndicator::paintEvent(QPaintEvent *event)
 
     brush=painter.brush();
 
-    BarWidth=this->width()-1;
+//    BarWidth=this->width()-1;
     BarHeight=this->height()-1;
 
     Left=0;

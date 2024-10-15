@@ -57,6 +57,7 @@ struct PI_SystemAPI
     PG_BOOL (*KVAddItem)(t_PIKVList *Handle,const char *Key,const char *Value);
     const char *(*KVGetItem)(const t_PIKVList *Handle,const char *Key);
     void (*WriteData)(const uint8_t *Data,int Bytes);       // DEBUG PAUL: This feels wrong, should be moved to DPS_API????
+    uint32_t (*GetExperimentalID)(void);
 //    PG_BOOL (*LoadKVList)(int StorageArea,const char *PluginName,const char *DataName,t_PIKVList *Handle);
 //    PG_BOOL (*SaveKVList)(int StorageArea,const char *PluginName,const char *DataName,const t_PIKVList *Handle);
 };

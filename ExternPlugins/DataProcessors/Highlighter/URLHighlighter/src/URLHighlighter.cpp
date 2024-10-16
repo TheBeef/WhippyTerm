@@ -124,8 +124,8 @@ extern "C"
         m_UIAPI=m_DPS->GetAPI_UI();
 
         /* If we are have the correct experimental API */
-        if(g_CP_System->GetExperimentalID()>0 &&
-                g_CP_System->GetExperimentalID()<1)
+        if(m_System->GetExperimentalID()>0 &&
+                m_System->GetExperimentalID()<1)
         {
             return 0xFFFFFFFF;
         }

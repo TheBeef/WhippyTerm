@@ -5636,6 +5636,10 @@ void Connection::SetBridgeFrom(class Connection *From)
  ******************************************************************************/
 void Connection::BridgeConnectionFreeing(void)
 {
+    if(BridgedTo!=NULL)
+    {
+        BridgedTo->BridgeConnection(NULL);
+    }
     BridgedTo=NULL;
     BridgedFrom=NULL;
     RethinkLockOut();

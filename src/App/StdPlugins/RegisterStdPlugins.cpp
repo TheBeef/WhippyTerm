@@ -105,7 +105,11 @@ extern "C"
 void RegisterStdPlugins(void)
 {
     /* IO Drivers */
-    Comport_RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+    RegisterStdPlugin(Comport_RegisterPlugin,"Comport");
+    RegisterStdPlugin(TCPClient_RegisterPlugin,"TCPClient");
+    RegisterStdPlugin(TCPServer_RegisterPlugin,"TCPServer");
+    RegisterStdPlugin(UDPClient_RegisterPlugin,"UDPClient");
+    RegisterStdPlugin(UDPServer_RegisterPlugin,"UDPServer");
 
     /* Term Emulation */
     RegisterStdPlugin(ANSIX3_64_RegisterPlugin,"ANSIX3_64");
@@ -120,12 +124,6 @@ void RegisterStdPlugins(void)
     /* File Transfer Protocols */
     RegisterStdPlugin(RAWFileUpload_RegisterPlugin,"RAWFileUpload");
     RegisterStdPlugin(XModemUpload_RegisterPlugin,"XModemUpload");
-
-    RegisterStdPlugin(TCPClient_RegisterPlugin,"TCPClient");
-    RegisterStdPlugin(TCPServer_RegisterPlugin,"TCPServer");
-
-    RegisterStdPlugin(UDPClient_RegisterPlugin,"UDPClient");
-    RegisterStdPlugin(UDPServer_RegisterPlugin,"UDPServer");
 
 #ifdef ALL_PLUGINS
     /* For testing we do all plugins */

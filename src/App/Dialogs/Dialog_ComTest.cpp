@@ -436,6 +436,9 @@ static void DCT_FillInConnectionPullDown(t_UIComboBoxCtrl *ConPullDown,
 
     UIClearComboBox(ConPullDown);
 
+    if(m_DCT_Connections==NULL)
+        return;
+
     NewSelection=NULL;
     for(Entry=m_DCT_Connections;Entry!=NULL;Entry=Entry->Next)
     {

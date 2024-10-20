@@ -2129,39 +2129,42 @@ void DisplayText::AdjustCursorAfterWriteChar(uint8_t *Chr)
     NewCursorPos=CursorX+1;
     NewCursorY=CursorY;
 
-    /* See if we will move past the end of the line */
-    if(NewCursorPos>=ScreenWidthChars)
-    {
-        /* Ok, we need to do a soft wrap here */
-        ActiveLine->EOL=e_DTEOL_Soft;
-
-        NewCursorPos=0;
-
-        /* Redraw any changes to the current line before we move on */
-        RedrawActiveLine();
-
-        MoveToNextLine(NewCursorY);
-    }
-
-    /* Move the Px by the width of the char we just added */
     if(TextDisplayCtrl!=NULL)
     {
-        DisplayFrag.FragType=e_TextCanvasFrag_String;
-        DisplayFrag.Text=(const char *)Chr;
-        if(InsertFrag!=ActiveLine->Frags.end())
+        /* See if we will move past the end of the line */
+        if(NewCursorPos>=ScreenWidthChars)
         {
-            DisplayFrag.Styling=InsertFrag->Styling;
-            DisplayFrag.Value=InsertFrag->Value;
-            DisplayFrag.Data=InsertFrag->Data;
+            /* Ok, we need to do a soft wrap here */
+            ActiveLine->EOL=e_DTEOL_Soft;
+
+            NewCursorPos=0;
+
+            /* Redraw any changes to the current line before we move on */
+            RedrawActiveLine();
+
+            MoveToNextLine(NewCursorY);
+            CursorXPx=0;
         }
         else
         {
-            DisplayFrag.Styling=CurrentStyle;
-            DisplayFrag.Value=0;
-            DisplayFrag.Data=NULL;
-        }
+            /* Move the Px by the width of the char we just added */
+            DisplayFrag.FragType=e_TextCanvasFrag_String;
+            DisplayFrag.Text=(const char *)Chr;
+            if(InsertFrag!=ActiveLine->Frags.end())
+            {
+                DisplayFrag.Styling=InsertFrag->Styling;
+                DisplayFrag.Value=InsertFrag->Value;
+                DisplayFrag.Data=InsertFrag->Data;
+            }
+            else
+            {
+                DisplayFrag.Styling=CurrentStyle;
+                DisplayFrag.Value=0;
+                DisplayFrag.Data=NULL;
+            }
 
-        CursorXPx+=UITC_GetFragWidth(TextDisplayCtrl,&DisplayFrag);
+            CursorXPx+=UITC_GetFragWidth(TextDisplayCtrl,&DisplayFrag);
+        }
     }
 
     MoveCursor(NewCursorPos,NewCursorY,true);   // We have already adjusted CursorXPx

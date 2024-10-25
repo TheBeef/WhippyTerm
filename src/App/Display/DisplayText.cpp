@@ -2909,9 +2909,17 @@ void DisplayText::ScrollScreenByXLines(int Lines2Scroll)
             while(LinesCount>(int)(Settings->ScrollBufferLines+
                     ScreenHeightChars))
             {
-                /* We are shifting all the lines so we need to move 'TopLine'
-                   down one */
-                TopLine++;
+                if(TopLine==Lines.begin())
+                {
+                    /* We are about to remove this line so we need to move
+                       top line as well */
+                    TopLine++;
+                }
+
+                /* We are removing the oldest line so we need to move TopLineY
+                   up */
+                TopLineY--;
+
                 Lines.pop_front();
                 LinesCount--;
             }
@@ -3058,22 +3066,19 @@ void DisplayText::MoveToNextLine(int &NewCursorY)
 
     NewCursorY++;
 
-    if(LinesCount<(int)(Settings->ScrollBufferLines+ScreenHeightChars))
-    {
-        if(LinesCount<ScreenHeightChars)
-            CursorGlobalY=CursorY;
-        else
-            CursorGlobalY=LinesCount-ScreenHeightChars+CursorY;
-        BottomLineY=TopLineY+WindowHeightChars-1;
+    if(LinesCount<ScreenHeightChars)
+        CursorGlobalY=CursorY;
+    else
+        CursorGlobalY=LinesCount-ScreenHeightChars+CursorY;
+    BottomLineY=TopLineY+WindowHeightChars-1;
 
-        if(CursorGlobalY==BottomLineY)
+    if(CursorGlobalY==BottomLineY)
+    {
+        if(TopLineY==LinesCount-WindowHeightChars)
         {
-            if(TopLineY==LinesCount-WindowHeightChars)
-            {
-                /* Move 'TopLine' down 1 so it stays at the top */
-                TopLine++;
-                TopLineY++;
-            }
+            /* Move 'TopLine' down 1 so it stays at the top */
+            TopLine++;
+            TopLineY++;
         }
     }
 

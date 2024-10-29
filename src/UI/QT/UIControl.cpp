@@ -145,6 +145,37 @@ void UISetMenuKeySeq(e_UIMenuCtrl *Menu,uint8_t Mod,e_UIKeys Key,char Letter)
 }
 
 /*************************************/
+/* Context Menus                     */
+/*************************************/
+void UIEnableContextMenu(t_UIContextMenuCtrl *Menu,bool Enable)
+{
+    QAction *action=(QAction *)Menu;
+
+    action->setEnabled(Enable);
+}
+
+void UICheckContextMenu(t_UIContextMenuCtrl *Menu,bool Checked)
+{
+    QAction *action=(QAction *)Menu;
+
+    action->setChecked(Checked);
+}
+
+bool UIGetContextMenuCheckStatus(t_UIContextMenuCtrl *Menu)
+{
+    QAction *action=(QAction *)Menu;
+
+    return action->isChecked();
+}
+
+void UISetContextMenuLabel(t_UIContextMenuCtrl *Menu,const char *NewLabel)
+{
+    QAction *action=(QAction *)Menu;
+
+    action->setText(NewLabel);
+}
+
+/*************************************/
 /* Checkbox                          */
 /*************************************/
 

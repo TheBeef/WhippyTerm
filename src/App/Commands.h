@@ -146,6 +146,10 @@ typedef enum
     e_Cmd_SendBuffer_EditPrompted,
     e_Cmd_NextConnectionTab,
     e_Cmd_PrevConnectionTab,
+    e_Cmd_SendBuffer_ClearBuffer,
+    e_Cmd_SendBuffer_Rename,
+    e_Cmd_SendBuffer_LoadSelectedBuffer,
+    e_Cmd_SendBuffer_SaveSelectedBuffer,
     e_CmdMAX
 } e_CmdType;
 
@@ -157,6 +161,7 @@ typedef enum
 void CmdCheck(void);
 e_UIMWMenuType Cmd2MainMenu(e_CmdType Cmd);
 e_CmdType MainMenu2Cmd(e_UIMWMenuType Menu);
+e_CmdType MainContextMenu2Cmd(e_UIMW_ContextMenuType Menu);
 e_CmdType MainToolBar2Cmd(e_UIMWToolbarType Tool);
 e_CmdType MainWindowBttn2Cmd(e_UIMWBttnType Bttn);
 e_CmdType MainCheckboxes2Cmd(e_UIMWCheckboxType CheckboxID);

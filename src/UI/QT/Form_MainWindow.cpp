@@ -7,6 +7,7 @@
 #include "VerPanelHandle.h"
 #include "Version.h"
 #include "main.h"
+#include "ContextMenuHelper.h"
 #include <stdio.h>
 #include <QCloseEvent>
 
@@ -126,6 +127,8 @@ Form_MainWindow::Form_MainWindow(QWidget *parent) :
     connect(StopWatchTimer, SIGNAL(timeout()), this, SLOT(StopWatchTimer_triggered()));
 
     ui->treeWidget_Buffer_BufferList->header()->resizeSection(0,256);
+
+    AddContextMenu2Widget(this,ui->treeWidget_Buffer_BufferList);
 
 #ifndef DEBUG
     /* Hide anything that shouldn't be in the release build */
@@ -299,6 +302,14 @@ void Form_MainWindow::DoMenuTriggered(e_UIMWMenuType MenuID)
 
     EventData.Menu.InputID=MenuID;
     SendEvent(e_MWEvent_MenuTriggered,&EventData);
+}
+
+void Form_MainWindow::DoContextMenuTriggered(e_UIMW_ContextMenuType MenuID)
+{
+    union MWEventData EventData;
+
+    EventData.ContextMenu.InputID=MenuID;
+    SendEvent(e_MWEvent_ContextMenuTriggered,&EventData);
 }
 
 void Form_MainWindow::DoBttnTriggered(e_UIMWBttnType BttnID)
@@ -1587,4 +1598,44 @@ void Form_MainWindow::actionApplyTerminalEmulationMenuItem_triggered()
     ID=MenuAction->objectName().toULongLong();
 
     SendEvent(e_MWEvent_ApplyTerminalEmulationMenuTriggered,NULL,ID);
+}
+
+void Form_MainWindow::ContextMenu(const QPoint &pos)
+{
+    HandleContextMenuClick(sender(),pos);
+}
+
+void Form_MainWindow::on_Menu_treeWidget_Buffer_BufferList_x2_Edit_triggered()
+{
+    DoContextMenuTriggered(e_UIMW_ContextMenu_SendBuffers_Edit);
+}
+
+
+void Form_MainWindow::on_Menu_treeWidget_Buffer_BufferList_x1_Send_triggered()
+{
+    DoContextMenuTriggered(e_UIMW_ContextMenu_SendBuffers_Send);
+}
+
+
+void Form_MainWindow::on_Menu_treeWidget_Buffer_BufferList_x5_ClearBuffer_triggered()
+{
+    DoContextMenuTriggered(e_UIMW_ContextMenu_SendBuffers_Clear);
+}
+
+
+void Form_MainWindow::on_Menu_treeWidget_Buffer_BufferList_x3_Rename_triggered()
+{
+    DoContextMenuTriggered(e_UIMW_ContextMenu_SendBuffers_Rename);
+}
+
+
+void Form_MainWindow::on_Menu_treeWidget_Buffer_BufferList_x7_LoadBuffer_triggered()
+{
+    DoContextMenuTriggered(e_UIMW_ContextMenu_SendBuffers_LoadBuffer);
+}
+
+
+void Form_MainWindow::on_Menu_treeWidget_Buffer_BufferList_x8_SaveBuffer_triggered()
+{
+    DoContextMenuTriggered(e_UIMW_ContextMenu_SendBuffers_SaveBuffer);
 }

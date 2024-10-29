@@ -155,6 +155,10 @@ const char *m_CmdNames[]=
     "SendBufferEditPrompted",               // e_Cmd_SendBuffer_EditPrompted
     "NextConnectionTab",                    // e_Cmd_NextConnectionTab
     "PrevConnectionTab",                    // e_Cmd_PrevConnectionTab
+    "SendBufferClearBuffer",                // e_Cmd_SendBuffer_ClearBuffer
+    "SendBufferRename",                     // e_Cmd_SendBuffer_Rename
+    "SendBufferLoadSelectedBuffer",         // e_Cmd_SendBuffer_LoadSelectedBuffer
+    "SendBufferSaveSelectedBuffer",         // e_Cmd_SendBuffer_SaveSelectedBuffer
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -240,6 +244,16 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_SendBufferSendGeneric,        // e_UIMWMenu_Buffers_SendBufferSendGeneric
     e_Cmd_SendBuffer_ClearAllBuffers,   // e_UIMWMenu_Buffers_ClearAllBuffers
     e_Cmd_SendBuffer_EditPrompted,      // e_UIMWMenu_Buffers_EditSenderBuffer
+};
+
+e_CmdType m_Cmd2ContextMenuMapping[]=
+{
+    e_Cmd_SendBuffer_SendSelectedBuffer,// e_UIMW_ContextMenu_SendBuffers_Send
+    e_Cmd_SendBuffer_Edit,              // e_UIMW_ContextMenu_SendBuffers_Edit
+    e_Cmd_SendBuffer_ClearBuffer,       // e_UIMW_ContextMenu_SendBuffers_Clear
+    e_Cmd_SendBuffer_Rename,            // e_UIMW_ContextMenu_SendBuffers_Rename
+    e_Cmd_SendBuffer_LoadSelectedBuffer,// e_UIMW_ContextMenu_SendBuffers_LoadBuffer
+    e_Cmd_SendBuffer_SaveSelectedBuffer,// e_UIMW_ContextMenu_SendBuffers_SaveBuffer
 };
 
 e_CmdType m_Cmd2ToolbarMapping[]=
@@ -396,6 +410,32 @@ e_CmdType MainMenu2Cmd(e_UIMWMenuType Menu)
     if(Menu>=sizeof(m_Cmd2MenuMapping)/sizeof(e_CmdType))
         return e_CmdMAX;
     return m_Cmd2MenuMapping[Menu];
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MainContextMenu2Cmd
+ *
+ * SYNOPSIS:
+ *    e_CmdType MainContextMenu2Cmd(e_UIMW_ContextMenuType Menu);
+ *
+ * PARAMETERS:
+ *    Menu [I] -- The menu to convert
+ *
+ * FUNCTION:
+ *    This function converts a menu ID to a command ID.
+ *
+ * RETURNS:
+ *    The command ID for this menu or 'e_CmdMAX' if there isn't one
+ *
+ * SEE ALSO:
+ *    MainWindowBttn2Cmd(), MainToolBar2Cmd()
+ ******************************************************************************/
+e_CmdType MainContextMenu2Cmd(e_UIMW_ContextMenuType Menu)
+{
+    if(Menu>=sizeof(m_Cmd2ContextMenuMapping)/sizeof(e_CmdType))
+        return e_CmdMAX;
+    return m_Cmd2ContextMenuMapping[Menu];
 }
 
 /*******************************************************************************

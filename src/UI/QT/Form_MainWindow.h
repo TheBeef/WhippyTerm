@@ -71,6 +71,7 @@ private slots:
     void on_actionTest2_triggered();
     void GlobalCloseTabBttnClicked(void);
     void StopWatchTimer_triggered();
+    void ContextMenu(const QPoint &pos);
 
     void on_Main_tabWidget_TabMoved(int from,int to);
     void on_actionComPort_TEST_triggered();
@@ -310,6 +311,18 @@ private slots:
     
     void on_actionEdit_Send_Buffer_triggered();
     
+    void on_Menu_treeWidget_Buffer_BufferList_x2_Edit_triggered();
+    
+    void on_Menu_treeWidget_Buffer_BufferList_x1_Send_triggered();
+    
+    void on_Menu_treeWidget_Buffer_BufferList_x5_ClearBuffer_triggered();
+    
+    void on_Menu_treeWidget_Buffer_BufferList_x3_Rename_triggered();
+    
+    void on_Menu_treeWidget_Buffer_BufferList_x7_LoadBuffer_triggered();
+    
+    void on_Menu_treeWidget_Buffer_BufferList_x8_SaveBuffer_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);
@@ -317,6 +330,7 @@ private:
     void changeEvent(QEvent *event);
     void moveEvent(QMoveEvent *event);
     void DoMenuTriggered(e_UIMWMenuType MenuID);
+    void DoContextMenuTriggered(e_UIMW_ContextMenuType MenuID);
     void DoToolbarTriggered(e_UIMWToolbarType ToolID);
     void DoBttnTriggered(e_UIMWBttnType BttnID);
     void DoCheckboxTriggered(e_UIMWCheckboxType CheckboxID,bool Checked);

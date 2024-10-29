@@ -3566,6 +3566,9 @@ bool MW_Event(const struct MWEvent *Event)
         case e_MWEvent_MenuTriggered:
             Event->MW->ExeCmd(MainMenu2Cmd(Event->Info.Menu.InputID));
         break;
+        case e_MWEvent_ContextMenuTriggered:
+            Event->MW->ExeCmd(MainContextMenu2Cmd(Event->Info.ContextMenu.InputID));
+        break;
         case e_MWEvent_BttnTriggered:
             switch(Event->Info.Bttn.InputID)
             {
@@ -4231,6 +4234,18 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_PrevConnectionTab:
             MoveToPrevTab();
+        break;
+        case e_Cmd_SendBuffer_ClearBuffer:
+            SendBuffersPanel.ClearCurrentBuffer();
+        break;
+        case e_Cmd_SendBuffer_Rename:
+            SendBuffersPanel.RenameCurrentBuffer();
+        break;
+        case e_Cmd_SendBuffer_LoadSelectedBuffer:
+            SendBuffersPanel.LoadOverCurrentBuffer();
+        break;
+        case e_Cmd_SendBuffer_SaveSelectedBuffer:
+            SendBuffersPanel.SaveCurrentBuffer();
         break;
         case e_CmdMAX:
         default:

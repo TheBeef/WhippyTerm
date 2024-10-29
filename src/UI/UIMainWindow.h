@@ -263,6 +263,17 @@ typedef enum
     e_UIMWProgressBarMAX
 } e_UIMWProgressBarType;
 
+typedef enum
+{
+    e_UIMW_ContextMenu_SendBuffers_Send,
+    e_UIMW_ContextMenu_SendBuffers_Edit,
+    e_UIMW_ContextMenu_SendBuffers_Clear,
+    e_UIMW_ContextMenu_SendBuffers_Rename,
+    e_UIMW_ContextMenu_SendBuffers_LoadBuffer,
+    e_UIMW_ContextMenu_SendBuffers_SaveBuffer,
+    e_UIMW_ContextMenuMAX
+} e_UIMW_ContextMenuType;
+
 struct UIMainWindow {int x;};
 typedef struct UIMainWindow t_UIMainWindow;
 
@@ -292,12 +303,18 @@ typedef enum
     e_MWEvent_ListViewChange,
     e_MWEvent_ColumnViewChange,
     e_MWEvent_ApplyTerminalEmulationMenuTriggered,
+    e_MWEvent_ContextMenuTriggered,
     e_MWEventMAX
 } e_MWEventType;
 
 struct MWEventDataMenu
 {
     e_UIMWMenuType InputID;
+};
+
+struct MWEventDataContextMenu
+{
+    e_UIMW_ContextMenuType InputID;
 };
 
 struct MWEventDataBttn
@@ -379,6 +396,7 @@ struct MWEventDataColumnView
 union MWEventData
 {
     struct MWEventDataMenu Menu;
+    struct MWEventDataContextMenu ContextMenu;
     struct MWEventDataBttn Bttn;
     struct MWEventDataToolbar Toolbar;
     struct MWEventDataCheckbox Checkbox;
@@ -473,6 +491,7 @@ t_UITextInputCtrl *UIMW_GetTxtInputHandle(t_UIMainWindow *win,e_UIMWTxtInputType
 t_UILabelCtrl *UIMW_GetLabelHandle(t_UIMainWindow *win,e_UIMWLabelType UIObj);
 t_UIComboBoxCtrl *UIMW_GetComboBoxHandle(t_UIMainWindow *win,e_UIMWComboBoxType UIObj);
 t_UIProgressBarCtrl *UIMW_GetProgressBarHandle(t_UIMainWindow *win,e_UIMWProgressBarType UIObj);
+t_UIContextMenuCtrl *UIMW_GetContextMenuHandle(t_UIMainWindow *win,e_UIMW_ContextMenuType UIObj);
 
 t_UIContainerCtrl *UIMW_GetOptionsFrameContainer(t_UIMainWindow *win);
 t_UIContainerCtrl *UIMW_GetUploadOptionsFrameContainer(t_UIMainWindow *win);

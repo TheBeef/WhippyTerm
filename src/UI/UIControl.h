@@ -170,8 +170,10 @@ void UISetMenuKeySeq(e_UIMenuCtrl *Menu,uint8_t Mod,e_UIKeys Key,char Letter);
 void UISetMenuLabel(e_UIMenuCtrl *Menu,const char *NewLabel);
 
 /* UIContextMenuCtrl */
-/* Currently don't support anything here, but it's for when we add this stuff.
-   DEBUG PAUL: Note this will be QAction */
+void UIEnableContextMenu(t_UIContextMenuCtrl *Menu,bool Enable);
+void UICheckContextMenu(t_UIContextMenuCtrl *Menu,bool Checked);
+bool UIGetContextMenuCheckStatus(t_UIContextMenuCtrl *Menu);
+void UISetContextMenuLabel(t_UIContextMenuCtrl *Menu,const char *NewLabel);
 
 /* Checkbox */
 void UIEnableCheckbox(t_UICheckboxCtrl *Checkbox,bool Enable);

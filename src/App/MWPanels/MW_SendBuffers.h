@@ -63,6 +63,10 @@ class MWSendBuffers
         void SendBttn2Cmd(void);
         void SendBuffer(int Buffer);
         void EditCurrentBuffer(void);
+        void RenameCurrentBuffer(void);
+        void ClearCurrentBuffer(void);
+        void LoadOverCurrentBuffer(void);
+        void SaveCurrentBuffer(void);
         void NewSendBufferSetLoaded(void);
         void SendCurrentBuffer(void);
 

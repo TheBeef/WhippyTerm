@@ -2745,6 +2745,64 @@
     <string>Edit Buffer...</string>
    </property>
   </action>
+  <action name="Menu_treeWidget_Buffer_BufferList_x2_Edit">
+   <property name="text">
+    <string>Edit...</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit Buffer</string>
+   </property>
+  </action>
+  <action name="Menu_treeWidget_Buffer_BufferList_x1_Send">
+   <property name="text">
+    <string>Send</string>
+   </property>
+   <property name="toolTip">
+    <string>Sends selected buffer</string>
+   </property>
+  </action>
+  <action name="Menu_treeWidget_Buffer_BufferList_x5_ClearBuffer">
+   <property name="text">
+    <string>Clear Buffer...</string>
+   </property>
+   <property name="toolTip">
+    <string>Clear the selected buffer and set it empty</string>
+   </property>
+  </action>
+  <action name="Menu_treeWidget_Buffer_BufferList_x3_Rename">
+   <property name="text">
+    <string>Rename...</string>
+   </property>
+   <property name="toolTip">
+    <string>Rename the selected buffer</string>
+   </property>
+  </action>
+  <action name="Menu_treeWidget_Buffer_BufferList_x7_LoadBuffer">
+   <property name="text">
+    <string>Load Buffer...</string>
+   </property>
+   <property name="toolTip">
+    <string>Replace the selected buffer with a new buffer loaded from disk</string>
+   </property>
+  </action>
+  <action name="Menu_treeWidget_Buffer_BufferList_x8_SaveBuffer">
+   <property name="text">
+    <string>Save Buffer...</string>
+   </property>
+   <property name="toolTip">
+    <string>Saves the selected buffer to disk</string>
+   </property>
+  </action>
+  <action name="Menu_treeWidget_Buffer_BufferList_x4_Sep">
+   <property name="text">
+    <string>---</string>
+   </property>
+  </action>
+  <action name="Menu_treeWidget_Buffer_BufferList_x6_Sep">
+   <property name="text">
+    <string>---</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

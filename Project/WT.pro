@@ -53,6 +53,7 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/StdPlugins/IODrivers/TCPServer/src/TCPServer_Main.cpp \
     ../src/App/StdPlugins/IODrivers/UDPClient/src/UDPClient_Main.cpp \
     ../src/App/StdPlugins/IODrivers/UDPServer/src/UDPServer_Main.cpp \
+    ../src/UI/QT/ContextMenuHelper.cpp \
     ../src/UI/QT/Form_DebugPrintLog.cpp \
     ../src/UI/QT/Form_DebugPrintLogAccess.cpp \
     ../src/UI/QT/Form_MainWindow.cpp \

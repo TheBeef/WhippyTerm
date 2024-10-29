@@ -479,6 +479,37 @@ t_UIProgressBarCtrl *UIMW_GetProgressBarHandle(t_UIMainWindow *win,
     return NULL;
 }
 
+t_UIContextMenuCtrl *UIMW_GetContextMenuHandle(t_UIMainWindow *win,e_UIMW_ContextMenuType UIObj)
+{
+    Form_MainWindow *realwin=(Form_MainWindow *)win;
+
+    switch(UIObj)
+    {
+        case e_UIMW_ContextMenu_SendBuffers_Edit:
+            return (t_UIContextMenuCtrl *)realwin->ui->Menu_treeWidget_Buffer_BufferList_x2_Edit;
+
+        case e_UIMW_ContextMenu_SendBuffers_Send:
+            return (t_UIContextMenuCtrl *)realwin->ui->Menu_treeWidget_Buffer_BufferList_x1_Send;
+
+        case e_UIMW_ContextMenu_SendBuffers_Clear:
+            return (t_UIContextMenuCtrl *)realwin->ui->Menu_treeWidget_Buffer_BufferList_x5_ClearBuffer;
+
+        case e_UIMW_ContextMenu_SendBuffers_Rename:
+            return (t_UIContextMenuCtrl *)realwin->ui->Menu_treeWidget_Buffer_BufferList_x3_Rename;
+
+        case e_UIMW_ContextMenu_SendBuffers_LoadBuffer:
+            return (t_UIContextMenuCtrl *)realwin->ui->Menu_treeWidget_Buffer_BufferList_x7_LoadBuffer;
+
+        case e_UIMW_ContextMenu_SendBuffers_SaveBuffer:
+            return (t_UIContextMenuCtrl *)realwin->ui->Menu_treeWidget_Buffer_BufferList_x8_SaveBuffer;
+
+        case e_UIMW_ContextMenuMAX:
+        default:
+        break;
+    }
+    return NULL;
+}
+
 t_UIMainWindow *UIMW_AllocMainWindow(class TheMainWindow *MW,uintptr_t ID)
 {
     Form_MainWindow *w;

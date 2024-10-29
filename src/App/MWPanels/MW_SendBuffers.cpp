@@ -39,10 +39,14 @@
 #include "App/Session.h"
 #include "App/SendBuffer.h"
 #include "UI/UIAsk.h"
+#include "UI/UITextInputBox.h"
+#include "UI/UIFileReq.h"
 #include <inttypes.h>
 #include <string.h>
 #include <stdint.h>
 #include <string>
+
+using namespace std;
 
 /*** DEFINES                  ***/
 
@@ -305,6 +309,7 @@ void MWSendBuffers::RethinkUI(void)
 {
     t_UIButtonCtrl *EditBttn;
     t_UIButtonCtrl *SendBttn;
+    t_UIContextMenuCtrl *SendContextMenu;
     bool EditEnabled;
     bool SendEnabled;
     t_UIColumnView *BufferList;
@@ -314,6 +319,7 @@ void MWSendBuffers::RethinkUI(void)
     EditBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_SendBuffers_Edit);
     SendBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_SendBuffers_Send);
     BufferList=UIMW_GetColumnViewHandle(UIWin,e_UIMWColumnView_Buffers_List);
+    SendContextMenu=UIMW_GetContextMenuHandle(UIWin,e_UIMW_ContextMenu_SendBuffers_Send);
 
     BufferSeleced=UIColumnViewHasSelectedEntry(BufferList);
 
@@ -339,6 +345,7 @@ void MWSendBuffers::RethinkUI(void)
 
     UIEnableButton(EditBttn,EditEnabled);
     UIEnableButton(SendBttn,SendEnabled);
+    UIEnableContextMenu(SendContextMenu,SendEnabled);
 }
 
 /*******************************************************************************
@@ -619,6 +626,227 @@ void MWSendBuffers::EditCurrentBuffer(void)
 
         RethinkBuffer();
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWSendBuffers::RenameCurrentBuffer
+ *
+ * SYNOPSIS:
+ *    void MWSendBuffers::RenameCurrentBuffer(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function renames the current send buffer.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWSendBuffers::RenameCurrentBuffer(void)
+{
+    t_UIColumnView *BufferList;
+    int SelectedBuffer;
+    char *Name;
+    string NewName;
+    char buff[100];
+
+    BufferList=UIMW_GetColumnViewHandle(UIWin,e_UIMWColumnView_Buffers_List);
+
+    if(!UIColumnViewHasSelectedEntry(BufferList))
+        return;
+
+    SelectedBuffer=UIGetColumnViewSelectedEntry(BufferList);
+
+    Name=g_SendBuffers.GetBufferName(SelectedBuffer);
+    if(Name!=NULL)
+    {
+        NewName=Name;
+        if(UITextInputBox("Rename Send Buffer",
+                "Change the name of this send buffer",NewName))
+        {
+            if(NewName=="")
+            {
+                sprintf(buff,"Buffer %d",SelectedBuffer+1);
+                NewName=buff;
+            }
+
+            g_SendBuffers.SetBufferName(SelectedBuffer,NewName.c_str());
+            g_SendBuffers.SaveBuffers();
+
+            UIColumnViewSetColumnText(BufferList,0,SelectedBuffer,
+                    NewName.c_str());
+            RethinkBuffer();
+        }
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWSendBuffers::ClearCurrentBuffer
+ *
+ * SYNOPSIS:
+ *    void MWSendBuffers::ClearCurrentBuffer(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function clear (sets to blank) the current send buffer.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWSendBuffers::ClearCurrentBuffer(void)
+{
+    t_UIColumnView *BufferList;
+    int SelectedBuffer;
+    char buff[100];
+
+    if(UIAsk("Are you sure?","Are you sure you want to erase this buffer?",
+            e_AskBox_Question,e_AskBttns_YesNo)!=e_AskRet_Yes)
+    {
+        return;
+    }
+
+    BufferList=UIMW_GetColumnViewHandle(UIWin,e_UIMWColumnView_Buffers_List);
+
+    if(!UIColumnViewHasSelectedEntry(BufferList))
+        return;
+
+    SelectedBuffer=UIGetColumnViewSelectedEntry(BufferList);
+
+    sprintf(buff,"Buffer %d",SelectedBuffer+1);
+
+    g_SendBuffers.SetBufferName(SelectedBuffer,buff);
+    g_SendBuffers.SetBuffer(SelectedBuffer,NULL,0);
+    g_SendBuffers.SaveBuffers();
+
+    UIColumnViewSetColumnText(BufferList,0,SelectedBuffer,buff);
+    RethinkBuffer();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWSendBuffers::LoadOverCurrentBuffer
+ *
+ * SYNOPSIS:
+ *    void MWSendBuffers::LoadOverCurrentBuffer(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function loads a new buffer over the current buffer
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWSendBuffers::LoadOverCurrentBuffer(void)
+{
+    string File;
+    string LoadFilename;
+    t_UITextInputCtrl *BufferName;
+    char *Name;
+    uint8_t *EditBuffer;
+    uint32_t BufferSize;
+    t_UIColumnView *BufferList;
+    int SelectedBuffer;
+
+    BufferList=UIMW_GetColumnViewHandle(UIWin,e_UIMWColumnView_Buffers_List);
+
+    if(!UIColumnViewHasSelectedEntry(BufferList))
+        return;
+
+    SelectedBuffer=UIGetColumnViewSelectedEntry(BufferList);
+
+    if(!UI_LoadFileReq("Load buffer",g_Session.SendBufferPath,File,
+            "Buffers (.buf)|*.buf\nAll Files|*",0))
+    {
+        return;
+    }
+
+    LoadFilename=UI_ConcatFile2Path(g_Session.SendBufferPath,File);
+
+    if(SendBuffer::LoadBufferFromFile(LoadFilename.c_str(),&Name,
+            &EditBuffer,&BufferSize))
+    {
+        g_SendBuffers.SetBufferName(SelectedBuffer,Name);
+        g_SendBuffers.SetBuffer(SelectedBuffer,EditBuffer,BufferSize);
+        g_SendBuffers.SaveBuffers();
+
+        UIColumnViewSetColumnText(BufferList,0,SelectedBuffer,Name);
+        RethinkBuffer();
+
+        free(Name);
+        free(EditBuffer);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWSendBuffers::SaveCurrentBuffer
+ *
+ * SYNOPSIS:
+ *    void MWSendBuffers::SaveCurrentBuffer(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function saves the current buffer to disk.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWSendBuffers::SaveCurrentBuffer(void)
+{
+    string File;
+    string SaveFilename;
+    t_UITextInputCtrl *BufferName;
+    char *Name;
+    const uint8_t *EditBuffer;
+    uint32_t BufferSize;
+    t_UIColumnView *BufferList;
+    int SelectedBuffer;
+
+    BufferList=UIMW_GetColumnViewHandle(UIWin,e_UIMWColumnView_Buffers_List);
+
+    if(!UIColumnViewHasSelectedEntry(BufferList))
+        return;
+
+    SelectedBuffer=UIGetColumnViewSelectedEntry(BufferList);
+
+    Name=g_SendBuffers.GetBufferName(SelectedBuffer);
+    if(Name==NULL)
+        return;
+
+    if(!g_SendBuffers.GetBufferInfo(SelectedBuffer,&EditBuffer,&BufferSize))
+        return;
+
+    if(!UI_SaveFileReq("Save buffer",g_Session.SendBufferPath,File,
+            "Buffers|*.buf\nAll Files|*",0))
+    {
+        return;
+    }
+
+    SaveFilename=UI_ConcatFile2Path(g_Session.SendBufferPath,File);
+
+    SendBuffer::SaveBuffer2File(SaveFilename.c_str(),Name,EditBuffer,
+            BufferSize);
 }
 
 /*******************************************************************************

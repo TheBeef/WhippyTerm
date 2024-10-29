@@ -895,7 +895,7 @@ static void DESB_DoExportData2Disk(void)
     }
 
     if(!UI_SaveFileReq("Export buffer data into binary file",
-            g_Session.SendBufferPath,File,"All Files|*\n",0))
+            g_Session.SendBufferPath,File,"All Files|*",0))
     {
         return;
     }
@@ -1165,7 +1165,7 @@ static void DESB_DoSaveBuffer(void)
     int BufferSize;
 
     if(!UI_SaveFileReq("Save buffer",g_Session.SendBufferPath,File,
-            "Buffers|*.buf\nAll Files|*\n",0))
+            "Buffers|*.buf\nAll Files|*",0))
     {
         return;
     }
@@ -1214,7 +1214,7 @@ static void DESB_DoLoadBuffer(void)
     uint32_t BufferSize;
 
     if(!UI_LoadFileReq("Load buffer",g_Session.SendBufferPath,File,
-            "Buffers|*.buf\nAll Files|*\n",0))
+            "Buffers|*.buf\nAll Files|*",0))
     {
         return;
     }

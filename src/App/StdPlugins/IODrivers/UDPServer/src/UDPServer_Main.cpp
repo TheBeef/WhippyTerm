@@ -609,7 +609,8 @@ void UDPServer_ConnectionOptionsWidgets_UpdateUI(
     if(TmpStr==NULL)
         TmpStr="0";
     ReuseAddressBool=atoi(TmpStr);
-
+    
+    ReusePortBool=0;
     if(ConWidgets->ReusePort!=NULL)
     {
         TmpStr=g_UDPS_System->KVGetItem(Options,"ReusePort");

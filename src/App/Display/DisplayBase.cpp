@@ -955,3 +955,30 @@ void DisplayBase::SetDrawMask(uint16_t Mask)
     /* Does nothing */
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetContextMenuHandle
+ *
+ * SYNOPSIS:
+ *    t_UIContextMenuCtrl *DisplayBase::GetContextMenuHandle(
+ *              e_UITD_ContextMenuType UIObj)
+ *
+ * PARAMETERS:
+ *    UIObj [I] -- The context menu item to get the handle for.
+ *
+ * FUNCTION:
+ *    This function gets a context menu item's handle.
+ *
+ * RETURNS:
+ *    The context menu item's handle or NULL if it was not found.  If this
+ *    is not supported (because there is no menu for example) then this will
+ *    return NULL.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIContextMenuCtrl *DisplayBase::GetContextMenuHandle(e_UITD_ContextMenuType UIObj)
+{
+    return NULL;
+}
+

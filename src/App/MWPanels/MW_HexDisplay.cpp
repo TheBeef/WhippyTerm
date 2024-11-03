@@ -335,11 +335,16 @@ void MWHexDisplay::RethinkUI(void)
     bool ControlsEnabled;
     bool PauseCheckEnabled;
     bool ClipboardBttnEnabled;
+    t_UIContextMenuCtrl *ContextMenu_Copy;
+    t_UIContextMenuCtrl *ContextMenu_Paste;
 
     ClearBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_HexDisplay_Clear);
     CopyBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_HexDisplay_Copy);
     CopyAsBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_HexDisplay_CopyAs);
     PausedCheckbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_HexDisplay_Paused);
+
+    ContextMenu_Copy=IncomingHistoryHexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_Copy);
+    ContextMenu_Paste=IncomingHistoryHexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_Paste);
 
     ControlsEnabled=PanelActive;
     PauseCheckEnabled=PanelActive;
@@ -366,6 +371,9 @@ void MWHexDisplay::RethinkUI(void)
     UIEnableButton(CopyBttn,ClipboardBttnEnabled);
     UIEnableButton(CopyAsBttn,ClipboardBttnEnabled);
     UIEnableCheckbox(PausedCheckbox,PauseCheckEnabled);
+
+    UIEnableContextMenu(ContextMenu_Copy,ClipboardBttnEnabled);
+    UISetContextMenuVisible(ContextMenu_Paste,false);
 }
 
 /*******************************************************************************
@@ -601,6 +609,26 @@ bool MWHexDisplay::HexDisplayBufferEvent(const struct HDEvent *Event)
                     SendSelection2Clipboard(e_Clipboard_Selection,
                     e_HDBCFormat_Default);
         return true;
+        case e_HDEvent_ContextMenu:
+            switch(Event->Info.Context.Menu)
+            {
+                case e_UITD_ContextMenu_Copy:
+                    Copy2Clip();
+                break;
+                case e_UITD_ContextMenu_ClearScreen:
+                    Clear();
+                break;
+                case e_UITD_ContextMenu_Edit:
+                case e_UITD_ContextMenu_EndianSwap:
+                case e_UITD_ContextMenu_SendBuffers:
+                case e_UITD_ContextMenu_Paste:
+                case e_UITD_ContextMenu_ZoomIn:
+                case e_UITD_ContextMenu_ZoomOut:
+                case e_UITD_ContextMenuMAX:
+                default:
+                break;
+            }
+        break;
         case e_HDEvent_CursorMove:
         case e_HDEvent_BufferResize:
         case e_HDEventMAX:

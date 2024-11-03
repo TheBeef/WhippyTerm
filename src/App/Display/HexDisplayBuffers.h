@@ -59,6 +59,7 @@ typedef enum
     e_HDEvent_MouseMove,
     e_HDEvent_CursorMove,
     e_HDEvent_BufferResize,
+    e_HDEvent_ContextMenu,
     e_HDEventMAX
 } e_HDEventType;
 
@@ -87,12 +88,18 @@ struct HDEventBufferInfo
     int Size;
 };
 
+struct HDEventContextMenu
+{
+    e_UITD_ContextMenuType Menu;
+};
+
 union HDEventData
 {
     struct HDEventKeyPress Key;
     struct HDEventSelectionChange Select;
     struct HDEventCursorMove Cursor;
     struct HDEventBufferInfo Buffer;
+    struct HDEventContextMenu Context;
 };
 
 struct HDEvent
@@ -147,6 +154,7 @@ class HexDisplayBuffer
         void FillSelectionWithValue(uint8_t Value);
         void FillWithValue(int InsertOffset,const uint8_t *Data,int Bytes,bool Replace);
         void DoInsertFromClipboard(e_HDBCFormatType ClipFormat);
+        t_UIContextMenuCtrl *GetContextMenuHandle(e_UITD_ContextMenuType UIObj);
 
     private:
         t_UITextDisplayCtrl *TextDisplayCtrl;

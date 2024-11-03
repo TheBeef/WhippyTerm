@@ -1,7 +1,3 @@
-//                case e_ESB_Button_Import:
-//                case e_ESB_Button_Export:
-//                case e_ESB_Button_InsertFromClipboard:
-//                case e_ESB_Button_InsertFromDisk:
 /*******************************************************************************
  * FILENAME: Dialog_EditSendBuffer.cpp
  *
@@ -113,6 +109,10 @@ bool RunEditSendBufferDialog(int BufferNumber)
     t_UITextInputCtrl *BufferName;
     string Name;
     char buff[100];
+    t_UIContextMenuCtrl *ContextMenu_Copy;
+    t_UIContextMenuCtrl *ContextMenu_Paste;
+    t_UIContextMenuCtrl *ContextMenu_ClearScreen;
+    t_UIContextMenuCtrl *ContextMenu_EndianSwap;
 
     m_DESB_HexDisplay=NULL;
     try
@@ -141,6 +141,14 @@ bool RunEditSendBufferDialog(int BufferNumber)
                 g_Settings.HexDisplaysFontItalic);
         m_DESB_HexDisplay->SetColors(g_Settings.HexDisplaysFGColor,
                 g_Settings.HexDisplaysBGColor,g_Settings.HexDisplaysSelBGColor);
+
+        ContextMenu_Copy=m_DESB_HexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_Copy);
+        ContextMenu_Paste=m_DESB_HexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_Paste);
+        ContextMenu_ClearScreen=m_DESB_HexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_ClearScreen);
+        ContextMenu_EndianSwap=m_DESB_HexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_EndianSwap);
+
+        UISetContextMenuVisible(ContextMenu_ClearScreen,false);
+        UISetContextMenuVisible(ContextMenu_EndianSwap,true);
 
         m_DESB_HexDisplay->SetBuffer(Memory,BuffSize);
         m_DESB_HexDisplay->RebuildDisplay();
@@ -415,6 +423,31 @@ static bool DESB_HexDisplayBufferEvent(const struct HDEvent *Event)
             BufferSize=UIESB_GetTextInput(e_ESB_TextInput_BufferSize);
             sprintf(buff,"%d",Event->Info.Buffer.Size);
             UISetTextCtrlText(BufferSize,buff);
+        break;
+        case e_HDEvent_ContextMenu:
+            switch(Event->Info.Context.Menu)
+            {
+                case e_UITD_ContextMenu_Copy:
+                    m_DESB_HexDisplay->
+                            SendSelection2Clipboard(e_Clipboard_Clipboard,
+                            e_HDBCFormat_Default);
+                break;
+                case e_UITD_ContextMenu_Paste:
+                    m_DESB_HexDisplay->
+                            DoInsertFromClipboard(e_HDBCFormat_Default);
+                break;
+                case e_UITD_ContextMenu_EndianSwap:
+                    DESB_DoEndianSwap();
+                break;
+                case e_UITD_ContextMenu_ClearScreen:
+                case e_UITD_ContextMenu_Edit:
+                case e_UITD_ContextMenu_SendBuffers:
+                case e_UITD_ContextMenu_ZoomIn:
+                case e_UITD_ContextMenu_ZoomOut:
+                case e_UITD_ContextMenuMAX:
+                default:
+                break;
+            }
         break;
         case e_HDEventMAX:
         default:
@@ -1029,6 +1062,8 @@ static void DESB_RethinkButtons(void)
     t_UIButtonCtrl *InsertAsNumber;
     t_UIButtonCtrl *InsertAsText;
     t_UIButtonCtrl *InsertProperties;
+    t_UIContextMenuCtrl *ContextMenu_Copy;
+    t_UIContextMenuCtrl *ContextMenu_EndianSwap;
 
     bool FillEnabled;
     bool EndianSwapEnabled;
@@ -1046,7 +1081,8 @@ static void DESB_RethinkButtons(void)
     InsertAsNumber=UIESB_GetButton(e_ESB_Button_InsertAsNumber);
     InsertAsText=UIESB_GetButton(e_ESB_Button_InsertAsText);
     InsertProperties=UIESB_GetButton(e_ESB_Button_InsertProperties);
-
+    ContextMenu_Copy=m_DESB_HexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_Copy);
+    ContextMenu_EndianSwap=m_DESB_HexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_EndianSwap);
 
     FillEnabled=false;
     InsertAsNumberEnabled=false;
@@ -1066,12 +1102,13 @@ static void DESB_RethinkButtons(void)
 
         switch(SelSize)
         {
-            case 1:
             case 2:
             case 4:
             case 8:
-                InsertAsNumberEnabled=true;
                 EndianSwapEnabled=true;
+                /* No break here */
+            case 1:
+                InsertAsNumberEnabled=true;
             break;
             default:
             break;
@@ -1081,7 +1118,6 @@ static void DESB_RethinkButtons(void)
     {
         InsertCRCEnabled=true;
         InsertAsNumberEnabled=true;
-        EndianSwapEnabled=true;
     }
 
     UIEnableButton(Fill,FillEnabled);
@@ -1090,6 +1126,9 @@ static void DESB_RethinkButtons(void)
     UIEnableButton(InsertAsNumber,InsertAsNumberEnabled);
     UIEnableButton(InsertAsText,InsertAsTextEnabled);
     UIEnableButton(InsertProperties,InsertPropertiesEnabled);
+
+    UIEnableContextMenu(ContextMenu_Copy,SelectionValid);
+    UIEnableContextMenu(ContextMenu_EndianSwap,EndianSwapEnabled);
 }
 
 /*******************************************************************************

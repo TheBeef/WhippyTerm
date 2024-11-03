@@ -437,6 +437,10 @@ bool DisplayText::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
             Info.BlockSend.Len=Event->Info.SendBttn.Len;
             SendEvent(e_DBEvent_SendBlockData,&Info);
         break;
+        case e_TextDisplayEvent_ContextMenu:
+            Info.Context.Menu=(e_UITD_ContextMenuType)Event->Info.Context.Menu;
+            SendEvent(e_DBEvent_ContextMenu,&Info);
+        break;
         case e_TextDisplayEventMAX:
         default:
             return true;
@@ -4521,7 +4525,8 @@ bool DisplayText::IsLineBlank(i_TextLines Line)
  *                UITC_SetDrawMask() UI control.
  *
  * FUNCTION:
- *    This function sets the draw mask for this display.
+ *    This function sets the draw mask for this display.  The draw mask is
+ *    what attributes / styles can be drawn (IE bold, color, etc).
  *
  * RETURNS:
  *    NONE
@@ -4536,3 +4541,33 @@ void DisplayText::SetDrawMask(uint16_t Mask)
 
     UITC_SetDrawMask(TextDisplayCtrl,Mask);
 }
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::GetContextMenuHandle
+ *
+ * SYNOPSIS:
+ *    t_UIContextMenuCtrl *DisplayBase::GetContextMenuHandle(
+ *              e_UITD_ContextMenuType UIObj)
+ *
+ * PARAMETERS:
+ *    UIObj [I] -- The context menu item to get the handle for.
+ *
+ * FUNCTION:
+ *    This function gets a context menu item's handle.
+ *
+ * RETURNS:
+ *    The context menu item's handle or NULL if it was not found.  If this
+ *    is not supported (because there is no menu for example) then this will
+ *    return NULL.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIContextMenuCtrl *DisplayText::GetContextMenuHandle(e_UITD_ContextMenuType UIObj)
+{
+    if(TextDisplayCtrl==NULL)
+        return NULL;
+    return UITC_GetContextMenuHandle(TextDisplayCtrl,UIObj);
+}
+

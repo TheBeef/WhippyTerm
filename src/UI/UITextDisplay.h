@@ -61,6 +61,19 @@
 struct UITextDisplay {int x;};
 typedef struct UITextDisplay t_UITextDisplayCtrl;
 
+typedef enum
+{
+    e_UITD_ContextMenu_SendBuffers,
+    e_UITD_ContextMenu_Copy,
+    e_UITD_ContextMenu_Paste,
+    e_UITD_ContextMenu_ClearScreen,
+    e_UITD_ContextMenu_ZoomIn,
+    e_UITD_ContextMenu_ZoomOut,
+    e_UITD_ContextMenu_Edit,
+    e_UITD_ContextMenu_EndianSwap,
+    e_UITD_ContextMenuMAX
+} e_UITD_ContextMenuType;
+
 /* Events */
 typedef enum
 {
@@ -79,6 +92,7 @@ typedef enum
     e_TextDisplayEvent_GotFocus,
     e_TextDisplayEvent_KeyEvent,
     e_TextDisplayEvent_SendBttn,
+    e_TextDisplayEvent_ContextMenu,
     e_TextDisplayEventMAX
 } e_TextDisplayEventType;
 
@@ -119,6 +133,11 @@ struct TextDisplayEventSendBttn
     int Len;
 };
 
+struct TextDisplayEventContextMenu
+{
+    e_UITD_ContextMenuType Menu;
+};
+
 union TextDisplayEventData
 {
     struct TextDisplayEventFrameScroll Scroll;
@@ -127,6 +146,7 @@ union TextDisplayEventData
     struct TextDisplayEventDataSize NewSize;
     struct TextDisplayEventKeyPress Key;
     struct TextDisplayEventSendBttn SendBttn;
+    struct TextDisplayEventContextMenu Context;
 };
 
 struct TextDisplayEvent
@@ -161,10 +181,12 @@ void UITC_ShowSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible);
 void UITC_SetCursorBlinking(t_UITextDisplayCtrl *ctrl,bool Blinking);
 void UITC_SetCursorPos(t_UITextDisplayCtrl *ctrl,unsigned int x,unsigned int y);
 void UITC_SetFocus(t_UITextDisplayCtrl *ctrl,e_UITCSetFocusType What);
+void UITC_SetSelectionAvailable(t_UITextDisplayCtrl *ctrl,bool Available);
 
 /* Sub-Widgets */
 t_UIScrollBarCtrl *UITC_GetHorzSlider(t_UITextDisplayCtrl *ctrl);
 t_UIScrollBarCtrl *UITC_GetVertSlider(t_UITextDisplayCtrl *ctrl);
+t_UIContextMenuCtrl *UITC_GetContextMenuHandle(t_UITextDisplayCtrl *ctrl,e_UITD_ContextMenuType UIObj);
 
 /* Info */
 int UITC_GetFragWidth(t_UITextDisplayCtrl *ctrl,const struct TextCanvasFrag *Frag);

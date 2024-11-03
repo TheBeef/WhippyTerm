@@ -175,6 +175,13 @@ void UISetContextMenuLabel(t_UIContextMenuCtrl *Menu,const char *NewLabel)
     action->setText(NewLabel);
 }
 
+void UISetContextMenuVisible(t_UIContextMenuCtrl *Menu,bool Show)
+{
+    QAction *action=(QAction *)Menu;
+
+    action->setVisible(Show);
+}
+
 /*************************************/
 /* Checkbox                          */
 /*************************************/

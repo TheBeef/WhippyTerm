@@ -174,6 +174,7 @@ void UIEnableContextMenu(t_UIContextMenuCtrl *Menu,bool Enable);
 void UICheckContextMenu(t_UIContextMenuCtrl *Menu,bool Checked);
 bool UIGetContextMenuCheckStatus(t_UIContextMenuCtrl *Menu);
 void UISetContextMenuLabel(t_UIContextMenuCtrl *Menu,const char *NewLabel);
+void UISetContextMenuVisible(t_UIContextMenuCtrl *Menu,bool Show);
 
 /* Checkbox */
 void UIEnableCheckbox(t_UICheckboxCtrl *Checkbox,bool Enable);

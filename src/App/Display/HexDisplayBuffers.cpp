@@ -59,7 +59,7 @@ static bool HexDisplayBuffer_EventHandler(const struct TextDisplayEvent *Event);
 /*** VARIABLE DEFINITIONS     ***/
 HexDisplayBuffer::HexDisplayBuffer()
 {
-    TextDisplayCtrl=nullptr;
+    TextDisplayCtrl=NULL;
 
     WeAllocBuffer=false;
 
@@ -120,7 +120,7 @@ HexDisplayBuffer::~HexDisplayBuffer()
     if(WeAllocBuffer)
         free(Buffer);
 
-    if(TextDisplayCtrl!=nullptr)
+    if(TextDisplayCtrl!=NULL)
         UITC_FreeTextDisplay(TextDisplayCtrl);
 }
 
@@ -155,7 +155,7 @@ bool HexDisplayBuffer::Init(void *ParentWidget,
 
         TextDisplayCtrl=UITC_AllocTextDisplay(ParentWidget,
                 HexDisplayBuffer_EventHandler,(uintptr_t)this);
-        if(TextDisplayCtrl==nullptr)
+        if(TextDisplayCtrl==NULL)
             throw(0);
 
         SetupCanvas();
@@ -238,7 +238,7 @@ bool HexDisplayBuffer::EventHandler(const struct TextDisplayEvent *Event)
         case e_TextDisplayEvent_DisplayFrameScrollX:
             WindowXOffsetPx=Event->Info.Scroll.Amount;
 
-            if(TextDisplayCtrl!=nullptr)
+            if(TextDisplayCtrl!=NULL)
             {
                 UITC_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
                 RebuildDisplay();
@@ -293,6 +293,14 @@ bool HexDisplayBuffer::EventHandler(const struct TextDisplayEvent *Event)
             HasFocus=true;
             RebuildDisplay();
             RethinkCursorLook();
+        break;
+
+        case e_TextDisplayEvent_ContextMenu:
+            HDEvent.EventType=e_HDEvent_ContextMenu;
+            HDEvent.ID=HDID;
+            HDEvent.Info.Context.Menu=Event->Info.Context.Menu;
+
+            HDEventHandler(&HDEvent);
         break;
 
         case e_TextDisplayEvent_MouseRightDown:
@@ -434,7 +442,7 @@ void HexDisplayBuffer::SetCanvasSize(int Width,int Height)
     View_WidthPx=Width;
     View_HeightPx=Height;
 
-    if(TextDisplayCtrl==nullptr)
+    if(TextDisplayCtrl==NULL)
         return;
 
     CharWidthPx=UITC_GetCharPxWidth(TextDisplayCtrl);
@@ -823,6 +831,12 @@ void HexDisplayBuffer::ApplySettingsChange(void)
 
 void HexDisplayBuffer::SetupCanvas(void)
 {
+    t_UIContextMenuCtrl *ContextMenu_SendBuffers;
+    t_UIContextMenuCtrl *ContextMenu_ZoomIn;
+    t_UIContextMenuCtrl *ContextMenu_ZoomOut;
+    t_UIContextMenuCtrl *ContextMenu_Edit;
+    t_UIContextMenuCtrl *ContextMenu_EndianSwap;
+
     UITC_SetFont(TextDisplayCtrl,FontName.c_str(),FontSize,FontBold,FontItalic);
 
     UITC_SetCursorColor(TextDisplayCtrl,0xFFFFFF);  /* DEBUG PAUL: Should this be cursor color? */
@@ -831,6 +845,18 @@ void HexDisplayBuffer::SetupCanvas(void)
     UITC_SetTextDefaultColor(TextDisplayCtrl,FGColor);
 
     UITC_ShowSendPanel(TextDisplayCtrl,false);
+
+    ContextMenu_SendBuffers=UITC_GetContextMenuHandle(TextDisplayCtrl,e_UITD_ContextMenu_SendBuffers);
+    ContextMenu_ZoomIn=UITC_GetContextMenuHandle(TextDisplayCtrl,e_UITD_ContextMenu_ZoomIn);
+    ContextMenu_ZoomOut=UITC_GetContextMenuHandle(TextDisplayCtrl,e_UITD_ContextMenu_ZoomOut);
+    ContextMenu_Edit=UITC_GetContextMenuHandle(TextDisplayCtrl,e_UITD_ContextMenu_Edit);
+    ContextMenu_EndianSwap=UITC_GetContextMenuHandle(TextDisplayCtrl,e_UITD_ContextMenu_EndianSwap);
+
+    UISetContextMenuVisible(ContextMenu_SendBuffers,false);
+    UISetContextMenuVisible(ContextMenu_ZoomIn,false);
+    UISetContextMenuVisible(ContextMenu_ZoomOut,false);
+    UISetContextMenuVisible(ContextMenu_Edit,false);
+    UISetContextMenuVisible(ContextMenu_EndianSwap,false);
 
     RethinkCursorLook();
 }
@@ -3137,6 +3163,8 @@ void HexDisplayBuffer::SetSelectionBounds(const uint8_t *StartPtr,
     MakeOffsetVisable(Cursor_Pos,InAscIIArea,false);
     RebuildDisplay();
     RethinkCursorPos();
+
+    SendSelectionEvent();
 }
 
 /*******************************************************************************
@@ -4137,3 +4165,32 @@ void HexDisplayBuffer::DoInsertFromClipboard(e_HDBCFormatType ClipFormat)
 
     free(Buffer);
 }
+
+/*******************************************************************************
+ * NAME:
+ *    HexDisplayBuffer::GetContextMenuHandle
+ *
+ * SYNOPSIS:
+ *    t_UIContextMenuCtrl *HexDisplayBuffer::GetContextMenuHandle(
+ *              e_UITD_ContextMenuType UIObj)
+ *
+ * PARAMETERS:
+ *    UIObj [I] -- The context menu item to get the handle for.
+ *
+ * FUNCTION:
+ *    This function gets a context menu item's handle.
+ *
+ * RETURNS:
+ *    The context menu item's handle or NULL if it was not found.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIContextMenuCtrl *HexDisplayBuffer::GetContextMenuHandle(e_UITD_ContextMenuType UIObj)
+{
+    if(TextDisplayCtrl==NULL)
+        return NULL;
+
+    return UITC_GetContextMenuHandle(TextDisplayCtrl,UIObj);
+}
+

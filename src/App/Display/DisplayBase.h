@@ -33,6 +33,7 @@
 
 /***  HEADER FILES TO INCLUDE          ***/
 #include "UI/UIMainWindow.h"
+#include "UI/UITextDisplay.h"
 #include "UI/UITextDefs.h"
 #include <stdint.h>
 #include <string>
@@ -51,6 +52,7 @@ typedef enum
     e_DBEvent_SendBlockData,
     e_DBEvent_FocusChange,
     e_DBEvent_MouseMouseWheel,
+    e_DBEvent_ContextMenu,
     e_DBEventMAX
 } e_DBEventType;
 
@@ -94,6 +96,11 @@ struct DBEventFocusInfo
     bool HasFocus;
 };
 
+struct DBEventContextMenu
+{
+    e_UITD_ContextMenuType Menu;
+};
+
 union DBEventData
 {
     struct DBEventKeyPress Key;
@@ -101,6 +108,7 @@ union DBEventData
     struct DBEventBlockSend BlockSend;
     struct DBEventFocusInfo Focus;
     struct DBEventMouseWheel MouseWheel;
+    struct DBEventContextMenu Context;
 };
 
 struct DBEvent
@@ -145,6 +153,7 @@ class DisplayBase
         virtual void ResetTerm(void);
         virtual void SetupCanvas(void);
         virtual void SetDrawMask(uint16_t Mask);
+        virtual t_UIContextMenuCtrl *GetContextMenuHandle(e_UITD_ContextMenuType UIObj);
 
         void SetCustomSettings(class ConSettings *NewSettingsPtr);
         class ConSettings *GetCustomSettings(void);

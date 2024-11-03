@@ -167,6 +167,34 @@ void UITC_Reparent(t_UITextDisplayCtrl *ctrl,void *NewParentWidget)
     TextDisplay->Layout->addWidget(TextDisplay);
 }
 
+t_UIContextMenuCtrl *UITC_GetContextMenuHandle(t_UITextDisplayCtrl *ctrl,e_UITD_ContextMenuType UIObj)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    switch(UIObj)
+    {
+        case e_UITD_ContextMenu_SendBuffers:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionSend_Buffer;
+        case e_UITD_ContextMenu_Copy:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionCopy;
+        case e_UITD_ContextMenu_Paste:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionPaste;
+        case e_UITD_ContextMenu_ClearScreen:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionClear_Screen;
+        case e_UITD_ContextMenu_ZoomIn:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionZoom_In;
+        case e_UITD_ContextMenu_ZoomOut:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionZoom_Out;
+        case e_UITD_ContextMenu_Edit:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionEdit;
+        case e_UITD_ContextMenu_EndianSwap:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionEndian_Swap;
+        case e_UITD_ContextMenuMAX:
+        default:
+            break;
+    }
+    return NULL;
+}
 
 /*******************************************************************************
  * NAME:
@@ -215,14 +243,11 @@ static bool UITC_EventHandler(const struct WTCEvent *Event)
             NewEvent.Info.Mouse.y=Event->Info->Mouse.y;
         break;
         case e_WTCEvent_MouseRightDown:
-            NewEvent.EventType=e_TextDisplayEvent_MouseRightDown;
-            NewEvent.Info.Mouse.x=Event->Info->Mouse.x;
-            NewEvent.Info.Mouse.y=Event->Info->Mouse.y;
+            ThisFrame->ContextMenu->exec(QCursor::pos());
+            return false;
         break;
         case e_WTCEvent_MouseRightUp:
-            NewEvent.EventType=e_TextDisplayEvent_MouseRightUp;
-            NewEvent.Info.Mouse.x=Event->Info->Mouse.x;
-            NewEvent.Info.Mouse.y=Event->Info->Mouse.y;
+            return false;
         break;
         case e_WTCEvent_MouseMiddleDown:
             NewEvent.EventType=e_TextDisplayEvent_MouseMiddleDown;

@@ -147,6 +147,71 @@
     </widget>
    </item>
   </layout>
+  <action name="actionSend_Buffer">
+   <property name="text">
+    <string>Send Buffer...</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="icon">
+    <iconset>
+     <normalon>:/G/Graphics/page_copy.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Copy</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="icon">
+    <iconset>
+     <normalon>:/G/Graphics/paste_plain.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Paste</string>
+   </property>
+  </action>
+  <action name="actionClear_Screen">
+   <property name="icon">
+    <iconset>
+     <normalon>:/G/Graphics/application.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Clear Screen</string>
+   </property>
+  </action>
+  <action name="actionZoom_In">
+   <property name="icon">
+    <iconset>
+     <normalon>:/G/Graphics/zoom_in.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Zoom In</string>
+   </property>
+  </action>
+  <action name="actionZoom_Out">
+   <property name="icon">
+    <iconset>
+     <normalon>:/G/Graphics/zoom_out.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Zoom Out</string>
+   </property>
+  </action>
+  <action name="actionEdit">
+   <property name="text">
+    <string>Edit...</string>
+   </property>
+  </action>
+  <action name="actionEndian_Swap">
+   <property name="text">
+    <string>Endian Swap</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

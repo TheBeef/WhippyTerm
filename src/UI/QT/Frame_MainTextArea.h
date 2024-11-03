@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "ui_Frame_MainTextArea.h"
 #include <QHBoxLayout>
+#include <QMenu>
 
 namespace Ui {
 class Frame_MainTextArea;
@@ -16,15 +17,12 @@ class Frame_MainTextArea : public QWidget
 public:
     explicit Frame_MainTextArea(QWidget *parent = 0);
     ~Frame_MainTextArea();
-//    void Init(bool (*EventHandler)(const struct TCEvent *Event),
-//            uintptr_t FrameID);
-//    void ShutDown(void);
 
     Ui::Frame_MainTextArea *ui;
     QHBoxLayout *Layout;
-//    t_UIDisplayFrameCtrl *DisplayFrame;
     uintptr_t ID;
     bool (*EventHandler)(const struct TextDisplayEvent *Event);
+    QMenu *ContextMenu;
 
     int WorkingLine;
 
@@ -34,6 +32,22 @@ private slots:
     void on_TextverticalScrollBar_valueChanged(int value);
     
     void on_TexthorizontalScrollBar_valueChanged(int value);
+    
+    void on_actionSend_Buffer_triggered();
+    
+    void on_actionCopy_triggered();
+    
+    void on_actionPaste_triggered();
+    
+    void on_actionClear_Screen_triggered();
+    
+    void on_actionZoom_In_triggered();
+    
+    void on_actionZoom_Out_triggered();
+    
+    void on_actionEdit_triggered();
+    
+    void on_actionEndian_Swap_triggered();
     
 private:
 };

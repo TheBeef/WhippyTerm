@@ -161,7 +161,7 @@ typedef enum
 void CmdCheck(void);
 e_UIMWMenuType Cmd2MainMenu(e_CmdType Cmd);
 e_CmdType MainMenu2Cmd(e_UIMWMenuType Menu);
-e_CmdType MainContextMenu2Cmd(e_UIMW_ContextMenuType Menu);
+e_CmdType MainSendBufferContextMenu2Cmd(e_UIMW_ContextMenuType Menu);
 e_CmdType MainToolBar2Cmd(e_UIMWToolbarType Tool);
 e_CmdType MainWindowBttn2Cmd(e_UIMWBttnType Bttn);
 e_CmdType MainCheckboxes2Cmd(e_UIMWCheckboxType CheckboxID);

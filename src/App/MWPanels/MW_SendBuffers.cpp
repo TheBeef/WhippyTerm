@@ -125,6 +125,10 @@ MWSendBuffers::~MWSendBuffers()
  ******************************************************************************/
 void MWSendBuffers::Setup(class TheMainWindow *Parent,t_UIMainWindow *Win)
 {
+    t_UIContextMenuCtrl *ContextMenu_Paste;
+    t_UIContextMenuCtrl *ContextMenu_ClearScreen;
+    t_UIContextMenuCtrl *ContextMenu_Edit;
+
     MW=Parent;
     UIWin=Win;
 
@@ -144,6 +148,14 @@ void MWSendBuffers::Setup(class TheMainWindow *Parent,t_UIMainWindow *Win)
             g_Settings.HexDisplaysFontItalic);
     Buffer2SendHexDisplay->SetColors(g_Settings.HexDisplaysFGColor,
             g_Settings.HexDisplaysBGColor,g_Settings.HexDisplaysSelBGColor);
+
+    ContextMenu_Paste=Buffer2SendHexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_Paste);
+    ContextMenu_ClearScreen=Buffer2SendHexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_ClearScreen);
+    ContextMenu_Edit=Buffer2SendHexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_Edit);
+
+    UISetContextMenuVisible(ContextMenu_Paste,false);
+    UISetContextMenuVisible(ContextMenu_ClearScreen,false);
+    UISetContextMenuVisible(ContextMenu_Edit,true);
 
     RethinkBufferList();
     RethinkBuffer();
@@ -315,11 +327,14 @@ void MWSendBuffers::RethinkUI(void)
     t_UIColumnView *BufferList;
     bool BufferSeleced;
     bool HexDisplayEnabled;
+    t_UIContextMenuCtrl *ContextMenu_Copy;
+    bool CopyEnabled;
 
     EditBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_SendBuffers_Edit);
     SendBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_SendBuffers_Send);
     BufferList=UIMW_GetColumnViewHandle(UIWin,e_UIMWColumnView_Buffers_List);
     SendContextMenu=UIMW_GetContextMenuHandle(UIWin,e_UIMW_ContextMenu_SendBuffers_Send);
+    ContextMenu_Copy=Buffer2SendHexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_Copy);
 
     BufferSeleced=UIColumnViewHasSelectedEntry(BufferList);
 
@@ -341,11 +356,17 @@ void MWSendBuffers::RethinkUI(void)
         HexDisplayEnabled=false;
     }
 
+    CopyEnabled=false;
+    if(Buffer2SendHexDisplay->GetSizeOfSelection(e_HDBCFormat_RAW)!=0)
+        CopyEnabled=true;
+
     Buffer2SendHexDisplay->Enable(HexDisplayEnabled);
 
     UIEnableButton(EditBttn,EditEnabled);
     UIEnableButton(SendBttn,SendEnabled);
     UIEnableContextMenu(SendContextMenu,SendEnabled);
+
+    UIEnableContextMenu(ContextMenu_Copy,CopyEnabled);
 }
 
 /*******************************************************************************
@@ -407,6 +428,26 @@ bool MWSendBuffers::SendBuffersBufferEvent(const struct HDEvent *Event)
                     SendSelection2Clipboard(e_Clipboard_Selection,
                     e_HDBCFormat_Default);
         return true;
+        case e_HDEvent_ContextMenu:
+            switch(Event->Info.Context.Menu)
+            {
+                case e_UITD_ContextMenu_Edit:
+                    MW->ExeCmd(e_Cmd_SendBuffer_Edit);
+                break;
+                case e_UITD_ContextMenu_Copy:
+                    Copy2Clip();
+                break;
+                case e_UITD_ContextMenu_EndianSwap:
+                case e_UITD_ContextMenu_ClearScreen:
+                case e_UITD_ContextMenu_SendBuffers:
+                case e_UITD_ContextMenu_Paste:
+                case e_UITD_ContextMenu_ZoomIn:
+                case e_UITD_ContextMenu_ZoomOut:
+                case e_UITD_ContextMenuMAX:
+                default:
+                break;
+            }
+        break;
         case e_HDEvent_CursorMove:
         case e_HDEvent_BufferResize:
         case e_HDEventMAX:
@@ -756,7 +797,6 @@ void MWSendBuffers::LoadOverCurrentBuffer(void)
 {
     string File;
     string LoadFilename;
-    t_UITextInputCtrl *BufferName;
     char *Name;
     uint8_t *EditBuffer;
     uint32_t BufferSize;
@@ -816,7 +856,6 @@ void MWSendBuffers::SaveCurrentBuffer(void)
 {
     string File;
     string SaveFilename;
-    t_UITextInputCtrl *BufferName;
     char *Name;
     const uint8_t *EditBuffer;
     uint32_t BufferSize;

@@ -139,6 +139,7 @@ class DisplayText : public DisplayBase
         void ResetTerm(void);
         void SetupCanvas(void);
         void SetDrawMask(uint16_t Mask);
+        t_UIContextMenuCtrl *GetContextMenuHandle(e_UITD_ContextMenuType UIObj);
 
         void SetBlockDeviceMode(bool On);
 

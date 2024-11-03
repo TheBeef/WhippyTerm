@@ -246,7 +246,7 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_SendBuffer_EditPrompted,      // e_UIMWMenu_Buffers_EditSenderBuffer
 };
 
-e_CmdType m_Cmd2ContextMenuMapping[]=
+e_CmdType m_Cmd2SendBufferContextMenuMapping[]=
 {
     e_Cmd_SendBuffer_SendSelectedBuffer,// e_UIMW_ContextMenu_SendBuffers_Send
     e_Cmd_SendBuffer_Edit,              // e_UIMW_ContextMenu_SendBuffers_Edit
@@ -414,16 +414,16 @@ e_CmdType MainMenu2Cmd(e_UIMWMenuType Menu)
 
 /*******************************************************************************
  * NAME:
- *    MainContextMenu2Cmd
+ *    MainSendBufferContextMenu2Cmd
  *
  * SYNOPSIS:
- *    e_CmdType MainContextMenu2Cmd(e_UIMW_ContextMenuType Menu);
+ *    e_CmdType MainSendBufferContextMenu2Cmd(e_UIMW_ContextMenuType Menu);
  *
  * PARAMETERS:
  *    Menu [I] -- The menu to convert
  *
  * FUNCTION:
- *    This function converts a menu ID to a command ID.
+ *    This function converts a send buffer context menu ID to a command ID.
  *
  * RETURNS:
  *    The command ID for this menu or 'e_CmdMAX' if there isn't one
@@ -431,11 +431,11 @@ e_CmdType MainMenu2Cmd(e_UIMWMenuType Menu)
  * SEE ALSO:
  *    MainWindowBttn2Cmd(), MainToolBar2Cmd()
  ******************************************************************************/
-e_CmdType MainContextMenu2Cmd(e_UIMW_ContextMenuType Menu)
+e_CmdType MainSendBufferContextMenu2Cmd(e_UIMW_ContextMenuType Menu)
 {
-    if(Menu>=sizeof(m_Cmd2ContextMenuMapping)/sizeof(e_CmdType))
+    if(Menu>=sizeof(m_Cmd2SendBufferContextMenuMapping)/sizeof(e_CmdType))
         return e_CmdMAX;
-    return m_Cmd2ContextMenuMapping[Menu];
+    return m_Cmd2SendBufferContextMenuMapping[Menu];
 }
 
 /*******************************************************************************

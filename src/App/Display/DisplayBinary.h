@@ -59,6 +59,7 @@ class DisplayBinary : public DisplayBase
         void SetCursorStyle(e_TextCursorStyleType Style);
         void ClearScrollBackBuffer(void);
         void ResetTerm(void);
+        t_UIContextMenuCtrl *GetContextMenuHandle(e_UITD_ContextMenuType UIObj);
 
     private:
         bool InitCalled;

@@ -42,6 +42,7 @@
 #include "UI/UITimers.h"
 #include "UI/UIMainWindow.h"
 #include "UI/UIClipboard.h"
+#include "UI/UITextDisplay.h"
 #include <stdint.h>
 #include <string>
 #include <list>
@@ -412,6 +413,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void SetTransmitDelayPerLine(unsigned int ms);
 
         bool IsConnectionBinary(void);
+        t_UIContextMenuCtrl *GetContextMenuHandle(e_UITD_ContextMenuType UIObj);
 
         /* Com Test */
         void SetupComTest(bool Sender,uint32_t PacketLen,uint32_t PacketsCount,uint32_t Delay,uint8_t *PacketData);

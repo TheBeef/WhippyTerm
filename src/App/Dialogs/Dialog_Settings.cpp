@@ -1946,6 +1946,7 @@ void DS_UpdateColorPreview(bool UpdateWeb)
         {
             /* Nothing select, use black */
             Color=e_SysCol_Black;
+            DefaultColor=e_DefaultColors_BG;
         }
     }
 

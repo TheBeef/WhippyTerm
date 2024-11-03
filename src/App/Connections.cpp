@@ -2716,6 +2716,37 @@ bool Connection::ProcessDisplayEvent(const struct DBEvent *Event)
         case e_DBEvent_FocusChange:
             RethinkCursor();
         break;
+        case e_DBEvent_ContextMenu:
+            if(MW==NULL)
+                break;
+
+            switch(Event->Info->Context.Menu)
+            {
+                case e_UITD_ContextMenu_SendBuffers:
+                    MW->ExeCmd(e_Cmd_SendBufferSendGeneric);
+                break;
+                case e_UITD_ContextMenu_Copy:
+                    MW->ExeCmd(e_Cmd_Copy);
+                break;
+                case e_UITD_ContextMenu_Paste:
+                    MW->ExeCmd(e_Cmd_Paste);
+                break;
+                case e_UITD_ContextMenu_ClearScreen:
+                    MW->ExeCmd(e_Cmd_ClearScreen);
+                break;
+                case e_UITD_ContextMenu_ZoomIn:
+                    MW->ExeCmd(e_Cmd_ZoomIn);
+                break;
+                case e_UITD_ContextMenu_ZoomOut:
+                    MW->ExeCmd(e_Cmd_ZoomOut);
+                break;
+                case e_UITD_ContextMenu_EndianSwap:
+                case e_UITD_ContextMenu_Edit:
+                case e_UITD_ContextMenuMAX:
+                default:
+                break;
+            }
+        break;
         case e_DBEventMAX:
         default:
         break;
@@ -6339,4 +6370,31 @@ bool Connection::IsProcessorATextProcessor(struct ProcessorConData &PData)
         }
     }
     return RetValue;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::GetContextMenuHandle
+ *
+ * SYNOPSIS:
+ *    t_UIContextMenuCtrl *Connection::GetContextMenuHandle(
+ *              e_UITD_ContextMenuType UIObj)
+ *
+ * PARAMETERS:
+ *    UIObj [I] -- The context menu item to get the handle for.
+ *
+ * FUNCTION:
+ *    This function gets a context menu item's handle.
+ *
+ * RETURNS:
+ *    The context menu item's handle or NULL if it was not found.  If this
+ *    is not supported (because there is no menu for example) then this will
+ *    return NULL.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIContextMenuCtrl *Connection::GetContextMenuHandle(e_UITD_ContextMenuType UIObj)
+{
+    return Display->GetContextMenuHandle(UIObj);
 }

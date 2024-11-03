@@ -54,6 +54,7 @@
 #include "UI/UIDebug.h"
 #include "UI/UISystem.h"
 #include "UI/UITextInputBox.h"
+#include "UI/UITextDisplay.h"
 #include "Version.h"
 #include <list>
 #include <map>
@@ -1284,6 +1285,14 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *SendBuffer11;
     e_UIMenuCtrl *SendBuffer12;
     e_UIMenuCtrl *SendBufferSendGeneric;
+    t_UIContextMenuCtrl *ContextMenu_SendBuffer;
+    t_UIContextMenuCtrl *ContextMenu_Copy;
+    t_UIContextMenuCtrl *ContextMenu_Paste;
+//    t_UIContextMenuCtrl *ContextMenu_ClearScreen;
+//    t_UIContextMenuCtrl *ContextMenu_ZoomIn;
+//    t_UIContextMenuCtrl *ContextMenu_ZoomOut;
+    t_UIContextMenuCtrl *ContextMenu_Edit;
+    t_UIContextMenuCtrl *ContextMenu_EndianSwap;
 
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
     ConnectToggle=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_ConnectToggle);
@@ -1413,7 +1422,6 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(GotoColumn,true);
         UIEnableMenu(GotoRow,true);
         UIEnableMenu(Copy,true);
-        UIEnableMenu(Paste,true);
         UIEnableToolbar(CopyTool,true);
         UIEnableToolbar(PasteTool,true);
         UIEnableMenu(SelectAll,true);
@@ -1436,6 +1444,15 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         if(Con==NULL)
             return;
 
+        ContextMenu_SendBuffer=Con->GetContextMenuHandle(e_UITD_ContextMenu_SendBuffers);
+        ContextMenu_Copy=Con->GetContextMenuHandle(e_UITD_ContextMenu_Copy);
+        ContextMenu_Paste=Con->GetContextMenuHandle(e_UITD_ContextMenu_Paste);
+        ContextMenu_Edit=Con->GetContextMenuHandle(e_UITD_ContextMenu_Edit);
+        ContextMenu_EndianSwap=Con->GetContextMenuHandle(e_UITD_ContextMenu_EndianSwap);
+
+        UISetContextMenuVisible(ContextMenu_Edit,false);
+        UISetContextMenuVisible(ContextMenu_EndianSwap,false);
+
         Connected=Con->GetConnectedStatus();
         UICheckToolbar(ConnectToggle,Connected);
         UIEnableMenu(ConnectMenu,!Connected);
@@ -1455,6 +1472,11 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(SendBuffer12,Connected);
         UIEnableMenu(SendBufferSendGeneric,Connected);
 
+        UIEnableMenu(Paste,Connected);
+
+        UIEnableContextMenu(ContextMenu_SendBuffer,Connected);
+        UIEnableContextMenu(ContextMenu_Paste,Connected);
+
         if(Con->UsingCustomSettings)
             RestoreConnectionSettingsActive=true;
 
@@ -1465,11 +1487,13 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         {
             UIEnableMenu(Copy,true);
             UIEnableToolbar(CopyTool,true);
+            UIEnableContextMenu(ContextMenu_Copy,true);
         }
         else
         {
             UIEnableMenu(Copy,false);
             UIEnableToolbar(CopyTool,false);
+            UIEnableContextMenu(ContextMenu_Copy,false);
         }
 
         if(Con->IsConnectionBinary())
@@ -3567,7 +3591,8 @@ bool MW_Event(const struct MWEvent *Event)
             Event->MW->ExeCmd(MainMenu2Cmd(Event->Info.Menu.InputID));
         break;
         case e_MWEvent_ContextMenuTriggered:
-            Event->MW->ExeCmd(MainContextMenu2Cmd(Event->Info.ContextMenu.InputID));
+            Event->MW->ExeCmd(MainSendBufferContextMenu2Cmd(Event->
+                    Info.ContextMenu.InputID));
         break;
         case e_MWEvent_BttnTriggered:
             switch(Event->Info.Bttn.InputID)

@@ -358,16 +358,15 @@ bool DisplayText::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
                     Event->Info.Mouse.y);
         break;
         case e_TextDisplayEvent_MouseRightDown:
-            DebugMsg("MouseRightDown");
         break;
         case e_TextDisplayEvent_MouseRightUp:
-            DebugMsg("MouseRightUp");
         break;
         case e_TextDisplayEvent_MouseMiddleDown:
-            DebugMsg("MouseMiddleDown");
+            Info.Mouse.x=Event->Info.Mouse.x;
+            Info.Mouse.y=Event->Info.Mouse.y;
+            SendEvent(e_DBEvent_MouseMiddlePress,&Info);
         break;
         case e_TextDisplayEvent_MouseMiddleUp:
-            DebugMsg("MouseMiddleUp");
         break;
         case e_TextDisplayEvent_MouseWheel:
             if(TextDisplayCtrl==NULL)

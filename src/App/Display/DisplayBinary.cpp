@@ -5,8 +5,6 @@
 Still to do:
  * Selection / clipboard
  * Mouse wheel
- * Right click menus
- * Remove the "send" button on the bottom if not a block connection (the same as text display)????
 
 */
 

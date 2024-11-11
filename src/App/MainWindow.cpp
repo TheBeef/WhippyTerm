@@ -940,6 +940,7 @@ class Connection *TheMainWindow::ReloadTabFromURI(const char *TabLabel,
                 throw(0);
 
             SetActiveConnection(NULL);
+            AuxControlsPanel.RemoveConnection(TabCon);
             Con_FreeConnection(TabCon);
 
             if(NoTabsConnection!=nullptr)
@@ -952,6 +953,8 @@ class Connection *TheMainWindow::ReloadTabFromURI(const char *TabLabel,
                 ParentWidget=ActiveTab;
             }
 
+            UITabCtrlSetTabID(MainTabs,ActiveTab,(uintptr_t)NewConnection);
+
             if(!NewConnection->Init(this,ParentWidget,UseSettings))
             {
                 /* We also need to free the tab because it's now an orphan */
@@ -963,10 +966,11 @@ class Connection *TheMainWindow::ReloadTabFromURI(const char *TabLabel,
                 throw("Failed to setup the new connection");
             }
 
-            UITabCtrlSetTabID(MainTabs,ActiveTab,(uintptr_t)NewConnection);
             NewConnection->SetDisplayName(TabLabel);
 
             SetActiveTab(NewConnection);
+
+            AuxControlsPanel.NewConnection(NewConnection);
 
             NewConnection->FinalizeNewConnection();
         }

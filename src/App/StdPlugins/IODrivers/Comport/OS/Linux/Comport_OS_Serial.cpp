@@ -1,5 +1,3 @@
-void DebugMsg(const char *fmt,...);
-/* DEBUG PAUL: We still need to handle setting baud rate, etc */
 /*******************************************************************************
  * FILENAME: Comport_OS_Serial.cpp
  *
@@ -31,7 +29,6 @@ void DebugMsg(const char *fmt,...);
  ******************************************************************************/
 
 /*** HEADER FILES TO INCLUDE  ***/
-//#include "Comport_OS_Serial.h"
 #include "../Comport_Serial.h"
 #include "../../Comport_Main.h"
 #include <list>
@@ -98,13 +95,40 @@ bool Comport_OS_GetSerialPortList(t_OSComportListType &List)
     struct dirent *dir;
     t_PossibleComPortList Possibles;
     string filename;
-    struct stat statbuf;
     i_PossibleComPortList pcpli;
     struct ComportInfo NewComportInfo;
     char driver[100];
+    char devname[100];
     int fd;
     struct serial_struct serialinfo;
     bool Valid;
+    bool TryGetSerialInfo;
+    struct termios tio;
+
+    /*
+        Ok, the philosophy we are using here is we look at all the stuff in
+        /sys/class/tty and assume everything is a real device.  We then
+        look at each one and if we recognize something that is known
+        to not be a real device, we test it, if the test fails then it
+        must not have been the thing that is known to have problems and we
+        add it as a real device.
+
+        We basicly error on the side of it being a real device and try to
+        screen out things known to give false positives.
+
+        Currently we check:
+            * If it has a "device/" driver named then it's a real device,
+              unless it is a "serial8250" or "port" in which case do more
+              testing
+            * If it doesn't have "device/" driver then do more testing.
+        If more testing needed then we open the device and check if:
+            * It supports 'TIOCGSERIAL' (real serial devices seem to all
+              support this)
+            * If it's "port" driver then we also check if we can do a
+              tcgetattr() on it (a number of devices get listed as tty,
+              have driver, support 'TIOCGSERIAL', but you can't do a
+              tcgetattr())
+    */
 
     d=opendir("/sys/class/tty");
     if(d)
@@ -114,11 +138,9 @@ bool Comport_OS_GetSerialPortList(t_OSComportListType &List)
             /* Check if it has a real driver */
             filename="/sys/class/tty/";
             filename+=dir->d_name;
-            filename+="/device/driver";
 
-            if(stat(filename.c_str(),&statbuf)>=0)
+            if(strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0)
             {
-                /* Real driver */
                 Possibles.push_back(dir->d_name);
             }
         }
@@ -129,6 +151,8 @@ bool Comport_OS_GetSerialPortList(t_OSComportListType &List)
     /* Ok, try to open each com port to which ones are really instead */
     for(pcpli=Possibles.begin();pcpli!=Possibles.end();pcpli++)
     {
+        TryGetSerialInfo=false;
+
         filename="/sys/class/tty/";
         filename+=*pcpli;
         filename+="/device/uevent";
@@ -136,24 +160,51 @@ bool Comport_OS_GetSerialPortList(t_OSComportListType &List)
         if(!Comport_ProcessUEventFile(filename.c_str(),"DRIVER",driver,
                 sizeof(driver)))
         {
-            continue;
+            TryGetSerialInfo=true;
         }
 
         Valid=false;
-        if(strcmp(driver,"serial8250")==0)
+        /* We need to double check if it's a 8250 or "port" */
+        if(TryGetSerialInfo || strcmp(driver,"serial8250")==0 ||
+                strcmp(driver,"port")==0)
         {
-            /* Check if it's real */
-            fd=open("",O_RDWR | O_NONBLOCK | O_NOCTTY);
-            if(fd!=-1)
+            filename="/sys/class/tty/";
+            filename+=*pcpli;
+            filename+="/uevent";
+
+            if(Comport_ProcessUEventFile(filename.c_str(),"DEVNAME",devname,
+                    sizeof(devname)))
             {
-                if(ioctl(fd,TIOCGSERIAL,&serialinfo)>=0)
+                filename="/dev/";
+                filename+=devname;
+
+                /* Check if it's real */
+                fd=open(filename.c_str(),O_RDWR | O_NONBLOCK | O_NOCTTY);
+                if(fd!=-1)
                 {
-                    if(serialinfo.type!=PORT_UNKNOWN)
+                    if(ioctl(fd,TIOCGSERIAL,&serialinfo)>=0)
                     {
-                        Valid=true;
+                        /* If it supports this ioctl then we count it as serial
+                           port */
+
+                        /* Ok, ttySx drivers that say they are "port" need more
+                           verifing because they reply to TIOCGSERIAL but don't
+                           let you do a tcgetattr() on them. */
+                        if(strcmp(driver,"port")==0)
+                        {
+                            if(tcgetattr(fd,&tio)>=0)
+                            {
+                                /* Looks like it's a real port */
+                                Valid=true;
+                            }
+                        }
+                        else
+                        {
+                            Valid=true;
+                        }
                     }
+                    close(fd);
                 }
-                close(fd);
             }
         }
         else

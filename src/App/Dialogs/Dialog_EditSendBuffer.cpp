@@ -109,8 +109,6 @@ bool RunEditSendBufferDialog(int BufferNumber)
     t_UITextInputCtrl *BufferName;
     string Name;
     char buff[100];
-    t_UIContextMenuCtrl *ContextMenu_Copy;
-    t_UIContextMenuCtrl *ContextMenu_Paste;
     t_UIContextMenuCtrl *ContextMenu_ClearScreen;
     t_UIContextMenuCtrl *ContextMenu_EndianSwap;
 
@@ -142,8 +140,6 @@ bool RunEditSendBufferDialog(int BufferNumber)
         m_DESB_HexDisplay->SetColors(g_Settings.HexDisplaysFGColor,
                 g_Settings.HexDisplaysBGColor,g_Settings.HexDisplaysSelBGColor);
 
-        ContextMenu_Copy=m_DESB_HexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_Copy);
-        ContextMenu_Paste=m_DESB_HexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_Paste);
         ContextMenu_ClearScreen=m_DESB_HexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_ClearScreen);
         ContextMenu_EndianSwap=m_DESB_HexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_EndianSwap);
 

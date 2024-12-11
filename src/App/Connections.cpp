@@ -701,6 +701,7 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
     {
         if(Display!=NULL)
             delete Display;
+        Display=NULL;
 
         return false;
     }

@@ -804,7 +804,7 @@ void ANSIX364Decoder_ProcessIncomingTextByte(t_DataProcessorHandleType *DataHand
             case 4: // End of Transmissionc
                 CodeStr="EOT";
             break;
-            case 5: // Enquiry
+            case 5: // Enquiry (Do we want an auto answer)
                 CodeStr="ENQ";
             break;
             case 6: // Acknowledge

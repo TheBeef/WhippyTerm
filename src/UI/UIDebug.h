@@ -33,13 +33,13 @@
 
 /***  HEADER FILES TO INCLUDE          ***/
 #include <stdint.h>
-#include <QDebug>
+//#include <QDebug>
 
 /***  DEFINES                          ***/
 
 /***  MACROS                           ***/
-#define D1() {uint64_t Start;Start=DEBUG_GetTimerElapsed();
-#define D2(x) qDebug("%s:%fms",x,(DEBUG_GetTimerElapsed()-Start)/1000000.0);}
+//#define D1() {uint64_t Start;Start=DEBUG_GetTimerElapsed();
+//#define D2(x) qDebug("%s:%fms",x,(DEBUG_GetTimerElapsed()-Start)/1000000.0);}
 
 /***  TYPE DEFINITIONS                 ***/
 #define FOREACH_DBT(ENTRY) \

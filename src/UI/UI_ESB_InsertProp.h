@@ -28,8 +28,8 @@
  *       Created
  *
  *******************************************************************************/
-#ifndef __UI_ESB_INSERTNUMBER_H_
-#define __UI_ESB_INSERTNUMBER_H_
+#ifndef __UI_ESB_INSERTPROP_H_
+#define __UI_ESB_INSERTPROP_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
 #include "UI/UIControl.h"

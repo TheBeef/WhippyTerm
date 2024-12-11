@@ -177,7 +177,7 @@
                   <item>
                    <widget class="QTabWidget" name="LeftPanel_tabWidget">
                     <property name="currentIndex">
-                     <number>0</number>
+                     <number>4</number>
                     </property>
                     <widget class="QWidget" name="Capture_Tab">
                      <attribute name="title">
@@ -1342,7 +1342,7 @@
               <item>
                <widget class="QTabWidget" name="BottomPanel_tabWidget">
                 <property name="currentIndex">
-                 <number>2</number>
+                 <number>0</number>
                 </property>
                 <widget class="QWidget" name="Hex_Tab">
                  <attribute name="title">

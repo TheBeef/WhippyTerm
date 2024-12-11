@@ -59,6 +59,7 @@
 #include <list>
 #include <map>
 #include <string.h>
+#include <algorithm>
 
 using namespace std;
 

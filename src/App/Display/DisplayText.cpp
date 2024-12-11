@@ -786,7 +786,7 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
                     /* Does this selection start in this fragment */
                     if(CurFrag->FragType!=e_TextCanvasFrag_String)
                         continue;
-                    Chars=utf8::distance(CurFrag->Text.begin(),
+                    Chars=utf8::unchecked::distance(CurFrag->Text.begin(),
                             CurFrag->Text.end());
                     if(SelX1>=CharsOver1 && SelX1<CharsOver1+Chars)
                     {
@@ -807,7 +807,7 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
                     /* Does this selection start in this fragment */
                     if(CurFrag->FragType!=e_TextCanvasFrag_String)
                         continue;
-                    Chars=utf8::distance(CurFrag->Text.begin(),
+                    Chars=utf8::unchecked::distance(CurFrag->Text.begin(),
                             CurFrag->Text.end());
                     if(SelX2>=CharsOver2 && SelX2<=CharsOver2+Chars)
                     {
@@ -839,7 +839,8 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
         DisplayFrag.Styling=CurFrag->Styling;
         DisplayFrag.Value=CurFrag->Value;
         DisplayFrag.Data=CurFrag->Data;
-        CharsLeft=utf8::distance(CurFrag->Text.begin(),CurFrag->Text.end());
+        CharsLeft=utf8::unchecked::distance(CurFrag->Text.begin(),
+                CurFrag->Text.end());
 
         if(FragIndex==SelectFrag1)
         {
@@ -3282,7 +3283,10 @@ bool DisplayText::ConvertScreenXY2Chars(int x,int y,int *CharX,int *CharY)
                 break;
 
             if(CurFrag->FragType==e_TextCanvasFrag_String)
-                CalX+=utf8::distance(CurFrag->Text.begin(),CurFrag->Text.end());
+            {
+                CalX+=utf8::unchecked::distance(CurFrag->Text.begin(),
+                        CurFrag->Text.end());
+            }
             StartPx+=CurFrag->WidthPx;
         }
 
@@ -3409,7 +3413,8 @@ bool DisplayText::GetSelectionString(std::string &Clip)
             if(CurFrag->FragType!=e_TextCanvasFrag_String)
                 continue;
 
-            Chars=utf8::distance(CurFrag->Text.begin(),CurFrag->Text.end());
+            Chars=utf8::unchecked::distance(CurFrag->Text.begin(),
+                    CurFrag->Text.end());
             if(SelX1>=CharsOver && SelX1<CharsOver+Chars)
             {
                 StartOfFragCharsOver1=CharsOver;
@@ -3501,7 +3506,8 @@ bool DisplayText::GetSelectionString(std::string &Clip)
             if(CurFrag->FragType!=e_TextCanvasFrag_String)
                 continue;
 
-            Chars=utf8::distance(CurFrag->Text.begin(),CurFrag->Text.end());
+            Chars=utf8::unchecked::distance(CurFrag->Text.begin(),
+                    CurFrag->Text.end());
             if(SelX1>=CharsOver && SelX1<CharsOver+Chars)
                 break;
             CharsOver+=Chars;
@@ -3554,7 +3560,8 @@ bool DisplayText::GetSelectionString(std::string &Clip)
             if(CurFrag->FragType!=e_TextCanvasFrag_String)
                 continue;
 
-            Chars=utf8::distance(CurFrag->Text.begin(),CurFrag->Text.end());
+            Chars=utf8::unchecked::distance(CurFrag->Text.begin(),
+                    CurFrag->Text.end());
             if(SelX2>=CharsOver && SelX2<=CharsOver+Chars)
                 break;
             Clip+=CurFrag->Text;
@@ -3643,8 +3650,8 @@ void DisplayText::SelectAll(void)
         {
             if(CurFrag->FragType==e_TextCanvasFrag_String)
             {
-                Selection_AnchorX+=utf8::distance(CurFrag->Text.begin(),
-                        CurFrag->Text.end());
+                Selection_AnchorX+=utf8::unchecked::distance(CurFrag->
+                        Text.begin(),CurFrag->Text.end());
             }
         }
 
@@ -3929,7 +3936,8 @@ int DisplayText::CalcCursorXPx(void)
     for(CurFrag=ActiveLine->Frags.begin();CurFrag!=ActiveLine->Frags.end();
             CurFrag++)
     {
-        Chars=utf8::distance(CurFrag->Text.begin(),CurFrag->Text.end());
+        Chars=utf8::unchecked::distance(CurFrag->Text.begin(),
+                CurFrag->Text.end());
         if(CursorX>=CalX && CursorX<CalX+Chars)
             break;
 
@@ -4016,7 +4024,8 @@ int DisplayText::CharUnderCursorWidthPx(void)
     for(CurFrag=ActiveLine->Frags.begin();CurFrag!=ActiveLine->Frags.end();
             CurFrag++)
     {
-        Chars=utf8::distance(CurFrag->Text.begin(),CurFrag->Text.end());
+        Chars=utf8::unchecked::distance(CurFrag->Text.begin(),
+                CurFrag->Text.end());
         if(CursorX>=CalX && CursorX<CalX+Chars)
             break;
 

@@ -2179,7 +2179,7 @@ void Connection::DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
             ClearScreen();
         break;
         case e_ConFunc_ClearArea:
-//            Display_ClearArea(DB,NULL,Arg1,Arg2,Arg3,Arg4);
+            Display->ClearArea(Arg1,Arg2,Arg3,Arg4);
         break;
         case e_ConFunc_Tab:
             Display->AddTab();

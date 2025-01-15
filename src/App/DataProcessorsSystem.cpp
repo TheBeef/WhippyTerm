@@ -108,6 +108,9 @@ void DPS_SendBackspace(void);
 void DPS_SendEnter(void);
 void DPS_BinaryAddText(const char *Str);
 void DPS_BinaryAddHex(uint8_t Byte);
+void DPS_DoSystemBell(void);
+void DPS_DoScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,
+        int32_t DeltaX,int32_t DeltaY);
 
 /*** VARIABLE DEFINITIONS     ***/
 static struct DataProcessor *m_ActiveDataProcessor;
@@ -141,6 +144,8 @@ struct DPS_API g_DPSAPI=
     DPS_SendEnter,
     DPS_BinaryAddText,
     DPS_BinaryAddHex,
+    DPS_DoSystemBell,
+    DPS_DoScrollArea,
 };
 t_DPSDataProcessorsType m_DataProcessors;     // All available data processors
 
@@ -1190,13 +1195,17 @@ void DPS_DoReturn(void)
  *    This function moves the cursor back one position.  When it hits the
  *    left edge it will move to the right edge up one line.
  *
+ *    This acts on the backspace command, unlike DPS_SendBackspace() which
+ *    just writes the backspace char.
+ *
  *    Depending on the settings this may erase the char under the char.
+ *
  *
  * RETURNS:
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    DPS_SendBackspace()
  ******************************************************************************/
 void DPS_DoBackspace(void)
 {
@@ -1275,6 +1284,20 @@ void DPS_DoClearScreen(void)
  * FUNCTION:
  *    This function clears a box on the screen.  The box may be only one line
  *    high or one row wide.
+ *
+ *    The line with Y1 and Y2 on it will be cleared.  The column that X1 and
+ *    X2 will also be cleared.
+ *
+ *    So if you send in:
+ *          DoClearArea(10,1,12,3);
+ *    Then it will clear line 1, 2, and 3 and column 10, 11 and 12.
+ *
+ *           012345678901234567890
+ *          0xxxxxxxxxxxxxxxxxxxxx
+ *          1xxxxxxxxxx   xxxxxxxx
+ *          2xxxxxxxxxx   xxxxxxxx
+ *          3xxxxxxxxxx   xxxxxxxx
+ *          4xxxxxxxxxxxxxxxxxxxxx
  *
  *    The background color will be taken from the current styling info.
  *
@@ -1488,11 +1511,14 @@ void DPS_DoTab(void)
  *    This function send the backspace char.  What the backspace char is
  *    depends on what the user has selected.
  *
+ *    This writes a backspace char (as if it was typed on the keyboard),
+ *    unlike DPS_DoBackspace() which does (acks) the backspace.
+ *
  * RETURNS:
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    DPS_DoBackspace()
  ******************************************************************************/
 void DPS_SendBackspace(void)
 {
@@ -1599,5 +1625,64 @@ void DPS_BinaryAddHex(uint8_t Byte)
     buff[1]=0;
 
     Con_WriteChar2Display(buff);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_DoSystemBell
+ *
+ * SYNOPSIS:
+ *    void DPS_DoSystemBell(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function rings the system bell.  The bell might be turned off in
+ *    which case this does nothing.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DPS_DoSystemBell(void)
+{
+/* DEBUG PAUL: Do this */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_DoScrollArea
+ *
+ * SYNOPSIS:
+ *    void DPS_DoScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,
+ *              int32_t DeltaX,int32_t DeltaY);
+ *
+ * PARAMETERS:
+ *    X1 [I] -- The left edge
+ *    Y1 [I] -- The top edge
+ *    X2 [I] -- The right edge
+ *    Y2 [I] -- The bottom edge
+ *    DeltaX [I] -- The amount to scroll in the X direction
+ *    DeltaY [I] -- The amount to scroll in the Y direction
+ *
+ * FUNCTION:
+ *    This function scrolls an area of the screen.  Nothing is moved to the
+ *    scroll back buffer.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DPS_DoScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,
+        int32_t DeltaX,int32_t DeltaY)
+{
+//void Con_DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
+//        uintptr_t Arg3,uintptr_t Arg4)
+//    Con_DoFunction(e_ConFunc_ClearArea,X1,Y1,X2,Y2);
 }
 

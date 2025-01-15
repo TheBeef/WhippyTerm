@@ -14,7 +14,194 @@
  *    Whippy Term
  *
  * FILE DESCRIPTION:
- *    
+ *    == C0 ==
+ *    NUL     00/00           0x00    NULL
+ *    SOH     00/01           0x01    START OF HEADING
+ *    STX     00/02           0x02    START OF TEXT
+ *    ETX     00/03           0x03    END OF TEXT
+ *    EOT     00/04           0x04    END OF TRANSMISSION
+ *    ENQ     00/05           0x05    ENQUIRY
+ *    ACK     00/06           0x06    ACKNOWLEDGE
+ *    BEL     00/07           0x07    BELL
+ *    BS      00/08           0x08    BACKSPACE
+ *    HT      00/09           0x09    CHARACTER TABULATION
+ *    LF      00/10           0x0A    LINE FEED
+ *    VT      00/11           0x0B    LINE TABULATION
+ *    FF      00/12           0x0C    FORM FEED
+ *    CR      00/13           0x0D    CARRIAGE RETURN
+ *    SO/LS1  00/14           0x0E    SHIFT-OUT / LOCKING-SHIFT ONE
+ *    SI/LS0  00/15           0x0F    SHIFT-IN / LOCKING-SHIFT ZERO
+ *    DLE     01/00           0x10    DATA LINK ESCAPE
+ *    DC1     01/01           0x11    DEVICE CONTROL ONE
+ *    DC2     01/02           0x12    DEVICE CONTROL TWO
+ *    DC3     01/03           0x13    DEVICE CONTROL THREE
+ *    DC4     01/04           0x14    DEVICE CONTROL FOUR
+ *    NAK     01/05           0x15    NEGATIVE ACKNOWLEDGE
+ *    SYN     01/06           0x16    SYNCHRONOUS IDLE
+ *    ETB     01/07           0x17    END OF TRANSMISSION BLOCK
+ *    CAN     01/08           0x18    CANCEL
+ *    EM      01/09           0x19    END OF MEDIUM
+ *    SUB     01/10           0x1A    SUBSTITUTE
+ *    ESC     01/11           0x1B    ESCAPE
+ *    IS4     01/12           0x1C    INFORMATION SEPARATOR FOUR (FS - FILE SEPARATOR)
+ *    IS3     01/13           0x1D    INFORMATION SEPARATOR THREE (GS - GROUP SEPARATOR)
+ *    IS2     01/14           0x1E    INFORMATION SEPARATOR TWO (RS - RECORD SEPARATOR)
+ *    IS1     01/15           0x1F    INFORMATION SEPARATOR ONE (US - UNIT SEPARATOR)
+ *
+ *    == C1 ==
+ *    BPH     ESC 04/02       0x1B 0x42   B   BREAK PERMITTED HERE
+ *    NBH     ESC 04/03       0x1B 0x43   C   NO BREAK HERE
+ *    NEL     ESC 04/05       0x1B 0x45   E   NEXT LINE
+ *    SSA     ESC 04/06       0x1B 0x46   F   START OF SELECTED AREA
+ *    ESA     ESC 04/07       0x1B 0x47   G   END OF SELECTED AREA
+ *    HTS     ESC 04/08       0x1B 0x48   H   CHARACTER TABULATION SET
+ *    HTJ     ESC 04/09       0x1B 0x49   I   CHARACTER TABULATION WITH JUSTIFICATION
+ *    VTS     ESC 04/10       0x1B 0x4A   J   LINE TABULATION SET
+ *    PLD     ESC 04/11       0x1B 0x4B   K   PARTIAL LINE FORWARD
+ *    PLU     ESC 04/12       0x1B 0x4C   L   PARTIAL LINE BACKWARD
+ *    RI      ESC 04/13       0x1B 0x4D   M   REVERSE LINE FEED
+ *    SS2     ESC 04/14       0x1B 0x4E   N   SINGLE-SHIFT TWO
+ *    SS3     ESC 04/15       0x1B 0x4F   O   SINGLE-SHIFT THREE
+ *
+ *    DCS     ESC 05/00       0x1B 0x50   P   DEVICE CONTROL STRING
+ *    PU1     ESC 05/01       0x1B 0x51   Q   PRIVATE USE ONE
+ *    PU2     ESC 05/02       0x1B 0x52   R   PRIVATE USE TWO
+ *    STS     ESC 05/03       0x1B 0x53   S   SET TRANSMIT STATE
+ *    CCH     ESC 05/04       0x1B 0x54   T   CANCEL CHARACTER
+ *    MW      ESC 05/05       0x1B 0x55   U   MESSAGE WAITING
+ *    SPA     ESC 05/06       0x1B 0x56   V   START OF GUARDED AREA
+ *    EPA     ESC 05/07       0x1B 0x57   W   END OF GUARDED AREA
+ *    SOS     ESC 05/08       0x1B 0x58   X   START OF STRING
+ *    SCI     ESC 05/10       0x1B 0x5A   Z   SINGLE CHARACTER INTRODUCER
+ *    CSI     ESC 05/11       0x1B 0x5B   [   CONTROL SEQUENCE INTRODUCER
+ *    ST      ESC 05/12       0x1B 0x5C   \   STRING TERMINATOR
+ *    OSC     ESC 05/13       0x1B 0x5D   ]   OPERATING SYSTEM COMMAND
+ *    PM      ESC 05/14       0x1B 0x5E   ^   PRIVACY MESSAGE
+ *    APC     ESC 05/15       0x1B 0x5F   _   APPLICATION PROGRAM COMMAND
+ *
+ *    == NP ==
+ *
+ *    == Ps ==
+ *    ICH     CSI 04/00       0x1B 0x5B 0x40  @   INSERT CHARACTER
+ *    CUU     CSI 04/01       0x1B 0x5B 0x41  A   CURSOR UP
+ *    CUD     CSI 04/02       0x1B 0x5B 0x42  B   CURSOR DOWN
+ *    CUF     CSI 04/03       0x1B 0x5B 0x43  C   CURSOR RIGHT
+ *    CUB     CSI 04/04       0x1B 0x5B 0x44  D   CURSOR LEFT
+ *    CNL     CSI 04/05       0x1B 0x5B 0x45  E   CURSOR NEXT LINE
+ *    CPL     CSI 04/06       0x1B 0x5B 0x46  F   CURSOR PRECEDING LINE
+ *    CHA     CSI 04/07       0x1B 0x5B 0x47  G   CURSOR CHARACTER ABSOLUTE
+ *    CUP     CSI 04/08       0x1B 0x5B 0x48  H   CURSOR POSITION
+ *    CHT     CSI 04/09       0x1B 0x5B 0x49  I   CURSOR FORWARD TABULATION
+ *    ED      CSI 04/10       0x1B 0x5B 0x4A  J   ERASE IN PAGE
+ *    EL      CSI 04/11       0x1B 0x5B 0x4B  K   ERASE IN LINE
+ *    IL      CSI 04/12       0x1B 0x5B 0x4C  L   INSERT LINE
+ *    DL      CSI 04/13       0x1B 0x5B 0x4D  M   DELETE LINE
+ *    EF      CSI 04/14       0x1B 0x5B 0x4E  N   ERASE IN FIELD
+ *    EA      CSI 04/15       0x1B 0x5B 0x4F  O   ERASE IN AREA
+ *
+ *    DCH     CSI 05/00       0x1B 0x5B 0x50  @   DELETE CHARACTER
+ *    SEE     CSI 05/01       0x1B 0x5B 0x51  Q   SELECT EDITING EXTENT (miss labled SSE)
+ *    CPR     CSI 05/02       0x1B 0x5B 0x52  R   ACTIVE POSITION REPORT
+ *    SU      CSI 05/03       0x1B 0x5B 0x53  S   SCROLL UP
+ *    SD      CSI 05/04       0x1B 0x5B 0x54  T   SCROLL DOWN
+ *    NP      CSI 05/05       0x1B 0x5B 0x55  U   NEXT PAGE
+ *    PP      CSI 05/06       0x1B 0x5B 0x56  V   PRECEDING PAGE
+ *    CTC     CSI 05/07       0x1B 0x5B 0x57  W   CURSOR TABULATION CONTROL
+ *    ECH     CSI 05/08       0x1B 0x5B 0x58  X   ERASE CHARACTER
+ *    CVT     CSI 05/09       0x1B 0x5B 0x59  Y   CURSOR LINE TABULATION
+ *    CBT     CSI 05/10       0x1B 0x5B 0x5A  Z   CURSOR BACKWARD TABULATION
+ *    SRS     CSI 05/11       0x1B 0x5B 0x5B  [   START REVERSED STRING
+ *    PTX     CSI 05/12       0x1B 0x5B 0x5C  \   PARALLEL TEXTS
+ *    SDS     CSI 05/13       0x1B 0x5B 0x5D  ]   START DIRECTED STRING
+ *    SIMD    CSI 05/14       0x1B 0x5B 0x5E  ^   SELECT IMPLICIT MOVEMENT DIRECTION
+ *    ---     CSI 05/15       0x1B 0x5B 0x5F  _   
+ *
+ *    HPA     CSI 06/00       0x1B 0x5B 0x60  `   CHARACTER POSITION ABSOLUTE
+ *    HPR     CSI 06/01       0x1B 0x5B 0x61  a   CHARACTER POSITION FORWARD
+ *    REP     CSI 06/02       0x1B 0x5B 0x62  b   REPEAT
+ *    DA      CSI 06/03       0x1B 0x5B 0x63  c   DEVICE ATTRIBUTES
+ *    VPA     CSI 06/04       0x1B 0x5B 0x64  d   LINE POSITION ABSOLUTE
+ *    VPR     CSI 06/05       0x1B 0x5B 0x65  e   LINE POSITION FORWARD
+ *    HVP     CSI 06/06       0x1B 0x5B 0x66  f   CHARACTER AND LINE POSITION
+ *    TBC     CSI 06/07       0x1B 0x5B 0x67  g   TABULATION CLEAR
+ *    SM      CSI 06/08       0x1B 0x5B 0x68  h   SET MODE
+ *    MC      CSI 06/09       0x1B 0x5B 0x69  i   MEDIA COPY
+ *    HPB     CSI 06/10       0x1B 0x5B 0x6A  j   CHARACTER POSITION BACKWARD
+ *    VPB     CSI 06/11       0x1B 0x5B 0x6B  k   LINE POSITION BACKWARD
+ *    RM      CSI 06/12       0x1B 0x5B 0x6C  l   RESET MODE
+ *    SGR     CSI 06/13       0x1B 0x5B 0x6D  m   SELECT GRAPHIC RENDITION
+ *    DSR     CSI 06/14       0x1B 0x5B 0x6E  n   DEVICE STATUS REPORT
+ *    DAQ     CSI 06/15       0x1B 0x5B 0x6F  o   DEFINE AREA QUALIFICATION
+ *
+ *    == Pn ==
+ *    SL      CSI 04/00       0x1B 0x5B 0x20 @    SCROLL LEFT
+ *    SR      CSI 04/01       0x1B 0x5B 0x20 A    SCROLL RIGHT
+ *    GSM     CSI 04/02       0x1B 0x5B 0x20 B    GRAPHIC SIZE MODIFICATION
+ *    GSS     CSI 04/03       0x1B 0x5B 0x20 C    GRAPHIC SIZE SELECTION
+ *    FNT     CSI 04/04       0x1B 0x5B 0x20 D    FONT SELECTION
+ *    TSS     CSI 04/05       0x1B 0x5B 0x20 E    THIN SPACE SPECIFICATION
+ *    JFY     CSI 04/06       0x1B 0x5B 0x20 F    JUSTIFY
+ *    SPI     CSI 04/07       0x1B 0x5B 0x20 G    SPACING INCREMENT
+ *    QUAD    CSI 04/08       0x1B 0x5B 0x20 H    QUAD
+ *    SSU     CSI 04/09       0x1B 0x5B 0x20 I    SELECT SIZE UNIT
+ *    PFS     CSI 04/10       0x1B 0x5B 0x20 J    PAGE FORMAT SELECTION
+ *    SHS     CSI 04/11       0x1B 0x5B 0x20 K    SELECT CHARACTER SPACING
+ *    SVS     CSI 04/12       0x1B 0x5B 0x20 L    SELECT LINE SPACING
+ *    IGS     CSI 04/13       0x1B 0x5B 0x20 M    IDENTIFY GRAPHIC SUBREPERTOIRE
+ *    --      CSI 04/14       0x1B 0x5B 0x20 N    
+ *    IDCS    CSI 04/15       0x1B 0x5B 0x20 O    IDENTIFY DEVICE CONTROL STRING
+ *
+ *    PPA     CSI 05/00       0x1B 0x5B 0x20 P    PAGE POSITION ABSOLUTE
+ *    PPR     CSI 05/01       0x1B 0x5B 0x20 Q    PAGE POSITION FORWARD
+ *    PPB     CSI 05/02       0x1B 0x5B 0x20 R    PAGE POSITION BACKWARD
+ *    SPD     CSI 05/03       0x1B 0x5B 0x20 S    SELECT PRESENTATION DIRECTIONS
+ *    DTA     CSI 05/04       0x1B 0x5B 0x20 T    DIMENSION TEXT AREA
+ *    SHL/SLH CSI 05/05       0x1B 0x5B 0x20 U    SET LINE HOME
+ *    SLL     CSI 05/06       0x1B 0x5B 0x20 V    SET LINE LIMIT
+ *    FNK     CSI 05/07       0x1B 0x5B 0x20 W    FUNCTION KEY
+ *    SPQR    CSI 05/08       0x1B 0x5B 0x20 X    SELECT PRINT QUALITY AND RAPIDITY
+ *    SEF     CSI 05/09       0x1B 0x5B 0x20 Y    SHEET EJECT AND FEED
+ *    PEC     CSI 05/10       0x1B 0x5B 0x20 Z    PRESENTATION EXPAND OR CONTRACT
+ *    SSW     CSI 05/11       0x1B 0x5B 0x20 [    SET SPACE WIDTH
+ *    SACS    CSI 05/12       0x1B 0x5B 0x20 \    SET ADDITIONAL CHARACTER SEPARATION
+ *    SAPV    CSI 05/13       0x1B 0x5B 0x20 ]    SELECT ALTERNATIVE PRESENTATION VARIANTS
+ *    STAB    CSI 05/14       0x1B 0x5B 0x20 ^    SELECTIVE TABULATION
+ *    GCC     CSI 05/15       0x1B 0x5B 0x20 _    GRAPHIC CHARACTER COMBINATION
+ *
+ *    TATE    CSI 06/00       0x1B 0x5B 0x20 `    TABULATION ALIGNED TRAILING EDGE
+ *    TALE    CSI 06/01       0x1B 0x5B 0x20 a    TABULATION ALIGNED LEADING EDGE
+ *    TAC     CSI 06/02       0x1B 0x5B 0x20 b    TABULATION ALIGNED CENTRED
+ *    TCC     CSI 06/03       0x1B 0x5B 0x20 c    TABULATION CENTRED ON CHARACTER
+ *    TSR     CSI 06/04       0x1B 0x5B 0x20 d    TABULATION STOP REMOVE
+ *    SCO     CSI 06/05       0x1B 0x5B 0x20 e    SELECT CHARACTER ORIENTATION
+ *    SRCS    CSI 06/06       0x1B 0x5B 0x20 f    SET REDUCED CHARACTER SEPARATION
+ *    SCS     CSI 06/07       0x1B 0x5B 0x20 g    SET CHARACTER SPACING
+ *    SLS     CSI 06/08       0x1B 0x5B 0x20 h    SET LINE SPACING
+ *    --      CSI 06/09       0x1B 0x5B 0x20 i    
+ *    --      CSI 06/10       0x1B 0x5B 0x20 j    
+ *    SCP     CSI 06/11       0x1B 0x5B 0x20 k    SELECT CHARACTER PATH
+ *    --      CSI 06/12       0x1B 0x5B 0x20 l    
+ *    --      CSI 06/13       0x1B 0x5B 0x20 m    
+ *    --      CSI 06/14       0x1B 0x5B 0x20 n    
+ *    --      CSI 06/15       0x1B 0x5B 0x20 o    
+ *
+ *    == Fs ==
+ *    DMI     ESC 06/00       0x1B 0x60   `   DISABLE MANUAL INPUT
+ *    INT     ESC 06/01       0x1B 0x61   a   INTERRUPT
+ *    EMI     ESC 06/02       0x1B 0x62   b   ENABLE MANUAL INPUT
+ *    RIS     ESC 06/03       0x1B 0x63   c   RESET TO INITIAL STATE
+ *    CMD     ESC 06/04       0x1B 0x64   d   CODING METHOD DELIMITER
+ *    --      ESC 06/05       0x1B 0x65   e   
+ *    --      ESC 06/06       0x1B 0x66   f   
+ *    --      ESC 06/07       0x1B 0x67   g   
+ *    --      ESC 06/08       0x1B 0x68   h   
+ *    --      ESC 06/09       0x1B 0x69   i   
+ *    --      ESC 06/10       0x1B 0x6A   j   
+ *    --      ESC 06/11       0x1B 0x6B   k   
+ *    --      ESC 06/12       0x1B 0x6C   l   
+ *    --      ESC 06/13       0x1B 0x6D   m   
+ *    LS2     ESC 06/14       0x1B 0x6E   n   LOCKING-SHIFT TWO
+ *    LS3     ESC 06/15       0x1B 0x6F   o   LOCKING-SHIFT THREE
  *
  * COPYRIGHT:
  *    Copyright 2018 Paul Hutchinson.
@@ -49,15 +236,32 @@
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      ANSIX3_64 // The name to append on the RegisterPlugin() function for built in version
 #define NEEDED_MIN_API_VERSION                  0x000B0000
 
+#define MAX_SEARCH_ABORT_COUNT  128
+
+#define LOG_UNKNOWN_CODES                   // Write a log when we see an unknown code
+#define LOG_UNKNOWN_CODES_FILENAME          "/ram/unknowncodes.txt"
+
 /*** MACROS                   ***/
 
 /*** TYPE DEFINITIONS         ***/
+typedef enum
+{
+    e_ESCState_Normal,
+    e_ESCState_Search4Exit,
+    e_ESCState_Search4ST,
+    e_ESCState_ESC,
+    e_ESCState_CSI,
+    e_ESCState_CSIQuest,
+    e_ESCStateMAX
+} e_ESCStateType;
+
 struct ANSIX364DecoderData
 {
-    bool ProcessingESC;
-    bool ProcessingCSI;
+    e_ESCStateType CurrentMode;
     int CSIArg[10];
     unsigned int CSIArgCount;
+    unsigned int SearchAbortCount;
+    unsigned int SearchIndex;
     int CurrentNum;
     bool DoingDim;
     bool DoingBright;
@@ -76,10 +280,25 @@ void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data);
 void ANSIX364Decoder_ProcessCSI(struct ANSIX364DecoderData *Data,
         const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
         PG_BOOL *Consumed);
+void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
+        const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+        PG_BOOL *Consumed);
 void ANSIX364Decoder_ResetSGR(struct ANSIX364DecoderData *Data);
 PG_BOOL ANSIX364Decoder_ProcessKeyPress(t_DataProcessorHandleType *DataHandle,
             const uint8_t *KeyChar,int KeyCharLen,e_UIKeys ExtendedKey,
             uint8_t Mod);
+void ANSIX364Decoder_ProcessESC(struct ANSIX364DecoderData *Data,
+        const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+        PG_BOOL *Consumed);
+void ANSIX364Decoder_ProcessNormalChar(struct ANSIX364DecoderData *Data,
+        const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+        PG_BOOL *Consumed);
+void ANSIX364Decoder_ProcessCSIQuest(struct ANSIX364DecoderData *Data,
+        const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+        PG_BOOL *Consumed);
+void ANSIX364Decoder_DoCSIQuestCommand(struct ANSIX364DecoderData *Data,
+        const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+        PG_BOOL *Consumed);
 
 /*** VARIABLE DEFINITIONS     ***/
 static const struct PI_UIAPI *m_UIAPI;
@@ -188,9 +407,9 @@ t_DataProcessorHandleType *ANSIX364Decoder_AllocateData(void)
     if(Data==NULL)
         return NULL;
 
-    Data->ProcessingESC=false;
-    Data->ProcessingCSI=false;
+    Data->CurrentMode=e_ESCState_Normal;
     Data->CSIArgCount=0;
+    Data->SearchAbortCount=0;
     Data->CurrentNum=0;
     Data->SavedCursorX=0;
     Data->SavedCursorY=0;
@@ -666,258 +885,282 @@ void ANSIX364Decoder_ProcessIncomingTextByte(t_DataProcessorHandleType *DataHand
         PG_BOOL *Consumed)
 {
     struct ANSIX364DecoderData *Data=(struct ANSIX364DecoderData *)DataHandle;
+
+    switch(Data->CurrentMode)
+    {
+        case e_ESCState_Normal:
+            ANSIX364Decoder_ProcessNormalChar(Data,RawByte,ProcessedChar,
+                    CharLen,Consumed);
+        break;
+        case e_ESCState_Search4Exit:
+            /* We are searching for a char that will make us exit (and ignore)
+               the current mode */
+            if(RawByte!=':' && RawByte!=';' && (RawByte<'0' || RawByte>'9'))
+            {
+                Data->CurrentMode=e_ESCState_Normal;
+            }
+            *Consumed=true;
+        break;
+        case e_ESCState_Search4ST:
+            /* Search until we find a ST (String Terminator) or we have to many
+               chars (we don't want to get locked into this) */
+            if((RawByte<0x08 || RawByte>0x0D) &&
+                    (RawByte<0x20 || RawByte>0x7E) &&
+                    RawByte!=0x1B)
+            {
+                /* This char is not in the valid range, abort */
+                Data->CurrentMode=e_ESCState_Normal;
+                break;
+            }
+            switch(Data->SearchIndex)
+            {
+                case 0: // First byte
+                    if(RawByte==0x1B)   // ESC
+                    {
+                        /* Ok, we need to check the new char */
+                        Data->SearchIndex++;
+                    }
+                break;
+                case 1: // Second byte
+                    if(RawByte=='\\')   // STRING TERMINATOR
+                    {
+                        /* Ok we are done */
+                        Data->CurrentMode=e_ESCState_Normal;
+                    }
+                    else
+                    {
+                        Data->SearchIndex=0;
+                    }
+                break;
+                default:
+                break;
+            }
+            Data->SearchAbortCount++;
+            if(Data->SearchAbortCount>MAX_SEARCH_ABORT_COUNT)
+            {
+                /* The string is too long so we abort (so we don't get stuck) */
+                Data->CurrentMode=e_ESCState_Normal;
+            }
+            *Consumed=true;
+        break;
+        case e_ESCState_ESC:
+            ANSIX364Decoder_ProcessESC(Data,RawByte,ProcessedChar,
+                    CharLen,Consumed);
+        break;
+        case e_ESCState_CSI:
+            ANSIX364Decoder_ProcessCSI(Data,RawByte,ProcessedChar,
+                    CharLen,Consumed);
+        break;
+        case e_ESCState_CSIQuest:
+            ANSIX364Decoder_ProcessCSIQuest(Data,RawByte,ProcessedChar,
+                    CharLen,Consumed);
+        break;
+        case e_ESCStateMAX:
+        default:
+            /* Invalid mode switch back to normal */
+            Data->CurrentMode=e_ESCState_Normal;
+        break;
+    }
+}
+
+void ANSIX364Decoder_ProcessNormalChar(struct ANSIX364DecoderData *Data,
+        const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+        PG_BOOL *Consumed)
+{
     const char *CodeStr;
 
-    if(Data->ProcessingCSI)
+    // https://en.wikipedia.org/wiki/C0_and_C1_control_codes
+    CodeStr=NULL;
+    switch(RawByte)
     {
-        /* We keep going until we see something that isn't a "0-9:;<=>?" */
-        *Consumed=true;
-        switch(RawByte)
-        {
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                /* Add to the number */
-                Data->CurrentNum*=10;
-                Data->CurrentNum+=RawByte-'0';
-            break;
-            case ':':
-            break;
-            case ';':
-                /* Next arg */
-                if(Data->CSIArgCount<sizeof(Data->CSIArg)/sizeof(int))
-                    Data->CSIArg[Data->CSIArgCount++]=Data->CurrentNum;
-                Data->CurrentNum=0;
-            break;
-            case '<':
-            case '=':
-            case '>':
-            default:
-                /* This is the end of the command */
-                if(Data->CSIArgCount<sizeof(Data->CSIArg)/sizeof(int))
-                    Data->CSIArg[Data->CSIArgCount++]=Data->CurrentNum;
-
-                ANSIX364Decoder_ProcessCSI(Data,RawByte,ProcessedChar,CharLen,
-                        Consumed);
-                Data->ProcessingCSI=false;
-            break;
-        }
-    }
-    else if(Data->ProcessingESC)
-    {
-        *Consumed=true;
-        Data->ProcessingESC=false;
-        // https://en.wikipedia.org/wiki/C0_and_C1_control_codes
-        // https://www.gnu.org/software/screen/manual/html_node/Control-Sequences.html
-        switch(RawByte)
-        {
-            case 27:    // ESC
-                /* Pass it along */
-                *Consumed=false;
-            break;
-            case '0':   // 
-            case '1':   // 
-            case '2':   // 
-            case '3':   // 
-            case '4':   // 
-            case '5':   // 
-            case '6':   // 
-            case '7':   // DEBUG PAUL: Save Cursor and Attributes
-            case '8':   // DEBUG PAUL: Restore Cursor and Attributes
-            case '9':   // 
-            break;
-            case '@':   // Padding Character
-            case 'A':   // High Octet Preset
-            case 'B':   // Break Permitted Here
-            case 'C':   // No Break Here
-            case 'D':   // Index
-            break;
-            case 'E':   // Next Line
-                m_DPS->DoReturn();
-                m_DPS->DoNewLine();
-            break;
-            case 'F':   // Start of Selected Area
-            case 'G':   // End of Selected Area
-            case 'H':   // Character Tabulation Set Horizontal Tabulation Set
-            case 'I':   // Character Tabulation With Justification Horizontal Tabulation With Justification
-            case 'J':   // Line Tabulation Set Vertical Tabulation Set
-            case 'K':   // Partial Line Forward Partial Line Down
-            case 'L':   // Partial Line Backward Partial Line Up
-            case 'M':   // Reverse Line Feed Reverse Index
-            case 'N':   // Single-Shift 2
-            case 'O':   // Single-Shift 3
-            case 'P':   // Device Control String
-            case 'Q':   // PU1 -- Private Use 1
-            case 'R':   // PU2 -- Private Use 2
-            case 'S':   // Set Transmit State
-            break;
-            case 'T':   // Cancel character
-                /* Backspace */
-                m_DPS->DoBackspace();
-                m_DPS->InsertString((uint8_t *)" ",1);
-                m_DPS->DoBackspace();
-            break;
-            case 'U':   // Message Waiting
-            case 'V':   // Start of Protected Area
-            case 'W':   // End of Protected Area
-            case 'X':   // Start of String
-            case 'Y':   // Single Graphic Character Introducer
-            case 'Z':   // Single Character Introducer
-            break;
-            case '[':   // Control Sequence Introducer (CSI)
-                Data->ProcessingCSI=true;
-            break;
-            case '\\':  // String Terminator
-            case ']':   // Operating System Command
-            case '^':   // Privacy Message
-            case '_':   // Application Program Command
-            break;
-            default:
-            break;
-        }
-    }
-    else
-    {
-        // https://en.wikipedia.org/wiki/C0_and_C1_control_codes
-        CodeStr=NULL;
-        switch(RawByte)
-        {
-            case 0: // NULL
-                CodeStr="NUL";
-            break;
-            case 1: // Start of Heading
-                CodeStr="SOH";
-            break;
-            case 2: // Start of Text
-                CodeStr="STX";
-            break;
-            case 3: // End of Text
-                CodeStr="ETX";
-            break;
-            case 4: // End of Transmissionc
-                CodeStr="EOT";
-            break;
-            case 5: // Enquiry (Do we want an auto answer)
-                CodeStr="ENQ";
-            break;
-            case 6: // Acknowledge
-                CodeStr="ACK";
-            break;
-            case 7: // Bell
-                CodeStr="BEL";
-//                MW_SystemBeep();
-                *Consumed=true;
-            break;
-            case 8: // Backspace
-                /* Backspace */
-//                CodeStr="BS";
-                m_DPS->DoBackspace();
-                *Consumed=true;
-            break;
-            case 9: // Character Tabulation, Horizontal Tabulation
-                m_DPS->DoTab();
-                *Consumed=true;
-            break;
-            case 10:    // Line Feed
-                /* New line */
-                m_DPS->DoNewLine();
-//                CodeStr="LF";
-                *Consumed=true;
-            break;
-            case 11:    // Line Tabulation, Vertical Tabulation
-                CodeStr="VT";
-            break;
-            case 12:    // Form Feed
-                m_DPS->DoClearScreen();
-//                CodeStr="FF";
-                *Consumed=true;
-            break;
-            case 13:    // Carriage Return
-                m_DPS->DoReturn();
-//                CodeStr="CR";
-                *Consumed=true;
-            break;
-            case 14:    // Shift Out
-                CodeStr="SO";
-            break;
-            case 15:    // Shift In
-                CodeStr="SI";
-            break;
-            case 16:    // Data Link Escape
-                CodeStr="DLE";
-            break;
-            case 17:    // Device Control One (XON)
-                CodeStr="DC1";
-            break;
-            case 18:    // Device Control Two
-                CodeStr="DC2";
-            break;
-            case 19:    // Device Control Three (XOFF)
-                CodeStr="DC3";
-            break;
-            case 20:    // Device Control Four
-                CodeStr="DC4";
-            break;
-            case 21:    // Negative Acknowledge
-                CodeStr="NAK";
-            break;
-            case 22:    // Synchronous Idle
-                CodeStr="SYN";
-            break;
-            case 23:    // End of Transmission Block
-                CodeStr="ETB";
-            break;
-            case 24:    // Cancel
-                CodeStr="CAN";
-            break;
-            case 25:    // End of medium
-                CodeStr="EM";
-            break;
-            case 26:    // Substitute
-                CodeStr="SUB";
-            break;
-            case 27:    // Escape
-//                CodeStr="ESC";
-                Data->CSIArgCount=0;
-                Data->CurrentNum=0;
-                Data->CSIArg[0]=0;
-                Data->ProcessingESC=true;
-                *Consumed=true;
-            break;
-            case 28:    // File Separator
-                CodeStr="FS";
-            break;
-            case 29:    // Group Separator
-                CodeStr="GS";
-            break;
-            case 30:    // Record Separator
-                CodeStr="RS";
-            break;
-            case 31:    // Unit Separator
-                CodeStr="US";
-            break;
-            case 127:   // Delete
-                CodeStr="DEL";
-            break;
-            default:
-            break;
-        }
-        if(CodeStr!=NULL)
-        {
-            m_DPS->NoteNonPrintable(CodeStr);
+        case 0: // NUL  NULL
+            CodeStr="NUL";
+        break;
+        case 1: // SOH  Start of Heading
+            CodeStr="SOH";
+        break;
+        case 2: // STX  Start of Text
+            CodeStr="STX";
+        break;
+        case 3: // ETX  End of Text
+            CodeStr="ETX";
+        break;
+        case 4: // EOT  End of Transmissionc
+            CodeStr="EOT";
+        break;
+        case 5: // ENQ  Enquiry (Do we want an auto answer)
+            CodeStr="ENQ";
+        break;
+        case 6: // ACK  Acknowledge
+            CodeStr="ACK";
+        break;
+        case 7: // BEL  Bell
+            CodeStr="BEL";
+            m_DPS->DoSystemBell();
             *Consumed=true;
-        }
+        break;
+        case 8: // BS  Backspace
+            /* Backspace */
+//                CodeStr="BS";
+            m_DPS->DoBackspace();
+            *Consumed=true;
+        break;
+        case 9: // HT  Character Tabulation, Horizontal Tabulation
+            m_DPS->DoTab();
+            *Consumed=true;
+        break;
+        case 10:    // LF  Line Feed
+            /* New line */
+            m_DPS->DoNewLine();
+//                CodeStr="LF";
+            *Consumed=true;
+        break;
+        case 11:    // VT  Line Tabulation, Vertical Tabulation
+            CodeStr="VT";
+        break;
+        case 12:    // FF  Form Feed
+            m_DPS->DoClearScreen();
+//                CodeStr="FF";
+            *Consumed=true;
+        break;
+        case 13:    // CR  Carriage Return
+            m_DPS->DoReturn();
+//                CodeStr="CR";
+            *Consumed=true;
+        break;
+        case 14:    // SO  Shift Out
+            CodeStr="SO";
+        break;
+        case 15:    // SI  Shift In
+            CodeStr="SI";
+        break;
+        case 16:    // DLE  Data Link Escape
+            CodeStr="DLE";
+        break;
+        case 17:    // DC1  Device Control One (XON)
+            CodeStr="DC1";
+        break;
+        case 18:    // DC2  Device Control Two
+            CodeStr="DC2";
+        break;
+        case 19:    // DC3  Device Control Three (XOFF)
+            CodeStr="DC3";
+        break;
+        case 20:    // DC4  Device Control Four
+            CodeStr="DC4";
+        break;
+        case 21:    // NAK  Negative Acknowledge
+            CodeStr="NAK";
+        break;
+        case 22:    // SYN  Synchronous Idle
+            CodeStr="SYN";
+        break;
+        case 23:    // ETB  End of Transmission Block
+            CodeStr="ETB";
+        break;
+        case 24:    // CAN  Cancel
+            CodeStr="CAN";
+        break;
+        case 25:    // EM  End of medium
+            CodeStr="EM";
+        break;
+        case 26:    // SUB  Substitute
+            CodeStr="SUB";
+        break;
+        case 27:    // ESC  Escape
+//                CodeStr="ESC";
+            Data->CSIArgCount=0;
+            Data->CurrentNum=0;
+            Data->CSIArg[0]=0;
+            Data->CurrentMode=e_ESCState_ESC;
+            *Consumed=true;
+        break;
+        case 28:    // FS  File Separator
+            CodeStr="FS";
+        break;
+        case 29:    // GS  Group Separator
+            CodeStr="GS";
+        break;
+        case 30:    // RS  Record Separator
+            CodeStr="RS";
+        break;
+        case 31:    // US  Unit Separator
+            CodeStr="US";
+        break;
+        case 127:   // DEL  Delete
+            CodeStr="DEL";
+        break;
+case '`':
+/* Testing hack */
+m_DPS->DoClearArea(10,1,12,3);
+//    void (*DoClearArea)(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2);
+*Consumed=true;
+
+break;
+        default:
+        break;
+    }
+    if(CodeStr!=NULL)
+    {
+        m_DPS->NoteNonPrintable(CodeStr);
+        *Consumed=true;
     }
 }
 
 void ANSIX364Decoder_ProcessCSI(struct ANSIX364DecoderData *Data,
+        const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+        PG_BOOL *Consumed)
+{
+    /* We keep going until we see something that isn't a "0-9:;<=>?" */
+    *Consumed=true;
+
+    switch(RawByte)
+    {
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            /* Add to the number */
+            Data->CurrentNum*=10;
+            Data->CurrentNum+=RawByte-'0';
+        break;
+        case ':':   // Sub arg...
+        break;
+        case ';':
+            /* Next arg */
+            if(Data->CSIArgCount<sizeof(Data->CSIArg)/sizeof(int))
+                Data->CSIArg[Data->CSIArgCount++]=Data->CurrentNum;
+            Data->CurrentNum=0;
+        break;
+        case '?':   // Private parameter strings
+            Data->CSIArgCount=0;
+            Data->CurrentNum=0;
+            Data->CSIArg[0]=0;
+            Data->CurrentMode=e_ESCState_CSIQuest;
+        break;
+        case '<':   // Private parameter strings
+        case '=':   // Private parameter strings
+        case '>':   // Private parameter strings
+        break;
+        default:
+            /* This is the end of the command */
+            if(Data->CSIArgCount<sizeof(Data->CSIArg)/sizeof(int))
+                Data->CSIArg[Data->CSIArgCount++]=Data->CurrentNum;
+
+            ANSIX364Decoder_DoCSICommand(Data,RawByte,ProcessedChar,CharLen,
+                    Consumed);
+            Data->CurrentMode=e_ESCState_Normal;
+        break;
+    }
+}
+
+void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
         const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
         PG_BOOL *Consumed)
 {
@@ -929,7 +1172,58 @@ void ANSIX364Decoder_ProcessCSI(struct ANSIX364DecoderData *Data,
 
     switch(RawByte)
     {
+        case 'N':   // EF
+        case 'O':   // EA
+        case 'Q':   // SSE
+        case 'R':   // CPR -- Active Position Report (reply to cursor pos)
+        case 'U':   // NP
+        case 'V':   // PP
+        case 'W':   // CTC
+        case 'Y':   // CVT
+        case '[':   // SRS
+        case '\\':  // PTX
+        case ']':   // SDS
+        case '^':   // SIMD
+        case 'c':   // DA
+        case 'h':   // SM
+        case 'i':   // MC - MEDIA COPY
+        case 'o':   // DAQ
+        case 'p':   // Private Use
+        case 'q':   // Private Use
+        case 'r':   // Private Use
+        case 'v':   // Private Use
+        case 'w':   // Private Use
+        case 'x':   // Private Use
+        case 'y':   // Private Use
+        case 'z':   // Private Use
+        case 't':   // Private Use
+            /* Unsupported */
+#ifdef LOG_UNKNOWN_CODES
+            {
+                FILE *out;
+                unsigned int r;
+                out=fopen(LOG_UNKNOWN_CODES_FILENAME,"a");
+                if(out!=NULL)
+                {
+                    fprintf(out,"\\e[");
+                    for(r=0;r<Data->CSIArgCount;r++)
+                    {
+                        fprintf(out,"%d",Data->CSIArg[r]);
+                        if(r!=Data->CSIArgCount-1)
+                            fprintf(out,";");
+                    }
+                    fprintf(out,"%c\n",RawByte);
+                    fclose(out);
+                }
+            }
+#endif
+        break;
         case '@':   // ICH
+            /* We need to push all the chars to the right at the cursor
+               (insert x spaces) */
+            m_DPS->DoScrollArea(0,0,40,10,1,0);
+//`
+        break;
         case 'A':   // CUU - Cursor Up
             m_DPS->GetCursorXY(&CursorX,&CursorY);
             i=Data->CSIArg[0];
@@ -965,8 +1259,13 @@ void ANSIX364Decoder_ProcessCSI(struct ANSIX364DecoderData *Data,
             m_DPS->DoMoveCursor(NewPos,CursorY);
         break;
         case 'E':   // CNL - Cursor Next Line
+//`
+        break;
         case 'F':   // CPL - Cursor Previous Line
+//`
+        break;
         case 'G':   // CHA - Cursor Horizontal Absolute
+//`
         break;
         case 'H':   // CUP - Cursor Position
             i=1;
@@ -984,6 +1283,7 @@ void ANSIX364Decoder_ProcessCSI(struct ANSIX364DecoderData *Data,
             m_DPS->DoMoveCursor(i2-1,i-1);
         break;
         case 'I':   // CHT
+//`
         break;
         case 'J':   // ED - Erase in Display
             i=Data->CSIArg[0];
@@ -999,12 +1299,17 @@ void ANSIX364Decoder_ProcessCSI(struct ANSIX364DecoderData *Data,
                     }
                     else
                     {
-                        m_DPS->DoClearArea(CursorX,CursorY,-1,-1);
+                        /* We can only clear rectangles so we have to do this
+                           in 2 steps, part of the line and everything else */
+                        m_DPS->DoClearArea(CursorX,CursorY,-1,CursorY);
+                        m_DPS->DoClearArea(0,CursorY+1,-1,-1);
                     }
                 break;
                 case 1: // From the beginning of the display through the cursor
                     m_DPS->GetCursorXY(&CursorX,&CursorY);
-                    m_DPS->DoClearArea(0,0,CursorX,CursorY);
+                    if(CursorY!=0)
+                        m_DPS->DoClearArea(0,0,-1,CursorY-1);
+                    m_DPS->DoClearArea(0,CursorY,CursorX+1,CursorY);
                 break;
                 case 2: // The complete display
                     m_DPS->DoClearScreen();
@@ -1035,37 +1340,55 @@ void ANSIX364Decoder_ProcessCSI(struct ANSIX364DecoderData *Data,
             }
         break;
         case 'L':   // IL
+//`
+        break;
         case 'M':   // DL
-        case 'N':   // EF
-        case 'O':   // EA
+//`
+        break;
         case 'P':   // DCH
-        case 'Q':   // SSE
-        case 'R':   // CPR -- Active Position Report (reply to cursor pos)
+//`
+        break;
         case 'S':   // SU - Scroll Up
+//`
+        break;
         case 'T':   // SD - Scroll Down
-        case 'U':   // NP
-        case 'V':   // PP
-        case 'W':   // CTC
+//`
+        break;
         case 'X':   // ECH
-        case 'Y':   // CVT
+//`
+        break;
         case 'Z':   // CBT
-        case '[':   // SRS
-        case '\\':  // PTX
-        case ']':   // SDS
-        case '^':   // SIMD
+//`
+        break;
         case '`':   // HPA
+//`
+        break;
         case 'a':   // HPR
+//`
+        break;
         case 'b':   // REP
-        case 'c':   // DA
+//`
+        break;
         case 'd':   // VPA
+//`
+        break;
         case 'e':   // VPR
+//`
+        break;
         case 'f':   // HVP - Horizontal Vertical Position
+//`
+        break;
         case 'g':   // TBC
-        case 'h':   // SM
-        case 'i':   // MC - MEDIA COPY
+//`
+        break;
         case 'j':   // HPB
+//`
+        break;
         case 'k':   // VPB
+//`
+        break;
         case 'l':   // RM
+//`
         break;
         case 'm':   // SGR - Select Graphic Rendition
             ANSIX364Decoder_HandleSGR(Data);
@@ -1095,26 +1418,13 @@ void ANSIX364Decoder_ProcessCSI(struct ANSIX364DecoderData *Data,
                 break;
             }
         break;
-        case 'o':   // DAQ
-        case 'p':   // Private Use
-        case 'q':   // Private Use
-        case 'r':   // Private Use
-        break;
         case 's':   // SCP - Save Cursor Position
             m_DPS->GetCursorXY(&Data->SavedCursorX,
                     &Data->SavedCursorY);
         break;
-        case 't':   // Private Use
-        break;
         case 'u':   // RCP - Restore Cursor Position
             m_DPS->DoMoveCursor(Data->SavedCursorX,
                     Data->SavedCursorY);
-        break;
-        case 'v':   // Private Use
-        case 'w':   // Private Use
-        case 'x':   // Private Use
-        case 'y':   // Private Use
-        case 'z':   // Private Use
         break;
         default:
         break;
@@ -1311,3 +1621,278 @@ void ANSIX364Decoder_ResetSGR(struct ANSIX364DecoderData *Data)
     Data->DoingBright=false;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    ANSIX364Decoder_ProcessESC
+ *
+ * SYNOPSIS:
+ *    void ANSIX364Decoder_ProcessESC(struct ANSIX364DecoderData *Data,
+ *          const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+ *          PG_BOOL *Consumed);
+ *
+ * PARAMETERS:
+ *    Data [I] -- Our internal data.
+ *    RawByte [I] -- The raw byte to process.  This is the byte that came in.
+ *    ProcessedChar [I/O] -- This is a unicode char that has already been
+ *                         processed by some of the other input filters.  You
+ *                         can change this as you need.  It must remain only
+ *                         one unicode char.
+ *    CharLen [I/O] -- This number of bytes in 'ProcessedChar'
+ *    Consumed [I/O] -- This tells the system (and other filters) if the
+ *                      char has been used up and will not be added to the
+ *                      screen.
+ *
+ * FUNCTION:
+ *    This function handles when we are 'ESC' mode.  We have just seen an
+ *    ESC and we are trying to decide what to with the first byte after it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    ANSIX364Decoder_ProcessIncomingTextByte()
+ ******************************************************************************/
+void ANSIX364Decoder_ProcessESC(struct ANSIX364DecoderData *Data,
+        const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+        PG_BOOL *Consumed)
+{
+    *Consumed=true;
+
+    // https://en.wikipedia.org/wiki/C0_and_C1_control_codes
+    // https://www.gnu.org/software/screen/manual/html_node/Control-Sequences.html
+    switch(RawByte)
+    {
+        case 27:    // ESC
+            /* Pass it along */
+            *Consumed=false;
+        break;
+
+        /* We don't support these (or they are not defined) */
+        case '0':   // 
+        case '1':   // 
+        case '2':   // 
+        case '3':   // 
+        case '4':   // 
+        case '5':   // 
+        case '6':   // Back Index (VT510)
+        case '9':   // Forward Index (VT510)
+        case '<':   // 
+        case '=':   // DECNKM  Numeric Keypad Mode (extention?)
+        case '>':   // DECNKM  Numeric Keypad Mode (extention?)
+        case '@':   // Padding Character
+        case 'A':   // High Octet Preset
+        case 'B':   // BPH  Break Permitted Here
+        case 'C':   // NBH  No Break Here
+        case 'F':   // SSA  Start of Selected Area
+        case 'G':   // ESA  End of Selected Area
+        case 'I':   // HTJ  Character Tabulation With Justification Horizontal Tabulation With Justification
+        case 'J':   // VTS  Line Tabulation Set Vertical Tabulation Set
+        case 'K':   // PLD  Partial Line Forward Partial Line Down
+        case 'L':   // PLU  Partial Line Backward Partial Line Up
+        case 'N':   // SS2  Single-Shift 2
+        case 'O':   // SS3  Single-Shift 3
+        case 'Q':   // PU1  Private Use 1
+        case 'R':   // PU2  Private Use 2
+        case 'S':   // STS  Set Transmit State
+        case 'T':   // CCH  Cancel character
+        case 'U':   // MW  Message Waiting
+        case 'V':   // SPA  Start of Protected Area
+        case 'W':   // EPA  End of Protected Area
+        case 'Y':   // Single Graphic Character Introducer
+        case 'Z':   // SCI  Single Character Introducer
+        case '\\':  // ST  String Terminator
+        case '`':   // DMI  DISABLE MANUAL INPUT
+        case 'a':   // INT  INTERRUPT
+        case 'b':   // EMI  ENABLE MANUAL INPUT
+        case 'd':   // CMD  CODING METHOD DELIMITER
+        case 'e':   // 
+        case 'f':   // 
+        case 'h':   // 
+        case 'i':   // 
+        case 'j':   // 
+        case 'l':   // 
+        case 'm':   // 
+        case 'n':   // LOCKING-SHIFT TWO
+        case 'o':   // LOCKING-SHIFT THREE
+        case 'p':   // 
+        case 'q':   // 
+        case 'r':   // 
+        case 's':   // 
+        case 't':   // 
+        case 'u':   // 
+        case 'v':   // 
+        case 'w':   // 
+        case 'x':   // 
+        case 'y':   // 
+        case 'z':   // 
+        case '{':   // 
+        case '|':   // LS3R
+        case '}':   // LS2R
+        case '~':   // LS1R
+            Data->CurrentMode=e_ESCState_Normal;
+#ifdef LOG_UNKNOWN_CODES
+            {
+                FILE *out;
+                out=fopen(LOG_UNKNOWN_CODES_FILENAME,"a");
+                if(out!=NULL)
+                {
+                    fprintf(out,"\\e%c\n",RawByte);
+                    fclose(out);
+                }
+            }
+#endif
+        break;
+        case '7':   // Save Cursor and Attributes
+//`
+        break;
+        case '8':   // Restore Cursor and Attributes
+//`
+        break;
+        case '?':   // Question mark mode (private commands)
+            Data->CurrentMode=e_ESCState_Search4Exit;
+        break;
+        case 'D':   // Index
+            m_DPS->DoNewLine();
+        break;
+        case 'E':   // NEL  Next Line
+            m_DPS->DoReturn();
+            m_DPS->DoNewLine();
+        break;
+        case 'H':   // HTS  Character Tabulation Set Horizontal Tabulation Set
+//`
+        break;
+        case 'M':   // RI  Reverse Line Feed Reverse Index
+//`
+        break;
+        case 'P':   // DCS  Device Control String
+            Data->SearchAbortCount=0;
+            Data->SearchIndex=0;
+            Data->CurrentMode=e_ESCState_Search4ST;
+        break;
+        case 'X':   // SOS  Start of String
+            Data->SearchAbortCount=0;
+            Data->SearchIndex=0;
+            Data->CurrentMode=e_ESCState_Search4ST;
+        break;
+        case '[':   // CSI  Control Sequence Introducer (CSI)
+            Data->CurrentMode=e_ESCState_CSI;
+        break;
+        case ']':   // OSC  Operating System Command
+        case '^':   // PM  Privacy Message
+        case '_':   // APC  Application Program Command
+            Data->SearchAbortCount=0;
+            Data->SearchIndex=0;
+            Data->CurrentMode=e_ESCState_Search4ST;
+        break;
+        case 'c':   // RIS  RESET TO INITIAL STATE
+//`
+        break;
+        case 'g':   // Visual Bell
+//`
+        break;
+        case 'k':   // Title Definition String
+//`
+        break;
+
+        default:
+        break;
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    ANSIX364Decoder_ProcessCSIQuest
+ *
+ * SYNOPSIS:
+ *    void ANSIX364Decoder_ProcessCSIQuest(struct ANSIX364DecoderData *Data,
+ *          const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+ *          PG_BOOL *Consumed);
+ *
+ * PARAMETERS:
+ *    Data [I] -- Our internal data.
+ *    RawByte [I] -- The raw byte to process.  This is the byte that came in.
+ *    ProcessedChar [I/O] -- This is a unicode char that has already been
+ *                         processed by some of the other input filters.  You
+ *                         can change this as you need.  It must remain only
+ *                         one unicode char.
+ *    CharLen [I/O] -- This number of bytes in 'ProcessedChar'
+ *    Consumed [I/O] -- This tells the system (and other filters) if the
+ *                      char has been used up and will not be added to the
+ *                      screen.
+ *
+ * FUNCTION:
+ *    This function handles when we are 'CSI' question mark mode (private
+ *    parameter string).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    ANSIX364Decoder_ProcessIncomingTextByte()
+ ******************************************************************************/
+void ANSIX364Decoder_ProcessCSIQuest(struct ANSIX364DecoderData *Data,
+        const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+        PG_BOOL *Consumed)
+{
+    *Consumed=true;
+
+    switch(RawByte)
+    {
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            /* Add to the number */
+            Data->CurrentNum*=10;
+            Data->CurrentNum+=RawByte-'0';
+        break;
+        case ':':   // Sub arg...
+        case ';':   // Next arg
+        break;
+        default:
+            /* This is the end of the command */
+            if(Data->CSIArgCount<sizeof(Data->CSIArg)/sizeof(int))
+                Data->CSIArg[Data->CSIArgCount++]=Data->CurrentNum;
+
+            ANSIX364Decoder_DoCSIQuestCommand(Data,RawByte,ProcessedChar,
+                    CharLen,Consumed);
+            Data->CurrentMode=e_ESCState_Normal;
+        break;
+    }
+}
+
+void ANSIX364Decoder_DoCSIQuestCommand(struct ANSIX364DecoderData *Data,
+        const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+        PG_BOOL *Consumed)
+{
+    switch(RawByte)
+    {
+        case 'l':   // Reset
+//            switch(Data->CurrentNum)
+//            {
+//                case 
+//            }
+        break;
+        case 'h':   // Set
+        break;
+        default:
+#ifdef LOG_UNKNOWN_CODES
+            {
+                FILE *out;
+                out=fopen(LOG_UNKNOWN_CODES_FILENAME,"a");
+                if(out!=NULL)
+                {
+                    fprintf(out,"\\e[?%d%c\n",Data->CurrentNum,RawByte);
+                    fclose(out);
+                }
+            }
+#endif
+        break;
+    }
+}

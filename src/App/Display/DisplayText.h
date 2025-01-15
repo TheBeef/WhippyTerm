@@ -134,6 +134,7 @@ class DisplayText : public DisplayBase
         void ClearSelection(void);
         void SetOverrideMessage(const char *Msg);
         void ClearScreen(e_ScreenClearType Type);
+        void ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2);
         void ClearScrollBackBuffer(void);
         void InsertHorizontalRule(void);
         void ResetTerm(void);
@@ -153,12 +154,12 @@ class DisplayText : public DisplayBase
 
         bool ShowNonPrintables;
         bool ShowEndOfLines;
-        int CursorX;
+        int CursorX;                // In chars
         int CursorY;
         bool LeftMouseDown;         // Is the left mouse button down
         int AutoSelectionScrolldx;
         int AutoSelectionScrolldy;
-        int CursorXPx;
+        int CursorXPx;              // In pixels
 
         int CharWidthPx;
         int CharHeightPx;
@@ -172,8 +173,8 @@ class DisplayText : public DisplayBase
         int TextAreaHeightPx;
 
         /* Screen Area (the area the cursor can move in) in chars */
-        int ScreenWidthChars;           // The number of chars wide is the screen area
-        int ScreenHeightChars;          // The number of chars height is the screen area
+        int_fast32_t ScreenWidthChars; // The number of chars wide is the screen area
+        int_fast32_t ScreenHeightChars;// The number of chars height is the screen area
         i_TextLines ScreenFirstLine;    // The line the cursor lives in below
         struct TextLine *ActiveLine;    // The line with the cursor on it
         int ActiveLineY;                // What line count (from 'ScreenFirstLine') is 'ActiveLine'
@@ -189,7 +190,7 @@ class DisplayText : public DisplayBase
         t_TextLines Lines;
         int LinesCount;                 // Lines.size(), but tracked (faster)
         i_TextLineFrags InsertFrag;
-        int InsertPos;
+        int InsertPos;                  // The offset into the current string frag's 'Text' (also used as a flag see DisplayText::RethinkInsertFrag())
 
         /* Selection */
         bool SelectionValid;        // Is the selection valid
@@ -205,9 +206,10 @@ class DisplayText : public DisplayBase
         void RedrawFullScreen(void);
         bool RethinkInsertFrag(void);
         void AppendChar(uint8_t *Chr);
-        i_TextLineFrags AddNewEmptyFragToActiveLine(i_TextLineFrags InsertPoint);
+        i_TextLineFrags AddNewEmptyFragToLine(struct TextLine *Line,i_TextLineFrags InsertPoint);
         void DoOverwriteInsertPos(uint8_t *Chr);
         void PadOutCurrentLine2Cursor(void);
+        void PadOutLine(struct TextLine *Line,int Pos);
         void AdjustCursorAfterWriteChar(uint8_t *Chr);
         void RethinkTextAreaSize(void);
         void RethinkWindowSize(void);
@@ -240,6 +242,12 @@ class DisplayText : public DisplayBase
         int CharUnderCursorWidthPx(void);
         void PadOutScreenWithBlankLines(void);
         bool IsLineBlank(i_TextLines Line);
+        bool TextLine_FindFragAndPos(i_TextLines Line,int_fast32_t Offset,i_TextLineFrags *FoundFrag,int_fast32_t *FoundPos);
+        void TextLine_SplitFrag(i_TextLines Line,int_fast32_t Offset,bool SplitEvenIfResultEmpty=false,i_TextLineFrags *Frag1=NULL,i_TextLineFrags *Frag2=NULL);
+        void TextLine_ErasePos2Pos(i_TextLines Line,int_fast32_t StartOffset,int_fast32_t EndOffset);
+        void TextLine_Insert(i_TextLines Line,int_fast32_t Offset,const struct CharStyling *Style,const char *Str);
+        void TextLine_Fill(i_TextLines Line,int_fast32_t Offset,uint_fast32_t Count,const struct CharStyling *Style,const char *Chr);
+        void TextLine_Clear(i_TextLines Line);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

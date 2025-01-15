@@ -982,3 +982,31 @@ t_UIContextMenuCtrl *DisplayBase::GetContextMenuHandle(e_UITD_ContextMenuType UI
     return NULL;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ClearArea
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,
+ *              uint32_t Y2);
+ *
+ * PARAMETERS:
+ *    X1 [I] -- The left edge
+ *    Y1 [I] -- The top edge
+ *    X2 [I] -- The right edge
+ *    Y2 [I] -- The bottom edge
+ *
+ * FUNCTION:
+ *    This function clears part of the screen.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2)
+{
+    /* Does nothing */
+}
+

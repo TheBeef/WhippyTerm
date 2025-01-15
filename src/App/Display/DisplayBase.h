@@ -148,6 +148,7 @@ class DisplayBase
         virtual void ClearSelection(void);
         virtual void SetOverrideMessage(const char *Msg);
         virtual void ClearScreen(e_ScreenClearType Type);
+        virtual void ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2);
         virtual void ClearScrollBackBuffer(void);
         virtual void InsertHorizontalRule(void);
         virtual void ResetTerm(void);

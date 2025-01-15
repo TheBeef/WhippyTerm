@@ -1365,11 +1365,12 @@ i_TextLineFrags DisplayText::InsertSpecialFragInMiddleOfString(
         NextFrag=InsertFrag;
         NextFrag++; // Move to the newly added special frag
         NextFrag++; // Move to the one after the new special frag
-        AddFrag=AddNewEmptyFragToActiveLine(NextFrag);
+
+        AddFrag=AddNewEmptyFragToLine(ActiveLine,NextFrag);
         AddFrag->Styling=InsertFrag->Styling;
         AddFrag->Value=InsertFrag->Value;
         AddFrag->Data=InsertFrag->Data;
-        AddFrag->Text.assign(InsertFrag->Text.c_str(),InsertPos);
+        AddFrag->Text.assign(InsertFrag->Text,InsertPos);
         RethinkFragWidth(AddFrag);
 
         InsertFrag->Text.erase(InsertPos);
@@ -1781,7 +1782,8 @@ void DisplayText::WriteChar(uint8_t *Chr)
             else
             {
                 /* We need to start a new string frag and then append */
-                InsertFrag=AddNewEmptyFragToActiveLine(ActiveLine->Frags.end());
+                InsertFrag=AddNewEmptyFragToLine(ActiveLine,
+                        ActiveLine->Frags.end());
             }
 
             InsertFrag->Text.append((char *)Chr);
@@ -1802,8 +1804,8 @@ void DisplayText::WriteChar(uint8_t *Chr)
                 if(!CmpCharStyle(&CurrentStyle,&InsertFrag->Styling))
                 {
                     /* Style changed we need to add a new frag */
-                    InsertFrag=AddNewEmptyFragToActiveLine(ActiveLine->
-                            Frags.end());
+                    InsertFrag=AddNewEmptyFragToLine(ActiveLine,
+                            ActiveLine->Frags.end());
                 }
 
                 /* We just append to the current frag */
@@ -1842,14 +1844,55 @@ void DisplayText::WriteChar(uint8_t *Chr)
  ******************************************************************************/
 void DisplayText::PadOutCurrentLine2Cursor(void)
 {
+    PadOutLine(ActiveLine,CursorX);
+
+    /* Move Insert Frag to the (new) end of the line */
+    /* See if we are a string frag and that the styles are the same */
+    if(ActiveLine->Frags.back().FragType!=e_TextCanvasFrag_String ||
+            !CmpCharStyle(&CurrentStyle,&ActiveLine->Frags.back().Styling))
+    {
+        InsertFrag=AddNewEmptyFragToLine(ActiveLine,ActiveLine->Frags.end());
+    }
+    else
+    {
+        InsertFrag=ActiveLine->Frags.end();
+        InsertFrag--;
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::PadOutLine
+ *
+ * SYNOPSIS:
+ *    void DisplayText::PadOutLine(struct TextLine *Line,int Pos);
+ *
+ * PARAMETERS:
+ *    Line [I] -- The line to pad out
+ *    Pos [I] -- The offset to pad the line out to.  This is the total number
+ *               of chars that the line will have after we are done.
+ *
+ * FUNCTION:
+ *    This function adds padding to the end of a line out to an offset.
+ *    Padding is spaces in the default style.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::PadOutLine(struct TextLine *Line,int Pos)
+{
     unsigned int LineLen;
     i_TextLineFrags Frag;
     const char *StartOfChar;
     unsigned int StrLength;
     struct CharStyling PaddingStyle;
+    i_TextLineFrags AppendFrag;
 
     LineLen=0;
-    for(Frag=ActiveLine->Frags.begin();Frag!=ActiveLine->Frags.end();Frag++)
+    for(Frag=Line->Frags.begin();Frag!=Line->Frags.end();Frag++)
     {
         switch(Frag->FragType)
         {
@@ -1874,40 +1917,29 @@ void DisplayText::PadOutCurrentLine2Cursor(void)
     /* We need to pad out in the background color until the point we are
        going to insert at */
     PaddingStyle.FGColor=Settings->DefaultColors[e_DefaultColors_FG];
-    PaddingStyle.BGColor=ActiveLine->LineBackgroundColor;
+    PaddingStyle.BGColor=Line->LineBackgroundColor;
     PaddingStyle.Attribs=0;
     PaddingStyle.ULineColor=PaddingStyle.FGColor;
 
     /* See if we are string frag and that the styles are the same */
-    if(ActiveLine->Frags.empty() ||
-            ActiveLine->Frags.back().FragType!=e_TextCanvasFrag_String ||
-            !CmpCharStyle(&PaddingStyle,&ActiveLine->Frags.back().Styling))
+    if(Line->Frags.empty() ||
+            Line->Frags.back().FragType!=e_TextCanvasFrag_String ||
+            !CmpCharStyle(&PaddingStyle,&Line->Frags.back().Styling))
     {
         /* Nope, add a new frag with a padding style frag */
-        InsertFrag=AddNewEmptyFragToActiveLine(ActiveLine->Frags.end());
-        InsertFrag->Styling=PaddingStyle;
+        AppendFrag=AddNewEmptyFragToLine(Line,Line->Frags.end());
+        AppendFrag->Styling=PaddingStyle;
     }
     else
     {
         /* We can just extend the end frag */
-        InsertFrag=ActiveLine->Frags.end();
-        InsertFrag--;
+        AppendFrag=Line->Frags.end();
+        AppendFrag--;
     }
-    /* Add the line background color padding */
-    if(CursorX-LineLen>0)
-        InsertFrag->Text.append(CursorX-LineLen,' ');
 
-    /* See if we are string frag and that the styles are the same */
-    if(ActiveLine->Frags.back().FragType!=e_TextCanvasFrag_String ||
-            !CmpCharStyle(&CurrentStyle,&ActiveLine->Frags.back().Styling))
-    {
-        InsertFrag=AddNewEmptyFragToActiveLine(ActiveLine->Frags.end());
-    }
-    else
-    {
-        InsertFrag=ActiveLine->Frags.end();
-        InsertFrag--;
-    }
+    /* Add the line background color padding */
+    if(Pos-LineLen>0)
+        AppendFrag->Text.append(Pos-LineLen,' ');
 }
 
 /*******************************************************************************
@@ -2010,18 +2042,18 @@ void DisplayText::DoOverwriteInsertPos(uint8_t *Chr)
                 InsertFrag->Text.erase(InsertPos);
                 RethinkFragWidth(InsertFrag);
 
-                InsertFrag=AddNewEmptyFragToActiveLine(NextFrag);
+                InsertFrag=AddNewEmptyFragToLine(ActiveLine,NextFrag);
                 InsertFrag->Text.assign((char *)Chr);
                 InsertPos=0;
             }
             else
             {
                 /* We need to split the string */
-                NewFrag=AddNewEmptyFragToActiveLine(NextFrag);
+                NewFrag=AddNewEmptyFragToLine(ActiveLine,NextFrag);
                 NewFrag->Text.assign((char *)Chr);
                 RethinkFragWidth(NewFrag);
 
-                SplitFrag=AddNewEmptyFragToActiveLine(NextFrag);
+                SplitFrag=AddNewEmptyFragToLine(ActiveLine,NextFrag);
                 SplitFrag->Text.assign(InsertFrag->Text,InsertPos+OldCharSize,
                         string::npos);
                 SplitFrag->Styling=InsertFrag->Styling;
@@ -2067,18 +2099,20 @@ void DisplayText::DoOverwriteInsertPos(uint8_t *Chr)
 
 /*******************************************************************************
  * NAME:
- *    DisplayText::AddNewEmptyFragToActiveLine
+ *    DisplayText::AddNewEmptyFragToLine
  *
  * SYNOPSIS:
- *    i_TextLineFrags DisplayText::AddNewEmptyFragToActiveLine(
+ *    i_TextLineFrags DisplayText::AddNewEmptyFragToLine(struct TextLine *Line,
  *              i_TextLineFrags InsertPoint);
  *
  * PARAMETERS:
+ *    Line [I] -- The line to add the empty frag to
  *    InsertPoint [I] -- The point to insert if front of (this will become
- *                       the frag after the newly added frag)
+ *                       the frag after the newly added frag).  This must
+ *                       be something on 'Line->Frags'
  *
  * FUNCTION:
- *    This function adds a new blank string fragment to the 'ActiveLine'.
+ *    This function adds a new blank string fragment to 'Line'.
  *
  * RETURNS:
  *    A pointer to the new fragment that was added.
@@ -2090,8 +2124,8 @@ void DisplayText::DoOverwriteInsertPos(uint8_t *Chr)
  * SEE ALSO:
  *    
  ******************************************************************************/
-i_TextLineFrags DisplayText::AddNewEmptyFragToActiveLine(i_TextLineFrags
-        InsertPoint)
+i_TextLineFrags DisplayText::AddNewEmptyFragToLine(struct TextLine *Line,
+        i_TextLineFrags InsertPoint)
 {
     /* We need to start a new string frag and then append */
     struct TextLineFrag NewFrag;
@@ -2101,7 +2135,7 @@ i_TextLineFrags DisplayText::AddNewEmptyFragToActiveLine(i_TextLineFrags
     NewFrag.Text="";
     NewFrag.WidthPx=0;
 
-    return ActiveLine->Frags.insert(InsertPoint,NewFrag);
+    return Line->Frags.insert(InsertPoint,NewFrag);
 }
 
 /*******************************************************************************
@@ -4579,3 +4613,486 @@ t_UIContextMenuCtrl *DisplayText::GetContextMenuHandle(e_UITD_ContextMenuType UI
     return UITC_GetContextMenuHandle(TextDisplayCtrl,UIObj);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ClearArea
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,
+ *              uint32_t Y2);
+ *
+ * PARAMETERS:
+ *    X1 [I] -- The left edge
+ *    Y1 [I] -- The top edge
+ *    X2 [I] -- The right edge
+ *    Y2 [I] -- The bottom edge
+ *
+ * FUNCTION:
+ *    This function clears part of the screen.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2)
+{
+    i_TextLines CurLine;
+    unsigned int y;
+    i_TextLineFrags CurFrag;
+    string::iterator StartPos;
+    string::iterator EndPos;
+    uint_fast32_t FillWidth;
+
+    try
+    {
+        if(TextDisplayCtrl==NULL)
+            return;
+
+        if(Y1>(unsigned)ScreenHeightChars)
+            return;
+
+        /* Find the first line */
+        CurLine=ScreenFirstLine;
+        for(y=0;y<Y1 && CurLine!=Lines.end();y++)
+            CurLine++;
+        if(CurLine==Lines.end())
+        {
+            /* We don't have enough lines, we are clearing below the
+               end of the lines, so we are done */
+               return;
+        }
+
+        FillWidth=X2-X1;
+        if(FillWidth>(uint_fast32_t)ScreenWidthChars)
+            FillWidth=ScreenWidthChars-X1;
+
+        while(y<=Y2 && CurLine!=Lines.end())
+        {
+            /* Remove the char's we are clearing */
+            TextLine_ErasePos2Pos(CurLine,X1,X2);
+            /* Now insert spaces */
+            TextLine_Fill(CurLine,X1,FillWidth,&CurrentStyle," ");
+
+            y++;
+            CurLine++;
+        }
+
+        RethinkInsertFrag();
+        RedrawFullScreen();
+    }
+    catch(...)
+    {
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::TextLine_FindFragAndPos
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::TextLine_FindFragAndPos(i_TextLines Line,
+ *              int_fast32_t Offset,i_TextLineFrags *FoundFrag,
+ *              int_fast32_t *FoundPos);
+ *
+ * PARAMETERS:
+ *    Line [I] -- The line to search
+ *    Offset [I] -- The string position on the line to find.  Only string
+ *                  type are counted in the search.
+ *    FoundFrag [O] -- This is set to the frag that 'Offset' was in
+ *    FoundPos [O] -- This is set to the position from the start of the
+ *                    string in 'FoundFrag'
+ *
+ * FUNCTION:
+ *    This function finds a string offset on a line.  This function searchs
+ *    all the string fragments and finds the char at 'Offset'
+ *
+ * RETURNS:
+ *    true -- This offset was found on this line
+ *    false -- The offset was not found.  'Offset' is beyond the end of the
+ *             line.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayText::TextLine_FindFragAndPos(i_TextLines Line,
+        int_fast32_t Offset,i_TextLineFrags *FoundFrag,int_fast32_t *FoundPos)
+{
+    i_TextLineFrags CurFrag;
+    unsigned int CalX;
+    string::iterator StartPos;
+    string::iterator EndPos;
+    int Chars;
+
+    try
+    {
+        /* We need to walk the line until we find Offset */
+        CalX=0;
+        for(CurFrag=Line->Frags.begin();CurFrag!=Line->Frags.end();CurFrag++)
+        {
+            if(CurFrag->FragType==e_TextCanvasFrag_String)
+            {
+                Chars=utf8::unchecked::distance(CurFrag->Text.begin(),
+                        CurFrag->Text.end());
+                if(Offset>=CalX && Offset<CalX+Chars)
+                    break;
+
+                CalX+=Chars;
+            }
+        }
+
+        /* Ok, 'Offset' is somewhere in this frag */
+        if(CurFrag!=Line->Frags.end() &&
+                CurFrag->FragType==e_TextCanvasFrag_String)
+        {
+            StartPos=CurFrag->Text.begin();
+            EndPos=StartPos;
+            while(StartPos!=CurFrag->Text.end())
+            {
+                /* Move up by 1 char */
+                utf8::unchecked::next(EndPos);
+
+                if(CalX>=Offset)
+                {
+                    /* Ok, we found the 'Offset' char */
+                    *FoundFrag=CurFrag;
+                    *FoundPos=EndPos-CurFrag->Text.begin()-1;
+                    return true;
+                }
+
+                StartPos=EndPos;
+                CalX++;
+            }
+        }
+    }
+    catch(...)
+    {
+    }
+
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::TextLine_SplitFrag
+ *
+ * SYNOPSIS:
+ *    void DisplayText::TextLine_SplitFrag(i_TextLines Line,int_fast32_t Offset,
+ *              bool SplitEvenIfResultEmpty,i_TextLineFrags *Frag1,
+ *              i_TextLineFrags *Frag2);
+ *
+ * PARAMETERS:
+ *    Line [I] -- The line to work on
+ *    Offset [I] -- The string position on the line to break.
+ *    SplitEvenIfResultEmpty [I] -- Normally if spliting the fragment will
+ *                                  end up with empty fragment then this
+ *                                  function will not split the fragment
+ *                                  (Frag2 will be set to the existing
+ *                                  fragment).  If this is true then the
+ *                                  fragment is split anyway and an empty
+ *                                  fragment is added.
+ *    Frag1 [O] -- The first fragment.  This is the one that 'Offset' was in
+ *                 (note that it maybe a copy).  This can be NULL.
+ *    Frag2 [O] -- The second fragment.  This can be NULL.
+ *
+ * FUNCTION:
+ *    This function takes a fragment and splits it into 2 fragments, 'Frag1'
+ *    and 'Frag2'.
+ *
+ *    So for example if you have:
+ *          AAAA->BBBB->CCCC
+ *    and you tell this function to split BBBB in half (Offset=6) then the
+ *    result will be:
+ *          AAAA->BB->BB->CCCC
+ *                ^   ^
+ *            Frag1   Frag2
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::TextLine_SplitFrag(i_TextLines Line,int_fast32_t Offset,
+        bool SplitEvenIfResultEmpty,i_TextLineFrags *Frag1,i_TextLineFrags *Frag2)
+{
+    i_TextLineFrags NextFrag;
+    i_TextLineFrags FirstFrag;
+    i_TextLineFrags SecondFrag;
+    i_TextLineFrags Frag;
+    int_fast32_t Pos;
+    struct TextLineFrag EmptyFrag;
+
+    try
+    {
+        if(Frag1!=NULL)
+            *Frag1=Line->Frags.end();
+        if(Frag2!=NULL)
+            *Frag2=Line->Frags.end();
+
+        /* TextLine_FindFragAndPos() only returns String type frags so we don't
+           need to worry about other frag types and we just need to break up
+           the text in the current frag */
+        if(!TextLine_FindFragAndPos(Line,Offset,&Frag,&Pos))
+        {
+            /* Nothing to do */
+            return;
+        }
+
+        if(Frag2!=NULL)
+            *Frag2=Frag;
+
+        /* Check if we are going to be adding blank strings */
+        if(!SplitEvenIfResultEmpty &&
+                (Pos==0 || Pos==(int_fast32_t)Frag->Text.length()))
+        {
+            return;
+        }
+
+        /* Add a copy of the frag */
+        FirstFrag=Line->Frags.insert(Frag,*Frag);
+
+        /* Remove the start of the copy of the string.  Because we insert
+           BEFORE frag, the order is now:
+                a -> b -> FirstFrag -> Frag -> c -> d) */
+        FirstFrag->Text.erase(Pos);
+        if(Frag1!=NULL)
+            *Frag1=FirstFrag;
+
+        /* Remove the end of the org string  */
+        Frag->Text.erase(0,Pos);
+
+        RethinkFragWidth(FirstFrag);
+        RethinkFragWidth(Frag);
+    }
+    catch(...)
+    {
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::TextLine_ErasePos2Pos
+ *
+ * SYNOPSIS:
+ *    void DisplayText::TextLine_ErasePos2Pos(i_TextLines Line,
+ *              int_fast32_t StartOffset,int_fast32_t EndOffset);
+ *
+ * PARAMETERS:
+ *    Line [I] -- The line to work on
+ *    StartOffset [I] -- The char to start erasing at
+ *    EndOffset [I] -- The char to stop erasing at
+ *
+ * FUNCTION:
+ *    This function erases all the char's and fragments between 'StartOffset'
+ *    and 'EndOffset'.
+ *
+ *    For example if you have:
+ *         AAAA->BBBB->CCCC
+ *    and you delete from offset 2 to offset 10 you will end up with:
+ *         AA->CC
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::TextLine_ErasePos2Pos(i_TextLines Line,
+        int_fast32_t StartOffset,int_fast32_t EndOffset)
+{
+    i_TextLineFrags Frag1;
+    i_TextLineFrags Frag2;
+
+    try
+    {
+        TextLine_SplitFrag(Line,EndOffset,false,NULL,&Frag2);
+        TextLine_SplitFrag(Line,StartOffset,false,NULL,&Frag1);
+
+        /* Delete everything between Frag1 and Frag2 */
+        Line->Frags.erase(Frag1,Frag2);
+    }
+    catch(...)
+    {
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::TextLine_Insert
+ *
+ * SYNOPSIS:
+ *    void DisplayText::TextLine_Insert(i_TextLines Line,int_fast32_t Offset,
+ *          const struct CharStyling *Style,const char *Str);
+ *
+ * PARAMETERS:
+ *    Line [I] -- The line to work on
+ *    Offset [I] -- The offset into 'Line' to insert this string
+ *    Style [I] -- The style for this string
+ *    Str [I] -- The string to insert (UTF8)
+ *
+ * FUNCTION:
+ *    This function adds a string to a line.  No line wrap is done.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::TextLine_Insert(i_TextLines Line,int_fast32_t Offset,
+        const struct CharStyling *Style,const char *Str)
+{
+    struct TextLineFrag NewFrag;
+    i_TextLineFrags SplitFrag;
+    i_TextLineFrags AddedFrag;
+    i_TextLineFrags Frag;
+    int_fast32_t Pos;
+
+    try
+    {
+        if(!TextLine_FindFragAndPos(Line,Offset,&Frag,&Pos))
+        {
+            /* This means we couldn't find this Offset on this line, basicly
+               Offset is past the end of the line.  We need to pad */
+            PadOutLine(&*Line,Offset);
+
+            /* We just added padding, so the last frag at the last pos is now
+               our insert point */
+            Frag=Line->Frags.end();
+            Frag--;
+            Pos=Frag->Text.length();
+        }
+        /* First check if we have the same attribs and if so just insert into
+           the existing string */
+        if(Frag->FragType==e_TextCanvasFrag_String &&
+                CmpCharStyle(&Frag->Styling,Style))
+        {
+            /* Ok, we can just mod the string */
+            Frag->Text.insert(Pos,Str);
+        }
+        else
+        {
+            /* Add a new frag with the new string */
+            TextLine_SplitFrag(Line,Offset,false,NULL,&SplitFrag);
+
+            NewFrag.FragType=e_TextCanvasFrag_String;
+            NewFrag.Styling=*Style;
+            NewFrag.Text=Str;
+            NewFrag.WidthPx=0; /* We need to pass in an iterator so we do this later */
+
+            Frag++;
+            AddedFrag=Line->Frags.insert(SplitFrag,NewFrag);
+            RethinkFragWidth(AddedFrag);
+        }
+    }
+    catch(...)
+    {
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::TextLine_Fill
+ *
+ * SYNOPSIS:
+ *    void DisplayText::TextLine_Fill(i_TextLines Line,int_fast32_t Offset,
+ *              uint_fast32_t Count,const struct CharStyling *Style,
+ *              const char *Chr);
+ *
+ * PARAMETERS:
+ *    Line [I] -- The line to work on
+ *    Offset [I] -- The offset into 'Line' to insert this string
+ *    Count [I] -- The number of chars to add
+ *    Style [I] -- The styling for this new string
+ *    Chr [I] -- The UTF8 char to add
+ *
+ * FUNCTION:
+ *    This function adds a string made up of 'Chr' repeated 'Count' times.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::TextLine_Fill(i_TextLines Line,int_fast32_t Offset,
+        uint_fast32_t Count,const struct CharStyling *Style,const char *Chr)
+{
+    struct TextLineFrag NewFrag;
+    i_TextLineFrags SplitFrag;
+    i_TextLineFrags AddedFrag;
+    i_TextLineFrags Frag;
+    int_fast32_t Pos;
+    uint_fast32_t r;
+
+    try
+    {
+        if(!TextLine_FindFragAndPos(Line,Offset,&Frag,&Pos))
+        {
+            /* This means we couldn't find this Offset on this line, basicly
+               Offset is past the end of the line.  We need to pad */
+            PadOutLine(&*Line,Offset);
+
+            /* We just added padding, so the last frag at the last pos is now
+               our insert point */
+            Frag=Line->Frags.end();
+            Frag--;
+            Pos=Frag->Text.length();
+        }
+        /* First check if we have the same attribs and if so just insert into
+           the existing string */
+        if(Frag->FragType==e_TextCanvasFrag_String &&
+                CmpCharStyle(&Frag->Styling,Style))
+        {
+            /* Ok, we can just mod the string */
+            for(r=0;r<Count;r++)
+                Frag->Text.insert(Pos,Chr);
+        }
+        else
+        {
+            /* Add a new frag with the new string */
+            TextLine_SplitFrag(Line,Offset,false,NULL,&SplitFrag);
+
+            NewFrag.FragType=e_TextCanvasFrag_String;
+            NewFrag.Styling=*Style;
+            NewFrag.Text="";
+            for(r=0;r<Count;r++)
+                NewFrag.Text+=Chr;
+            NewFrag.WidthPx=0; /* We need to pass in an iterator so we do this later */
+
+            Frag++;
+            AddedFrag=Line->Frags.insert(SplitFrag,NewFrag);
+            RethinkFragWidth(AddedFrag);
+        }
+    }
+    catch(...)
+    {
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::TextLine_Clear
+ *
+ * SYNOPSIS:
+ *    void DisplayText::TextLine_Clear(i_TextLines Line);
+ *
+ * PARAMETERS:
+ *    Line [I] -- The line to work on
+ *
+ * FUNCTION:
+ *    This function erases all the fragments for a line.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::TextLine_Clear(i_TextLines Line)
+{
+    Line->Frags.clear();
+    Line->LineWidthPx=0;
+}

@@ -1278,25 +1278,25 @@ void DPS_DoClearScreen(void)
  * PARAMETERS:
  *    X1 [I] -- The left edge
  *    Y1 [I] -- The top edge
- *    X2 [I] -- The right edge
- *    Y2 [I] -- The bottom edge
+ *    X2 [I] -- The right edge +1
+ *    Y2 [I] -- The bottom edge +1
  *
  * FUNCTION:
  *    This function clears a box on the screen.  The box may be only one line
  *    high or one row wide.
  *
- *    The line with Y1 and Y2 on it will be cleared.  The column that X1 and
- *    X2 will also be cleared.
+ *    The line with Y1 to Y2-1 will be cleared.  The column X1 to X2-1 will
+ *    be cleared.
  *
  *    So if you send in:
  *          DoClearArea(10,1,12,3);
- *    Then it will clear line 1, 2, and 3 and column 10, 11 and 12.
+ *    Then it will clear line 1, and 2 and column 10, and 11.
  *
  *           012345678901234567890
  *          0xxxxxxxxxxxxxxxxxxxxx
- *          1xxxxxxxxxx   xxxxxxxx
- *          2xxxxxxxxxx   xxxxxxxx
- *          3xxxxxxxxxx   xxxxxxxx
+ *          1xxxxxxxxxx  xxxxxxxxx
+ *          2xxxxxxxxxx  xxxxxxxxx
+ *          3xxxxxxxxxxxxxxxxxxxxx
  *          4xxxxxxxxxxxxxxxxxxxxx
  *
  *    The background color will be taken from the current styling info.

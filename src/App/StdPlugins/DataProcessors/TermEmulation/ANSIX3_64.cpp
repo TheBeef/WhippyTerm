@@ -1,5 +1,8 @@
+#define TEST_CTRLS
+#ifdef TEST_CTRLS
 int TestX=5,TestY=1,TestX2=10,TestY2=5;
 int TestDX=0,TestDY=-1;
+#endif
 // https://vt100.net/docs/vt510-rm/chapter4.html
 
 // Also see:https://stackoverflow.com/questions/44116977/get-mouse-position-in-pixels-using-escape-sequences
@@ -965,6 +968,7 @@ void ANSIX364Decoder_ProcessIncomingTextByte(t_DataProcessorHandleType *DataHand
     }
 }
 
+#ifdef TEST_CTRLS
 void DEBUG_TEST_FN(void)
 {
     char buff[100];
@@ -977,7 +981,7 @@ void DEBUG_TEST_FN(void)
     m_DPS->InsertString((uint8_t *)buff,strlen(buff));
     m_DPS->DoMoveCursor(CursorX,CursorY);
 }
-
+#endif
 
 void ANSIX364Decoder_ProcessNormalChar(struct ANSIX364DecoderData *Data,
         const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
@@ -1106,19 +1110,10 @@ void ANSIX364Decoder_ProcessNormalChar(struct ANSIX364DecoderData *Data,
         case 127:   // DEL  Delete
             CodeStr="DEL";
         break;
+#ifdef TEST_CTRLS
 case '|':
     {
         DEBUG_TEST_FN();
-//        char buff[100];
-//        int32_t CursorX,CursorY;
-//
-//        sprintf(buff,"%d,%d - %d,%d = %d,%d",TestX,TestY,TestX2,TestY2,
-//                TestDX,TestDY);
-//
-//        m_DPS->GetCursorXY(&CursorX,&CursorY);
-//        m_DPS->DoMoveCursor(0,CursorY);
-//        m_DPS->InsertString((uint8_t *)buff,strlen(buff));
-//        m_DPS->DoMoveCursor(0,CursorY);
         *Consumed=true;
     }
 break;
@@ -1170,19 +1165,16 @@ case '-':
 break;
 case '\\':
 /* Testing hack */
-//m_DPS->DoClearArea(10,1,12,3);
 {
     int32_t CursorX,CursorY;
     m_DPS->GetCursorXY(&CursorX,&CursorY);
 //    m_DPS->DoScrollArea(5,0,10,5,0,-2);
-    m_DPS->DoScrollArea(TestX,TestY,TestX2,TestY2,TestDX,TestDY);
-//    m_DPS->DoClearArea(TestX,TestY,TestX2,TestY2);
+//    m_DPS->DoScrollArea(TestX,TestY,TestX2,TestY2,TestDX,TestDY);
+    m_DPS->DoClearArea(TestX,TestY,TestX2,TestY2);
+    *Consumed=true;
 }
-
-//    void (*DoClearArea)(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2);
-*Consumed=true;
-
 break;
+#endif
         default:
         break;
     }

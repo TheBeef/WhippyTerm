@@ -4669,8 +4669,8 @@ void DisplayText::DEBUG_ForceRedrawOfScreen(void)
  * PARAMETERS:
  *    X1 [I] -- The left edge
  *    Y1 [I] -- The top edge
- *    X2 [I] -- The right edge
- *    Y2 [I] -- The bottom edge
+ *    X2 [I] -- The right edge +1
+ *    Y2 [I] -- The bottom edge +1
  *
  * FUNCTION:
  *    This function clears part of the screen.
@@ -4695,7 +4695,10 @@ void DisplayText::ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2)
         if(TextDisplayCtrl==NULL)
             return;
 
-        if(Y1>(unsigned)ScreenHeightChars)
+        if(X1>=X2 || Y1>=Y2)
+            return;
+
+        if(Y1>(unsigned)ScreenHeightChars || X1>(unsigned)ScreenWidthChars)
             return;
 
         /* Find the first line */
@@ -4713,7 +4716,7 @@ void DisplayText::ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2)
         if(FillWidth>(uint_fast32_t)ScreenWidthChars)
             FillWidth=ScreenWidthChars-X1;
 
-        while(y<=Y2 && CurLine!=Lines.end())
+        while(y<Y2 && CurLine!=Lines.end())
         {
             /* Remove the char's we are clearing */
             TextLine_ErasePos2Pos(CurLine,X1,X2);

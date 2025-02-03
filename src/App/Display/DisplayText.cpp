@@ -1,3 +1,4 @@
+#include "UI/UISystem.h"
 /*******************************************************************************
  * FILENAME: DisplayText.cpp
  *
@@ -1884,7 +1885,7 @@ void DisplayText::PadOutCurrentLine2Cursor(void)
  ******************************************************************************/
 void DisplayText::PadOutLine(struct TextLine *Line,int Pos)
 {
-    unsigned int LineLen;
+    int LineLen;
     i_TextLineFrags Frag;
     const char *StartOfChar;
     unsigned int StrLength;
@@ -1913,6 +1914,9 @@ void DisplayText::PadOutLine(struct TextLine *Line,int Pos)
             break;
         }
     }
+
+    if(Pos<LineLen)
+        return;
 
     /* We need to pad out in the background color until the point we are
        going to insert at */
@@ -4494,6 +4498,18 @@ void DisplayText::PadOutScreenWithBlankLines(void)
 
         while(LinesCount<ScreenHeightChars)
         {
+//`
+struct TextLineFrag t;
+char buff[100];
+t.FragType=e_TextCanvasFrag_String;
+sprintf(buff,"Blank:%d",LinesCount);
+t.Text=buff;
+t.Styling=CurrentStyle;
+t.WidthPx=0;
+t.Value=0;
+t.Data=NULL;
+BlankLine.Frags.clear();
+BlankLine.Frags.push_back(t);
             Lines.push_back(BlankLine);
             LinesCount++;
         }
@@ -4615,6 +4631,35 @@ t_UIContextMenuCtrl *DisplayText::GetContextMenuHandle(e_UITD_ContextMenuType UI
 
 /*******************************************************************************
  * NAME:
+ *    DisplayText::DEBUG_ForceRedrawOfScreen
+ *
+ * SYNOPSIS:
+ *    void DisplayText::DEBUG_ForceRedrawOfScreen(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is a debug function that redraws the screen.  It is used when you
+ *    want to single step through the code and see what's going on.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    REMOVE ALL CALLS TO THIS IN A RELEASE BUILD AS IT SLOWS THINGS DOWN A LOT!
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::DEBUG_ForceRedrawOfScreen(void)
+{
+    RedrawFullScreen();
+    UI_ProcessAllPendingUIEvents();
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayText::ClearArea
  *
  * SYNOPSIS:
@@ -4684,6 +4729,432 @@ void DisplayText::ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2)
     }
     catch(...)
     {
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ScrollArea
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,
+ *              uint32_t Y2,int32_t dx,int32_t dy);
+ *
+ * PARAMETERS:
+ *    X1 [I] -- The left edge
+ *    Y1 [I] -- The top edge
+ *    X2 [I] -- The right edge +1
+ *    Y2 [I] -- The bottom edge +1
+ *    dx [I] -- The amount to scroll in the x dir
+ *    dy [I] -- The amount to scroll in the y dir
+ *
+ * FUNCTION:
+ *    This function scrolls an area on the screen.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    ClearArea()
+ ******************************************************************************/
+void DisplayText::ScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,
+        int32_t dx,int32_t dy)
+{
+    i_TextLines CurLine;
+    int_fast32_t y;
+    i_TextLineFrags CurFrag;
+    i_TextLineFrags Frag1;
+    i_TextLineFrags Frag2;
+    string::iterator StartPos;
+    string::iterator EndPos;
+    int_fast32_t ScrollWidth;
+    int_fast32_t ScrollHeight;
+    int32_t Use_dx;
+    int32_t Use_dy;
+    int32_t Delta;
+    struct TextLine BlankLine;
+
+    try
+    {
+        if(TextDisplayCtrl==NULL)
+            return;
+
+        if(X1>X2 || Y1>Y2)
+            return;
+
+        if(Y1>(unsigned)ScreenHeightChars || X1>(unsigned)ScreenWidthChars)
+            return;
+
+        ScrollWidth=X2-X1;
+        if(ScrollWidth>ScreenWidthChars)
+            ScrollWidth=ScreenWidthChars-X1;
+
+        ScrollHeight=Y2-Y1;
+        if(ScrollHeight>ScreenHeightChars)
+            ScrollHeight=ScreenHeightChars-Y1;
+
+        Use_dx=dx;
+        if(Use_dx>0)
+        {
+            if(Use_dx>ScreenWidthChars)
+                Use_dx=ScreenWidthChars;
+
+            if(Use_dx>ScrollWidth)
+                Use_dx=ScrollWidth;
+        }
+        else if(Use_dx<0)
+        {
+            if(Use_dx<-ScreenWidthChars)
+                Use_dx=-ScreenWidthChars;
+            if(Use_dx<-ScrollWidth)
+                Use_dx=-ScrollWidth;
+        }
+
+        Use_dy=dy;
+        if(Use_dy>0)
+        {
+            if(Use_dy>ScreenHeightChars)
+                Use_dy=ScreenHeightChars;
+
+            if(Use_dy>ScrollHeight)
+                Use_dy=ScrollHeight;
+        }
+        else if(Use_dy<0)
+        {
+            if(Use_dy<-ScreenWidthChars)
+                Use_dy=-ScreenWidthChars;
+            if(Use_dy<-ScrollHeight)
+                Use_dy=-ScrollHeight;
+        }
+
+        /* Scroll the X */
+        /* Ok, walk each line scrolling things in the x dir */
+        if(Use_dx!=0)
+        {
+            /* Find the first line */
+            CurLine=ScreenFirstLine;
+            for(y=0;y<Y1 && CurLine!=Lines.end();y++)
+                CurLine++;
+            if(CurLine==Lines.end())
+            {
+                /* We don't have enough lines, we are clearing below the
+                   end of the lines, so we are done */
+                   return;
+            }
+
+            /* Find the first line */
+            while(y<Y2 && CurLine!=Lines.end())
+            {
+                if(Use_dx>0)
+                {
+                    /* Moving to the right */
+
+                    /* Delete from the end and insert at the front */
+                    TextLine_ErasePos2Pos(CurLine,X2-Use_dx,X2);
+                    TextLine_Fill(CurLine,X1,Use_dx,&CurrentStyle," ");
+                }
+                else
+                {
+                    /* Moving to the left */
+                    Delta=-Use_dx;  // Because dx is neg we need to invert
+
+                    /* Delete from the start and insert at the end (dx is neg
+                       so we have to reverse all the math (sub instead of add)) */
+                    TextLine_ErasePos2Pos(CurLine,X1,X1+Delta);
+                    TextLine_Fill(CurLine,X2-Delta,Delta,&CurrentStyle," ");
+                }
+
+                y++;
+                CurLine++;
+            }
+        }
+
+        /* Scroll the Y */
+        if(Use_dy!=0)
+        {
+            /* Make sure we have enough lines */
+            PadOutScreenWithBlankLines();
+
+            if(Use_dy>0)
+            {
+                /* We are scrolling down */
+                ScrollVertAreaDown(X1,Y1,X2,Y2,Use_dy);
+            }
+            else if(Use_dy<0)
+            {
+                /* We are scrolling up */
+                ScrollVertAreaUp(X1,Y1,X2,Y2,-Use_dy);
+            }
+        }
+
+        RethinkInsertFrag();
+        RedrawFullScreen();
+    }
+    catch(...)
+    {
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ScrollVertAreaDown
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ScrollVertAreaDown(uint32_t X1,uint32_t Y1,uint32_t X2,
+ *          uint32_t Y2,int32_t dy);
+ *
+ * PARAMETERS:
+ *    X1 [I] -- The left edge
+ *    Y1 [I] -- The top edge
+ *    X2 [I] -- The right edge
+ *    Y2 [I] -- The bottom edge
+ *    dy [I] -- The amount to scroll
+ *
+ * FUNCTION:
+ *    This function scrolls an area down (text moves down).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DisplayText::ScrollArea()
+ ******************************************************************************/
+void DisplayText::ScrollVertAreaDown(uint32_t X1,uint32_t Y1,uint32_t X2,
+        uint32_t Y2,int32_t dy)
+{
+    i_TextLines TopLineOfArea;
+    i_TextLines BottomLineOfArea;
+    i_TextLines CurLine;
+    i_TextLines CopyFromLine;
+    i_TextLines CopyToLine;
+    i_TextLineFrags InsertAfterFrag;
+    i_TextLineFrags StartFrag;
+    i_TextLineFrags EndFrag;
+    int_fast32_t y;
+    int_fast32_t r;
+    int_fast32_t AreaHeight;
+
+    if(Y2<=Y1)
+    {
+        /* Nothing to do */
+        return;
+    }
+
+    AreaHeight=Y2-Y1;
+
+    /* Find the top line */
+    TopLineOfArea=ScreenFirstLine;
+    for(y=0;y<Y1 && TopLineOfArea!=Lines.end();y++)
+        TopLineOfArea++;
+    if(TopLineOfArea==Lines.end())
+    {
+        /* We don't have enough lines, we are below the of the lines, so we
+           are done */
+        return;
+    }
+
+    /* Find the bottom line */
+    BottomLineOfArea=TopLineOfArea;
+    if(Y2>0)
+    {
+        for(;y<Y2-1 && BottomLineOfArea!=Lines.end();y++)
+            BottomLineOfArea++;
+    }
+
+    /************************************/
+    /*** First delete from the bottom ***/
+    /************************************/
+    CurLine=BottomLineOfArea;
+    for(r=0;r<dy;r++)
+    {
+        TextLine_ErasePos2Pos(CurLine,X1,X2);
+//DEBUG_ForceRedrawOfScreen();
+
+        if(CurLine==Lines.begin())
+        {
+            /* We just did the top line, nothing above this, abort */
+            break;
+        }
+        CurLine--;
+    }
+
+    /*************************************/
+    /*** Shift the lines down (scroll) ***/
+    /*************************************/
+    /* Move the lines (working from the bottom) */
+    CopyToLine=BottomLineOfArea;
+
+    /* Move the copy from line up by the scroll amount */
+    CopyFromLine=BottomLineOfArea;
+    for(r=0;r<dy;r++)
+    {
+        if(CopyFromLine==Lines.begin())
+        {
+            /* We just did the top line, nothing above this, abort */
+            break;
+        }
+        CopyFromLine--;
+    }
+
+    for(r=0;r<AreaHeight-dy;r++)
+    {
+        TextLine_SplitFrag(CopyFromLine,X2,false,NULL,&EndFrag);
+        TextLine_SplitFrag(CopyFromLine,X1,false,NULL,&StartFrag);
+
+        /* Make sure we have enough room on the line to insert the frag's */
+        PadOutLine(&*CopyToLine,X1);
+
+        TextLine_SplitFrag(CopyToLine,X1,false,NULL,&InsertAfterFrag);
+
+        CopyToLine->Frags.insert(InsertAfterFrag,StartFrag,EndFrag);
+//DEBUG_ForceRedrawOfScreen();
+        CopyFromLine->Frags.erase(StartFrag,EndFrag);
+//DEBUG_ForceRedrawOfScreen();
+
+        if(CopyFromLine==Lines.begin())
+        {
+            /* We just did the top line, nothing above this, abort */
+            break;
+        }
+        CopyFromLine--;
+        CopyToLine--;
+    }
+
+    /***********************************************************/
+    /*** Fill in blank lines to fill in the holes at the top ***/
+    /***********************************************************/
+    CurLine=TopLineOfArea;
+    for(r=0;r<dy && CurLine!=Lines.end();r++)
+    {
+        TextLine_Fill(CurLine,X1,X2-X1,&CurrentStyle," ");
+//DEBUG_ForceRedrawOfScreen();
+        CurLine++;
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ScrollVertAreaUp
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,
+ *          uint32_t Y2,int32_t dy);
+ *
+ * PARAMETERS:
+ *    X1 [I] -- The left edge
+ *    Y1 [I] -- The top edge
+ *    X2 [I] -- The right edge
+ *    Y2 [I] -- The bottom edge
+ *    dy [I] -- The amount to scroll
+ *
+ * FUNCTION:
+ *    This function scrolls an area up (text moves up, like a normal scroll
+ *    of a screen).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DisplayText::ScrollArea()
+ ******************************************************************************/
+void DisplayText::ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,
+        uint32_t Y2,int32_t dy)
+{
+    i_TextLines TopLineOfArea;
+    i_TextLines BottomLineOfArea;
+    i_TextLines CurLine;
+    i_TextLines CopyFromLine;
+    i_TextLines CopyToLine;
+    i_TextLineFrags InsertAfterFrag;
+    i_TextLineFrags StartFrag;
+    i_TextLineFrags EndFrag;
+    int_fast32_t y;
+    int_fast32_t r;
+    int_fast32_t AreaHeight;
+
+    if(Y2<=Y1)
+    {
+        /* Nothing to do */
+        return;
+    }
+
+    AreaHeight=Y2-Y1;
+
+    /* Find the top line */
+    TopLineOfArea=ScreenFirstLine;
+    for(y=0;y<Y1 && TopLineOfArea!=Lines.end();y++)
+        TopLineOfArea++;
+    if(TopLineOfArea==Lines.end())
+    {
+        /* We don't have enough lines, we are below the of the lines, so we
+           are done */
+        return;
+    }
+
+    /* Find the bottom line */
+    BottomLineOfArea=TopLineOfArea;
+    if(Y2>0)
+    {
+        for(;y<Y2-1 && BottomLineOfArea!=Lines.end();y++)
+            BottomLineOfArea++;
+    }
+
+    /*********************************/
+    /*** First delete from the top ***/
+    /*********************************/
+    CurLine=TopLineOfArea;
+    for(r=0;r<dy && CurLine!=Lines.end();r++)
+    {
+        TextLine_ErasePos2Pos(CurLine,X1,X2);
+//DEBUG_ForceRedrawOfScreen();
+        CurLine++;
+    }
+
+    /***********************************/
+    /*** Shift the lines up (scroll) ***/
+    /***********************************/
+    /* Move the lines (working from the top) */
+    CopyToLine=TopLineOfArea;
+
+    /* Move the copy from line up by the scroll amount */
+    CopyFromLine=TopLineOfArea;
+    for(r=0;r<dy && CopyFromLine!=Lines.end();r++)
+        CopyFromLine++;
+
+    for(r=0;r<AreaHeight-dy && CopyFromLine!=Lines.end();r++)
+    {
+        TextLine_SplitFrag(CopyFromLine,X2,false,NULL,&EndFrag);
+        TextLine_SplitFrag(CopyFromLine,X1,false,NULL,&StartFrag);
+
+        /* Make sure we have enough room on the line to insert the frag's */
+        PadOutLine(&*CopyToLine,X1);
+
+        TextLine_SplitFrag(CopyToLine,X1,false,NULL,&InsertAfterFrag);
+
+        CopyToLine->Frags.insert(InsertAfterFrag,StartFrag,EndFrag);
+//DEBUG_ForceRedrawOfScreen();
+        CopyFromLine->Frags.erase(StartFrag,EndFrag);
+//DEBUG_ForceRedrawOfScreen();
+
+        CopyFromLine++;
+        CopyToLine++;
+    }
+
+    /**************************************************************/
+    /*** Fill in blank lines to fill in the holes at the bottom ***/
+    /**************************************************************/
+    CurLine=BottomLineOfArea;
+    for(r=0;r<dy;r++)
+    {
+        TextLine_Fill(CurLine,X1,X2-X1,&CurrentStyle," ");
+//DEBUG_ForceRedrawOfScreen();
+
+        if(CurLine==Lines.begin())
+        {
+            /* We just did the top line, nothing above this, abort */
+            break;
+        }
+        CurLine--;
     }
 }
 

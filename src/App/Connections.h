@@ -65,6 +65,7 @@ typedef enum
     e_ConFunc_NoteNonPrintable,
     e_ConFunc_SendBackspace,
     e_ConFunc_SendEnter,
+    e_ConFunc_ScrollArea,
     e_ConFuncMAX
 } e_ConFuncType;
 
@@ -363,7 +364,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void SetAttribs(uint32_t Attribs);
         uint32_t GetAttribs(void);
         void DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
-                uintptr_t Arg3,uintptr_t Arg4);
+                uintptr_t Arg3,uintptr_t Arg4,uintptr_t Arg5,uintptr_t Arg6);
         void GetCursorXY(int *RetCursorX,int *RetCursorY);
         bool InsertString(uint8_t *Str,uint32_t Len);
         void GetScreenSize(int32_t *RetRows,int32_t *RetColumns);

@@ -130,7 +130,7 @@ struct DPS_API g_DPSAPI=
     DPS_DoNewLine,
     DPS_DoReturn,
     DPS_DoBackspace,
-    DPS_DoMoveCursor,
+    DPS_DoMoveCursor,           // DEBUG PAUL: Think about renaming this to DPS_SetCursorXY
     DPS_DoClearScreen,
     DPS_DoClearArea,
     DPS_GetCursorXY,
@@ -1220,7 +1220,7 @@ void DPS_DoBackspace(void)
  *    void DPS_DoMoveCursor(uint32_t X,uint32_t Y);
  *
  * PARAMETERS:
- *    X [I] -- The new X pos
+ *    X [I] -- The new X pos.  DEBUG PAUL: Add doc about if this is from 0 or 1
  *    Y [I] -- The new Y pos
  *
  * FUNCTION:
@@ -1681,8 +1681,6 @@ void DPS_DoSystemBell(void)
 void DPS_DoScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,
         int32_t DeltaX,int32_t DeltaY)
 {
-//void Con_DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
-//        uintptr_t Arg3,uintptr_t Arg4)
-//    Con_DoFunction(e_ConFunc_ClearArea,X1,Y1,X2,Y2);
+    Con_DoFunction(e_ConFunc_ScrollArea,X1,Y1,X2,Y2,DeltaX,DeltaY);
 }
 

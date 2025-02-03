@@ -63,7 +63,7 @@ uint32_t Con_GetULineColor(void);
 void Con_SetAttribs(uint16_t Attribs);
 uint16_t Con_GetAttribs(void);
 void Con_DoFunction(e_ConFuncType Fn,uintptr_t Arg1=0,uintptr_t Arg2=0,
-        uintptr_t Arg3=0,uintptr_t Arg4=0);
+        uintptr_t Arg3=0,uintptr_t Arg4=0,uintptr_t Arg5=0,uintptr_t Arg6=0);
 void Con_GetCursorXY(int32_t *RetCursorX,int32_t *RetCursorY);
 void Con_InsertString(uint8_t *Str,uint32_t Len);
 void Con_GetScreenSize(int32_t *RetRows,int32_t *RetColumns);

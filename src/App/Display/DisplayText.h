@@ -135,6 +135,7 @@ class DisplayText : public DisplayBase
         void SetOverrideMessage(const char *Msg);
         void ClearScreen(e_ScreenClearType Type);
         void ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2);
+        void ScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dx,int32_t dy);
         void ClearScrollBackBuffer(void);
         void InsertHorizontalRule(void);
         void ResetTerm(void);
@@ -210,6 +211,7 @@ class DisplayText : public DisplayBase
         void DoOverwriteInsertPos(uint8_t *Chr);
         void PadOutCurrentLine2Cursor(void);
         void PadOutLine(struct TextLine *Line,int Pos);
+        void PadOutScreen(int Y);
         void AdjustCursorAfterWriteChar(uint8_t *Chr);
         void RethinkTextAreaSize(void);
         void RethinkWindowSize(void);
@@ -248,6 +250,9 @@ class DisplayText : public DisplayBase
         void TextLine_Insert(i_TextLines Line,int_fast32_t Offset,const struct CharStyling *Style,const char *Str);
         void TextLine_Fill(i_TextLines Line,int_fast32_t Offset,uint_fast32_t Count,const struct CharStyling *Style,const char *Chr);
         void TextLine_Clear(i_TextLines Line);
+        void ScrollVertAreaDown(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dy);
+        void ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dy);
+        void DEBUG_ForceRedrawOfScreen(void);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

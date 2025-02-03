@@ -548,8 +548,9 @@ uint16_t Con_GetAttribs(void)
  *    Con_DoFunction
  *
  * SYNOPSIS:
- *    void Con_DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
- *              uintptr_t Arg3,uintptr_t Arg4);
+ *    void Con_DoFunction(e_ConFuncType Fn,uintptr_t Arg1=0,uintptr_t Arg2=0,
+ *              uintptr_t Arg3=0,uintptr_t Arg4=0,uintptr_t Arg5=0,
+ *              uintptr_t Arg6=0);
  *
  * PARAMETERS:
  *    Fn [I] -- The function to do.  See the functions in DataProcessSystem()
@@ -570,12 +571,12 @@ uint16_t Con_GetAttribs(void)
  *    
  ******************************************************************************/
 void Con_DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
-        uintptr_t Arg3,uintptr_t Arg4)
+        uintptr_t Arg3,uintptr_t Arg4,uintptr_t Arg5,uintptr_t Arg6)
 {
     if(m_ActiveConnection==NULL)
         return;
 
-    m_ActiveConnection->DoFunction(Fn,Arg1,Arg2,Arg3,Arg4);
+    m_ActiveConnection->DoFunction(Fn,Arg1,Arg2,Arg3,Arg4,Arg5,Arg6);
 }
 
 void Con_GetCursorXY(int32_t *RetCursorX,int32_t *RetCursorY)

@@ -48,6 +48,7 @@
 #include "UI/UIDebug.h"
 #include "UI/UISystem.h"
 #include "UI/UITimers.h"
+#include "ThirdParty/utf8.h"
 #include "Version.h"
 #include <string.h>
 #include <stdlib.h>
@@ -1917,9 +1918,26 @@ void Connection::WriteChar2Display(uint8_t *Chr)
  ******************************************************************************/
 bool Connection::InsertString(uint8_t *Str,uint32_t Len)
 {
-/* DEBUG PAUL: walk the string breaking it up into UTF8 chars and calling
-   Display->WriteChar() */
-return false;
+    uint_fast32_t r;
+    uint8_t CharBuff[10];
+    const uint8_t *StartOfChar;
+    const uint8_t *EndOfChar;
+
+    StartOfChar=Str;
+    for(r=0;r<Len;r++)
+    {
+        EndOfChar=StartOfChar;
+        utf8::unchecked::advance(EndOfChar,1);
+        if(EndOfChar-StartOfChar>sizeof(CharBuff)-1)
+            return false;
+        memcpy(CharBuff,StartOfChar,EndOfChar-StartOfChar);
+        CharBuff[EndOfChar-StartOfChar]=0;
+        WriteChar2Display(CharBuff);
+
+        /* Move to next char */
+        StartOfChar=EndOfChar;
+    }
+    return true;
 }
 
 /*******************************************************************************
@@ -2132,7 +2150,8 @@ uint32_t Connection::GetAttribs(void)
  *
  * SYNOPSIS:
  *    void Connection::DoFunction(e_ConFuncType Fn,uintptr_t Arg1,
- *              uintptr_t Arg2,uintptr_t Arg3,uintptr_t Arg4);
+ *              uintptr_t Arg2,uintptr_t Arg3,uintptr_t Arg4,uintptr_t Arg5,
+ *              uintptr_t Arg6);
  *
  * PARAMETERS:
  *    Fn [I] -- The function to do.  See the functions in DataProcessSystem()
@@ -2140,6 +2159,8 @@ uint32_t Connection::GetAttribs(void)
  *    Arg2 [I] -- Depends on 'Fn'
  *    Arg3 [I] -- Depends on 'Fn'
  *    Arg4 [I] -- Depends on 'Fn'
+ *    Arg5 [I] -- Depends on 'Fn'
+ *    Arg6 [I] -- Depends on 'Fn'
  *
  * FUNCTION:
  *    This function a function on the connection.  See DataProcessSystem()
@@ -2153,7 +2174,7 @@ uint32_t Connection::GetAttribs(void)
  *    
  ******************************************************************************/
 void Connection::DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
-        uintptr_t Arg3,uintptr_t Arg4)
+        uintptr_t Arg3,uintptr_t Arg4,uintptr_t Arg5,uintptr_t Arg6)
 {
     uint8_t SendBuff[2];
     int Len;
@@ -2221,6 +2242,10 @@ void Connection::DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
                 break;
             }
             WriteData(SendBuff,Len,e_ConWriteSource_Keyboard);
+        break;
+        case e_ConFunc_ScrollArea:
+            Display->ScrollArea(Arg1,Arg2,Arg3,Arg4,(intptr_t)Arg5,
+                    (intptr_t)Arg6);
         break;
 
         case e_ConFuncMAX:

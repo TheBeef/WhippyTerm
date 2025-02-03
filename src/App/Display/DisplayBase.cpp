@@ -1003,9 +1003,40 @@ t_UIContextMenuCtrl *DisplayBase::GetContextMenuHandle(e_UITD_ContextMenuType UI
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    ScrollArea()
  ******************************************************************************/
 void DisplayBase::ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2)
+{
+    /* Does nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::ScrollArea
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::ScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,
+ *              uint32_t Y2,int32_t dx,int32_t dy);
+ *
+ * PARAMETERS:
+ *    X1 [I] -- The left edge
+ *    Y1 [I] -- The top edge
+ *    X2 [I] -- The right edge
+ *    Y2 [I] -- The bottom edge
+ *    dx [I] -- The amount to scroll in the x dir
+ *    dy [I] -- The amount to scroll in the y dir
+ *
+ * FUNCTION:
+ *    This function scrolls an area on the screen.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    ClearArea()
+ ******************************************************************************/
+void DisplayBase::ScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,
+        int32_t dx,int32_t dy)
 {
     /* Does nothing */
 }

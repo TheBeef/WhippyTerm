@@ -4498,18 +4498,6 @@ void DisplayText::PadOutScreenWithBlankLines(void)
 
         while(LinesCount<ScreenHeightChars)
         {
-//`
-struct TextLineFrag t;
-char buff[100];
-t.FragType=e_TextCanvasFrag_String;
-sprintf(buff,"Blank:%d",LinesCount);
-t.Text=buff;
-t.Styling=CurrentStyle;
-t.WidthPx=0;
-t.Value=0;
-t.Data=NULL;
-BlankLine.Frags.clear();
-BlankLine.Frags.push_back(t);
             Lines.push_back(BlankLine);
             LinesCount++;
         }
@@ -4971,7 +4959,6 @@ void DisplayText::ScrollVertAreaDown(uint32_t X1,uint32_t Y1,uint32_t X2,
     for(r=0;r<dy;r++)
     {
         TextLine_ErasePos2Pos(CurLine,X1,X2);
-//DEBUG_ForceRedrawOfScreen();
 
         if(CurLine==Lines.begin())
         {
@@ -5010,9 +4997,7 @@ void DisplayText::ScrollVertAreaDown(uint32_t X1,uint32_t Y1,uint32_t X2,
         TextLine_SplitFrag(CopyToLine,X1,false,NULL,&InsertAfterFrag);
 
         CopyToLine->Frags.insert(InsertAfterFrag,StartFrag,EndFrag);
-//DEBUG_ForceRedrawOfScreen();
         CopyFromLine->Frags.erase(StartFrag,EndFrag);
-//DEBUG_ForceRedrawOfScreen();
 
         if(CopyFromLine==Lines.begin())
         {
@@ -5030,7 +5015,6 @@ void DisplayText::ScrollVertAreaDown(uint32_t X1,uint32_t Y1,uint32_t X2,
     for(r=0;r<dy && CurLine!=Lines.end();r++)
     {
         TextLine_Fill(CurLine,X1,X2-X1,&CurrentStyle," ");
-//DEBUG_ForceRedrawOfScreen();
         CurLine++;
     }
 }
@@ -5109,7 +5093,6 @@ void DisplayText::ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,
     for(r=0;r<dy && CurLine!=Lines.end();r++)
     {
         TextLine_ErasePos2Pos(CurLine,X1,X2);
-//DEBUG_ForceRedrawOfScreen();
         CurLine++;
     }
 
@@ -5135,9 +5118,7 @@ void DisplayText::ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,
         TextLine_SplitFrag(CopyToLine,X1,false,NULL,&InsertAfterFrag);
 
         CopyToLine->Frags.insert(InsertAfterFrag,StartFrag,EndFrag);
-//DEBUG_ForceRedrawOfScreen();
         CopyFromLine->Frags.erase(StartFrag,EndFrag);
-//DEBUG_ForceRedrawOfScreen();
 
         CopyFromLine++;
         CopyToLine++;
@@ -5150,7 +5131,6 @@ void DisplayText::ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,
     for(r=0;r<dy;r++)
     {
         TextLine_Fill(CurLine,X1,X2-X1,&CurrentStyle," ");
-//DEBUG_ForceRedrawOfScreen();
 
         if(CurLine==Lines.begin())
         {

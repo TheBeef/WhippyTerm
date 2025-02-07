@@ -139,6 +139,7 @@ class DisplayBase
         virtual void SetCursorXY(unsigned int x,unsigned y);
         virtual void GetCursorXY(unsigned int *x,unsigned int *y);
         virtual void AddTab(void);
+        virtual void AddReverseTab(void);
         virtual void DoBackspace(void);
         virtual void DoReturn(void);
         virtual void DoLineFeed(void);

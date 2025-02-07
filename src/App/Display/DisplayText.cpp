@@ -2387,6 +2387,39 @@ void DisplayText::AddTab(void)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayText::AddReverseTab
+ *
+ * SYNOPSIS:
+ *    void DisplayText::AddReverseTab(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function handles when a driver send a goto previous tab stop command.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::AddReverseTab(void)
+{
+    int NewPos;
+    int Amount;
+
+    /* Move the cursor to the prev tab pos */
+    Amount=CursorX%CHARS_IN_A_TAB;
+    if(Amount==0)
+        Amount=CHARS_IN_A_TAB;
+    NewPos=CursorX-Amount;
+
+    MoveCursor(NewPos,CursorY,false);
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayText::RethinkTextAreaSize
  *
  * SYNOPSIS:
@@ -4924,6 +4957,7 @@ void DisplayText::ScrollVertAreaDown(uint32_t X1,uint32_t Y1,uint32_t X2,
     int_fast32_t y;
     int_fast32_t r;
     int_fast32_t AreaHeight;
+    int_fast32_t AreaWidth;
 
     if(Y2<=Y1)
     {
@@ -4932,6 +4966,12 @@ void DisplayText::ScrollVertAreaDown(uint32_t X1,uint32_t Y1,uint32_t X2,
     }
 
     AreaHeight=Y2-Y1;
+    if(AreaHeight>ScreenHeightChars)
+        AreaHeight=ScreenHeightChars-Y1;
+
+    AreaWidth=X2-X1;
+    if(AreaWidth>ScreenWidthChars)
+        AreaWidth=ScreenWidthChars-X1;
 
     /* Find the top line */
     TopLineOfArea=ScreenFirstLine;
@@ -4950,6 +4990,9 @@ void DisplayText::ScrollVertAreaDown(uint32_t X1,uint32_t Y1,uint32_t X2,
     {
         for(;y<Y2-1 && BottomLineOfArea!=Lines.end();y++)
             BottomLineOfArea++;
+
+        if(BottomLineOfArea==Lines.end())
+            BottomLineOfArea--;
     }
 
     /************************************/
@@ -5014,7 +5057,7 @@ void DisplayText::ScrollVertAreaDown(uint32_t X1,uint32_t Y1,uint32_t X2,
     CurLine=TopLineOfArea;
     for(r=0;r<dy && CurLine!=Lines.end();r++)
     {
-        TextLine_Fill(CurLine,X1,X2-X1,&CurrentStyle," ");
+        TextLine_Fill(CurLine,X1,AreaWidth,&CurrentStyle," ");
         CurLine++;
     }
 }
@@ -5058,6 +5101,7 @@ void DisplayText::ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,
     int_fast32_t y;
     int_fast32_t r;
     int_fast32_t AreaHeight;
+    int_fast32_t AreaWidth;
 
     if(Y2<=Y1)
     {
@@ -5066,6 +5110,12 @@ void DisplayText::ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,
     }
 
     AreaHeight=Y2-Y1;
+    if(AreaHeight>ScreenHeightChars)
+        AreaHeight=ScreenHeightChars-Y1;
+
+    AreaWidth=X2-X1;
+    if(AreaWidth>ScreenWidthChars)
+        AreaWidth=ScreenWidthChars-X1;
 
     /* Find the top line */
     TopLineOfArea=ScreenFirstLine;
@@ -5084,6 +5134,9 @@ void DisplayText::ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,
     {
         for(;y<Y2-1 && BottomLineOfArea!=Lines.end();y++)
             BottomLineOfArea++;
+
+        if(BottomLineOfArea==Lines.end())
+            BottomLineOfArea--;
     }
 
     /*********************************/
@@ -5130,7 +5183,7 @@ void DisplayText::ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,
     CurLine=BottomLineOfArea;
     for(r=0;r<dy;r++)
     {
-        TextLine_Fill(CurLine,X1,X2-X1,&CurrentStyle," ");
+        TextLine_Fill(CurLine,X1,AreaWidth,&CurrentStyle," ");
 
         if(CurLine==Lines.begin())
         {

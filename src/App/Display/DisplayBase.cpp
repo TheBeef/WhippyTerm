@@ -536,6 +536,30 @@ void DisplayBase::AddTab(void)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayBase::AddReverseTab
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::AddReverseTab(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function handles when a driver send a goto previous tab stop command.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::AddReverseTab(void)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayBase::DoBackspace
  *
  * SYNOPSIS:

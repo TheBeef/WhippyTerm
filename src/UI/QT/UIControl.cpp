@@ -584,8 +584,16 @@ void UIClearListViewSelectedEntry(t_UIListViewCtrl *ListView)
 uintptr_t UIGetListViewSelectedEntry(t_UIListViewCtrl *ListView)
 {
     QListWidget *lv=(QListWidget *)ListView;
+    QListWidgetItem *SelectedItem;
+    uintptr_t RetValue;
 
-    return (uintptr_t)(lv->item(lv->currentRow())->data(Qt::UserRole).toULongLong());
+    SelectedItem=lv->item(lv->currentRow());
+    if(SelectedItem==NULL)
+        return 0;
+
+    RetValue=(uintptr_t)(SelectedItem->data(Qt::UserRole).toULongLong());
+
+    return RetValue;
 }
 
 bool UIListViewHasSelectedEntry(t_UIListViewCtrl *ListView)

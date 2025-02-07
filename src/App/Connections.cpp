@@ -1928,7 +1928,7 @@ bool Connection::InsertString(uint8_t *Str,uint32_t Len)
     {
         EndOfChar=StartOfChar;
         utf8::unchecked::advance(EndOfChar,1);
-        if(EndOfChar-StartOfChar>sizeof(CharBuff)-1)
+        if(EndOfChar-StartOfChar>(unsigned)sizeof(CharBuff)-1)
             return false;
         memcpy(CharBuff,StartOfChar,EndOfChar-StartOfChar);
         CharBuff[EndOfChar-StartOfChar]=0;
@@ -2199,11 +2199,18 @@ void Connection::DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
         case e_ConFunc_ClearScreen:
             ClearScreen();
         break;
+        case e_ConFunc_ClearScreenAndBackBuffer:
+            ClearScreen();
+            ClearScrollBackBuffer();
+        break;
         case e_ConFunc_ClearArea:
             Display->ClearArea(Arg1,Arg2,Arg3,Arg4);
         break;
         case e_ConFunc_Tab:
             Display->AddTab();
+        break;
+        case e_ConFunc_PrevTab:
+            Display->AddReverseTab();
         break;
         case e_ConFunc_NoteNonPrintable:
             Display->NoteNonPrintable((const char *)Arg1);

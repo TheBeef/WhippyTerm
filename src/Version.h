@@ -110,7 +110,7 @@
 #define OFFICIAL_RELEASE    0               // 1=official, 0=developer build (don't forget to update ExperimentalID.h on release)
 
 #define WHIPPYTERM_VERSION_MAJOR       0
-#define WHIPPYTERM_VERSION_MINOR       14
+#define WHIPPYTERM_VERSION_MINOR       15
 #define WHIPPYTERM_VERSION_REV         0
 #define WHIPPYTERM_VERSION_PATCH       0
 

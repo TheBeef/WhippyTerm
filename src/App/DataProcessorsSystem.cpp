@@ -96,6 +96,7 @@ void DPS_DoReturn(void);
 void DPS_DoBackspace(void);
 void DPS_DoMoveCursor(uint32_t X,uint32_t Y);
 void DPS_DoClearScreen(void);
+void DPS_DoClearScreenAndBackBuffer(void);
 void DPS_DoClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2);
 void DPS_GetCursorXY(int32_t *RetCursorX,int32_t *RetCursorY);
 void DPS_InsertString(uint8_t *Str,uint32_t Len);
@@ -104,6 +105,7 @@ uint32_t DPS_GetSysColor(uint32_t SysColShade,uint32_t SysColor);
 uint32_t DPS_GetSysDefaultColor(uint32_t DefaultColor);
 void DPS_NoteNonPrintable(const char *CodeStr);
 void DPS_DoTab(void);
+void DPS_DoPrevTab(void);
 void DPS_SendBackspace(void);
 void DPS_SendEnter(void);
 void DPS_BinaryAddText(const char *Str);
@@ -146,6 +148,8 @@ struct DPS_API g_DPSAPI=
     DPS_BinaryAddHex,
     DPS_DoSystemBell,
     DPS_DoScrollArea,
+    DPS_DoClearScreenAndBackBuffer,
+    DPS_DoPrevTab,
 };
 t_DPSDataProcessorsType m_DataProcessors;     // All available data processors
 
@@ -1257,6 +1261,8 @@ void DPS_DoMoveCursor(uint32_t X,uint32_t Y)
  *    Depending on settings it may also insert a dividing line or some other
  *    action.
  *
+ *    The cursor will also be moved to 0,0
+ *
  * RETURNS:
  *    NONE
  *
@@ -1266,6 +1272,31 @@ void DPS_DoMoveCursor(uint32_t X,uint32_t Y)
 void DPS_DoClearScreen(void)
 {
     Con_DoFunction(e_ConFunc_ClearScreen);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_DoClearScreenAndBackBuffer
+ *
+ * SYNOPSIS:
+ *    void DPS_DoClearScreenAndBackBuffer(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function clears the screen and the back buffer.  It will be filled
+ *    with the current background color and spaces.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DPS_DoClearScreenAndBackBuffer(void)
+{
+    Con_DoFunction(e_ConFunc_ClearScreenAndBackBuffer);
 }
 
 /*******************************************************************************
@@ -1347,10 +1378,12 @@ void DPS_GetCursorXY(int32_t *RetCursorX,int32_t *RetCursorY)
  *
  * PARAMETERS:
  *    Str [I] -- The string to add (UTF8)
- *    Len [I] -- The number of bytes in 'Str'
+ *    Len [I] -- The number of chars in 'Str'.  Note chars are utf8 chars not
+ *               bytes.  So if you have "0xE2 0x98 0x82 0x33" in 'str' that is
+ *               only 2 chars but 4 bytes, so the correct value for 'Len' is 2.
  *
  * FUNCTION:
- *    This function adds a string to the display.
+ *    This function adds a utf8 string to the display.
  *
  * RETURNS:
  *    NONE
@@ -1483,8 +1516,7 @@ void DPS_NoteNonPrintable(const char *CodeStr)
  *    NONE
  *
  * FUNCTION:
- *    This function moves inserts a tab char.  The tab char moves to the
- *    next tab stop.
+ *    This function moves to the next tab stop.
  *
  * RETURNS:
  *    NONE
@@ -1495,6 +1527,30 @@ void DPS_NoteNonPrintable(const char *CodeStr)
 void DPS_DoTab(void)
 {
     Con_DoFunction(e_ConFunc_Tab);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_DoPrevTab
+ *
+ * SYNOPSIS:
+ *    void DPS_DoPrevTab(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves to the previous tab stop.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DPS_DoPrevTab(void)
+{
+    Con_DoFunction(e_ConFunc_PrevTab);
 }
 
 /*******************************************************************************

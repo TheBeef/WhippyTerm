@@ -125,6 +125,7 @@ class DisplayText : public DisplayBase
         void SetCursorXY(unsigned int x,unsigned y);
         void GetCursorXY(unsigned int *x,unsigned int *y);
         void AddTab(void);
+        void AddReverseTab(void);
         void DoBackspace(void);
         void DoReturn(void);
         void DoLineFeed(void);

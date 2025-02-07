@@ -1,4 +1,4 @@
-#define TEST_CTRLS
+//#define TEST_CTRLS
 #ifdef TEST_CTRLS
 int TestX=5,TestY=1,TestX2=10,TestY2=5;
 int TestDX=0,TestDY=-1;
@@ -272,6 +272,9 @@ struct ANSIX364DecoderData
     bool DoingBright;
     int32_t SavedCursorX;
     int32_t SavedCursorY;
+    uint8_t *LastProcessedChar;
+    int LastProcessedCharLen;
+    int LastProcessedCharBuffSize;
 };
 
 /*** FUNCTION PROTOTYPES      ***/
@@ -418,6 +421,14 @@ t_DataProcessorHandleType *ANSIX364Decoder_AllocateData(void)
     Data->CurrentNum=0;
     Data->SavedCursorX=0;
     Data->SavedCursorY=0;
+    Data->LastProcessedCharLen=0;
+    Data->LastProcessedCharBuffSize=1;
+    Data->LastProcessedChar=(uint8_t *)malloc(Data->LastProcessedCharBuffSize);
+    if(Data->LastProcessedChar==NULL)
+    {
+        free(Data);
+        return NULL;
+    }
 
     ANSIX364Decoder_ResetSGR(Data);
 
@@ -447,6 +458,9 @@ t_DataProcessorHandleType *ANSIX364Decoder_AllocateData(void)
 void ANSIX364Decoder_FreeData(t_DataProcessorHandleType *DataHandle)
 {
     struct ANSIX364DecoderData *Data=(struct ANSIX364DecoderData *)DataHandle;
+
+    if(Data->LastProcessedChar!=NULL)
+        free(Data->LastProcessedChar);
 
     free(Data);
 }
@@ -1176,6 +1190,26 @@ case '\\':
 break;
 #endif
         default:
+            /* Note what char this was */
+            Data->LastProcessedCharLen=*CharLen;
+            if(*CharLen>Data->LastProcessedCharBuffSize)
+            {
+                uint8_t *NewBuffer;
+
+                /* We need a bigger buffer */
+                NewBuffer=(uint8_t *)realloc(Data->LastProcessedChar,*CharLen);
+                if(NewBuffer!=NULL)
+                {
+                    Data->LastProcessedChar=NewBuffer;
+                    Data->LastProcessedCharBuffSize=*CharLen;
+                }
+                else
+                {
+                    Data->LastProcessedCharLen=0;
+                }
+            }
+            if(Data->LastProcessedCharLen>0)
+                memcpy(Data->LastProcessedChar,ProcessedChar,*CharLen);
         break;
     }
     if(CodeStr!=NULL)
@@ -1243,10 +1277,27 @@ void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
         PG_BOOL *Consumed)
 {
     int32_t CursorX,CursorY;
-    int i;
-    int i2;
+    int p1;
+    int p2;
+    int r;
     int32_t NewPos;
     char buff[100];
+
+    /* Setup defaults args for the first 2 args (defaulting to 1) */
+    p1=1;
+    p2=1;
+    if(Data->CSIArgCount>=1)
+        p1=Data->CSIArg[0];
+    if(Data->CSIArgCount>=2)
+        p2=Data->CSIArg[1];
+
+    if(p1<1)
+        p1=1;
+    if(p2<1)
+        p2=1;
+
+    /* Get the cursor x,y because a lot of stuff uses them */
+    m_DPS->GetCursorXY(&CursorX,&CursorY);
 
     switch(RawByte)
     {
@@ -1299,73 +1350,54 @@ void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
         case '@':   // ICH
             /* We need to push all the chars to the right at the cursor
                (insert x spaces) */
-            m_DPS->DoScrollArea(0,0,40,10,1,0);
-//`
+            m_DPS->DoScrollArea(CursorX,CursorY,-1,CursorY+1,p1,0);
         break;
         case 'A':   // CUU - Cursor Up
-            m_DPS->GetCursorXY(&CursorX,&CursorY);
-            i=Data->CSIArg[0];
-            if(i<1)
-                i=1;
-            NewPos=CursorY-i;
+            NewPos=CursorY-p1;
             if(NewPos<0)
                 NewPos=0;
             m_DPS->DoMoveCursor(CursorX,NewPos);
         break;
         case 'B':   // CUD - Cursor Down
-            m_DPS->GetCursorXY(&CursorX,&CursorY);
-            i=Data->CSIArg[0];
-            if(i<1)
-                i=1;
-            NewPos=CursorY+i;
+            NewPos=CursorY+p1;
             m_DPS->DoMoveCursor(CursorX,NewPos);
         break;
+        case 'a':   // HPR - Horizontal Position Relative
         case 'C':   // CUF - Cursor Forward
-            m_DPS->GetCursorXY(&CursorX,&CursorY);
-            i=Data->CSIArg[0];
-            if(i<1)
-                i=1;
-            NewPos=CursorX+i;
+            NewPos=CursorX+p1;
             m_DPS->DoMoveCursor(NewPos,CursorY);
         break;
         case 'D':   // CUB - Cursor Back
-            m_DPS->GetCursorXY(&CursorX,&CursorY);
-            i=Data->CSIArg[0];
-            if(i<1)
-                i=1;
-            NewPos=CursorX-i;
+            NewPos=CursorX-p1;
             m_DPS->DoMoveCursor(NewPos,CursorY);
         break;
-        case 'E':   // CNL - Cursor Next Line
-//`
+        case 'E':   // CNL - Cursor Next Line (Move to right edge and down)
+            NewPos=CursorY+p1;
+            m_DPS->DoMoveCursor(0,NewPos);
         break;
-        case 'F':   // CPL - Cursor Previous Line
-//`
+        case 'F':   // CPL - Cursor Previous Line (Move to right edge and up)
+            NewPos=CursorY-p1;
+            if(NewPos<0)
+                NewPos=0;
+            m_DPS->DoMoveCursor(0,NewPos);
         break;
+        case '`':   // HPA - Horizontal Position Absolute
         case 'G':   // CHA - Cursor Horizontal Absolute
-//`
+            m_DPS->DoMoveCursor(p1-1,CursorY);
         break;
+        case 'f':   // HVP - Horizontal Vertical Position
         case 'H':   // CUP - Cursor Position
-            i=1;
-            i2=1;
-            if(Data->CSIArgCount>=1)
-                i=Data->CSIArg[0];
-            if(Data->CSIArgCount>=2)
-                i2=Data->CSIArg[1];
-
-            if(i<1)
-                i=1;
-            if(i2<1)
-                i2=1;
-
-            m_DPS->DoMoveCursor(i2-1,i-1);
+            m_DPS->DoMoveCursor(p2-1,p1-1);
         break;
-        case 'I':   // CHT
-//`
+        case 'I':   // CHT - Do x tabs
+            for(r=0;r<p2;r++)
+                m_DPS->DoTab();
         break;
         case 'J':   // ED - Erase in Display
-            i=Data->CSIArg[0];
-            switch(i)
+            p1=0;
+            if(Data->CSIArgCount>=1)
+                p1=Data->CSIArg[0];
+            switch(p1)
             {
                 case 0: // From the cursor through the end of the display
                     m_DPS->GetCursorXY(&CursorX,&CursorY);
@@ -1390,19 +1422,23 @@ void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
                     m_DPS->DoClearArea(0,CursorY,CursorX+1,CursorY);
                 break;
                 case 2: // The complete display
+                    m_DPS->GetCursorXY(&CursorX,&CursorY);
                     m_DPS->DoClearScreen();
-//                    m_DPS->DoMoveCursor(0,0);
+                    m_DPS->DoMoveCursor(CursorX,CursorY);
                 break;
                 case 3: // clear entire screen and delete all lines saved in the scrollback buffer (from xterm)
+                    m_DPS->DoClearScreenAndBackBuffer();
                 break;
                 default:
                 break;
             }
         break;
         case 'K':   // EL - Erase in Line
-            m_DPS->GetCursorXY(&CursorX,&CursorY);
+            p1=0;
+            if(Data->CSIArgCount>=1)
+                p1=Data->CSIArg[0];
 
-            switch(Data->CSIArg[0])
+            switch(p1)
             {
                 case 0: // Erase to end
                     m_DPS->DoClearArea(CursorX,CursorY,-1,CursorY);
@@ -1417,64 +1453,61 @@ void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
                 break;
             }
         break;
-        case 'L':   // IL
-//`
+        case 'L':   // IL - Insert lines
+            m_DPS->DoScrollArea(0,CursorY,-1,-1,0,p1);
         break;
-        case 'M':   // DL
-//`
+        case 'M':   // DL - Delete Line
+            m_DPS->DoScrollArea(0,CursorY,-1,-1,0,-p1);
         break;
-        case 'P':   // DCH
-//`
+        case 'P':   // DCH - Delete Character
+            m_DPS->DoScrollArea(CursorX,CursorY,-1,CursorY+1,-p1,0);
         break;
         case 'S':   // SU - Scroll Up
-//`
+            m_DPS->DoScrollArea(0,0,-1,-1,0,-p1);
         break;
         case 'T':   // SD - Scroll Down
-//`
+            m_DPS->DoScrollArea(0,0,-1,-1,0,p1);
         break;
-        case 'X':   // ECH
-//`
+        case 'X':   // ECH - Erase Character
+            m_DPS->DoClearArea(CursorX,CursorY,CursorX+p1,CursorY+1);
         break;
-        case 'Z':   // CBT
-//`
+        case 'Z':   // CBT - Cursor Backward Tabulation
+            for(r=0;r<p1;r++)
+                m_DPS->DoPrevTab();
         break;
-        case '`':   // HPA
-//`
+        case 'b':   // REP - Repeat Preceding Character
+            for(r=0;r<p1;r++)
+                m_DPS->InsertString((uint8_t *)Data->LastProcessedChar,1);
         break;
-        case 'a':   // HPR
-//`
+        case 'd':   // VPA - Vertical Position Absolute
+            m_DPS->DoMoveCursor(CursorX,p1-1);
         break;
-        case 'b':   // REP
-//`
+        case 'e':   // VPR - Vertical Position Relative
+            NewPos=CursorY+p1;
+            m_DPS->DoMoveCursor(CursorX,NewPos);
         break;
-        case 'd':   // VPA
-//`
+        case 'g':   // TBC - TABULATION CLEAR
+            /* Not supported */
         break;
-        case 'e':   // VPR
-//`
+        case 'j':   // HPB - CHARACTER POSITION BACKWARD
+            /* Not supported */
         break;
-        case 'f':   // HVP - Horizontal Vertical Position
-//`
+        case 'k':   // VPB - LINE POSITION BACKWARD
+            /* Not supported */
         break;
-        case 'g':   // TBC
+        case 'l':   // RM - RESET MODE
 //`
-        break;
-        case 'j':   // HPB
-//`
-        break;
-        case 'k':   // VPB
-//`
-        break;
-        case 'l':   // RM
-//`
+            /* Not supported */
         break;
         case 'm':   // SGR - Select Graphic Rendition
             ANSIX364Decoder_HandleSGR(Data);
             *Consumed=true;
         break;
         case 'n':   // DSR - Device Status Report
-            i=Data->CSIArg[0];
-            switch(i)
+            p1=0;
+            if(Data->CSIArgCount>=1)
+                p1=Data->CSIArg[0];
+            switch(p1)
             {
                 case 0: // ready, no malfunction detected
                 case 1: // busy, another DSR must be requested later

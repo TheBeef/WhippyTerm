@@ -169,7 +169,7 @@ struct DPS_API
     void (*SendEnter)(void);
     void (*BinaryAddText)(const char *Str);
     void (*BinaryAddHex)(uint8_t Byte);
-    void (*DoSystemBell)(void);
+    void (*DoSystemBell)(int VisualOnly);
     void (*DoScrollArea)(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t DeltaX,int32_t DeltaY);
     void (*DoClearScreenAndBackBuffer)(void);
     void (*DoPrevTab)(void);

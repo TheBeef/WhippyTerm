@@ -110,7 +110,7 @@ void DPS_SendBackspace(void);
 void DPS_SendEnter(void);
 void DPS_BinaryAddText(const char *Str);
 void DPS_BinaryAddHex(uint8_t Byte);
-void DPS_DoSystemBell(void);
+void DPS_DoSystemBell(int VisualOnly);
 void DPS_DoScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,
         int32_t DeltaX,int32_t DeltaY);
 
@@ -1688,10 +1688,11 @@ void DPS_BinaryAddHex(uint8_t Byte)
  *    DPS_DoSystemBell
  *
  * SYNOPSIS:
- *    void DPS_DoSystemBell(void);
+ *    void DPS_DoSystemBell(int VisualOnly);
  *
  * PARAMETERS:
- *    NONE
+ *    VisualOnly [I] -- If this is true then we do not play a sound and only
+ *                      do something on screen to "show" the bell.
  *
  * FUNCTION:
  *    This function rings the system bell.  The bell might be turned off in
@@ -1703,7 +1704,7 @@ void DPS_BinaryAddHex(uint8_t Byte)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void DPS_DoSystemBell(void)
+void DPS_DoSystemBell(int VisualOnly)
 {
 /* DEBUG PAUL: Do this */
 }

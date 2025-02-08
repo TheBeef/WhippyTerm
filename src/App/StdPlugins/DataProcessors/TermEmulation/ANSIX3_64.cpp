@@ -260,6 +260,16 @@ typedef enum
     e_ESCStateMAX
 } e_ESCStateType;
 
+struct ANSIX364DecoderSavedCursorAttribs
+{
+    int32_t SavedCursorX;
+    int32_t SavedCursorY;
+    uint32_t SavedAttribs;
+    uint32_t SavedFGColor;
+    uint32_t SavedBGColor;
+    uint32_t SavedULineColor;
+};
+
 struct ANSIX364DecoderData
 {
     e_ESCStateType CurrentMode;
@@ -270,11 +280,10 @@ struct ANSIX364DecoderData
     int CurrentNum;
     bool DoingDim;
     bool DoingBright;
-    int32_t SavedCursorX;
-    int32_t SavedCursorY;
     uint8_t *LastProcessedChar;
     int LastProcessedCharLen;
     int LastProcessedCharBuffSize;
+    struct ANSIX364DecoderSavedCursorAttribs SavedCursorAttribs;
 };
 
 /*** FUNCTION PROTOTYPES      ***/
@@ -307,6 +316,7 @@ void ANSIX364Decoder_ProcessCSIQuest(struct ANSIX364DecoderData *Data,
 void ANSIX364Decoder_DoCSIQuestCommand(struct ANSIX364DecoderData *Data,
         const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
         PG_BOOL *Consumed);
+static void ANSIX364Decoder_DefaultData(struct ANSIX364DecoderData *Data);
 
 /*** VARIABLE DEFINITIONS     ***/
 static const struct PI_UIAPI *m_UIAPI;
@@ -415,13 +425,6 @@ t_DataProcessorHandleType *ANSIX364Decoder_AllocateData(void)
     if(Data==NULL)
         return NULL;
 
-    Data->CurrentMode=e_ESCState_Normal;
-    Data->CSIArgCount=0;
-    Data->SearchAbortCount=0;
-    Data->CurrentNum=0;
-    Data->SavedCursorX=0;
-    Data->SavedCursorY=0;
-    Data->LastProcessedCharLen=0;
     Data->LastProcessedCharBuffSize=1;
     Data->LastProcessedChar=(uint8_t *)malloc(Data->LastProcessedCharBuffSize);
     if(Data->LastProcessedChar==NULL)
@@ -430,7 +433,7 @@ t_DataProcessorHandleType *ANSIX364Decoder_AllocateData(void)
         return NULL;
     }
 
-    ANSIX364Decoder_ResetSGR(Data);
+    ANSIX364Decoder_DefaultData(Data);
 
     return (t_DataProcessorHandleType *)Data;
 }
@@ -518,6 +521,46 @@ const struct DataProcessorInfo *ANSIX364Decoder_GetProcessorInfo(
 {
     *SizeOfInfo=sizeof(struct DataProcessorInfo);
     return &m_ANSIX364Decoder_Info;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    ANSIX364Decoder_DefaultData
+ *
+ * SYNOPSIS:
+ *    static void ANSIX364Decoder_DefaultData(struct ANSIX364DecoderData *Data);
+ *
+ * PARAMETERS:
+ *    Data [I] -- The data to default
+ *
+ * FUNCTION:
+ *    This function defaults the data for this plugin.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void ANSIX364Decoder_DefaultData(struct ANSIX364DecoderData *Data)
+{
+    Data->CurrentMode=e_ESCState_Normal;
+    Data->CSIArgCount=0;
+    Data->SearchAbortCount=0;
+    Data->CurrentNum=0;
+    Data->LastProcessedCharLen=0;
+
+    Data->SavedCursorAttribs.SavedCursorX=0;
+    Data->SavedCursorAttribs.SavedCursorY=0;
+    Data->SavedCursorAttribs.SavedAttribs=0;
+    Data->SavedCursorAttribs.SavedFGColor=
+            m_DPS->GetSysDefaultColor(e_DefaultColors_FG);
+    Data->SavedCursorAttribs.SavedBGColor=
+            m_DPS->GetSysDefaultColor(e_DefaultColors_BG);
+    Data->SavedCursorAttribs.SavedULineColor=
+            m_DPS->GetSysDefaultColor(e_DefaultColors_FG);
+
+    ANSIX364Decoder_ResetSGR(Data);
 }
 
 /*******************************************************************************
@@ -1030,7 +1073,7 @@ void ANSIX364Decoder_ProcessNormalChar(struct ANSIX364DecoderData *Data,
         break;
         case 7: // BEL  Bell
             CodeStr="BEL";
-            m_DPS->DoSystemBell();
+            m_DPS->DoSystemBell(false);
             *Consumed=true;
         break;
         case 8: // BS  Backspace
@@ -1496,7 +1539,6 @@ void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
             /* Not supported */
         break;
         case 'l':   // RM - RESET MODE
-//`
             /* Not supported */
         break;
         case 'm':   // SGR - Select Graphic Rendition
@@ -1530,12 +1572,12 @@ void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
             }
         break;
         case 's':   // SCP - Save Cursor Position
-            m_DPS->GetCursorXY(&Data->SavedCursorX,
-                    &Data->SavedCursorY);
+            m_DPS->GetCursorXY(&Data->SavedCursorAttribs.SavedCursorX,
+                    &Data->SavedCursorAttribs.SavedCursorY);
         break;
         case 'u':   // RCP - Restore Cursor Position
-            m_DPS->DoMoveCursor(Data->SavedCursorX,
-                    Data->SavedCursorY);
+            m_DPS->DoMoveCursor(Data->SavedCursorAttribs.SavedCursorX,
+                    Data->SavedCursorAttribs.SavedCursorY);
         break;
         default:
         break;
@@ -1767,6 +1809,9 @@ void ANSIX364Decoder_ProcessESC(struct ANSIX364DecoderData *Data,
         const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
         PG_BOOL *Consumed)
 {
+    int32_t NewPos;
+    int32_t CursorX,CursorY;
+
     *Consumed=true;
 
     // https://en.wikipedia.org/wiki/C0_and_C1_control_codes
@@ -1840,7 +1885,6 @@ void ANSIX364Decoder_ProcessESC(struct ANSIX364DecoderData *Data,
         case '|':   // LS3R
         case '}':   // LS2R
         case '~':   // LS1R
-            Data->CurrentMode=e_ESCState_Normal;
 #ifdef LOG_UNKNOWN_CODES
             {
                 FILE *out;
@@ -1854,10 +1898,20 @@ void ANSIX364Decoder_ProcessESC(struct ANSIX364DecoderData *Data,
 #endif
         break;
         case '7':   // Save Cursor and Attributes
-//`
+            m_DPS->GetCursorXY(&Data->SavedCursorAttribs.SavedCursorX,
+                    &Data->SavedCursorAttribs.SavedCursorY);
+            Data->SavedCursorAttribs.SavedFGColor=m_DPS->GetFGColor();
+            Data->SavedCursorAttribs.SavedBGColor=m_DPS->GetBGColor();
+            Data->SavedCursorAttribs.SavedAttribs=m_DPS->GetAttribs();
+            Data->SavedCursorAttribs.SavedULineColor=m_DPS->GetULineColor();
         break;
         case '8':   // Restore Cursor and Attributes
-//`
+            m_DPS->DoMoveCursor(Data->SavedCursorAttribs.SavedCursorX,
+                    Data->SavedCursorAttribs.SavedCursorY);
+            m_DPS->SetFGColor(Data->SavedCursorAttribs.SavedFGColor);
+            m_DPS->SetBGColor(Data->SavedCursorAttribs.SavedBGColor);
+            m_DPS->SetAttribs(Data->SavedCursorAttribs.SavedAttribs);
+            m_DPS->SetULineColor(Data->SavedCursorAttribs.SavedULineColor);
         break;
         case '?':   // Question mark mode (private commands)
             Data->CurrentMode=e_ESCState_Search4Exit;
@@ -1870,10 +1924,14 @@ void ANSIX364Decoder_ProcessESC(struct ANSIX364DecoderData *Data,
             m_DPS->DoNewLine();
         break;
         case 'H':   // HTS  Character Tabulation Set Horizontal Tabulation Set
-//`
+            /* Not supported */
         break;
         case 'M':   // RI  Reverse Line Feed Reverse Index
-//`
+            m_DPS->GetCursorXY(&CursorX,&CursorY);
+            NewPos=CursorY-1;
+            if(NewPos<0)
+                NewPos=0;
+            m_DPS->DoMoveCursor(CursorX,NewPos);
         break;
         case 'P':   // DCS  Device Control String
             Data->SearchAbortCount=0;
@@ -1896,10 +1954,18 @@ void ANSIX364Decoder_ProcessESC(struct ANSIX364DecoderData *Data,
             Data->CurrentMode=e_ESCState_Search4ST;
         break;
         case 'c':   // RIS  RESET TO INITIAL STATE
-//`
+            ANSIX364Decoder_DefaultData(Data);
+
+            m_DPS->SetFGColor(m_DPS->GetSysDefaultColor(e_DefaultColors_FG));
+            m_DPS->SetBGColor(m_DPS->GetSysDefaultColor(e_DefaultColors_BG));
+            m_DPS->SetAttribs(0);
+            m_DPS->SetULineColor(m_DPS->GetSysDefaultColor(e_DefaultColors_FG));
+
+            m_DPS->DoClearScreen();
+            m_DPS->DoClearScreenAndBackBuffer();
         break;
         case 'g':   // Visual Bell
-//`
+            m_DPS->DoSystemBell(true);
         break;
         case 'k':   // Title Definition String
 //`
@@ -1908,6 +1974,10 @@ void ANSIX364Decoder_ProcessESC(struct ANSIX364DecoderData *Data,
         default:
         break;
     }
+
+    /* If we are still in the ESC mode then switch back to normal */
+    if(Data->CurrentMode==e_ESCState_ESC)
+        Data->CurrentMode=e_ESCState_Normal;
 }
 
 /*******************************************************************************

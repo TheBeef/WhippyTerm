@@ -1371,7 +1371,7 @@ i_TextLineFrags DisplayText::InsertSpecialFragInMiddleOfString(
         AddFrag->Styling=InsertFrag->Styling;
         AddFrag->Value=InsertFrag->Value;
         AddFrag->Data=InsertFrag->Data;
-        AddFrag->Text.assign(InsertFrag->Text,InsertPos);
+        AddFrag->Text.assign(InsertFrag->Text,InsertPos,string::npos);
         RethinkFragWidth(AddFrag);
 
         InsertFrag->Text.erase(InsertPos);

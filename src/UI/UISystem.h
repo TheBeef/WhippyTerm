@@ -49,7 +49,6 @@ typedef struct UIMutex {int Private;} t_UIMutex;
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
 void FlagDrvDataEvent(t_IOSystemHandle *IOHandle);
 void UI_ProcessAllPendingUIEvents(void);
-void UI_Beep(void);
 t_UIMutex *AllocMutex(void);
 void FreeMutex(t_UIMutex *Mut);
 void LockMutex(t_UIMutex *Mut);

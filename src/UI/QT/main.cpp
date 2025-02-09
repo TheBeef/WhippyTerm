@@ -209,11 +209,6 @@ void UI_ProcessAllPendingUIEvents(void)
     g_MainApp->processEvents();
 }
 
-void UI_Beep(void)
-{
-    QApplication::beep();
-}
-
 t_UIMutex *AllocMutex(void)
 {
     QMutex *NewMutex;

@@ -611,3 +611,31 @@ void Con_GetScreenSize(int32_t *RetRows,int32_t *RetColumns)
     m_ActiveConnection->GetScreenSize(RetRows,RetColumns);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Con_DoBell
+ *
+ * SYNOPSIS:
+ *    uint32_t Con_DoBell(bool VisualOnly);
+ *
+ * PARAMETERS:
+ *    VisualOnly [I] -- If this is true then we do not play a sound and only
+ *                      do something on screen to "show" the bell.
+ *
+ * FUNCTION:
+ *    This function rings the bell.  It will look up the setting and use the
+ *    correct bell for this connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Con_DoBell(bool VisualOnly)
+{
+    if(m_ActiveConnection==NULL)
+        return;
+
+    m_ActiveConnection->DoBell(VisualOnly);
+}

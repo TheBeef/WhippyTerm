@@ -42,6 +42,7 @@
 #include "UI/UIFileReq.h"
 #include "UI/UIFontReq.h"
 #include "UI/UIColorReq.h"
+#include "OS/Directorys.h"
 #include "Version.h"
 #include <time.h>
 #include <string>
@@ -539,6 +540,11 @@ static void DS_SetSettingGUI(void)
     t_UITextInputCtrl *TxtHandle;
     t_UIColorPreviewCtrl *ColorPreviewHandle;
     i_StringListType CurStr;
+    t_UIRadioBttnCtrl *SysBell_None;
+    t_UIRadioBttnCtrl *SysBell_System;
+    t_UIRadioBttnCtrl *SysBell_BuiltIn;
+    t_UIRadioBttnCtrl *SysBell_AudioOnly;
+    t_UIRadioBttnCtrl *SysBell_VisualOnly;
     unsigned int r;
 
     /********************/
@@ -719,6 +725,38 @@ static void DS_SetSettingGUI(void)
     /* Keyboard */
     DS_SetKeyboardRadioBttns();
     DS_RethinkTerminalDisplay();
+
+    /* Sounds */
+    SysBell_None=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysBell_None);
+    SysBell_System=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysBell_System);
+    SysBell_BuiltIn=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysBell_BuiltIn);
+    SysBell_AudioOnly=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysBell_AudioOnly);
+    SysBell_VisualOnly=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysBell_VisualOnly);
+    switch(m_SettingConSettings->BeepMode)
+    {
+        case e_Beep_None:
+            UISelectRadioBttn(SysBell_None);
+        break;
+        default:
+        case e_BeepMAX:
+        case e_Beep_System:
+            UISelectRadioBttn(SysBell_System);
+        break;
+        case e_Beep_BuiltIn:
+            UISelectRadioBttn(SysBell_BuiltIn);
+        break;
+        case e_Beep_AudioOnly:
+            UISelectRadioBttn(SysBell_AudioOnly);
+        break;
+        case e_Beep_VisualOnly:
+            UISelectRadioBttn(SysBell_VisualOnly);
+        break;
+    }
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_UseCustomSounds);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->UseCustomSound);
+
+    TxtHandle=UIS_GetTextInputHandle(e_UIS_TextInput_CustomSoundFilename);
+    UISetTextCtrlText(TxtHandle,m_SettingConSettings->BeepFilename.c_str());
 
     /*******************/
     /* Data Processors */
@@ -1048,6 +1086,29 @@ static void DS_GetSettingsFromGUI(void)
                 sizeof(m_CopyOfKeyMapping));
     }
 
+    /* Sounds */
+    RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysBell_None);
+    if(UIIsRadioBttnSelected(RadioHandle))
+        m_SettingConSettings->BeepMode=e_Beep_None;
+    RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysBell_System);
+    if(UIIsRadioBttnSelected(RadioHandle))
+        m_SettingConSettings->BeepMode=e_Beep_System;
+    RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysBell_BuiltIn);
+    if(UIIsRadioBttnSelected(RadioHandle))
+        m_SettingConSettings->BeepMode=e_Beep_BuiltIn;
+    RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysBell_AudioOnly);
+    if(UIIsRadioBttnSelected(RadioHandle))
+        m_SettingConSettings->BeepMode=e_Beep_AudioOnly;
+    RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysBell_VisualOnly);
+    if(UIIsRadioBttnSelected(RadioHandle))
+        m_SettingConSettings->BeepMode=e_Beep_VisualOnly;
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_UseCustomSounds);
+    m_SettingConSettings->UseCustomSound=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+    TxtHandle=UIS_GetTextInputHandle(e_UIS_TextInput_CustomSoundFilename);
+    UIGetTextCtrlText(TxtHandle,m_SettingConSettings->BeepFilename);
+
     /*******************/
     /* Data Processors */
     /*******************/
@@ -1120,6 +1181,10 @@ static void DS_RethinkGUI(void)
 {
     t_UIButtonCtrl *ButtonHandle;
     t_UIListViewCtrl *ListViewHandle;
+    t_UICheckboxCtrl *CheckboxHandle;
+    t_UIRadioBttnCtrl *SysBell_BuiltIn;
+    t_UIRadioBttnCtrl *SysBell_AudioOnly;
+    t_UITextInputCtrl *TxtHandle;
 
     UIS_HandleLeftPanelAutoHideClick(g_Settings.LeftPanelAutoHide);
     UIS_HandleRightPanelAutoHideClick(g_Settings.RightPanelAutoHide);
@@ -1141,6 +1206,27 @@ static void DS_RethinkGUI(void)
     UIEnableButton(ButtonHandle,false);
 
     DS_UpdateColorPreview(true);
+
+    SysBell_BuiltIn=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysBell_BuiltIn);
+    SysBell_AudioOnly=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysBell_AudioOnly);
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_UseCustomSounds);
+    TxtHandle=UIS_GetTextInputHandle(e_UIS_TextInput_Capture_DefaultFilename);
+    TxtHandle=UIS_GetTextInputHandle(e_UIS_TextInput_CustomSoundFilename);
+    ButtonHandle=UIS_GetButtonHandle(e_UIS_Button_CustomSound_SelectFilename);
+    if(UIIsRadioBttnSelected(SysBell_BuiltIn) ||
+            UIIsRadioBttnSelected(SysBell_AudioOnly))
+    {
+        UIEnableCheckbox(CheckboxHandle,true);
+        UIEnableTextCtrl(TxtHandle,true);
+        UIEnableButton(ButtonHandle,true);
+    }
+    else
+    {
+        UIEnableCheckbox(CheckboxHandle,false);
+        UIEnableTextCtrl(TxtHandle,false);
+        UIEnableButton(ButtonHandle,false);
+    }
 }
 
 /*******************************************************************************
@@ -2137,6 +2223,11 @@ bool DS_Event(const struct DSEvent *Event)
     t_UIButtonCtrl *InputProHighLighting_Settings;
     t_UIButtonCtrl *InputProOther_Settings;
     t_UIColorPreviewCtrl *ColorPreviewHandle;
+    t_UITextInputCtrl *TxtHandle;
+    string FileNameStr;
+    string PathStr;
+    const char *FilePart;
+    const char *TmpCStr;
 
     AcceptEvent=true;
     switch(Event->EventType)
@@ -2233,6 +2324,32 @@ bool DS_Event(const struct DSEvent *Event)
                     DS_DoSelectHexDisplayFont();
                 break;
 
+                case e_UIS_Button_CustomSound_SelectFilename:
+                    TxtHandle=UIS_GetTextInputHandle(e_UIS_TextInput_CustomSoundFilename);
+                    UIGetTextCtrlText(TxtHandle,FileNameStr);
+
+                    TmpCStr=FileNameStr.c_str();
+                    FilePart=Basename(TmpCStr);
+                    if(FilePart==TmpCStr)
+                    {
+                        /* No path */
+                        PathStr="";
+                    }
+                    else
+                    {
+                        PathStr.assign(TmpCStr,FilePart-TmpCStr);
+                        FileNameStr.erase(0,FilePart-TmpCStr);
+                    }
+
+                    if(UI_LoadFileReq("Custom System Bell Sound",PathStr,
+                            FileNameStr,"All Files|*\nWave|*.wav",1))
+                    {
+                        PathStr+=GetOSPathSeparator();
+                        PathStr+=FileNameStr;
+                        UISetTextCtrlText(TxtHandle,PathStr.c_str());
+                    }
+                break;
+
                 case e_UIS_ButtonMAX:
                 default:
                 break;
@@ -2288,6 +2405,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Checkbox_ReverseEnable:
                 case e_UIS_Checkbox_StrikeThroughEnable:
                 case e_UIS_Checkbox_ColorEnable:
+                case e_UIS_Checkbox_UseCustomSounds:
                 case e_UIS_CheckboxMAX:
                 default:
                 break;
@@ -2330,6 +2448,13 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_RadioBttn_Keyboard_Clipboard_ShiftCtrl:
                 case e_UIS_RadioBttn_Keyboard_Clipboard_Alt:
                 case e_UIS_RadioBttn_Keyboard_Clipboard_Smart:
+                break;
+                case e_UIS_RadioBttn_SysBell_None:
+                case e_UIS_RadioBttn_SysBell_System:
+                case e_UIS_RadioBttn_SysBell_BuiltIn:
+                case e_UIS_RadioBttn_SysBell_AudioOnly:
+                case e_UIS_RadioBttn_SysBell_VisualOnly:
+                    DS_RethinkGUI();
                 break;
                 case e_UIS_RadioBttnMAX:
                 default:
@@ -2425,6 +2550,7 @@ bool DS_Event(const struct DSEvent *Event)
                 break;
                 case e_UIS_TextInput_KeyBinding_Assigned2:
                 case e_UIS_TextInput_Capture_DefaultFilename:
+                case e_UIS_TextInput_CustomSoundFilename:
                 case e_UIS_TextInputMAX:
                 default:
                 break;

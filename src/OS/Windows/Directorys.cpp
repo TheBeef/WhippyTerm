@@ -289,3 +289,28 @@ bool MakeFileExe(const char *Filename)
     /* Does nothing on Windows */
     return true;
 }
+
+/*******************************************************************************
+ * NAME:
+ *    GetOSPathSeparator
+ *
+ * SYNOPSIS:
+ *    const char *GetOSPathSeparator(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets the char that OS used as a path separator char.
+ *
+ * RETURNS:
+ *    A static string with the path separator in it.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+const char *GetOSPathSeparator(void)
+{
+    return "\\";
+}
+

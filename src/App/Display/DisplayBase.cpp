@@ -1065,3 +1065,28 @@ void DisplayBase::ScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,
     /* Does nothing */
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::ShowBell
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::ShowBell(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function tells the display to show the bell graphic / do a visible
+ *    bell.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::ShowBell(void)
+{
+    /* Do nothing */
+}
+

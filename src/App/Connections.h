@@ -351,6 +351,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void ZoomIn(void);
         void ZoomOut(void);
         void ResetZoom(void);
+        void DoBell(bool VisualOnly);
 
         void InformOfConnected(void);
         void InformOfDisconnected(void);

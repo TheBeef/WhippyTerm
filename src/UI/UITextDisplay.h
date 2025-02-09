@@ -217,4 +217,6 @@ void UITC_SetMaxLines(t_UITextDisplayCtrl *ctrl,int MaxLines,uint32_t BGColor);
 void UITC_RedrawScreen(t_UITextDisplayCtrl *ctrl);
 void UITC_SetDrawMask(t_UITextDisplayCtrl *ctrl,uint16_t Mask);
 
+void UITC_ShowBellIcon(t_UITextDisplayCtrl *ctrl);
+
 #endif

@@ -55,6 +55,16 @@ typedef enum
     e_WindowStartupPosMAX
 } e_WindowStartupPosType;
 
+typedef enum
+{
+    e_Beep_None,
+    e_Beep_System,
+    e_Beep_BuiltIn,
+    e_Beep_AudioOnly,
+    e_Beep_VisualOnly,
+    e_BeepMAX
+} e_BeepType;
+
 typedef std::list<std::string> t_StringListType;
 typedef t_StringListType::iterator i_StringListType;
 
@@ -128,11 +138,17 @@ class ConSettings
         bool LineThroughEnabled;
         bool ColorsEnabled;
 
+        /* Sounds */
+        e_BeepType BeepMode;
+        bool UseCustomSound;
+        std::string BeepFilename;
+
         void RegisterAllMembers(class TinyCFG &cfg);
         void DefaultSettings(void);
         bool RegisterBackspaceKey(class TinyCFG &cfg,const char *XmlName,e_BackspaceKeyType &Data);
         bool RegisterEnterKey(class TinyCFG &cfg,const char *XmlName,e_EnterKeyType &Data);
         bool RegisterClipboardMode(class TinyCFG &cfg,const char *XmlName,e_ClipboardModeType &Data);
+        bool RegisterBeep(class TinyCFG &cfg,const char *XmlName,e_BeepType &Data);
 };
 
 /* Global settings + connection settings defaults */

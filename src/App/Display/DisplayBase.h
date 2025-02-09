@@ -157,6 +157,7 @@ class DisplayBase
         virtual void SetupCanvas(void);
         virtual void SetDrawMask(uint16_t Mask);
         virtual t_UIContextMenuCtrl *GetContextMenuHandle(e_UITD_ContextMenuType UIObj);
+        virtual void ShowBell(void);
 
         void SetCustomSettings(class ConSettings *NewSettingsPtr);
         class ConSettings *GetCustomSettings(void);

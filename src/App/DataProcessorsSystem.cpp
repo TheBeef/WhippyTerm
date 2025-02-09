@@ -1706,7 +1706,7 @@ void DPS_BinaryAddHex(uint8_t Byte)
  ******************************************************************************/
 void DPS_DoSystemBell(int VisualOnly)
 {
-/* DEBUG PAUL: Do this */
+    Con_DoBell(VisualOnly);
 }
 
 /*******************************************************************************

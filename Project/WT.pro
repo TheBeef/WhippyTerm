@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets
+QT       += core gui widgets multimedia
 
 TARGET = WhippyTerm
 TEMPLATE = app
@@ -62,6 +62,7 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/UI/QT/Form_SendByte.cpp \
     ../src/UI/QT/Form_SendByteAccess.cpp \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.cpp \
+    ../src/UI/QT/QTSound.cpp \
     ../src/UI/QT/VerPanelHandle.cpp \
     ../src/UI/QT/HozPanelHandle.cpp \
     ../src/UI/QT/Widget_MovableTabWidget.cpp \

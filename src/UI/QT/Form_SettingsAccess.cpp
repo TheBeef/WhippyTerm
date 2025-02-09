@@ -106,6 +106,8 @@ t_UICheckboxCtrl *UIS_GetCheckboxHandle(e_UIS_Checkbox UIObj)
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->StrikeThroughEnable_checkBox;
         case e_UIS_Checkbox_ColorEnable:
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->ColorEnable_checkBox;
+        case e_UIS_Checkbox_UseCustomSounds:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->UseCustomSounds_checkBox;
 
         case e_UIS_CheckboxMAX:
         default:
@@ -174,6 +176,8 @@ t_UIButtonCtrl *UIS_GetButtonHandle(e_UIS_Button UIObj)
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->HexDisplay_SelectFontPushButton;
         case e_UIS_Button_SelectHexDisplaySelBGColor:
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->HexDisplay_SelectSelBGColor_pushButton;
+        case e_UIS_Button_CustomSound_SelectFilename:
+            return (t_UIButtonCtrl *)g_SettingsDialog->ui->CustomSound_SelectFilename_pushButton;
 
         case e_UIS_ButtonMAX:
         default:
@@ -329,6 +333,16 @@ t_UIRadioBttnCtrl *UIS_GetRadioBttnHandle(e_UIS_RadioBttns UIObj)
             return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->ClipboardKeys_AltClip_radioButton;
         case e_UIS_RadioBttn_Keyboard_Clipboard_Smart:
             return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->ClipboardKeys_SmartClip_radioButton;
+        case e_UIS_RadioBttn_SysBell_None:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->SysBell_None_radioButton;
+        case e_UIS_RadioBttn_SysBell_System:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->SysBell_System_radioButton;
+        case e_UIS_RadioBttn_SysBell_BuiltIn:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->SysBell_BuiltIn_radioButton;
+        case e_UIS_RadioBttn_SysBell_AudioOnly:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->SysBell_AudioOnly_radioButton;
+        case e_UIS_RadioBttn_SysBell_VisualOnly:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->SysBell_VisualOnly_radioButton;
         case e_UIS_RadioBttnMAX:
         default:
         break;
@@ -364,6 +378,8 @@ t_UITextInputCtrl *UIS_GetTextInputHandle(e_UIS_TextInput UIObj)
             return (t_UITextInputCtrl *)g_SettingsDialog->ui->KeyBinding_Assigned2_lineEdit;
         case e_UIS_TextInput_Capture_DefaultFilename:
             return (t_UITextInputCtrl *)g_SettingsDialog->ui->lineEdit_CaptureDefaultFilename;
+        case e_UIS_TextInput_CustomSoundFilename:
+            return (t_UITextInputCtrl *)g_SettingsDialog->ui->CustomSoundFilename_lineEdit;
 
         case e_UIS_TextInputMAX:
         default:

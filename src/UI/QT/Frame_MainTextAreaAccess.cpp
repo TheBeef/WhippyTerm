@@ -1097,3 +1097,30 @@ void UITC_SetDrawMask(t_UITextDisplayCtrl *ctrl,uint16_t Mask)
     TextDisplay->ui->TextDisplay->SetDrawMask(Mask);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    UITC_ShowBellIcon
+ *
+ * SYNOPSIS:
+ *    void UITC_ShowBellIcon(t_UITextDisplayCtrl *ctrl);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- The control to work on
+ *
+ * FUNCTION:
+ *    This function tells the text area to show the bell icon for a while then
+ *    clear it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UITC_ShowBellIcon(t_UITextDisplayCtrl *ctrl)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    TextDisplay->ui->TextDisplay->ShowBell();
+}
+

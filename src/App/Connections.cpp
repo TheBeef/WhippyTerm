@@ -46,6 +46,7 @@
 #include "UI/UIAsk.h"
 #include "UI/UIClipboard.h"
 #include "UI/UIDebug.h"
+#include "UI/UISound.h"
 #include "UI/UISystem.h"
 #include "UI/UITimers.h"
 #include "ThirdParty/utf8.h"
@@ -6430,4 +6431,74 @@ bool Connection::IsProcessorATextProcessor(struct ProcessorConData &PData)
 t_UIContextMenuCtrl *Connection::GetContextMenuHandle(e_UITD_ContextMenuType UIObj)
 {
     return Display->GetContextMenuHandle(UIObj);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::DoBell
+ *
+ * SYNOPSIS:
+ *    uint32_t Connection::DoBell(bool VisualOnly);
+ *
+ * PARAMETERS:
+ *    VisualOnly [I] -- If this is true then we do not play a sound and only
+ *                      do something on screen to "show" the bell.
+ *
+ * FUNCTION:
+ *    This function rings the bell.  It will look up the setting and use the
+ *    correct bell for this connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::DoBell(bool VisualOnly)
+{
+    bool PlaySound;
+    bool ShowGraphic;
+
+    if(Display==NULL)
+        return;
+
+    PlaySound=false;
+    ShowGraphic=false;
+    switch(CustomSettings.BeepMode)
+    {
+        case e_Beep_None:
+        break;
+        case e_Beep_System:
+            UI_Beep();
+        break;
+        case e_Beep_BuiltIn:
+            PlaySound=true;
+            ShowGraphic=true;
+        break;
+        case e_Beep_AudioOnly:
+            PlaySound=true;
+        break;
+        case e_Beep_VisualOnly:
+            ShowGraphic=true;
+        break;
+        default:
+        case e_BeepMAX:
+        break;
+    }
+
+    if(PlaySound)
+    {
+        if(CustomSettings.UseCustomSound)
+            UIPlayWav(CustomSettings.BeepFilename.c_str());
+        else
+            UIPlayBuiltInBeep();
+    }
+
+    if(ShowGraphic)
+    {
+        if(Display==NULL)
+            return;
+
+        Display->ShowBell();
+    }
 }

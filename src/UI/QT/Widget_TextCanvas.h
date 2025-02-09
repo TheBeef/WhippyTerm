@@ -7,6 +7,9 @@
 #include "PluginSDK/KeyDefines.h"
 #include "UI/UITextDefs.h"
 #include "Frame_TextCavnasOverrideBox.h"
+#include <QLabel>
+#include <QGraphicsOpacityEffect>
+#include <QPropertyAnimation>
 #include <list>
 #include <vector>
 
@@ -109,6 +112,7 @@ public:
     bool SetFont(const char *FontName,int PointSize,bool Bold,bool Italic);
     void SetCursorBlinking(bool Blinking);
     void SetDrawMask(uint16_t Mask);
+    void ShowBell(void);
 
     void ClearLine(unsigned int Line,uint32_t BGColor);
     void AppendTextFrag(unsigned int Line,const struct TextCanvasFrag *Frag);
@@ -173,6 +177,7 @@ private:
     bool CursorSet2BeBlinking;
     bool CursorHiddenByBlink;
     QTimer *CursorTimer;
+    QLabel *BellLabel;
     Frame_TextCavnasOverrideBox *OverrideWidget;
     bool OverrideActive;
 
@@ -194,6 +199,9 @@ private:
     QColor UseDisplayBackgroundColor;
     bool FillDisplayBackground;
     uint16_t DrawAttribMask;
+
+    QGraphicsOpacityEffect *BellAnimEffect;
+    QPropertyAnimation *BellAnim;
 
     bool SendEvent(e_WTCEventType EventType,union WTCEventData *Info);
     bool SendEvent(e_WTCEventType EventType);

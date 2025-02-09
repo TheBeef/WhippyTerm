@@ -61,6 +61,7 @@ enum e_UIS_Checkbox
     e_UIS_Checkbox_ReverseEnable,
     e_UIS_Checkbox_StrikeThroughEnable,
     e_UIS_Checkbox_ColorEnable,
+    e_UIS_Checkbox_UseCustomSounds,
     e_UIS_CheckboxMAX
 };
 
@@ -104,6 +105,7 @@ enum e_UIS_Button
     e_UIS_Button_SelectHexDisplayBGColor,
     e_UIS_Button_SelectHexDisplayFont,
     e_UIS_Button_SelectHexDisplaySelBGColor,
+    e_UIS_Button_CustomSound_SelectFilename,
     e_UIS_ButtonMAX
 };
 
@@ -166,6 +168,11 @@ enum e_UIS_RadioBttns
     e_UIS_RadioBttn_Keyboard_Clipboard_ShiftCtrl,
     e_UIS_RadioBttn_Keyboard_Clipboard_Alt,
     e_UIS_RadioBttn_Keyboard_Clipboard_Smart,
+    e_UIS_RadioBttn_SysBell_None,
+    e_UIS_RadioBttn_SysBell_System,
+    e_UIS_RadioBttn_SysBell_BuiltIn,
+    e_UIS_RadioBttn_SysBell_AudioOnly,
+    e_UIS_RadioBttn_SysBell_VisualOnly,
     e_UIS_RadioBttnMAX
 };
 
@@ -182,6 +189,7 @@ enum e_UIS_TextInput
     e_UIS_TextInput_SysCol_Web,   // SysCol_Web_lineEdit
     e_UIS_TextInput_KeyBinding_Assigned2,
     e_UIS_TextInput_Capture_DefaultFilename,
+    e_UIS_TextInput_CustomSoundFilename,
     e_UIS_TextInputMAX
 };
 

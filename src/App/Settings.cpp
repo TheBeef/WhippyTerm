@@ -776,6 +776,78 @@ bool ConSettings::RegisterClipboardMode(class TinyCFG &cfg,const char *XmlName,
     return cfg.RegisterGeneric(NewDataClass);
 }
 ////////////////////
+class BeepCFG : public TinyCFGBaseData
+{
+   public:
+      e_BeepType *Ptr;
+      bool LoadData(string &LoadedString);
+      bool SaveData(string &StoreString);
+};
+bool BeepCFG::LoadData(string &LoadedString)
+{
+    *Ptr=e_Beep_System;  /* Defaults to system */
+
+    if(strcmp(LoadedString.c_str(),"None")==0)
+        *Ptr=e_Beep_None;
+    if(strcmp(LoadedString.c_str(),"System")==0)
+        *Ptr=e_Beep_System;
+    if(strcmp(LoadedString.c_str(),"BuiltIn")==0)
+        *Ptr=e_Beep_BuiltIn;
+    if(strcmp(LoadedString.c_str(),"AudioOnly")==0)
+        *Ptr=e_Beep_AudioOnly;
+    if(strcmp(LoadedString.c_str(),"VisualOnly")==0)
+        *Ptr=e_Beep_VisualOnly;
+
+    return true;
+}
+
+bool BeepCFG::SaveData(string &StoreString)
+{
+    switch(*Ptr)
+    {
+        default:
+        case e_BeepMAX:
+        case e_Beep_System:
+            StoreString="System";
+        break;
+        case e_Beep_None:
+            StoreString="None";
+        break;
+        case e_Beep_BuiltIn:
+            StoreString="BuiltIn";
+        break;
+        case e_Beep_AudioOnly:
+            StoreString="AudioOnly";
+        break;
+        case e_Beep_VisualOnly:
+            StoreString="VisualOnly";
+        break;
+    }
+    return true;
+}
+
+bool ConSettings::RegisterBeep(class TinyCFG &cfg,const char *XmlName,
+      e_BeepType &Data)
+{
+    class BeepCFG *NewDataClass;
+
+    /* Make a new class to handle this new piece of data */
+    try
+    {
+        NewDataClass=new BeepCFG;
+    }
+    catch(std::bad_alloc const &)
+    {
+        return false;
+    }
+
+    /* Setup the data */
+    NewDataClass->Ptr=&Data;
+    NewDataClass->XmlName=XmlName;
+
+    return cfg.RegisterGeneric(NewDataClass);
+}
+///////////////////
 
 /*******************************************************************************
  * NAME:
@@ -933,6 +1005,12 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
     cfg.Register("ReverseEnabled",ReverseEnabled);
     cfg.Register("LineThroughEnabled",LineThroughEnabled);
     cfg.Register("ColorsEnabled",ColorsEnabled);
+    cfg.EndBlock();
+
+    cfg.StartBlock("Sound");
+        RegisterBeep(cfg,"Beep",BeepMode);
+        cfg.Register("UseCustomSound",UseCustomSound);
+        cfg.Register("BeepSound",BeepFilename);
     cfg.EndBlock();
 }
 
@@ -1112,4 +1190,8 @@ void ConSettings::DefaultSettings(void)
     ReverseEnabled=true;
     LineThroughEnabled=true;
     ColorsEnabled=true;
+
+    BeepMode=e_Beep_System;
+    UseCustomSound=false;
+    BeepFilename="";
 }

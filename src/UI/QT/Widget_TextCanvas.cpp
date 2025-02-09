@@ -8,8 +8,12 @@
 #include <QPainter>
 #include <QDebug>
 #include <QtGui>
+#include <QGraphicsOpacityEffect>
+#include <QPropertyAnimation>
 
 #define FOCUS_BOX_SIZE          1
+
+#define BELL_TIME               1000    // 1000ms
 
 Widget_TextCanvas::Widget_TextCanvas(QWidget *parent) : QWidget(parent)
 {
@@ -47,7 +51,22 @@ Widget_TextCanvas::Widget_TextCanvas(QWidget *parent) : QWidget(parent)
     OverrideWidget->setVisible(false);
     OverrideActive=false;
 
+    BellLabel=new QLabel(this);
+    BellLabel->setPixmap(QPixmap(QString::fromUtf8(":/G/Graphics/bell_feathered.png")));
+    BellLabel->setAlignment(Qt::AlignCenter);
+
     DrawAttribMask=~0;  // Draw everything
+
+    /* Hide the bell */
+    QGraphicsOpacityEffect *eff = new QGraphicsOpacityEffect(this);
+    BellLabel->setGraphicsEffect(eff);
+    QPropertyAnimation *a = new QPropertyAnimation(eff,"opacity");
+
+    a->setDuration(0);
+    a->setStartValue(0);
+    a->setEndValue(0);
+    a->setEasingCurve(QEasingCurve::OutBack);
+    a->start(QPropertyAnimation::DeleteWhenStopped);
 }
 
 Widget_TextCanvas::~Widget_TextCanvas()
@@ -363,6 +382,10 @@ void Widget_TextCanvas::resizeEvent(QResizeEvent *event)
     GetCorrectedWidgetSize(EventData.NewSize.Width,EventData.NewSize.Height);
 
     ResizeOverrideWidget();
+
+    /* Recenter the bell */
+    BellLabel->setGeometry(QRect(0,0,event->size().width(),
+            event->size().height()));
 
     SendEvent(e_WTCEvent_Resize,&EventData);
 }
@@ -1636,3 +1659,17 @@ void Widget_TextCanvas::SetDrawMask(uint16_t Mask)
     update();
 }
 
+void Widget_TextCanvas::ShowBell(void)
+{
+    /* These auto delete when they are done */
+    QGraphicsOpacityEffect *eff = new QGraphicsOpacityEffect(this);
+    BellLabel->setGraphicsEffect(eff);
+    QPropertyAnimation *a = new QPropertyAnimation(eff,"opacity");
+
+    a->setDuration(500);
+    a->setStartValue(1);
+    a->setEndValue(0);
+    a->setEasingCurve(QEasingCurve::OutBack);
+    a->start(QPropertyAnimation::DeleteWhenStopped);
+//    connect(a,SIGNAL(finished()),this,SLOT(hideThisWidget()));
+}

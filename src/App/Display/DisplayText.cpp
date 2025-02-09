@@ -5603,3 +5603,29 @@ void DisplayText::TextLine_Clear(i_TextLines Line)
     Line->Frags.clear();
     Line->LineWidthPx=0;
 }
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ShowBell
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ShowBell(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function tells the display to show the bell graphic / do a visible
+ *    bell.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::ShowBell(void)
+{
+    UITC_ShowBellIcon(TextDisplayCtrl);
+}
+

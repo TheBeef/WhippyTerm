@@ -129,13 +129,13 @@ void Form_Settings::on_BottomPanel_SaveCurrent_pushButton_clicked()
 
 void Form_Settings::on_Area_listWidget_itemClicked(QListWidgetItem *item)
 {
-    uintptr_t ID;   // The ID for this item
-    union DSEventData EventData;
-
-    ID=(uintptr_t)(item->data(Qt::UserRole).toULongLong());
-
-    EventData.ListView.InputID=e_UIS_ListView_AreaList;
-    SendEvent(e_DSEvent_ListViewChange,&EventData,ID);
+//    uintptr_t ID;   // The ID for this item
+//    union DSEventData EventData;
+//
+//    ID=(uintptr_t)(item->data(Qt::UserRole).toULongLong());
+//
+//    EventData.ListView.InputID=e_UIS_ListView_AreaList;
+//    SendEvent(e_DSEvent_ListViewChange,&EventData,ID);
 }
 
 void Form_Settings::on_GrabCurrentWinPos_pushButton_clicked()
@@ -665,5 +665,76 @@ void Form_Settings::on_Terminal_tabWidget_currentChanged(int index)
     EventData.Tab.TabID=e_UIS_TabCtrl_Terminal;
     EventData.Tab.Index=(e_UIS_TabCtrl_Terminal_Page)index;
     SendEvent(e_DSEvent_TabChange,&EventData);
+}
+
+void Form_Settings::on_Area_listWidget_itemSelectionChanged()
+{
+    uintptr_t ID;   // The ID for this item
+    union DSEventData EventData;
+    QList<QListWidgetItem *> Selected;
+    QListWidgetItem *item;
+
+    Selected=ui->Area_listWidget->selectedItems();
+
+    if(Selected.empty())
+        return;
+
+    item=Selected.first();
+    ID=(uintptr_t)(item->data(Qt::UserRole).toULongLong());
+
+    EventData.ListView.InputID=e_UIS_ListView_AreaList;
+    SendEvent(e_DSEvent_ListViewChange,&EventData,ID);
+}
+
+
+void Form_Settings::on_CustomSound_SelectFilename_pushButton_clicked()
+{
+    union DSEventData EventData;
+
+    EventData.Bttn.InputID=e_UIS_Button_CustomSound_SelectFilename;
+    SendEvent(e_DSEvent_BttnTriggered,&EventData);
+}
+
+void Form_Settings::on_SysBell_None_radioButton_clicked()
+{
+    union DSEventData EventData;
+
+    EventData.RadioBttn.InputID=e_UIS_RadioBttn_SysBell_None;
+    SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+}
+
+void Form_Settings::on_SysBell_System_radioButton_clicked()
+{
+    union DSEventData EventData;
+
+    EventData.RadioBttn.InputID=e_UIS_RadioBttn_SysBell_System;
+    SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+}
+
+
+void Form_Settings::on_SysBell_BuiltIn_radioButton_clicked()
+{
+    union DSEventData EventData;
+
+    EventData.RadioBttn.InputID=e_UIS_RadioBttn_SysBell_BuiltIn;
+    SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+}
+
+
+void Form_Settings::on_SysBell_AudioOnly_radioButton_clicked()
+{
+    union DSEventData EventData;
+
+    EventData.RadioBttn.InputID=e_UIS_RadioBttn_SysBell_AudioOnly;
+    SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+}
+
+
+void Form_Settings::on_SysBell_VisualOnly_radioButton_clicked()
+{
+    union DSEventData EventData;
+
+    EventData.RadioBttn.InputID=e_UIS_RadioBttn_SysBell_VisualOnly;
+    SendEvent(e_DSEvent_RadioBttnClick,&EventData);
 }
 

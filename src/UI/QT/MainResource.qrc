@@ -58,5 +58,9 @@
         <file>Graphics/WIcon.svg</file>
         <file>Graphics/text_horizontalrule.png</file>
         <file>Graphics/lightning.png</file>
+        <file>Graphics/bell_feathered.png</file>
+    </qresource>
+    <qresource prefix="/S">
+        <file>Sounds/Computer_Error_Alert_Short.wav</file>
     </qresource>
 </RCC>

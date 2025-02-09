@@ -58,6 +58,7 @@ bool MakePathDir(const char *Path);
 bool PathExists(const char *Path);
 const char *ConvertPath2Native(const char *Path);
 const char *Basename(const char *Filename);
+const char *GetOSPathSeparator(void);
 //bool GetFileList(const char *Path,t_FileListType &Files);
 bool MakeFileExe(const char *Filename);
 

@@ -139,6 +139,20 @@ private slots:
     
     void on_Terminal_tabWidget_currentChanged(int index);
     
+    void on_Area_listWidget_itemSelectionChanged();
+    
+    void on_CustomSound_SelectFilename_pushButton_clicked();
+    
+    void on_SysBell_None_radioButton_clicked();
+    
+    void on_SysBell_System_radioButton_clicked();
+    
+    void on_SysBell_BuiltIn_radioButton_clicked();
+    
+    void on_SysBell_AudioOnly_radioButton_clicked();
+    
+    void on_SysBell_VisualOnly_radioButton_clicked();
+    
 private:
     bool DoingEvent;
 

@@ -117,6 +117,8 @@ void RunAboutDialog(void)
             "<tr><td>UTF8-CPP</td><td>2.3</td><td><a href='https://github.com/nemtrif/utfcpp'>https://github.com/nemtrif/utfcpp</a></td>"
             "<tr><td>strnatcmp</td><td></td><td><a href='https://github.com/sourcefrog/natsort'>https://github.com/sourcefrog/natsort</a></td>"
             "<tr><td>Silk icons</td><td>1.3</td><td><a href='http://www.famfamfam.com/lab/icons/silk/'>http://www.famfamfam.com/lab/icons/silk/</a></td>"
+            "<tr><td>Computer Error Alert</td><td>1.0</td><td><a href='https://soundbible.com/1540-Computer-Error-Alert.html'>https://soundbible.com/1540-Computer-Error-Alert.html</a></td>"
+            "<tr><td>Bell Icon designed by Pixel perfect from Flaticon</td><td>1.0</td><td><a href='https://www.flaticon.com/free-icon/bell_1827272'>https://www.flaticon.com/free-icon/bell_1827272</a></td>"
             "</table>",
             WHIPPYTERM_NAME,
             GetGUIEngineName(),

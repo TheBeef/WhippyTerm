@@ -6464,26 +6464,35 @@ void Connection::DoBell(bool VisualOnly)
 
     PlaySound=false;
     ShowGraphic=false;
-    switch(CustomSettings.BeepMode)
+
+    if(VisualOnly)
     {
-        case e_Beep_None:
-        break;
-        case e_Beep_System:
-            UI_Beep();
-        break;
-        case e_Beep_BuiltIn:
-            PlaySound=true;
+        if(CustomSettings.BeepMode!=e_Beep_None)
             ShowGraphic=true;
-        break;
-        case e_Beep_AudioOnly:
-            PlaySound=true;
-        break;
-        case e_Beep_VisualOnly:
-            ShowGraphic=true;
-        break;
-        default:
-        case e_BeepMAX:
-        break;
+    }
+    else
+    {
+        switch(CustomSettings.BeepMode)
+        {
+            case e_Beep_None:
+            break;
+            case e_Beep_System:
+                UI_Beep();
+            break;
+            case e_Beep_BuiltIn:
+                PlaySound=true;
+                ShowGraphic=true;
+            break;
+            case e_Beep_AudioOnly:
+                PlaySound=true;
+            break;
+            case e_Beep_VisualOnly:
+                ShowGraphic=true;
+            break;
+            default:
+            case e_BeepMAX:
+            break;
+        }
     }
 
     if(PlaySound)

@@ -106,6 +106,7 @@ uint32_t DPS_GetSysDefaultColor(uint32_t DefaultColor);
 void DPS_NoteNonPrintable(const char *CodeStr);
 void DPS_DoTab(void);
 void DPS_DoPrevTab(void);
+void DPS_SetTitle(const char *Title);
 void DPS_SendBackspace(void);
 void DPS_SendEnter(void);
 void DPS_BinaryAddText(const char *Str);
@@ -150,6 +151,7 @@ struct DPS_API g_DPSAPI=
     DPS_DoScrollArea,
     DPS_DoClearScreenAndBackBuffer,
     DPS_DoPrevTab,
+//void DPS_SetTitle(const char *Title);
 };
 t_DPSDataProcessorsType m_DataProcessors;     // All available data processors
 

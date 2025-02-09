@@ -1,8 +1,3 @@
-//#define TEST_CTRLS
-#ifdef TEST_CTRLS
-int TestX=5,TestY=1,TestX2=10,TestY2=5;
-int TestDX=0,TestDY=-1;
-#endif
 // https://vt100.net/docs/vt510-rm/chapter4.html
 
 // Also see:https://stackoverflow.com/questions/44116977/get-mouse-position-in-pixels-using-escape-sequences
@@ -10,7 +5,8 @@ int TestDX=0,TestDY=-1;
 // https://godoc.org/github.com/pborman/ansi
 // https://ecma-international.org/publications-and-standards/standards/ecma-48/
 
-// DEBUG PAUL: Rename this to ECMA-48?  Seems that ANSIX3.64 was withdrawn because it's basicly ECMA-48.
+// Note: Seems that ANSI-X3.64 was withdrawn because it's basicly ECMA-48, but
+// everyone seems to use ANSI and no one knows about ECMA-48.
 
 /*******************************************************************************
  * FILENAME: ANSIX3_64.c
@@ -1025,21 +1021,6 @@ void ANSIX364Decoder_ProcessIncomingTextByte(t_DataProcessorHandleType *DataHand
     }
 }
 
-#ifdef TEST_CTRLS
-void DEBUG_TEST_FN(void)
-{
-    char buff[100];
-    int32_t CursorX,CursorY;
-
-    sprintf(buff,"%d,%d - %d,%d = %d,%d ",TestX,TestY,TestX2,TestY2,TestDX,TestDY);
-
-    m_DPS->GetCursorXY(&CursorX,&CursorY);
-    m_DPS->DoMoveCursor(0,20);
-    m_DPS->InsertString((uint8_t *)buff,strlen(buff));
-    m_DPS->DoMoveCursor(CursorX,CursorY);
-}
-#endif
-
 void ANSIX364Decoder_ProcessNormalChar(struct ANSIX364DecoderData *Data,
         const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
         PG_BOOL *Consumed)
@@ -1167,71 +1148,6 @@ void ANSIX364Decoder_ProcessNormalChar(struct ANSIX364DecoderData *Data,
         case 127:   // DEL  Delete
             CodeStr="DEL";
         break;
-#ifdef TEST_CTRLS
-case '|':
-    {
-        DEBUG_TEST_FN();
-        *Consumed=true;
-    }
-break;
-case '`':
-{
-    int32_t CursorX,CursorY;
-    m_DPS->GetCursorXY(&CursorX,&CursorY);
-    TestX=CursorX;
-    TestY=CursorY;
-    *Consumed=true;
-}
-break;
-case '/':
-{
-    int32_t CursorX,CursorY;
-    m_DPS->GetCursorXY(&CursorX,&CursorY);
-    TestX2=CursorX;
-    TestY2=CursorY;
-    *Consumed=true;
-}
-break;
-case '}':
-{
-    TestDX++;
-    DEBUG_TEST_FN();
-    *Consumed=true;
-}
-break;
-case '{':
-{
-    TestDX--;
-    DEBUG_TEST_FN();
-    *Consumed=true;
-}
-break;
-case '+':
-{
-    TestDY++;
-    DEBUG_TEST_FN();
-    *Consumed=true;
-}
-break;
-case '-':
-{
-    TestDY--;
-    DEBUG_TEST_FN();
-    *Consumed=true;
-}
-break;
-case '\\':
-/* Testing hack */
-{
-    int32_t CursorX,CursorY;
-    m_DPS->GetCursorXY(&CursorX,&CursorY);
-//    m_DPS->DoScrollArea(5,0,10,5,0,-2);
-//    m_DPS->DoScrollArea(TestX,TestY,TestX2,TestY2,TestDX,TestDY);
-    m_DPS->DoClearArea(TestX,TestY,TestX2,TestY2);
-    *Consumed=true;
-}
-break;
-#endif
         default:
             /* Note what char this was */
             Data->LastProcessedCharLen=*CharLen;
@@ -1968,7 +1884,7 @@ void ANSIX364Decoder_ProcessESC(struct ANSIX364DecoderData *Data,
             m_DPS->DoSystemBell(true);
         break;
         case 'k':   // Title Definition String
-//`
+            /* Not supported */
         break;
 
         default:

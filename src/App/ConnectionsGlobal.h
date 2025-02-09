@@ -70,5 +70,6 @@ void Con_GetScreenSize(int32_t *RetRows,int32_t *RetColumns);
 uint32_t Con_GetSysColor(e_SysColShadeType SysColShade,e_SysColType SysColor);
 uint32_t Con_GetSysDefaultColor(e_DefaultColorsType DefaultColor);
 void Con_DoBell(bool VisualOnly);
+void Con_SetTitle(const char *Title);
 
 #endif

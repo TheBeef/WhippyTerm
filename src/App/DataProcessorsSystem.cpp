@@ -151,7 +151,7 @@ struct DPS_API g_DPSAPI=
     DPS_DoScrollArea,
     DPS_DoClearScreenAndBackBuffer,
     DPS_DoPrevTab,
-//void DPS_SetTitle(const char *Title);
+    DPS_SetTitle,
 };
 t_DPSDataProcessorsType m_DataProcessors;     // All available data processors
 
@@ -1741,5 +1741,29 @@ void DPS_DoScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,
         int32_t DeltaX,int32_t DeltaY)
 {
     Con_DoFunction(e_ConFunc_ScrollArea,X1,Y1,X2,Y2,DeltaX,DeltaY);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_SetTitle
+ *
+ * SYNOPSIS:
+ *    void DPS_SetTitle(const char *Title);
+ *
+ * PARAMETERS:
+ *    Title [I] -- The new title for the window.
+ *
+ * FUNCTION:
+ *    This function changes the title of this connections title.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DPS_SetTitle(const char *Title)
+{
+    Con_SetTitle(Title);
 }
 

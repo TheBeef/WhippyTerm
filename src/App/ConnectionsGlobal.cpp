@@ -639,3 +639,31 @@ void Con_DoBell(bool VisualOnly)
 
     m_ActiveConnection->DoBell(VisualOnly);
 }
+
+/*******************************************************************************
+ * NAME:
+ *    Con_SetTitle
+ *
+ * SYNOPSIS:
+ *    void Con_SetTitle(const char *Title);
+ *
+ * PARAMETERS:
+ *    Title [I] -- The new title
+ *
+ * FUNCTION:
+ *    This function changes the title of the active connetion
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Con_SetTitle(const char *Title)
+{
+    if(m_ActiveConnection==NULL)
+        return;
+
+    m_ActiveConnection->SetDisplayName(Title);
+}
+

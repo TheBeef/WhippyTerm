@@ -173,6 +173,7 @@ struct DPS_API
     void (*DoScrollArea)(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t DeltaX,int32_t DeltaY);
     void (*DoClearScreenAndBackBuffer)(void);
     void (*DoPrevTab)(void);
+    void (*SetTitle)(const char *Title);
 };
 
 /***  CLASS DEFINITIONS                ***/

@@ -69,6 +69,8 @@ using namespace std;
 #define TRANSMIT_DELAY_BUFFER_SIZE      4000    // A little under a page size
 #define SMART_CLIPBOARD_PASTE_TIME      250     // 250ms
 
+#define MAX_BELL_RATE                   100     // We have to have at least this many ms between bell sounds
+
 /*** MACROS                   ***/
 
 /*** TYPE DEFINITIONS         ***/
@@ -6499,10 +6501,15 @@ void Connection::DoBell(bool VisualOnly)
 
     if(PlaySound)
     {
-        if(CustomSettings.UseCustomSound)
-            UIPlayWav(CustomSettings.BeepFilename.c_str());
-        else
-            UIPlayBuiltInBeep();
+        /* We slow this down so we don't over play the bell */
+        if(GetMSCounter()-LastBellPlayed>=MAX_BELL_RATE)
+        {
+            if(CustomSettings.UseCustomSound)
+                UIPlayWav(CustomSettings.BeepFilename.c_str());
+            else
+                UIPlayBuiltInBeep();
+            LastBellPlayed=GetMSCounter();
+        }
     }
 
     if(ShowGraphic)

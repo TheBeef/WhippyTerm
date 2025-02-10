@@ -468,6 +468,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         int ZoomLevel;
         int FontSize;
         bool BinaryConnection;
+        uint64_t LastBellPlayed;
 
         void FreeConnectionResources(bool FreeDB);
         void HandleCaptureIncomingData(const uint8_t *Inbuff,int bytes);

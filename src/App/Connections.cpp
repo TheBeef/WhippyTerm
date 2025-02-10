@@ -752,6 +752,8 @@ void Connection::FinalizeNewConnection(void)
     /* DEBUG PAUL: Set show non-printables based on settings */
     //SetShowNonPrintable(xxx);
 
+    SendMWEvent(ConMWEvent_NewConnection);
+
     /* Give this connection focus */
     GiveFocus();
 }

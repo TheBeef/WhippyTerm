@@ -317,6 +317,7 @@ void MWUpload::NewConnectionAllocated(class Connection *NewCon)
 {
     i_ConUploadOptions SessOpt;
     string UniqueID;
+    t_UIComboBoxCtrl *ProtocolCB;
 
     /* Setup this UI to the last stored */
     NewCon->GetConnectionUniqueID(UniqueID);
@@ -331,6 +332,11 @@ void MWUpload::NewConnectionAllocated(class Connection *NewCon)
         SessOpt->second.Age=time(NULL);
         NoteSessionChanged();
     }
+
+    /* Make sure the first entry is selected */
+    ProtocolCB=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Upload_Protocol);
+    UISetComboBoxSelectedEntry(ProtocolCB,0);
+    UploadProtocolChange(0);
 
     /* Update the GUI */
     ConnectionChanged();

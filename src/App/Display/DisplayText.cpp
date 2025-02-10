@@ -2964,8 +2964,7 @@ void DisplayText::ScrollScreenByXLines(int Lines2Scroll)
     {
         TotalLinesBeforeAdjust=LinesCount;
 
-        BlankLine.LineBackgroundColor=
-                Settings->DefaultColors[e_DefaultColors_BG];
+        BlankLine.LineBackgroundColor=CurrentStyle.BGColor;
         BlankLine.LineWidthPx=0;
         BlankLine.EOL=e_DTEOL_Hard;
 

@@ -85,6 +85,8 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
     {
         case e_UIMWMenu_NewTab:
             return (e_UIMenuCtrl *)realwin->ui->actionNew_Tab;
+        case e_UIMWMenu_NewTabFromURI:
+            return (e_UIMenuCtrl *)realwin->ui->actionNew_Tab_From_URI;
         case e_UIMWMenu_CloseTab:
             return (e_UIMenuCtrl *)realwin->ui->actionClose_Tab;
         case e_UIMWMenu_CloseAll:

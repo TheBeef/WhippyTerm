@@ -36,6 +36,7 @@
 #include "App/Dialogs/Dialog_ComTest.h"
 #include "App/Dialogs/Dialog_ManagePlugins.h"
 #include "App/Dialogs/Dialog_NewConnection.h"
+#include "App/Dialogs/Dialog_NewConnectionFromURI.h"
 #include "App/Dialogs/Dialog_SendByte.h"
 #include "App/Dialogs/Dialog_Settings.h"
 #include "App/Dialogs/Dialog_TransmitDelay.h"
@@ -746,6 +747,7 @@ void TheMainWindow::NewConnection(void)
  *    UseSettings [I] -- The settings to apply to this connection (or NULL
  *                       for global settings).
  *    URI [I] -- The URI to open the connection with
+ *    Options [I] -- The options to apply to this new connection
  *
  * FUNCTION:
  *    This function allocates a new tab and adds it to the main window.
@@ -3812,6 +3814,8 @@ bool MW_Event(const struct MWEvent *Event)
  * PARAMETERS:
  *    Cmd [I] -- The command to exe.
  *                  e_Cmd_NewTab -- Open a new connection.
+ *                  e_Cmd_NewTabFromURI -- Request a URI and then open a new
+ *                                         connection.
  *                  e_Cmd_ResetTerm -- Resets the term
  *                  e_Cmd_InsertHorizontalRule -- A horizontal rule replaces
  *                          the current line.  Cursor is moved to the next line.
@@ -3884,6 +3888,9 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_NewTab:
             NewConnection();
+        break;
+        case e_Cmd_NewTabFromURI:
+            RunNewConnectionFromURIDialog(this);
         break;
         case e_Cmd_ResetTerm:
             ResetTerm();

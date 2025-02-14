@@ -1612,6 +1612,7 @@
     </widget>
     <addaction name="actionNew_Tab"/>
     <addaction name="actionNew_Window"/>
+    <addaction name="actionNew_Tab_From_URI"/>
     <addaction name="separator"/>
     <addaction name="menuCapture"/>
     <addaction name="menu_Upload"/>
@@ -2801,6 +2802,11 @@
   <action name="Menu_treeWidget_Buffer_BufferList_x6_Sep">
    <property name="text">
     <string>---</string>
+   </property>
+  </action>
+  <action name="actionNew_Tab_From_URI">
+   <property name="text">
+    <string>New Tab From URI...</string>
    </property>
   </action>
  </widget>

@@ -1639,3 +1639,9 @@ void Form_MainWindow::on_Menu_treeWidget_Buffer_BufferList_x8_SaveBuffer_trigger
 {
     DoContextMenuTriggered(e_UIMW_ContextMenu_SendBuffers_SaveBuffer);
 }
+
+void Form_MainWindow::on_actionNew_Tab_From_URI_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_NewTabFromURI);
+}
+

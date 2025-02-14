@@ -121,7 +121,22 @@ extern const struct IODriverAPI g_TCPServerPluginAPI;
 
 struct IODriverInfo m_TCPServerInfo=
 {
-    0
+    0,
+    "<h3>FORMAT</h3>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "TCPS://[host]:[port]"
+    "</p>"
+    "<h3>WHERE</h3>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "host -- The TCP/IP interface to listen on"
+    "</p>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "port -- The port to listen on."
+    "</p>"
+    "<h3>EXAMPLE</h3>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "TCPS://localhost:80"
+    "</p>"
 };
 
 const struct IOS_API *g_TCPS_IOSystem;
@@ -673,7 +688,7 @@ PG_BOOL TCPServer_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,
     unsigned long Port;
     char buff[100];
 
-    /* Make sure it starts with TCP:// */
+    /* Make sure it starts with TCPS:// */
     if(strncasecmp(URI,TCPSERVER_URI_PREFIX ":",
             (sizeof(TCPSERVER_URI_PREFIX)-1)+1)!=0)   // +1 for ':'
     {

@@ -53,6 +53,13 @@ struct ConnectionInfoList
     struct ConnectionInfoList *Next;
 };
 
+struct DriverInfoList
+{
+    std::string Name;
+    std::string DriverURIHelpString;
+    struct DriverInfoList *Next;
+};
+
 typedef struct PrivateConnectionOptionsData {int PrivateDataHere;} t_ConnectionOptionsDataType;    // Fake type holder
 typedef struct PrivateConnectionAuxCtrlsDataType {int PrivateDataHere;} t_ConnectionAuxCtrlsDataType;    // Fake type holder
 
@@ -124,5 +131,8 @@ bool IOS_UpdateOptionsFromURI(const char *URI,t_KVList &Options);
 e_IOSysIOErrorType IOS_TransmitQueuedData(t_IOSystemHandle *Handle);
 
 int IOS_Ask(const char *Message,int Type);
+
+struct DriverInfoList *IOS_GetListOfDrivers(void);
+void IOS_FreeDriverInfoList(struct DriverInfoList *List);
 
 #endif

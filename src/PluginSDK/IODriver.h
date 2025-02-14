@@ -84,6 +84,7 @@ typedef struct ConnectionWidgets {int PrivateDataHere;} t_ConnectionWidgetsType;
 struct IODriverInfo
 {
     uint32_t Flags;
+    const char *URIHelpString;
 };
 
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */

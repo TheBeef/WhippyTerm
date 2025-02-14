@@ -83,4 +83,6 @@ bool Comport_ReadAuxDTRCheckbox(struct Comport_ConAuxWidgets *ConAuxWidgets);
 bool Comport_ReadAuxRTSCheckbox(struct Comport_ConAuxWidgets *ConAuxWidgets);
 void Comport_AddLogMsg(struct Comport_ConAuxWidgets *ConAuxWidgets,const char *Msg);
 
+void Comport_CustomizeComportInfo(struct IODriverInfo *ComportInfo);
+
 #endif

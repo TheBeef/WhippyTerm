@@ -52,6 +52,7 @@ const char *m_CmdNames[]=
 {
     "NOP",                                  // e_Cmd_NOP
     "NewTab",                               // e_Cmd_NewTab
+    "NewTabFromURI",                        // e_Cmd_NewTabFromURI
     "ResetTerm",                            // e_Cmd_ResetTerm
     "InsertHorizontalRule",                 // e_Cmd_InsertHorizontalRule
     "ClearScreen",                          // e_Cmd_ClearScreen
@@ -164,6 +165,7 @@ const char *m_CmdNames[]=
 e_CmdType m_Cmd2MenuMapping[]=
 {
     e_Cmd_NewTab,                       // e_UIMWMenu_NewTab
+    e_Cmd_NewTabFromURI,                // e_UIMWMenu_NewTabFromURI
     e_Cmd_ResetTerm,                    // e_UIMWMenu_ResetTerm
     e_Cmd_InsertHorizontalRule,         // e_UIMWMenu_InsertHorizontalRule
     e_Cmd_ClearScreen,                  // e_UIMWMenu_ClearScreen

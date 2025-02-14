@@ -75,6 +75,7 @@ typedef enum
 typedef enum
 {
     e_UIMWMenu_NewTab,
+    e_UIMWMenu_NewTabFromURI,
 //    e_UIMWMenu_NewConnection,
     e_UIMWMenu_ResetTerm,
     e_UIMWMenu_InsertHorizontalRule,

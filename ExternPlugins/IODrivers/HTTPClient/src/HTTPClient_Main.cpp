@@ -113,7 +113,27 @@ const struct IODriverAPI g_HTTPClientPluginAPI=
 
 struct IODriverInfo m_HTTPClientInfo=
 {
-    0
+    0,
+    "<h3>FORMAT</h3>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "HTTP://[host][:port][/path]"
+    "</p>"
+    "<h3>WHERE</h3>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "host -- The server to connect to"
+    "</p>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "port -- The port number to connect to.  If this is provided then port 80 "
+    "will be used."
+    "</p>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "path -- The path to send to the server of the page to load.  This can "
+    "include a query (?)."
+    "</p>"
+    "<h3>EXAMPLE</h3>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "HTTP://localhost:2000/test.php?one=1"
+    "</p>"
 };
 
 const struct IOS_API *g_HC_IOSystem;
@@ -658,13 +678,13 @@ PG_BOOL HTTPClient_Convert_Options_To_URI(const char *DeviceUniqueID,
     strcpy(URI,HTTPCLIENT_URI_PREFIX);
     strcat(URI,"://");
     strcat(URI,AddressStr);
-    if(strcmp(PathStr,"/")!=0)
-        strcat(URI,PathStr);
     if(strcmp(PortStr,"80")!=0)
     {
         strcat(URI,":");
         strcat(URI,PortStr);
     }
+    if(strcmp(PathStr,"/")!=0)
+        strcat(URI,PathStr);
 
     return true;
 }

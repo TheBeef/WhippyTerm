@@ -76,7 +76,8 @@ const struct IODriverAPI g_TestFilePluginAPI=
 
 struct IODriverInfo m_TestFileInfo=
 {
-    0
+    0,
+    NULL
 };
 
 static const struct IODriverDetectedInfo g_TestFile_DeviceInfo=

@@ -107,7 +107,22 @@ const struct IODriverAPI g_TCPClientPluginAPI=
 
 struct IODriverInfo m_TCPClientInfo=
 {
-    0
+    0,
+    "<h3>FORMAT</h3>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "TCP://[host]:[port]"
+    "</p>"
+    "<h3>WHERE</h3>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "host -- The server to connect to"
+    "</p>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "port -- The port to connect to"
+    "</p>"
+    "<h3>EXAMPLE</h3>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "TCP://localhost:80"
+    "</p>"
 };
 
 const struct IOS_API *g_TCPC_IOSystem;

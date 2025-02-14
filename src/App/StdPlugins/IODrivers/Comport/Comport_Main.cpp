@@ -88,7 +88,8 @@ const struct IODriverAPI g_ComportPluginAPI=
 
 struct IODriverInfo m_ComportInfo=
 {
-    0
+    0,
+    NULL
 };
 
 const struct IOS_API *g_CP_IOSystem;
@@ -202,6 +203,9 @@ PG_BOOL Comport_Init(void)
  ******************************************************************************/
 const struct IODriverInfo *Comport_GetDriverInfo(unsigned int *SizeOfInfo)
 {
+    /* We need to customize for the OS */
+    Comport_CustomizeComportInfo(&m_ComportInfo);
+
     *SizeOfInfo=sizeof(struct IODriverInfo);
     return &m_ComportInfo;
 }

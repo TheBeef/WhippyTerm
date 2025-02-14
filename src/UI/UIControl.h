@@ -122,6 +122,9 @@ typedef struct UITextInputCtrl t_UITextInputCtrl;
 struct UIMuliListTextInput {int x;};
 typedef struct UIMuliListTextInput t_UIMuliLineTextInputCtrl;
 
+struct UIHTMLViewCtrl {int x;};
+typedef struct UIHTMLViewCtrl t_UIHTMLViewCtrl;
+
 struct UIRadioBttnCtrl {int x;};
 typedef struct UIRadioBttn t_UIRadioBttnCtrl;
 
@@ -304,6 +307,9 @@ void UISetMuliLineTextCtrlText(t_UIMuliLineTextInputCtrl *TextInput,const char *
 void UIGetMuliLineTextCtrlText(t_UIMuliLineTextInputCtrl *TextInput,char *Text,int MaxLen);
 void UIGetMuliLineTextCtrlText(t_UIMuliLineTextInputCtrl *TextInput,std::string &Text);
 void UIEnableMuliLineTextCtrl(t_UIMuliLineTextInputCtrl *TextInput,bool Enable);
+
+/* t_UIHTMLViewCtrl */
+void UISetHTMLViewCtrlText(t_UIHTMLViewCtrl *HTMLView,const char *HTMLText);
 
 /* UITreeViewCtrl */
 void UIClearTreeView(t_UITreeView *Tree);

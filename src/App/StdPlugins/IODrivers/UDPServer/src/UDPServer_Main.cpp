@@ -125,7 +125,22 @@ extern const struct IODriverAPI g_UDPServerPluginAPI;
 
 struct IODriverInfo m_UDPServerInfo=
 {
-    0
+    0,
+    "<h3>FORMAT</h3>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "UDPS://[host]:[port]"
+    "</p>"
+    "<h3>WHERE</h3>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "host -- The TCP/IP interface to listen on"
+    "</p>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "port -- The port to listen on"
+    "</p>"
+    "<h3>EXAMPLE</h3>"
+    "<p style='margin-left:60px;text-indent: -30px;'>"
+    "UDPS://localhost:80"
+    "</p>"
 };
 
 const struct IOS_API *g_UDPS_IOSystem;

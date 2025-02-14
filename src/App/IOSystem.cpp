@@ -360,7 +360,25 @@ t_ActiveHandlesListType m_ActiveHandlesList;    // A list of active handles
  *   the following fields:
  *           Flags -- Attributes about this driver.
  *                       Supported flags:
- *                           
+ *                           IODRVINFOFLAG_BLOCKDEV -- This is block device.
+ *           URIHelpString -- This is a help string that explains the URI to
+ *                            the user.  This is HTML (basic only) and is
+ *                            in this format:
+ *                            <h3>FORMAT</h3>
+ *                            <p style='margin-left:60px;text-indent: -30px;'>
+ *                              URI:[parm1],[parm2],etc...
+ *                            </p>
+ *                            <h3>WHERE</h3>
+ *                            <p style='margin-left:60px;text-indent: -30px;'>
+ *                              parm1 -- description
+ *                            </p>
+ *                            <p style='margin-left:60px;text-indent: -30px;'>
+ *                              parm2 -- description
+ *                            </p>
+ *                            <h3>EXAMPLE</h3>
+ *                            <p style='margin-left:60px;text-indent: -30px;'>
+ *                              URI:100,2000
+ *                            </p>
  *
  * RETURNS:
  *   NONE
@@ -974,7 +992,6 @@ PG_BOOL IOS_RegisterDriver(const char *DriverName,const char *BaseURI,
                 NewDriver.API.DetectDevices==NULL ||
                 NewDriver.API.GetConnectionInfo==NULL ||
                 NewDriver.API.Init==NULL)
-
         {
             throw(0);
         }
@@ -4724,5 +4741,114 @@ void IOS_ConnectionAuxCtrlsShow(t_ConnectionAuxCtrlsDataType *ConAuxCtrlsHandle,
             UIPI_ShowButtonInput(ExtraData->ButtonInput,Show);
         if(ExtraData->Indicator!=NULL)
             UIPI_ShowIndicator(ExtraData->Indicator,Show);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_GetListOfDrivers
+ *
+ * SYNOPSIS:
+ *    struct DriverInfoList *IOS_GetListOfDrivers(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets a list of the available drivers on the system.  It
+ *    also includes some info about the driver.
+ *
+ * RETURNS:
+ *    A linked list of available drivers.
+ *
+ * NOTES:
+ *    You must free the list with IOS_FreeDriverInfoList()
+ *
+ * SEE ALSO:
+ *    IOS_FreeDriverInfoList()
+ ******************************************************************************/
+struct DriverInfoList *IOS_GetListOfDrivers(void)
+{
+    i_IODriverListType drv;
+    struct DriverInfoList *RetList;
+    struct DriverInfoList *Entry;
+    struct DriverInfoList *Prev;
+    struct DriverInfoList *NewDriverInfo;
+
+    RetList=NULL;
+    try
+    {
+        /* Ask each driver to fill in supported connections */
+        for(drv=m_IODriverList.begin();drv!=m_IODriverList.end();drv++)
+        {
+            NewDriverInfo=new struct DriverInfoList;
+            NewDriverInfo->Name=drv->DriverName;
+            if(drv->Info.URIHelpString==NULL)
+                NewDriverInfo->DriverURIHelpString="Not available";
+            else
+                NewDriverInfo->DriverURIHelpString=drv->Info.URIHelpString;
+
+            Prev=NULL;
+            for(Entry=RetList;Entry!=NULL;Entry=Entry->Next)
+            {
+                if(Entry->Name.compare(NewDriverInfo->Name)>=0)
+                    break;
+                Prev=Entry;
+            }
+
+            NewDriverInfo->Next=Entry;
+            if(Entry==NULL)
+            {
+                /* Goes on the end */
+                if(Prev==NULL)
+                    RetList=NewDriverInfo;
+                else
+                    Prev->Next=NewDriverInfo;
+            }
+            else
+            {
+                if(Prev==NULL)
+                    RetList=NewDriverInfo;
+                else
+                    Prev->Next=NewDriverInfo;
+            }
+        }
+    }
+    catch(...)
+    {
+        IOS_FreeDriverInfoList(RetList);
+        RetList=NULL;
+    }
+    return RetList;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_FreeDriverInfoList
+ *
+ * SYNOPSIS:
+ *    void IOS_FreeDriverInfoList(struct DriverInfoList *List);
+ *
+ * PARAMETERS:
+ *    List [I] -- The list to free
+ *
+ * FUNCTION:
+ *    This function frees the linked allocated with IOS_GetListOfDrivers()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    IOS_GetListOfDrivers()
+ ******************************************************************************/
+void IOS_FreeDriverInfoList(struct DriverInfoList *List)
+{
+    struct DriverInfoList *Entry;
+
+    while(List!=NULL)
+    {
+        Entry=List->Next;
+        delete List;
+        List=Entry;
     }
 }

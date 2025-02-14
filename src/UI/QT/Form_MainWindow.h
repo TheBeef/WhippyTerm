@@ -323,6 +323,8 @@ private slots:
     
     void on_Menu_treeWidget_Buffer_BufferList_x8_SaveBuffer_triggered();
     
+    void on_actionNew_Tab_From_URI_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

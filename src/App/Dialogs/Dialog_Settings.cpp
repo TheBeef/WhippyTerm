@@ -158,7 +158,8 @@ struct DPS_ProInfo DS_DPSNoneEntry=
  *
  * PARAMETERS:
  *    MW [I] -- The main window to take info about (the main window that
- *              was active when the command was run)
+ *              was active when the command was run).  You can pass NULL if
+ *              are doing a con settings.
  *    SetConSettings [I] -- If this set to a ConSettings structure then
  *                          the dialog will only set connection settings.
  *                          If this is set to NULL then it will set all
@@ -184,6 +185,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         class ConSettings *SetConSettings,e_SettingsJump2Type Jump2)
 {
     bool RetValue;
+    unsigned int r;
     t_UIListViewCtrl *AreaList;
     t_UIListViewCtrl *InputProTextHighlight;
     t_UIListViewCtrl *InputProTextOther;
@@ -209,7 +211,6 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     t_UITabCtrl *DisplayTabCtrl;
     t_UIGroupBox *Display_Tabs;
     t_UIGroupBox *Display_ClearScreen;
-    unsigned int r;
     e_DS_SettingsArea FirstSelectedArea;
     e_UIS_TabCtrl_Terminal_Page SelectTerminalPage;
     e_UIS_TabCtrl_Display_Page SelectDisplayPage;
@@ -2248,9 +2249,12 @@ bool DS_Event(const struct DSEvent *Event)
                     g_Settings.BottomPanelSize=g_Session.BottomPanelSize;
                 break;
                 case e_UIS_Button_GrabCurrentWinPos:
-                    m_SettingsMW->GetSizeAndPos(g_Settings.WindowPosX,
-                            g_Settings.WindowPosY,g_Settings.WindowWidth,
-                            g_Settings.WindowHeight);
+                    if(m_SettingsMW!=NULL)
+                    {
+                        m_SettingsMW->GetSizeAndPos(g_Settings.WindowPosX,
+                                g_Settings.WindowPosY,g_Settings.WindowWidth,
+                                g_Settings.WindowHeight);
+                    }
                 break;
                 case e_UIS_Button_InputProCharEnc_Settings:
                 break;

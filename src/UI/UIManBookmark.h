@@ -44,6 +44,9 @@ enum e_UIDMB_Button
 {
     e_UIDMB_Button_Rename,
     e_UIDMB_Button_Delete,
+    e_UIDMB_Button_Options,
+    e_UIDMB_Button_Settings,
+    e_UIDMB_Button_RestoreSettings,
     e_UIDMB_ButtonMAX
 };
 
@@ -123,7 +126,6 @@ void UIDMB_GetBookmarkName(std::string &Name);
 void UIDMB_SetURIInput(const char *URI);
 void UIDMB_GetURIInput(std::string &URI);
 
-t_UIContainerCtrl *UIDMB_GetOptionsFrameContainer(void);
 t_UIButtonCtrl *UIDMB_GetButton(e_UIDMB_Button bttn);
 t_UITextInputCtrl *UIDMB_GetTextInput(e_UIDMB_TextInput Input);
 t_UITreeView *UIDMB_GetTreeView(e_UIDMB_TreeView TreeView);

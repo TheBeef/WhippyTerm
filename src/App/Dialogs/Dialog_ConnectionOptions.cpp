@@ -73,20 +73,14 @@ t_ConnectionOptionsDataType *m_CO_ConnectionOptionsWidgets=NULL;
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool RunConnectionOptionsDialog(class Connection *Con)
+bool RunConnectionOptionsDialog(const std::string &UniqueID,t_KVList &Options)
 {
     bool RetValue;
-    string UniqueID;
-    t_KVList Options;
 
     try
     {
         if(!UIAlloc_ConnectionOptions())
             return false;
-
-        Con->GetConnectionUniqueID(UniqueID);
-        if(!Con->GetConnectionOptions(Options))
-            throw("Failed to get connection options");
 
         m_CO_ConnectionOptionsWidgets=IOS_AllocConnectionOptionsFromUniqueID(
                 UniqueID.c_str(),UI_CO_GetOptionsFrameContainer(),Options,
@@ -99,10 +93,6 @@ bool RunConnectionOptionsDialog(class Connection *Con)
 
             /* Grap from UI */
             IOS_StoreConnectionOptions(m_CO_ConnectionOptionsWidgets,Options);
-
-            /* Send to connection */
-            if(!Con->SetConnectionOptions(Options))
-                throw("There was an error applying connection options");
         }
     }
     catch(const char *Msg)

@@ -143,6 +143,12 @@ t_UIButtonCtrl *UIDMB_GetButton(e_UIDMB_Button bttn)
             return (t_UIButtonCtrl *)g_ManBookmarkDialog->ui->Rename_pushButton;
         case e_UIDMB_Button_Delete:
             return (t_UIButtonCtrl *)g_ManBookmarkDialog->ui->Delete_pushButton;
+        case e_UIDMB_Button_Options:
+            return (t_UIButtonCtrl *)g_ManBookmarkDialog->ui->Options_pushButton;
+        case e_UIDMB_Button_Settings:
+            return (t_UIButtonCtrl *)g_ManBookmarkDialog->ui->Settings_pushButton;
+        case e_UIDMB_Button_RestoreSettings:
+            return (t_UIButtonCtrl *)g_ManBookmarkDialog->ui->ResetSettings_pushButton;
         case e_UIDMB_ButtonMAX:
         default:
             return NULL;
@@ -238,10 +244,5 @@ void UIDMB_SetURIInput(const char *URI)
 void UIDMB_GetURIInput(std::string &URI)
 {
     URI=g_ManBookmarkDialog->ui->URI_lineEdit->text().toStdString();
-}
-
-t_UIContainerCtrl *UIDMB_GetOptionsFrameContainer(void)
-{
-    return (t_UIContainerCtrl *)g_ManBookmarkDialog->ui->Options_formLayout;
 }
 

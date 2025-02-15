@@ -1992,10 +1992,28 @@ void TheMainWindow::ChangeCurrentConnectionName(void)
  ******************************************************************************/
 void TheMainWindow::ShowConnectionOptions(void)
 {
+    string UniqueID;
+    t_KVList Options;
+
     if(ActiveCon==NULL)
         return;
 
-    RunConnectionOptionsDialog(ActiveCon);
+    ActiveCon->GetConnectionUniqueID(UniqueID);
+    if(!ActiveCon->GetConnectionOptions(Options))
+    {
+        UIAsk("Error","Failed to get connection options",e_AskBox_Error,
+                e_AskBttns_Ok);
+        return;
+    }
+
+    if(RunConnectionOptionsDialog(UniqueID,Options))
+    {
+        if(!ActiveCon->SetConnectionOptions(Options))
+        {
+            UIAsk("Error","There was an error applying connection options",
+                    e_AskBox_Error,e_AskBttns_Ok);
+        }
+    }
 }
 
 /*******************************************************************************

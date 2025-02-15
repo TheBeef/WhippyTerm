@@ -49,6 +49,12 @@ private slots:
     
     void on_URI_lineEdit_editingFinished();
     
+    void on_Options_pushButton_clicked();
+    
+    void on_Settings_pushButton_clicked();
+    
+    void on_ResetSettings_pushButton_clicked();
+    
 private:
     bool DoingEvent;
     bool SendEvent(e_DMBEventType EventType,union DMBEventData *Info,uintptr_t ID);

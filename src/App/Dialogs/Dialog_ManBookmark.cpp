@@ -29,7 +29,9 @@
  ******************************************************************************/
 
 /*** HEADER FILES TO INCLUDE  ***/
+#include "App/Dialogs/Dialog_ConnectionOptions.h"
 #include "App/Dialogs/Dialog_ManBookmark.h"
+#include "App/Dialogs/Dialog_Settings.h"
 #include "UI/UIManBookmark.h"
 #include "UI/UIDebug.h"
 #include "UI/UIAsk.h"
@@ -48,9 +50,6 @@ typedef map<t_UITreeItem *,i_BookmarkList> t_DMB_ItemLookup;
 typedef t_DMB_ItemLookup::iterator i_DMB_ItemLookup;
 
 /*** FUNCTION PROTOTYPES      ***/
-static void DMB_SetupOptionsInputs(void);
-static void DMB_StoreOptionsInputs(void);
-static void DMB_ClearOptionsInputs(void);
 static void DMB_RebuildFolderTree(void);
 static void DMB_ClearSelection(void);
 static void DMB_HandleRenameFolder(void);
@@ -60,13 +59,14 @@ static void DMB_ChangeSelectedItemsURIText(const char *Text);
 static void DMB_ChangeSelectedItem(t_UITreeItem *Item);
 static void DMB_HandleDragAndDropped(t_UITreeItem *ItemDragged,t_UITreeItem *DroppedOn,
         int DropPlacement);
-static void DMB_OptionsUIChanged(void *UserData);
+static void DMB_RunSettings(void);
+static void DMB_RestoreSettings(void);
+static void DMB_DoOptions(void);
 
 /*** VARIABLE DEFINITIONS     ***/
 t_DMB_ItemLookup m_DMB_ItemLookup;
 t_BookmarkList *m_DMB_EditList;
 i_DMB_ItemLookup m_SelectedEntry;
-t_ConnectionOptionsDataType *m_DMB_ConOptions;
 
 /*******************************************************************************
  * NAME:
@@ -94,7 +94,6 @@ bool RunManBookmarkDialog(t_BookmarkList &EditList)
 {
     bool RetValue;
 
-    m_DMB_ConOptions=NULL;
     try
     {
         m_DMB_EditList=&EditList;
@@ -106,15 +105,12 @@ bool RunManBookmarkDialog(t_BookmarkList &EditList)
         DMB_RebuildFolderTree();
 
         RetValue=UIShow_ManBookmark();
-
-        DMB_StoreOptionsInputs();
     }
     catch(...)
     {
         RetValue=false;
     }
 
-    DMB_ClearOptionsInputs();
     UIFree_ManBookmark();
 
     return RetValue;
@@ -146,34 +142,53 @@ void DMB_ChangeSelectedItem(t_UITreeItem *Item)
     t_UITextInputCtrl *URIInput;
     t_UITextInputCtrl *BookmarkNameInput;
     t_UIButtonCtrl *DeleteBttn;
-
-    DMB_StoreOptionsInputs();
-
-    m_SelectedEntry=m_DMB_ItemLookup.find(Item);
-    if(m_SelectedEntry==m_DMB_ItemLookup.end())
-        return;
+    t_UIButtonCtrl *OptionsBttn;
+    t_UIButtonCtrl *SettingsBttn;
+    t_UIButtonCtrl *RestoreSettingsBttn;
 
     RenameBttn=UIDMB_GetButton(e_UIDMB_Button_Rename);
     DeleteBttn=UIDMB_GetButton(e_UIDMB_Button_Delete);
+    OptionsBttn=UIDMB_GetButton(e_UIDMB_Button_Options);
+    SettingsBttn=UIDMB_GetButton(e_UIDMB_Button_Settings);
+    RestoreSettingsBttn=UIDMB_GetButton(e_UIDMB_Button_RestoreSettings);
     BookmarkNameInput=UIDMB_GetTextInput(e_UIDMB_TextInput_BookmarkName);
     URIInput=UIDMB_GetTextInput(e_UIDMB_TextInput_URI);
 
-    if(m_SelectedEntry->second==m_DMB_EditList->end())
+    m_SelectedEntry=m_DMB_ItemLookup.find(Item);
+    if(m_SelectedEntry==m_DMB_ItemLookup.end())
     {
-        /* Folder */
-        UIEnableButton(RenameBttn,true);
-
+        UIEnableButton(RenameBttn,false);
+        UIEnableButton(OptionsBttn,false);
+        UIEnableButton(SettingsBttn,false);
+        UIEnableButton(RestoreSettingsBttn,false);
         UIEnableTextCtrl(BookmarkNameInput,false);
         UIEnableTextCtrl(URIInput,false);
         UISetTextCtrlText(BookmarkNameInput,"");
         UISetTextCtrlText(URIInput,"");
 
-        DMB_ClearOptionsInputs();
+        return;
+    }
+
+    if(m_SelectedEntry->second==m_DMB_EditList->end())
+    {
+        /* Folder */
+        UIEnableButton(RenameBttn,true);
+        UIEnableButton(OptionsBttn,false);
+        UIEnableButton(SettingsBttn,false);
+        UIEnableButton(RestoreSettingsBttn,false);
+
+        UIEnableTextCtrl(BookmarkNameInput,false);
+        UIEnableTextCtrl(URIInput,false);
+        UISetTextCtrlText(BookmarkNameInput,"");
+        UISetTextCtrlText(URIInput,"");
     }
     else
     {
         /* Bookmark */
         UIEnableButton(RenameBttn,false);
+        UIEnableButton(OptionsBttn,true);
+        UIEnableButton(SettingsBttn,true);
+        UIEnableButton(RestoreSettingsBttn,true);
 
         UIEnableTextCtrl(BookmarkNameInput,true);
         UIEnableTextCtrl(URIInput,true);
@@ -181,8 +196,6 @@ void DMB_ChangeSelectedItem(t_UITreeItem *Item)
         UISetTextCtrlText(BookmarkNameInput,
                 m_SelectedEntry->second->Name.c_str());
         UISetTextCtrlText(URIInput,m_SelectedEntry->second->URI.c_str());
-
-        DMB_SetupOptionsInputs();
     }
     UIEnableButton(DeleteBttn,true);
 }
@@ -538,16 +551,25 @@ static void DMB_ClearSelection(void)
     t_UIButtonCtrl *DeleteBttn;
     t_UITextInputCtrl *URIInput;
     t_UITextInputCtrl *BookmarkNameInput;
+    t_UIButtonCtrl *OptionsBttn;
+    t_UIButtonCtrl *SettingsBttn;
+    t_UIButtonCtrl *RestoreSettingsBttn;
     t_UITreeView *Folders;
 
     RenameBttn=UIDMB_GetButton(e_UIDMB_Button_Rename);
     DeleteBttn=UIDMB_GetButton(e_UIDMB_Button_Delete);
+    OptionsBttn=UIDMB_GetButton(e_UIDMB_Button_Options);
+    SettingsBttn=UIDMB_GetButton(e_UIDMB_Button_Settings);
+    RestoreSettingsBttn=UIDMB_GetButton(e_UIDMB_Button_RestoreSettings);
     BookmarkNameInput=UIDMB_GetTextInput(e_UIDMB_TextInput_BookmarkName);
     URIInput=UIDMB_GetTextInput(e_UIDMB_TextInput_URI);
     Folders=UIDMB_GetTreeView(e_UIDMB_TreeView_Folders);
 
     UIEnableButton(RenameBttn,false);
     UIEnableButton(DeleteBttn,false);
+    UIEnableButton(OptionsBttn,false);
+    UIEnableButton(SettingsBttn,false);
+    UIEnableButton(RestoreSettingsBttn,false);
     UIEnableTextCtrl(BookmarkNameInput,false);
     UIEnableTextCtrl(URIInput,false);
     UISetTextCtrlText(BookmarkNameInput,"");
@@ -725,133 +747,8 @@ void DMB_ChangeSelectedItemsURIText(const char *Text)
 
     m_SelectedEntry->second->URI=Text;
 
-    /* Update the options */
+    /* Now update the options */
     IOS_UpdateOptionsFromURI(Text,m_SelectedEntry->second->Options);
-
-    /* Set the UI with the updated options */
-    IOS_SetUI2ConnectionOptions(m_DMB_ConOptions,
-            m_SelectedEntry->second->Options);
-}
-
-/*******************************************************************************
- * NAME:
- *    DMB_SetupOptionsInputs
- *
- * SYNOPSIS:
- *    static void DMB_SetupOptionsInputs(void);
- *
- * PARAMETERS:
- *    NONE
- *
- * FUNCTION:
- *    This function clears the options and adds in new ones with the
- *    currently selected bookmarks data.
- *
- * RETURNS:
- *    NONE
- *
- * SEE ALSO:
- *    
- ******************************************************************************/
-static void DMB_SetupOptionsInputs(void)
-{
-    string UniqueID;
-
-    DMB_ClearOptionsInputs();
-
-    if(m_SelectedEntry==m_DMB_ItemLookup.end())
-        return;
-
-    if(m_SelectedEntry->second==m_DMB_EditList->end())
-        return;
-
-    if(!IOS_GetUniqueIDFromURI(m_SelectedEntry->second->URI.c_str(),UniqueID))
-        return;
-
-    m_DMB_ConOptions=IOS_AllocConnectionOptionsFromUniqueID(UniqueID.c_str(),
-            UIDMB_GetOptionsFrameContainer(),m_SelectedEntry->second->Options,
-            DMB_OptionsUIChanged,NULL);
-}
-
-/*******************************************************************************
- * NAME:
- *    DMB_ClearOptionsInputs()
- *
- * SYNOPSIS:
- *    static void DMB_ClearOptionsInputs(void);
- *
- * PARAMETERS:
- *    NONE
- *
- * FUNCTION:
- *    This function clears (and frees) the options from the options area.
- *
- * RETURNS:
- *    NONE
- *
- * SEE ALSO:
- *    
- ******************************************************************************/
-static void DMB_ClearOptionsInputs(void)
-{
-    if(m_DMB_ConOptions!=NULL)
-    {
-        IOS_FreeConnectionOptions(m_DMB_ConOptions);
-        m_DMB_ConOptions=NULL;
-    }
-}
-
-/*******************************************************************************
- * NAME:
- *    DMB_StoreOptionsInputs
- *
- * SYNOPSIS:
- *    static void DMB_StoreOptionsInputs(void);
- *
- * PARAMETERS:
- *    NONE
- *
- * FUNCTION:
- *    This function stores the connection options back into the current
- *    selected bookmark.
- *
- * RETURNS:
- *    NONE
- *
- * SEE ALSO:
- *    
- ******************************************************************************/
-static void DMB_StoreOptionsInputs(void)
-{
-    string UniqueID;
-    string URI;
-    t_UITextInputCtrl *URIInput;
-
-    if(m_SelectedEntry==m_DMB_ItemLookup.end())
-        return;
-
-    if(m_SelectedEntry->second==m_DMB_EditList->end())
-        return;
-
-    if(m_DMB_ConOptions==NULL)
-        return;
-
-    if(!IOS_GetUniqueIDFromURI(m_SelectedEntry->second->URI.c_str(),UniqueID))
-        return;
-
-    IOS_StoreConnectionOptions(m_DMB_ConOptions,
-            m_SelectedEntry->second->Options);
-
-    /* We need to rebuild the URI (to apply the options if needed) */
-    if(!IOS_GetURIFromUniqueID(UniqueID.c_str(),
-            m_SelectedEntry->second->Options,URI))
-    {
-        return;
-    }
-    m_SelectedEntry->second->URI=URI;
-
-    URIInput=UIDMB_GetTextInput(e_UIDMB_TextInput_URI);
-    UISetTextCtrlText(URIInput,m_SelectedEntry->second->URI.c_str());
 }
 
 /*******************************************************************************
@@ -890,6 +787,15 @@ bool DMB_Event(const struct DMBEvent *Event)
                 case e_UIDMB_Button_Delete:
                     DMB_HandleDeleteItem();
                 break;
+                case e_UIDMB_Button_Options:
+                    DMB_DoOptions();
+                break;
+                case e_UIDMB_Button_Settings:
+                    DMB_RunSettings();
+                break;
+                case e_UIDMB_Button_RestoreSettings:
+                    DMB_RestoreSettings();
+                break;
                 case e_UIDMB_ButtonMAX:
                 default:
                 break;
@@ -917,19 +823,17 @@ bool DMB_Event(const struct DMBEvent *Event)
 
 /*******************************************************************************
  * NAME:
- *    DMB_OptionsUIChanged
+ *    DMB_RunSettings
  *
  * SYNOPSIS:
- *    static void DMB_OptionsUIChanged(void *UserData);
+ *    static void DMB_RunSettings(void);
  *
  * PARAMETERS:
- *    UserData [I] -- Ignored.
+ *    NONE
  *
  * FUNCTION:
- *    This function gets called when one of the options for a connection
- *    changes.
- *
- *    We rebuild the URI.
+ *    Runs the settings dialog to set the connection settings for the selected
+ *    bookmark.
  *
  * RETURNS:
  *    NONE
@@ -937,8 +841,106 @@ bool DMB_Event(const struct DMBEvent *Event)
  * SEE ALSO:
  *    
  ******************************************************************************/
-static void DMB_OptionsUIChanged(void *UserData)
+static void DMB_RunSettings(void)
 {
-    DMB_StoreOptionsInputs();
+    if(m_SelectedEntry==m_DMB_ItemLookup.end())
+        return;
+
+    if(m_SelectedEntry->second==m_DMB_EditList->end())
+        return;
+
+    if(RunSettingsDialog(NULL,&m_SelectedEntry->second->CustomSettings,
+            e_SettingsJump2_Default))
+    {
+        m_SelectedEntry->second->UseCustomSettings=true;
+    }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DMB_RestoreSettings
+ *
+ * SYNOPSIS:
+ *    static void DMB_RestoreSettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    Asks if the user wants to restore the settings for the current bookmark
+ *    and then resets the settings.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void DMB_RestoreSettings(void)
+{
+    if(m_SelectedEntry==m_DMB_ItemLookup.end())
+        return;
+
+    if(m_SelectedEntry->second==m_DMB_EditList->end())
+        return;
+
+    if(UIAsk("Reset","Restore this bookmark to global settings?",
+            e_AskBox_Question,e_AskBttns_YesNo)==e_AskRet_Yes)
+    {
+        m_SelectedEntry->second->CustomSettings=g_Settings.DefaultConSettings;
+        m_SelectedEntry->second->UseCustomSettings=false;
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DMB_DoOptions
+ *
+ * SYNOPSIS:
+ *    static void DMB_DoOptions(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function shows the connection options for the selected bookmark.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void DMB_DoOptions(void)
+{
+    std::string UniqueID;
+    t_UITextInputCtrl *URIInput;
+    string URI;
+
+    URIInput=UIDMB_GetTextInput(e_UIDMB_TextInput_URI);
+
+    if(m_SelectedEntry==m_DMB_ItemLookup.end())
+        return;
+
+    if(m_SelectedEntry->second==m_DMB_EditList->end())
+        return;
+
+    if(!IOS_GetUniqueIDFromURI(m_SelectedEntry->second->URI.c_str(),UniqueID))
+    {
+        UIAsk("URI error","Unable to find correct driver for URI",
+                e_AskBox_Error,e_AskBttns_Ok);
+        return;
+    }
+
+    if(RunConnectionOptionsDialog(UniqueID,m_SelectedEntry->second->Options))
+    {
+        if(!IOS_GetURIFromUniqueID(UniqueID.c_str(),
+                m_SelectedEntry->second->Options,URI))
+        {
+            return;
+        }
+        m_SelectedEntry->second->URI=URI;
+
+        UISetTextCtrlText(URIInput,m_SelectedEntry->second->URI.c_str());
+    }
+}

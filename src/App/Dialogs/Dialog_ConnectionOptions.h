@@ -46,6 +46,6 @@
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
-bool RunConnectionOptionsDialog(class Connection *Con);
+bool RunConnectionOptionsDialog(const std::string &UniqueID,t_KVList &Options);
 
 #endif

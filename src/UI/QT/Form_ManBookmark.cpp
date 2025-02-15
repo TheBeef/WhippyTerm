@@ -82,8 +82,13 @@ void Form_ManBookmark::on_Delete_pushButton_clicked()
 void Form_ManBookmark::on_Folder_treeWidget_itemSelectionChanged()
 {
     union DMBEventData EventData;
+    QList<QTreeWidgetItem *>SelectedItems;
 
-    EventData.Item.NewItem=(t_UITreeItem *)ui->Folder_treeWidget->currentItem();
+    SelectedItems=ui->Folder_treeWidget->selectedItems();
+    if(SelectedItems.empty())
+        EventData.Item.NewItem=NULL;
+    else
+        EventData.Item.NewItem=(t_UITreeItem *)ui->Folder_treeWidget->currentItem();
     SendEvent(e_DMBEvent_SelectedFolderItemChanged,&EventData);
 }
 
@@ -170,3 +175,30 @@ bool Form_ManBookmark::SendEvent(e_DMBEventType EventType)
 {
     return SendEvent(EventType,NULL,0);
 }
+
+void Form_ManBookmark::on_Options_pushButton_clicked()
+{
+    union DMBEventData EventData;
+
+    EventData.Bttn.BttnID=e_UIDMB_Button_Options;
+    SendEvent(e_DMBEvent_BttnTriggered,&EventData);
+}
+
+
+void Form_ManBookmark::on_Settings_pushButton_clicked()
+{
+    union DMBEventData EventData;
+
+    EventData.Bttn.BttnID=e_UIDMB_Button_Settings;
+    SendEvent(e_DMBEvent_BttnTriggered,&EventData);
+}
+
+
+void Form_ManBookmark::on_ResetSettings_pushButton_clicked()
+{
+    union DMBEventData EventData;
+
+    EventData.Bttn.BttnID=e_UIDMB_Button_RestoreSettings;
+    SendEvent(e_DMBEvent_BttnTriggered,&EventData);
+}
+

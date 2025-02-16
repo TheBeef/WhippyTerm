@@ -169,6 +169,7 @@ void DisplayBase::SetCustomSettings(class ConSettings *NewSettingsPtr)
     Settings=NewSettingsPtr;
     if(Settings==nullptr)
         Settings=&g_Settings.DefaultConSettings;
+    ApplySettings();
 }
 
 /*******************************************************************************

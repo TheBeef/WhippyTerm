@@ -113,13 +113,18 @@ DisplayBinary::DisplayBinary()
     CursorStyle=e_TextCursorStyle_Block;
 }
 
-bool DisplayBinary::Init(void *ParentWidget,bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData)
+bool DisplayBinary::Init(void *ParentWidget,class ConSettings *SettingsPtr,
+        bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData)
 {
     TextDisplayCtrl=NULL;
     try
     {
         if(!InitBase(EventCallback,UserData))
             throw(0);
+
+        Settings=SettingsPtr;
+        if(Settings==NULL)
+            Settings=&g_Settings.DefaultConSettings;
 
         /* Allocate the text canvas */
         TextDisplayCtrl=UITC_AllocTextDisplay(ParentWidget,

@@ -1,4 +1,3 @@
-#include "UI/UISystem.h"
 /*******************************************************************************
  * FILENAME: DisplayText.cpp
  *
@@ -35,6 +34,7 @@
 #include "App/Util/TextStyleHelpers.h"
 #include "DisplayText.h"
 #include "UI/UIDebug.h"
+#include "UI/UISystem.h"
 #include "UI/UITimers.h"
 #include "ThirdParty/utf8.h"
 #include <string.h>
@@ -166,12 +166,14 @@ DisplayText::~DisplayText()
  *    DisplayText::Init
  *
  * SYNOPSIS:
- *    bool DisplayText::Init(void *ParentWidget,
+ *    bool DisplayText::Init(void *ParentWidget,class ConSettings *SettingsPtr,
  *          bool (*EventCallback)(const struct DBEvent *Event),
  *          uintptr_t UserData);
  *
  * PARAMETERS:
  *    ParentWidget [I] -- The parent UI widget that we will add our widgets to
+ *    SettingsPtr [I] -- The setting to use for this display.  NULL for the
+ *                       global settings.
  *    EventCallback [I] -- See DisplayBase::InitBase()
  *    UserData [I] -- The user data to send to the 'EventCallback' callback.
  *
@@ -185,7 +187,7 @@ DisplayText::~DisplayText()
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool DisplayText::Init(void *ParentWidget,
+bool DisplayText::Init(void *ParentWidget,class ConSettings *SettingsPtr,
         bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData)
 {
     TextDisplayCtrl=NULL;
@@ -195,6 +197,10 @@ bool DisplayText::Init(void *ParentWidget,
 
         if(!InitBase(EventCallback,UserData))
             throw(0);
+
+        Settings=SettingsPtr;
+        if(Settings==NULL)
+            Settings=&g_Settings.DefaultConSettings;
 
         /* Allocate the text canvas */
         TextDisplayCtrl=UITC_AllocTextDisplay(ParentWidget,

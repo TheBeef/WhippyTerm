@@ -679,14 +679,11 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
                 Display=new DisplayText();
             }
 
-            if(!Display->Init(OurParentWidget,Con_DisplayBufferEvent,
-                    (uintptr_t)this))
+            if(!Display->Init(OurParentWidget,&CustomSettings,
+                    Con_DisplayBufferEvent,(uintptr_t)this))
             {
                 throw(0);
             }
-
-            /* Use our copy of the settings */
-            Display->SetCustomSettings(&CustomSettings);
         }
 
         /* IOHandle was allocated in the constructor */
@@ -985,14 +982,12 @@ void Connection::ApplyCustomSettings(void)
             Display=new DisplayText();
         }
 
-        if(!Display->Init(OurParentWidget,Con_DisplayBufferEvent,
-                (uintptr_t)this))
+        if(!Display->Init(OurParentWidget,&CustomSettings,
+                Con_DisplayBufferEvent,(uintptr_t)this))
         {
             throw(0);
         }
 
-        /* Use our copy of the settings */
-        Display->SetCustomSettings(&CustomSettings);
         Display->SetBlockDeviceMode(BlockSendDevice);
     }
     else

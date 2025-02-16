@@ -112,7 +112,7 @@ class DisplayText : public DisplayBase
         DisplayText();
         ~DisplayText();
 
-        bool Init(void *ParentWidget,bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData);
+        bool Init(void *ParentWidget,class ConSettings *SettingsPtr,bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData);
         void Reparent(void *NewParentWidget);
         void WriteChar(uint8_t *Chr);
         void NoteNonPrintable(const char *NoteStr);

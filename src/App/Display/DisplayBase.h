@@ -124,7 +124,7 @@ class DisplayBase
     public:
         DisplayBase();
         virtual ~DisplayBase();
-        virtual bool Init(void *ParentWidget,bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData)=0;
+        virtual bool Init(void *ParentWidget,class ConSettings *SettingsPtr,bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData)=0;
         virtual void Reparent(void *NewParentWidget)=0;
         virtual void SetBlockDeviceMode(bool On);
         virtual void WriteChar(uint8_t *Chr)=0;

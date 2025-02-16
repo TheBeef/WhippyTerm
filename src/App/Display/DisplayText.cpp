@@ -490,7 +490,19 @@ void DisplayText::HandleLeftMousePress(bool Down,int x,int y)
         NeedRedraw=SelectionActive;
 
         SelectionActive=false;
-        ConvertScreenXY2Chars(x,y,&XChars,&YChars);
+
+        if(x<CharWidthPx)
+        {
+            /* We select from the edge instead of the middle when we are on
+               the left side */
+            ConvertScreenXY2Chars(x,y,&XChars,&YChars);
+        }
+        else
+        {
+            /* We add 1/2 a char so we select the whole char when we are half way
+               though instead of having to be all the way through */
+            ConvertScreenXY2Chars(x+CharWidthPx/2,y,&XChars,&YChars);
+        }
         Selection_X=XChars;
         Selection_AnchorX=XChars;
         Selection_Y=YChars;
@@ -569,7 +581,9 @@ void DisplayText::HandleMouseMove(int x,int y)
                 UITimerStop(ScrollTimer);
         }
 
-        ConvertScreenXY2Chars(x,y,&XChars,&YChars);
+        /* We add 1/2 a char so we select the whole char when we are half way
+           though instead of having to be all the way through */
+        ConvertScreenXY2Chars(x+CharWidthPx/2,y,&XChars,&YChars);
 
         Selection_X=XChars;
         Selection_Y=YChars;

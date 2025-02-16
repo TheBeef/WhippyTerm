@@ -141,7 +141,7 @@ DisplayText::DisplayText()
     CursorStyle=e_TextCursorStyle_Block;
 
     /* Selection */
-    SelectionValid=false;
+    SelectionActive=false;
     Selection_X=0;
     Selection_Y=0;
     Selection_AnchorX=0;
@@ -487,9 +487,9 @@ void DisplayText::HandleLeftMousePress(bool Down,int x,int y)
     if(Down)
     {
         /* Clear the selection, but note where the user clicked */
-        NeedRedraw=SelectionValid;
+        NeedRedraw=SelectionActive;
 
-        SelectionValid=false;
+        SelectionActive=false;
         ConvertScreenXY2Chars(x,y,&XChars,&YChars);
         Selection_X=XChars;
         Selection_AnchorX=XChars;
@@ -539,7 +539,7 @@ void DisplayText::HandleMouseMove(int x,int y)
     if(LeftMouseDown)
     {
         /* Clear the selection, but note where the user clicked */
-        SelectionValid=true;
+        SelectionActive=true;
 
         AutoSelectionScrolldx=0;
         if(x<0)
@@ -770,7 +770,7 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
     SelectFrag2=-1;
 
     /* See if we have to deal with the selection */
-    if(SelectionValid)
+    if(IsThereASelection())
     {
         /* See if we are drawing the selection */
         GetNormalizedSelection(SelX1,SelY1,SelX2,SelY2);
@@ -3237,7 +3237,7 @@ void DisplayText::GetNormalizedSelection(int &X1,int &Y1,int &X2,int &Y2)
     int Tmp;
 
     /* See if we have to deal with the selection */
-    if(!SelectionValid)
+    if(!SelectionActive)
         return;
 
     X1=Selection_X;
@@ -3444,11 +3444,11 @@ bool DisplayText::GetSelectionString(std::string &Clip)
 
     Clip="";
 
-    GetNormalizedSelection(SelX1,SelY1,SelX2,SelY2);
-
     /* The select is also not valid if y=y and x=x */
-    if(!SelectionValid || (SelY1==SelY2 && SelX1==SelX2))
+    if(!IsThereASelection())
         return false;
+
+    GetNormalizedSelection(SelX1,SelY1,SelX2,SelY2);
 
     /* We need to find the line with the start of the selection on it */
 
@@ -3679,7 +3679,7 @@ bool DisplayText::GetSelectionString(std::string &Clip)
  ******************************************************************************/
 bool DisplayText::IsThereASelection(void)
 {
-    if(!SelectionValid)
+    if(!SelectionActive)
         return false;
 
     if(Selection_Y==Selection_AnchorY && Selection_X==Selection_AnchorX)
@@ -3714,7 +3714,7 @@ void DisplayText::SelectAll(void)
 
     if(Lines.empty())
     {
-        SelectionValid=false;
+        SelectionActive=false;
     }
     else
     {
@@ -3731,7 +3731,7 @@ void DisplayText::SelectAll(void)
             }
         }
 
-        SelectionValid=true;
+        SelectionActive=true;
 
         Selection_Y=0;
         Selection_X=0;
@@ -3764,7 +3764,7 @@ void DisplayText::SelectAll(void)
  ******************************************************************************/
 void DisplayText::ClearSelection(void)
 {
-    SelectionValid=false;
+    SelectionActive=false;
     Selection_X=0;
     Selection_Y=0;
     Selection_AnchorX=0;
@@ -3864,7 +3864,7 @@ void DisplayText::ScrollScreen(int dxpx,int dy)
  ******************************************************************************/
 void DisplayText::DoScrollTimerTimeout(void)
 {
-    if(!SelectionValid)
+    if(!SelectionActive)
     {
         /* Hu? this is for scrolling when doing a selection.  No selection
            means we shouldn't be called */
@@ -4367,7 +4367,7 @@ void DisplayText::ClearScrollBackBuffer(void)
 
     TopLine=Lines.begin();
     TopLineY=0;
-    SelectionValid=false;
+    SelectionActive=false;
 
     RethinkLineLengths();
     RethinkScrollBars();
@@ -4473,7 +4473,7 @@ void DisplayText::ResetTerm(void)
         ClearScrollBackBuffer();
         ClearScreen(e_ScreenClear_Clear);
 
-        SelectionValid=false;
+        SelectionActive=false;
         Selection_X=0;
         Selection_Y=0;
         Selection_AnchorX=0;

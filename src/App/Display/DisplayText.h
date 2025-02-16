@@ -196,7 +196,7 @@ class DisplayText : public DisplayBase
         int InsertPos;                  // The offset into the current string frag's 'Text' (also used as a flag see DisplayText::RethinkInsertFrag())
 
         /* Selection */
-        bool SelectionValid;        // Is the selection valid
+        bool SelectionActive;       // Is there an active selection (may not be valid, but we are selecting something)
         int Selection_X;            // The selection left pos (in chars)
         int Selection_Y;            // The selection top pos (in lines)
         int Selection_AnchorX;      // The selection end left pos (in chars)

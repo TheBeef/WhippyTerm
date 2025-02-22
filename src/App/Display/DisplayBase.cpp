@@ -92,10 +92,10 @@ DisplayBase::~DisplayBase()
 
 /*******************************************************************************
  * NAME:
- *    DisplayBuffer::Init
+ *    DisplayBuffer::InitBase
  *
  * SYNOPSIS:
- *    bool DisplayBuffer::Init(bool (*EventCallback)(const struct
+ *    bool DisplayBuffer::InitBase(bool (*EventCallback)(const struct
  *          DBEvent *Event),uintptr_t UserData);
  *
  * PARAMETERS:

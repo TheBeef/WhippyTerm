@@ -34,6 +34,7 @@
 /***  HEADER FILES TO INCLUDE          ***/
 #include "App/Display/DisplayBase.h"
 #include "UI/UITextDisplay.h"
+#include "UI/UITimers.h"
 #include <stdint.h>
 
 /***  DEFINES                          ***/
@@ -47,6 +48,7 @@
 class DisplayBinary : public DisplayBase
 {
     friend bool DisplayBinary_EventHandlerCB(const struct TextDisplayEvent *Event);
+    friend void DisplayBin_ScrollTimer_Timeout(uintptr_t UserData);
 
     public:
         DisplayBinary();
@@ -65,19 +67,20 @@ class DisplayBinary : public DisplayBase
         bool InitCalled;
         e_TextCursorStyleType CursorStyle;
         t_UITextDisplayCtrl *TextDisplayCtrl;
+        struct UITimer *ScrollTimer;
+        bool LeftMouseDown;         // Is the left mouse button down
 
         uint8_t *HexBuffer;             // This is a circular buffer
         uint8_t *EndOfHexBuffer;
         int HexBufferSize;
-
         struct CharStyling *ColorBuffer;    // This is a circular buffer with the styling info for 'HexBuffer' in it
+
         struct CharStyling *ColorBottomOfBufferLine;
         struct CharStyling *ColorTopOfBufferLine;
         struct CharStyling *ColorTopLine;
-
+        uint8_t *TopOfBufferLine;       // Where we read data from 'HexBuffer'.  This is the oldest data
         uint8_t *BottomOfBufferLine;    // Where we insert new data in 'HexBuffer'.  This points to the start of the line
         uint8_t InsertPoint;            // The insert offset from 'BottomOfBufferLine' (BottomOfBufferLine[InsertPoint])
-        uint8_t *TopOfBufferLine;       // Where we read data from 'HexBuffer'.  This is the oldest data
         uint8_t *TopLine;               // The first line of the display window (where we are scrolled to).  This is relitive to 'Top of Buffer'
 
         int ScreenWidthPx;
@@ -85,6 +88,17 @@ class DisplayBinary : public DisplayBase
         int CharWidthPx;
         int CharHeightPx;
         int DisplayLines;
+        int WindowXOffsetPx;
+
+        /* Selection */
+        bool SelectionActive;       // Is there an active selection
+        bool SelectionInAscII;
+        uint8_t *SelectionLine;
+        int SelectionLineOffset;
+        uint8_t *SelectionAnchorLine;
+        int SelectionLineAnchorOffset;
+        int AutoSelectionScrolldx;
+        int AutoSelectionScrolldy;
 
         bool DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event);
         void RedrawCurrentLine(void);
@@ -97,6 +111,11 @@ class DisplayBinary : public DisplayBase
                 int ScreenLine,unsigned int Bytes);
         bool ScrollBarAtBottom(void);
         void RethinkCursor(void);
+        bool ConvertScreenXY2BufferLinePtr(int x,int y,uint8_t **Ptr,int *Offset,bool *InAscII);
+        void HandleLeftMousePress(bool Down,int x,int y);
+        void HandleMouseMove(int x,int y);
+        void DoScrollTimerTimeout(void);
+        void ScrollScreen(int dxpx,int dy);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

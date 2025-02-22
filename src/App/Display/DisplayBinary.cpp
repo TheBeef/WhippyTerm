@@ -1,13 +1,3 @@
-#include "UI/UIDebug.h"
-
-/*
-
-Still to do:
- * Selection / clipboard
- * Mouse wheel
-
-*/
-
 /*******************************************************************************
  * FILENAME: DisplayBinary.cpp
  *
@@ -42,12 +32,25 @@ Still to do:
 /*** HEADER FILES TO INCLUDE  ***/
 #include "App/Settings.h"
 #include "DisplayBinary.h"
+#include <stdint.h>
 #include <string.h>
 
 /*** DEFINES                  ***/
-#define HEX_BYTES_PER_LINE              16
-//#define HEX_MIN_LINES                   24
-#define HEX_MIN_LINES                   3   /* DEBUG PAUL: Should be above, just for test */
+#define DEBUG_SHOW_BUFFER_POS               1       // Show the pointers to parts of the screen
+
+#define HEX_BYTES_PER_LINE                      16
+#define HEX_MIN_LINES                           24
+#define HEX_SPACE_BETWEEN_HEX_AND_ASCII         3
+
+#define END_OF_HEX_PX           (HEX_BYTES_PER_LINE*3*CharWidthPx)
+#define START_OF_ASCII_PX       (END_OF_HEX_PX+HEX_SPACE_BETWEEN_HEX_AND_ASCII*CharWidthPx)
+#define END_OF_ASCII_PX         (START_OF_ASCII_PX+HEX_BYTES_PER_LINE*CharWidthPx)
+
+#define END_OF_HEX_CHAR         (HEX_BYTES_PER_LINE*3)
+#define START_OF_ASCII_CHAR     (END_OF_HEX_CHAR+HEX_SPACE_BETWEEN_HEX_AND_ASCII)
+#define END_OF_ASCII_CHAR       (START_OF_ASCII_CHAR+HEX_BYTES_PER_LINE)
+
+#define SELECTION_SCROLL_SPEED_TIMER            50 // ms
 
 /*** MACROS                   ***/
 
@@ -55,6 +58,7 @@ Still to do:
 
 /*** FUNCTION PROTOTYPES      ***/
 bool DisplayBin_EventHandlerCB(const struct TextDisplayEvent *Event);
+void DisplayBin_ScrollTimer_Timeout(uintptr_t UserData);
 
 /*** VARIABLE DEFINITIONS     ***/
 
@@ -88,6 +92,52 @@ bool DisplayBinary_EventHandlerCB(const struct TextDisplayEvent *Event)
     return DBin->DoTextDisplayCtrlEvent(Event);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayBin_ScrollTimer_Timeout
+ *
+ * SYNOPSIS:
+ *    void DisplayBin_ScrollTimer_Timeout(uintptr_t UserData);
+ *
+ * PARAMETERS:
+ *    UserData [I] -- A pointer to our display bin class.
+ *
+ * FUNCTION:
+ *    This is a callback from the scroll timer.  It just calls the class
+ *    DoScrollTimerTimeout() function.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBin_ScrollTimer_Timeout(uintptr_t UserData)
+{
+    class DisplayBinary *DB=(class DisplayBinary *)UserData;
+
+    DB->DoScrollTimerTimeout();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::DisplayBinary
+ *
+ * SYNOPSIS:
+ *    DisplayBinary::DisplayBinary();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the constructor.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 DisplayBinary::DisplayBinary()
 {
     TextDisplayCtrl=NULL;
@@ -109,10 +159,44 @@ DisplayBinary::DisplayBinary()
     DisplayLines=0;
     CharWidthPx=1;
     CharHeightPx=1;
+    WindowXOffsetPx=0;
+
+    SelectionActive=false;
+    SelectionInAscII=false;
+    SelectionLine=NULL;
+    SelectionAnchorLine=NULL;
 
     CursorStyle=e_TextCursorStyle_Block;
+
+    ScrollTimer=NULL;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::Init
+ *
+ * SYNOPSIS:
+ *    bool DisplayBinary::Init(void *ParentWidget,class ConSettings *SettingsPtr,
+ *          bool (*EventCallback)(const struct DBEvent *Event),
+ *          uintptr_t UserData);
+ *
+ * PARAMETERS:
+ *    ParentWidget [I] -- The parent UI widget that we will add our widgets to
+ *    SettingsPtr [I] -- The setting to use for this display.  NULL for the
+ *                       global settings.
+ *    EventCallback [I] -- See DisplayBase::InitBase()
+ *    UserData [I] -- The user data to send to the 'EventCallback' callback.
+ *
+ * FUNCTION:
+ *    This function init's the binary display.
+ *
+ * RETURNS:
+ *    true -- Things worked
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 bool DisplayBinary::Init(void *ParentWidget,class ConSettings *SettingsPtr,
         bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData)
 {
@@ -176,6 +260,15 @@ bool DisplayBinary::Init(void *ParentWidget,class ConSettings *SettingsPtr,
 
         SetupCanvas();
 
+        ScrollTimer=AllocUITimer();
+        if(ScrollTimer==NULL)
+            throw(0);
+
+        SetupUITimer(ScrollTimer,DisplayBin_ScrollTimer_Timeout,(uintptr_t)this,
+                true);
+
+        UITimerSetTimeout(ScrollTimer,SELECTION_SCROLL_SPEED_TIMER);
+
         InitCalled=true;
     }
     catch(...)
@@ -195,9 +288,31 @@ bool DisplayBinary::Init(void *ParentWidget,class ConSettings *SettingsPtr,
     return true;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::~DisplayBinary
+ *
+ * SYNOPSIS:
+ *    DisplayBinary::~DisplayBinary();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the destructor
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 DisplayBinary::~DisplayBinary()
 {
     InitCalled=false;
+
+    if(ScrollTimer!=NULL)
+        FreeUITimer(ScrollTimer);
 
     if(HexBuffer!=NULL)
         free(HexBuffer);
@@ -256,6 +371,7 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
 {
     bool WasAtBottom;
     t_UIScrollBarCtrl *VertScroll;
+    bool NeedRedraw;
 
     BottomOfBufferLine[InsertPoint]=*Chr;
     ColorBottomOfBufferLine[InsertPoint]=CurrentStyle;
@@ -265,6 +381,8 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
 
     if(InsertPoint>=HEX_BYTES_PER_LINE)
     {
+        NeedRedraw=false;
+
         InsertPoint=0;
 
         /* If we are scrolled all the way at the bottom then keep it that way */
@@ -282,13 +400,18 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
         /* See if we need to move the start of buffer */
         if(BottomOfBufferLine==TopOfBufferLine)
         {
-            TopOfBufferLine+=HEX_BYTES_PER_LINE;
-            ColorTopOfBufferLine+=HEX_BYTES_PER_LINE;
-            if(TopOfBufferLine>=EndOfHexBuffer)
+            /* Move selection down */
+            if(SelectionLine==SelectionAnchorLine)
             {
-                TopOfBufferLine=HexBuffer;
-                ColorTopOfBufferLine=ColorBuffer;
+                SelectionActive=false;
+                SelectionLine=NULL;
+                SelectionAnchorLine=NULL;
             }
+
+            if(SelectionLine==TopOfBufferLine)
+                SelectionLine+=HEX_BYTES_PER_LINE;
+            if(SelectionAnchorLine==TopOfBufferLine)
+                SelectionAnchorLine+=HEX_BYTES_PER_LINE;
 
             if(TopLine==TopOfBufferLine || WasAtBottom)
             {
@@ -300,7 +423,15 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
                     TopLine=HexBuffer;
                     ColorTopLine=ColorBuffer;
                 }
-                RedrawScreen();
+                NeedRedraw=true;
+            }
+
+            TopOfBufferLine+=HEX_BYTES_PER_LINE;
+            ColorTopOfBufferLine+=HEX_BYTES_PER_LINE;
+            if(TopOfBufferLine>=EndOfHexBuffer)
+            {
+                TopOfBufferLine=HexBuffer;
+                ColorTopOfBufferLine=ColorBuffer;
             }
         }
 
@@ -318,6 +449,9 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
                 UISetScrollBarPos(VertScroll,TotalLines-DisplayLines);
             }
         }
+
+        if(NeedRedraw)
+            RedrawScreen();
     }
 
     RethinkCursor();
@@ -363,7 +497,8 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
         case e_TextDisplayEvent_DisplayFrameScrollX:
             if(TextDisplayCtrl==NULL)
                 break;
-            UITC_SetXOffset(TextDisplayCtrl,Event->Info.Scroll.Amount*CharWidthPx);
+            WindowXOffsetPx=Event->Info.Scroll.Amount*CharWidthPx;
+            UITC_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
             UITC_RedrawScreen(TextDisplayCtrl);
         break;
         case e_TextDisplayEvent_DisplayFrameScrollY:
@@ -380,14 +515,19 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
             RethinkCursor();
         break;
         case e_TextDisplayEvent_MouseDown:
+            HandleLeftMousePress(true,Event->Info.Mouse.x,
+                    Event->Info.Mouse.y);
         break;
         case e_TextDisplayEvent_MouseUp:
+            HandleLeftMousePress(false,Event->Info.Mouse.x,
+                    Event->Info.Mouse.y);
         break;
         case e_TextDisplayEvent_MouseRightDown:
         break;
         case e_TextDisplayEvent_MouseRightUp:
         break;
         case e_TextDisplayEvent_MouseMiddleDown:
+RethinkYScrollBar();
         break;
         case e_TextDisplayEvent_MouseMiddleUp:
         break;
@@ -423,6 +563,7 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
             }
         break;
         case e_TextDisplayEvent_MouseMove:
+            HandleMouseMove(Event->Info.Mouse.x,Event->Info.Mouse.y);
         break;
         case e_TextDisplayEvent_Resize:
             ScreenResize();
@@ -492,6 +633,8 @@ void DisplayBinary::ScreenResize(void)
     if(TextDisplayCtrl==NULL)
         return;
 
+    HozScroll=UITC_GetHorzSlider(TextDisplayCtrl);
+
     ScreenWidthPx=UITC_GetWidgetWidth(TextDisplayCtrl);
     ScreenHeightPx=UITC_GetWidgetHeight(TextDisplayCtrl);
 
@@ -501,9 +644,8 @@ void DisplayBinary::ScreenResize(void)
         DisplayLines=ScreenHeightPx/CharHeightPx;
 
     /* Horizontal */
-    HozScroll=UITC_GetHorzSlider(TextDisplayCtrl);
     ScreenChars=ScreenWidthPx/CharWidthPx;
-    TotalChars=HEX_BYTES_PER_LINE*3+3+HEX_BYTES_PER_LINE;   // 3 bytes per char, and 3 chars space between hex and ASCII
+    TotalChars=END_OF_ASCII_CHAR;
     UISetScrollBarPageSizeAndMax(HozScroll,ScreenChars,TotalChars);
 }
 
@@ -549,8 +691,7 @@ void DisplayBinary::RethinkYScrollBar(void)
         Bytes=TopLine-TopOfBufferLine;
     else
         Bytes=(EndOfHexBuffer-TopOfBufferLine)+(TopLine-HexBuffer);
-    TopLineY=Bytes/HEX_BYTES_PER_LINE;
-    TopLineY++;
+    TopLineY=(Bytes+HEX_BYTES_PER_LINE-1)/HEX_BYTES_PER_LINE;
 
     /* Vert */
     VertScroll=UITC_GetVertSlider(TextDisplayCtrl);
@@ -782,13 +923,24 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
         const struct CharStyling *ColorLine,int ScreenLine,unsigned int Bytes)
 {
     struct TextCanvasFrag DisplayFrag;
-    char LineBuff[MAX_BINARY_HEX_BYTES_PER_LINE*3+3+MAX_BINARY_HEX_BYTES_PER_LINE+1];
-    struct CharStyling ColorBuff[MAX_BINARY_HEX_BYTES_PER_LINE*3+3+MAX_BINARY_HEX_BYTES_PER_LINE+1];
+    char LineBuff[MAX_BINARY_HEX_BYTES_PER_LINE*3+HEX_SPACE_BETWEEN_HEX_AND_ASCII+MAX_BINARY_HEX_BYTES_PER_LINE+1];
+    struct CharStyling ColorBuff[MAX_BINARY_HEX_BYTES_PER_LINE*3+HEX_SPACE_BETWEEN_HEX_AND_ASCII+MAX_BINARY_HEX_BYTES_PER_LINE+1];
     uint8_t c;
     unsigned int x;
     unsigned int r;
+    unsigned int s;
+    unsigned int tmp;
+    unsigned int Offset;
     struct CharStyling SpaceStyle;
     int StartOfStr;
+    uint8_t *SelWindowStart[2];
+    int SelWindowStartOffset[2];
+    uint8_t *SelWindowEnd[2];
+    int SelWindowEndOffset[2];
+    unsigned int HighLightStart;
+    unsigned int HighLightEnd;
+    unsigned int HighLightMaxSize;
+    unsigned int HighLightLineSize;
 
     /* Make sure the padding is all 0x00's */
     memset(ColorBuff,0x00,sizeof(ColorBuff));
@@ -799,29 +951,197 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
     SpaceStyle.Attribs=0;
     SpaceStyle.ULineColor=SpaceStyle.FGColor;
 
+    /* Setup the selection */
+    for(s=0;s<2;s++)
+    {
+        SelWindowStart[s]=NULL;
+        SelWindowEnd[s]=NULL;
+    }
+
+    if(SelectionActive && SelectionLine!=NULL && SelectionAnchorLine!=NULL)
+    {
+        if(SelectionLine==SelectionAnchorLine)
+        {
+            /* They are on the same line */
+            SelWindowStart[0]=SelectionLine;
+            SelWindowEnd[0]=SelectionAnchorLine;
+            if(SelectionLineAnchorOffset>SelectionLineOffset)
+            {
+                SelWindowStartOffset[0]=SelectionLineOffset;
+                SelWindowEndOffset[0]=SelectionLineAnchorOffset;
+            }
+            else
+            {
+                SelWindowStartOffset[0]=SelectionLineAnchorOffset;
+                SelWindowEndOffset[0]=SelectionLineOffset;
+            }
+        }
+        else if((SelectionLine<TopOfBufferLine &&
+                SelectionAnchorLine<TopOfBufferLine) ||
+                (SelectionLine>=TopOfBufferLine &&
+                SelectionAnchorLine>=TopOfBufferLine))
+        {
+            /* Both are above or below the start of the data, just setup one */
+            if(SelectionAnchorLine>SelectionLine)
+            {
+                SelWindowStart[0]=SelectionLine;
+                SelWindowStartOffset[0]=SelectionLineOffset;
+                SelWindowEnd[0]=SelectionAnchorLine;
+                SelWindowEndOffset[0]=SelectionLineAnchorOffset;
+            }
+            else
+            {
+                SelWindowStart[0]=SelectionAnchorLine;
+                SelWindowStartOffset[0]=SelectionLineAnchorOffset;
+                SelWindowEnd[0]=SelectionLine;
+                SelWindowEndOffset[0]=SelectionLineOffset;
+            }
+        }
+        else
+        {
+            /* One is above and one below, we need to highlight blocks */
+            if(SelectionLine>TopOfBufferLine)
+            {
+                SelWindowStart[0]=SelectionLine;
+                SelWindowStartOffset[0]=SelectionLineOffset;
+                SelWindowEnd[0]=EndOfHexBuffer;
+                SelWindowEndOffset[0]=0;
+
+                SelWindowStart[1]=HexBuffer;
+                SelWindowStartOffset[1]=0;
+                SelWindowEnd[1]=SelectionAnchorLine;
+                SelWindowEndOffset[1]=SelectionLineAnchorOffset;
+            }
+            else
+            {
+                SelWindowStart[0]=SelectionAnchorLine;
+                SelWindowStartOffset[0]=SelectionLineAnchorOffset;
+                SelWindowEnd[0]=EndOfHexBuffer;
+                SelWindowEndOffset[0]=0;
+
+                SelWindowStart[1]=HexBuffer;
+                SelWindowStartOffset[1]=0;
+                SelWindowEnd[1]=SelectionLine;
+                SelWindowEndOffset[1]=SelectionLineOffset;
+            }
+        }
+    }
+
     for(x=0;x<Bytes;x++)
     {
         c=Line[x];
 
         sprintf(&LineBuff[x*3],"%02X ",c);
-        ColorBuff[x*3+0]=ColorLine[x];
-        ColorBuff[x*3+1]=ColorLine[x];
-        ColorBuff[x*3+2]=ColorLine[x];
+        /* If you change HEX_SPACE_BETWEEN_HEX_AND_ASCII you need to update
+           this as well */
+        tmp=x*3+0;
+        ColorBuff[tmp++]=ColorLine[x];
+        ColorBuff[tmp++]=ColorLine[x];
+        ColorBuff[tmp++]=ColorLine[x];
 
         if(c<32 || c>127)
             c='.';
-        LineBuff[HEX_BYTES_PER_LINE*3+3+x]=c;
-        ColorBuff[HEX_BYTES_PER_LINE*3+3+x]=ColorLine[x];
+
+        LineBuff[START_OF_ASCII_CHAR+x]=c;
+        ColorBuff[START_OF_ASCII_CHAR+x]=ColorLine[x];
     }
-    memset(&LineBuff[x*3],' ',(HEX_BYTES_PER_LINE*3+3)-(x*3));
-    for(r=0;r<(HEX_BYTES_PER_LINE*3+3)-(x*3);r++)
+    /* x=Bytes at this point */
+    memset(&LineBuff[x*3],' ',START_OF_ASCII_CHAR-(x*3));
+    for(r=0;r<START_OF_ASCII_CHAR-(x*3);r++)
         ColorBuff[x*3+r]=SpaceStyle;
 
-    memset(&LineBuff[HEX_BYTES_PER_LINE*3+3+x],' ',HEX_BYTES_PER_LINE-x);
+    memset(&LineBuff[START_OF_ASCII_CHAR+x],' ',HEX_BYTES_PER_LINE-x);
     for(r=0;r<HEX_BYTES_PER_LINE-x;r++)
-        ColorBuff[HEX_BYTES_PER_LINE*3+3+x+r]=SpaceStyle;
+        ColorBuff[START_OF_ASCII_CHAR+x+r]=SpaceStyle;
 
-    LineBuff[HEX_BYTES_PER_LINE*3+HEX_BYTES_PER_LINE+3]=0;
+    LineBuff[END_OF_ASCII_CHAR]=0;
+
+    /* Handle selection */
+    for(s=0;s<2;s++)
+    {
+        if(Line>=SelWindowStart[s] && Line<=SelWindowEnd[s])
+        {
+            if(SelectionInAscII)
+            {
+                Offset=START_OF_ASCII_CHAR;
+                HighLightStart=SelWindowStartOffset[s];
+                HighLightEnd=SelWindowEndOffset[s]+1;
+                HighLightMaxSize=HEX_BYTES_PER_LINE;
+                HighLightLineSize=SelWindowEndOffset[s]-SelWindowStartOffset[s]+1;
+            }
+            else
+            {
+                /* times 3 because we use 3 chars per hex value, and -1 because
+                   we don't highlight the last char */
+                Offset=0;
+                HighLightStart=SelWindowStartOffset[s]*3;
+                HighLightEnd=(SelWindowEndOffset[s]+1)*3-1;
+                HighLightMaxSize=HEX_BYTES_PER_LINE*3-1;
+                HighLightLineSize=(SelWindowEndOffset[s]-
+                        SelWindowStartOffset[s]+1)*3-1;
+            }
+
+            if(Line==SelWindowStart[s] && Line==SelWindowEnd[s])
+            {
+                for(r=0;r<HighLightLineSize;r++)
+                {
+                    ColorBuff[Offset+HighLightStart+r].Attribs=
+                            TXT_ATTRIB_REVERSE;
+                }
+            }
+            else if(Line==SelWindowStart[s])
+            {
+                for(r=HighLightStart;r<HighLightMaxSize;r++)
+                    ColorBuff[Offset+r].Attribs=TXT_ATTRIB_REVERSE;
+            }
+            else if(Line==SelWindowEnd[s])
+            {
+                for(r=0;r<HighLightEnd;r++)
+                    ColorBuff[Offset+r].Attribs=TXT_ATTRIB_REVERSE;
+            }
+            else
+            {
+                for(r=0;r<HighLightMaxSize;r++)
+                    ColorBuff[Offset+r].Attribs=TXT_ATTRIB_REVERSE;
+            }
+        }
+    }
+
+#ifdef DEBUG_SHOW_BUFFER_POS
+    if(Line==TopOfBufferLine)
+    {
+        ColorBuff[HEX_BYTES_PER_LINE*3+1].BGColor=0xFF0000; // Red
+        LineBuff[HEX_BYTES_PER_LINE*3+1]='^';
+    }
+    if(Line==BottomOfBufferLine)
+    {
+        ColorBuff[HEX_BYTES_PER_LINE*3+1].BGColor=0x00FF00; // Green
+        LineBuff[HEX_BYTES_PER_LINE*3+1]='B';
+    }
+    if(Line==TopLine)
+    {
+        ColorBuff[HEX_BYTES_PER_LINE*3+0].BGColor=0x0000FF; // Blue
+        LineBuff[HEX_BYTES_PER_LINE*3+0]='T';
+    }
+    if(Line==HexBuffer)
+    {
+        ColorBuff[HEX_BYTES_PER_LINE*3+1].BGColor=0xFFFF00; // Yellow
+        LineBuff[HEX_BYTES_PER_LINE*3+1]='H';
+    }
+    if(Line==SelectionAnchorLine)
+    {
+        ColorBuff[HEX_BYTES_PER_LINE*3+2].BGColor=0xFFFFFF; // White
+        LineBuff[HEX_BYTES_PER_LINE*3+2]='A';
+    }
+    if(Line==SelectionLine)
+    {
+        ColorBuff[HEX_BYTES_PER_LINE*3+2].BGColor=0xFF00FF; // Perp
+        LineBuff[HEX_BYTES_PER_LINE*3+2]='S';
+    }
+
+    /* Add the address to the end of the buffer */
+    sprintf(&LineBuff[END_OF_ASCII_CHAR]," %lX",Line-HexBuffer);
+#endif
 
     DisplayFrag.FragType=e_TextCanvasFrag_String;
     DisplayFrag.Text=LineBuff;
@@ -834,7 +1154,7 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
 
     /* Add the different fragments based on styling */
     StartOfStr=0;
-    for(r=0;r<HEX_BYTES_PER_LINE*3+HEX_BYTES_PER_LINE+3;r++)
+    for(r=0;r<END_OF_ASCII_CHAR;r++)
     {
         if(memcmp(&ColorBuff[StartOfStr],&ColorBuff[r],
                 sizeof(struct CharStyling))!=0)
@@ -939,6 +1259,10 @@ void DisplayBinary::ClearScreen(e_ScreenClearType Type)
     ColorTopLine=ColorTopOfBufferLine;
 
     InsertPoint=0;
+
+    SelectionActive=false;
+    SelectionLine=NULL;
+    SelectionAnchorLine=NULL;
 
     UITC_ClearAllLines(TextDisplayCtrl);
     RethinkYScrollBar();
@@ -1121,3 +1445,313 @@ t_UIContextMenuCtrl *DisplayBinary::GetContextMenuHandle(e_UITD_ContextMenuType 
     return UITC_GetContextMenuHandle(TextDisplayCtrl,UIObj);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::DoScrollTimerTimeout
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::DoScrollTimerTimeout(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when the scroll timer goes off.  It scroll the
+ *    screen if needed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::DoScrollTimerTimeout(void)
+{
+    if(SelectionLine==NULL)
+    {
+        /* Hu? this is for scrolling when doing a selection.  No selection
+           means we shouldn't be called */
+        UITimerStop(ScrollTimer);
+        return;
+    }
+
+    ScrollScreen(AutoSelectionScrolldx*CharWidthPx,AutoSelectionScrolldy);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::HandleLeftMousePress
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::HandleLeftMousePress(bool Down,int x,int y);
+ *
+ * PARAMETERS:
+ *    Down [I] -- The mouse button was pressed (true) or released (false).
+ *    x [I] -- The x pos of the mouse
+ *    y [I] -- The y pos of the mouse
+ *
+ * FUNCTION:
+ *    This function is called when the left mouse button is pressed or released.
+ *
+ *    It used to track if we are moving the selection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::HandleLeftMousePress(bool Down,int x,int y)
+{
+    LeftMouseDown=Down;
+    if(Down)
+    {
+        /* Clear the selection, but note where the user clicked */
+        SelectionActive=false;
+        SelectionLine=NULL;
+        SelectionAnchorLine=NULL;
+
+        ConvertScreenXY2BufferLinePtr(x,y,&SelectionAnchorLine,
+                &SelectionLineAnchorOffset,&SelectionInAscII);
+
+        SelectionLine=SelectionAnchorLine;
+        SelectionLineOffset=SelectionLineAnchorOffset;
+
+        RedrawScreen();
+        SendEvent(e_DBEvent_SelectionChanged,NULL);
+    }
+    else
+    {
+        /* If the mouse is coming up, cancel any selection scroll timers */
+        if(UITimerRunning(ScrollTimer))
+            UITimerStop(ScrollTimer);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::HandleMouseMove
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::HandleMouseMove(int x,int y);
+ *
+ * PARAMETERS:
+ *    x [I] -- The x pos of the mouse
+ *    y [I] -- The y pos of the mouse
+ *
+ * FUNCTION:
+ *    This function is called to inform us that the mouse has moved.  The
+ *    event may only come if the mouse button is down.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::HandleMouseMove(int x,int y)
+{
+    uint8_t *TmpSelectionLine;
+    int TmpSelectionLineOffset;
+    bool TmpSelectionInAscII;
+
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    if(LeftMouseDown)
+    {
+        AutoSelectionScrolldx=0;
+        if(x<0)
+            AutoSelectionScrolldx=-1;
+        else if(x>UITC_GetWidgetWidth(TextDisplayCtrl))
+            AutoSelectionScrolldx=1;
+
+        AutoSelectionScrolldy=0;
+        if(y<0)
+            AutoSelectionScrolldy=-1;
+        else if(y>UITC_GetWidgetHeight(TextDisplayCtrl))
+            AutoSelectionScrolldy=1;
+
+        if(AutoSelectionScrolldx!=0 || AutoSelectionScrolldy!=0)
+        {
+            /* Ok, we are scrolling the display */
+            ScrollScreen(AutoSelectionScrolldx*CharWidthPx,
+                    AutoSelectionScrolldy);
+
+            /* Start the auto scroll timer */
+            UITimerStart(ScrollTimer);
+        }
+        else
+        {
+            /* We don't need the timer */
+            if(UITimerRunning(ScrollTimer))
+                UITimerStop(ScrollTimer);
+        }
+
+        ConvertScreenXY2BufferLinePtr(x,y,&TmpSelectionLine,
+                &TmpSelectionLineOffset,&TmpSelectionInAscII);
+
+        /* Only change the selection if it was in the same zone we started in */
+        if(TmpSelectionInAscII==SelectionInAscII && TmpSelectionLine!=NULL)
+        {
+            SelectionLine=TmpSelectionLine;
+            SelectionLineOffset=TmpSelectionLineOffset;
+        }
+
+        if(SelectionLine!=SelectionAnchorLine ||
+                SelectionLineOffset!=SelectionLineAnchorOffset)
+        {
+            SelectionActive=true;
+        }
+
+        RedrawScreen();
+        SendEvent(e_DBEvent_SelectionChanged,NULL);
+    }
+    else
+    {
+        /* If we have a scroll timer running kill it */
+        if(UITimerRunning(ScrollTimer))
+            UITimerStop(ScrollTimer);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ConvertScreenXY2BufferLinePtr
+ *
+ * SYNOPSIS:
+ *    bool DisplayBinary::ConvertScreenXY2BufferLinePtr(int x,int y,
+ *              uint8_t **LinePtr,int *Offset,bool *InAscII);
+ *
+ * PARAMETERS:
+ *    x [I] -- The x pos on the screen
+ *    y [I] -- The y pos on the screen
+ *    LinePtr [O] -- The pointer into 'HexBuffer' that this x,y is.
+ *    Offset [O] -- The offset from 'LinePtr' that this x,y is.
+ *    InAscII [O] -- Set to true if this is in the AscII area or false if
+ *                   it's in the hex area.
+ *
+ * FUNCTION:
+ *    This function takes a screen x,y and converts it to a pointer into the
+ *    'HexBuffer' buffer.
+ *
+ * RETURNS:
+ *    true -- The x,y is in the text
+ *    false -- The x,y is out of bounds.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayBinary::ConvertScreenXY2BufferLinePtr(int x,int y,uint8_t **Ptr,
+        int *Offset,bool *InAscII)
+{
+    int XOffset;
+    int YOffset;
+    uint8_t *SelLine;
+
+    *Ptr=NULL;
+    *Offset=0;
+
+    /* Check if we are clicking a "dead" space */
+    if(x<0 || (x>=END_OF_HEX_PX && x<START_OF_ASCII_PX) || x>=END_OF_ASCII_PX)
+        return false;
+    if(y<0)
+        return false;
+
+    YOffset=y/CharHeightPx;
+    SelLine=TopLine+YOffset*HEX_BYTES_PER_LINE;
+    if(SelLine>=EndOfHexBuffer)
+    {
+        /* Wrap */
+        SelLine=HexBuffer+(SelLine-EndOfHexBuffer);
+    }
+    if(y>=DisplayLines*CharHeightPx)
+        return false;
+
+    XOffset=x/(CharWidthPx*3);    // We have 3 chars for a hex number (2 numbers + a space)
+    if(x>=START_OF_ASCII_PX)
+    {
+        /* Ok, we are in the ascII display */
+        XOffset=(x-START_OF_ASCII_PX)/CharWidthPx;
+        *InAscII=true;
+    }
+    else
+    {
+        *InAscII=false;
+    }
+
+    if(SelLine==BottomOfBufferLine && XOffset>=InsertPoint)
+        return false;
+
+    *Ptr=SelLine;
+    *Offset=XOffset;
+
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ScrollScreen
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::ScrollScreen(int dxpx,int dy);
+ *
+ * PARAMETERS:
+ *    dxpx [I] -- The amount to scroll the screen in the x dir.  This is pixels
+ *    dy [I] -- The amount to scroll the screen in the y dir.  This is chars
+ *
+ * FUNCTION:
+ *    This function moves the scroll bar(s) by an amount.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::ScrollScreen(int dxpx,int dy)
+{
+    t_UIScrollBarCtrl *HorzScroll;
+    t_UIScrollBarCtrl *VertScroll;
+    int MaxPos;
+    int NewPos;
+    int ScreenChars;
+    int TotalChars;
+    int TotalLines;
+    int CurrentPos;
+
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    HorzScroll=UITC_GetHorzSlider(TextDisplayCtrl);
+    VertScroll=UITC_GetVertSlider(TextDisplayCtrl);
+
+    /* Hozr */
+    ScreenChars=ScreenWidthPx/CharWidthPx;
+    TotalChars=END_OF_ASCII_CHAR;
+
+    if(TotalChars>=ScreenChars)
+        MaxPos=(TotalChars-ScreenChars)*CharWidthPx;
+    else
+        MaxPos=0;
+    WindowXOffsetPx+=dxpx;
+    if(WindowXOffsetPx<0)
+        WindowXOffsetPx=0;
+    if(WindowXOffsetPx>MaxPos)
+        WindowXOffsetPx=MaxPos;
+
+    UISetScrollBarPos(HorzScroll,WindowXOffsetPx/CharWidthPx);
+
+    /* Vert */
+    CurrentPos=UIGetScrollBarPos(VertScroll);
+    TotalLines=UIGetScrollBarTotalSize(VertScroll);
+    MaxPos=TotalLines-DisplayLines;
+
+    NewPos=CurrentPos+dy;
+    if(NewPos>MaxPos)
+        NewPos=MaxPos;
+    if(NewPos<0)
+        NewPos=0;
+
+    UISetScrollBarPos(VertScroll,NewPos);
+}

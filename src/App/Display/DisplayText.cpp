@@ -3886,8 +3886,7 @@ void DisplayText::DoScrollTimerTimeout(void)
         return;
     }
 
-    ScrollScreen(AutoSelectionScrolldx*CharWidthPx,
-            AutoSelectionScrolldy);
+    ScrollScreen(AutoSelectionScrolldx*CharWidthPx,AutoSelectionScrolldy);
 }
 
 /*******************************************************************************

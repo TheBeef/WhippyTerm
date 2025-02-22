@@ -34,6 +34,9 @@
 #include "DisplayBinary.h"
 #include <stdint.h>
 #include <string.h>
+#include <string>
+
+using namespace std;
 
 /*** DEFINES                  ***/
 #define DEBUG_SHOW_BUFFER_POS               1       // Show the pointers to parts of the screen
@@ -527,7 +530,11 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
         case e_TextDisplayEvent_MouseRightUp:
         break;
         case e_TextDisplayEvent_MouseMiddleDown:
-RethinkYScrollBar();
+//`
+{
+std::string clip;
+GetSelectionString(clip);
+}
         break;
         case e_TextDisplayEvent_MouseMiddleUp:
         break;
@@ -933,14 +940,11 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
     unsigned int Offset;
     struct CharStyling SpaceStyle;
     int StartOfStr;
-    uint8_t *SelWindowStart[2];
-    int SelWindowStartOffset[2];
-    uint8_t *SelWindowEnd[2];
-    int SelWindowEndOffset[2];
     unsigned int HighLightStart;
     unsigned int HighLightEnd;
     unsigned int HighLightMaxSize;
     unsigned int HighLightLineSize;
+    struct DisBin_SelectionBlock SelBlocks[2];
 
     /* Make sure the padding is all 0x00's */
     memset(ColorBuff,0x00,sizeof(ColorBuff));
@@ -951,81 +955,7 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
     SpaceStyle.Attribs=0;
     SpaceStyle.ULineColor=SpaceStyle.FGColor;
 
-    /* Setup the selection */
-    for(s=0;s<2;s++)
-    {
-        SelWindowStart[s]=NULL;
-        SelWindowEnd[s]=NULL;
-    }
-
-    if(SelectionActive && SelectionLine!=NULL && SelectionAnchorLine!=NULL)
-    {
-        if(SelectionLine==SelectionAnchorLine)
-        {
-            /* They are on the same line */
-            SelWindowStart[0]=SelectionLine;
-            SelWindowEnd[0]=SelectionAnchorLine;
-            if(SelectionLineAnchorOffset>SelectionLineOffset)
-            {
-                SelWindowStartOffset[0]=SelectionLineOffset;
-                SelWindowEndOffset[0]=SelectionLineAnchorOffset;
-            }
-            else
-            {
-                SelWindowStartOffset[0]=SelectionLineAnchorOffset;
-                SelWindowEndOffset[0]=SelectionLineOffset;
-            }
-        }
-        else if((SelectionLine<TopOfBufferLine &&
-                SelectionAnchorLine<TopOfBufferLine) ||
-                (SelectionLine>=TopOfBufferLine &&
-                SelectionAnchorLine>=TopOfBufferLine))
-        {
-            /* Both are above or below the start of the data, just setup one */
-            if(SelectionAnchorLine>SelectionLine)
-            {
-                SelWindowStart[0]=SelectionLine;
-                SelWindowStartOffset[0]=SelectionLineOffset;
-                SelWindowEnd[0]=SelectionAnchorLine;
-                SelWindowEndOffset[0]=SelectionLineAnchorOffset;
-            }
-            else
-            {
-                SelWindowStart[0]=SelectionAnchorLine;
-                SelWindowStartOffset[0]=SelectionLineAnchorOffset;
-                SelWindowEnd[0]=SelectionLine;
-                SelWindowEndOffset[0]=SelectionLineOffset;
-            }
-        }
-        else
-        {
-            /* One is above and one below, we need to highlight blocks */
-            if(SelectionLine>TopOfBufferLine)
-            {
-                SelWindowStart[0]=SelectionLine;
-                SelWindowStartOffset[0]=SelectionLineOffset;
-                SelWindowEnd[0]=EndOfHexBuffer;
-                SelWindowEndOffset[0]=0;
-
-                SelWindowStart[1]=HexBuffer;
-                SelWindowStartOffset[1]=0;
-                SelWindowEnd[1]=SelectionAnchorLine;
-                SelWindowEndOffset[1]=SelectionLineAnchorOffset;
-            }
-            else
-            {
-                SelWindowStart[0]=SelectionAnchorLine;
-                SelWindowStartOffset[0]=SelectionLineAnchorOffset;
-                SelWindowEnd[0]=EndOfHexBuffer;
-                SelWindowEndOffset[0]=0;
-
-                SelWindowStart[1]=HexBuffer;
-                SelWindowStartOffset[1]=0;
-                SelWindowEnd[1]=SelectionLine;
-                SelWindowEndOffset[1]=SelectionLineOffset;
-            }
-        }
-    }
+    GetNormalizedSelectionBlocks(SelBlocks);
 
     for(x=0;x<Bytes;x++)
     {
@@ -1059,29 +989,30 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
     /* Handle selection */
     for(s=0;s<2;s++)
     {
-        if(Line>=SelWindowStart[s] && Line<=SelWindowEnd[s])
+        if(Line>=SelBlocks[s].Start.Line && Line<=SelBlocks[s].End.Line)
         {
             if(SelectionInAscII)
             {
                 Offset=START_OF_ASCII_CHAR;
-                HighLightStart=SelWindowStartOffset[s];
-                HighLightEnd=SelWindowEndOffset[s]+1;
+                HighLightStart=SelBlocks[s].Start.Offset;
+                HighLightEnd=SelBlocks[s].End.Offset+1;
                 HighLightMaxSize=HEX_BYTES_PER_LINE;
-                HighLightLineSize=SelWindowEndOffset[s]-SelWindowStartOffset[s]+1;
+                HighLightLineSize=SelBlocks[s].End.Offset-
+                        SelBlocks[s].Start.Offset+1;
             }
             else
             {
                 /* times 3 because we use 3 chars per hex value, and -1 because
                    we don't highlight the last char */
                 Offset=0;
-                HighLightStart=SelWindowStartOffset[s]*3;
-                HighLightEnd=(SelWindowEndOffset[s]+1)*3-1;
+                HighLightStart=SelBlocks[s].Start.Offset*3;
+                HighLightEnd=(SelBlocks[s].End.Offset+1)*3-1;
                 HighLightMaxSize=HEX_BYTES_PER_LINE*3-1;
-                HighLightLineSize=(SelWindowEndOffset[s]-
-                        SelWindowStartOffset[s]+1)*3-1;
+                HighLightLineSize=(SelBlocks[s].End.Offset-
+                        SelBlocks[s].Start.Offset+1)*3-1;
             }
 
-            if(Line==SelWindowStart[s] && Line==SelWindowEnd[s])
+            if(Line==SelBlocks[s].Start.Line && Line==SelBlocks[s].End.Line)
             {
                 for(r=0;r<HighLightLineSize;r++)
                 {
@@ -1089,12 +1020,12 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
                             TXT_ATTRIB_REVERSE;
                 }
             }
-            else if(Line==SelWindowStart[s])
+            else if(Line==SelBlocks[s].Start.Line)
             {
                 for(r=HighLightStart;r<HighLightMaxSize;r++)
                     ColorBuff[Offset+r].Attribs=TXT_ATTRIB_REVERSE;
             }
-            else if(Line==SelWindowEnd[s])
+            else if(Line==SelBlocks[s].End.Line)
             {
                 for(r=0;r<HighLightEnd;r++)
                     ColorBuff[Offset+r].Attribs=TXT_ATTRIB_REVERSE;
@@ -1754,4 +1685,347 @@ void DisplayBinary::ScrollScreen(int dxpx,int dy)
         NewPos=0;
 
     UISetScrollBarPos(VertScroll,NewPos);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::GetSelectionString
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::GetSelectionString(std::string &Clip);
+ *
+ * PARAMETERS:
+ *    Clip [O] -- The text from the selection
+ *
+ * FUNCTION:
+ *    This function gets a copy of the selection text.
+ *
+ * RETURNS:
+ *    true -- The selection was valid and 'Clip' has been set
+ *    false --- There was no selection and 'Clip' has been set to ""
+ *
+ * SEE ALSO:
+ *    IsThereASelection(), SelectAll(), ClearSelection()
+ ******************************************************************************/
+bool DisplayBinary::GetSelectionString(std::string &Clip)
+{
+    uint8_t *Start;
+    uint8_t *End;
+    int StartOffset;
+    int EndOffset;
+    uint8_t *Line;
+    string TmpStr;
+    unsigned int s;
+    struct DisBin_SelectionBlock SelBlocks[2];
+
+    if(!SelectionActive || SelectionLine==NULL || SelectionAnchorLine==NULL)
+        return false;
+
+    GetNormalizedSelectionBlocks(SelBlocks);
+
+    Clip="";
+    for(s=0;s<2;s++)
+    {
+        Start=SelBlocks[s].Start.Line;
+        End=SelBlocks[s].End.Line;
+        StartOffset=SelBlocks[s].Start.Offset;
+        EndOffset=SelBlocks[s].End.Offset;
+
+        if(Start==NULL || End==NULL)
+            continue;
+
+        Line=Start;
+        /* We are doing the AscII copy the RAW bytes */
+        if(Start!=End)
+        {
+            /* The first line (partal line) */
+            BuildSelOutputAndAppendData(Clip,&Line[StartOffset],
+                    HEX_BYTES_PER_LINE-StartOffset,SelectionInAscII);
+            Line+=HEX_BYTES_PER_LINE;
+
+            /* Full lines */
+            while(Line!=End)
+            {
+                BuildSelOutputAndAppendData(Clip,Line,HEX_BYTES_PER_LINE,
+                        SelectionInAscII);
+                Line+=HEX_BYTES_PER_LINE;
+            }
+
+            /* The last line (partal line) */
+            if(End<EndOfHexBuffer)
+            {
+                BuildSelOutputAndAppendData(Clip,Line,EndOffset+1,
+                        SelectionInAscII);
+            }
+        }
+        else
+        {
+            /* Just part of one line */
+            if(EndOffset>StartOffset)
+            {
+                BuildSelOutputAndAppendData(Clip,&Line[StartOffset],
+                        EndOffset-StartOffset+1,SelectionInAscII);
+            }
+            else
+            {
+                BuildSelOutputAndAppendData(Clip,&Line[EndOffset],
+                        StartOffset-EndOffset+1,SelectionInAscII);
+            }
+        }
+    }
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::BuildSelOutputAndAppendData
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::BuildSelOutputAndAppendData(std::string &Dest,
+ *              const uint8_t *Src,int Bytes,bool AscII);
+ *
+ * PARAMETERS:
+ *    Dest [I/O] -- The is the string to append to
+ *    Src [I] -- The hex data to append
+ *    Bytes [I] -- The number of bytes to copy
+ *    AscII [I] -- Output the hex data as or as AscII data.
+ *
+ * FUNCTION:
+ *    This function is a helper function for building a block of the hex data
+ *    as AscII or hex codes and append it to a string.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::BuildSelOutputAndAppendData(std::string &Dest,
+        const uint8_t *Src,int Bytes,bool AscII)
+{
+    int r;
+    char buff[HEX_BYTES_PER_LINE*3+1];
+
+    if((unsigned)Bytes*3>=sizeof(buff))
+        return;
+
+    if(AscII)
+    {
+        Dest.append((const char *)Src,Bytes);
+    }
+    else
+    {
+        for(r=0;r<Bytes;r++)
+        {
+            sprintf(&buff[r*3],"%02X ",Src[r]);
+        }
+        Dest.append(buff);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::IsThereASelection
+ *
+ * SYNOPSIS:
+ *    bool DisplayBinary::IsThereASelection(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function checks to see if there is selected text.
+ *
+ * RETURNS:
+ *    true -- There is text that can be copied to the clip board
+ *    false -- There is not selection (nothing to copy).
+ *
+ * SEE ALSO:
+ *    DisplayBase::GetSelectionString()
+ ******************************************************************************/
+bool DisplayBinary::IsThereASelection(void)
+{
+    if(!SelectionActive)
+        return false;
+    if(SelectionLine==NULL || SelectionAnchorLine==NULL)
+        return false;
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::SelectAll
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::SelectAll(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function sets the selection to select everything.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    GetSelectionString()
+ ******************************************************************************/
+void DisplayBinary::SelectAll(void)
+{
+    SelectionInAscII=false;
+    SelectionActive=true;
+    SelectionLine=TopOfBufferLine;
+    SelectionLineOffset=0;
+    SelectionAnchorLine=BottomOfBufferLine;
+    SelectionLineAnchorOffset=InsertPoint;
+
+    RedrawScreen();
+
+    SendEvent(e_DBEvent_SelectionChanged,NULL);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ClearSelection
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::ClearSelection(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function sets the selection to nothing.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    GetSelectionString()
+ ******************************************************************************/
+void DisplayBinary::ClearSelection(void)
+{
+    SelectionInAscII=false;
+    SelectionActive=false;
+    SelectionLine=NULL;
+    SelectionLineOffset=0;
+    SelectionAnchorLine=NULL;
+    SelectionLineAnchorOffset=0;
+
+    RedrawScreen();
+
+    SendEvent(e_DBEvent_SelectionChanged,NULL);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetNormalizedSelectionBlocks
+ *
+ * SYNOPSIS:
+ *    bool DisplayBinary::GetNormalizedSelectionBlocks(
+ *              struct DisBin_SelectionBlock *Blocks);
+ *
+ * PARAMETERS:
+ *    Blocks [O] -- This is a 2 dim array of selection data for the two blocks
+ *                  that make up the selection.
+ *
+ * FUNCTION:
+ *    This function takes the selection and normalizes it (makes sure select
+ *    is before anchor) and split the selection into blocks.
+ *
+ *    The blocks are needed because the hex buffer is circular and loops.  This
+ *    means that you can end up with one block that goes to the end of the
+ *    buffer and another that is at the top with a hole in the middle.
+ *
+ * RETURNS:
+ *    true -- We where able to get the selection
+ *    false -- There wan't a valid selection.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayBinary::GetNormalizedSelectionBlocks(struct DisBin_SelectionBlock *Blocks)
+{
+    unsigned int s;
+
+    /* Setup the selection */
+    for(s=0;s<2;s++)
+    {
+        Blocks[s].Start.Line=NULL;
+        Blocks[s].Start.Offset=0;
+        Blocks[s].End.Line=NULL;
+        Blocks[s].End.Offset=0;
+    }
+
+    if(!SelectionActive || SelectionLine==NULL || SelectionAnchorLine==NULL)
+        return false;
+
+    if(SelectionLine==SelectionAnchorLine)
+    {
+        /* They are on the same line */
+        Blocks[0].Start.Line=SelectionLine;
+        Blocks[0].End.Line=SelectionAnchorLine;
+        if(SelectionLineAnchorOffset>SelectionLineOffset)
+        {
+            Blocks[0].Start.Offset=SelectionLineOffset;
+            Blocks[0].End.Offset=SelectionLineAnchorOffset;
+        }
+        else
+        {
+            Blocks[0].Start.Offset=SelectionLineAnchorOffset;
+            Blocks[0].End.Offset=SelectionLineOffset;
+        }
+    }
+    else if((SelectionLine<TopOfBufferLine &&
+            SelectionAnchorLine<TopOfBufferLine) ||
+            (SelectionLine>=TopOfBufferLine &&
+            SelectionAnchorLine>=TopOfBufferLine))
+    {
+        /* Both are above or below the start of the data, just setup one */
+        if(SelectionAnchorLine>SelectionLine)
+        {
+            Blocks[0].Start.Line=SelectionLine;
+            Blocks[0].Start.Offset=SelectionLineOffset;
+            Blocks[0].End.Line=SelectionAnchorLine;
+            Blocks[0].End.Offset=SelectionLineAnchorOffset;
+        }
+        else
+        {
+            Blocks[0].Start.Line=SelectionAnchorLine;
+            Blocks[0].Start.Offset=SelectionLineAnchorOffset;
+            Blocks[0].End.Line=SelectionLine;
+            Blocks[0].End.Offset=SelectionLineOffset;
+        }
+    }
+    else
+    {
+        /* One is above and one below, we need to highlight blocks */
+        if(SelectionLine>TopOfBufferLine)
+        {
+            Blocks[0].Start.Line=SelectionLine;
+            Blocks[0].Start.Offset=SelectionLineOffset;
+            Blocks[0].End.Line=EndOfHexBuffer;
+            Blocks[0].End.Offset=0;
+
+            Blocks[1].Start.Line=HexBuffer;
+            Blocks[1].Start.Offset=0;
+            Blocks[1].End.Line=SelectionAnchorLine;
+            Blocks[1].End.Offset=SelectionLineAnchorOffset;
+        }
+        else
+        {
+            Blocks[0].Start.Line=SelectionAnchorLine;
+            Blocks[0].Start.Offset=SelectionLineAnchorOffset;
+            Blocks[0].End.Line=EndOfHexBuffer;
+            Blocks[0].End.Offset=0;
+
+            Blocks[1].Start.Line=HexBuffer;
+            Blocks[1].Start.Offset=0;
+            Blocks[1].End.Line=SelectionLine;
+            Blocks[1].End.Offset=SelectionLineOffset;
+        }
+    }
+    return true;
 }

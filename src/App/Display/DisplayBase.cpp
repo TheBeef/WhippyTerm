@@ -631,106 +631,106 @@ void DisplayBase::DoLineFeed(void)
     /* Do nothing */
 }
 
-/*******************************************************************************
- * NAME:
- *    DisplayBase::GetSelectionString
- *
- * SYNOPSIS:
- *    bool DisplayBase::GetSelectionString(std::string &Clip);
- *
- * PARAMETERS:
- *    Clip [O] -- The text from the selection
- *
- * FUNCTION:
- *    This function gets a copy of the selection text.
- *
- * RETURNS:
- *    true -- The selection was valid and 'Clip' has been set
- *    false --- There was no selection and 'Clip' has been set to ""
- *
- * SEE ALSO:
- *    IsThereASelection(), SelectAll(), ClearSelection()
- ******************************************************************************/
-bool DisplayBase::GetSelectionString(std::string &Clip)
-{
-    /* Do nothing */
-    Clip="";
-    return false;
-}
-
-/*******************************************************************************
- * NAME:
- *    DisplayBase::IsThereASelection
- *
- * SYNOPSIS:
- *    bool DisplayBase::IsThereASelection(void);
- *
- * PARAMETERS:
- *    NONE
- *
- * FUNCTION:
- *    This function checks to see if there is selected text.
- *
- * RETURNS:
- *    true -- There is text that can be copied to the clip board
- *    false -- There is not selection (nothing to copy).
- *
- * SEE ALSO:
- *    DisplayBase::GetSelectionString()
- ******************************************************************************/
-bool DisplayBase::IsThereASelection(void)
-{
-    /* Do nothing */
-    return false;
-}
-
-/*******************************************************************************
- * NAME:
- *    DisplayBase::SelectAll
- *
- * SYNOPSIS:
- *    void DisplayBase::SelectAll(void);
- *
- * PARAMETERS:
- *    NONE
- *
- * FUNCTION:
- *    This function sets the selection to select everything.
- *
- * RETURNS:
- *    NONE
- *
- * SEE ALSO:
- *    DisplayBase::GetSelectionString()
- ******************************************************************************/
-void DisplayBase::SelectAll(void)
-{
-    /* Do nothing */
-}
-
-/*******************************************************************************
- * NAME:
- *    DisplayBase::ClearSelection
- *
- * SYNOPSIS:
- *    void DisplayBase::ClearSelection(void);
- *
- * PARAMETERS:
- *    NONE
- *
- * FUNCTION:
- *    This function sets the selection to nothing.
- *
- * RETURNS:
- *    NONE
- *
- * SEE ALSO:
- *    GetSelectionString()
- ******************************************************************************/
-void DisplayBase::ClearSelection(void)
-{
-    /* Do nothing */
-}
+///*******************************************************************************
+// * NAME:
+// *    DisplayBase::GetSelectionString
+// *
+// * SYNOPSIS:
+// *    bool DisplayBase::GetSelectionString(std::string &Clip);
+// *
+// * PARAMETERS:
+// *    Clip [O] -- The text from the selection
+// *
+// * FUNCTION:
+// *    This function gets a copy of the selection text.
+// *
+// * RETURNS:
+// *    true -- The selection was valid and 'Clip' has been set
+// *    false --- There was no selection and 'Clip' has been set to ""
+// *
+// * SEE ALSO:
+// *    IsThereASelection(), SelectAll(), ClearSelection()
+// ******************************************************************************/
+//bool DisplayBase::GetSelectionString(std::string &Clip)
+//{
+//    /* Do nothing */
+//    Clip="";
+//    return false;
+//}
+//
+///*******************************************************************************
+// * NAME:
+// *    DisplayBase::IsThereASelection
+// *
+// * SYNOPSIS:
+// *    bool DisplayBase::IsThereASelection(void);
+// *
+// * PARAMETERS:
+// *    NONE
+// *
+// * FUNCTION:
+// *    This function checks to see if there is selected text.
+// *
+// * RETURNS:
+// *    true -- There is text that can be copied to the clip board
+// *    false -- There is not selection (nothing to copy).
+// *
+// * SEE ALSO:
+// *    DisplayBase::GetSelectionString()
+// ******************************************************************************/
+//bool DisplayBase::IsThereASelection(void)
+//{
+//    /* Do nothing */
+//    return false;
+//}
+//
+///*******************************************************************************
+// * NAME:
+// *    DisplayBase::SelectAll
+// *
+// * SYNOPSIS:
+// *    void DisplayBase::SelectAll(void);
+// *
+// * PARAMETERS:
+// *    NONE
+// *
+// * FUNCTION:
+// *    This function sets the selection to select everything.
+// *
+// * RETURNS:
+// *    NONE
+// *
+// * SEE ALSO:
+// *    DisplayBase::GetSelectionString()
+// ******************************************************************************/
+//void DisplayBase::SelectAll(void)
+//{
+//    /* Do nothing */
+//}
+//
+///*******************************************************************************
+// * NAME:
+// *    DisplayBase::ClearSelection
+// *
+// * SYNOPSIS:
+// *    void DisplayBase::ClearSelection(void);
+// *
+// * PARAMETERS:
+// *    NONE
+// *
+// * FUNCTION:
+// *    This function sets the selection to nothing.
+// *
+// * RETURNS:
+// *    NONE
+// *
+// * SEE ALSO:
+// *    GetSelectionString()
+// ******************************************************************************/
+//void DisplayBase::ClearSelection(void)
+//{
+//    /* Do nothing */
+//}
 
 /*******************************************************************************
  * NAME:

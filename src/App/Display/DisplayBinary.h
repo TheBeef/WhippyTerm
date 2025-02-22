@@ -35,6 +35,7 @@
 #include "App/Display/DisplayBase.h"
 #include "UI/UITextDisplay.h"
 #include "UI/UITimers.h"
+#include <string>
 #include <stdint.h>
 
 /***  DEFINES                          ***/
@@ -43,6 +44,17 @@
 /***  MACROS                           ***/
 
 /***  TYPE DEFINITIONS                 ***/
+struct DisBin_SelectionPair
+{
+    uint8_t *Line;
+    int Offset;
+};
+
+struct DisBin_SelectionBlock
+{
+    struct DisBin_SelectionPair Start;
+    struct DisBin_SelectionPair End;
+};
 
 /***  CLASS DEFINITIONS                ***/
 class DisplayBinary : public DisplayBase
@@ -62,6 +74,10 @@ class DisplayBinary : public DisplayBase
         void ClearScrollBackBuffer(void);
         void ResetTerm(void);
         t_UIContextMenuCtrl *GetContextMenuHandle(e_UITD_ContextMenuType UIObj);
+        void ClearSelection(void);
+        bool GetSelectionString(std::string &Clip);
+        void SelectAll(void);
+        bool IsThereASelection(void);
 
     private:
         bool InitCalled;
@@ -116,6 +132,8 @@ class DisplayBinary : public DisplayBase
         void HandleMouseMove(int x,int y);
         void DoScrollTimerTimeout(void);
         void ScrollScreen(int dxpx,int dy);
+        bool GetNormalizedSelectionBlocks(struct DisBin_SelectionBlock *Blocks);
+        void BuildSelOutputAndAppendData(std::string &Dest,const uint8_t *Src,int Bytes,bool AscII);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

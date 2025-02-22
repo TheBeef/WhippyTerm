@@ -143,10 +143,10 @@ class DisplayBase
         virtual void DoBackspace(void);
         virtual void DoReturn(void);
         virtual void DoLineFeed(void);
-        virtual bool GetSelectionString(std::string &Clip);
-        virtual bool IsThereASelection(void);
-        virtual void SelectAll(void);
-        virtual void ClearSelection(void);
+        virtual bool GetSelectionString(std::string &Clip)=0;
+        virtual bool IsThereASelection(void)=0;
+        virtual void SelectAll(void)=0;
+        virtual void ClearSelection(void)=0;
         virtual void SetOverrideMessage(const char *Msg);
         virtual void ClearScreen(e_ScreenClearType Type);
         virtual void ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2);

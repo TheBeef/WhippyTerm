@@ -1322,23 +1322,6 @@ bool Connection::KeyPress(uint8_t Mods,e_UIKeys Key,const uint8_t *TextPtr,
     if(MW->KeyPress(Mods,Key,TextPtr,TextLen))
         return true;
 
-    if(BinaryConnection)
-    {
-        /* Key presses are converted to send buffers */
-        if(TextPtr==NULL)
-            return true;
-        if(*TextPtr<'a' || *TextPtr>'z')
-            return true;
-
-        if(!g_SendBuffers.Send(this,*TextPtr-'a'+MAX_QUICK_SEND_BUFFERS))
-        {
-            UIAsk("Error","Failed to send the buffer.",e_AskBox_Error,
-                    e_AskBttns_Ok);
-        }
-
-        return true;
-    }
-
     Con_SetActiveConnection(this);
 
     /* Handle Cut/Copy/Paste */
@@ -1404,7 +1387,21 @@ bool Connection::KeyPress(uint8_t Mods,e_UIKeys Key,const uint8_t *TextPtr,
     else
     {
         RetValue=false;
-        if(!DPS_ProcessorKeyPress(TextPtr,TextLen,Key,Mods))
+        if(BinaryConnection)
+        {
+            /* Key presses are converted to send buffers */
+            if(TextPtr!=NULL && (*TextPtr>='a' && *TextPtr<='z'))
+            {
+                if(!g_SendBuffers.Send(this,*TextPtr-'a'+
+                        MAX_QUICK_SEND_BUFFERS))
+                {
+                    UIAsk("Error","Failed to send the buffer.",e_AskBox_Error,
+                            e_AskBttns_Ok);
+                }
+                RetValue=true;
+            }
+        }
+        else if(!DPS_ProcessorKeyPress(TextPtr,TextLen,Key,Mods))
         {
             /* Send the key out */
             if(TextLen>0)

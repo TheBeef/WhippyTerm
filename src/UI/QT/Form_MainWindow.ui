@@ -2369,6 +2369,9 @@
    <property name="text">
     <string>actionURIGo</string>
    </property>
+   <property name="toolTip">
+    <string>Go</string>
+   </property>
   </action>
   <action name="actionBookmark_this_connection">
    <property name="icon">

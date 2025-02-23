@@ -39,7 +39,7 @@
 using namespace std;
 
 /*** DEFINES                  ***/
-#define DEBUG_SHOW_BUFFER_POS               1       // Show the pointers to parts of the screen
+//#define DEBUG_SHOW_BUFFER_POS               1       // Show the pointers to parts of the screen
 
 #define HEX_BYTES_PER_LINE                      16
 #define HEX_MIN_LINES                           24

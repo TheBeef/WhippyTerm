@@ -19,10 +19,9 @@ Form_FontDialog::Form_FontDialog(QWidget *parent) :
     {
         foreach(const QString &style,FontDatabase.styles(family))
         {
-#warning DEBUG PAUL: Need this for fixed width only to work, Put this back in
+//#warning DEBUG PAUL: Need this for fixed width only to work, Put this back in
 /* DEBUG PAUL: Need this for fixed width only to work */
-// DEBUG PAUL: Put this back in
-//`            if(FontDatabase.isFixedPitch(family,style))
+            if(FontDatabase.isFixedPitch(family,style))
             {
                 if(First)
                 {

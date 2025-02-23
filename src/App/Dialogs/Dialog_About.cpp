@@ -73,12 +73,6 @@ void RunAboutDialog(void)
 
     UISetAboutName(WHIPPYTERM_TITLE " " VER_STR(WHIPPYTERM_VERSION_MAJOR) "." VER_STR(WHIPPYTERM_VERSION_MINOR));
 
-/* DEBUG PAUL: At some point:
-    * Fix up this program is text
-    * Add copyright to below text
-    * Add links the website and repos
-*/
-
     snprintf(buff,sizeof(buff)-1,
             "A GUI based modern serial terminal<br/>"
             "<br/>"
@@ -94,7 +88,7 @@ void RunAboutDialog(void)
     UISetAboutText(buff,e_UIAboutTab_Author);
 
     snprintf(buff,sizeof(buff)-1,
-            "Copyright 2024 Paul Hutchinson.<br/>"
+            "Copyright 2025 Paul Hutchinson.<br/>"
             ""
             "<p>This program is free software: you can redistribute it and/or modify it "
             "under the terms of the GNU General Public License as published by the "

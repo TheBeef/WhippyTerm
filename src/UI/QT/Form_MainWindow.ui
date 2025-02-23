@@ -1348,7 +1348,7 @@
               <item>
                <widget class="QTabWidget" name="BottomPanel_tabWidget">
                 <property name="currentIndex">
-                 <number>0</number>
+                 <number>1</number>
                 </property>
                 <widget class="QWidget" name="Hex_Tab">
                  <attribute name="title">
@@ -1446,11 +1446,6 @@
                    </widget>
                   </item>
                  </layout>
-                </widget>
-                <widget class="QWidget" name="Injection_Tab">
-                 <attribute name="title">
-                  <string>Injection</string>
-                 </attribute>
                 </widget>
                 <widget class="QWidget" name="Buffers_Tab">
                  <attribute name="title">

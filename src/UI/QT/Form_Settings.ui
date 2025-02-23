@@ -36,7 +36,7 @@
       <item>
        <widget class="QStackedWidget" name="Editing_stackedWidget">
         <property name="currentIndex">
-         <number>3</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="page_Panel">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -520,13 +520,6 @@
               <string>Startup</string>
              </attribute>
              <layout class="QHBoxLayout" name="horizontalLayout_5">
-              <item>
-               <widget class="QGroupBox" name="groupBox_4">
-                <property name="title">
-                 <string>Options</string>
-                </property>
-               </widget>
-              </item>
               <item>
                <widget class="QGroupBox" name="groupBox_5">
                 <property name="title">

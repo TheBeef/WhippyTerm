@@ -1224,6 +1224,9 @@
                          </property>
                          <item>
                           <widget class="QCheckBox" name="checkBox_SW_StartOnTx">
+                           <property name="toolTip">
+                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Start the stop watch when the next byte is sent.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                           </property>
                            <property name="text">
                             <string>Start On Tx</string>
                            </property>
@@ -1231,6 +1234,9 @@
                          </item>
                          <item>
                           <widget class="QCheckBox" name="checkBox_SW_AutoLap">
+                           <property name="toolTip">
+                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add a lap when the byte stream pauses for a short time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                           </property>
                            <property name="text">
                             <string>Auto Lap</string>
                            </property>

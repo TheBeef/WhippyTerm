@@ -1673,3 +1673,19 @@ void Widget_TextCanvas::ShowBell(void)
     a->start(QPropertyAnimation::DeleteWhenStopped);
 //    connect(a,SIGNAL(finished()),this,SLOT(hideThisWidget()));
 }
+
+void Widget_TextCanvas::SetMouseCursor(e_UITD_MouseCursorType Cursor)
+{
+    switch(Cursor)
+    {
+        case e_UITD_MouseCursor_Default:
+        case e_UITD_MouseCursorMAX:
+        default:
+            setCursor(QCursor(Qt::ArrowCursor));
+        break;
+        case e_UITD_MouseCursor_IBeam:
+            setCursor(QCursor(Qt::IBeamCursor));
+        break;
+    }
+}
+

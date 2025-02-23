@@ -190,6 +190,7 @@ class Settings
         /***** Display *****/
         bool AlwaysShowTabs;
         bool CloseButtonOnTabs;
+        bool MouseCursorIBeam;
 
         /***** Terminal *****/
         e_ScreenClearType ScreenClear;

@@ -6,6 +6,7 @@
 #include <QTimer>
 #include "PluginSDK/KeyDefines.h"
 #include "UI/UITextDefs.h"
+#include "UI/UITextDisplay.h"
 #include "Frame_TextCavnasOverrideBox.h"
 #include <QLabel>
 #include <QGraphicsOpacityEffect>
@@ -113,6 +114,7 @@ public:
     void SetCursorBlinking(bool Blinking);
     void SetDrawMask(uint16_t Mask);
     void ShowBell(void);
+    void SetMouseCursor(e_UITD_MouseCursorType Cursor);
 
     void ClearLine(unsigned int Line,uint32_t BGColor);
     void AppendTextFrag(unsigned int Line,const struct TextCanvasFrag *Frag);

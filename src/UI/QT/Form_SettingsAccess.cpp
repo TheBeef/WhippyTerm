@@ -108,7 +108,8 @@ t_UICheckboxCtrl *UIS_GetCheckboxHandle(e_UIS_Checkbox UIObj)
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->ColorEnable_checkBox;
         case e_UIS_Checkbox_UseCustomSounds:
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->UseCustomSounds_checkBox;
-
+        case e_UIS_Checkbox_MouseCursorUseIBeam:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->MouseCursor_UseIBeam_checkBox;
         case e_UIS_CheckboxMAX:
         default:
         break;
@@ -267,6 +268,8 @@ t_UIGroupBox *UIS_GetGroupBoxHandle(e_UIS_GroupBox UIObj)
             return (t_UIGroupBox *)g_SettingsDialog->ui->groupBox_DisplayTabs;
         case e_UIS_GroupBox_Display_ClearScreen:
             return (t_UIGroupBox *)g_SettingsDialog->ui->groupBox_DisplayClearScreen;
+        case e_UIS_GroupBox_Display_MouseCursor:
+            return (t_UIGroupBox *)g_SettingsDialog->ui->MouseCursor_groupBox;
 
         case e_UIS_GroupBoxMAX:
         default:

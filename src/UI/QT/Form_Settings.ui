@@ -36,7 +36,7 @@
       <item>
        <widget class="QStackedWidget" name="Editing_stackedWidget">
         <property name="currentIndex">
-         <number>4</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="page_Panel">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -1216,6 +1216,22 @@
                      </spacer>
                     </item>
                    </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="MouseCursor_groupBox">
+                <property name="title">
+                 <string>Mouse Cursor</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_45">
+                 <item>
+                  <widget class="QCheckBox" name="MouseCursor_UseIBeam_checkBox">
+                   <property name="text">
+                    <string>Use IBeam</string>
+                   </property>
                   </widget>
                  </item>
                 </layout>
@@ -11583,7 +11599,7 @@
           <item>
            <widget class="QTabWidget" name="Terminal_tabWidget">
             <property name="currentIndex">
-             <number>4</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="Terminal_tab">
              <attribute name="title">

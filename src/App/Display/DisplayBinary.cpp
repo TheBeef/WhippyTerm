@@ -272,6 +272,8 @@ bool DisplayBinary::Init(void *ParentWidget,class ConSettings *SettingsPtr,
 
         UITimerSetTimeout(ScrollTimer,SELECTION_SCROLL_SPEED_TIMER);
 
+        ApplySettings();
+
         InitCalled=true;
     }
     catch(...)
@@ -530,11 +532,6 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
         case e_TextDisplayEvent_MouseRightUp:
         break;
         case e_TextDisplayEvent_MouseMiddleDown:
-//`
-{
-std::string clip;
-GetSelectionString(clip);
-}
         break;
         case e_TextDisplayEvent_MouseMiddleUp:
         break;
@@ -2028,4 +2025,37 @@ bool DisplayBinary::GetNormalizedSelectionBlocks(struct DisBin_SelectionBlock *B
         }
     }
     return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ApplySettings
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::ApplySettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function needs to be called after there is a change to the con
+ *    settings that this display has been connected to.
+ *
+ *    It will look things again and apply them to this display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::ApplySettings(void)
+{
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    if(g_Settings.MouseCursorIBeam)
+        UITC_SetMouseCursor(TextDisplayCtrl,e_UITD_MouseCursor_IBeam);
+    else
+        UITC_SetMouseCursor(TextDisplayCtrl,e_UITD_MouseCursor_Default);
 }

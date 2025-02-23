@@ -211,6 +211,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     t_UITabCtrl *DisplayTabCtrl;
     t_UIGroupBox *Display_Tabs;
     t_UIGroupBox *Display_ClearScreen;
+    t_UIGroupBox *Display_MouseCursor;
     e_DS_SettingsArea FirstSelectedArea;
     e_UIS_TabCtrl_Terminal_Page SelectTerminalPage;
     e_UIS_TabCtrl_Display_Page SelectDisplayPage;
@@ -422,6 +423,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     {
         Display_Tabs=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_Tabs);
         Display_ClearScreen=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_ClearScreen);
+        Display_MouseCursor=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_MouseCursor);
 
         UITabCtrlSetTabVisibleByIndex(TerminalTabCtrl,
                 e_UIS_TabCtrl_Terminal_Page_KeyBinding,false);
@@ -430,6 +432,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
 
         UIGroupBoxVisible(Display_Tabs,false);
         UIGroupBoxVisible(Display_ClearScreen,false);
+        UIGroupBoxVisible(Display_MouseCursor,false);
     }
 
     /* Load settings into UI */
@@ -530,6 +533,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
  ******************************************************************************/
 static void DS_SetSettingGUI(void)
 {
+    unsigned int r;
     t_UICheckboxCtrl *CheckboxHandle;
     t_UIComboBoxCtrl *ComboBoxHandle;
     t_UINumberInput *NumberInputHandle;
@@ -546,7 +550,6 @@ static void DS_SetSettingGUI(void)
     t_UIRadioBttnCtrl *SysBell_BuiltIn;
     t_UIRadioBttnCtrl *SysBell_AudioOnly;
     t_UIRadioBttnCtrl *SysBell_VisualOnly;
-    unsigned int r;
 
     /********************/
     /* Behaviour        */
@@ -657,6 +660,8 @@ static void DS_SetSettingGUI(void)
     UICheckCheckbox(CheckboxHandle,g_Settings.CloseButtonOnTabs);
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CursorBlink);
     UICheckCheckbox(CheckboxHandle,m_SettingConSettings->CursorBlink);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_MouseCursorUseIBeam);
+    UICheckCheckbox(CheckboxHandle,g_Settings.MouseCursorIBeam);
 
     m_CursorColor=m_SettingConSettings->CursorColor;
     ColorPreviewHandle=UIS_GetColorPreviewHandle(e_UIS_ColorPreview_CursorColor);
@@ -1027,6 +1032,9 @@ static void DS_GetSettingsFromGUI(void)
         g_Settings.AlwaysShowTabs=UIGetCheckboxCheckStatus(CheckboxHandle);
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CloseButtonOnTabs);
         g_Settings.CloseButtonOnTabs=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_MouseCursorUseIBeam);
+        g_Settings.MouseCursorIBeam=UIGetCheckboxCheckStatus(CheckboxHandle);
     }
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CursorBlink);
     m_SettingConSettings->CursorBlink=UIGetCheckboxCheckStatus(CheckboxHandle);
@@ -2410,6 +2418,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Checkbox_StrikeThroughEnable:
                 case e_UIS_Checkbox_ColorEnable:
                 case e_UIS_Checkbox_UseCustomSounds:
+                case e_UIS_Checkbox_MouseCursorUseIBeam:
                 case e_UIS_CheckboxMAX:
                 default:
                 break;

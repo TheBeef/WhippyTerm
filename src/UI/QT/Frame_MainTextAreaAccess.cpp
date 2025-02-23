@@ -1124,3 +1124,30 @@ void UITC_ShowBellIcon(t_UITextDisplayCtrl *ctrl)
     TextDisplay->ui->TextDisplay->ShowBell();
 }
 
+/*******************************************************************************
+ * NAME:
+ *    UITC_SetMouseCursor
+ *
+ * SYNOPSIS:
+ *    void UITC_SetMouseCursor(t_UITextDisplayCtrl *ctrl,
+ *              e_UITD_MouseCursorType Cursor);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- The control to work on
+ *    Cursor [I] -- What mouse pointer to use
+ *
+ * FUNCTION:
+ *    This function changes the mouse pointer when on this widget.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UITC_SetMouseCursor(t_UITextDisplayCtrl *ctrl,e_UITD_MouseCursorType Cursor)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    TextDisplay->ui->TextDisplay->SetMouseCursor(Cursor);
+}

@@ -246,6 +246,8 @@ bool DisplayText::Init(void *ParentWidget,class ConSettings *SettingsPtr,
 
         UITimerSetTimeout(ScrollTimer,SELECTION_SCROLL_SPEED_TIMER);
 
+        ApplySettings();
+
         InitCalled=true;
     }
     catch(...)
@@ -1441,6 +1443,11 @@ void DisplayText::ApplySettings(void)
        was in the middle of the text??? */
 
     SetupCanvas();
+
+    if(g_Settings.MouseCursorIBeam)
+        UITC_SetMouseCursor(TextDisplayCtrl,e_UITD_MouseCursor_IBeam);
+    else
+        UITC_SetMouseCursor(TextDisplayCtrl,e_UITD_MouseCursor_Default);
 
     RedrawFullScreen();
 }

@@ -87,27 +87,21 @@ t_ConnectionListType m_Connections;
 
 void Connection::Debug1(void)
 {
-//    DB->Debug1();
 }
 void Connection::Debug2(void)
 {
-//    DB->Debug2();
 }
 void Connection::Debug3(void)
 {
-//    DB->Debug3();
 }
 void Connection::Debug4(void)
 {
-//    DB->Debug4();
 }
 void Connection::Debug5(void)
 {
-//    DB->Debug5();
 }
 void Connection::Debug6(void)
 {
-//    DB->Debug6();
 }
 
 /*******************************************************************************
@@ -846,6 +840,9 @@ bool Connection::ApplySettings(void)
         ApplyCustomSettings();
     }
 
+    if(Display!=NULL)
+        Display->ApplySettings();
+
     RoundedBufferSize=g_Settings.HexDisplayBufferSize;
     if(RoundedBufferSize<16)
         RoundedBufferSize=16;
@@ -989,11 +986,6 @@ void Connection::ApplyCustomSettings(void)
         }
 
         Display->SetBlockDeviceMode(BlockSendDevice);
-    }
-    else
-    {
-        if(Display!=NULL)
-            Display->ApplySettings();
     }
 
     /* Apply the zoom */
@@ -1276,8 +1268,6 @@ void Connection::GetDisplayName(std::string &Name)
  ******************************************************************************/
 void Connection::TextCanvasResize(int Width,int Height)
 {
-//    if(DB!=NULL)
-//        DB->SetDisplaySize(Width,Height);
 }
 
 /*******************************************************************************
@@ -1314,10 +1304,6 @@ bool Connection::KeyPress(uint8_t Mods,e_UIKeys Key,const uint8_t *TextPtr,
 
     if(IOHandle==NULL || Display==NULL || MW==NULL)
         return false;
-
-//    /* If the display isn't set to have focus ignore this key press */
-//    if(!DB->GetFocusStatus())
-//        return false;
 
     if(MW->KeyPress(Mods,Key,TextPtr,TextLen))
         return true;
@@ -1661,7 +1647,6 @@ void Connection::InformOfConnected(void)
     IsConnected=true;
     SendMWEvent(ConMWEvent_StatusChange);
     RethinkCursor();
-//    DB->SetConnectStatus(true);
 }
 
 /*******************************************************************************
@@ -1692,7 +1677,6 @@ void Connection::InformOfDisconnected(void)
     IsConnected=false;
     SendMWEvent(ConMWEvent_StatusChange);
     RethinkCursor();
-//    DB->SetConnectStatus(false);
 }
 
 /*******************************************************************************
@@ -2296,8 +2280,6 @@ void Connection::GetCursorXY(int *RetCursorX,int *RetCursorY)
 
 void Connection::GetScreenSize(int32_t *RetRows,int32_t *RetColumns)
 {
-//    if(DB!=NULL)
-//        DB->GetBufferSize(*RetRows,*RetColumns);
 }
 
 /*******************************************************************************

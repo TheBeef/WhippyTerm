@@ -63,6 +63,13 @@ typedef struct UITextDisplay t_UITextDisplayCtrl;
 
 typedef enum
 {
+    e_UITD_MouseCursor_Default,
+    e_UITD_MouseCursor_IBeam,
+    e_UITD_MouseCursorMAX
+} e_UITD_MouseCursorType;
+
+typedef enum
+{
     e_UITD_ContextMenu_SendBuffers,
     e_UITD_ContextMenu_Copy,
     e_UITD_ContextMenu_Paste,
@@ -218,5 +225,7 @@ void UITC_RedrawScreen(t_UITextDisplayCtrl *ctrl);
 void UITC_SetDrawMask(t_UITextDisplayCtrl *ctrl,uint16_t Mask);
 
 void UITC_ShowBellIcon(t_UITextDisplayCtrl *ctrl);
+void UITC_SetMouseCursor(t_UITextDisplayCtrl *ctrl,e_UITD_MouseCursorType Cursor);
+
 
 #endif

@@ -78,6 +78,7 @@ class DisplayBinary : public DisplayBase
         bool GetSelectionString(std::string &Clip);
         void SelectAll(void);
         bool IsThereASelection(void);
+        void ApplySettings(void);
 
     private:
         bool InitCalled;

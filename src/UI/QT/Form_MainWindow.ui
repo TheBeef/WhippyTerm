@@ -10,6 +10,9 @@
     <height>699</height>
    </rect>
   </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::NoContextMenu</enum>
+  </property>
   <property name="windowIcon">
    <iconset resource="MainResource.qrc">
     <normaloff>:/G/Graphics/WIcon.svg</normaloff>:/G/Graphics/WIcon.svg</iconset>
@@ -177,7 +180,7 @@
                   <item>
                    <widget class="QTabWidget" name="LeftPanel_tabWidget">
                     <property name="currentIndex">
-                     <number>4</number>
+                     <number>0</number>
                     </property>
                     <widget class="QWidget" name="Capture_Tab">
                      <attribute name="title">

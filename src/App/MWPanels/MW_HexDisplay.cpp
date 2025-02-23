@@ -468,9 +468,13 @@ void MWHexDisplay::Clear(void)
 void MWHexDisplay::InformOfUpdate(class Connection *EffectedCon,
         const struct ConMWHexDisplayData *UpdateInfo)
 {
+    bool WasAtBottom;
+
     /* Don't update the screen if this connection is not active */
     if(EffectedCon!=MW->ActiveCon)
         return;
+
+    WasAtBottom=IncomingHistoryHexDisplay->IsYScrollBarAtBottom();
 
     IncomingHistoryHexDisplay->SetDisplayParms(UpdateInfo->InsertPos,
             UpdateInfo->BufferIsCircular);
@@ -479,6 +483,8 @@ void MWHexDisplay::InformOfUpdate(class Connection *EffectedCon,
     if(EffectedCon->GetBottomPanelInfo()!=e_BottomPanelTab_Hex)
         return;
 
+    if(WasAtBottom)
+        IncomingHistoryHexDisplay->ScrollToBottom();
     IncomingHistoryHexDisplay->RebuildDisplay();
 }
 

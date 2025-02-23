@@ -129,6 +129,8 @@ class HexDisplayBuffer
         bool SetBuffer(const uint8_t *Data,int Size);
         void SetBufferSize(int Size);
         void RebuildDisplay(void);
+        bool IsYScrollBarAtBottom(void);
+        void ScrollToBottom(void);
 
         void GiveFocus(void);
         void SetCanvasSize(int Width,int Height);

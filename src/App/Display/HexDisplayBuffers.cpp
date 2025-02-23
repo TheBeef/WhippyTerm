@@ -1058,6 +1058,24 @@ void HexDisplayBuffer::Enable(bool Enable)
     RebuildDisplay();
 }
 
+bool HexDisplayBuffer::IsYScrollBarAtBottom(void)
+{
+    t_UIScrollBarCtrl *ScrollY;
+    int TotalLines;
+
+    ScrollY=UITC_GetVertSlider(TextDisplayCtrl);
+
+    TotalLines=UIGetScrollBarTotalSize(ScrollY);
+    if(UIGetScrollBarPos(ScrollY)>=TotalLines-View_CharsY)
+        return true;
+    return false;
+}
+
+void HexDisplayBuffer::ScrollToBottom(void)
+{
+    MakeOffsetVisable(BufferBytes2Draw,false,false);
+}
+
 void HexDisplayBuffer::RethinkYScrollBar(void)
 {
     t_UIScrollBarCtrl *ScrollY;

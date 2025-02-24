@@ -4,8 +4,6 @@
     has a number of unique features such as bookmarks, built in hex dumps,
     extending through plugins, and native support for binary protocols.
 
-![Screen Shot](https://github.com/TheBeef/WhippyTerm/blob/main/Graphics/ScreenShot.gif?raw=true)
-
 ## Embedded Developers
     It is primarily aimed at embedded developers that need to talk to their
     devices. It supports serial communication such as serial ports
@@ -25,4 +23,4 @@
 # Website
     http://whippyterm.com
 
-
+![Screen Shot](https://github.com/TheBeef/WhippyTerm/blob/main/Graphics/ScreenShot.gif?raw=true)

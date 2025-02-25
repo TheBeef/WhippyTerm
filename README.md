@@ -1,3 +1,6 @@
+# Website
+http://whippyterm.com
+
 # WhippyTerm
 Whippy Term is a modern terminal program.  It has been designed to have
 a modern UI and to run on modern OS's like Windows and Linux.  It also
@@ -19,8 +22,5 @@ WhippyTerm also support working with binary protocols, in both
 serial streams like RS232, and message block protocols like UDP.
 Support for sending blocks of binary or AscII data is included to
 better work with embedded devices and binary protocols.
-
-# Website
-http://whippyterm.com
 
 ![Screen Shot](https://github.com/TheBeef/WhippyTerm/blob/main/Graphics/ScreenShot.gif?raw=true)

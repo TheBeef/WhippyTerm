@@ -10,9 +10,9 @@
     <InstallFilename>TestPattern</InstallFilename>
     <Description>A test plugin to fill the rx buffer with test data.</Description>
     <Contributors>Paul Hutchinson</Contributors>
-    <Copyright>2024</Copyright>
-    <ReleaseDate>15 Oct 2024</ReleaseDate>
-    <Version>0.2.0</Version>
+    <Copyright>2025</Copyright>
+    <ReleaseDate>25 Feb 2025</ReleaseDate>
+    <Version>1.0</Version>
     <APIVersion>1.0.0.0</APIVersion>
     <PluginClass>2</PluginClass>
     <PluginSubClass>0</PluginSubClass>

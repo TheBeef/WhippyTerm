@@ -93,13 +93,6 @@ bool AppMain(int argc,char *argv[])
     LoadBookmarks();
     g_SendBuffers.LoadBuffers();
 
-///* DEBUG PAUL: Tmp hack to get data in there that we can work with */
-//g_SendBuffers.SetBuffer(0,(uint8_t *)"Hello world!\n",13);
-//g_SendBuffers.SetBuffer(1,(uint8_t *)"Paul was here and left this message.  How lame.\r\n",49);
-//g_SendBuffers.SetBuffer(2,(uint8_t *)"\0\1\2\3\4\5\6\7\10\11\12\13\14\15\16\17\20",16);
-//g_SendBuffers.SetBuffer(3,(uint8_t *)"ABCDEFGHIJKLMNOPabcdefghijklmnop0123456789:;<=>? !\"#$%&'()*+,-/ABCDEFGHIJKLMNOPabcdefghijklmnop0123456789:;<=>? !\"#$%&'()*+,-/ABCDEFGHIJKLMNOPabcdefghijklmnop0123456789:;<=>? !\"#$%&'()*+,-/ABCDEFGHIJKLMNOPabcdefghijklmnop0123456789:;<=>? !\"#$%&'()*+,-/ABCDEFGHIJKLMNOPabcdefghijklmnop0123456789:;<=>? !\"#$%&'()*+,-/ABCDEFGHIJKLMNOPabcdefghijklmnop0123456789:;<=>? !\"#$%&'()*+,-/ABCDEFGHIJKLMNOPabcdefghijklmnop0123456789:;<=>? !\"#$%&'()*+,-/ABCDEFGHIJKLMNOPabcdefghijklmnop0123456789:;<=>? !\"#$%&'()*+,-/ABCDEFGHIJKLMNOPabcdefghijklmnop0123456789:;<=>? !\"#$%&'()*+,-/ABCDEFGHIJKLMNOPabcdefghijklmnop0123456789:;<=>? !\"#$%&'()*+,-/",630);
-//g_SendBuffers.SetBuffer(4,(uint8_t *)"ABCDEFGHIJKLMNOPQRSTUVWXYZ",26);
-
     IOS_Init();
     DPS_Init();
     FTPS_Init();

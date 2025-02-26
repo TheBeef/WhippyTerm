@@ -130,7 +130,7 @@ Form_MainWindow::Form_MainWindow(QWidget *parent) :
 
     AddContextMenu2Widget(this,ui->treeWidget_Buffer_BufferList);
 
-#ifndef DEBUG
+#if OFFICIAL_RELEASE==1
     /* Hide anything that shouldn't be in the release build */
     ui->menuDebug->menuAction()->setVisible(false);
 #endif

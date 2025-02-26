@@ -178,6 +178,10 @@ static void RegisterStdPlugin(unsigned int (*RegFn)(const struct PI_SystemAPI *S
         {
             Msg="The internal plugin %s used the experimental plugin API and "
                     "is not supported by this version of " WHIPPYTERM_NAME;
+            Maj=0;
+            Min=0;
+            Rev=0;
+            Patch=0;
         }
         else
         {

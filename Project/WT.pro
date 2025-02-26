@@ -28,13 +28,13 @@ QMAKE_CFLAGS += -Wall
 
 CONFIG(debug, debug|release){
     DEFINES += DEBUG=1
-    SOURCES += \
-        ../src/BuildOptions/Debug/BuildOptions.cpp \
-
+#    SOURCES += \
+#        ../src/BuildOptions/Debug/BuildOptions.cpp \
+#
 } else {
-    SOURCES += \
-        ../src/BuildOptions/Release/BuildOptions.cpp \
-
+#    SOURCES += \
+#        ../src/BuildOptions/Release/BuildOptions.cpp \
+#
 }
 
 win32 {
@@ -46,6 +46,7 @@ RC_ICONS = ..\WindowsInstaller\WhippyTerm.ico
 
 SOURCES += ../src/UI/QT/main.cpp\
     ../ExternPlugins/DataProcessors/TermEmulation/BasicHex/src/BasicHex.cpp \
+    ../src/BuildOptions/BuildOptions.cpp \
     ../src/App/Dialogs/Dialog_NewConnectionFromURI.cpp \
     ../src/App/Dialogs/Dialog_SendBufferSelect.cpp \
     ../src/App/Dialogs/Dialog_SendByte.cpp \

@@ -263,14 +263,14 @@ const struct IODriverDetectedInfo *Comport_DetectDevices(void)
     struct IODriverDetectedInfo *First;
     struct IODriverDetectedInfo *NewInfo;
     const char *CopyFrom;
-
+    
+    First=NULL;
     try
     {
         /* Scan for the OS devices */
         if(!Comport_OS_GetSerialPortList(DevList))
             throw(0);
 
-        First=NULL;
         for(d=DevList.begin();d!=DevList.end();d++)
         {
             NewInfo=new struct IODriverDetectedInfo;

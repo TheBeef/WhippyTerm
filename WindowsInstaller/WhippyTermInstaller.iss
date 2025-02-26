@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Whippy Term"
-#define MyAppVersion "0.14"
+#define MyAppVersion "0.16"
 #define MyAppURL "http://WhippyTerm.com"
 #define MyAppExeName "WhippyTerm.exe"
 

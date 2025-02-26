@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Whippy Term"
-#define MyAppVersion "0.14"
+#define MyAppVersion "0.17"
 #define MyAppURL "http://WhippyTerm.com"
 #define MyAppExeName "WhippyTerm.exe"
 
@@ -53,6 +53,8 @@ Source: "InstallFiles\Qt5Core.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InstallFiles\Qt5Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InstallFiles\Qt5Svg.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InstallFiles\Qt5Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InstallFiles\Qt5Multimedia.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InstallFiles\Qt5Network.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InstallFiles\iconengines\*"; DestDir: "{app}\iconengines"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "InstallFiles\imageformats\*"; DestDir: "{app}\imageformats"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "InstallFiles\platforms\*"; DestDir: "{app}\platforms"; Flags: ignoreversion recursesubdirs createallsubdirs

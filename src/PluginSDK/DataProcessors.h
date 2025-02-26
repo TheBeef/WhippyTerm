@@ -37,6 +37,12 @@
 #include "KeyDefines.h"
 
 /***  DEFINES                          ***/
+/* Versions of struct DataProcessorAPI */
+#define DATA_PROCESSORS_API_VERSION_1       1
+
+/* Versions of struct DPS_API */
+#define DPS_API_VERSION_1                   1
+
 #define TXT_ATTRIB_UNDERLINE                0x0001
 #define TXT_ATTRIB_UNDERLINE_DOUBLE         0x0002
 #define TXT_ATTRIB_UNDERLINE_DOTTED         0x0004
@@ -126,6 +132,7 @@ struct DataProcessorInfo
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */
 struct DataProcessorAPI
 {
+    /********* Start of DATA_PROCESSORS_API_VERSION_1 *********/
     t_DataProcessorHandleType *(*AllocateData)(void);
     void (*FreeData)(t_DataProcessorHandleType *DataHandle);
     const struct DataProcessorInfo *(*GetProcessorInfo)(unsigned int *SizeOfInfo);
@@ -137,13 +144,18 @@ struct DataProcessorAPI
             PG_BOOL *Consumed);
     void (*ProcessIncomingBinaryByte)(t_DataProcessorHandleType *DataHandle,
             const uint8_t Byte);
+    /********* End of DATA_PROCESSORS_API_VERSION_1 *********/
 };
 
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */
 struct DPS_API
 {
+    /********* Start of DPS_API_VERSION_1 *********/
     PG_BOOL (*RegisterDataProcessor)(const char *ProID,const struct DataProcessorAPI *ProAPI,int SizeOfProAPI);
     const struct PI_UIAPI *(*GetAPI_UI)(void);
+    void (*WriteData)(const uint8_t *Data,int Bytes);
+    uint32_t (*GetSysColor)(uint32_t SysColShade,uint32_t SysColor);
+    uint32_t (*GetSysDefaultColor)(uint32_t DefaultColor);
     void (*SetFGColor)(uint32_t FGColor);
     uint32_t (*GetFGColor)(void);
     void (*SetBGColor)(uint32_t BGColor);
@@ -152,28 +164,27 @@ struct DPS_API
     uint32_t (*GetULineColor)(void);
     void (*SetAttribs)(uint32_t Attribs);
     uint32_t (*GetAttribs)(void);
+    void (*SetTitle)(const char *Title);
     void (*DoNewLine)(void);
     void (*DoReturn)(void);
     void (*DoBackspace)(void);
-    void (*DoMoveCursor)(uint32_t X,uint32_t Y);
     void (*DoClearScreen)(void);
     void (*DoClearArea)(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2);
-    void (*GetCursorXY)(int32_t *RetCursorX,int32_t *RetCursorY);
-    void (*InsertString)(uint8_t *Str,uint32_t Len);
-    void (*GetScreenSize)(int32_t *RetRows,int32_t *RetColumns);
-    uint32_t (*GetSysColor)(uint32_t SysColShade,uint32_t SysColor);
-    uint32_t (*GetSysDefaultColor)(uint32_t DefaultColor);
-    void (*NoteNonPrintable)(const char *CodeStr);
     void (*DoTab)(void);
+    void (*DoPrevTab)(void);
+    void (*DoSystemBell)(int VisualOnly);
+    void (*DoScrollArea)(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t DeltaX,int32_t DeltaY);
+    void (*DoClearScreenAndBackBuffer)(void);
+    void (*GetCursorXY)(int32_t *RetCursorX,int32_t *RetCursorY);
+    void (*SetCursorXY)(uint32_t X,uint32_t Y);
+    void (*GetScreenSize)(int32_t *RetRows,int32_t *RetColumns);
+    void (*NoteNonPrintable)(const char *CodeStr);
     void (*SendBackspace)(void);
     void (*SendEnter)(void);
     void (*BinaryAddText)(const char *Str);
     void (*BinaryAddHex)(uint8_t Byte);
-    void (*DoSystemBell)(int VisualOnly);
-    void (*DoScrollArea)(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t DeltaX,int32_t DeltaY);
-    void (*DoClearScreenAndBackBuffer)(void);
-    void (*DoPrevTab)(void);
-    void (*SetTitle)(const char *Title);
+    void (*InsertString)(uint8_t *Str,uint32_t Len);
+    /********* End of DPS_API_VERSION_1 *********/
 };
 
 /***  CLASS DEFINITIONS                ***/

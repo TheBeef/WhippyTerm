@@ -29,7 +29,7 @@
 
 /*** DEFINES                  ***/
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      BASIC_HEX // The name to append on the RegisterPlugin() function for built in version
-#define NEEDED_MIN_API_VERSION                  0x000B0000
+#define NEEDED_MIN_API_VERSION                  0x01000000
 
 /*** MACROS                   ***/
 
@@ -569,7 +569,7 @@ PG_BOOL BasicHexDecoder_ProcessKeyPress(t_DataProcessorHandleType *DataHandle,
         }
     }
 
-    m_System->WriteData(SendStr,SendLen);
+    m_DPS->WriteData(SendStr,SendLen);
 
     return true;
 }

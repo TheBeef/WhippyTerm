@@ -43,7 +43,7 @@ using namespace std;
 /*** DEFINES                  ***/
 #define TCPCLIENT_URI_PREFIX                    "TCP"
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      TCPClient // The name to append on the RegisterPlugin() function for built in version
-#define NEEDED_MIN_API_VERSION                  0x000B0000
+#define NEEDED_MIN_API_VERSION                  0x01000000
 
 /*** MACROS                   ***/
 
@@ -61,20 +61,11 @@ const struct IODriverDetectedInfo *TCPClient_DetectDevices(void);
 void TCPClient_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices);
 t_ConnectionWidgetsType *TCPClient_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle);
-void TCPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle);
-void TCPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
-            t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
-            t_PIKVList *Options);
-void TCPClient_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
-        t_PIKVList *Options);
-PG_BOOL TCPClient_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,
-            char *DeviceUniqueID,unsigned int MaxDeviceUniqueIDLen,
-            PG_BOOL Update);
-PG_BOOL TCPClient_Convert_Options_To_URI(const char *DeviceUniqueID,
-            t_PIKVList *Options,char *URI,unsigned int MaxURILen);
+void TCPClient_ConnectionOptionsWidgets_FreeWidgets(t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions);
+void TCPClient_ConnectionOptionsWidgets_StoreUI(t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,t_PIKVList *Options);
+void TCPClient_ConnectionOptionsWidgets_UpdateUI(t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,t_PIKVList *Options);
+PG_BOOL TCPClient_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,char *DeviceUniqueID,unsigned int MaxDeviceUniqueIDLen,PG_BOOL Update);
+PG_BOOL TCPClient_Convert_Options_To_URI(const char *DeviceUniqueID,t_PIKVList *Options,char *URI,unsigned int MaxURILen);
 PG_BOOL TCPClient_GetConnectionInfo(const char *DeviceUniqueID,t_PIKVList *Options,struct IODriverDetectedInfo *RetInfo);
 
 /*** VARIABLE DEFINITIONS     ***/
@@ -404,8 +395,9 @@ t_ConnectionWidgetsType *TCPClient_ConnectionOptionsWidgets_AllocWidgets(
  *    TCPClient_ConnectionOptionsWidgets_FreeWidgets
  *
  * SYNOPSIS:
- *    void TCPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *
- *              ConOptions,t_WidgetSysHandle *WidgetHandle);
+ *    void TCPClient_ConnectionOptionsWidgets_FreeWidgets(
+ *              t_WidgetSysHandle *WidgetHandle,
+ *              t_ConnectionWidgetsType *ConOptions);
  *
  * PARAMETERS:
  *    ConOptions [I] -- The options data that was allocated with
@@ -421,8 +413,8 @@ t_ConnectionWidgetsType *TCPClient_ConnectionOptionsWidgets_AllocWidgets(
  * SEE ALSO:
  *    
  ******************************************************************************/
-void TCPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle)
+void TCPClient_ConnectionOptionsWidgets_FreeWidgets(
+        t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions)
 {
     struct TCPClient_ConWidgets *ConWidgets=(struct TCPClient_ConWidgets *)ConOptions;
 
@@ -440,8 +432,8 @@ void TCPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *Con
  *
  * SYNOPSIS:
  *      void TCPClient_ConnectionOptionsWidgets_StoreUI(
- *              t_ConnectionWidgetsType *ConOptions,
- *              t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
+ *              t_WidgetSysHandle *WidgetHandle,
+ *              t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,
  *              t_PIKVList *Options);
  *
  * PARAMETERS:
@@ -463,8 +455,8 @@ void TCPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *Con
  * SEE ALSO:
  *    
  ******************************************************************************/
-void TCPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
+void TCPClient_ConnectionOptionsWidgets_StoreUI(t_WidgetSysHandle *WidgetHandle,
+        t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,
         t_PIKVList *Options)
 {
     struct TCPClient_ConWidgets *ConWidgets=(struct TCPClient_ConWidgets *)ConOptions;
@@ -493,9 +485,8 @@ void TCPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOpti
  *
  * SYNOPSIS:
  *    void TCPClient_ConnectionOptionsWidgets_UpdateUI(
- *          t_ConnectionWidgetsType *ConOptions,
- *          t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
- *          t_PIKVList *Options);
+ *          t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,
+ *          const char *DeviceUniqueID,t_PIKVList *Options);
  *
  * PARAMETERS:
  *    ConOptions [I] -- The options data that was allocated with
@@ -517,9 +508,8 @@ void TCPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOpti
  *    ConnectionOptionsWidgets_StoreUI()
  ******************************************************************************/
 void TCPClient_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
-        t_PIKVList *Options)
+        t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,
+        const char *DeviceUniqueID,t_PIKVList *Options)
 {
     struct TCPClient_ConWidgets *ConWidgets=(struct TCPClient_ConWidgets *)ConOptions;
     const char *AddressStr;

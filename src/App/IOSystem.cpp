@@ -238,43 +238,40 @@ static struct PI_UIAPI IOS_UIAPI=
     PIUSDefault_AddItem2ComboBox,
     PIUSDefault_SetComboBoxSelectedEntry,
     PIUSDefault_GetComboBoxSelectedEntry,
+    PIUSDefault_GetComboBoxText,
+    PIUSDefault_SetComboBoxText,
+    PIUSDefault_EnableComboBox,
+
     IOS_AllocRadioBttnGroup,
     IOS_FreeRadioBttnGroup,
     IOS_AddRadioBttnInput,
     IOS_FreeRadioBttnInput,
     PIUSDefault_IsRadioBttnChecked,
     PIUSDefault_SetRadioBttnChecked,
-    PIUSDefault_GetComboBoxText,
-    PIUSDefault_SetComboBoxText,
+    PIUSDefault_EnableRadioBttn,
     IOS_AddCheckboxInput,
     IOS_FreeCheckboxInput,
     PIUSDefault_IsCheckboxChecked,
     PIUSDefault_SetCheckboxChecked,
+    PIUSDefault_EnableCheckbox,
     IOS_AddTextInput,
     IOS_FreeTextInput,
     PIUSDefault_GetTextInputText,
     PIUSDefault_SetTextInputText,
-
+    PIUSDefault_EnableTextInput,
     IOS_AddNumberInput,
     IOS_FreeNumberInput,
     PIUSDefault_GetNumberInputValue,
     PIUSDefault_SetNumberInputValue,
     PIUSDefault_SetNumberInputMinMax,
-
+    PIUSDefault_EnableNumberInput,
     IOS_AddDoubleInput,
     IOS_FreeDoubleInput,
     PIUSDefault_GetDoubleInputValue,
     PIUSDefault_SetDoubleInputValue,
     PIUSDefault_SetDoubleInputMinMax,
     PIUSDefault_SetDoubleInputDecimals,
-
-    PIUSDefault_EnableComboBox,
-    PIUSDefault_EnableRadioBttn,
-    PIUSDefault_EnableCheckbox,
-    PIUSDefault_EnableTextInput,
-    PIUSDefault_EnableNumberInput,
     PIUSDefault_EnableDoubleInput,
-
     IOS_AddColumnViewInput,
     IOS_FreeColumnViewInput,
     PIUSDefault_ColumnViewInputClear,
@@ -283,14 +280,11 @@ static struct PI_UIAPI IOS_UIAPI=
     PIUSDefault_ColumnViewInputSetColumnText,
     PIUSDefault_ColumnViewInputSelectRow,
     PIUSDefault_ColumnViewInputClearSelection,
-
     IOS_AddButtonInput,
     IOS_FreeButtonInput,
-
     IOS_AddIndicator,
     IOS_FreeIndicator,
     PIUSDefault_SetIndicator,
-
     PIUSDefault_Ask,
 };
 
@@ -560,14 +554,13 @@ t_ActiveHandlesListType m_ActiveHandlesList;    // A list of active handles
  *    ConnectionOptionsWidgets_FreeWidgets
  *
  * SYNOPSIS:
- *    void ConnectionOptionsWidgets_FreeWidgets(
- *              t_ConnectionWidgetsType *ConWidgets,
- *              t_WidgetSysHandle *WidgetHandle);
+ *    void ConnectionOptionsWidgets_FreeWidgets(t_WidgetSysHandle *WidgetHandle,
+ *              t_ConnectionWidgetsType *ConWidgets);
  *
  * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to send to the widgets
  *    ConWidgets [I] -- The options data that was allocated with
  *          ConnectionOptionsWidgets_AllocWidgets().
- *    WidgetHandle [I] -- The handle to send to the widgets
  *
  * FUNCTION:
  *    Frees the widgets added with ConnectionOptionsWidgets_AllocWidgets()
@@ -582,15 +575,14 @@ t_ActiveHandlesListType m_ActiveHandlesList;    // A list of active handles
  *    ConnectionOptionsWidgets_StoreUI
  *
  * SYNOPSIS:
- *    void ConnectionOptionsWidgets_StoreUI(
- *          t_ConnectionWidgetsType *ConWidgets,
- *          t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
+ *    void ConnectionOptionsWidgets_StoreUI(t_WidgetSysHandle *WidgetHandle,
+ *          t_ConnectionWidgetsType *ConWidgets,const char *DeviceUniqueID,
  *          t_PIKVList *Options);
  *
  * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to send to the widgets
  *    ConWidgets [I] -- The options data that was allocated with
  *          ConnectionOptionsWidgets_AllocWidgets().
- *    WidgetHandle [I] -- The handle to send to the widgets
  *    DeviceUniqueID [I] -- This is the unique ID for the device we are working
  *                          on.
  *    Options [O] -- The options for this connection.
@@ -610,15 +602,14 @@ t_ActiveHandlesListType m_ActiveHandlesList;    // A list of active handles
  *    ConnectionOptionsWidgets_UpdateUI
  *
  * SYNOPSIS:
- *    void ConnectionOptionsWidgets_UpdateUI(
- *          t_ConnectionWidgetsType *ConWidgets,
- *          t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
+ *    void ConnectionOptionsWidgets_UpdateUI(t_WidgetSysHandle *WidgetHandle,
+ *          t_ConnectionWidgetsType *ConWidgets,const char *DeviceUniqueID,
  *          t_PIKVList *Options);
  *
  * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to send to the widgets
  *    ConWidgets [I] -- The options data that was allocated with
  *                      ConnectionOptionsWidgets_AllocWidgets().
- *    WidgetHandle [I] -- The handle to send to the widgets
  *    DeviceUniqueID [I] -- This is the unique ID for the device we are working
  *                          on.
  *    Options [I] -- The options for this connection.
@@ -1744,8 +1735,8 @@ t_ConnectionOptionsDataType *IOS_AllocConnectionOptions(
 
             if(ConInfo->drv->API.ConnectionOptionsWidgets_UpdateUI!=NULL)
             {
-                ConInfo->drv->API.ConnectionOptionsWidgets_UpdateUI(ConWidgets,
-                        (t_WidgetSysHandle *)ConWidgetData,
+                ConInfo->drv->API.ConnectionOptionsWidgets_UpdateUI(
+                        (t_WidgetSysHandle *)ConWidgetData,ConWidgets,
                         DeviceUniqueID.c_str(),
                         PIS_ConvertKVList2PIKVList(OptionsKeyValues));
             }
@@ -1759,7 +1750,7 @@ t_ConnectionOptionsDataType *IOS_AllocConnectionOptions(
             if(ConInfo->drv->API.ConnectionOptionsWidgets_FreeWidgets!=NULL)
             {
                 ConInfo->drv->API.ConnectionOptionsWidgets_FreeWidgets(
-                        ConWidgets,(t_WidgetSysHandle *)ConWidgetData);
+                        (t_WidgetSysHandle *)ConWidgetData,ConWidgets);
             }
             ConWidgets=NULL;
         }
@@ -1853,8 +1844,8 @@ t_ConnectionOptionsDataType *IOS_AllocConnectionOptionsFromUniqueID(
 
             if(drv->API.ConnectionOptionsWidgets_UpdateUI!=NULL)
             {
-                drv->API.ConnectionOptionsWidgets_UpdateUI(ConWidgets,
-                        (t_WidgetSysHandle *)ConWidgetData,
+                drv->API.ConnectionOptionsWidgets_UpdateUI(
+                        (t_WidgetSysHandle *)ConWidgetData,ConWidgets,
                         DeviceUniqueID.c_str(),
                         PIS_ConvertKVList2PIKVList(OptionsKeyValues));
             }
@@ -1869,8 +1860,8 @@ t_ConnectionOptionsDataType *IOS_AllocConnectionOptionsFromUniqueID(
         {
             if(drv->API.ConnectionOptionsWidgets_FreeWidgets!=NULL)
             {
-                drv->API.ConnectionOptionsWidgets_FreeWidgets(ConWidgets,
-                        (t_WidgetSysHandle *)ConWidgetData);
+                drv->API.ConnectionOptionsWidgets_FreeWidgets(
+                        (t_WidgetSysHandle *)ConWidgetData,ConWidgets);
             }
             ConWidgets=NULL;
         }
@@ -1914,8 +1905,8 @@ void IOS_FreeConnectionOptions(t_ConnectionOptionsDataType *ConWidgetsHandle)
         if(ConWidgetData->IOdrv->API.ConnectionOptionsWidgets_FreeWidgets!=NULL)
         {
             ConWidgetData->IOdrv->API.ConnectionOptionsWidgets_FreeWidgets(
-                    ConWidgetData->ConWidgets,
-                    (t_WidgetSysHandle *)ConWidgetData);
+                    (t_WidgetSysHandle *)ConWidgetData,
+                    ConWidgetData->ConWidgets);
         }
 
         delete ConWidgetData;
@@ -1960,8 +1951,7 @@ void IOS_StoreConnectionOptions(t_ConnectionOptionsDataType *ConWidgetsHandle,
     if(ConWidgetData->IOdrv->API.ConnectionOptionsWidgets_StoreUI!=NULL)
     {
         ConWidgetData->IOdrv->API.ConnectionOptionsWidgets_StoreUI(
-                ConWidgetData->ConWidgets,
-                (t_WidgetSysHandle *)ConWidgetData,
+                (t_WidgetSysHandle *)ConWidgetData,ConWidgetData->ConWidgets,
                 ConWidgetData->DeviceUniqueID.c_str(),
                 PIS_ConvertKVList2PIKVList(OptionsKeyValues));
     }
@@ -1998,8 +1988,7 @@ void IOS_SetUI2ConnectionOptions(t_ConnectionOptionsDataType *ConWidgetsHandle,
     if(ConWidgetData->IOdrv->API.ConnectionOptionsWidgets_UpdateUI!=NULL)
     {
         ConWidgetData->IOdrv->API.ConnectionOptionsWidgets_UpdateUI(
-                ConWidgetData->ConWidgets,
-                (t_WidgetSysHandle *)ConWidgetData,
+                (t_WidgetSysHandle *)ConWidgetData,ConWidgetData->ConWidgets,
                 ConWidgetData->DeviceUniqueID.c_str(),
                 PIS_ConvertKVList2PIKVList(OptionsKeyValues));
     }

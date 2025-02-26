@@ -20,7 +20,7 @@
 
 /*** DEFINES                  ***/
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      TestFile // The name to append on the RegisterPlugin() function for built in version
-#define NEEDED_MIN_API_VERSION                  0x000B0000
+#define NEEDED_MIN_API_VERSION                  0x01000000
 
 /*** MACROS                   ***/
 

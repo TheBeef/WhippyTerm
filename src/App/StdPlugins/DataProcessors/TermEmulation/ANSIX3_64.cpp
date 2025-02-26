@@ -235,7 +235,7 @@
 
 /*** DEFINES                  ***/
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      ANSIX3_64 // The name to append on the RegisterPlugin() function for built in version
-#define NEEDED_MIN_API_VERSION                  0x000B0000
+#define NEEDED_MIN_API_VERSION                  0x01000000
 
 #define MAX_SEARCH_ABORT_COUNT  128
 
@@ -903,7 +903,7 @@ PG_BOOL ANSIX364Decoder_ProcessKeyPress(t_DataProcessorHandleType *DataHandle,
         }
     }
 
-    m_System->WriteData(SendStr,SendLen);
+    m_DPS->WriteData(SendStr,SendLen);
 
     return true;
 }
@@ -1315,38 +1315,38 @@ void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
             NewPos=CursorY-p1;
             if(NewPos<0)
                 NewPos=0;
-            m_DPS->DoMoveCursor(CursorX,NewPos);
+            m_DPS->SetCursorXY(CursorX,NewPos);
         break;
         case 'B':   // CUD - Cursor Down
             NewPos=CursorY+p1;
-            m_DPS->DoMoveCursor(CursorX,NewPos);
+            m_DPS->SetCursorXY(CursorX,NewPos);
         break;
         case 'a':   // HPR - Horizontal Position Relative
         case 'C':   // CUF - Cursor Forward
             NewPos=CursorX+p1;
-            m_DPS->DoMoveCursor(NewPos,CursorY);
+            m_DPS->SetCursorXY(NewPos,CursorY);
         break;
         case 'D':   // CUB - Cursor Back
             NewPos=CursorX-p1;
-            m_DPS->DoMoveCursor(NewPos,CursorY);
+            m_DPS->SetCursorXY(NewPos,CursorY);
         break;
         case 'E':   // CNL - Cursor Next Line (Move to right edge and down)
             NewPos=CursorY+p1;
-            m_DPS->DoMoveCursor(0,NewPos);
+            m_DPS->SetCursorXY(0,NewPos);
         break;
         case 'F':   // CPL - Cursor Previous Line (Move to right edge and up)
             NewPos=CursorY-p1;
             if(NewPos<0)
                 NewPos=0;
-            m_DPS->DoMoveCursor(0,NewPos);
+            m_DPS->SetCursorXY(0,NewPos);
         break;
         case '`':   // HPA - Horizontal Position Absolute
         case 'G':   // CHA - Cursor Horizontal Absolute
-            m_DPS->DoMoveCursor(p1-1,CursorY);
+            m_DPS->SetCursorXY(p1-1,CursorY);
         break;
         case 'f':   // HVP - Horizontal Vertical Position
         case 'H':   // CUP - Cursor Position
-            m_DPS->DoMoveCursor(p2-1,p1-1);
+            m_DPS->SetCursorXY(p2-1,p1-1);
         break;
         case 'I':   // CHT - Do x tabs
             for(r=0;r<p2;r++)
@@ -1383,7 +1383,7 @@ void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
                 case 2: // The complete display
                     m_DPS->GetCursorXY(&CursorX,&CursorY);
                     m_DPS->DoClearScreen();
-                    m_DPS->DoMoveCursor(CursorX,CursorY);
+                    m_DPS->SetCursorXY(CursorX,CursorY);
                 break;
                 case 3: // clear entire screen and delete all lines saved in the scrollback buffer (from xterm)
                     m_DPS->DoClearScreenAndBackBuffer();
@@ -1439,11 +1439,11 @@ void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
                 m_DPS->InsertString((uint8_t *)Data->LastProcessedChar,1);
         break;
         case 'd':   // VPA - Vertical Position Absolute
-            m_DPS->DoMoveCursor(CursorX,p1-1);
+            m_DPS->SetCursorXY(CursorX,p1-1);
         break;
         case 'e':   // VPR - Vertical Position Relative
             NewPos=CursorY+p1;
-            m_DPS->DoMoveCursor(CursorX,NewPos);
+            m_DPS->SetCursorXY(CursorX,NewPos);
         break;
         case 'g':   // TBC - TABULATION CLEAR
             /* Not supported */
@@ -1475,12 +1475,12 @@ void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
                 break;
                 case 5: // a DSR is requested
                     /* Always report that we are ready */
-                    m_System->WriteData((uint8_t *)"\33[0n",4);
+                    m_DPS->WriteData((uint8_t *)"\33[0n",4);
                 break;
                 case 6: // Cursor Position Report
                     m_DPS->GetCursorXY(&CursorX,&CursorY);
                     sprintf(buff,"\33[%d;%dR",CursorY+1,CursorX+1);   // CPR
-                    m_System->WriteData((uint8_t *)buff,
+                    m_DPS->WriteData((uint8_t *)buff,
                             strlen(buff));
                 break;
                 default:
@@ -1492,7 +1492,7 @@ void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
                     &Data->SavedCursorAttribs.SavedCursorY);
         break;
         case 'u':   // RCP - Restore Cursor Position
-            m_DPS->DoMoveCursor(Data->SavedCursorAttribs.SavedCursorX,
+            m_DPS->SetCursorXY(Data->SavedCursorAttribs.SavedCursorX,
                     Data->SavedCursorAttribs.SavedCursorY);
         break;
         default:
@@ -1822,7 +1822,7 @@ void ANSIX364Decoder_ProcessESC(struct ANSIX364DecoderData *Data,
             Data->SavedCursorAttribs.SavedULineColor=m_DPS->GetULineColor();
         break;
         case '8':   // Restore Cursor and Attributes
-            m_DPS->DoMoveCursor(Data->SavedCursorAttribs.SavedCursorX,
+            m_DPS->SetCursorXY(Data->SavedCursorAttribs.SavedCursorX,
                     Data->SavedCursorAttribs.SavedCursorY);
             m_DPS->SetFGColor(Data->SavedCursorAttribs.SavedFGColor);
             m_DPS->SetBGColor(Data->SavedCursorAttribs.SavedBGColor);
@@ -1847,7 +1847,7 @@ void ANSIX364Decoder_ProcessESC(struct ANSIX364DecoderData *Data,
             NewPos=CursorY-1;
             if(NewPos<0)
                 NewPos=0;
-            m_DPS->DoMoveCursor(CursorX,NewPos);
+            m_DPS->SetCursorXY(CursorX,NewPos);
         break;
         case 'P':   // DCS  Device Control String
             Data->SearchAbortCount=0;

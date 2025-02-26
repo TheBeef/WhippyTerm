@@ -50,7 +50,7 @@ using namespace std;
 /*** DEFINES                  ***/
 #define UDPSERVER_URI_PREFIX                    "UDPS"
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      UDPServer // The name to append on the RegisterPlugin() function for built in version
-#define NEEDED_MIN_API_VERSION                  0x000B0000
+#define NEEDED_MIN_API_VERSION                  0x01000000
 
 /*** MACROS                   ***/
 
@@ -77,15 +77,9 @@ const struct IODriverDetectedInfo *UDPServer_DetectDevices(void);
 void UDPServer_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices);
 t_ConnectionWidgetsType *UDPServer_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle);
-void UDPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle);
-void UDPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
-            t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
-            t_PIKVList *Options);
-void UDPServer_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
-        t_PIKVList *Options);
+void UDPServer_ConnectionOptionsWidgets_FreeWidgets(t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions);
+void UDPServer_ConnectionOptionsWidgets_StoreUI(t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,t_PIKVList *Options);
+void UDPServer_ConnectionOptionsWidgets_UpdateUI(t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,t_PIKVList *Options);
 PG_BOOL UDPServer_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,
             char *DeviceUniqueID,unsigned int MaxDeviceUniqueIDLen,
             PG_BOOL Update);
@@ -453,8 +447,9 @@ t_ConnectionWidgetsType *UDPServer_ConnectionOptionsWidgets_AllocWidgets(
  *    UDPServer_ConnectionOptionsWidgets_FreeWidgets
  *
  * SYNOPSIS:
- *    void UDPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *
- *              ConOptions,t_WidgetSysHandle *WidgetHandle);
+ *    void UDPServer_ConnectionOptionsWidgets_FreeWidgets(
+ *              t_WidgetSysHandle *WidgetHandle,
+ *              t_ConnectionWidgetsType *ConOptions);
  *
  * PARAMETERS:
  *    ConOptions [I] -- The options data that was allocated with
@@ -470,8 +465,8 @@ t_ConnectionWidgetsType *UDPServer_ConnectionOptionsWidgets_AllocWidgets(
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UDPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle)
+void UDPServer_ConnectionOptionsWidgets_FreeWidgets(
+        t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions)
 {
     struct UDPServer_ConWidgets *ConWidgets=(struct UDPServer_ConWidgets *)ConOptions;
 
@@ -495,8 +490,8 @@ void UDPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *Con
  *
  * SYNOPSIS:
  *      void UDPServer_ConnectionOptionsWidgets_StoreUI(
- *              t_ConnectionWidgetsType *ConOptions,
- *              t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
+ *              t_WidgetSysHandle *WidgetHandle,
+ *              t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,
  *              t_PIKVList *Options);
  *
  * PARAMETERS:
@@ -518,8 +513,8 @@ void UDPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *Con
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UDPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
+void UDPServer_ConnectionOptionsWidgets_StoreUI(t_WidgetSysHandle *WidgetHandle,
+        t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,
         t_PIKVList *Options)
 {
     struct UDPServer_ConWidgets *ConWidgets=(struct UDPServer_ConWidgets *)ConOptions;
@@ -572,9 +567,8 @@ void UDPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOpti
  *
  * SYNOPSIS:
  *    void UDPServer_ConnectionOptionsWidgets_UpdateUI(
- *          t_ConnectionWidgetsType *ConOptions,
- *          t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
- *          t_PIKVList *Options);
+ *          t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,
+ *          const char *DeviceUniqueID,t_PIKVList *Options);
  *
  * PARAMETERS:
  *    ConOptions [I] -- The options data that was allocated with
@@ -596,9 +590,8 @@ void UDPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOpti
  *    ConnectionOptionsWidgets_StoreUI()
  ******************************************************************************/
 void UDPServer_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
-        t_PIKVList *Options)
+        t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,
+        const char *DeviceUniqueID,t_PIKVList *Options)
 {
     struct UDPServer_ConWidgets *ConWidgets=(struct UDPServer_ConWidgets *)ConOptions;
     const char *PortStr;

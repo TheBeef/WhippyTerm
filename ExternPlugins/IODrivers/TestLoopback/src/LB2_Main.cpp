@@ -32,7 +32,7 @@ using namespace std;
 /*** DEFINES                  ***/
 #define LB2_URI_PREFIX          "LB"
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      TestLB // The name to append on the RegisterPlugin() function for built in version
-#define NEEDED_MIN_API_VERSION                  0x000B0000
+#define NEEDED_MIN_API_VERSION                  0x01000000
 
 #define QUEUE_SIZE              2000
 
@@ -83,16 +83,10 @@ const struct IODriverDetectedInfo *LB2_DetectDevices(void);
 void LB2_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices);
 t_ConnectionWidgetsType *LB2_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle);
-void LB2_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,t_WidgetSysHandle *WidgetHandle);
-void LB2_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
-        t_PIKVList *Options);
-void LB2_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
-        t_PIKVList *Options);
-t_DriverIOHandleType *LB2_AllocateHandle(const char *DeviceUniqueID,
-        t_IOSystemHandle *IOHandle);
+void LB2_ConnectionOptionsWidgets_FreeWidgets(t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions);
+void LB2_ConnectionOptionsWidgets_StoreUI(t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,t_PIKVList *Options);
+void LB2_ConnectionOptionsWidgets_UpdateUI(t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,t_PIKVList *Options);
+t_DriverIOHandleType *LB2_AllocateHandle(const char *DeviceUniqueID,t_IOSystemHandle *IOHandle);
 PG_BOOL LB2_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,
             char *DeviceUniqueID,unsigned int MaxDeviceUniqueIDLen,
             PG_BOOL Update);
@@ -347,8 +341,7 @@ t_ConnectionWidgetsType *LB2_ConnectionOptionsWidgets_AllocWidgets(
     return (t_ConnectionWidgetsType *)ConWidgets;
 }
 
-void LB2_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle)
+void LB2_ConnectionOptionsWidgets_FreeWidgets(t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions)
 {
     struct LB2_ConWidgets *ConWidgets=(struct LB2_ConWidgets *)ConOptions;
 
@@ -358,8 +351,8 @@ void LB2_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOption
     delete ConWidgets;
 }
 
-void LB2_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
+void LB2_ConnectionOptionsWidgets_StoreUI(t_WidgetSysHandle *WidgetHandle,
+        t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,
         t_PIKVList *Options)
 {
     struct LB2_ConWidgets *ConWidgets=(struct LB2_ConWidgets *)ConOptions;
@@ -378,9 +371,8 @@ void LB2_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
 }
 
 void LB2_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
-        t_PIKVList *Options)
+        t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,
+        const char *DeviceUniqueID,t_PIKVList *Options)
 {
     struct LB2_ConWidgets *ConWidgets=(struct LB2_ConWidgets *)ConOptions;
     uintptr_t Value;

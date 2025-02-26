@@ -60,7 +60,6 @@ const struct PI_SystemAPI g_PISystemAPI=
     PI_KVClear,
     PI_KVAddItem,
     PI_KVGetItem,
-    Con_WriteData,
     PISys_GetExperimentalID,
 };
 

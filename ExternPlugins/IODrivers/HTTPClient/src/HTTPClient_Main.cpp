@@ -47,7 +47,7 @@ using namespace std;
 /*** DEFINES                  ***/
 #define HTTPCLIENT_URI_PREFIX                   "HTTP"
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      HTTPClient // The name to append on the RegisterPlugin() function for built in version
-#define NEEDED_MIN_API_VERSION                  0x000B0000
+#define NEEDED_MIN_API_VERSION                  0x01000000
 
 /*** MACROS                   ***/
 
@@ -69,15 +69,9 @@ const struct IODriverDetectedInfo *HTTPClient_DetectDevices(void);
 void HTTPClient_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices);
 t_ConnectionWidgetsType *HTTPClient_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle);
-void HTTPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle);
-void HTTPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
-            t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
-            t_PIKVList *Options);
-void HTTPClient_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
-        t_PIKVList *Options);
+void HTTPClient_ConnectionOptionsWidgets_FreeWidgets(t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions);
+void HTTPClient_ConnectionOptionsWidgets_StoreUI(t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,t_PIKVList *Options);
+void HTTPClient_ConnectionOptionsWidgets_UpdateUI(t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,t_PIKVList *Options);
 PG_BOOL HTTPClient_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,
             char *DeviceUniqueID,unsigned int MaxDeviceUniqueIDLen,
             PG_BOOL Update);
@@ -448,8 +442,8 @@ t_ConnectionWidgetsType *HTTPClient_ConnectionOptionsWidgets_AllocWidgets(
  *    HTTPClient_ConnectionOptionsWidgets_FreeWidgets
  *
  * SYNOPSIS:
- *    void HTTPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *
- *              ConOptions,t_WidgetSysHandle *WidgetHandle);
+ *    void HTTPClient_ConnectionOptionsWidgets_FreeWidgets(
+ *          t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions);
  *
  * PARAMETERS:
  *    ConOptions [I] -- The options data that was allocated with
@@ -465,8 +459,8 @@ t_ConnectionWidgetsType *HTTPClient_ConnectionOptionsWidgets_AllocWidgets(
  * SEE ALSO:
  *    
  ******************************************************************************/
-void HTTPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle)
+void HTTPClient_ConnectionOptionsWidgets_FreeWidgets(
+        t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions)
 {
     struct HTTPClient_ConWidgets *ConWidgets=(struct HTTPClient_ConWidgets *)ConOptions;
 
@@ -492,8 +486,8 @@ void HTTPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *Co
  *
  * SYNOPSIS:
  *      void HTTPClient_ConnectionOptionsWidgets_StoreUI(
- *              t_ConnectionWidgetsType *ConOptions,
- *              t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
+ *              t_WidgetSysHandle *WidgetHandle,
+ *              t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,
  *              t_PIKVList *Options);
  *
  * PARAMETERS:
@@ -515,9 +509,9 @@ void HTTPClient_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *Co
  * SEE ALSO:
  *    
  ******************************************************************************/
-void HTTPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
-        t_PIKVList *Options)
+void HTTPClient_ConnectionOptionsWidgets_StoreUI(
+        t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,
+        const char *DeviceUniqueID,t_PIKVList *Options)
 {
     struct HTTPClient_ConWidgets *ConWidgets=(struct HTTPClient_ConWidgets *)ConOptions;
     const char *AddressStr;
@@ -568,9 +562,8 @@ void HTTPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOpt
  *
  * SYNOPSIS:
  *    void HTTPClient_ConnectionOptionsWidgets_UpdateUI(
- *          t_ConnectionWidgetsType *ConOptions,
- *          t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
- *          t_PIKVList *Options);
+ *          t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,
+ *          const char *DeviceUniqueID,t_PIKVList *Options);
  *
  * PARAMETERS:
  *    ConOptions [I] -- The options data that was allocated with
@@ -592,9 +585,8 @@ void HTTPClient_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOpt
  *    ConnectionOptionsWidgets_StoreUI()
  ******************************************************************************/
 void HTTPClient_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
-        t_PIKVList *Options)
+        t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,
+        const char *DeviceUniqueID,t_PIKVList *Options)
 {
     struct HTTPClient_ConWidgets *ConWidgets=(struct HTTPClient_ConWidgets *)ConOptions;
     const char *AddressStr;

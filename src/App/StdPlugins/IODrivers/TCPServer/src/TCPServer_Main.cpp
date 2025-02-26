@@ -50,7 +50,7 @@ using namespace std;
 /*** DEFINES                  ***/
 #define TCPSERVER_URI_PREFIX              "TCPS"
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      TCPServer // The name to append on the RegisterPlugin() function for built in version
-#define NEEDED_MIN_API_VERSION                  0x000B0000
+#define NEEDED_MIN_API_VERSION                  0x01000000
 
 /*** MACROS                   ***/
 
@@ -74,20 +74,11 @@ const struct IODriverDetectedInfo *TCPServer_DetectDevices(void);
 void TCPServer_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices);
 t_ConnectionWidgetsType *TCPServer_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle);
-void TCPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle);
-void TCPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
-            t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
-            t_PIKVList *Options);
-void TCPServer_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
-        t_PIKVList *Options);
-PG_BOOL TCPServer_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,
-            char *DeviceUniqueID,unsigned int MaxDeviceUniqueIDLen,
-            PG_BOOL Update);
-PG_BOOL TCPServer_Convert_Options_To_URI(const char *DeviceUniqueID,
-            t_PIKVList *Options,char *URI,unsigned int MaxURILen);
+void TCPServer_ConnectionOptionsWidgets_FreeWidgets(t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions);
+void TCPServer_ConnectionOptionsWidgets_StoreUI(t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,t_PIKVList *Options);
+void TCPServer_ConnectionOptionsWidgets_UpdateUI(t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,t_PIKVList *Options);
+PG_BOOL TCPServer_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,char *DeviceUniqueID,unsigned int MaxDeviceUniqueIDLen,PG_BOOL Update);
+PG_BOOL TCPServer_Convert_Options_To_URI(const char *DeviceUniqueID,t_PIKVList *Options,char *URI,unsigned int MaxURILen);
 PG_BOOL TCPServer_GetConnectionInfo(const char *DeviceUniqueID,t_PIKVList *Options,struct IODriverDetectedInfo *RetInfo);
 
 /*** VARIABLE DEFINITIONS     ***/
@@ -446,8 +437,8 @@ t_ConnectionWidgetsType *TCPServer_ConnectionOptionsWidgets_AllocWidgets(
  * SEE ALSO:
  *    
  ******************************************************************************/
-void TCPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle)
+void TCPServer_ConnectionOptionsWidgets_FreeWidgets(
+        t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions)
 {
     struct TCPServer_ConWidgets *ConWidgets=(struct TCPServer_ConWidgets *)ConOptions;
 
@@ -467,8 +458,8 @@ void TCPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *Con
  *
  * SYNOPSIS:
  *      void TCPServer_ConnectionOptionsWidgets_StoreUI(
- *              t_ConnectionWidgetsType *ConOptions,
- *              t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
+ *              t_WidgetSysHandle *WidgetHandle,
+ *              t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,
  *              t_PIKVList *Options);
  *
  * PARAMETERS:
@@ -490,8 +481,8 @@ void TCPServer_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *Con
  * SEE ALSO:
  *    
  ******************************************************************************/
-void TCPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
+void TCPServer_ConnectionOptionsWidgets_StoreUI(t_WidgetSysHandle *WidgetHandle,
+        t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,
         t_PIKVList *Options)
 {
     struct TCPServer_ConWidgets *ConWidgets=(struct TCPServer_ConWidgets *)ConOptions;
@@ -534,9 +525,8 @@ void TCPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOpti
  *
  * SYNOPSIS:
  *    void TCPServer_ConnectionOptionsWidgets_UpdateUI(
- *          t_ConnectionWidgetsType *ConOptions,
- *          t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
- *          t_PIKVList *Options);
+ *          t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,
+ *          const char *DeviceUniqueID,t_PIKVList *Options);
  *
  * PARAMETERS:
  *    ConOptions [I] -- The options data that was allocated with
@@ -558,9 +548,8 @@ void TCPServer_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOpti
  *    ConnectionOptionsWidgets_StoreUI()
  ******************************************************************************/
 void TCPServer_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
-        t_PIKVList *Options)
+        t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions,
+        const char *DeviceUniqueID,t_PIKVList *Options)
 {
     struct TCPServer_ConWidgets *ConWidgets=(struct TCPServer_ConWidgets *)ConOptions;
     const char *PortStr;

@@ -34,6 +34,8 @@
 /***  HEADER FILES TO INCLUDE          ***/
 
 /***  DEFINES                          ***/
+/* Versions of struct PI_SystemAPI */
+#define PI_SYSTEM_API_VERSION_1             1
 
 /***  MACROS                           ***/
 #ifdef BUILT_IN_PLUGINS // defined in WhippyTerm project
@@ -50,16 +52,15 @@
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */
 struct PI_SystemAPI
 {
+    /********* Start of PI_SYSTEM_API_VERSION_1 *********/
     const struct IOS_API *(*GetAPI_IO)(void);
     const struct DPS_API *(*GetAPI_DataProcessors)(void);
     const struct FTPS_API *(*GetAPI_FileTransfersProtocol)(void);
     void (*KVClear)(t_PIKVList *Handle);
     PG_BOOL (*KVAddItem)(t_PIKVList *Handle,const char *Key,const char *Value);
     const char *(*KVGetItem)(const t_PIKVList *Handle,const char *Key);
-    void (*WriteData)(const uint8_t *Data,int Bytes);       // DEBUG PAUL: This feels wrong, should be moved to DPS_API????
     uint32_t (*GetExperimentalID)(void);
-//    PG_BOOL (*LoadKVList)(int StorageArea,const char *PluginName,const char *DataName,t_PIKVList *Handle);
-//    PG_BOOL (*SaveKVList)(int StorageArea,const char *PluginName,const char *DataName,const t_PIKVList *Handle);
+    /********* Start of PI_SYSTEM_API_VERSION_1 *********/
 };
 
 /***  CLASS DEFINITIONS                ***/

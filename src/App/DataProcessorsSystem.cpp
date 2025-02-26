@@ -94,7 +94,7 @@ uint32_t DPS_GetAttribs(void);
 void DPS_DoNewLine(void);
 void DPS_DoReturn(void);
 void DPS_DoBackspace(void);
-void DPS_DoMoveCursor(uint32_t X,uint32_t Y);
+void DPS_SetCursorXY(uint32_t X,uint32_t Y);
 void DPS_DoClearScreen(void);
 void DPS_DoClearScreenAndBackBuffer(void);
 void DPS_DoClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2);
@@ -122,6 +122,9 @@ struct DPS_API g_DPSAPI=
 {
     DPS_RegisterDataProcessor,
     PIUSDefault_GetDefaultAPI,
+    Con_WriteData,
+    DPS_GetSysColor,
+    DPS_GetSysDefaultColor,
     DPS_SetFGColor,
     DPS_GetFGColor,
     DPS_SetBGColor,
@@ -130,28 +133,26 @@ struct DPS_API g_DPSAPI=
     DPS_GetULineColor,
     DPS_SetAttribs,
     DPS_GetAttribs,
+    DPS_SetTitle,
     DPS_DoNewLine,
     DPS_DoReturn,
     DPS_DoBackspace,
-    DPS_DoMoveCursor,           // DEBUG PAUL: Think about renaming this to DPS_SetCursorXY
     DPS_DoClearScreen,
     DPS_DoClearArea,
-    DPS_GetCursorXY,
-    DPS_InsertString,
-    DPS_GetScreenSize,
-    DPS_GetSysColor,
-    DPS_GetSysDefaultColor,
-    DPS_NoteNonPrintable,
     DPS_DoTab,
+    DPS_DoPrevTab,
+    DPS_DoSystemBell,
+    DPS_DoScrollArea,
+    DPS_DoClearScreenAndBackBuffer,
+    DPS_GetCursorXY,
+    DPS_SetCursorXY,
+    DPS_GetScreenSize,
+    DPS_NoteNonPrintable,
     DPS_SendBackspace,
     DPS_SendEnter,
     DPS_BinaryAddText,
     DPS_BinaryAddHex,
-    DPS_DoSystemBell,
-    DPS_DoScrollArea,
-    DPS_DoClearScreenAndBackBuffer,
-    DPS_DoPrevTab,
-    DPS_SetTitle,
+    DPS_InsertString,
 };
 t_DPSDataProcessorsType m_DataProcessors;     // All available data processors
 
@@ -1220,10 +1221,10 @@ void DPS_DoBackspace(void)
 
 /*******************************************************************************
  * NAME:
- *    DPS_DoMoveCursor
+ *    DPS_SetCursorXY
  *
  * SYNOPSIS:
- *    void DPS_DoMoveCursor(uint32_t X,uint32_t Y);
+ *    void DPS_SetCursorXY(uint32_t X,uint32_t Y);
  *
  * PARAMETERS:
  *    X [I] -- The new X pos.  DEBUG PAUL: Add doc about if this is from 0 or 1
@@ -1241,7 +1242,7 @@ void DPS_DoBackspace(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void DPS_DoMoveCursor(uint32_t X,uint32_t Y)
+void DPS_SetCursorXY(uint32_t X,uint32_t Y)
 {
     Con_DoFunction(e_ConFunc_MoveCursor,X,Y);
 }

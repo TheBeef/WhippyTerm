@@ -185,13 +185,14 @@ t_ConnectionWidgetsType *Comport_ConnectionOptionsWidgets_AllocWidgets(
  *    Comport_ConnectionOptionsWidgets_FreeWidgets
  *
  * SYNOPSIS:
- *    void Comport_ConnectionOptionsWidgets_FreeWidgets(t_ConnectionWidgetsType *
- *              ConOptions,t_WidgetSysHandle *WidgetHandle);
+ *    void Comport_ConnectionOptionsWidgets_FreeWidgets(
+ *              t_WidgetSysHandle *WidgetHandle,
+ *              t_ConnectionWidgetsType *ConOptions);
  *
  * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to send to the widgets
  *    ConOptions [I] -- The options data that was allocated with
  *          ConnectionOptionsWidgets_AllocWidgets().
- *    WidgetHandle [I] -- The handle to send to the widgets
  *
  * FUNCTION:
  *    Frees the widgets added with ConnectionOptionsWidgets_AllocWidgets()
@@ -203,8 +204,7 @@ t_ConnectionWidgetsType *Comport_ConnectionOptionsWidgets_AllocWidgets(
  *    Comport_ConnectionOptionsWidgets_AllocWidgets()
  ******************************************************************************/
 void Comport_ConnectionOptionsWidgets_FreeWidgets(
-        t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle)
+        t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConOptions)
 {
     struct Comport_OptionWidgets *Widgets=(struct Comport_OptionWidgets *)ConOptions;
 
@@ -223,14 +223,14 @@ void Comport_ConnectionOptionsWidgets_FreeWidgets(
  *
  * SYNOPSIS:
  *      void Comport_ConnectionOptionsWidgets_StoreUI(
- *              t_ConnectionWidgetsType *ConOptions,
- *              t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
+ *              t_WidgetSysHandle *WidgetHandle,
+ *              t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,
  *              t_PIKVList *Options);
  *
  * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to send to the widgets
  *    ConOptions [I] -- The options data that was allocated with
  *          ConnectionOptionsWidgets_AllocWidgets().
- *    WidgetHandle [I] -- The handle to send to the widgets
  *    DeviceUniqueID [I] -- This is the unique ID for the device we are working
  *                          on.
  *    Options [O] -- The options for this connection.
@@ -246,8 +246,8 @@ void Comport_ConnectionOptionsWidgets_FreeWidgets(
  * SEE ALSO:
  *    
  ******************************************************************************/
-void Comport_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
+void Comport_ConnectionOptionsWidgets_StoreUI(t_WidgetSysHandle *WidgetHandle,
+        t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,
         t_PIKVList *Options)
 {
     struct Comport_OptionWidgets *Widgets=(struct Comport_OptionWidgets *)ConOptions;
@@ -273,14 +273,14 @@ void Comport_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOption
  *
  * SYNOPSIS:
  *    void Comport_ConnectionOptionsWidgets_UpdateUI(
- *          t_ConnectionWidgetsType *ConOptions,
- *          t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
+ *          t_WidgetSysHandle *WidgetHandle,
+ *          t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,
  *          t_PIKVList *Options);
  *
  * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to send to the widgets
  *    ConOptions [I] -- The options data that was allocated with
  *                      ConnectionOptionsWidgets_AllocWidgets().
- *    WidgetHandle [I] -- The handle to send to the widgets
  *    DeviceUniqueID [I] -- This is the unique ID for the device we are working
  *                          on.
  *    Options [I] -- The options for this connection.
@@ -296,9 +296,8 @@ void Comport_ConnectionOptionsWidgets_StoreUI(t_ConnectionWidgetsType *ConOption
  * SEE ALSO:
  *    ConnectionOptionsWidgets_StoreUI()
  ******************************************************************************/
-void Comport_ConnectionOptionsWidgets_UpdateUI(
-        t_ConnectionWidgetsType *ConOptions,
-        t_WidgetSysHandle *WidgetHandle,const char *DeviceUniqueID,
+void Comport_ConnectionOptionsWidgets_UpdateUI(t_WidgetSysHandle *WidgetHandle,
+        t_ConnectionWidgetsType *ConOptions,const char *DeviceUniqueID,
         t_PIKVList *Options)
 {
     struct Comport_OptionWidgets *Widgets=(struct Comport_OptionWidgets *)ConOptions;

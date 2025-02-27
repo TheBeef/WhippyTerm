@@ -4179,7 +4179,7 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
             ShowTransmitDelayDialog();
         break;
         case e_Cmd_GetPlugins:
-            UI_GotoWebPage("http://whippyterm.com/plugins.php");
+            UI_GotoWebPage("https://whippyterm.com/Plugins.php");
         break;
         case e_Cmd_InstallPlugin:
             PromptAndInstallPlugin();

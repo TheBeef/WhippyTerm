@@ -5,7 +5,7 @@
  *    Whippy Term
  *
  * FILE DESCRIPTION:
- *    This has the version number for Whippy Term in it.
+ *    This has the version number for WhippyTerm in it.
  *          Major -- This is the major part of the feature number.
  *                   This is used with 'Minor' to determine the feature set
  *                   that is in a release.  It doesn't really mean anything,

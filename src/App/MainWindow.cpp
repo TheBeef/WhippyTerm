@@ -4146,7 +4146,7 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
             path="";
             file="SendBufferSet.wtb";
             if(UI_SaveFileReq("Save Send Buffer Set",path,file,
-                    "All Files|*.*\nWhippy Term Send Buffer Set|*.wtb",1))
+                    "All Files|*.*\nWhippyTerm Send Buffer Set|*.wtb",1))
             {
                 FullFilename=UI_ConcatFile2Path(path,file);
                 g_SendBuffers.SaveBuffers(FullFilename.c_str());
@@ -4156,7 +4156,7 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
             path="";
             file="SendBufferSet.wtb";
             if(UI_LoadFileReq("Load Send Buffer Set",path,file,
-                    "All Files|*.*\nWhippy Term Send Buffer Set|*.wtb",1))
+                    "All Files|*.*\nWhippyTerm Send Buffer Set|*.wtb",1))
             {
                 FullFilename=UI_ConcatFile2Path(path,file);
                 g_SendBuffers.LoadBuffers(FullFilename.c_str());

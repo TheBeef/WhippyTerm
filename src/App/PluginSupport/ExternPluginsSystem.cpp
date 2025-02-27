@@ -370,7 +370,7 @@ bool LoadPlugin(const char *File,const char *Name)
     RegisterPlugin=(RegisterPluginFnType)DLL2Function(Plugin,"RegisterPlugin");
     if(RegisterPlugin==NULL)
     {
-        /* Not a Whippy Term plugin as the plugin must have a register plugin
+        /* Not a WhippyTerm plugin as the plugin must have a register plugin
            function */
         snprintf(buff,sizeof(buff)-1,"Failed to load plugin.  "
                 "\"%s\" is not a WhipyTerm plugin.",Name);

@@ -1867,10 +1867,13 @@
      <normaloff>:/G/Graphics/help.png</normaloff>:/G/Graphics/help.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;About Whippy Term</string>
+    <string>&amp;About WhippyTerm</string>
+   </property>
+   <property name="iconText">
+    <string>About WhippyTerm</string>
    </property>
    <property name="toolTip">
-    <string>About Whippy Term</string>
+    <string>About WhippyTerm</string>
    </property>
   </action>
   <action name="actionTest1">

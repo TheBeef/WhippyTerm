@@ -19,7 +19,7 @@
 #include "Version.h"
 
 /***  DEFINES                          ***/
-#define WHIPPYTERM_NAME                 "Whippy Term"
+#define WHIPPYTERM_NAME                 "WhippyTerm"
 
 #if OFFICIAL_RELEASE==1
  #define WHIPPYTERM_TITLE               WHIPPYTERM_NAME

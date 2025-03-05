@@ -18,6 +18,8 @@ set -x
 
 rm -r WhippyTerm_$1-1
 cp -r WhippyTerm_x.x-1/ WhippyTerm_$1-1/
+gzip -9 -c -n ../Tools/MakeReleaseNotes/changelog.Debian > WhippyTerm_$1-1/usr/share/doc/whippyterm/changelog.Debian.gz
+chmod 644 WhippyTerm_$1-1/usr/share/doc/whippyterm/changelog.Debian.gz
 rm -r WhippyTerm_$1-1/usr/bin/README
 
 sed -i "s/Version: x.x-1/Version: $1-1/g" WhippyTerm_$1-1/DEBIAN/control

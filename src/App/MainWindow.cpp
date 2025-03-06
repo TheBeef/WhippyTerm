@@ -3955,6 +3955,7 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
             {
                 FullFilename=UI_ConcatFile2Path(path,file);
                 LoadSettings(FullFilename.c_str());
+                SaveSettings();
             }
         break;
         case e_Cmd_ExportSettings:

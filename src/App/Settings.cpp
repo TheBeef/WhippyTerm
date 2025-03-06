@@ -1175,11 +1175,11 @@ void ConSettings::DefaultSettings(void)
     ClipboardMode=e_ClipboardMode_Smart;
 
     EnabledTextDataProcessors.clear();
+    EnabledTextDataProcessors.push_back("UnicodeDecoder");
 
     DataProcessorType=e_DataProcessorType_Text;
     EnabledTermEmuDataProcessors.clear();
     EnabledTermEmuDataProcessors.push_back("ANSIX364Decoder");
-    EnabledTermEmuDataProcessors.push_back("UnicodeDecoder");
 
     EnabledKeyPressProcessors.clear();
 

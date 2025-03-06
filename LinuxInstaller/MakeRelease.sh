@@ -20,7 +20,11 @@ rm -r WhippyTerm_$1-1
 cp -r WhippyTerm_x.x-1/ WhippyTerm_$1-1/
 gzip -9 -c -n ../Tools/MakeReleaseNotes/changelog.Debian > WhippyTerm_$1-1/usr/share/doc/whippyterm/changelog.Debian.gz
 chmod 644 WhippyTerm_$1-1/usr/share/doc/whippyterm/changelog.Debian.gz
+cp ../manpages/whippyterm.1 WhippyTerm_$1-1/usr/share/man/man1/whippyterm.1
+chmod 644 WhippyTerm_$1-1/usr/share/man/man1/whippyterm.1
+gzip -9n WhippyTerm_$1-1/usr/share/man/man1/whippyterm.1
 rm -r WhippyTerm_$1-1/usr/bin/README
+rm -r WhippyTerm_$1-1/usr/share/man/man1/README
 
 sed -i "s/Version: x.x-1/Version: $1-1/g" WhippyTerm_$1-1/DEBIAN/control
 

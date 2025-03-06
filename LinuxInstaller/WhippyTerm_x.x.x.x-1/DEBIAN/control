@@ -1,9 +1,9 @@
 Package: whippyterm
-Version: x.x-1
+Version: x.x.x.x-1
 Section: comm
 Priority: optional
 Architecture: amd64
 Depends: qtbase5-dev, libc6, libgcc1, libstdc++6
 Maintainer: Paul Hutchinson <hutchinson.paul@gmail.com>
 Description: Modern term program.
- More description goes here.
+ Terminal program with Modern GUI, hex dumps, plugins, and binary protocols.

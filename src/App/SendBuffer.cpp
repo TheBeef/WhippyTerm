@@ -81,6 +81,8 @@ SendBuffer::SendBuffer()
         BufferSize[r]=0;
         BufferName[r]=NULL;
     }
+
+    ClearAllBuffers();
 }
 
 SendBuffer::~SendBuffer()
@@ -227,6 +229,8 @@ bool SendBuffer::LoadBuffers(const char *Filename)
 
         if(Memory!=NULL)
             free(Memory);
+
+        ClearAllBuffers();
 
         RetValue=false;
     }
@@ -764,6 +768,7 @@ bool SendBuffer::GetBufferInfo(int BufferIndex,const uint8_t **Memory,
 void SendBuffer::ClearAllBuffers(void)
 {
     int r;
+    char buff[100];
 
     for(r=0;r<MAX_SEND_BUFFERS;r++)
     {
@@ -772,6 +777,15 @@ void SendBuffer::ClearAllBuffers(void)
         Buffer[r]=NULL;
         BufferSize[r]=0;
         BufferName[r]=NULL;
+    }
+
+    for(r=0;r<MAX_SEND_BUFFERS;r++)
+    {
+        if(r<MAX_QUICK_SEND_BUFFERS)
+            sprintf(buff,"Send Buffer #%d",r+1);
+        else
+            sprintf(buff,"%c",'a'+(r-MAX_QUICK_SEND_BUFFERS));
+        SetBuffer(r,(uint8_t *)buff,strlen(buff));
     }
 }
 

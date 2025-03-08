@@ -3464,15 +3464,26 @@ void TheMainWindow::ApplyTerminalEmulationMenuTriggered(uint64_t ID)
     DPro=DPS_GetProcessorsInfo(TermIdStr);
     if(DPro==NULL)
         return;
+
+    /* Clear out old processors */
+    ActiveCon->CustomSettings.EnabledTermEmuDataProcessors.clear();
+    ActiveCon->CustomSettings.EnabledBinaryDataProcessors.clear();
+
     /* See if it's binary */
     if(DPro->Info.ProType==e_DataProcessorType_Binary)
+    {
         ActiveCon->CustomSettings.DataProcessorType=e_DataProcessorType_Binary;
+
+        /* Replace the term emulator with the one selected */
+        ActiveCon->CustomSettings.EnabledBinaryDataProcessors.push_back(TermIdStr);
+    }
     else
+    {
         ActiveCon->CustomSettings.DataProcessorType=e_DataProcessorType_Text;
 
-    /* Replace the term emulator with the one selected */
-    ActiveCon->CustomSettings.EnabledTermEmuDataProcessors.clear();
-    ActiveCon->CustomSettings.EnabledTermEmuDataProcessors.push_back(TermIdStr);
+        /* Replace the term emulator with the one selected */
+        ActiveCon->CustomSettings.EnabledTermEmuDataProcessors.push_back(TermIdStr);
+    }
 
     /* Now apply this change */
     ActiveCon->SetCustomSettings(ActiveCon->CustomSettings);

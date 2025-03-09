@@ -1580,10 +1580,14 @@ bool DisplayBinary::ConvertScreenXY2BufferLinePtr(int x,int y,uint8_t **Ptr,
     *Ptr=NULL;
     *Offset=0;
 
-    /* Check if we are clicking a "dead" space */
-    if(x<0 || (x>=END_OF_HEX_PX && x<START_OF_ASCII_PX) || x>=END_OF_ASCII_PX)
+    if(x<0 || y<0)
         return false;
-    if(y<0)
+
+    /* Add the offset */
+    x+=WindowXOffsetPx;
+
+    /* Check if we are clicking a "dead" space */
+    if((x>=END_OF_HEX_PX && x<START_OF_ASCII_PX) || x>=END_OF_ASCII_PX)
         return false;
 
     YOffset=y/CharHeightPx;

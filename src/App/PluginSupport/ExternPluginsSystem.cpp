@@ -1061,7 +1061,7 @@ static void ReadStringChunk(class RIFF &PluginFile,std::string &Str,
         tmpbuff=(char *)malloc(ChunkLen+1);
         if(tmpbuff==NULL)
             throw("Out of memory");
-        PluginFile.Read(buff,ChunkLen);
+        PluginFile.Read(tmpbuff,ChunkLen);
         tmpbuff[ChunkLen]=0;
         Str=tmpbuff;
         free(tmpbuff);

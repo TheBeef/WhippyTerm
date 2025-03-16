@@ -1,4 +1,10 @@
-whippyterm (1.0.0-1) unstable; urgency=low
+whippyterm (1.0.1.0-1) unstable; urgency=low
+
+  * First Release - bug fix #1
+    - Fixed bug with plugins with long descriptions
+
+ -- Paul Hutchinson <paul@whippyterm.com>  Sun, 16 Mar 2025 00:00:00 +0000
+whippyterm (1.0.0.0-1) unstable; urgency=low
 
   * First Release
     - Finished all features for first version

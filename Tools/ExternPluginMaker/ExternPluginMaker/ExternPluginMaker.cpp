@@ -2,6 +2,7 @@
 #include "ui_ExternPluginMaker.h"
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QDebug>
 #include "TinyCFG.h"
 #include "RIFF.h"
 #include <stdint.h>
@@ -195,7 +196,7 @@ void ExternPluginMaker::Build(const char *Filename)
     uint32_t Tmp32;
     const char *VerStr;
     uint8_t Tmp;
-
+    
     LastBuildFile=Filename;
 
     Data.LinuxFilename=ui->Linux_SO->text().toStdString();

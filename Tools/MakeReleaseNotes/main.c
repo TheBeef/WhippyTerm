@@ -50,6 +50,7 @@
 int main(void)
 {
     int rel;
+    int searchrel;
     int note;
     FILE *outmd;
     FILE *outdeb;
@@ -105,9 +106,25 @@ int main(void)
         Start++;
         Patch=strtol(Start,&Start,10);
 
-        fprintf(outdeb,"whippyterm (%d.%d.%d-%d) unstable; urgency=low\n",Major,Minor,Patch,Rev+1);
+        fprintf(outdeb,"whippyterm (%d.%d.%d.%d-1) unstable; urgency=low\n",Major,Minor,Rev,Patch);
         fprintf(outdeb,"\n");
-        fprintf(outdeb,"  * %s\n",m_ReleaseNotes[rel].CodeName);
+        if(m_ReleaseNotes[rel].CodeName==NULL)
+        {
+            /* Find the code name of this */
+            for(searchrel=rel;searchrel<sizeof(m_ReleaseNotes)/sizeof(struct ReleaseInfo);searchrel++)
+            {
+                if(m_ReleaseNotes[searchrel].CodeName!=NULL)
+                {
+                    /* Found it */
+                    fprintf(outdeb,"  * %s - bug fix #%d\n",m_ReleaseNotes[searchrel].CodeName,Rev);
+                    
+                }
+            }
+        }
+        else
+        {
+            fprintf(outdeb,"  * %s\n",m_ReleaseNotes[rel].CodeName);
+        }
         for(note=0;note<m_ReleaseNotes[rel].NotesCount;note++)
             fprintf(outdeb,"    - %s\n",m_ReleaseNotes[rel].Notes[note].Summary);
         fprintf(outdeb,"\n");

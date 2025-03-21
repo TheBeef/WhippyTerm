@@ -290,7 +290,7 @@ static void DNCFU_OpenConnection(class TheMainWindow *MW)
 {
     t_UITextInputCtrl *URICtrl;
     string URI;
-    t_KVList EmptyOptions;
+    t_KVList Options;
     class Connection *NewConnection;
 
     NewConnection=NULL;
@@ -300,7 +300,10 @@ static void DNCFU_OpenConnection(class TheMainWindow *MW)
 
         UIGetTextCtrlText(URICtrl,URI);
 
-        NewConnection=MW->AllocNewTab(NULL,NULL,URI.c_str(),EmptyOptions);
+        if(!IOS_UpdateOptionsFromURI(URI.c_str(),Options))
+            throw("Invalid URI");
+
+        NewConnection=MW->AllocNewTab(NULL,NULL,URI.c_str(),Options);
         if(NewConnection==NULL)
             throw(nullptr);    // We have already prompted
     }

@@ -57,6 +57,7 @@ struct DriverInfoList
 {
     std::string Name;
     std::string DriverURIHelpString;
+    std::string BaseURI;
     struct DriverInfoList *Next;
 };
 
@@ -113,6 +114,8 @@ bool IOS_GetURIFromUniqueID(const char *UniqueID,const t_KVList &Options,
         std::string &URI);
 bool IOS_GetConnectionInfo(const char *UniqueID,const t_KVList &Options,
         struct ConnectionInfoList *Info);
+bool IOS_UpdateOptionsFromURI(const char *URI,t_KVList &Options);
+bool IOS_DoesURIMatchBaseURI(const char *URI,const char *BaseURI);
 
 t_IOSystemHandle *IOS_AllocIOSystemHandle(const char *UniqueID,uintptr_t ID);
 t_IOSystemHandle *IOS_AllocIOSystemHandleFromURI(const char *URI,uintptr_t ID);
@@ -127,7 +130,6 @@ void IOS_Close(t_IOSystemHandle *Handle);
 void IOS_GetUniqueID(t_IOSystemHandle *Handle,std::string &UniqueID);
 void IOS_InformOfNewDataEvent(t_IOSystemHandle *IOHandle);
 bool IOS_GetDeviceURI(t_IOSystemHandle *Handle,std::string &URI);
-bool IOS_UpdateOptionsFromURI(const char *URI,t_KVList &Options);
 e_IOSysIOErrorType IOS_TransmitQueuedData(t_IOSystemHandle *Handle);
 
 int IOS_Ask(const char *Message,int Type);

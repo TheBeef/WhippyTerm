@@ -160,6 +160,7 @@ const char *m_CmdNames[]=
     "SendBufferRename",                     // e_Cmd_SendBuffer_Rename
     "SendBufferLoadSelectedBuffer",         // e_Cmd_SendBuffer_LoadSelectedBuffer
     "SendBufferSaveSelectedBuffer",         // e_Cmd_SendBuffer_SaveSelectedBuffer
+    "URIHelp",                              // e_Cmd_URIHelp
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -265,6 +266,7 @@ e_CmdType m_Cmd2ToolbarMapping[]=
     e_Cmd_URIGo,                        // e_UIMWToolbar_URIGo
     e_Cmd_Copy,                         // e_UIMWToolbar_Copy
     e_Cmd_Paste,                        // e_UIMWToolbar_Paste
+    e_Cmd_URIHelp,                      // e_UIMWToolbar_URIHelp
 };
 
 e_CmdType m_Cmd2ButtonMapping[]=

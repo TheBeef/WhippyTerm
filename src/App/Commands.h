@@ -151,6 +151,7 @@ typedef enum
     e_Cmd_SendBuffer_Rename,
     e_Cmd_SendBuffer_LoadSelectedBuffer,
     e_Cmd_SendBuffer_SaveSelectedBuffer,
+    e_Cmd_URIHelp,
     e_CmdMAX
 } e_CmdType;
 

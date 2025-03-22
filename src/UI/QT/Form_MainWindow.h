@@ -325,6 +325,8 @@ private slots:
     
     void on_actionNew_Tab_From_URI_triggered();
     
+    void on_actionURIHelp_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

@@ -48,7 +48,8 @@ using namespace std;
 static void FillInDriverList(void);
 static void DNCFU_UpdateInfoPanel(void);
 static void DNCFU_RethinkGUI(void);
-static void DNCFU_OpenConnection(class TheMainWindow *MW);
+static bool DNCFU_OpenConnection(class TheMainWindow *MW);
+static void DNCFU_SetURIAndUpdate(std::string &NewURI);
 
 /*** VARIABLE DEFINITIONS     ***/
 struct DriverInfoList *m_RNCFUD_DriverList;
@@ -58,17 +59,22 @@ struct DriverInfoList *m_RNCFUD_DriverList;
  *    RunNewConnectionFromURIDialog
  *
  * SYNOPSIS:
- *    void RunNewConnectionFromURIDialog(class TheMainWindow *MW);
+ *    bool RunNewConnectionFromURIDialog(class TheMainWindow *MW,
+ *              std::string *URI);
  *
  * PARAMETERS:
  *    MW [I] -- The main window to take info about (the main window that
  *              was active when the command was run)
+ *    URI [I/O] -- The URI to fill the URI input with.  This is also where the
+ *                 contents of teh URI input is stored when the user clicks
+ *                 OK.  This can be NULL to ignore it.
  *
  * FUNCTION:
  *    This function shows the open connection from URI dialog.
  *
  * RETURNS:
- *    NONE
+ *    true -- User pressed OK
+ *    false -- User pressed cancel or there was an error
  *
  * SEE ALSO:
  *    
@@ -77,24 +83,48 @@ struct DriverInfoList *m_RNCFUD_DriverList;
  *    Paul Hutchinson (10 Feb 2025)
  *       Created
  ******************************************************************************/
-void RunNewConnectionFromURIDialog(class TheMainWindow *MW)
+bool RunNewConnectionFromURIDialog(class TheMainWindow *MW,std::string *URI)
 {
     bool AllocatedUI;
+    bool RetValue;
+    bool done;
 
     AllocatedUI=false;
     m_RNCFUD_DriverList=NULL;
+    RetValue=false;
     try
     {
         if(!UIAlloc_NewConnectionFromURI())
             throw("Failed to open window");
 
         FillInDriverList();
+
+        if(URI!=NULL)
+            DNCFU_SetURIAndUpdate(*URI);
+
         DNCFU_RethinkGUI();
 
-        if(UIShow_NewConnectionFromURI())
+        done=false;
+        while(!done)
         {
-            /* User clicked ok */
-            DNCFU_OpenConnection(MW);
+            if(UIShow_NewConnectionFromURI())
+            {
+                /* User clicked ok */
+                if(DNCFU_OpenConnection(MW))
+                {
+                    done=true;
+                    RetValue=true;
+                }
+                else
+                {
+                    UIAsk("Error opening new connection","Invalid URI",
+                            e_AskBox_Error,e_AskBttns_Ok);
+                }
+            }
+            else
+            {
+                done=true;
+            }
         }
     }
     catch(const char *Error)
@@ -117,6 +147,8 @@ void RunNewConnectionFromURIDialog(class TheMainWindow *MW)
 
     if(AllocatedUI)
         UIFree_NewConnectionFromURI();
+
+    return RetValue;
 }
 
 /*******************************************************************************
@@ -270,7 +302,7 @@ static void DNCFU_RethinkGUI(void)
  *    DNCFU_OpenConnection
  *
  * SYNOPSIS:
- *    static void DNCFU_OpenConnection(class TheMainWindow *MW);
+ *    static bool DNCFU_OpenConnection(class TheMainWindow *MW);
  *
  * PARAMETERS:
  *    MW [I] -- The main window to take info about (the main window that
@@ -286,11 +318,11 @@ static void DNCFU_RethinkGUI(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-static void DNCFU_OpenConnection(class TheMainWindow *MW)
+static bool DNCFU_OpenConnection(class TheMainWindow *MW)
 {
     t_UITextInputCtrl *URICtrl;
     string URI;
-    t_KVList EmptyOptions;
+    t_KVList Options;
     class Connection *NewConnection;
 
     NewConnection=NULL;
@@ -300,7 +332,10 @@ static void DNCFU_OpenConnection(class TheMainWindow *MW)
 
         UIGetTextCtrlText(URICtrl,URI);
 
-        NewConnection=MW->AllocNewTab(NULL,NULL,URI.c_str(),EmptyOptions);
+        if(!IOS_UpdateOptionsFromURI(URI.c_str(),Options))
+            return false;
+
+        NewConnection=MW->AllocNewTab(NULL,NULL,URI.c_str(),Options);
         if(NewConnection==NULL)
             throw(nullptr);    // We have already prompted
     }
@@ -313,5 +348,48 @@ static void DNCFU_OpenConnection(class TheMainWindow *MW)
     catch(...)
     {
         throw;
+    }
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DNCFU_SetURIAndUpdate
+ *
+ * SYNOPSIS:
+ *    static void DNCFU_SetURIAndUpdate(std::string &NewURI);
+ *
+ * PARAMETERS:
+ *    NewURI [I] -- The new URI to set the dialog to
+ *
+ * FUNCTION:
+ *    This function sets the URI and looks up the driver for that device.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void DNCFU_SetURIAndUpdate(std::string &NewURI)
+{
+    struct DriverInfoList *Entry;
+    t_UITextInputCtrl *URICtrl;
+    t_UIListViewCtrl *DriversCtrl;
+    string UniqueID;
+
+    DriversCtrl=UINC_GetListViewInputHandle(e_UINCFU_ListView_Driver);
+    URICtrl=UINC_GetTxtInputHandle(e_UINCFU_TxtInput_URI);
+
+    UISetTextCtrlText(URICtrl,NewURI.c_str());
+
+    /* Find the driver and select it */
+    for(Entry=m_RNCFUD_DriverList;Entry!=NULL;Entry=Entry->Next)
+    {
+        if(IOS_DoesURIMatchBaseURI(NewURI.c_str(),Entry->BaseURI.c_str()))
+        {
+            UISetListViewSelectedEntry(DriversCtrl,(uintptr_t)Entry);
+            break;
+        }
     }
 }

@@ -3892,6 +3892,7 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_LoadSendBufferSet -- Prompt and load a send buffer set from disk
  *                  e_Cmd_SendBufferSendGeneric -- Prompt user for what buffer to send
  *                  e_Cmd_SendBuffer_EditPrompted -- Prompt and edit a send buffer
+ *                  e_Cmd_URIHelp -- User select to copy the URI info the connect URI dialog
  *
  * FUNCTION:
  *    This function executes a command.
@@ -3909,6 +3910,7 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
     string path;
     string file;
     string FullFilename;
+    string TmpStr;
 
     switch(Cmd)
     {
@@ -3919,7 +3921,7 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
             NewConnection();
         break;
         case e_Cmd_NewTabFromURI:
-            RunNewConnectionFromURIDialog(this);
+            RunNewConnectionFromURIDialog(this,NULL);
         break;
         case e_Cmd_ResetTerm:
             ResetTerm();
@@ -4313,6 +4315,15 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_SendBuffer_SaveSelectedBuffer:
             SendBuffersPanel.SaveCurrentBuffer();
+        break;
+        case e_Cmd_URIHelp:
+            URIInput=UIMW_GetTxtInputHandle(UIWin,e_UIMWTxtInput_URI);
+            UIGetTextCtrlText(URIInput,TmpStr);
+            if(RunNewConnectionFromURIDialog(this,&TmpStr))
+            {
+//                UISetTextCtrlText(URIInput,TmpStr.c_str());
+//                ReloadTabFromURI(NULL,NULL,TmpStr.c_str());
+            }
         break;
         case e_CmdMAX:
         default:

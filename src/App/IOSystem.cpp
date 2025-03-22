@@ -4772,6 +4772,7 @@ struct DriverInfoList *IOS_GetListOfDrivers(void)
         {
             NewDriverInfo=new struct DriverInfoList;
             NewDriverInfo->Name=drv->DriverName;
+            NewDriverInfo->BaseURI=drv->BaseURI;
             if(drv->Info.URIHelpString==NULL)
                 NewDriverInfo->DriverURIHelpString="Not available";
             else
@@ -4841,3 +4842,53 @@ void IOS_FreeDriverInfoList(struct DriverInfoList *List)
         List=Entry;
     }
 }
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_DoesURIMatchBaseURI
+ *
+ * SYNOPSIS:
+ *    bool IOS_DoesURIMatchBaseURI(const char *URI,const char *BaseURI);
+ *
+ * PARAMETERS:
+ *    URI [I] -- The URI to compare
+ *    BaseURI [I] -- The base URI from the driver
+ *
+ * FUNCTION:
+ *    This function checks to see if a URI matchs the BaseURI (the driver)
+ *
+ * RETURNS:
+ *    true -- This URI is for this driver
+ *    false -- This URI does not match this driver.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool IOS_DoesURIMatchBaseURI(const char *URI,const char *BaseURI)
+{
+    const char *p;
+    string ExtractedBaseURI;
+    bool RetValue;
+
+    try
+    {
+        /* Break the URI down into it's parts */
+        p=URI;
+        while((*p>='a' && *p<='z') || (*p>='A' && *p<='Z'))
+            p++;
+        ExtractedBaseURI.assign(URI,p-URI);
+        transform(ExtractedBaseURI.begin(),ExtractedBaseURI.end(),
+                ExtractedBaseURI.begin(),::toupper);
+
+        if(strcmp(ExtractedBaseURI.c_str(),BaseURI)==0)
+            RetValue=true;
+        else
+            RetValue=false;
+    }
+    catch(...)
+    {
+        RetValue=false;
+    }
+    return RetValue;
+}
+

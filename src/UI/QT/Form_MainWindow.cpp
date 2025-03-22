@@ -110,7 +110,8 @@ Form_MainWindow::Form_MainWindow(QWidget *parent) :
             "For example:\n"
             "\"COM1:9600,8,n,1\" is for comport 1 at 9600 baud, 8 bits, no parity, 1 stop bit.");
 
-    ToolBarURI=ui->mainToolBar->insertWidget(ui->actionactionURIGo,ToolBarURI_LineEdit);
+//    ToolBarURI=ui->mainToolBar->insertWidget(ui->actionactionURIGo,ToolBarURI_LineEdit);
+    ToolBarURI=ui->mainToolBar->insertWidget(ui->actionURIHelp,ToolBarURI_LineEdit);
 
     ToolbarURILabel_Label = new QLabel(ui->mainToolBar);
     ToolbarURILabel_Label->setObjectName(QString::fromUtf8("ToolbarURILabel"));
@@ -1643,5 +1644,11 @@ void Form_MainWindow::on_Menu_treeWidget_Buffer_BufferList_x8_SaveBuffer_trigger
 void Form_MainWindow::on_actionNew_Tab_From_URI_triggered()
 {
     DoMenuTriggered(e_UIMWMenu_NewTabFromURI);
+}
+
+
+void Form_MainWindow::on_actionURIHelp_triggered()
+{
+    DoToolbarTriggered(e_UIMWToolbar_URIHelp);
 }
 

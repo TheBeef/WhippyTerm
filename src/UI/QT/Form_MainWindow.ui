@@ -1844,6 +1844,7 @@
    <addaction name="separator"/>
    <addaction name="actionClear_Screen"/>
    <addaction name="separator"/>
+   <addaction name="actionURIHelp"/>
    <addaction name="actionactionURIGo"/>
   </widget>
   <action name="actionQuit">
@@ -2817,6 +2818,14 @@
   <action name="actionNew_Tab_From_URI">
    <property name="text">
     <string>New Tab From URI...</string>
+   </property>
+  </action>
+  <action name="actionURIHelp">
+   <property name="text">
+    <string>?</string>
+   </property>
+   <property name="toolTip">
+    <string>URI Help</string>
    </property>
   </action>
  </widget>

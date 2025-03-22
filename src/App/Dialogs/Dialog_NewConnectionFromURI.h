@@ -32,6 +32,7 @@
 #define __DIALOG_NEWCONNECTIONFROMURI_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
+#include <string>
 #include "App/MainWindow.h"
 
 /***  DEFINES                          ***/
@@ -45,6 +46,6 @@
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
-void RunNewConnectionFromURIDialog(class TheMainWindow *MW);
+bool RunNewConnectionFromURIDialog(class TheMainWindow *MW,std::string *URI);
 
 #endif   /* end of "#ifndef __DIALOG_NEWCONNECTIONFROMURI_H_" */

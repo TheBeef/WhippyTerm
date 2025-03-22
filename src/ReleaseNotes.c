@@ -20,6 +20,11 @@ struct ReleaseInfo
 //    {   "Title",
 //            "Descrition"},
 //};
+static struct ReleaseNote m_Notes_NEXT[]=
+{
+    {   "Fixed bug with open new connection from URI dialog",
+            "Dialog was not setting up options which depending on the device would prevent connection from working."},
+};
 static struct ReleaseNote m_Notes_Rel1_0_1_0[]=
 {
     {   "Fixed bug with plugins with long descriptions",

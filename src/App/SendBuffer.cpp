@@ -31,6 +31,7 @@
 
 /*** HEADER FILES TO INCLUDE  ***/
 #include "App/SendBuffer.h"
+#include "App/MainWindow.h"
 #include "ThirdParty/SimpleRIFF/RIFF.h"
 #include "UI/UIAsk.h"
 #include "OS/FilePaths.h"
@@ -220,6 +221,11 @@ bool SendBuffer::LoadBuffers(const char *Filename)
                 Load.DoneReadingGroup();
             }
         }
+
+        /* Tell the main windows that we changed all the bookmarks */
+        for(r=0;r<MAX_SEND_BUFFERS;r++)
+            MW_InformOfSendBufferChange(r);
+
         RetValue=true;
     }
     catch(e_RIFFErrorType err)
@@ -630,6 +636,8 @@ void SendBuffer::SetBuffer(int BufferIndex,const uint8_t *Memory,uint32_t BSize)
     }
 
     BufferSize[BufferIndex]=BSize;
+
+    MW_InformOfSendBufferChange(BufferIndex);
 }
 
 /*******************************************************************************
@@ -661,6 +669,8 @@ void SendBuffer::SetBufferName(int BufferIndex,const char *NewName)
 
     BufferName[BufferIndex]=(char *)malloc(strlen(NewName)+1);
     strcpy(BufferName[BufferIndex],NewName);
+
+    MW_InformOfSendBufferChange(BufferIndex);
 }
 
 /*******************************************************************************
@@ -786,6 +796,8 @@ void SendBuffer::ClearAllBuffers(void)
         else
             sprintf(buff,"%c",'a'+(r-MAX_QUICK_SEND_BUFFERS));
         SetBuffer(r,(uint8_t *)buff,strlen(buff));
+
+        MW_InformOfSendBufferChange(r);
     }
 }
 

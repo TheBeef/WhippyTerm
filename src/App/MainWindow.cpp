@@ -276,6 +276,35 @@ void MW_RebuildAllBookmarkMenus(void)
 
 /*******************************************************************************
  * NAME:
+ *    MW_InformOfSendBufferChange
+ *
+ * SYNOPSIS:
+ *    void MW_InformOfSendBufferChange(int BufferIndex);
+ *
+ * PARAMETERS:
+ *    BufferIndex [I] -- The send buffer that was changed
+ *
+ * FUNCTION:
+ *    This function is called when there is a change to a send buffer.  It
+ *    sends this info to all the main windows.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MW_InformOfSendBufferChange(int BufferIndex)
+{
+    i_MainWindowsListType MW;
+
+    /* Update all the main windows */
+    for(MW=m_MainWindowsList.begin();MW!=m_MainWindowsList.end();MW++)
+        (*MW)->InformOfSendBufferChange(BufferIndex);
+}
+
+/*******************************************************************************
+ * NAME:
  *    TheMainWindow::TheMainWindow
  *
  * SYNOPSIS:
@@ -406,6 +435,7 @@ void TheMainWindow::ShowWindow(void)
  ******************************************************************************/
 void TheMainWindow::Init(void)
 {
+    int r;
     t_UITabCtrl *PanelCtrl;
 
     /* Restore the session data */
@@ -469,6 +499,10 @@ void TheMainWindow::Init(void)
 
     /* Add all the terminal emulations to the menu */
     RebuildTerminalEmulationMenu();
+
+    /* Update the names of the send buffers in the menu */
+    for(r=0;r<MAX_QUICK_SEND_BUFFERS;r++)
+        InformOfSendBufferChange(r);
 }
 
 /*******************************************************************************
@@ -2556,6 +2590,43 @@ void TheMainWindow::GotoBookmark(uintptr_t ID)
 
     /* Make this new connection the active one */
     SetActiveTab(NewCon);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::InformOfSendBufferChange
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::InformOfSendBufferChange(int BufferIndex);
+ *
+ * PARAMETERS:
+ *    BufferIndex [I] -- The send buffer that was changed.
+ *
+ * FUNCTION:
+ *    This function is called when there is a change to a send buffer.
+ *    It updates the menu name for this send buffer.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::InformOfSendBufferChange(int BufferIndex)
+{
+    e_UIMWMenuType MenuID;
+    e_UIMenuCtrl *SendBufferMenu;
+    string NewName;
+
+    if(BufferIndex>=MAX_QUICK_SEND_BUFFERS)
+        return;
+
+    MenuID=(e_UIMWMenuType)((int)e_UIMWMenu_Buffers_SendBuffer1+BufferIndex);
+    SendBufferMenu=UIMW_GetMenuHandle(UIWin,MenuID);
+    NewName="Send \"";
+    NewName+=g_SendBuffers.GetBufferName(BufferIndex);
+    NewName+="\"";
+    UISetMenuLabel(SendBufferMenu,NewName.c_str());
 }
 
 /*******************************************************************************

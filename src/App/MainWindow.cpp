@@ -3966,6 +3966,7 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
             {
                 FullFilename=UI_ConcatFile2Path(path,file);
                 LoadSettings(FullFilename.c_str());
+                ::ApplySettings();
                 SaveSettings();
             }
         break;

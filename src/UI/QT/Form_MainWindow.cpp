@@ -1652,3 +1652,9 @@ void Form_MainWindow::on_actionURIHelp_triggered()
     DoToolbarTriggered(e_UIMWToolbar_URIHelp);
 }
 
+
+void Form_MainWindow::on_actionDefault_Settings_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_DefaultSettings);
+}
+

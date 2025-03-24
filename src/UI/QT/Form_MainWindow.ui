@@ -1662,6 +1662,8 @@
     <addaction name="separator"/>
     <addaction name="actionImport_Settings"/>
     <addaction name="actionExport_Settings"/>
+    <addaction name="separator"/>
+    <addaction name="actionDefault_Settings"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -2826,6 +2828,11 @@
    </property>
    <property name="toolTip">
     <string>URI Help</string>
+   </property>
+  </action>
+  <action name="actionDefault_Settings">
+   <property name="text">
+    <string>Default Settings...</string>
    </property>
   </action>
  </widget>

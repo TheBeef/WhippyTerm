@@ -3964,6 +3964,7 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_SendBufferSendGeneric -- Prompt user for what buffer to send
  *                  e_Cmd_SendBuffer_EditPrompted -- Prompt and edit a send buffer
  *                  e_Cmd_URIHelp -- User select to copy the URI info the connect URI dialog
+ *                  e_Cmd_Default_Settings -- Default the settings
  *
  * FUNCTION:
  *    This function executes a command.
@@ -4039,6 +4040,7 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
             {
                 FullFilename=UI_ConcatFile2Path(path,file);
                 LoadSettings(FullFilename.c_str());
+                ::ApplySettings();
                 SaveSettings();
             }
         break;
@@ -4390,10 +4392,16 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         case e_Cmd_URIHelp:
             URIInput=UIMW_GetTxtInputHandle(UIWin,e_UIMWTxtInput_URI);
             UIGetTextCtrlText(URIInput,TmpStr);
-            if(RunNewConnectionFromURIDialog(this,&TmpStr))
+            RunNewConnectionFromURIDialog(this,&TmpStr);
+        break;
+        case e_Cmd_Default_Settings:
+            if(UIAsk("Default Settings","Are you sure you want to default the "
+                    "settings",e_AskBox_Question,e_AskBttns_YesNo)==
+                    e_AskRet_Yes)
             {
-//                UISetTextCtrlText(URIInput,TmpStr.c_str());
-//                ReloadTabFromURI(NULL,NULL,TmpStr.c_str());
+                g_Settings.DefaultSettings();
+                SaveSettings();
+                ::ApplySettings();
             }
         break;
         case e_CmdMAX:

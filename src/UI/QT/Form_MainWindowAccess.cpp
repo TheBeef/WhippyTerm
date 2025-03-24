@@ -250,6 +250,8 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionSend_Buffer;
         case e_UIMWMenu_Buffers_EditSenderBuffer:
             return (e_UIMenuCtrl *)realwin->ui->actionEdit_Send_Buffer;
+        case e_UIMWMenu_DefaultSettings:
+            return (e_UIMenuCtrl *)realwin->ui->actionDefault_Settings;
 
         case e_UIMWMenuMAX:
         default:

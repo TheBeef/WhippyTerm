@@ -327,6 +327,8 @@ private slots:
     
     void on_actionURIHelp_triggered();
     
+    void on_actionDefault_Settings_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

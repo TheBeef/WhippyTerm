@@ -20,8 +20,10 @@ struct ReleaseInfo
 //    {   "Title",
 //            "Descrition"},
 //};
-static struct ReleaseNote m_Notes_NEXT[]=
+static struct ReleaseNote m_Notes_Rel1_0_2_0[]=
 {
+    {   "Fixed problem with Linux installer",
+            "The Linux installer was missing a depends for the QT multimedia.  Added it and added version numbers to the packages."},
     {   "Fixed bug with open new connection from URI dialog",
             "Dialog was not setting up options which depending on the device would prevent connection from working."},
     {   "Fixed bug with importing settings does not apply the settings",
@@ -43,6 +45,7 @@ static struct ReleaseNote m_Notes_Rel1_0_0_0[]=
 const struct ReleaseInfo m_ReleaseNotes[]=
 {
 //    {"x.x.x.x","dd Mmm yyyy","NEXT",m_Notes_NEXT,sizeof(m_Notes_NEXT)/sizeof(struct ReleaseNote)},
+    {"1.0.2.0","23 Apr 2025",NULL,m_Notes_Rel1_0_2_0,sizeof(m_Notes_Rel1_0_2_0)/sizeof(struct ReleaseNote)},
     {"1.0.1.0","16 Mar 2025",NULL,m_Notes_Rel1_0_1_0,sizeof(m_Notes_Rel1_0_1_0)/sizeof(struct ReleaseNote)},
     {"1.0.0.0","01 Mar 2025","First Release",m_Notes_Rel1_0_0_0,sizeof(m_Notes_Rel1_0_0_0)/sizeof(struct ReleaseNote)},
 };

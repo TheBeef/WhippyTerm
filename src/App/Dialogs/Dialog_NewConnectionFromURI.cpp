@@ -333,7 +333,11 @@ static bool DNCFU_OpenConnection(class TheMainWindow *MW)
         UIGetTextCtrlText(URICtrl,URI);
 
         if(!IOS_UpdateOptionsFromURI(URI.c_str(),Options))
+<<<<<<< HEAD
             return false;
+=======
+            throw("Invalid URI");
+>>>>>>> Rel1.x
 
         NewConnection=MW->AllocNewTab(NULL,NULL,URI.c_str(),Options);
         if(NewConnection==NULL)

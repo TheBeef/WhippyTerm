@@ -2959,6 +2959,7 @@ void TheMainWindow::ConnectionEvent(const struct ConMWEvent *Event)
         break;
         case ConMWEvent_NewConnection:
             UploadPanel.NewConnectionAllocated(Event->Con);
+            DownloadPanel.NewConnectionAllocated(Event->Con);
             BridgePanel.ConnectionAddedRemoved();
         break;
         case ConMWEvent_DownloadStatUpdate:

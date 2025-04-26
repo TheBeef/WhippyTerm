@@ -20,6 +20,12 @@ struct ReleaseInfo
 //    {   "Title",
 //            "Descrition"},
 //};
+static struct ReleaseNote m_Notes_Rel1_0_3_0[]=
+{
+    {   "Fixed problem where file download didn't know what xmodem was selected by default",
+            "When you went to select download a file you needed to click on the"
+            " protocol input or it would just keep giving an error."},
+};
 static struct ReleaseNote m_Notes_Rel1_0_2_0[]=
 {
     {   "Fixed problem with Linux installer",
@@ -45,6 +51,7 @@ static struct ReleaseNote m_Notes_Rel1_0_0_0[]=
 const struct ReleaseInfo m_ReleaseNotes[]=
 {
 //    {"x.x.x.x","dd Mmm yyyy","NEXT",m_Notes_NEXT,sizeof(m_Notes_NEXT)/sizeof(struct ReleaseNote)},
+//    {"1.0.3.0","xx Apr 2025",NULL,m_Notes_Rel1_0_3_0,sizeof(m_Notes_Rel1_0_3_0)/sizeof(struct ReleaseNote)},
     {"1.0.2.0","23 Apr 2025",NULL,m_Notes_Rel1_0_2_0,sizeof(m_Notes_Rel1_0_2_0)/sizeof(struct ReleaseNote)},
     {"1.0.1.0","16 Mar 2025",NULL,m_Notes_Rel1_0_1_0,sizeof(m_Notes_Rel1_0_1_0)/sizeof(struct ReleaseNote)},
     {"1.0.0.0","01 Mar 2025","First Release",m_Notes_Rel1_0_0_0,sizeof(m_Notes_Rel1_0_0_0)/sizeof(struct ReleaseNote)},

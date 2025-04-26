@@ -15,7 +15,6 @@ Press the green button to build and run.
 You can also build from the command line.
 
 Process for command line build (in Linux anyway):
-
  - cd into WhippyTerm dir
     - **cd WhippyTerm**
  - make a build directory
@@ -27,3 +26,10 @@ Process for command line build (in Linux anyway):
  - this makes a Makefile in the build directory. run the make file (maybe with -j$(nproc) for quicker builds)
     - **make**
  - you will find the "WhippyTerm" exe in the build directory.
+
+### Installing QT
+These are some hints for how to install the needed dev env.
+
+#### Ubuntu 24.04
+Run this line:
+ - **sudo apt install build-essential qt5-qmake qtbase5-dev qtmultimedia5-dev**

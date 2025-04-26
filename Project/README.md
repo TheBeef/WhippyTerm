@@ -1,8 +1,8 @@
-= Building =
+# Building
 These instructions are for the Linux build but most apply to the Windows build as well (at least from inside
 QTCreator).
 
-== QTCreator ==
+## QTCreator
 Most dev is done in QTCreator.
 
 You need to install QTCreator and configure a kit for building with QT5 using gcc.
@@ -11,7 +11,7 @@ Then open the .pro file in this directory.  Configure QTCreator for a Desktop 5 
 
 Press the green button to build and run.
 
-== Command line ==
+## Command line
 You can also build from the command line.
 
 Process for command line build (in Linux anyway):

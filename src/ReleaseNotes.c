@@ -34,7 +34,7 @@ static struct ReleaseNote m_Notes_NEXT[]=
             "Under the Settings menu a new menu item was added that lets "
             "the user set settings back to defaults."},
 };
-static struct ReleaseNote m_Notes_COPIED_FROM_NEXT_REV[]=
+static struct ReleaseNote m_Notes_Rel1_0_2_0[]=
 {
     {   "Fixed bug with open new connection from URI dialog",
             "Dialog was not setting up options which depending on the device would prevent connection from working."},
@@ -57,6 +57,7 @@ static struct ReleaseNote m_Notes_Rel1_0_0_0[]=
 const struct ReleaseInfo m_ReleaseNotes[]=
 {
 //    {"x.x.x.x","dd Mmm yyyy","NEXT",m_Notes_NEXT,sizeof(m_Notes_NEXT)/sizeof(struct ReleaseNote)},
+    {"1.0.2.0","23 Apr 2025",NULL,m_Notes_Rel1_0_2_0,sizeof(m_Notes_Rel1_0_2_0)/sizeof(struct ReleaseNote)},
     {"1.0.1.0","16 Mar 2025",NULL,m_Notes_Rel1_0_1_0,sizeof(m_Notes_Rel1_0_1_0)/sizeof(struct ReleaseNote)},
     {"1.0.0.0","01 Mar 2025","First Release",m_Notes_Rel1_0_0_0,sizeof(m_Notes_Rel1_0_0_0)/sizeof(struct ReleaseNote)},
 };

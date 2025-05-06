@@ -20,6 +20,13 @@ struct ReleaseInfo
 //    {   "Title",
 //            "Descrition"},
 //};
+
+static struct ReleaseNote m_Notes_NEXT[]=
+{
+    {   "Fixed a crash in the edit send buffer dialog",
+            "If you where in the edit buffer on the second nibble and cleared"
+            " the buffer it would crash when you clicked on the hex."},
+};
 static struct ReleaseNote m_Notes_Rel1_0_3_0[]=
 {
     {   "Fixed problem where file download didn't know what xmodem was selected by default",

@@ -409,6 +409,9 @@ void HexDisplayBuffer::SetBufferSize(int Size)
     StartOfData=Buffer;
     InsertPos=Buffer+BufferSize;
     Cursor_Pos=0;
+    Last_Cursor_Pos=0;
+    EditMode=e_HDB_EditState_FirstNib;
+
     ClearSelection();
     MakeOffsetVisable(Cursor_Pos,InAscIIArea,false);
     RebuildDisplay();

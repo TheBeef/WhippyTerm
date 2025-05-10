@@ -163,9 +163,16 @@ bool RunEditSendBufferDialog(int BufferNumber,uint8_t **CustomBuffer,
 
         m_DESB_UseCRCType=g_Session.LastSelectedCRCType;
 
-        Name=g_SendBuffers.GetBufferName(BufferNumber);
         BufferName=UIESB_GetTextInput(e_ESB_TextInput_BufferName);
-        UISetTextCtrlText(BufferName,Name.c_str());
+        if(CustomBuffer==NULL)
+        {
+            Name=g_SendBuffers.GetBufferName(BufferNumber);
+            UISetTextCtrlText(BufferName,Name.c_str());
+        }
+        else
+        {
+            UIEnableTextCtrl(BufferName,false);
+        }
 
         DESB_RethinkButtons();
 

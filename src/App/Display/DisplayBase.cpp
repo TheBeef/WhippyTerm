@@ -1,3 +1,8 @@
+/*
+TODO:
+ - Binary blinks when no focus
+*/
+
 /*******************************************************************************
  * FILENAME: DisplayBase.cpp
  *
@@ -30,17 +35,54 @@
 
 /*** HEADER FILES TO INCLUDE  ***/
 #include "DisplayBase.h"
+#include "App/Dialogs/Dialog_EditSendBuffer.h"
 #include "App/Settings.h"
+#include "App/Settings.h"
+#include "UI/UIAsk.h"
+#include <string>
+#include <string.h>
+
+using namespace std;
 
 /*** DEFINES                  ***/
+#define LOCAL_SEND_BUFFER_STARTING_SIZE         100
 
 /*** MACROS                   ***/
 
 /*** TYPE DEFINITIONS         ***/
 
 /*** FUNCTION PROTOTYPES      ***/
+bool DisplayBase_HexInputEvent(const struct HDEvent *Event);
 
 /*** VARIABLE DEFINITIONS     ***/
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase_HexInputEvent
+ *
+ * SYNOPSIS:
+ *    static bool DisplayBase_HexInputEvent(const struct HDEvent *
+ *              Event);
+ *
+ * PARAMETERS:
+ *    Event [I] -- The event from the hex display buffer.
+ *
+ * FUNCTION:
+ *    This function handles events from the hex display.
+ *
+ * RETURNS:
+ *    true -- Accept this event
+ *    false -- Cancel this event
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayBase_HexInputEvent(const struct HDEvent *Event)
+{
+    class DisplayBase *DT=(class DisplayBase *)Event->ID;
+
+    return DT->DoHexInputEvent(Event);
+}
 
 /*******************************************************************************
  * NAME:
@@ -65,6 +107,8 @@ DisplayBase::DisplayBase()
 {
     Settings=&g_Settings.DefaultConSettings;
     HasFocus=false;
+
+    HexInput=NULL;
 }
 
 /*******************************************************************************
@@ -759,10 +803,10 @@ void DisplayBase::SetOverrideMessage(const char *Msg)
 
 /*******************************************************************************
  * NAME:
- *    DisplayText::ClearScreen
+ *    DisplayBase::ClearScreen
  *
  * SYNOPSIS:
- *    void DisplayText::ClearScreen(e_ScreenClearType Type);
+ *    void DisplayBase::ClearScreen(e_ScreenClearType Type);
  *
  * PARAMETERS:
  *    Type [I] -- The type of clearing we want to do.  Supported types:
@@ -792,10 +836,10 @@ void DisplayBase::ClearScreen(e_ScreenClearType Type)
 
 /*******************************************************************************
  * NAME:
- *    DisplayText::ClearScrollBackBuffer
+ *    DisplayBase::ClearScrollBackBuffer
  *
  * SYNOPSIS:
- *    void DisplayText::ClearScrollBackBuffer(void);
+ *    void DisplayBase::ClearScrollBackBuffer(void);
  *
  * PARAMETERS:
  *    NONE
@@ -816,10 +860,10 @@ void DisplayBase::ClearScrollBackBuffer(void)
 
 /*******************************************************************************
  * NAME:
- *    DisplayText::InsertHorizontalRule
+ *    DisplayBase::InsertHorizontalRule
  *
  * SYNOPSIS:
- *    void DisplayText::InsertHorizontalRule(void);
+ *    void DisplayBase::InsertHorizontalRule(void);
  *
  * PARAMETERS:
  *    NONE
@@ -841,10 +885,10 @@ void DisplayBase::InsertHorizontalRule(void)
 
 /*******************************************************************************
  * NAME:
- *    DisplayText::ResetTerm
+ *    DisplayBase::ResetTerm
  *
  * SYNOPSIS:
- *    void DisplayText::ResetTerm(void);
+ *    void DisplayBase::ResetTerm(void);
  *
  * PARAMETERS:
  *    NONE
@@ -1009,7 +1053,7 @@ t_UIContextMenuCtrl *DisplayBase::GetContextMenuHandle(e_UITD_ContextMenuType UI
 
 /*******************************************************************************
  * NAME:
- *    DisplayText::ClearArea
+ *    DisplayBase::ClearArea
  *
  * SYNOPSIS:
  *    void DisplayBase::ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,
@@ -1089,5 +1133,573 @@ void DisplayBase::ScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,
 void DisplayBase::ShowBell(void)
 {
     /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::DoHexInputEvent
+ *
+ * SYNOPSIS:
+ *    bool DisplayBase::DoHexInputEvent(const struct HDEvent *Event);
+ *
+ * PARAMETERS:
+ *    Event [I] -- The event from the hex input.
+ *
+ * FUNCTION:
+ *    This function is called when there is an event in the hex input control.
+ *
+ * RETURNS:
+ *    true -- Accept this event
+ *    false -- Cancel this event
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayBase::DoHexInputEvent(const struct HDEvent *Event)
+{
+    t_UITextInputCtrl *Offset;
+    char buff[100];
+    switch(Event->EventType)
+    {
+        case e_HDEvent_SelectionEvent:
+        case e_HDEvent_MouseMove:
+        case e_HDEvent_BufferResize:
+        break;
+        case e_HDEvent_CursorMove:
+            Offset=GetSendPanel_HexPosInput();
+            if(Offset==NULL)
+                return true;
+
+            sprintf(buff,"%d",Event->Info.Cursor.Pos);
+            UISetTextCtrlText(Offset,buff);
+        break;
+        case e_HDEvent_ContextMenu:
+            switch(Event->Info.Context.Menu)
+            {
+                case e_UICTW_ContextMenu_Copy:
+                    HexInput->SendSelection2Clipboard(e_Clipboard_Clipboard,
+                            e_HDBCFormat_Default);
+                break;
+                case e_UICTW_ContextMenu_Paste:
+                    HexInput->DoInsertFromClipboard(e_HDBCFormat_Default);
+                break;
+                case e_UICTW_ContextMenu_ClearScreen:
+                    DoBlock_ClearHexInput();
+                break;
+                case e_UICTW_ContextMenu_Edit:
+                    DoBlock_EditHex();
+                break;
+                case e_UICTW_ContextMenu_EndianSwap:
+                case e_UICTW_ContextMenu_ZoomIn:
+                case e_UICTW_ContextMenu_ZoomOut:
+                case e_UICTW_ContextMenuMAX:
+                default:
+                break;
+            }
+        break;
+        case e_HDEventMAX:
+        default:
+        break;
+    }
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetSendPanel_HexPosInput
+ *
+ * SYNOPSIS:
+ *    t_UITextInputCtrl *DisplayBase::GetSendPanel_HexPosInput(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the text input for cursor position.
+ *
+ * RETURNS:
+ *    A handle to the hex cursor position text input in the send panel or NULL
+ *    if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UITextInputCtrl *DisplayBase::GetSendPanel_HexPosInput(void)
+{
+    return NULL;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetSendPanel_HexRadioBttn
+ *
+ * SYNOPSIS:
+ *    t_UIRadioBttnCtrl *DisplayBase::GetSendPanel_HexRadioBttn(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the hex mode radio button.
+ *
+ * RETURNS:
+ *    A handle to the widget or NULL if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIRadioBttnCtrl *DisplayBase::GetSendPanel_HexRadioBttn(void)
+{
+    return NULL;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetSendPanel_TextRadioBttn
+ *
+ * SYNOPSIS:
+ *    t_UIRadioBttnCtrl *DisplayBase::GetSendPanel_TextRadioBttn(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the text mode radio button.
+ *
+ * RETURNS:
+ *    A handle to the widget or NULL if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIRadioBttnCtrl *DisplayBase::GetSendPanel_TextRadioBttn(void)
+{
+    return NULL;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetSendPanel_TextInput
+ *
+ * SYNOPSIS:
+ *    t_UIMuliLineTextInputCtrl *DisplayBase::GetSendPanel_TextInput(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the muliline text to send input.
+ *
+ * RETURNS:
+ *    A handle to the widget or NULL if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIMuliLineTextInputCtrl *DisplayBase::GetSendPanel_TextInput(void)
+{
+    return NULL;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetSendPanel_LineEndInput
+ *
+ * SYNOPSIS:
+ *    t_UIComboBoxCtrl *DisplayBase::GetSendPanel_LineEndInput(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the line end input.
+ *
+ * RETURNS:
+ *    A handle to the widget or NULL if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIComboBoxCtrl *DisplayBase::GetSendPanel_LineEndInput(void)
+{
+    return NULL;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetupHexInput
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetupHexInput(t_UIContainerFrameCtrl *ParentWid);
+ *
+ * PARAMETERS:
+ *    ParentWid [I] -- The widget that this hex input will live
+ *
+ * FUNCTION:
+ *    This function adds a hex input widget and sets it up.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    Throws text if there was an error.
+ *
+ * SEE ALSO:
+ *    DisplayBase::FreeHexInput()
+ ******************************************************************************/
+void DisplayBase::SetupHexInput(t_UIContainerFrameCtrl *ParentWid)
+{
+    t_UIContextMenuCtrl *ContextMenu_ClearScreen;
+    t_UIContextMenuCtrl *ContextMenu_EndianSwap;
+    t_UIContextMenuCtrl *ContextMenu_Edit;
+
+    /* Connect in the hex control */
+    HexInput=new HexDisplayBuffer();
+    if(!HexInput->Init(ParentWid,DisplayBase_HexInputEvent,(uintptr_t)this))
+        throw("Failed to connect hex input to UI");
+
+    HexInput->SetEditMode();
+    HexInput->SetLossOfFocusBehavior(true);
+    HexInput->SetFont(g_Settings.HexDisplaysFontName.c_str(),
+            g_Settings.HexDisplaysFontSize,g_Settings.HexDisplaysFontBold,
+            g_Settings.HexDisplaysFontItalic);
+    HexInput->SetColors(g_Settings.HexDisplaysFGColor,
+            g_Settings.HexDisplaysBGColor,g_Settings.HexDisplaysSelBGColor);
+
+    ContextMenu_ClearScreen=HexInput->GetContextMenuHandle(e_UICTW_ContextMenu_ClearScreen);
+    ContextMenu_EndianSwap=HexInput->GetContextMenuHandle(e_UICTW_ContextMenu_EndianSwap);
+    ContextMenu_Edit=HexInput->GetContextMenuHandle(e_UICTW_ContextMenu_Edit);
+
+    UISetContextMenuVisible(ContextMenu_ClearScreen,true);
+    UISetContextMenuVisible(ContextMenu_EndianSwap,false);
+    UISetContextMenuVisible(ContextMenu_Edit,true);
+
+    HexInput->RebuildDisplay();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::FreeHexInput
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::FreeHexInput(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function frees the stuff that was allocated with SetupHexInput().
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DisplayBase::SetupHexInput()
+ ******************************************************************************/
+void DisplayBase::FreeHexInput(void)
+{
+    if(HexInput!=NULL)
+        delete HexInput;
+    HexInput=NULL;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::DoBlock_ClearHexInput
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::DoBlock_ClearHexInput(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function clears the hex input (after asking the user if they are
+ *    sure)
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::DoBlock_ClearHexInput(void)
+{
+    if(UIAsk("Are you sure?","This will erase all the data.\n"
+            "Are you sure?",e_AskBox_Question,
+            e_AskBttns_YesNo)==e_AskRet_Yes)
+    {
+        HexInput->SetBufferSize(0);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::DoBlock_Send
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::DoBlock_Send(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when the user presses the send button in the
+ *    block area at the bottom.  It sends the currently entered data and the
+ *    line ending.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::DoBlock_Send(void)
+{
+    union DBEventData Info;
+    t_UIRadioBttnCtrl *HexBttn;
+    t_UIMuliLineTextInputCtrl *Text2Send;
+    t_UIComboBoxCtrl *LineEnd;
+    string String2Send;
+    string EndOfLine;
+    const uint8_t *Buffer;
+    int BufferSize;
+
+    HexBttn=GetSendPanel_HexRadioBttn();
+    Text2Send=GetSendPanel_TextInput();
+    LineEnd=GetSendPanel_LineEndInput();
+
+    if(HexBttn==NULL || Text2Send==NULL || LineEnd==NULL)
+        return;
+
+    if(UIIsRadioBttnSelected(HexBttn))
+    {
+        /* We are sending the hex buffer */
+        if(HexInput->GetBufferInfo(&Buffer,&BufferSize))
+        {
+            Info.BlockSend.Buffer=Buffer;
+            Info.BlockSend.Len=BufferSize;
+            SendEvent(e_DBEvent_SendBlockData,&Info);
+        }
+    }
+    else
+    {
+        /* We are sending the text */
+        UIGetMuliLineTextCtrlText(Text2Send,String2Send);
+        switch(UIGetComboBoxSelectedIndex(LineEnd))
+        {
+             case e_Block_LineEnd_CRLF:
+                EndOfLine="\r\n";
+            break;
+            case e_Block_LineEnd_CR:
+                EndOfLine="\r";
+            break;
+            case e_Block_LineEnd_LF:
+                EndOfLine="\n";
+            break;
+            case e_Block_LineEnd_TAB:
+                EndOfLine="\t";
+            break;
+            case e_Block_LineEnd_ESC:
+                EndOfLine="\033";
+            break;
+            case e_Block_LineEnd_NULL:
+                EndOfLine="";
+                EndOfLine.append(1,0);
+            break;
+            case e_Block_LineEnd_None:
+            case e_Block_LineEndMAX:
+            default:
+                EndOfLine="";
+            break;
+        }
+
+        /* We also want to change all \n's to the end of line char */
+        size_t pos = 0;
+        while((pos = String2Send.find('\n', pos)) != std::string::npos)
+        {
+            String2Send.replace(pos,1,EndOfLine);
+            pos+=EndOfLine.length();
+        }
+        String2Send+=EndOfLine;
+
+        Info.BlockSend.Buffer=(uint8_t *)String2Send.c_str();
+        Info.BlockSend.Len=String2Send.length();
+        SendEvent(e_DBEvent_SendBlockData,&Info);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::DoBlock_EditHex
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::DoBlock_EditHex(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when the user presses the edit button in the hex
+ *    area of the block area at the bottom.  It opens the edit dialog.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::DoBlock_EditHex(void)
+{
+    const uint8_t *EditBuffer;
+    uint8_t *EditBufferCopy;
+    int BufferSize;
+
+    EditBufferCopy=NULL;
+    try
+    {
+        if(!HexInput->GetBufferInfo(&EditBuffer,&BufferSize))
+            throw("Failed to get buffer");
+
+        /* We need to copy the buffer because we don't want hex input freeing
+           it on us */
+        EditBufferCopy=(uint8_t *)malloc(BufferSize);
+        if(EditBufferCopy==NULL)
+            throw("Failed to copy the buffer for editing");
+        memcpy(EditBufferCopy,EditBuffer,BufferSize);
+
+        if(RunEditSendBufferDialog(0,&EditBufferCopy,&BufferSize))
+        {
+            HexInput->SetBuffer(EditBufferCopy,BufferSize);
+            EditBufferCopy=NULL;
+        }
+    }
+    catch(const char *Msg)
+    {
+        UIAsk("Error",Msg,e_AskBox_Error,e_AskBttns_Ok);
+    }
+    catch(...)
+    {
+    }
+
+    if(EditBufferCopy!=NULL)
+        free(EditBufferCopy);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::DoBlock_RadioBttnChange
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::DoBlock_RadioBttnChange(void)
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when the user changes the mode of block area
+ *    at the bottom.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::DoBlock_RadioBttnChange(void)
+{
+    t_UIRadioBttnCtrl *HexBttn;
+
+    HexBttn=GetSendPanel_HexRadioBttn();
+
+    if(HexBttn==NULL)
+        return;
+
+    if(UIIsRadioBttnSelected(HexBttn))
+    {
+        /* We are sending the hex buffer */
+        Block_SetHexOrTextMode(false);
+    }
+    else
+    {
+        Block_SetHexOrTextMode(true);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::Block_SetHexOrTextMode
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::Block_SetHexOrTextMode(bool TextMode);
+ *
+ * PARAMETERS:
+ *    TextMode [I] -- Set things for text mode (true), or hex mode (false)
+ *
+ * FUNCTION:
+ *    This function changes the send block panel to text or hex mode.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::Block_SetHexOrTextMode(bool TextMode)
+{
+    t_UIRadioBttnCtrl *HexBttn;
+    t_UIRadioBttnCtrl *TxtBttn;
+    t_UIComboBoxCtrl *LineEndInput;
+
+    HexBttn=GetSendPanel_HexRadioBttn();
+    TxtBttn=GetSendPanel_TextRadioBttn();
+    LineEndInput=GetSendPanel_LineEndInput();
+
+    if(HexBttn==NULL || TxtBttn==NULL || LineEndInput==NULL)
+        return;
+
+    if(TextMode)
+    {
+        UIUnselectRadioBttn(HexBttn);
+        UISelectRadioBttn(TxtBttn);
+        UIEnableComboBox(LineEndInput,true);
+    }
+    else
+    {
+        UISelectRadioBttn(HexBttn);
+        UIUnselectRadioBttn(TxtBttn);
+        UIEnableComboBox(LineEndInput,false);
+    }
+
+    SendPanel_ShowHexOrText(TextMode);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SendPanel_ShowHexOrText
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SendPanel_ShowHexOrText(bool Text);
+ *
+ * PARAMETERS:
+ *    Text [I] -- Show the text input (true) or the hex input (false).
+ *
+ * FUNCTION:
+ *    This function tells the GUI to show the text input or the hex input in
+ *    the send panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SendPanel_ShowHexOrText(bool Text)
+{
 }
 

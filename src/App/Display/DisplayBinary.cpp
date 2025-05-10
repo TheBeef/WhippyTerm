@@ -219,6 +219,11 @@ bool DisplayBinary::Init(void *ParentWidget,class ConSettings *SettingsPtr,
         if(TextDisplayCtrl==NULL)
             throw(0);
 
+        SetupHexInput(UITC_GetSendHexDisplayContainerFrameCtrlHandle(TextDisplayCtrl));
+
+        /* We show hex input because we are binary */
+        Block_SetHexOrTextMode(false);
+
         HexBufferSize=Settings->ScrollBufferLines*HEX_BYTES_PER_LINE;
         if(HexBufferSize<HEX_MIN_LINES*HEX_BYTES_PER_LINE)
             HexBufferSize=HEX_MIN_LINES*HEX_BYTES_PER_LINE;
@@ -315,6 +320,8 @@ bool DisplayBinary::Init(void *ParentWidget,class ConSettings *SettingsPtr,
 DisplayBinary::~DisplayBinary()
 {
     InitCalled=false;
+
+    FreeHexInput();
 
     if(ScrollTimer!=NULL)
         FreeUITimer(ScrollTimer);
@@ -593,15 +600,40 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
             Info.Key.TextLen=Event->Info.Key.TextLen;
             SendEvent(e_DBEvent_KeyEvent,&Info);
         break;
-        case e_TextDisplayEvent_SendBttn:
-            Info.BlockSend.Buffer=Event->Info.SendBttn.Buffer;
-            Info.BlockSend.Len=Event->Info.SendBttn.Len;
-            SendEvent(e_DBEvent_SendBlockData,&Info);
-        break;
         case e_TextDisplayEvent_ContextMenu:
             Info.Context.Menu=(e_UITD_ContextMenuType)Event->Info.Context.Menu;
             SendEvent(e_DBEvent_ContextMenu,&Info);
         break;
+        case e_TextDisplayEvent_ButtonPress:
+            switch(Event->Info.ButtonPress.Bttn)
+            {
+                case e_UITC_Bttn_Send:
+                    DoBlock_Send();
+                break;
+                case e_UITC_Bttn_HexEdit:
+                    DoBlock_EditHex();
+                break;
+                case e_UITC_Bttn_Clear:
+                    DoBlock_ClearHexInput();
+                break;
+                case e_UITC_BttnMAX:
+                default:
+                break;
+            }
+        break;
+        case e_TextDisplayEvent_RadioButtonPress:
+            switch(Event->Info.RadioButton.BttnID)
+            {
+                case e_UITC_RadioButton_Text:
+                case e_UITC_RadioButton_Hex:
+                    DoBlock_RadioBttnChange();
+                break;
+                case e_UITC_RadioButtonMAX:
+                default:
+                break;
+            }
+        break;
+        case e_TextDisplayEvent_ComboxChange:
         case e_TextDisplayEventMAX:
         default:
             return true;
@@ -1298,6 +1330,37 @@ void DisplayBinary::SetCursorStyle(e_TextCursorStyleType Style)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayBinary::SetInFocus
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::SetInFocus(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gives focus to this display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    GetInFocus()
+ ******************************************************************************/
+void DisplayBinary::SetInFocus(void)
+{
+    union DBEventData Info;
+
+    HasFocus=true;
+
+    UITC_SetFocus(TextDisplayCtrl,e_UITCSetFocus_Main);
+
+    Info.Focus.HasFocus=HasFocus;
+    SendEvent(e_DBEvent_FocusChange,&Info);
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayBinary::ResetTerm
  *
  * SYNOPSIS:
@@ -1690,10 +1753,10 @@ void DisplayBinary::ScrollScreen(int dxpx,int dy)
 
 /*******************************************************************************
  * NAME:
- *    DisplayText::GetSelectionString
+ *    DisplayBinary::GetSelectionString
  *
  * SYNOPSIS:
- *    bool DisplayText::GetSelectionString(std::string &Clip);
+ *    bool DisplayBinary::GetSelectionString(std::string &Clip);
  *
  * PARAMETERS:
  *    Clip [O] -- The text from the selection
@@ -2059,7 +2122,185 @@ void DisplayBinary::ApplySettings(void)
         return;
 
     if(g_Settings.MouseCursorIBeam)
-        UITC_SetMouseCursor(TextDisplayCtrl,e_UITD_MouseCursor_IBeam);
+        UITC_SetMouseCursor(TextDisplayCtrl,e_UIMouse_Cursor_IBeam);
     else
-        UITC_SetMouseCursor(TextDisplayCtrl,e_UITD_MouseCursor_Default);
+        UITC_SetMouseCursor(TextDisplayCtrl,e_UIMouse_Cursor_Default);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::SetCursorBlinking
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::SetCursorBlinking(bool Blinking);
+ *
+ * PARAMETERS:
+ *    Blinking [I] -- Is the cursor blinking (true), or on solid (false)
+ *
+ * FUNCTION:
+ *    This function changes if the cursor is blinking or not.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::SetCursorBlinking(bool Blinking)
+{
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    UITC_SetCursorBlinking(TextDisplayCtrl,Blinking);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetSendPanel_HexPosInput
+ *
+ * SYNOPSIS:
+ *    t_UITextInputCtrl *DisplayBinary::GetSendPanel_HexPosInput(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the text input for cursor position.
+ *
+ * RETURNS:
+ *    A handle to the hex cursor position text input in the send panel or NULL
+ *    if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UITextInputCtrl *DisplayBinary::GetSendPanel_HexPosInput(void)
+{
+    return UITC_GetTextInputHandle(TextDisplayCtrl,e_UITC_Txt_Pos);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetSendPanel_HexRadioBttn
+ *
+ * SYNOPSIS:
+ *    t_UIRadioBttnCtrl *DisplayBinary::GetSendPanel_HexRadioBttn(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the hex mode radio button.
+ *
+ * RETURNS:
+ *    A handle to the widget or NULL if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIRadioBttnCtrl *DisplayBinary::GetSendPanel_HexRadioBttn(void)
+{
+    return UITC_GetRadioButton(TextDisplayCtrl,e_UITC_RadioButton_Hex);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetSendPanel_TextRadioBttn
+ *
+ * SYNOPSIS:
+ *    t_UIRadioBttnCtrl *DisplayBinary::GetSendPanel_TextRadioBttn(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the text mode radio button.
+ *
+ * RETURNS:
+ *    A handle to the widget or NULL if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIRadioBttnCtrl *DisplayBinary::GetSendPanel_TextRadioBttn(void)
+{
+    return UITC_GetRadioButton(TextDisplayCtrl,e_UITC_RadioButton_Text);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetSendPanel_TextInput
+ *
+ * SYNOPSIS:
+ *    t_UIMuliLineTextInputCtrl *DisplayBinary::GetSendPanel_TextInput(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the muliline text to send input.
+ *
+ * RETURNS:
+ *    A handle to the widget or NULL if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIMuliLineTextInputCtrl *DisplayBinary::GetSendPanel_TextInput(void)
+{
+    return UITC_GetMuliLineTextInputHandle(TextDisplayCtrl,e_UITC_MuliTxt_TextInput);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetSendPanel_LineEndInput
+ *
+ * SYNOPSIS:
+ *    t_UIComboBoxCtrl *DisplayBinary::GetSendPanel_LineEndInput(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the line end input.
+ *
+ * RETURNS:
+ *    A handle to the widget or NULL if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIComboBoxCtrl *DisplayBinary::GetSendPanel_LineEndInput(void)
+{
+    return UITC_GetComboBoxHandle(TextDisplayCtrl,e_UITC_Combox_LineEnd);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::SendPanel_ShowHexOrText
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::SendPanel_ShowHexOrText(bool Text);
+ *
+ * PARAMETERS:
+ *    Text [I] -- Show the text input (true) or the hex input (false).
+ *
+ * FUNCTION:
+ *    This function tells the GUI to show the text input or the hex input in
+ *    the send panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::SendPanel_ShowHexOrText(bool Text)
+{
+    UITC_SendPanelShowHexOrTextInput(TextDisplayCtrl,Text);
 }

@@ -358,6 +358,16 @@ uintptr_t UIGetComboBoxSelectedEntry(t_UIComboBoxCtrl *ComboBox)
     return (uintptr_t)box->itemData(CurrentIndex).toULongLong();
 }
 
+int UIGetComboBoxSelectedIndex(t_UIComboBoxCtrl *ComboBox)
+{
+    QComboBox *box=(QComboBox *)ComboBox;
+    int CurrentIndex;   // The currently selected index
+
+    CurrentIndex=box->currentIndex();
+
+    return CurrentIndex;
+}
+
 void UISetComboBoxItemToolTip(t_UIComboBoxCtrl *ComboBox,uintptr_t ID,
         const char *Tip)
 {

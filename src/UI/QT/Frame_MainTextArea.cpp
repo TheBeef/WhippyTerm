@@ -1,6 +1,6 @@
 #include "Frame_MainTextArea.h"
 #include "ui_Frame_MainTextArea.h"
-#include "UI/UITextDisplay.h"
+#include "UI/UITextMainArea.h"
 #include <string>
 
 using namespace std;
@@ -34,17 +34,13 @@ Frame_MainTextArea::~Frame_MainTextArea()
 void Frame_MainTextArea::on_BlockSendSend_pushButton_clicked()
 {
     struct TextDisplayEvent NewEvent;
-    string EventStr;
 
     if(EventHandler==nullptr)
         return;
 
-    EventStr=ui->BlockSend_textEdit->toPlainText().toStdString();
-
-    NewEvent.EventType=e_TextDisplayEvent_SendBttn;
+    NewEvent.EventType=e_TextDisplayEvent_ButtonPress;
     NewEvent.ID=ID;
-    NewEvent.Info.SendBttn.Buffer=(uint8_t *)EventStr.c_str();
-    NewEvent.Info.SendBttn.Len=EventStr.length();
+    NewEvent.Info.ButtonPress.Bttn=e_UITC_Bttn_Send;
 
     EventHandler(&NewEvent);
 }
@@ -192,6 +188,83 @@ void Frame_MainTextArea::on_actionEndian_Swap_triggered()
     NewEvent.EventType=e_TextDisplayEvent_ContextMenu;
     NewEvent.ID=ID;
     NewEvent.Info.Context.Menu=e_UITD_ContextMenu_EndianSwap;
+
+    EventHandler(&NewEvent);
+}
+
+
+void Frame_MainTextArea::on_BlockSendHex_Clear_pushButton_clicked()
+{
+    struct TextDisplayEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_ButtonPress;
+    NewEvent.ID=ID;
+    NewEvent.Info.ButtonPress.Bttn=e_UITC_Bttn_Clear;
+
+    EventHandler(&NewEvent);
+}
+
+void Frame_MainTextArea::on_BlockSendHex_Edit_pushButton_clicked()
+{
+    struct TextDisplayEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_ButtonPress;
+    NewEvent.ID=ID;
+    NewEvent.Info.ButtonPress.Bttn=e_UITC_Bttn_HexEdit;
+
+    EventHandler(&NewEvent);
+}
+
+void Frame_MainTextArea::on_BlockSend_TextMode_radioButton_clicked()
+{
+    struct TextDisplayEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_RadioButtonPress;
+    NewEvent.ID=ID;
+
+    NewEvent.Info.RadioButton.BttnID=e_UITC_RadioButton_Text;
+
+    EventHandler(&NewEvent);
+}
+
+void Frame_MainTextArea::on_BlockSend_HexMode_radioButton_clicked()
+{
+    struct TextDisplayEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_RadioButtonPress;
+    NewEvent.ID=ID;
+
+    NewEvent.Info.RadioButton.BttnID=e_UITC_RadioButton_Hex;
+
+    EventHandler(&NewEvent);
+}
+
+void Frame_MainTextArea::on_BlockSend_LineEnd_comboBox_activated(int index)
+{
+    struct TextDisplayEvent NewEvent;
+    uintptr_t ComboxID;   // The ID for this item
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_ComboxChange;
+    NewEvent.ID=ID;
+
+    ComboxID=ui->BlockSend_LineEnd_comboBox->itemData(index).toULongLong();
+    NewEvent.Info.Combox.ID=ComboxID;
+    NewEvent.Info.Combox.BoxID=e_UITC_Combox_LineEnd;
 
     EventHandler(&NewEvent);
 }

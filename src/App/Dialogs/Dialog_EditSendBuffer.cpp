@@ -71,7 +71,6 @@ static void DESB_DoLoadBuffer(void);
 
 /*** VARIABLE DEFINITIONS     ***/
 class HexDisplayBuffer *m_DESB_HexDisplay;
-int m_DESB_BufferNum;
 
 e_CRCType m_DESB_UseCRCType=e_CRC_CRC32;
 uint8_t m_DESB_LastFillValue=0xFF;
@@ -83,10 +82,17 @@ e_INBitsType m_DESB_Bits=e_INBits_16;
  *    RunEditSendBufferDialog
  *
  * SYNOPSIS:
- *    bool RunEditSendBufferDialog(int BufferNumber);
+ *    bool RunEditSendBufferDialog(int BufferNumber,uint8_t **CustomBuffer,
+ *              int *CustomBufferSize);
  *
  * PARAMETERS:
- *    BufferNumber [I] -- What buffer to edit.
+ *    BufferNumber [I] -- What buffer to edit.  This is ignored if
+ *                        'CustomBuffer' is not NULL.
+ *    CustomBuffer [I] -- The buffer to edit if using a custom buffer.  This is
+ *                        a pointer to a pointer because we may free the
+ *                        org pointer and allocate a new one, in that case we
+ *                        need to return the new pointer.
+ *    CustomBufferSize [I] -- The size of 'CustomBuffer'.
  *
  * FUNCTION:
  *    This function shows the edit send buffer dialog.  It will edit the
@@ -99,7 +105,8 @@ e_INBitsType m_DESB_Bits=e_INBits_16;
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool RunEditSendBufferDialog(int BufferNumber)
+bool RunEditSendBufferDialog(int BufferNumber,uint8_t **CustomBuffer,
+        int *CustomBufferSize)
 {
     bool RetValue;
     const uint8_t *Memory;
@@ -115,8 +122,6 @@ bool RunEditSendBufferDialog(int BufferNumber)
     m_DESB_HexDisplay=NULL;
     try
     {
-        m_DESB_BufferNum=BufferNumber;
-
         if(!UIAlloc_EditSendBuffer())
             return false;
 
@@ -127,9 +132,12 @@ bool RunEditSendBufferDialog(int BufferNumber)
             throw("Failed to connect hex display to UI");
         }
 
-        if(!g_SendBuffers.GetBufferInfo(m_DESB_BufferNum,&Memory,&BuffSize))
+        if(CustomBuffer==NULL)
         {
-            throw("Failed to get buffer to edit");
+            if(!g_SendBuffers.GetBufferInfo(BufferNumber,&Memory,&BuffSize))
+            {
+                throw("Failed to get buffer to edit");
+            }
         }
 
         m_DESB_HexDisplay->SetEditMode();
@@ -140,41 +148,60 @@ bool RunEditSendBufferDialog(int BufferNumber)
         m_DESB_HexDisplay->SetColors(g_Settings.HexDisplaysFGColor,
                 g_Settings.HexDisplaysBGColor,g_Settings.HexDisplaysSelBGColor);
 
-        ContextMenu_ClearScreen=m_DESB_HexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_ClearScreen);
-        ContextMenu_EndianSwap=m_DESB_HexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_EndianSwap);
+        ContextMenu_ClearScreen=m_DESB_HexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_ClearScreen);
+        ContextMenu_EndianSwap=m_DESB_HexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_EndianSwap);
 
         UISetContextMenuVisible(ContextMenu_ClearScreen,false);
         UISetContextMenuVisible(ContextMenu_EndianSwap,true);
 
-        m_DESB_HexDisplay->SetBuffer(Memory,BuffSize);
+        if(CustomBuffer==NULL)
+            m_DESB_HexDisplay->SetBuffer(Memory,BuffSize);
+        else
+            m_DESB_HexDisplay->SetBuffer(*CustomBuffer,*CustomBufferSize);
+
         m_DESB_HexDisplay->RebuildDisplay();
 
         m_DESB_UseCRCType=g_Session.LastSelectedCRCType;
 
-        Name=g_SendBuffers.GetBufferName(m_DESB_BufferNum);
+        Name=g_SendBuffers.GetBufferName(BufferNumber);
         BufferName=UIESB_GetTextInput(e_ESB_TextInput_BufferName);
         UISetTextCtrlText(BufferName,Name.c_str());
 
         DESB_RethinkButtons();
 
         RetValue=UIShow_EditSendBuffer();
-
         if(RetValue)
         {
-            BufferName=UIESB_GetTextInput(e_ESB_TextInput_BufferName);
-            UIGetTextCtrlText(BufferName,Name);
-            if(Name=="")
-            {
-                sprintf(buff,"Buffer %d",m_DESB_BufferNum+1);
-                Name=buff;
-            }
-
             if(!m_DESB_HexDisplay->GetBufferInfo(&EditBuffer,&BufferSize))
                 throw("Failed to get buffer");
 
-            g_SendBuffers.SetBufferName(m_DESB_BufferNum,Name.c_str());
-            g_SendBuffers.SetBuffer(m_DESB_BufferNum,EditBuffer,BufferSize);
-            g_SendBuffers.SaveBuffers();
+            if(CustomBuffer==NULL)
+            {
+                BufferName=UIESB_GetTextInput(e_ESB_TextInput_BufferName);
+                UIGetTextCtrlText(BufferName,Name);
+                if(Name=="")
+                {
+                    sprintf(buff,"Buffer %d",BufferNumber+1);
+                    Name=buff;
+                }
+
+                g_SendBuffers.SetBufferName(BufferNumber,Name.c_str());
+                g_SendBuffers.SetBuffer(BufferNumber,EditBuffer,BufferSize);
+                g_SendBuffers.SaveBuffers();
+            }
+            else
+            {
+                /* We are using a custom buffer, free the old one then
+                   copy the data from the hex buffer before we free it */
+                free(*CustomBuffer);
+
+                *CustomBuffer=(uint8_t *)malloc(BufferSize);
+                if(*CustomBuffer==NULL)
+                    throw("Failed to allocate memory needed copy the buffer");
+                memcpy(*CustomBuffer,EditBuffer,BufferSize);
+
+                *CustomBufferSize=BufferSize;
+            }
         }
     }
     catch(const char *Msg)
@@ -423,24 +450,23 @@ static bool DESB_HexDisplayBufferEvent(const struct HDEvent *Event)
         case e_HDEvent_ContextMenu:
             switch(Event->Info.Context.Menu)
             {
-                case e_UITD_ContextMenu_Copy:
+                case e_UICTW_ContextMenu_Copy:
                     m_DESB_HexDisplay->
                             SendSelection2Clipboard(e_Clipboard_Clipboard,
                             e_HDBCFormat_Default);
                 break;
-                case e_UITD_ContextMenu_Paste:
+                case e_UICTW_ContextMenu_Paste:
                     m_DESB_HexDisplay->
                             DoInsertFromClipboard(e_HDBCFormat_Default);
                 break;
-                case e_UITD_ContextMenu_EndianSwap:
+                case e_UICTW_ContextMenu_EndianSwap:
                     DESB_DoEndianSwap();
                 break;
-                case e_UITD_ContextMenu_ClearScreen:
-                case e_UITD_ContextMenu_Edit:
-                case e_UITD_ContextMenu_SendBuffers:
-                case e_UITD_ContextMenu_ZoomIn:
-                case e_UITD_ContextMenu_ZoomOut:
-                case e_UITD_ContextMenuMAX:
+                case e_UICTW_ContextMenu_ClearScreen:
+                case e_UICTW_ContextMenu_Edit:
+                case e_UICTW_ContextMenu_ZoomIn:
+                case e_UICTW_ContextMenu_ZoomOut:
+                case e_UICTW_ContextMenuMAX:
                 default:
                 break;
             }
@@ -1077,8 +1103,8 @@ static void DESB_RethinkButtons(void)
     InsertAsNumber=UIESB_GetButton(e_ESB_Button_InsertAsNumber);
     InsertAsText=UIESB_GetButton(e_ESB_Button_InsertAsText);
     InsertProperties=UIESB_GetButton(e_ESB_Button_InsertProperties);
-    ContextMenu_Copy=m_DESB_HexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_Copy);
-    ContextMenu_EndianSwap=m_DESB_HexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_EndianSwap);
+    ContextMenu_Copy=m_DESB_HexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_Copy);
+    ContextMenu_EndianSwap=m_DESB_HexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_EndianSwap);
 
     FillEnabled=false;
     InsertAsNumberEnabled=false;

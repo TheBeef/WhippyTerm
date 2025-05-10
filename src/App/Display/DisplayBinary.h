@@ -33,7 +33,7 @@
 
 /***  HEADER FILES TO INCLUDE          ***/
 #include "App/Display/DisplayBase.h"
-#include "UI/UITextDisplay.h"
+#include "UI/UITextMainArea.h"
 #include "UI/UITimers.h"
 #include <string>
 #include <stdint.h>
@@ -71,6 +71,7 @@ class DisplayBinary : public DisplayBase
         void WriteChar(uint8_t *Chr);
         void ClearScreen(e_ScreenClearType Type);
         void SetCursorStyle(e_TextCursorStyleType Style);
+        void SetInFocus(void);
         void ClearScrollBackBuffer(void);
         void ResetTerm(void);
         t_UIContextMenuCtrl *GetContextMenuHandle(e_UITD_ContextMenuType UIObj);
@@ -79,6 +80,7 @@ class DisplayBinary : public DisplayBase
         void SelectAll(void);
         bool IsThereASelection(void);
         void ApplySettings(void);
+        void SetCursorBlinking(bool Blinking);
 
     private:
         bool InitCalled;
@@ -135,6 +137,13 @@ class DisplayBinary : public DisplayBase
         void ScrollScreen(int dxpx,int dy);
         bool GetNormalizedSelectionBlocks(struct DisBin_SelectionBlock *Blocks);
         void BuildSelOutputAndAppendData(std::string &Dest,const uint8_t *Src,int Bytes,bool AscII);
+        bool DoHexInputEvent(const struct HDEvent *Event);
+        t_UITextInputCtrl *GetSendPanel_HexPosInput(void);
+        t_UIRadioBttnCtrl *GetSendPanel_HexRadioBttn(void);
+        t_UIRadioBttnCtrl *GetSendPanel_TextRadioBttn(void);
+        t_UIMuliLineTextInputCtrl *GetSendPanel_TextInput(void);
+        t_UIComboBoxCtrl *GetSendPanel_LineEndInput(void);
+        void SendPanel_ShowHexOrText(bool Text);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

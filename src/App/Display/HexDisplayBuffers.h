@@ -33,7 +33,7 @@
 
 /***  HEADER FILES TO INCLUDE          ***/
 #include "App/Display/DisplayBase.h"
-#include "UI/UITextDisplay.h"
+#include "UI/UICustomTextWidget.h"
 #include "UI/UIClipboard.h"
 #include <string>
 
@@ -90,7 +90,7 @@ struct HDEventBufferInfo
 
 struct HDEventContextMenu
 {
-    e_UITD_ContextMenuType Menu;
+    e_UICTW_ContextMenuType Menu;
 };
 
 union HDEventData
@@ -135,7 +135,7 @@ class HexDisplayBuffer
         void GiveFocus(void);
         void SetCanvasSize(int Width,int Height);
         void ApplySettingsChange(void);
-        bool EventHandler(const struct TextDisplayEvent *Event);
+        bool EventHandler(const struct UICTWEvent *Event);
         void SetFont(const char *FontName,int Size,bool Bold,bool Italic);
         void SetColors(uint32_t NewFGColor,uint32_t NewBGColor,uint32_t NewSelBGColor);
         void SetDisplayParms(uint8_t *InsertPos,bool BufferIsCircular);
@@ -156,10 +156,10 @@ class HexDisplayBuffer
         void FillSelectionWithValue(uint8_t Value);
         void FillWithValue(int InsertOffset,const uint8_t *Data,int Bytes,bool Replace);
         void DoInsertFromClipboard(e_HDBCFormatType ClipFormat);
-        t_UIContextMenuCtrl *GetContextMenuHandle(e_UITD_ContextMenuType UIObj);
+        t_UIContextMenuCtrl *GetContextMenuHandle(e_UICTW_ContextMenuType UIObj);
 
     private:
-        t_UITextDisplayCtrl *TextDisplayCtrl;
+        t_UICustomTextWidgetCtrl *TextDisplayCtrl;
         uintptr_t HDID;
         bool (*HDEventHandler)(const struct HDEvent *Event);
         bool FirstResize;   // Is this the resize call we have gotten since we where constructed

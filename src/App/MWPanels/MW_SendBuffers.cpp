@@ -149,9 +149,9 @@ void MWSendBuffers::Setup(class TheMainWindow *Parent,t_UIMainWindow *Win)
     Buffer2SendHexDisplay->SetColors(g_Settings.HexDisplaysFGColor,
             g_Settings.HexDisplaysBGColor,g_Settings.HexDisplaysSelBGColor);
 
-    ContextMenu_Paste=Buffer2SendHexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_Paste);
-    ContextMenu_ClearScreen=Buffer2SendHexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_ClearScreen);
-    ContextMenu_Edit=Buffer2SendHexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_Edit);
+    ContextMenu_Paste=Buffer2SendHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_Paste);
+    ContextMenu_ClearScreen=Buffer2SendHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_ClearScreen);
+    ContextMenu_Edit=Buffer2SendHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_Edit);
 
     UISetContextMenuVisible(ContextMenu_Paste,false);
     UISetContextMenuVisible(ContextMenu_ClearScreen,false);
@@ -334,7 +334,7 @@ void MWSendBuffers::RethinkUI(void)
     SendBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_SendBuffers_Send);
     BufferList=UIMW_GetColumnViewHandle(UIWin,e_UIMWColumnView_Buffers_List);
     SendContextMenu=UIMW_GetContextMenuHandle(UIWin,e_UIMW_ContextMenu_SendBuffers_Send);
-    ContextMenu_Copy=Buffer2SendHexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_Copy);
+    ContextMenu_Copy=Buffer2SendHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_Copy);
 
     BufferSeleced=UIColumnViewHasSelectedEntry(BufferList);
 
@@ -431,19 +431,18 @@ bool MWSendBuffers::SendBuffersBufferEvent(const struct HDEvent *Event)
         case e_HDEvent_ContextMenu:
             switch(Event->Info.Context.Menu)
             {
-                case e_UITD_ContextMenu_Edit:
+                case e_UICTW_ContextMenu_Edit:
                     MW->ExeCmd(e_Cmd_SendBuffer_Edit);
                 break;
-                case e_UITD_ContextMenu_Copy:
+                case e_UICTW_ContextMenu_Copy:
                     Copy2Clip();
                 break;
-                case e_UITD_ContextMenu_EndianSwap:
-                case e_UITD_ContextMenu_ClearScreen:
-                case e_UITD_ContextMenu_SendBuffers:
-                case e_UITD_ContextMenu_Paste:
-                case e_UITD_ContextMenu_ZoomIn:
-                case e_UITD_ContextMenu_ZoomOut:
-                case e_UITD_ContextMenuMAX:
+                case e_UICTW_ContextMenu_EndianSwap:
+                case e_UICTW_ContextMenu_ClearScreen:
+                case e_UICTW_ContextMenu_Paste:
+                case e_UICTW_ContextMenu_ZoomIn:
+                case e_UICTW_ContextMenu_ZoomOut:
+                case e_UICTW_ContextMenuMAX:
                 default:
                 break;
             }
@@ -658,7 +657,7 @@ void MWSendBuffers::EditCurrentBuffer(void)
 
     SelectedBuffer=UIGetColumnViewSelectedEntry(BufferList);
 
-    if(RunEditSendBufferDialog(SelectedBuffer))
+    if(RunEditSendBufferDialog(SelectedBuffer,NULL,0))
     {
         /* Update the UI with any changes */
         Name=g_SendBuffers.GetBufferName(SelectedBuffer);

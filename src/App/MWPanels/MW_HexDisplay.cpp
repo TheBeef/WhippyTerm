@@ -343,8 +343,8 @@ void MWHexDisplay::RethinkUI(void)
     CopyAsBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_HexDisplay_CopyAs);
     PausedCheckbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_HexDisplay_Paused);
 
-    ContextMenu_Copy=IncomingHistoryHexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_Copy);
-    ContextMenu_Paste=IncomingHistoryHexDisplay->GetContextMenuHandle(e_UITD_ContextMenu_Paste);
+    ContextMenu_Copy=IncomingHistoryHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_Copy);
+    ContextMenu_Paste=IncomingHistoryHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_Paste);
 
     ControlsEnabled=PanelActive;
     PauseCheckEnabled=PanelActive;
@@ -618,19 +618,18 @@ bool MWHexDisplay::HexDisplayBufferEvent(const struct HDEvent *Event)
         case e_HDEvent_ContextMenu:
             switch(Event->Info.Context.Menu)
             {
-                case e_UITD_ContextMenu_Copy:
+                case e_UICTW_ContextMenu_Copy:
                     Copy2Clip();
                 break;
-                case e_UITD_ContextMenu_ClearScreen:
+                case e_UICTW_ContextMenu_ClearScreen:
                     Clear();
                 break;
-                case e_UITD_ContextMenu_Edit:
-                case e_UITD_ContextMenu_EndianSwap:
-                case e_UITD_ContextMenu_SendBuffers:
-                case e_UITD_ContextMenu_Paste:
-                case e_UITD_ContextMenu_ZoomIn:
-                case e_UITD_ContextMenu_ZoomOut:
-                case e_UITD_ContextMenuMAX:
+                case e_UICTW_ContextMenu_Edit:
+                case e_UICTW_ContextMenu_EndianSwap:
+                case e_UICTW_ContextMenu_Paste:
+                case e_UICTW_ContextMenu_ZoomIn:
+                case e_UICTW_ContextMenu_ZoomOut:
+                case e_UICTW_ContextMenuMAX:
                 default:
                 break;
             }

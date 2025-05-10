@@ -1,6 +1,6 @@
 #include "UI/UIDebug.h"
 
-#include "UI/UITextDisplay.h"
+#include "UI/UITextMainArea.h"
 #include "Widget_TextCanvas.h"
 #include "main.h"
 #include "UI/UIDebug.h"
@@ -17,6 +17,9 @@
 
 Widget_TextCanvas::Widget_TextCanvas(QWidget *parent) : QWidget(parent)
 {
+    WTCEventHandler=NULL;
+    WTCEventHandlerUserData=0;
+
     CursorX=0;
     CursorY=0;
 
@@ -765,10 +768,10 @@ int Widget_TextCanvas::CalTextFragWidth(QFontMetrics *fm,
     if(!ForcedAttrib)
     {
         if(Bold)
-            if(!(DrawAttribMask&UITC_DRAWMASK_BOLD))
+            if(!(DrawAttribMask&UITD_DRAWMASK_BOLD))
                 Bold=false;
         if(Italic)
-            if(!(DrawAttribMask&UITC_DRAWMASK_ITALIC))
+            if(!(DrawAttribMask&UITD_DRAWMASK_ITALIC))
                 Italic=false;
     }
 
@@ -842,43 +845,43 @@ int Widget_TextCanvas::DrawTextFrag(QPainter *painter,QFontMetrics *fm,
     if(!ForcedAttrib)
     {
         if(LineThough)
-            if(!(DrawAttribMask&UITC_DRAWMASK_LINETHROUGH))
+            if(!(DrawAttribMask&UITD_DRAWMASK_LINETHROUGH))
                 LineThough=false;
         if(Bold)
-            if(!(DrawAttribMask&UITC_DRAWMASK_BOLD))
+            if(!(DrawAttribMask&UITD_DRAWMASK_BOLD))
                 Bold=false;
         if(Italic)
-            if(!(DrawAttribMask&UITC_DRAWMASK_ITALIC))
+            if(!(DrawAttribMask&UITD_DRAWMASK_ITALIC))
                 Italic=false;
         if(Outline)
-            if(!(DrawAttribMask&UITC_DRAWMASK_OUTLINE))
+            if(!(DrawAttribMask&UITD_DRAWMASK_OUTLINE))
                 Outline=false;
         if(RoundBox)
-            if(!(DrawAttribMask&UITC_DRAWMASK_ROUNDBOX))
+            if(!(DrawAttribMask&UITD_DRAWMASK_ROUNDBOX))
                 RoundBox=false;
         if(Overline)
-            if(!(DrawAttribMask&UITC_DRAWMASK_OVERLINE))
+            if(!(DrawAttribMask&UITD_DRAWMASK_OVERLINE))
                 Overline=false;
         if(Underline)
-            if(!(DrawAttribMask&UITC_DRAWMASK_UNDERLINE))
+            if(!(DrawAttribMask&UITD_DRAWMASK_UNDERLINE))
                 Underline=false;
         if(DoubleUnderline)
-            if(!(DrawAttribMask&UITC_DRAWMASK_UNDERLINE_DOUBLE))
+            if(!(DrawAttribMask&UITD_DRAWMASK_UNDERLINE_DOUBLE))
                 DoubleUnderline=false;
         if(DottedUnderline)
-            if(!(DrawAttribMask&UITC_DRAWMASK_UNDERLINE_DOTTED))
+            if(!(DrawAttribMask&UITD_DRAWMASK_UNDERLINE_DOTTED))
                 DottedUnderline=false;
         if(DashedUnderline)
-            if(!(DrawAttribMask&UITC_DRAWMASK_UNDERLINE_DASHED))
+            if(!(DrawAttribMask&UITD_DRAWMASK_UNDERLINE_DASHED))
                 DashedUnderline=false;
         if(WavyUnderline)
-            if(!(DrawAttribMask&UITC_DRAWMASK_UNDERLINE_WAVY))
+            if(!(DrawAttribMask&UITD_DRAWMASK_UNDERLINE_WAVY))
                 WavyUnderline=false;
         if(ReverseAttrib)
-            if(!(DrawAttribMask&UITC_DRAWMASK_REVERSE))
+            if(!(DrawAttribMask&UITD_DRAWMASK_REVERSE))
                 ReverseAttrib=false;
         if(ColorAttrib)
-            if(!(DrawAttribMask&UITC_DRAWMASK_COLOR_ATTRIB))
+            if(!(DrawAttribMask&UITD_DRAWMASK_COLOR_ATTRIB))
                 ColorAttrib=false;
     }
 
@@ -1674,16 +1677,16 @@ void Widget_TextCanvas::ShowBell(void)
 //    connect(a,SIGNAL(finished()),this,SLOT(hideThisWidget()));
 }
 
-void Widget_TextCanvas::SetMouseCursor(e_UITD_MouseCursorType Cursor)
+void Widget_TextCanvas::SetMouseCursor(e_UIMouse_CursorType Cursor)
 {
     switch(Cursor)
     {
-        case e_UITD_MouseCursor_Default:
-        case e_UITD_MouseCursorMAX:
+        case e_UIMouse_Cursor_Default:
+        case e_UIMouse_CursorMAX:
         default:
             setCursor(QCursor(Qt::ArrowCursor));
         break;
-        case e_UITD_MouseCursor_IBeam:
+        case e_UIMouse_Cursor_IBeam:
             setCursor(QCursor(Qt::IBeamCursor));
         break;
     }

@@ -201,6 +201,7 @@ void UIStyleComboBoxItem(t_UIComboBoxCtrl *ComboBox,uintptr_t ID,
         uint32_t Styles);
 void UISetComboBoxSelectedEntry(t_UIComboBoxCtrl *ComboBox,uintptr_t ID);
 uintptr_t UIGetComboBoxSelectedEntry(t_UIComboBoxCtrl *ComboBox);
+int UIGetComboBoxSelectedIndex(t_UIComboBoxCtrl *ComboBox);
 void UISetComboBoxItemToolTip(t_UIComboBoxCtrl *ComboBox,uintptr_t ID,
         const char *Tip);
 void UIGetComboBoxText(t_UIComboBoxCtrl *ComboBox,std::string &Text);

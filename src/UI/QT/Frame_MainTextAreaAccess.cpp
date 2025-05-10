@@ -29,7 +29,7 @@
  ******************************************************************************/
 
 /*** HEADER FILES TO INCLUDE  ***/
-#include "UI/UITextDisplay.h"
+#include "UI/UITextMainArea.h"
 #include "Frame_MainTextArea.h"
 
 /*** DEFINES                  ***/
@@ -190,6 +190,87 @@ t_UIContextMenuCtrl *UITC_GetContextMenuHandle(t_UITextDisplayCtrl *ctrl,e_UITD_
         case e_UITD_ContextMenu_EndianSwap:
             return (t_UIContextMenuCtrl *)TextDisplay->ui->actionEndian_Swap;
         case e_UITD_ContextMenuMAX:
+        default:
+            break;
+    }
+    return NULL;
+}
+
+t_UIButtonCtrl *UITC_GetButtonHandle(t_UITextDisplayCtrl *ctrl,e_UITC_BttnType Bttn)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    switch(Bttn)
+    {
+        case e_UITC_Bttn_Send:
+            return (t_UIButtonCtrl *)TextDisplay->ui->BlockSendSend_pushButton;
+        case e_UITC_Bttn_HexEdit:
+            return (t_UIButtonCtrl *)TextDisplay->ui->BlockSendHex_Edit_pushButton;
+        case e_UITC_Bttn_Clear:
+            return (t_UIButtonCtrl *)TextDisplay->ui->BlockSendHex_Clear_pushButton;
+        case e_UITC_BttnMAX:
+        default:
+            break;
+    }
+    return NULL;
+}
+
+t_UITextInputCtrl *UITC_GetTextInputHandle(t_UITextDisplayCtrl *ctrl,e_UITC_TxtType Txt)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    switch(Txt)
+    {
+        case e_UITC_Txt_Pos:
+            return (t_UITextInputCtrl *)TextDisplay->ui->BlockSendHex_Position_lineEdit;
+        case e_UITC_TxtMAX:
+        default:
+            break;
+    }
+    return NULL;
+}
+
+t_UIMuliLineTextInputCtrl *UITC_GetMuliLineTextInputHandle(t_UITextDisplayCtrl *ctrl,e_UITC_MuliTxtType Txt)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    switch(Txt)
+    {
+        case e_UITC_MuliTxt_TextInput:
+            return (t_UIMuliLineTextInputCtrl *)TextDisplay->ui->BlockSend_textEdit;
+        case e_UITC_MuliTxtMAX:
+        default:
+            break;
+    }
+    return NULL;
+}
+
+t_UIRadioBttnCtrl *UITC_GetRadioButton(t_UITextDisplayCtrl *ctrl,e_UITC_RadioButtonType bttn)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    switch(bttn)
+    {
+        case e_UITC_RadioButton_Text:
+            return (t_UIRadioBttnCtrl *)TextDisplay->ui->BlockSend_TextMode_radioButton;
+        case e_UITC_RadioButton_Hex:
+            return (t_UIRadioBttnCtrl *)TextDisplay->ui->BlockSend_HexMode_radioButton;
+        case e_UITC_RadioButtonMAX:
+        default:
+            break;
+    }
+    return NULL;
+}
+
+t_UIComboBoxCtrl *UITC_GetComboBoxHandle(t_UITextDisplayCtrl *ctrl,e_UITC_ComboxType UIObj)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    switch(UIObj)
+    {
+        case e_UITC_Combox_LineEnd:
+            return (t_UIComboBoxCtrl *)TextDisplay->ui->BlockSend_LineEnd_comboBox;
+        case e_UITC_ComboxMAX:
         default:
             break;
     }
@@ -1130,7 +1211,7 @@ void UITC_ShowBellIcon(t_UITextDisplayCtrl *ctrl)
  *
  * SYNOPSIS:
  *    void UITC_SetMouseCursor(t_UITextDisplayCtrl *ctrl,
- *              e_UITD_MouseCursorType Cursor);
+ *              e_UIMouse_CursorType Cursor);
  *
  * PARAMETERS:
  *    ctrl [I] -- The control to work on
@@ -1145,9 +1226,51 @@ void UITC_ShowBellIcon(t_UITextDisplayCtrl *ctrl)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UITC_SetMouseCursor(t_UITextDisplayCtrl *ctrl,e_UITD_MouseCursorType Cursor)
+void UITC_SetMouseCursor(t_UITextDisplayCtrl *ctrl,e_UIMouse_CursorType Cursor)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
     TextDisplay->ui->TextDisplay->SetMouseCursor(Cursor);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_GetSendHexDisplayContainerFrameCtrlHandle
+ *
+ * SYNOPSIS:
+ *    t_UIContainerFrameCtrl *UITC_GetSendHexDisplayContainerFrameCtrlHandle(t_UITextDisplayCtrl *ctrl);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- What control to work on
+ *
+ * FUNCTION:
+ *    This function gets the container that the send hex input lives.
+ *
+ * RETURNS:
+ *    A pointer to the send hex input container.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIContainerFrameCtrl *UITC_GetSendHexDisplayContainerFrameCtrlHandle(t_UITextDisplayCtrl *ctrl)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    return (t_UIContainerFrameCtrl *)TextDisplay->ui->BlockSendHex_frame;
+}
+
+void UITC_SendPanelShowHexOrTextInput(t_UITextDisplayCtrl *ctrl,bool ShowText)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    if(ShowText)
+    {
+        TextDisplay->ui->BlockSend_textEdit->setVisible(true);
+        TextDisplay->ui->SendPanelHexView_widget->setVisible(false);
+    }
+    else
+    {
+        TextDisplay->ui->BlockSend_textEdit->setVisible(false);
+        TextDisplay->ui->SendPanelHexView_widget->setVisible(true);
+    }
 }

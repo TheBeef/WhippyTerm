@@ -152,6 +152,8 @@ DisplayText::DisplayText()
 
 DisplayText::~DisplayText()
 {
+    FreeHexInput();
+
     if(ScrollTimer!=NULL)
         FreeUITimer(ScrollTimer);
 
@@ -207,6 +209,11 @@ bool DisplayText::Init(void *ParentWidget,class ConSettings *SettingsPtr,
                 DisplayText_EventHandlerCB,(uintptr_t)this);
         if(TextDisplayCtrl==NULL)
             throw(0);
+
+        SetupHexInput(UITC_GetSendHexDisplayContainerFrameCtrlHandle(TextDisplayCtrl));
+
+        /* We show hex input because we are text */
+        Block_SetHexOrTextMode(true);
 
         /* Current Style */
         CurrentStyle.FGColor=Settings->DefaultColors[e_DefaultColors_FG];
@@ -440,15 +447,40 @@ bool DisplayText::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
             Info.Key.TextLen=Event->Info.Key.TextLen;
             SendEvent(e_DBEvent_KeyEvent,&Info);
         break;
-        case e_TextDisplayEvent_SendBttn:
-            Info.BlockSend.Buffer=Event->Info.SendBttn.Buffer;
-            Info.BlockSend.Len=Event->Info.SendBttn.Len;
-            SendEvent(e_DBEvent_SendBlockData,&Info);
-        break;
         case e_TextDisplayEvent_ContextMenu:
             Info.Context.Menu=(e_UITD_ContextMenuType)Event->Info.Context.Menu;
             SendEvent(e_DBEvent_ContextMenu,&Info);
         break;
+        case e_TextDisplayEvent_ButtonPress:
+            switch(Event->Info.ButtonPress.Bttn)
+            {
+                case e_UITC_Bttn_Send:
+                    DoBlock_Send();
+                break;
+                case e_UITC_Bttn_HexEdit:
+                    DoBlock_EditHex();
+                break;
+                case e_UITC_Bttn_Clear:
+                    DoBlock_ClearHexInput();
+                break;
+                case e_UITC_BttnMAX:
+                default:
+                break;
+            }
+        break;
+        case e_TextDisplayEvent_RadioButtonPress:
+            switch(Event->Info.RadioButton.BttnID)
+            {
+                case e_UITC_RadioButton_Text:
+                case e_UITC_RadioButton_Hex:
+                    DoBlock_RadioBttnChange();
+                break;
+                case e_UITC_RadioButtonMAX:
+                default:
+                break;
+            }
+        break;
+        case e_TextDisplayEvent_ComboxChange:
         case e_TextDisplayEventMAX:
         default:
             return true;
@@ -1445,9 +1477,9 @@ void DisplayText::ApplySettings(void)
     SetupCanvas();
 
     if(g_Settings.MouseCursorIBeam)
-        UITC_SetMouseCursor(TextDisplayCtrl,e_UITD_MouseCursor_IBeam);
+        UITC_SetMouseCursor(TextDisplayCtrl,e_UIMouse_Cursor_IBeam);
     else
-        UITC_SetMouseCursor(TextDisplayCtrl,e_UITD_MouseCursor_Default);
+        UITC_SetMouseCursor(TextDisplayCtrl,e_UIMouse_Cursor_Default);
 
     RedrawFullScreen();
 }
@@ -5654,3 +5686,153 @@ void DisplayText::ShowBell(void)
     UITC_ShowBellIcon(TextDisplayCtrl);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::GetSendPanel_HexPosInput
+ *
+ * SYNOPSIS:
+ *    t_UITextInputCtrl *DisplayText::GetSendPanel_HexPosInput(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the text input for cursor position.
+ *
+ * RETURNS:
+ *    A handle to the hex cursor position text input in the send panel or NULL
+ *    if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UITextInputCtrl *DisplayText::GetSendPanel_HexPosInput(void)
+{
+    return UITC_GetTextInputHandle(TextDisplayCtrl,e_UITC_Txt_Pos);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::GetSendPanel_HexRadioBttn
+ *
+ * SYNOPSIS:
+ *    t_UIRadioBttnCtrl *DisplayText::GetSendPanel_HexRadioBttn(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the hex mode radio button.
+ *
+ * RETURNS:
+ *    A handle to the widget or NULL if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIRadioBttnCtrl *DisplayText::GetSendPanel_HexRadioBttn(void)
+{
+    return UITC_GetRadioButton(TextDisplayCtrl,e_UITC_RadioButton_Hex);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::GetSendPanel_TextRadioBttn
+ *
+ * SYNOPSIS:
+ *    t_UIRadioBttnCtrl *DisplayText::GetSendPanel_TextRadioBttn(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the text mode radio button.
+ *
+ * RETURNS:
+ *    A handle to the widget or NULL if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIRadioBttnCtrl *DisplayText::GetSendPanel_TextRadioBttn(void)
+{
+    return UITC_GetRadioButton(TextDisplayCtrl,e_UITC_RadioButton_Text);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::GetSendPanel_TextInput
+ *
+ * SYNOPSIS:
+ *    t_UIMuliLineTextInputCtrl *DisplayText::GetSendPanel_TextInput(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the muliline text to send input.
+ *
+ * RETURNS:
+ *    A handle to the widget or NULL if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIMuliLineTextInputCtrl *DisplayText::GetSendPanel_TextInput(void)
+{
+    return UITC_GetMuliLineTextInputHandle(TextDisplayCtrl,e_UITC_MuliTxt_TextInput);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::GetSendPanel_LineEndInput
+ *
+ * SYNOPSIS:
+ *    t_UIComboBoxCtrl *DisplayText::GetSendPanel_LineEndInput(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the line end input.
+ *
+ * RETURNS:
+ *    A handle to the widget or NULL if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIComboBoxCtrl *DisplayText::GetSendPanel_LineEndInput(void)
+{
+    return UITC_GetComboBoxHandle(TextDisplayCtrl,e_UITC_Combox_LineEnd);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::SendPanel_ShowHexOrText
+ *
+ * SYNOPSIS:
+ *    void DisplayText::SendPanel_ShowHexOrText(bool Text);
+ *
+ * PARAMETERS:
+ *    Text [I] -- Show the text input (true) or the hex input (false).
+ *
+ * FUNCTION:
+ *    This function tells the GUI to show the text input or the hex input in
+ *    the send panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::SendPanel_ShowHexOrText(bool Text)
+{
+    UITC_SendPanelShowHexOrTextInput(TextDisplayCtrl,Text);
+}

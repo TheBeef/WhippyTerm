@@ -40,6 +40,21 @@
 /***  DEFINES                          ***/
 #define MAX_BYTES_PER_CHAR  32
 
+#define UITD_DRAWMASK_BOLD                  0x0001
+#define UITD_DRAWMASK_UNDERLINE             0x0002
+#define UITD_DRAWMASK_UNDERLINE_DOUBLE      0x0004
+#define UITD_DRAWMASK_UNDERLINE_DOTTED      0x0008
+#define UITD_DRAWMASK_UNDERLINE_DASHED      0x0010
+#define UITD_DRAWMASK_UNDERLINE_WAVY        0x0020
+#define UITD_DRAWMASK_OVERLINE              0x0040
+#define UITD_DRAWMASK_LINETHROUGH           0x0080
+#define UITD_DRAWMASK_ITALIC                0x0100
+#define UITD_DRAWMASK_REVERSE               0x0200
+#define UITD_DRAWMASK_OUTLINE               0x0400
+#define UITD_DRAWMASK_BOX                   0x0800
+#define UITD_DRAWMASK_ROUNDBOX              0x1000
+#define UITD_DRAWMASK_COLOR_ATTRIB          0x2000
+
 /***  MACROS                           ***/
 
 /***  TYPE DEFINITIONS                 ***/

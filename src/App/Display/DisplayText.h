@@ -32,7 +32,7 @@
 #define __DISPLAYTEXT_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
-#include "UI/UITextDisplay.h"
+#include "UI/UITextMainArea.h"
 #include "App/Display/DisplayBase.h"
 #include "UI/UITimers.h"
 #include <stdint.h>
@@ -255,6 +255,12 @@ class DisplayText : public DisplayBase
         void ScrollVertAreaDown(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dy);
         void ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dy);
         void DEBUG_ForceRedrawOfScreen(void);
+        t_UITextInputCtrl *GetSendPanel_HexPosInput(void);
+        t_UIRadioBttnCtrl *GetSendPanel_HexRadioBttn(void);
+        t_UIRadioBttnCtrl *GetSendPanel_TextRadioBttn(void);
+        t_UIMuliLineTextInputCtrl *GetSendPanel_TextInput(void);
+        t_UIComboBoxCtrl *GetSendPanel_LineEndInput(void);
+        void SendPanel_ShowHexOrText(bool Text);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

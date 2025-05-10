@@ -49,6 +49,16 @@ private slots:
     
     void on_actionEndian_Swap_triggered();
     
+    void on_BlockSendHex_Clear_pushButton_clicked();
+    
+    void on_BlockSendHex_Edit_pushButton_clicked();
+    
+    void on_BlockSend_TextMode_radioButton_clicked();
+    
+    void on_BlockSend_HexMode_radioButton_clicked();
+    
+    void on_BlockSend_LineEnd_comboBox_activated(int index);
+    
 private:
 };
 

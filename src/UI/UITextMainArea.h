@@ -1,13 +1,18 @@
 /*******************************************************************************
- * FILENAME: UITextDisplay.h
+ * FILENAME: UITextMainArea.h
  * 
  * PROJECT:
  *    Whippy Term
  *
  * FILE DESCRIPTION:
- *    This file has the access functions and defines for the text display
- *    control in it (it is a custom control and big enough that it gets
- *    it's own file outside of UIControl.h)
+ *    This file has the access functions and defines for the main frame that
+ *    has the text display control in it (it is a custom control and big
+ *    enough that it gets it's own file outside of UIControl.h) as well as
+ *    any controls for that text area (basicly the contents of a main window
+ *    tab).
+ *
+ *    See also: UICustomTextInput.h for just the text input area without the
+ *    send panel and other things that go in a tab.
  *
  * COPYRIGHT:
  *    Copyright 2023 Paul Hutchinson.
@@ -35,38 +40,18 @@
 
 /***  HEADER FILES TO INCLUDE          ***/
 #include "PluginSDK/KeyDefines.h"
+#include "UI/UIMouse.h"
 #include "UI/UITextDefs.h"
 #include "UI/UIControl.h"
 #include <stdint.h>
 
 /***  DEFINES                          ***/
-#define UITC_DRAWMASK_BOLD                  0x0001
-#define UITC_DRAWMASK_UNDERLINE             0x0002
-#define UITC_DRAWMASK_UNDERLINE_DOUBLE      0x0004
-#define UITC_DRAWMASK_UNDERLINE_DOTTED      0x0008
-#define UITC_DRAWMASK_UNDERLINE_DASHED      0x0010
-#define UITC_DRAWMASK_UNDERLINE_WAVY        0x0020
-#define UITC_DRAWMASK_OVERLINE              0x0040
-#define UITC_DRAWMASK_LINETHROUGH           0x0080
-#define UITC_DRAWMASK_ITALIC                0x0100
-#define UITC_DRAWMASK_REVERSE               0x0200
-#define UITC_DRAWMASK_OUTLINE               0x0400
-#define UITC_DRAWMASK_BOX                   0x0800
-#define UITC_DRAWMASK_ROUNDBOX              0x1000
-#define UITC_DRAWMASK_COLOR_ATTRIB          0x2000
 
 /***  MACROS                           ***/
 
 /***  TYPE DEFINITIONS                 ***/
 struct UITextDisplay {int x;};
 typedef struct UITextDisplay t_UITextDisplayCtrl;
-
-typedef enum
-{
-    e_UITD_MouseCursor_Default,
-    e_UITD_MouseCursor_IBeam,
-    e_UITD_MouseCursorMAX
-} e_UITD_MouseCursorType;
 
 typedef enum
 {
@@ -80,6 +65,39 @@ typedef enum
     e_UITD_ContextMenu_EndianSwap,
     e_UITD_ContextMenuMAX
 } e_UITD_ContextMenuType;
+
+typedef enum
+{
+    e_UITC_Bttn_Send,
+    e_UITC_Bttn_HexEdit,
+    e_UITC_Bttn_Clear,
+    e_UITC_BttnMAX
+} e_UITC_BttnType;
+
+typedef enum
+{
+    e_UITC_Txt_Pos,
+    e_UITC_TxtMAX
+} e_UITC_TxtType;
+
+typedef enum
+{
+    e_UITC_RadioButton_Text,
+    e_UITC_RadioButton_Hex,
+    e_UITC_RadioButtonMAX
+} e_UITC_RadioButtonType;
+
+typedef enum
+{
+    e_UITC_Combox_LineEnd,
+    e_UITC_ComboxMAX
+} e_UITC_ComboxType;
+
+typedef enum
+{
+    e_UITC_MuliTxt_TextInput,
+    e_UITC_MuliTxtMAX
+} e_UITC_MuliTxtType;
 
 /* Events */
 typedef enum
@@ -98,8 +116,10 @@ typedef enum
     e_TextDisplayEvent_LostFocus,
     e_TextDisplayEvent_GotFocus,
     e_TextDisplayEvent_KeyEvent,
-    e_TextDisplayEvent_SendBttn,
     e_TextDisplayEvent_ContextMenu,
+    e_TextDisplayEvent_ButtonPress,
+    e_TextDisplayEvent_ComboxChange,
+    e_TextDisplayEvent_RadioButtonPress,
     e_TextDisplayEventMAX
 } e_TextDisplayEventType;
 
@@ -134,10 +154,20 @@ struct TextDisplayEventKeyPress
     unsigned int TextLen;
 };
 
-struct TextDisplayEventSendBttn
+struct TextDisplayEventButtonPress
 {
-    const uint8_t *Buffer;
-    int Len;
+    e_UITC_BttnType Bttn;
+};
+
+struct TextDisplayEventCombox
+{
+    uintptr_t ID;
+    e_UITC_ComboxType BoxID;
+};
+
+struct TextDisplayEventRadioBttn
+{
+    e_UITC_RadioButtonType BttnID;
 };
 
 struct TextDisplayEventContextMenu
@@ -152,8 +182,10 @@ union TextDisplayEventData
     struct TextDisplayEventDataWheel MouseWheel;
     struct TextDisplayEventDataSize NewSize;
     struct TextDisplayEventKeyPress Key;
-    struct TextDisplayEventSendBttn SendBttn;
     struct TextDisplayEventContextMenu Context;
+    struct TextDisplayEventButtonPress ButtonPress;
+    struct TextDisplayEventCombox Combox;
+    struct TextDisplayEventRadioBttn RadioButton;
 };
 
 struct TextDisplayEvent
@@ -185,6 +217,7 @@ void UITC_Reparent(t_UITextDisplayCtrl *ctrl,void *NewParentWidget);
 
 /* Control */
 void UITC_ShowSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible);
+void UITC_SendPanelShowHexOrTextInput(t_UITextDisplayCtrl *ctrl,bool ShowText);
 void UITC_SetCursorBlinking(t_UITextDisplayCtrl *ctrl,bool Blinking);
 void UITC_SetCursorPos(t_UITextDisplayCtrl *ctrl,unsigned int x,unsigned int y);
 void UITC_SetFocus(t_UITextDisplayCtrl *ctrl,e_UITCSetFocusType What);
@@ -194,6 +227,12 @@ void UITC_SetSelectionAvailable(t_UITextDisplayCtrl *ctrl,bool Available);
 t_UIScrollBarCtrl *UITC_GetHorzSlider(t_UITextDisplayCtrl *ctrl);
 t_UIScrollBarCtrl *UITC_GetVertSlider(t_UITextDisplayCtrl *ctrl);
 t_UIContextMenuCtrl *UITC_GetContextMenuHandle(t_UITextDisplayCtrl *ctrl,e_UITD_ContextMenuType UIObj);
+t_UIContainerFrameCtrl *UITC_GetSendHexDisplayContainerFrameCtrlHandle(t_UITextDisplayCtrl *ctrl);
+t_UIButtonCtrl *UITC_GetButtonHandle(t_UITextDisplayCtrl *ctrl,e_UITC_BttnType Bttn);
+t_UITextInputCtrl *UITC_GetTextInputHandle(t_UITextDisplayCtrl *ctrl,e_UITC_TxtType Txt);
+t_UIRadioBttnCtrl *UITC_GetRadioButton(t_UITextDisplayCtrl *ctrl,e_UITC_RadioButtonType bttn);
+t_UIComboBoxCtrl *UITC_GetComboBoxHandle(t_UITextDisplayCtrl *ctrl,e_UITC_ComboxType UIObj);
+t_UIMuliLineTextInputCtrl *UITC_GetMuliLineTextInputHandle(t_UITextDisplayCtrl *ctrl,e_UITC_MuliTxtType Txt);
 
 /* Info */
 int UITC_GetFragWidth(t_UITextDisplayCtrl *ctrl,const struct TextCanvasFrag *Frag);
@@ -225,7 +264,7 @@ void UITC_RedrawScreen(t_UITextDisplayCtrl *ctrl);
 void UITC_SetDrawMask(t_UITextDisplayCtrl *ctrl,uint16_t Mask);
 
 void UITC_ShowBellIcon(t_UITextDisplayCtrl *ctrl);
-void UITC_SetMouseCursor(t_UITextDisplayCtrl *ctrl,e_UITD_MouseCursorType Cursor);
+void UITC_SetMouseCursor(t_UITextDisplayCtrl *ctrl,e_UIMouse_CursorType Cursor);
 
 
 #endif

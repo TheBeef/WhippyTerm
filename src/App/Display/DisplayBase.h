@@ -32,8 +32,9 @@
 #define __DISPLAYBASE_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
+#include "App/Display/HexDisplayBuffers.h"
 #include "UI/UIMainWindow.h"
-#include "UI/UITextDisplay.h"
+#include "UI/UITextMainArea.h"
 #include "UI/UITextDefs.h"
 #include <stdint.h>
 #include <string>
@@ -64,6 +65,18 @@ typedef enum
     e_ScreenClear_ScrollWithHR,
     e_ScreenClearMAX
 } e_ScreenClearType;
+
+typedef enum
+{
+    e_Block_LineEnd_CRLF,
+    e_Block_LineEnd_CR,
+    e_Block_LineEnd_LF,
+    e_Block_LineEnd_TAB,
+    e_Block_LineEnd_ESC,
+    e_Block_LineEnd_NULL,
+    e_Block_LineEnd_None,
+    e_Block_LineEndMAX
+} e_Block_LineEndType;
 
 struct DBEventKeyPress
 {
@@ -121,6 +134,8 @@ struct DBEvent
 /***  CLASS DEFINITIONS                ***/
 class DisplayBase
 {
+    friend bool DisplayBase_HexInputEvent(const struct HDEvent *Event);
+
     public:
         DisplayBase();
         virtual ~DisplayBase();
@@ -163,6 +178,8 @@ class DisplayBase
         class ConSettings *GetCustomSettings(void);
         void GetFont(std::string &CurFontName,int &CurFontSize,bool &CurFontBold,bool &CurFontItalic);
         void SetFont(const std::string &NewFontName,int NewFontSize,bool NewFontBold,bool NewFontItalic);
+        void SetupHexInput(t_UIContainerFrameCtrl *ParentWid);
+        void FreeHexInput(void);
 
         struct CharStyling CurrentStyle;
 
@@ -171,6 +188,21 @@ class DisplayBase
         bool (*DBEventHandler)(const struct DBEvent *Event);
         uintptr_t EventHandlerUserData;
         void SendEvent(e_DBEventType EventID,const union DBEventData *Info);
+        bool DoHexInputEvent(const struct HDEvent *Event);
+        virtual t_UITextInputCtrl *GetSendPanel_HexPosInput(void);
+        virtual t_UIRadioBttnCtrl *GetSendPanel_HexRadioBttn(void);
+        virtual t_UIRadioBttnCtrl *GetSendPanel_TextRadioBttn(void);
+        virtual t_UIMuliLineTextInputCtrl *GetSendPanel_TextInput(void);
+        virtual t_UIComboBoxCtrl *GetSendPanel_LineEndInput(void);
+        virtual void SendPanel_ShowHexOrText(bool Text);
+
+        void DoBlock_ClearHexInput(void);
+        void DoBlock_Send(void);
+        void DoBlock_EditHex(void);
+        void DoBlock_RadioBttnChange(void);
+        void Block_SetHexOrTextMode(bool TextMode);
+
+        class HexDisplayBuffer *HexInput;
 
         class ConSettings *Settings;
         bool HasFocus;

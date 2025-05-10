@@ -32,6 +32,8 @@
 #define __DIALOG_EDITSENDBUFFER_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
+#include <stdbool.h>
+#include <stdint.h>
 
 /***  DEFINES                          ***/
 
@@ -44,6 +46,7 @@
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
-bool RunEditSendBufferDialog(int BufferNumber);
+bool RunEditSendBufferDialog(int BufferNumber,uint8_t **CustomBuffer,
+        int *CustomBufferSize);
 
 #endif

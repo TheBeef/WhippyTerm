@@ -187,7 +187,7 @@ bool SBS_Event(const struct SBSEvent *Event)
                             UISBS_CloseDialog();
                         break;
                         case e_SBSD_Edit:
-                            if(RunEditSendBufferDialog(BufferIndex))
+                            if(RunEditSendBufferDialog(BufferIndex,NULL,0))
                             {
                                 /* Update the UI with any changes */
                                 m_SBSD_MW->RethinkActiveConnectionUI();

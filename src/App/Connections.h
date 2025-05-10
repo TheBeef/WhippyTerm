@@ -42,7 +42,7 @@
 #include "UI/UITimers.h"
 #include "UI/UIMainWindow.h"
 #include "UI/UIClipboard.h"
-#include "UI/UITextDisplay.h"
+#include "UI/UITextMainArea.h"
 #include <stdint.h>
 #include <string>
 #include <list>

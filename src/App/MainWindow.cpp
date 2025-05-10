@@ -55,7 +55,7 @@
 #include "UI/UIDebug.h"
 #include "UI/UISystem.h"
 #include "UI/UITextInputBox.h"
-#include "UI/UITextDisplay.h"
+#include "UI/UITextMainArea.h"
 #include "Version.h"
 #include <list>
 #include <map>

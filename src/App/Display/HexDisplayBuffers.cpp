@@ -54,7 +54,7 @@ using namespace std;
 /*** TYPE DEFINITIONS         ***/
 
 /*** FUNCTION PROTOTYPES      ***/
-static bool HexDisplayBuffer_EventHandler(const struct TextDisplayEvent *Event);
+static bool HexDisplayBuffer_EventHandler(const struct UICTWEvent *Event);
 
 /*** VARIABLE DEFINITIONS     ***/
 HexDisplayBuffer::HexDisplayBuffer()
@@ -96,6 +96,9 @@ HexDisplayBuffer::HexDisplayBuffer()
     View_CharsY=0;
     BufferBytes2Draw=0;
 
+    CharWidthPx=0;
+    CharHeightPx=0;
+
     WindowXOffsetPx=0;
 
     Selection_OrgAnchor=0;
@@ -121,7 +124,7 @@ HexDisplayBuffer::~HexDisplayBuffer()
         free(Buffer);
 
     if(TextDisplayCtrl!=NULL)
-        UITC_FreeTextDisplay(TextDisplayCtrl);
+        UICTW_FreeCustomTextWidget(TextDisplayCtrl);
 }
 
 /*******************************************************************************
@@ -153,7 +156,7 @@ bool HexDisplayBuffer::Init(void *ParentWidget,
         HDID=ID;
         HDEventHandler=EventHandler;
 
-        TextDisplayCtrl=UITC_AllocTextDisplay(ParentWidget,
+        TextDisplayCtrl=UICTW_AllocCustomTextWidget(ParentWidget,
                 HexDisplayBuffer_EventHandler,(uintptr_t)this);
         if(TextDisplayCtrl==NULL)
             throw(0);
@@ -177,7 +180,7 @@ bool HexDisplayBuffer::Init(void *ParentWidget,
  *
  * SYNOPSIS:
  *    static bool HexDisplayBuffer_EventHandler(
- *              const struct TextDisplayEvent *Event);
+ *              const struct UICTWEvent *Event);
  *
  * PARAMETERS:
  *    Event [I] -- The event for the canvas.  The ID is used to get the
@@ -194,7 +197,7 @@ bool HexDisplayBuffer::Init(void *ParentWidget,
  * SEE ALSO:
  *    HexDisplayBuffer::EventHandler()
  ******************************************************************************/
-static bool HexDisplayBuffer_EventHandler(const struct TextDisplayEvent *Event)
+static bool HexDisplayBuffer_EventHandler(const struct UICTWEvent *Event)
 {
     class HexDisplayBuffer *HexBuffer;
 
@@ -211,7 +214,7 @@ static bool HexDisplayBuffer_EventHandler(const struct TextDisplayEvent *Event)
  *    HexDisplayBuffer::EventHandler
  *
  * SYNOPSIS:
- *    bool HexDisplayBuffer::EventHandler(const struct TextDisplayEvent *Event);
+ *    bool HexDisplayBuffer::EventHandler(const struct UICTWEvent *Event);
  *
  * PARAMETERS:
  *    Event [I] -- The canvas event to act on
@@ -227,7 +230,7 @@ static bool HexDisplayBuffer_EventHandler(const struct TextDisplayEvent *Event)
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool HexDisplayBuffer::EventHandler(const struct TextDisplayEvent *Event)
+bool HexDisplayBuffer::EventHandler(const struct UICTWEvent *Event)
 {
     bool AcceptEvent;
     struct HDEvent HDEvent;
@@ -235,36 +238,36 @@ bool HexDisplayBuffer::EventHandler(const struct TextDisplayEvent *Event)
     AcceptEvent=true;
     switch(Event->EventType)
     {
-        case e_TextDisplayEvent_DisplayFrameScrollX:
+        case e_UICTWEvent_DisplayFrameScrollX:
             WindowXOffsetPx=Event->Info.Scroll.Amount;
 
             if(TextDisplayCtrl!=NULL)
             {
-                UITC_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
+                UICTW_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
                 RebuildDisplay();
             }
         break;
-        case e_TextDisplayEvent_DisplayFrameScrollY:
+        case e_UICTWEvent_DisplayFrameScrollY:
             TopLine=Event->Info.Scroll.Amount;
             RebuildDisplay();
         break;
-        case e_TextDisplayEvent_MouseDown:
+        case e_UICTWEvent_MouseDown:
             HandleSelectionMouseUpDown(true,Event->Info.Mouse.x,
                     Event->Info.Mouse.y);
         break;
-        case e_TextDisplayEvent_MouseUp:
+        case e_UICTWEvent_MouseUp:
             HandleSelectionMouseUpDown(false,Event->Info.Mouse.x,
                     Event->Info.Mouse.y);
         break;
-        case e_TextDisplayEvent_MouseMiddleDown:
+        case e_UICTWEvent_MouseMiddleDown:
         break;
-        case e_TextDisplayEvent_MouseMiddleUp:
+        case e_UICTWEvent_MouseMiddleUp:
         break;
-        case e_TextDisplayEvent_MouseWheel:
+        case e_UICTWEvent_MouseWheel:
             MouseWheelMoved(Event->Info.MouseWheel.Steps,
                     Event->Info.MouseWheel.Mods);
         break;
-        case e_TextDisplayEvent_MouseMove:
+        case e_UICTWEvent_MouseMove:
             HandleSelectionMouseUpDownMove(Event->Info.Mouse.x,
                     Event->Info.Mouse.y);
 
@@ -276,26 +279,26 @@ bool HexDisplayBuffer::EventHandler(const struct TextDisplayEvent *Event)
                 HDEventHandler(&HDEvent);
             }
         break;
-        case e_TextDisplayEvent_Resize:
+        case e_UICTWEvent_Resize:
             SetCanvasSize(Event->Info.NewSize.Width,Event->Info.NewSize.
                     Height);
         break;
-        case e_TextDisplayEvent_KeyEvent:
+        case e_UICTWEvent_KeyEvent:
             AcceptEvent=KeyPress(Event->Info.Key.Mods,Event->Info.Key.Key,
                     Event->Info.Key.TextPtr,Event->Info.Key.TextLen);
         break;
-        case e_TextDisplayEvent_LostFocus:
+        case e_UICTWEvent_LostFocus:
             HasFocus=false;
             RebuildDisplay();
-            UITC_SetCursorStyle(TextDisplayCtrl,e_TextCursorStyle_Hidden);
+            UICTW_SetCursorStyle(TextDisplayCtrl,e_TextCursorStyle_Hidden);
         break;
-        case e_TextDisplayEvent_GotFocus:
+        case e_UICTWEvent_GotFocus:
             HasFocus=true;
             RebuildDisplay();
             RethinkCursorLook();
         break;
 
-        case e_TextDisplayEvent_ContextMenu:
+        case e_UICTWEvent_ContextMenu:
             HDEvent.EventType=e_HDEvent_ContextMenu;
             HDEvent.ID=HDID;
             HDEvent.Info.Context.Menu=Event->Info.Context.Menu;
@@ -303,10 +306,9 @@ bool HexDisplayBuffer::EventHandler(const struct TextDisplayEvent *Event)
             HDEventHandler(&HDEvent);
         break;
 
-        case e_TextDisplayEvent_MouseRightDown:
-        case e_TextDisplayEvent_MouseRightUp:
-        case e_TextDisplayEvent_SendBttn:
-        case e_TextDisplayEventMAX:
+        case e_UICTWEvent_MouseRightDown:
+        case e_UICTWEvent_MouseRightUp:
+        case e_UICTWEventMAX:
         default:
         break;
     }
@@ -335,7 +337,7 @@ bool HexDisplayBuffer::EventHandler(const struct TextDisplayEvent *Event)
  *    false -- There was an error.  Most likely out of memory.
  *
  * SEE ALSO:
- *    
+ *    HexDisplayBuffer::GetBufferInfo()
  ******************************************************************************/
 bool HexDisplayBuffer::SetBuffer(uint8_t *Data,int Size)
 {
@@ -362,9 +364,18 @@ bool HexDisplayBuffer::SetBuffer(uint8_t *Data,int Size)
     StartOfData=Buffer;
     BufferIsCircular=false;
 
-    ClearSelection();
+    Cursor_Pos=0;
+    EditMode=e_HDB_EditState_FirstNib;
+    DoingDotInputChar=false;
+    DoingCycleInputChar=false;
+    InAscIIArea=false;
 
-    return false;
+    ClearSelection();
+    RebuildDisplay();
+    RethinkCursorPos();
+    MakeOffsetVisable(Cursor_Pos,InAscIIArea,false);
+
+    return true;
 }
 bool HexDisplayBuffer::SetBuffer(const uint8_t *Data,int Size)
 {
@@ -409,6 +420,11 @@ void HexDisplayBuffer::SetBufferSize(int Size)
     StartOfData=Buffer;
     InsertPos=Buffer+BufferSize;
     Cursor_Pos=0;
+    EditMode=e_HDB_EditState_FirstNib;
+    DoingDotInputChar=false;
+    DoingCycleInputChar=false;
+    InAscIIArea=false;
+
     ClearSelection();
     MakeOffsetVisable(Cursor_Pos,InAscIIArea,false);
     RebuildDisplay();
@@ -445,8 +461,8 @@ void HexDisplayBuffer::SetCanvasSize(int Width,int Height)
     if(TextDisplayCtrl==NULL)
         return;
 
-    CharWidthPx=UITC_GetCharPxWidth(TextDisplayCtrl);
-    CharHeightPx=UITC_GetCharPxHeight(TextDisplayCtrl);
+    CharWidthPx=UICTW_GetCharPxWidth(TextDisplayCtrl);
+    CharHeightPx=UICTW_GetCharPxHeight(TextDisplayCtrl);
 
     if(CharWidthPx==0 || CharHeightPx==0)
     {
@@ -459,7 +475,7 @@ void HexDisplayBuffer::SetCanvasSize(int Width,int Height)
     View_CharsX=View_WidthPx/CharWidthPx;
     View_CharsY=View_HeightPx/CharHeightPx;
 
-    UITC_SetClippingWindow(TextDisplayCtrl,0,0,View_WidthPx,View_HeightPx);
+    UICTW_SetClippingWindow(TextDisplayCtrl,0,0,View_WidthPx,View_HeightPx);
     RebuildDisplay();
     RethinkYScrollBar();
     RethinkXScrollBar();
@@ -511,11 +527,11 @@ void HexDisplayBuffer::RebuildDisplay(void)
     if(TextDisplayCtrl==NULL)
         return;
 
-    UITC_ClearAllLines(TextDisplayCtrl);
+    UICTW_ClearAllLines(TextDisplayCtrl);
 
     if(BufferBytes2Draw==0 && Buffer==NULL && !DisplayEnabled)
     {
-        UITC_RedrawScreen(TextDisplayCtrl);
+        UICTW_RedrawScreen(TextDisplayCtrl);
         return;
     }
 
@@ -583,8 +599,8 @@ void HexDisplayBuffer::RebuildDisplay(void)
 
     for(l=0;l<View_CharsY && BytesDrawen<BufferBytes2Draw;l++)
     {
-        UITC_Begin(TextDisplayCtrl,l);
-        UITC_ClearLine(TextDisplayCtrl,BGColor);
+        UICTW_Begin(TextDisplayCtrl,l);
+        UICTW_ClearLine(TextDisplayCtrl,BGColor);
 
         StartOfLine=BytesDrawen;
         FirstUseOfStyle=true;
@@ -746,7 +762,7 @@ void HexDisplayBuffer::RebuildDisplay(void)
                     /* They are not the same add this frag */
                     c=Line[i];  // The the char at the end of the string
                     Line[i]=0;
-                    UITC_AddFragment(TextDisplayCtrl,&StyledFrag);
+                    UICTW_AddFragment(TextDisplayCtrl,&StyledFrag);
                     Line[i]=c;  // Restore the saved char
                     StyledFrag.Text=&Line[i];
                     StyledFrag.Styling=LineStyling[i];
@@ -754,14 +770,14 @@ void HexDisplayBuffer::RebuildDisplay(void)
             }
 
             /* Add the last frag */
-            UITC_AddFragment(TextDisplayCtrl,&StyledFrag);
+            UICTW_AddFragment(TextDisplayCtrl,&StyledFrag);
         }
         else
         {
-            UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
+            UICTW_AddFragment(TextDisplayCtrl,&DisplayFrag);
         }
 
-        UITC_End(TextDisplayCtrl);
+        UICTW_End(TextDisplayCtrl);
     }
 
     /* We have an edge case where if we are 1 pass the end of the data and
@@ -772,8 +788,8 @@ void HexDisplayBuffer::RebuildDisplay(void)
         /* Is the cursor past the end of the data */
         if(Cursor_Pos>=BufferBytes2Draw)
         {
-            UITC_Begin(TextDisplayCtrl,l);
-            UITC_ClearLine(TextDisplayCtrl,BGColor);
+            UICTW_Begin(TextDisplayCtrl,l);
+            UICTW_ClearLine(TextDisplayCtrl,BGColor);
 
             /* Output a caned __                _ */
             memset(Line,' ',sizeof(Line));
@@ -784,24 +800,24 @@ void HexDisplayBuffer::RebuildDisplay(void)
             /* The hex __ */
             Line[2]=0;
             StyledFrag.Styling.Attribs=TXT_ATTRIB_UNDERLINE;
-            UITC_AddFragment(TextDisplayCtrl,&StyledFrag);
+            UICTW_AddFragment(TextDisplayCtrl,&StyledFrag);
 
             /* The blank between hex and AscII */
             Line[2]=' ';
             Line[BYTESPERLINE*HEX_DIG_SIZE+SPACE_BETWEEN_HEX_AND_ASCII-2]=0;
             StyledFrag.Styling.Attribs=0;
-            UITC_AddFragment(TextDisplayCtrl,&StyledFrag);
+            UICTW_AddFragment(TextDisplayCtrl,&StyledFrag);
 
             /* The AscII _ */
             Line[1]=0;
             StyledFrag.Styling.Attribs=TXT_ATTRIB_UNDERLINE;
-            UITC_AddFragment(TextDisplayCtrl,&StyledFrag);
+            UICTW_AddFragment(TextDisplayCtrl,&StyledFrag);
 
-            UITC_End(TextDisplayCtrl);
+            UICTW_End(TextDisplayCtrl);
         }
     }
 
-    UITC_RedrawScreen(TextDisplayCtrl);
+    UICTW_RedrawScreen(TextDisplayCtrl);
 }
 
 void HexDisplayBuffer::RebuildDisplay_ClearStyleHelper(struct CharStyling *style)
@@ -831,34 +847,34 @@ void HexDisplayBuffer::ApplySettingsChange(void)
 
 void HexDisplayBuffer::SetupCanvas(void)
 {
-    t_UIContextMenuCtrl *ContextMenu_SendBuffers;
     t_UIContextMenuCtrl *ContextMenu_ZoomIn;
     t_UIContextMenuCtrl *ContextMenu_ZoomOut;
     t_UIContextMenuCtrl *ContextMenu_Edit;
     t_UIContextMenuCtrl *ContextMenu_EndianSwap;
 
-    UITC_SetFont(TextDisplayCtrl,FontName.c_str(),FontSize,FontBold,FontItalic);
+    UICTW_SetFont(TextDisplayCtrl,FontName.c_str(),FontSize,FontBold,FontItalic);
 
-    UITC_SetCursorColor(TextDisplayCtrl,0xFFFFFF);  /* DEBUG PAUL: Should this be cursor color? */
+    UICTW_SetCursorColor(TextDisplayCtrl,0xFFFFFF);  /* DEBUG PAUL: Should this be cursor color? */
 
-    UITC_SetTextAreaBackgroundColor(TextDisplayCtrl,BGColor);
-    UITC_SetTextDefaultColor(TextDisplayCtrl,FGColor);
+    UICTW_SetTextAreaBackgroundColor(TextDisplayCtrl,BGColor);
+    UICTW_SetTextDefaultColor(TextDisplayCtrl,FGColor);
 
-    UITC_ShowSendPanel(TextDisplayCtrl,false);
+    ContextMenu_ZoomIn=UICTW_GetContextMenuHandle(TextDisplayCtrl,e_UICTW_ContextMenu_ZoomIn);
+    ContextMenu_ZoomOut=UICTW_GetContextMenuHandle(TextDisplayCtrl,e_UICTW_ContextMenu_ZoomOut);
+    ContextMenu_Edit=UICTW_GetContextMenuHandle(TextDisplayCtrl,e_UICTW_ContextMenu_Edit);
+    ContextMenu_EndianSwap=UICTW_GetContextMenuHandle(TextDisplayCtrl,e_UICTW_ContextMenu_EndianSwap);
 
-    ContextMenu_SendBuffers=UITC_GetContextMenuHandle(TextDisplayCtrl,e_UITD_ContextMenu_SendBuffers);
-    ContextMenu_ZoomIn=UITC_GetContextMenuHandle(TextDisplayCtrl,e_UITD_ContextMenu_ZoomIn);
-    ContextMenu_ZoomOut=UITC_GetContextMenuHandle(TextDisplayCtrl,e_UITD_ContextMenu_ZoomOut);
-    ContextMenu_Edit=UITC_GetContextMenuHandle(TextDisplayCtrl,e_UITD_ContextMenu_Edit);
-    ContextMenu_EndianSwap=UITC_GetContextMenuHandle(TextDisplayCtrl,e_UITD_ContextMenu_EndianSwap);
-
-    UISetContextMenuVisible(ContextMenu_SendBuffers,false);
     UISetContextMenuVisible(ContextMenu_ZoomIn,false);
     UISetContextMenuVisible(ContextMenu_ZoomOut,false);
     UISetContextMenuVisible(ContextMenu_Edit,false);
     UISetContextMenuVisible(ContextMenu_EndianSwap,false);
 
     RethinkCursorLook();
+
+    /* If we already got a resize event, rethink it (incase we couldn't
+       fully process it when it came in) */
+    if(View_WidthPx!=0 && View_HeightPx!=0)
+        SetCanvasSize(View_WidthPx,View_HeightPx);
 }
 
 /*******************************************************************************
@@ -897,7 +913,7 @@ void HexDisplayBuffer::RethinkCursorLook(void)
             CursorStyle=e_TextCursorStyle_Block;
     }
 
-    UITC_SetCursorStyle(TextDisplayCtrl,CursorStyle);
+    UICTW_SetCursorStyle(TextDisplayCtrl,CursorStyle);
 }
 
 void HexDisplayBuffer::SetFont(const char *NewFontName,int NewSize,bool NewBold,
@@ -911,7 +927,7 @@ void HexDisplayBuffer::SetFont(const char *NewFontName,int NewSize,bool NewBold,
     if(TextDisplayCtrl==NULL)
         return;
 
-    UITC_SetFont(TextDisplayCtrl,FontName.c_str(),FontSize,FontBold,FontItalic);
+    UICTW_SetFont(TextDisplayCtrl,FontName.c_str(),FontSize,FontBold,FontItalic);
 
     RethinkYScrollBar();
     RethinkXScrollBar();
@@ -1063,7 +1079,7 @@ bool HexDisplayBuffer::IsYScrollBarAtBottom(void)
     t_UIScrollBarCtrl *ScrollY;
     int TotalLines;
 
-    ScrollY=UITC_GetVertSlider(TextDisplayCtrl);
+    ScrollY=UICTW_GetVertSlider(TextDisplayCtrl);
 
     TotalLines=UIGetScrollBarTotalSize(ScrollY);
     if(UIGetScrollBarPos(ScrollY)>=TotalLines-View_CharsY)
@@ -1095,7 +1111,7 @@ void HexDisplayBuffer::RethinkYScrollBar(void)
         LastTotalLines=TotalLines;
         LastView_CharsY=View_CharsY;
 
-        ScrollY=UITC_GetVertSlider(TextDisplayCtrl);
+        ScrollY=UICTW_GetVertSlider(TextDisplayCtrl);
 
         if(View_CharsY==0)
             UISetScrollBarPageSizeAndMax(ScrollY,0,0);
@@ -1134,7 +1150,7 @@ void HexDisplayBuffer::RethinkXScrollBar(void)
     TotalWidth+=BYTESPERLINE;   // Add the BYTESPERLINE's for the ASCII preview
     TotalWidth*=CharWidthPx;
 
-    ScrollX=UITC_GetHorzSlider(TextDisplayCtrl);
+    ScrollX=UICTW_GetHorzSlider(TextDisplayCtrl);
     if(View_CharsX==0)
         UISetScrollBarPageSizeAndMax(ScrollX,0,0);
     else
@@ -1178,8 +1194,8 @@ bool HexDisplayBuffer::KeyPress(uint8_t Mods,e_UIKeys Key,
     int LastCursor;
     unsigned int r;
 
-    ScrollY=UITC_GetVertSlider(TextDisplayCtrl);
-    ScrollX=UITC_GetHorzSlider(TextDisplayCtrl);
+    ScrollY=UICTW_GetVertSlider(TextDisplayCtrl);
+    ScrollX=UICTW_GetHorzSlider(TextDisplayCtrl);
 
     LastAnchor=Selection_Anchor;
     LastCursor=Cursor_Pos;
@@ -2573,7 +2589,7 @@ void HexDisplayBuffer::MouseWheelMoved(int Steps,uint8_t Mods)
     int CurrentScrollY;
     t_UIScrollBarCtrl *ScrollY;
 
-    ScrollY=UITC_GetVertSlider(TextDisplayCtrl);
+    ScrollY=UICTW_GetVertSlider(TextDisplayCtrl);
 
     CurrentScrollY=UIGetScrollBarPos(ScrollY);
 
@@ -2881,8 +2897,8 @@ void HexDisplayBuffer::HandleSelectionScrollFromMouse(int x,int y,
     int TotalLines;
     int TotalWidth;
 
-    ScrollY=UITC_GetVertSlider(TextDisplayCtrl);
-    ScrollX=UITC_GetHorzSlider(TextDisplayCtrl);
+    ScrollY=UICTW_GetVertSlider(TextDisplayCtrl);
+    ScrollX=UICTW_GetHorzSlider(TextDisplayCtrl);
 
     SetY=false;
     TotalLines=(BufferBytes2Draw+BYTESPERLINE-1)/BYTESPERLINE;
@@ -2991,8 +3007,8 @@ void HexDisplayBuffer::MakeOffsetVisable(int Offset,bool ShowInAscII,
     t_UIScrollBarCtrl *ScrollY;
     t_UIScrollBarCtrl *ScrollX;
 
-    ScrollY=UITC_GetVertSlider(TextDisplayCtrl);
-    ScrollX=UITC_GetHorzSlider(TextDisplayCtrl);
+    ScrollY=UICTW_GetVertSlider(TextDisplayCtrl);
+    ScrollX=UICTW_GetHorzSlider(TextDisplayCtrl);
 
     /* Fix Y */
     OffsetLine=Offset/BYTESPERLINE;
@@ -3002,7 +3018,7 @@ void HexDisplayBuffer::MakeOffsetVisable(int Offset,bool ShowInAscII,
         TopLine=OffsetLine;
         SetY=true;
     }
-    if(OffsetLine>TopLine+View_CharsY-1)
+    if(OffsetLine>TopLine+View_CharsY-1 && TopLine+View_CharsY>0)
     {
         TopLine=OffsetLine-(View_CharsY-1);
         SetY=true;
@@ -3210,7 +3226,7 @@ void HexDisplayBuffer::SetSelectionBounds(const uint8_t *StartPtr,
  *    This is only valid if in edit mode.
  *
  * SEE ALSO:
- *    
+ *    HexDisplayBuffer::SetBuffer()
  ******************************************************************************/
 bool HexDisplayBuffer::GetBufferInfo(const uint8_t **StartOfBuffer,int *Size)
 {
@@ -3816,7 +3832,7 @@ void HexDisplayBuffer::RethinkCursorPos(void)
     int TopEdge;
     struct HDEvent HDEvent;
 
-    ScrollY=UITC_GetVertSlider(TextDisplayCtrl);
+    ScrollY=UICTW_GetVertSlider(TextDisplayCtrl);
 
     TopEdge=UIGetScrollBarPos(ScrollY);
 
@@ -3849,7 +3865,7 @@ void HexDisplayBuffer::RethinkCursorPos(void)
     if(CursorY<0)
         CursorY=0;
 
-    UITC_SetCursorPos(TextDisplayCtrl,CursorX,CursorY);
+    UICTW_SetCursorPos(TextDisplayCtrl,CursorX,CursorY);
 
     if(Cursor_Pos!=Last_Cursor_Pos)
     {
@@ -4077,7 +4093,7 @@ void HexDisplayBuffer::FillWithValue(int InsertOffset,const uint8_t *Data,
  ******************************************************************************/
 void HexDisplayBuffer::GiveFocus(void)
 {
-    UITC_SetFocus(TextDisplayCtrl,e_UITCSetFocus_Main);
+    UICTW_SetFocus(TextDisplayCtrl);
 }
 
 /*******************************************************************************
@@ -4190,7 +4206,7 @@ void HexDisplayBuffer::DoInsertFromClipboard(e_HDBCFormatType ClipFormat)
  *
  * SYNOPSIS:
  *    t_UIContextMenuCtrl *HexDisplayBuffer::GetContextMenuHandle(
- *              e_UITD_ContextMenuType UIObj)
+ *              e_UICTW_ContextMenuType UIObj)
  *
  * PARAMETERS:
  *    UIObj [I] -- The context menu item to get the handle for.
@@ -4204,11 +4220,11 @@ void HexDisplayBuffer::DoInsertFromClipboard(e_HDBCFormatType ClipFormat)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIContextMenuCtrl *HexDisplayBuffer::GetContextMenuHandle(e_UITD_ContextMenuType UIObj)
+t_UIContextMenuCtrl *HexDisplayBuffer::GetContextMenuHandle(e_UICTW_ContextMenuType UIObj)
 {
     if(TextDisplayCtrl==NULL)
         return NULL;
 
-    return UITC_GetContextMenuHandle(TextDisplayCtrl,UIObj);
+    return UICTW_GetContextMenuHandle(TextDisplayCtrl,UIObj);
 }
 

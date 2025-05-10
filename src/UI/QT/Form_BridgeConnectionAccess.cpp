@@ -168,7 +168,7 @@ t_UIComboBoxCtrl *UIBC_GetComboBoxHandle(e_BC_ComboxType UIObj)
  *    UIBC_GetCheckboxHandle
  *
  * SYNOPSIS:
- *    t_UIRadioBttnCtrl *UIBC_GetCheckboxHandle(e_BC_CheckboxType UIObj);
+ *    t_UICheckboxCtrl *UIBC_GetCheckboxHandle(e_BC_CheckboxType UIObj);
  *
  * PARAMETERS:
  *    UIObj [I] -- The check box to get the handle for

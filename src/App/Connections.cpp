@@ -1000,19 +1000,19 @@ void Connection::ApplyCustomSettings(void)
 
     DrawMask=~0;    // Draw everything
     if(!CustomSettings.BoldEnabled)
-        DrawMask&=~UITC_DRAWMASK_BOLD;
+        DrawMask&=~UITD_DRAWMASK_BOLD;
     if(!CustomSettings.ItalicEnabled)
-        DrawMask&=~UITC_DRAWMASK_ITALIC;
+        DrawMask&=~UITD_DRAWMASK_ITALIC;
     if(!CustomSettings.UnderlineEnabled)
-        DrawMask&=~(UITC_DRAWMASK_UNDERLINE|UITC_DRAWMASK_UNDERLINE_DOUBLE|UITC_DRAWMASK_UNDERLINE_DOTTED);
+        DrawMask&=~(UITD_DRAWMASK_UNDERLINE|UITD_DRAWMASK_UNDERLINE_DOUBLE|UITD_DRAWMASK_UNDERLINE_DOTTED);
     if(!CustomSettings.OverlineEnabled)
-        DrawMask&=~UITC_DRAWMASK_OVERLINE;
+        DrawMask&=~UITD_DRAWMASK_OVERLINE;
     if(!CustomSettings.ReverseEnabled)
-        DrawMask&=~UITC_DRAWMASK_REVERSE;
+        DrawMask&=~UITD_DRAWMASK_REVERSE;
     if(!CustomSettings.LineThroughEnabled)
-        DrawMask&=~UITC_DRAWMASK_LINETHROUGH;
+        DrawMask&=~UITD_DRAWMASK_LINETHROUGH;
     if(!CustomSettings.ColorsEnabled)
-        DrawMask&=~UITC_DRAWMASK_COLOR_ATTRIB;
+        DrawMask&=~UITD_DRAWMASK_COLOR_ATTRIB;
 
     if(Display!=NULL)
         Display->SetDrawMask(DrawMask);

@@ -1,5 +1,5 @@
 # Website
-http://whippyterm.com
+https://whippyterm.com
 
 # WhippyTerm
 Whippy Term is a modern terminal program.  It has been designed to have
@@ -24,13 +24,3 @@ Support for sending blocks of binary or AscII data is included to
 better work with embedded devices and binary protocols.
 
 ![Screen Shot](https://github.com/TheBeef/WhippyTerm/blob/main/Graphics/ScreenShot.gif?raw=true)
-
-# Release Notes
-
-## Version 1.0.1.0 -- 16 Mar 2025
- * Fixed bug with plugins with long descriptions
-   - The wrong buffer was used when loading a plugin with a description longer than 99 bytes
-## Version 1.0.0.0 -- 01 Mar 2025
-### First Release
- * Finished all features for first version
-   - The first release 1.0

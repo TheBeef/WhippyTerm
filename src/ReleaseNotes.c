@@ -41,6 +41,9 @@ static struct ReleaseNote m_Notes_NEXT[]=
             " * ESC\n"
             " * NULL\n"
             " * None\n"},
+    {   NOTETYPE_BUG_FIX,"Fixed bug where binary display doesn't stop the cursor from blinking",
+            "When using the binary decoder if the main text area loses focus"
+            " the cursor should stop blinking.  It wasn't"},
     {   NOTETYPE_ENHANCEMENT,"Added a help button to URI input",
             "A new help button was added after the URI input on the main window."
             " This button opens the open connection using URI dialog and fills"

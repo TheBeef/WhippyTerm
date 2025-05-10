@@ -29,8 +29,18 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
-    {   NOTETYPE_ENHANCEMENT,"",
-            ""},
+    {   NOTETYPE_ENHANCEMENT,"Updated send block panel to support hex",
+            "Added a hex input to the send block panel on binary and block connections."
+            " A hex input with edit button (that goes the send buffer dialog)"
+            " was added to the panel as well as input for what to send at the "
+            "end of a text block.  The uesr can select from:\n"
+            " * CR+LF\n"
+            " * CR\n"
+            " * LF\n"
+            " * TAB\n"
+            " * ESC\n"
+            " * NULL\n"
+            " * None\n"},
     {   NOTETYPE_ENHANCEMENT,"Added a help button to URI input",
             "A new help button was added after the URI input on the main window."
             " This button opens the open connection using URI dialog and fills"

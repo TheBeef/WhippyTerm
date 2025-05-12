@@ -162,6 +162,7 @@ const char *m_CmdNames[]=
     "SendBufferSaveSelectedBuffer",         // e_Cmd_SendBuffer_SaveSelectedBuffer
     "URIHelp",                              // e_Cmd_URIHelp
     "DefaultSettings",                      // e_Cmd_Default_Settings
+    "ToggleAutoReconnect",                  // e_Cmd_ToggleAutoReconnect
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -249,6 +250,7 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_SendBuffer_ClearAllBuffers,   // e_UIMWMenu_Buffers_ClearAllBuffers
     e_Cmd_SendBuffer_EditPrompted,      // e_UIMWMenu_Buffers_EditSenderBuffer
     e_Cmd_Default_Settings,             // e_UIMWMenu_DefaultSettings
+    e_Cmd_ToggleAutoReconnect,          // e_UIMWMenu_ToggleAutoReconnect
 };
 
 e_CmdType m_Cmd2SendBufferContextMenuMapping[]=
@@ -717,6 +719,7 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     SetKeySeq(&KeyMapping[e_Cmd_NextConnectionTab],KEYMOD_CONTROL,e_UIKeys_Tab,0);
     SetKeySeq(&KeyMapping[e_Cmd_PrevConnectionTab],KEYMOD_CONTROL|KEYMOD_SHIFT,e_UIKeys_Backtab,0);
     // e_Cmd_Default_Settings
+    // e_Cmd_ToggleAutoReconnect
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A

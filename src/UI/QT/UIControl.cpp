@@ -193,6 +193,13 @@ void UIEnableCheckbox(t_UICheckboxCtrl *Checkbox,bool Enable)
     cb->setEnabled(Enable);
 }
 
+void UICheckboxVisible(t_UICheckboxCtrl *Checkbox,bool Show)
+{
+    QCheckBox *cb=(QCheckBox *)Checkbox;
+
+    cb->setVisible(Show);
+}
+
 void UICheckCheckbox(t_UICheckboxCtrl *Checkbox,bool Checked)
 {
     QCheckBox *cb=(QCheckBox *)Checkbox;

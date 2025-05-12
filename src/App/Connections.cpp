@@ -51,6 +51,7 @@
 #include "UI/UITimers.h"
 #include "ThirdParty/utf8.h"
 #include "Version.h"
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
@@ -81,6 +82,7 @@ typedef t_ConnectionListType::iterator i_ConnectionListType;
 void Con_ComTestTimeout(uintptr_t UserData);
 void Con_DelayTransmitTimeout(uintptr_t UserData);
 void Con_SmartClipTimeout(uintptr_t UserData);
+void Con_AutoReopenTimeout(uintptr_t UserData);
 
 /*** VARIABLE DEFINITIONS     ***/
 t_ConnectionListType m_Connections;
@@ -319,6 +321,33 @@ void Con_SmartClipTimeout(uintptr_t UserData)
 
 /*******************************************************************************
  * NAME:
+ *    Con_AutoReopenTimeout
+ *
+ * SYNOPSIS:
+ *    void Con_AutoReopenTimeout(uintptr_t UserData);
+ *
+ * PARAMETERS:
+ *    UsedData [I] -- The connection that this timer is for
+ *
+ * FUNCTION:
+ *    This function is a call back from the UI that is called when the
+ *    auto reopen timer goes off.  It just calls the
+ *    InformOfAutoReopenTimeout() function.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Con_AutoReopenTimeout(uintptr_t UserData)
+{
+    class Connection *Con=(class Connection *)UserData;
+    Con->InformOfAutoReopenTimeout();
+}
+
+/*******************************************************************************
+ * NAME:
  *    Con_ApplySettings2AllConnections
  *
  * SYNOPSIS:
@@ -384,6 +413,7 @@ Connection::Connection(const char *URI)
     BridgedTo=NULL;
     BridgedFrom=NULL;
     BinaryConnection=false;
+    DoAutoReopen=false;
 
     Bookmark=0;
     ZoomLevel=0;
@@ -404,12 +434,18 @@ Connection::Connection(const char *URI)
     if(SmartClipTimer==NULL)
         throw("Failed to allocate smart clipboard timer");
 
+    AutoReopenTimer=AllocUITimer();
+    if(AutoReopenTimer==NULL)
+        throw("Failed to allocate auto reopen timer");
+
     if(!SetConnectionBasedOnURI(URI))
         throw("Failed to setup the connection");
 
     SetupUITimer(TransmitDelayTimer,Con_DelayTransmitTimeout,(uintptr_t)this,
             false);
     SetupUITimer(SmartClipTimer,Con_SmartClipTimeout,(uintptr_t)this,false);
+    SetupUITimer(AutoReopenTimer,Con_AutoReopenTimeout,(uintptr_t)this,
+            false);
 
     IsConnected=false;
     BlockSendDevice=false;
@@ -563,6 +599,12 @@ void Connection::FreeConnectionResources(bool FreeDB)
         SmartClipTimer=NULL;
     }
 
+    if(AutoReopenTimer!=NULL)
+    {
+        FreeUITimer(AutoReopenTimer);
+        AutoReopenTimer=NULL;
+    }
+
     /* Free the hex buffer */
     if(HexDisplay.Buffer!=NULL)
         free(HexDisplay.Buffer);
@@ -572,6 +614,7 @@ void Connection::FreeConnectionResources(bool FreeDB)
 
     if(IOHandle!=NULL)
     {
+        DoAutoReopen=false;
         if(IsConnected)
             IOS_Close(IOHandle);
         IOS_FreeIOSystemHandle(IOHandle);
@@ -735,10 +778,19 @@ void Connection::FinalizeNewConnection(void)
     /* We auto open this when we open the tab */
     if(g_Settings.AutoConnectOnNewConnection)
     {
+        if(UITimerRunning(AutoReopenTimer))
+        {
+            /* The auto reopen timer was running.  Kill it */
+            UITimerStop(AutoReopenTimer);
+        }
+
+        DoAutoReopen=CustomSettings.AutoReopen;
         if(!IOS_Open(IOHandle))
         {
             /* Mark this connection as closed */
             InformOfDisconnected();
+
+            /* DEBUG PAUL: Prompt user with an error message here */
         }
     }
 
@@ -1014,8 +1066,10 @@ void Connection::ApplyCustomSettings(void)
     if(!CustomSettings.ColorsEnabled)
         DrawMask&=~UITD_DRAWMASK_COLOR_ATTRIB;
 
-    if(Display!=NULL)
-        Display->SetDrawMask(DrawMask);
+    Display->SetDrawMask(DrawMask);
+
+    DoAutoReopen=CustomSettings.AutoReopen;
+    DoAutoReopenIfNeeded();
 }
 
 /*******************************************************************************
@@ -1677,6 +1731,8 @@ void Connection::InformOfDisconnected(void)
     IsConnected=false;
     SendMWEvent(ConMWEvent_StatusChange);
     RethinkCursor();
+
+    DoAutoReopenIfNeeded();
 }
 
 /*******************************************************************************
@@ -2310,16 +2366,44 @@ void Connection::SetConnectedState(bool Connect)
     if(IOHandle==NULL)
         return;
 
+    if(UITimerRunning(AutoReopenTimer))
+    {
+        /* The auto reopen timer was running.  Kill it */
+        UITimerStop(AutoReopenTimer);
+    }
+
     if(Connect)
     {
+        DoAutoReopen=false;
         if(!IOS_Open(IOHandle))
         {
             /* Mark this connection as closed */
             InformOfDisconnected();
+
+            /* DEBUG PAUL: Prompt user with an error message here */
+
+            /* Ask if the user wants to keep trying to open this connection */
+            if(CustomSettings.AutoReopen)
+            {
+                if(UIAsk("Auto reconnect","Do you want to keep trying to open "
+                        "this connection?",
+                        e_AskBox_Question,e_AskBttns_YesNo)==e_AskRet_Yes)
+                {
+                    /* Ok, they want to keep trying */
+                    DoAutoReopen=true;
+                    if(!IOS_Open(IOHandle))
+                    {
+                        /* Mark this connection as closed */
+                        InformOfDisconnected();
+                    }
+                }
+            }
         }
+        DoAutoReopen=CustomSettings.AutoReopen;
     }
     else
     {
+        DoAutoReopen=false;
         if(IsConnected)
             IOS_Close(IOHandle);
     }
@@ -5237,20 +5321,6 @@ void Connection::SetTransmitDelayPerLine(unsigned int ms)
  ******************************************************************************/
 void Connection::ApplyTransmitDelayChange(void)
 {
-//    if(TransmitDelayBuffer!=NULL && TransmitDelayByte==0 &&
-//            TransmitDelayLine==0)
-//    {
-//        /* Ok, we don't need the queue any more, free it */
-//        FreeTransmitDelayBuffer();
-//    }
-//    else
-//    {
-//        if(TransmitDelayLine!=0 && TransmitDelayByte==0)
-//            UITimerSetTimeout(TransmitDelayTimer,TransmitDelayLine);
-//        if(TransmitDelayByte!=0)
-//            UITimerSetTimeout(TransmitDelayTimer,TransmitDelayByte);
-//    }
-
     if(TransmitDelayByte==0 && TransmitDelayLine==0)
     {
         if(UITimerRunning(TransmitDelayTimer))
@@ -6304,6 +6374,37 @@ void Connection::InformOfSmartClipTimeout(void)
 
 /*******************************************************************************
  * NAME:
+ *    Connection::InformOfAutoReopenTimeout
+ *
+ * SYNOPSIS:
+ *    void Connection::InformOfAutoReopenTimeout(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called using the auto reopen timer.  It will try to
+ *    reopen the connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::InformOfAutoReopenTimeout(void)
+{
+    UITimerStop(AutoReopenTimer);
+
+    if(!IOS_Open(IOHandle))
+    {
+        /* Mark this connection as closed */
+        InformOfDisconnected();
+    }
+}
+
+/*******************************************************************************
+ * NAME:
  *    Connection::IsConnectionBinary
  *
  * SYNOPSIS:
@@ -6493,4 +6594,122 @@ void Connection::DoBell(bool VisualOnly)
 
         Display->ShowBell();
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::ToggleAutoReopen
+ *
+ * SYNOPSIS:
+ *    void Connection::ToggleAutoReopen(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function toggles the auto reopen option for this connection.
+ *    Toggling this will change this connection over to custom settings.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::ToggleAutoReopen(void)
+{
+    DoAutoReopen=!DoAutoReopen;
+
+    /* Update the settings */
+    UsingCustomSettings=true;
+    CustomSettings.AutoReopen=DoAutoReopen;
+
+    DoAutoReopenIfNeeded();
+
+    SendReopenChangeEvent();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::DoAutoReopenIfNeeded
+ *
+ * SYNOPSIS:
+ *    void Connection::DoAutoReopenIfNeeded(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function checks to see if we should setup the reopen timer to
+ *    open the connection again.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::DoAutoReopenIfNeeded(void)
+{
+    /* If we are not currently connected we should try to open again */
+    if(!IsConnected && DoAutoReopen)
+    {
+        /* If there is already a timer running cancel it and start a new open */
+        if(UITimerRunning(AutoReopenTimer))
+            UITimerStop(AutoReopenTimer);
+
+        UITimerSetTimeout(AutoReopenTimer,CustomSettings.AutoReopenWaitTime);
+        UITimerStart(AutoReopenTimer);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::SendReopenChangeEvent
+ *
+ * SYNOPSIS:
+ *    void Connection::SendReopenChangeEvent(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function sends a Auto Reopen Changed event to the main window.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::SendReopenChangeEvent(void)
+{
+    union ConMWInfo ExtraInfo;
+
+    ExtraInfo.AutoReopen.Enabled=CustomSettings.AutoReopen;
+    SendMWEvent(ConMWEvent_AutoReopenChanged,&ExtraInfo);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::GetCurrentAutoReopenStatus
+ *
+ * SYNOPSIS:
+ *    bool Connection::GetCurrentAutoReopenStatus(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets the current status of the auto reopen option.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::GetCurrentAutoReopenStatus(void)
+{
+    return CustomSettings.AutoReopen;
 }

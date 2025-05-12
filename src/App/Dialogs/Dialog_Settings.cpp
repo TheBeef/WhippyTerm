@@ -215,6 +215,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     e_DS_SettingsArea FirstSelectedArea;
     e_UIS_TabCtrl_Terminal_Page SelectTerminalPage;
     e_UIS_TabCtrl_Display_Page SelectDisplayPage;
+    t_UICheckboxCtrl *CheckboxHandle;
 
     m_SettingsMW=MW;
     m_DS_ConList=NULL;
@@ -247,8 +248,8 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     if(!m_SettingConSettingsOnly)
     {
         UIAddItem2ListView(AreaList,"Behaviour",e_DS_SettingsArea_Behaviour);
-        UIAddItem2ListView(AreaList,"Connections",e_DS_SettingsArea_Connections);
     }
+    UIAddItem2ListView(AreaList,"Connections",e_DS_SettingsArea_Connections);
     UIAddItem2ListView(AreaList,"Display",e_DS_SettingsArea_Display);
     if(!m_SettingConSettingsOnly)
     {
@@ -421,6 +422,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     /* Hide anything we can't set if we are in Con Settings Only */
     if(m_SettingConSettingsOnly)
     {
+        /* Hide global only items */
         Display_Tabs=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_Tabs);
         Display_ClearScreen=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_ClearScreen);
         Display_MouseCursor=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_MouseCursor);
@@ -433,6 +435,9 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         UIGroupBoxVisible(Display_Tabs,false);
         UIGroupBoxVisible(Display_ClearScreen,false);
         UIGroupBoxVisible(Display_MouseCursor,false);
+
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoConnectOnNewConnection);
+        UICheckboxVisible(CheckboxHandle,false);
     }
 
     /* Load settings into UI */
@@ -464,7 +469,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         case e_SettingsJump2MAX:
         default:
             if(m_SettingConSettingsOnly)
-                FirstSelectedArea=e_DS_SettingsArea_Display;
+                FirstSelectedArea=e_DS_SettingsArea_Connections;
             else
                 FirstSelectedArea=e_DS_SettingsArea_Behaviour;
         break;
@@ -650,6 +655,12 @@ static void DS_SetSettingGUI(void)
     /********************/
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoConnectOnNewConnection);
     UICheckCheckbox(CheckboxHandle,g_Settings.AutoConnectOnNewConnection);
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoReopen);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->AutoReopen);
+
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_AutoReopenWaitTime);
+    UISetNumberInputCtrlValue(NumberInputHandle,m_SettingConSettings->AutoReopenWaitTime);
 
     /********************/
     /* Display          */
@@ -930,6 +941,8 @@ static void DS_GetSettingsFromGUI(void)
 
     if(!m_SettingConSettingsOnly)
     {
+        /* Global settings only */
+
         /********************/
         /* Behaviour        */
         /********************/
@@ -1021,13 +1034,10 @@ static void DS_GetSettingsFromGUI(void)
         /********************/
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoConnectOnNewConnection);
         g_Settings.AutoConnectOnNewConnection=UIGetCheckboxCheckStatus(CheckboxHandle);
-    }
 
-    /********************/
-    /* Display          */
-    /********************/
-    if(!m_SettingConSettingsOnly)
-    {
+        /********************/
+        /* Display          */
+        /********************/
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AlwaysShowTabs);
         g_Settings.AlwaysShowTabs=UIGetCheckboxCheckStatus(CheckboxHandle);
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CloseButtonOnTabs);
@@ -1035,7 +1045,40 @@ static void DS_GetSettingsFromGUI(void)
 
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_MouseCursorUseIBeam);
         g_Settings.MouseCursorIBeam=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        /* Keyboard */
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Clear);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.ScreenClear=e_ScreenClear_Clear;
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Scroll);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.ScreenClear=e_ScreenClear_Scroll;
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollAll);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.ScreenClear=e_ScreenClear_ScrollAll;
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollWithHR);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.ScreenClear=e_ScreenClear_ScrollWithHR;
+
+        /* KeyBindings */
+        memcpy(&g_Settings.KeyMapping,&m_CopyOfKeyMapping,
+                sizeof(m_CopyOfKeyMapping));
     }
+
+    /* Common to global settings and connections */
+
+    /********************/
+    /* Connections      */
+    /********************/
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoReopen);
+    m_SettingConSettings->AutoReopen=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_AutoReopenWaitTime);
+    m_SettingConSettings->AutoReopenWaitTime=UIGetNumberInputCtrlValue(NumberInputHandle);
+
+    /********************/
+    /* Display          */
+    /********************/
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CursorBlink);
     m_SettingConSettings->CursorBlink=UIGetCheckboxCheckStatus(CheckboxHandle);
     m_SettingConSettings->CursorColor=m_CursorColor;
@@ -1074,26 +1117,6 @@ static void DS_GetSettingsFromGUI(void)
 
     /* Keyboard */
     DS_GetSettingsFromGUI_KeyboardRadioBttns();
-
-    if(!m_SettingConSettingsOnly)
-    {
-        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Clear);
-        if(UIIsRadioBttnSelected(RadioHandle))
-            g_Settings.ScreenClear=e_ScreenClear_Clear;
-        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Scroll);
-        if(UIIsRadioBttnSelected(RadioHandle))
-            g_Settings.ScreenClear=e_ScreenClear_Scroll;
-        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollAll);
-        if(UIIsRadioBttnSelected(RadioHandle))
-            g_Settings.ScreenClear=e_ScreenClear_ScrollAll;
-        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollWithHR);
-        if(UIIsRadioBttnSelected(RadioHandle))
-            g_Settings.ScreenClear=e_ScreenClear_ScrollWithHR;
-
-        /* KeyBindings */
-        memcpy(&g_Settings.KeyMapping,&m_CopyOfKeyMapping,
-                sizeof(m_CopyOfKeyMapping));
-    }
 
     /* Sounds */
     RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysBell_None);
@@ -2395,6 +2418,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Checkbox_BottomPanel_ShowPanelOnStartup:
                 case e_UIS_Checkbox_StartMax:
                 case e_UIS_Checkbox_AutoConnectOnNewConnection:
+                case e_UIS_Checkbox_AutoReopen:
                 case e_UIS_Checkbox_AlwaysShowTabs:
                 case e_UIS_Checkbox_CloseButtonOnTabs:
                 case e_UIS_Checkbox_CenterTextInWindow:

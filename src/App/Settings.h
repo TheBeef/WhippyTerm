@@ -104,6 +104,10 @@ class ConSettings
         bool FontBold;
         bool FontItalic;
 
+        /***** Connections *****/
+        bool AutoReopen;
+        uint32_t AutoReopenWaitTime;
+
         /* Keyboard */
         e_BackspaceKeyType BackspaceKeyMode;
         e_EnterKeyType EnterKeyMode;

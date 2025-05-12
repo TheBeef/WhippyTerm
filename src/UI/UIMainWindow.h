@@ -158,6 +158,7 @@ typedef enum
     e_UIMWMenu_Buffers_ClearAllBuffers,
     e_UIMWMenu_Buffers_EditSenderBuffer,
     e_UIMWMenu_DefaultSettings,
+    e_UIMWMenu_ToggleAutoReconnect,
     e_UIMWMenuMAX
 } e_UIMWMenuType;
 

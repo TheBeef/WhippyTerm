@@ -252,6 +252,8 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionEdit_Send_Buffer;
         case e_UIMWMenu_DefaultSettings:
             return (e_UIMenuCtrl *)realwin->ui->actionDefault_Settings;
+        case e_UIMWMenu_ToggleAutoReconnect:
+            return (e_UIMenuCtrl *)realwin->ui->actionAuto_Reconnect;
 
         case e_UIMWMenuMAX:
         default:

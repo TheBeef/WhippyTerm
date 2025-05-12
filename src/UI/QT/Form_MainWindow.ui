@@ -1715,6 +1715,7 @@
     </property>
     <addaction name="actionConnect_Menu"/>
     <addaction name="actionDisconnect_Menu"/>
+    <addaction name="actionAuto_Reconnect"/>
     <addaction name="separator"/>
     <addaction name="actionBridge_Connections"/>
     <addaction name="actionRelease_Bridged_Connections"/>
@@ -2833,6 +2834,14 @@
   <action name="actionDefault_Settings">
    <property name="text">
     <string>Default Settings...</string>
+   </property>
+  </action>
+  <action name="actionAuto_Reconnect">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Auto Reconnect</string>
    </property>
   </action>
  </widget>

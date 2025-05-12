@@ -1658,3 +1658,9 @@ void Form_MainWindow::on_actionDefault_Settings_triggered()
     DoMenuTriggered(e_UIMWMenu_DefaultSettings);
 }
 
+
+void Form_MainWindow::on_actionAuto_Reconnect_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ToggleAutoReconnect);
+}
+

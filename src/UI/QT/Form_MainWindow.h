@@ -329,6 +329,8 @@ private slots:
     
     void on_actionDefault_Settings_triggered();
     
+    void on_actionAuto_Reconnect_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

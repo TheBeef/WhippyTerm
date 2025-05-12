@@ -431,7 +431,7 @@ void TheMainWindow::ShowWindow(void)
  *    NONE
  *
  * SEE ALSO:
- *
+ *    Shutdown()
  ******************************************************************************/
 void TheMainWindow::Init(void)
 {
@@ -503,6 +503,31 @@ void TheMainWindow::Init(void)
     /* Update the names of the send buffers in the menu */
     for(r=0;r<MAX_QUICK_SEND_BUFFERS;r++)
         InformOfSendBufferChange(r);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::Shutdown
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::Shutdown(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function shutdown all the things done with Init() when the main
+ *    window is closing.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    Init()
+ ******************************************************************************/
+void TheMainWindow::Shutdown(void)
+{
+    CloseAllConnections();
 }
 
 /*******************************************************************************
@@ -1326,6 +1351,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *SendBuffer11;
     e_UIMenuCtrl *SendBuffer12;
     e_UIMenuCtrl *SendBufferSendGeneric;
+    e_UIMenuCtrl *AutoReconnectMenu;
     t_UIContextMenuCtrl *ContextMenu_SendBuffer;
     t_UIContextMenuCtrl *ContextMenu_Copy;
     t_UIContextMenuCtrl *ContextMenu_Paste;
@@ -1372,6 +1398,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     Send_Escape=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Escape);
     Send_Delete=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Delete);
     Send_Other=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Other);
+    AutoReconnectMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ToggleAutoReconnect);
 
     SendBuffer1=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer1);
     SendBuffer2=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer2);
@@ -1440,6 +1467,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(SendBuffer11,false);
         UIEnableMenu(SendBuffer12,false);
         UIEnableMenu(SendBufferSendGeneric,false);
+        UIEnableMenu(AutoReconnectMenu,false);
 
         UIMW_EnableApplyTerminalEmulationMenu(UIWin,false);
 
@@ -1478,6 +1506,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(Send_Escape,true);
         UIEnableMenu(Send_Delete,true);
         UIEnableMenu(Send_Other,true);
+        UIEnableMenu(AutoReconnectMenu,true);
 
         UIMW_EnableApplyTerminalEmulationMenu(UIWin,true);
 
@@ -1541,6 +1570,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
             UIEnableMenu(InsertHorizontalRule,false);
         else
             UIEnableMenu(InsertHorizontalRule,true);
+
+        UICheckMenu(AutoReconnectMenu,Con->GetCurrentAutoReopenStatus());
 
         ActivatePanels=true;
     }
@@ -2325,6 +2356,36 @@ void TheMainWindow::ResetZoom(void)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::ToggleAutoReconnect
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::ToggleAutoReconnect(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function changes the auto reconnect option for the active connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void TheMainWindow::ToggleAutoReconnect(void)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+        TabCon->ToggleAutoReopen();
+}
+
+/*******************************************************************************
+ * NAME:
  *    TheMainWindow::DoSendByte
  *
  * SYNOPSIS:
@@ -2997,7 +3058,9 @@ void TheMainWindow::ConnectionEvent(const struct ConMWEvent *Event)
             RethinkBridgeMenu();
         break;
         case ConMWEvent_SelectionChanged:
+        case ConMWEvent_AutoReopenChanged:
             RethinkActiveConnectionUI();
+        break;
         break;
         case ConMWEventMAX:
         default:
@@ -3308,6 +3371,8 @@ static bool MW_DoMainWindowClose(class TheMainWindow *win)
         /* Remove this entry */
         m_MainWindowsList.erase(Search);
     }
+
+    win->Shutdown();
 
     /* Ok, the main window is about to go away, delete the main window class */
     delete win;
@@ -3966,6 +4031,7 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_SendBuffer_EditPrompted -- Prompt and edit a send buffer
  *                  e_Cmd_URIHelp -- User select to copy the URI info the connect URI dialog
  *                  e_Cmd_Default_Settings -- Default the settings
+ *                  e_Cmd_ToggleAutoReconnect -- Toggles the auto reconnect on the active connection
  *
  * FUNCTION:
  *    This function executes a command.
@@ -4404,6 +4470,9 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
                 SaveSettings();
                 ::ApplySettings();
             }
+        break;
+        case e_Cmd_ToggleAutoReconnect:
+            ToggleAutoReconnect();
         break;
         case e_CmdMAX:
         default:

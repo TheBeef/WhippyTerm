@@ -153,6 +153,7 @@ typedef enum
     e_Cmd_SendBuffer_SaveSelectedBuffer,
     e_Cmd_URIHelp,
     e_Cmd_Default_Settings,
+    e_Cmd_ToggleAutoReconnect,
     e_CmdMAX
 } e_CmdType;
 

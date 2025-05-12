@@ -29,6 +29,12 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_ENHANCEMENT,"Added option to auto reconnect when a connection is closed",
+            "A new feature was added that will auto retry opening a connection"
+            " if it fails to open.  A setting was added to say if this should"
+            " be done and how long to wait between tries.  This can be set"
+            " per-connection and toggled with a menu option under the"
+            " connection menu."},
     {   NOTETYPE_ENHANCEMENT,"Updated send block panel to support hex",
             "Added a hex input to the send block panel on binary and block connections."
             " A hex input with edit button (that goes the send buffer dialog)"

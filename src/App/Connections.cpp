@@ -790,7 +790,7 @@ void Connection::FinalizeNewConnection(void)
             /* Mark this connection as closed */
             InformOfDisconnected();
 
-            /* DEBUG PAUL: Prompt user with an error message here */
+            HandleFailed2OpenErrorMessage();
         }
     }
 
@@ -2380,7 +2380,7 @@ void Connection::SetConnectedState(bool Connect)
             /* Mark this connection as closed */
             InformOfDisconnected();
 
-            /* DEBUG PAUL: Prompt user with an error message here */
+            HandleFailed2OpenErrorMessage();
 
             /* Ask if the user wants to keep trying to open this connection */
             if(CustomSettings.AutoReopen)
@@ -6712,4 +6712,40 @@ void Connection::SendReopenChangeEvent(void)
 bool Connection::GetCurrentAutoReopenStatus(void)
 {
     return CustomSettings.AutoReopen;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::HandleFailed2OpenErrorMessage
+ *
+ * SYNOPSIS:
+ *    void Connection::HandleFailed2OpenErrorMessage(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function shows the user the error message on failed to open
+ *    a connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::HandleFailed2OpenErrorMessage(void)
+{
+    string Msg;
+    const char *Details;
+
+    Msg="Failed to open the requested connection";
+    Details=IOS_GetLastErrorMessage(IOHandle);
+    if(Details!=NULL)
+    {
+        Msg+=":\n";
+        Msg+=Details;
+    }
+
+    UIAsk("Failed",Msg.c_str(),e_AskBox_Error,e_AskBttns_Ok);
 }

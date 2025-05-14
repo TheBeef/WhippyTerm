@@ -922,6 +922,35 @@ t_ActiveHandlesListType m_ActiveHandlesList;    // A list of active handles
  * SEE ALSO:
  *    Open(), Write()
  *==============================================================================
+ * NAME:
+ *    GetLastErrorMessage
+ *
+ * SYNOPSIS:
+ *    const char *GetLastErrorMessage(t_DriverIOHandleType *DriverIO);
+ *
+ * PARAMETERS:
+ *    DriverIO [I] -- The handle to this connection
+ *
+ * FUNCTION:
+ *    This function is optional.
+ *
+ *    This function gets info about the last error.  If there wasn't an error
+ *    or no error info is available then this function returns NULL.
+ *
+ * RETURNS:
+ *    A static buffer with the error message in it.  This buffer must remain
+ *    valid until another call to the driver (at which point it can be free'ed
+ *    for overriden).
+ *
+ *    If there isn't an error or an error message could not be built then
+ *    this function can return NULL.
+ *
+ * API VERSION:
+ *    2
+ *
+ * SEE ALSO:
+ *    
+ *==============================================================================
  *
  * RETURNS:
  *    true -- Registration worked
@@ -4892,3 +4921,40 @@ bool IOS_DoesURIMatchBaseURI(const char *URI,const char *BaseURI)
     return RetValue;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    IOS_GetLastErrorMessage
+ *
+ * SYNOPSIS:
+ *    const char *IOS_GetLastErrorMessage(t_IOSystemHandle *Handle);
+ *
+ * PARAMETERS:
+ *    Handle [I] -- The IO system handle to work on
+ *
+ * FUNCTION:
+ *    This function gets the last error message from the driver.  If the
+ *    driver supports error messages it will return a message, if the
+ *    driver does not support error messages then it will return NULL.
+ *
+ * RETURNS:
+ *    A static buffer with the error message in it, or NULL if there isn't an
+ *    erorr or error messages are not supported.  This buffer will be valid
+ *    until the next call to a IOSystem function.
+ *
+ * NOTES:
+ *    When this function returns NULL it does NOT mean there wasn't an error
+ *    just that there wasn't an error message.  DO NOT USE THIS FUNCTION TO
+ *    CHECK FOR SUCCESS.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+const char *IOS_GetLastErrorMessage(t_IOSystemHandle *Handle)
+{
+    struct IOSystemDrvHandle *DrvHandle=(struct IOSystemDrvHandle *)Handle;
+
+    if(DrvHandle->IOdrv->API.GetLastErrorMessage!=NULL)
+        return DrvHandle->IOdrv->API.GetLastErrorMessage(DrvHandle->DriverData);
+
+    return NULL;
+}

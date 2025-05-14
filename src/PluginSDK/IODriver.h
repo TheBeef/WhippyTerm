@@ -38,6 +38,7 @@
 /***  DEFINES                          ***/
 /* Versions of struct IODriverAPI */
 #define IODRIVER_API_VERSION_1          1
+#define IODRIVER_API_VERSION_2          2
 
 
 #define RETERROR_NOBYTES                0
@@ -125,6 +126,9 @@ struct IODriverAPI
     t_ConnectionWidgetsType *(*ConnectionAuxCtrlWidgets_AllocWidgets)(t_DriverIOHandleType *DriverIO,t_WidgetSysHandle *WidgetHandle);
     void (*ConnectionAuxCtrlWidgets_FreeWidgets)(t_DriverIOHandleType *DriverIO,t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConAuxCtrls);
     /********* End of IODRIVER_API_VERSION_1 *********/
+    /********* Start of IODRIVER_API_VERSION_2 *********/
+    const char *(*GetLastErrorMessage)(t_DriverIOHandleType *DriverIO);
+    /********* End of IODRIVER_API_VERSION_2 *********/
 };
 
 struct IOS_API

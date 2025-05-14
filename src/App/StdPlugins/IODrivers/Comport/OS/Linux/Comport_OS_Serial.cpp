@@ -526,6 +526,9 @@ const char *Comport_GetLastErrorMessage(t_DriverIOHandleType *DriverIO)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
 
+    if(ComInfo->LastErrorMsg=="")
+        return NULL;
+
     return ComInfo->LastErrorMsg.c_str();
 }
 

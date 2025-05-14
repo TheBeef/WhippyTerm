@@ -87,6 +87,7 @@ bool AppMain(int argc,char *argv[])
     /* Startup code */
     InitSessionSystem();
     InitBookmarks();
+    g_SendBuffers.Init();
 
     LoadSettings();
     LoadSession();

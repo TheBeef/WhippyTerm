@@ -49,6 +49,7 @@ class SendBuffer
     public:
         SendBuffer();
         ~SendBuffer();
+        void Init(void);
         bool LoadBuffers(const char *Filename=nullptr);
         bool SaveBuffers(const char *Filename=nullptr);
         static bool SaveBuffer2File(const char *Filename,const char *BufferName,

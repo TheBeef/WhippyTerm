@@ -380,7 +380,7 @@ PG_BOOL Comport_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
         LPTSTR errorText;
 
         FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_IGNORE_INSERTS,
-                NULL,ComInfo->hComm,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                NULL,GetLastError(),MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                 (LPTSTR)&errorText,
                 0,
                 NULL);

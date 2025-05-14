@@ -82,8 +82,6 @@ SendBuffer::SendBuffer()
         BufferSize[r]=0;
         BufferName[r]=NULL;
     }
-
-    ClearAllBuffers();
 }
 
 SendBuffer::~SendBuffer()
@@ -97,6 +95,30 @@ SendBuffer::~SendBuffer()
         if(BufferName[r]!=NULL)
             free(BufferName[r]);
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    SendBuffer::Init
+ *
+ * SYNOPSIS:
+ *    void SendBuffer::Init(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function init's the send buffer system.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void SendBuffer::Init(void)
+{
+    ClearAllBuffers();
 }
 
 /*******************************************************************************

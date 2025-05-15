@@ -29,6 +29,10 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_ENHANCEMENT,"Improved open errors dialog with OS messages",
+            "When an open connection fails the user is now prompted with"
+            " and error message.  This message can include more details from"
+            " the plugin."},
     {   NOTETYPE_ENHANCEMENT,"Added option to auto reconnect when a connection is closed",
             "A new feature was added that will auto retry opening a connection"
             " if it fails to open.  A setting was added to say if this should"

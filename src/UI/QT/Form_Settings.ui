@@ -36,7 +36,7 @@
       <item>
        <widget class="QStackedWidget" name="Editing_stackedWidget">
         <property name="currentIndex">
-         <number>2</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="page_Panel">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -1291,6 +1291,22 @@
                   <widget class="QCheckBox" name="MouseCursor_UseIBeam_checkBox">
                    <property name="text">
                     <string>Use IBeam</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="Window_groupBox">
+                <property name="title">
+                 <string>Window</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_47">
+                 <item>
+                  <widget class="QCheckBox" name="LockWinScrollWhenNotOnBottom_checkBox">
+                   <property name="text">
+                    <string>Lock window scroll when not on bottom line</string>
                    </property>
                   </widget>
                  </item>

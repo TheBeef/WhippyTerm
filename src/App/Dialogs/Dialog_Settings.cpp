@@ -212,6 +212,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     t_UIGroupBox *Display_Tabs;
     t_UIGroupBox *Display_ClearScreen;
     t_UIGroupBox *Display_MouseCursor;
+    t_UIGroupBox *Display_Window;
     e_DS_SettingsArea FirstSelectedArea;
     e_UIS_TabCtrl_Terminal_Page SelectTerminalPage;
     e_UIS_TabCtrl_Display_Page SelectDisplayPage;
@@ -426,6 +427,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         Display_Tabs=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_Tabs);
         Display_ClearScreen=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_ClearScreen);
         Display_MouseCursor=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_MouseCursor);
+        Display_Window=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_Window);
 
         UITabCtrlSetTabVisibleByIndex(TerminalTabCtrl,
                 e_UIS_TabCtrl_Terminal_Page_KeyBinding,false);
@@ -435,6 +437,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         UIGroupBoxVisible(Display_Tabs,false);
         UIGroupBoxVisible(Display_ClearScreen,false);
         UIGroupBoxVisible(Display_MouseCursor,false);
+        UIGroupBoxVisible(Display_Window,false);
 
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoConnectOnNewConnection);
         UICheckboxVisible(CheckboxHandle,false);
@@ -673,6 +676,8 @@ static void DS_SetSettingGUI(void)
     UICheckCheckbox(CheckboxHandle,m_SettingConSettings->CursorBlink);
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_MouseCursorUseIBeam);
     UICheckCheckbox(CheckboxHandle,g_Settings.MouseCursorIBeam);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_LockWinScrollWhenNotOnBottom);
+    UICheckCheckbox(CheckboxHandle,g_Settings.LockWinScrollWhenNotOnBottom);
 
     m_CursorColor=m_SettingConSettings->CursorColor;
     ColorPreviewHandle=UIS_GetColorPreviewHandle(e_UIS_ColorPreview_CursorColor);
@@ -1045,6 +1050,9 @@ static void DS_GetSettingsFromGUI(void)
 
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_MouseCursorUseIBeam);
         g_Settings.MouseCursorIBeam=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_LockWinScrollWhenNotOnBottom);
+        g_Settings.LockWinScrollWhenNotOnBottom=UIGetCheckboxCheckStatus(CheckboxHandle);
 
         /* Keyboard */
         RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Clear);
@@ -2443,6 +2451,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Checkbox_ColorEnable:
                 case e_UIS_Checkbox_UseCustomSounds:
                 case e_UIS_Checkbox_MouseCursorUseIBeam:
+                case e_UIS_Checkbox_LockWinScrollWhenNotOnBottom:
                 case e_UIS_CheckboxMAX:
                 default:
                 break;
@@ -2573,6 +2582,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_NumberInput_TermSizeHeight:
                 case e_UIS_NumberInput_ScrollBufferLines:
                 case e_UIS_NumberInput_HexDisplay_BufferSize:
+                case e_UIS_NumberInput_AutoReopenWaitTime:
                 case e_UIS_NumberInputMAX:
                 default:
                 break;

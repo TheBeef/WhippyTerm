@@ -112,8 +112,6 @@ t_UICheckboxCtrl *UIS_GetCheckboxHandle(e_UIS_Checkbox UIObj)
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->MouseCursor_UseIBeam_checkBox;
         case e_UIS_Checkbox_AutoReopen:
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->AutoReopen_checkBox;
-        case e_UIS_Checkbox_LockWinScrollWhenNotOnBottom:
-            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->LockWinScrollWhenNotOnBottom_checkBox;
         case e_UIS_CheckboxMAX:
         default:
         break;
@@ -276,8 +274,6 @@ t_UIGroupBox *UIS_GetGroupBoxHandle(e_UIS_GroupBox UIObj)
             return (t_UIGroupBox *)g_SettingsDialog->ui->groupBox_DisplayClearScreen;
         case e_UIS_GroupBox_Display_MouseCursor:
             return (t_UIGroupBox *)g_SettingsDialog->ui->MouseCursor_groupBox;
-        case e_UIS_GroupBox_Display_Window:
-            return (t_UIGroupBox *)g_SettingsDialog->ui->Window_groupBox;
 
         case e_UIS_GroupBoxMAX:
         default:

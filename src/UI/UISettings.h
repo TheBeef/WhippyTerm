@@ -64,7 +64,6 @@ enum e_UIS_Checkbox
     e_UIS_Checkbox_UseCustomSounds,
     e_UIS_Checkbox_MouseCursorUseIBeam,
     e_UIS_Checkbox_AutoReopen,
-    e_UIS_Checkbox_LockWinScrollWhenNotOnBottom,
     e_UIS_CheckboxMAX
 };
 
@@ -141,7 +140,6 @@ enum e_UIS_GroupBox
     e_UIS_GroupBox_Display_Tabs,
     e_UIS_GroupBox_Display_ClearScreen,
     e_UIS_GroupBox_Display_MouseCursor,
-    e_UIS_GroupBox_Display_Window,
     e_UIS_GroupBoxMAX
 };
 

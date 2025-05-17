@@ -928,7 +928,6 @@ void Settings::RegisterAllMembers(class TinyCFG &cfg)
         cfg.Register("AlwaysShowTabs",AlwaysShowTabs);
         cfg.Register("CloseButtonOnTabs",CloseButtonOnTabs);
         cfg.Register("MouseCursorIBeam",MouseCursorIBeam);
-        cfg.Register("LockWinScrollWhenNotOnBottom",LockWinScrollWhenNotOnBottom);
         cfg.StartBlock("HexDisplays");
             cfg.Register("HexDisplaysFGColor",HexDisplaysFGColor);
             cfg.Register("HexDisplaysBGColor",HexDisplaysBGColor);
@@ -1120,7 +1119,6 @@ void Settings::DefaultSettings(void)
     WindowHeight=480;
     CloseButtonOnTabs=false;
     MouseCursorIBeam=true;
-    LockWinScrollWhenNotOnBottom=true;
 
 //            ScrollBackLines=20;
     AlwaysShowTabs=true;

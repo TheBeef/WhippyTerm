@@ -1298,22 +1298,6 @@
                </widget>
               </item>
               <item>
-               <widget class="QGroupBox" name="Window_groupBox">
-                <property name="title">
-                 <string>Window</string>
-                </property>
-                <layout class="QVBoxLayout" name="verticalLayout_47">
-                 <item>
-                  <widget class="QCheckBox" name="LockWinScrollWhenNotOnBottom_checkBox">
-                   <property name="text">
-                    <string>Lock window scroll when not on bottom line</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item>
                <spacer name="verticalSpacer_6">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>

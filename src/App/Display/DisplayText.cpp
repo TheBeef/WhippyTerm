@@ -2779,8 +2779,8 @@ void DisplayText::MoveCursor(unsigned int x,unsigned y,bool CursorXPxPrecaled)
 
     UITC_SetCursorPos(TextDisplayCtrl,CursorX,CalcCorrectedCursorPos());
 
-    if(!g_Settings.LockWinScrollWhenNotOnBottom)
-        ScrollScreen2MakeCursorVisible();
+    /* This line will make the screen always scroll to the bottom */
+    /* ScrollScreen2MakeCursorVisible(); */
 
     RethinkCursorHidden();
 

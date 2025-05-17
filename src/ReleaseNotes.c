@@ -29,6 +29,10 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_ENHANCEMENT,"Added Lock window scroll when not on bottom line",
+            "When the scroll bar is at the bottom the screen will be scrolled"
+            " to the bottom when new text is added.  If the scroll bar is"
+            " not at the bottom it will say at it's current display."},
     {   NOTETYPE_ENHANCEMENT,"Improved open errors dialog with OS messages",
             "When an open connection fails the user is now prompted with"
             " and error message.  This message can include more details from"

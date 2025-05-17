@@ -195,7 +195,6 @@ class Settings
         bool AlwaysShowTabs;
         bool CloseButtonOnTabs;
         bool MouseCursorIBeam;
-        bool LockWinScrollWhenNotOnBottom;
 
         /***** Terminal *****/
         e_ScreenClearType ScreenClear;

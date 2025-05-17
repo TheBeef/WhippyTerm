@@ -449,6 +449,7 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
 
         RethinkYScrollBar();
 
+//`
         if(WasAtBottom)
         {
             int TotalLines;

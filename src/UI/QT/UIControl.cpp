@@ -53,6 +53,7 @@
 #include <QWidget>
 #include <QStackedWidget>
 #include <QtGlobal>
+#include <QToolButton>
 
 //include <stdio.h>
 
@@ -1251,23 +1252,23 @@ void UISetDoubleInputCtrlDecimals(t_UIDoubleInput *DoubleInputCtrl,int Points)
 /*************************************/
 void UIEnableToolbar(t_UIToolbarCtrl *Toolbar,bool Enable)
 {
-    QAction *action=(QAction *)Toolbar;
+    QToolButton *bttn=(QToolButton *)Toolbar;
 
-    action->setEnabled(Enable);
+    bttn->setEnabled(Enable);
 }
 
 void UICheckToolbar(t_UIToolbarCtrl *Toolbar,bool Checked)
 {
-    QAction *action=(QAction *)Toolbar;
+    QToolButton *bttn=(QToolButton *)Toolbar;
 
-    action->setChecked(Checked);
+    bttn->setChecked(Checked);
 }
 
 bool UIGetToolbarCheckStatus(t_UIToolbarCtrl *Toolbar)
 {
-    QAction *action=(QAction *)Toolbar;
+    QToolButton *bttn=(QToolButton *)Toolbar;
 
-    return action->isChecked();
+    return bttn->isChecked();
 }
 
 /*************************************/

@@ -50,7 +50,6 @@ public:
     bool BottomClosed;
     bool LeftClosed;
     bool RightClosed;
-    QLineEdit *ToolBarURI_LineEdit;
     t_MWListOfActionsType BookmarkMenuItems;
     t_MWListOfMenusType BookmarkMenus;
     t_MWListOfActionsType FTPUploadMenuItems;
@@ -63,8 +62,6 @@ public slots:
     void on_LeftRightSplitter_splitterMoved(int pos, int index);
 
 private slots:
-    void URIreturnPressed();
-    void URIEdited(const QString &arg1);
     void on_actionQuit_triggered();
     void on_actionAbout_Whippy_Term_triggered();
     void on_actionTest1_triggered();
@@ -330,6 +327,24 @@ private slots:
     void on_actionDefault_Settings_triggered();
     
     void on_actionAuto_Reconnect_triggered();
+    
+    void on_New_Tab_toolButton_clicked();
+    
+    void on_ConnectToggle_toolButton_clicked();
+    
+    void on_Copy_toolButton_clicked();
+    
+    void on_Paste_toolButton_clicked();
+    
+    void on_Clear_Screen_toolButton_clicked();
+    
+    void on_URIHelp_toolButton_clicked();
+    
+    void on_URIGo_toolButton_clicked();
+    
+    void on_URI_lineEdit_textEdited(const QString &arg1);
+    
+    void on_URI_lineEdit_returnPressed();
     
 private:
     void resizeEvent(QResizeEvent *event);

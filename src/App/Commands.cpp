@@ -271,6 +271,7 @@ e_CmdType m_Cmd2ToolbarMapping[]=
     e_Cmd_Copy,                         // e_UIMWToolbar_Copy
     e_Cmd_Paste,                        // e_UIMWToolbar_Paste
     e_Cmd_URIHelp,                      // e_UIMWToolbar_URIHelp
+    e_Cmd_ClearScreen,                  // e_UIMWToolbar_ClearScreen
 };
 
 e_CmdType m_Cmd2ButtonMapping[]=

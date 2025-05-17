@@ -270,17 +270,19 @@ t_UIToolbarCtrl *UIMW_GetToolbarHandle(t_UIMainWindow *win,
     switch(UIObj)
     {
         case e_UIMWToolbar_NewTab:
-            return (t_UIToolbarCtrl *)realwin->ui->actionNew_Tab_Toolbar;
+            return (t_UIToolbarCtrl *)realwin->ui->New_Tab_toolButton;
         case e_UIMWToolbar_ConnectToggle:
-            return (t_UIToolbarCtrl *)realwin->ui->actionConnectToggle;
+            return (t_UIToolbarCtrl *)realwin->ui->ConnectToggle_toolButton;
         case e_UIMWToolbar_URIGo:
-            return (t_UIToolbarCtrl *)realwin->ui->actionactionURIGo;
+            return (t_UIToolbarCtrl *)realwin->ui->URIGo_toolButton;
         case e_UIMWToolbar_Copy:
-            return (t_UIToolbarCtrl *)realwin->ui->actionCopy_toolbar;
+            return (t_UIToolbarCtrl *)realwin->ui->Copy_toolButton;
         case e_UIMWToolbar_Paste:
-            return (t_UIToolbarCtrl *)realwin->ui->actionPaste_toolbar;
+            return (t_UIToolbarCtrl *)realwin->ui->Paste_toolButton;
         case e_UIMWToolbar_URIHelp:
-            return (t_UIToolbarCtrl *)realwin->ui->actionURIHelp;
+            return (t_UIToolbarCtrl *)realwin->ui->URIHelp_toolButton;
+        case e_UIMWToolbar_ClearScreen:
+            return (t_UIToolbarCtrl *)realwin->ui->Clear_Screen_toolButton;
         case e_UIMWToolbarMAX:
         default:
         break;
@@ -296,7 +298,7 @@ t_UITextInputCtrl *UIMW_GetTxtInputHandle(t_UIMainWindow *win,
     switch(UIObj)
     {
         case e_UIMWTxtInput_URI:
-            return (t_UITextInputCtrl *)realwin->ToolBarURI_LineEdit;
+            return (t_UITextInputCtrl *)realwin->ui->URI_lineEdit;
         case e_UIMWTxtInput_Capture_Filename:
             return (t_UITextInputCtrl *)realwin->ui->lineEdit_Cap_FileName;
         case e_UIMWTxtInput_Upload_Filename:

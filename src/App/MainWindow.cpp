@@ -1305,6 +1305,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     t_UIToolbarCtrl *ConnectToggle;
     t_UIToolbarCtrl *CopyTool;
     t_UIToolbarCtrl *PasteTool;
+    t_UIToolbarCtrl *ClearScreenTool;
     e_UIMenuCtrl *CloseTabMenu;
     e_UIMenuCtrl *CloseAllMenu;
     e_UIMenuCtrl *ConnectMenu;
@@ -1365,6 +1366,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     ConnectToggle=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_ConnectToggle);
     CopyTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_Copy);
     PasteTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_Paste);
+    ClearScreenTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_ClearScreen);
     CloseTabMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_CloseTab);
     CloseAllMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_CloseAll);
     ConnectMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Connect);
@@ -1418,10 +1420,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
 
     if(UITabCtrlGetTabCount(MainTabs)==0)
     {
-        UIEnableToolbar(ConnectToggle,false);
         UIEnableMenu(CloseTabMenu,false);
         UIEnableMenu(CloseAllMenu,false);
-        UICheckToolbar(ConnectToggle,false);
         UIEnableMenu(ConnectMenu,false);
         UIEnableMenu(DisconnectMenu,false);
         UIEnableMenu(ChangeConnectionNameMenu,false);
@@ -1439,8 +1439,6 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(GotoRow,false);
         UIEnableMenu(Copy,false);
         UIEnableMenu(Paste,false);
-        UIEnableToolbar(CopyTool,false);
-        UIEnableToolbar(PasteTool,false);
         UIEnableMenu(SelectAll,false);
         UIEnableMenu(ZoomIn,false);
         UIEnableMenu(ZoomOut,false);
@@ -1469,13 +1467,18 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(SendBufferSendGeneric,false);
         UIEnableMenu(AutoReconnectMenu,false);
 
+        UIEnableToolbar(ConnectToggle,false);
+        UICheckToolbar(ConnectToggle,false);
+        UIEnableToolbar(CopyTool,false);
+        UIEnableToolbar(PasteTool,false);
+        UIEnableToolbar(ClearScreenTool,false);
+
         UIMW_EnableApplyTerminalEmulationMenu(UIWin,false);
 
         ActivatePanels=false;
     }
     else
     {
-        UIEnableToolbar(ConnectToggle,true);
         UIEnableMenu(CloseTabMenu,true);
         UIEnableMenu(CloseAllMenu,true);
         UIEnableMenu(ChangeConnectionNameMenu,true);
@@ -1491,8 +1494,6 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(GotoColumn,true);
         UIEnableMenu(GotoRow,true);
         UIEnableMenu(Copy,true);
-        UIEnableToolbar(CopyTool,true);
-        UIEnableToolbar(PasteTool,true);
         UIEnableMenu(SelectAll,true);
         UIEnableMenu(ZoomIn,true);
         UIEnableMenu(ZoomOut,true);
@@ -1507,6 +1508,11 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(Send_Delete,true);
         UIEnableMenu(Send_Other,true);
         UIEnableMenu(AutoReconnectMenu,true);
+
+        UIEnableToolbar(ConnectToggle,true);
+        UIEnableToolbar(CopyTool,true);
+        UIEnableToolbar(PasteTool,true);
+        UIEnableToolbar(ClearScreenTool,true);
 
         UIMW_EnableApplyTerminalEmulationMenu(UIWin,true);
 

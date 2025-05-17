@@ -9,6 +9,7 @@
 #include "main.h"
 #include "ContextMenuHelper.h"
 #include <stdio.h>
+#include <string>
 #include <QCloseEvent>
 
 #include "Form_DebugStats.h"
@@ -16,6 +17,8 @@
 #include "UI/UISettings.h"
 #include "UI/UIDebug.h"
 #include "UI/UIFontReq.h"
+
+using namespace std;
 
 bool g_DEBUG_DoInsertTest;
 
@@ -93,35 +96,6 @@ Form_MainWindow::Form_MainWindow(QWidget *parent) :
     IgnoreNextKeyEvent=false;
 
     ui->setupUi(this);
-
-    ToolBarURI_LineEdit = new QLineEdit(ui->mainToolBar);
-    ToolBarURI_LineEdit->setObjectName(QString::fromUtf8("ToolBarURI"));
-    ToolBarURI_LineEdit->setGeometry(QRect(200, 10, 113, 27));
-
-    ToolBarURI_LineEdit->setToolTip(
-            "The URI is a way of specifying what device to connect to and"
-            " set parameters for that connection.\n"
-            "\n"
-            "The format is:\n"
-            "Device : parameters\n"
-            "\n"
-            "The parameters format depends on the device.\n"
-            "\n"
-            "For example:\n"
-            "\"COM1:9600,8,n,1\" is for comport 1 at 9600 baud, 8 bits, no parity, 1 stop bit.");
-
-//    ToolBarURI=ui->mainToolBar->insertWidget(ui->actionactionURIGo,ToolBarURI_LineEdit);
-    ToolBarURI=ui->mainToolBar->insertWidget(ui->actionURIHelp,ToolBarURI_LineEdit);
-
-    ToolbarURILabel_Label = new QLabel(ui->mainToolBar);
-    ToolbarURILabel_Label->setObjectName(QString::fromUtf8("ToolbarURILabel"));
-    ToolbarURILabel_Label->setGeometry(QRect(200, 10, 62, 17));
-    ToolbarURILabel_Label->setText("URI ");
-
-    ToolBarURILabel=ui->mainToolBar->insertWidget(ToolBarURI,ToolbarURILabel_Label);
-
-    connect(ToolBarURI_LineEdit, SIGNAL(returnPressed()), this, SLOT(URIreturnPressed()));
-    connect(ToolBarURI_LineEdit, SIGNAL(textEdited(const QString &)), this, SLOT(URIEdited(const QString &)));
 
     StopWatchTimer=new QTimer(this);
     StopWatchTimer->setInterval(13);   // 13ms so the updates look like they are coming in faster
@@ -930,18 +904,6 @@ void Form_MainWindow::on_pushButton_CO_Apply_clicked()
     DoBttnTriggered(e_UIMWBttn_ConnectionOptionApply);
 }
 
-void Form_MainWindow::URIreturnPressed()
-{
-    DoToolbarTriggered(e_UIMWToolbar_URIGo);
-    IgnoreNextKeyEvent=true;
-}
-
-void Form_MainWindow::URIEdited(const QString &text)
-{
-    DoTextInputChanged(e_UIMWTxtInput_URI,
-            qPrintable(ToolBarURI_LineEdit->text()));
-}
-
 void Form_MainWindow::on_actionactionURIGo_triggered()
 {
     DoToolbarTriggered(e_UIMWToolbar_URIGo);
@@ -1662,5 +1624,59 @@ void Form_MainWindow::on_actionDefault_Settings_triggered()
 void Form_MainWindow::on_actionAuto_Reconnect_triggered()
 {
     DoMenuTriggered(e_UIMWMenu_ToggleAutoReconnect);
+}
+
+void Form_MainWindow::on_New_Tab_toolButton_clicked()
+{
+    DoToolbarTriggered(e_UIMWToolbar_NewTab);
+}
+
+
+void Form_MainWindow::on_ConnectToggle_toolButton_clicked()
+{
+    DoToolbarTriggered(e_UIMWToolbar_ConnectToggle);
+}
+
+
+void Form_MainWindow::on_Copy_toolButton_clicked()
+{
+    DoToolbarTriggered(e_UIMWToolbar_Copy);
+}
+
+
+void Form_MainWindow::on_Paste_toolButton_clicked()
+{
+    DoToolbarTriggered(e_UIMWToolbar_Paste);
+}
+
+
+void Form_MainWindow::on_Clear_Screen_toolButton_clicked()
+{
+    DoToolbarTriggered(e_UIMWToolbar_ClearScreen);
+}
+
+void Form_MainWindow::on_URIHelp_toolButton_clicked()
+{
+    DoToolbarTriggered(e_UIMWToolbar_URIHelp);
+}
+
+
+void Form_MainWindow::on_URIGo_toolButton_clicked()
+{
+    DoToolbarTriggered(e_UIMWToolbar_URIGo);
+}
+
+
+void Form_MainWindow::on_URI_lineEdit_textEdited(const QString &arg1)
+{
+    string InputText;
+    InputText=ui->URI_lineEdit->text().toStdString();
+    DoTextInputChanged(e_UIMWTxtInput_URI,InputText.c_str());
+}
+
+void Form_MainWindow::on_URI_lineEdit_returnPressed()
+{
+    DoToolbarTriggered(e_UIMWToolbar_URIGo);
+    IgnoreNextKeyEvent=true;
 }
 

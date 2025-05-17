@@ -179,6 +179,7 @@ typedef enum
     e_UIMWToolbar_Copy,
     e_UIMWToolbar_Paste,
     e_UIMWToolbar_URIHelp,
+    e_UIMWToolbar_ClearScreen,
     e_UIMWToolbarMAX
 } e_UIMWToolbarType;
 

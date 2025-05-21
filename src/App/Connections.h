@@ -362,6 +362,9 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void DoBell(bool VisualOnly);
         void ToggleAutoReopen(void);
         bool GetCurrentAutoReopenStatus(void);
+        void ApplyAttribs2Selection(uint32_t Attribs);
+        bool IsThisAttribInSelection(uint32_t Attrib);
+        void ApplyBGColor2Selection(uint32_t Color);
 
         void InformOfConnected(void);
         void InformOfDisconnected(void);
@@ -428,6 +431,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
 
         bool IsConnectionBinary(void);
         t_UIContextMenuCtrl *GetContextMenuHandle(e_UITD_ContextMenuType UIObj);
+        t_UIContextSubMenuCtrl *GetContextSubMenuHandle(e_UITD_ContextSubMenuType UIObj);
 
         /* Com Test */
         void SetupComTest(bool Sender,uint32_t PacketLen,uint32_t PacketsCount,uint32_t Delay,uint8_t *PacketData);

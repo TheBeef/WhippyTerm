@@ -63,8 +63,34 @@ typedef enum
     e_UITD_ContextMenu_ZoomOut,
     e_UITD_ContextMenu_Edit,
     e_UITD_ContextMenu_EndianSwap,
+    e_UITD_ContextMenu_Bold,
+    e_UITD_ContextMenu_Italics,
+    e_UITD_ContextMenu_Underline,
+    e_UITD_ContextMenu_StrikeThrough,
+    e_UITD_ContextMenu_StyleBGColor_Black,
+    e_UITD_ContextMenu_StyleBGColor_Blue,
+    e_UITD_ContextMenu_StyleBGColor_Green,
+    e_UITD_ContextMenu_StyleBGColor_Cyan,
+    e_UITD_ContextMenu_StyleBGColor_Red,
+    e_UITD_ContextMenu_StyleBGColor_Magenta,
+    e_UITD_ContextMenu_StyleBGColor_Brown,
+    e_UITD_ContextMenu_StyleBGColor_White,
+    e_UITD_ContextMenu_StyleBGColor_Gray,
+    e_UITD_ContextMenu_StyleBGColor_LightBlue,
+    e_UITD_ContextMenu_StyleBGColor_LightGreen,
+    e_UITD_ContextMenu_StyleBGColor_LightCyan,
+    e_UITD_ContextMenu_StyleBGColor_LightRed,
+    e_UITD_ContextMenu_StyleBGColor_LightMagenta,
+    e_UITD_ContextMenu_StyleBGColor_Yellow,
+    e_UITD_ContextMenu_StyleBGColor_BrightWhite,
     e_UITD_ContextMenuMAX
 } e_UITD_ContextMenuType;
+
+typedef enum
+{
+    e_UITD_ContextSubMenu_BGColor,
+    e_UITD_ContextSubMenuMAX
+} e_UITD_ContextSubMenuType;
 
 typedef enum
 {
@@ -227,6 +253,7 @@ void UITC_SetSelectionAvailable(t_UITextDisplayCtrl *ctrl,bool Available);
 t_UIScrollBarCtrl *UITC_GetHorzSlider(t_UITextDisplayCtrl *ctrl);
 t_UIScrollBarCtrl *UITC_GetVertSlider(t_UITextDisplayCtrl *ctrl);
 t_UIContextMenuCtrl *UITC_GetContextMenuHandle(t_UITextDisplayCtrl *ctrl,e_UITD_ContextMenuType UIObj);
+t_UIContextSubMenuCtrl *UITC_GetContextSubMenuHandle(t_UITextDisplayCtrl *ctrl,e_UITD_ContextSubMenuType UIObj);
 t_UIContainerFrameCtrl *UITC_GetSendHexDisplayContainerFrameCtrlHandle(t_UITextDisplayCtrl *ctrl);
 t_UIButtonCtrl *UITC_GetButtonHandle(t_UITextDisplayCtrl *ctrl,e_UITC_BttnType Bttn);
 t_UITextInputCtrl *UITC_GetTextInputHandle(t_UITextDisplayCtrl *ctrl,e_UITC_TxtType Txt);

@@ -108,6 +108,7 @@ void Debug6(void);
         void InformOfNewPluginInstalled(const struct ExternPluginInfo *Info);
         void HandleGoURIToolBttnEnabled(void);
         void InformOfSendBufferChange(int BufferIndex);
+        void ToolbarMenuSelected(e_UIMWToolbarMenuType InputID);
 
         /* Panel handlers */
         class MWConnectionOptions ConnectionOptionsPanel;
@@ -134,6 +135,8 @@ void Debug6(void);
         bool BridgeActive;
         class Connection *BridgedCon1;
         class Connection *BridgedCon2;
+        e_SysColType CurrentBGStyleColor;
+        e_SysColShadeType CurrentBGStyleShade;
 
         class Connection *NoTabsConnection;
 
@@ -168,6 +171,10 @@ void Debug6(void);
         void RebuildTerminalEmulationMenu(void);
         void MoveToNextTab(void);
         void MoveToPrevTab(void);
+        void ApplyAttrib2Selection(uint32_t Attribs);
+        void ApplyBGColor2Selection(void);
+        void ApplyBGColor2Selection(e_SysColType Color,e_SysColShadeType Shade);
+        void ChangeStyleBGColorSelectedColor(e_SysColType Color,e_SysColShadeType Shade);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

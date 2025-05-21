@@ -2836,6 +2836,66 @@ bool Connection::ProcessDisplayEvent(const struct DBEvent *Event)
                 case e_UITD_ContextMenu_ZoomOut:
                     MW->ExeCmd(e_Cmd_ZoomOut);
                 break;
+                case e_UITD_ContextMenu_Bold:
+                    MW->ExeCmd(e_Cmd_StyleSelectionBold);
+                break;
+                case e_UITD_ContextMenu_Italics:
+                    MW->ExeCmd(e_Cmd_StyleSelectionItalics);
+                break;
+                case e_UITD_ContextMenu_Underline:
+                    MW->ExeCmd(e_Cmd_StyleSelectionUnderline);
+                break;
+                case e_UITD_ContextMenu_StrikeThrough:
+                    MW->ExeCmd(e_Cmd_StyleSelectionStrikeThrough);
+                break;
+                case e_UITD_ContextMenu_StyleBGColor_Black:
+                    MW->ExeCmd(e_Cmd_ApplyStyleBGColor_Black);
+                break;
+                case e_UITD_ContextMenu_StyleBGColor_Blue:
+                    MW->ExeCmd(e_Cmd_ApplyStyleBGColor_Blue);
+                break;
+                case e_UITD_ContextMenu_StyleBGColor_Green:
+                    MW->ExeCmd(e_Cmd_ApplyStyleBGColor_Green);
+                break;
+                case e_UITD_ContextMenu_StyleBGColor_Cyan:
+                    MW->ExeCmd(e_Cmd_ApplyStyleBGColor_Cyan);
+                break;
+                case e_UITD_ContextMenu_StyleBGColor_Red:
+                    MW->ExeCmd(e_Cmd_ApplyStyleBGColor_Red);
+                break;
+                case e_UITD_ContextMenu_StyleBGColor_Magenta:
+                    MW->ExeCmd(e_Cmd_ApplyStyleBGColor_Magenta);
+                break;
+                case e_UITD_ContextMenu_StyleBGColor_Brown:
+                    MW->ExeCmd(e_Cmd_ApplyStyleBGColor_Brown);
+                break;
+                case e_UITD_ContextMenu_StyleBGColor_White:
+                    MW->ExeCmd(e_Cmd_ApplyStyleBGColor_White);
+                break;
+                case e_UITD_ContextMenu_StyleBGColor_Gray:
+                    MW->ExeCmd(e_Cmd_ApplyStyleBGColor_Gray);
+                break;
+                case e_UITD_ContextMenu_StyleBGColor_LightBlue:
+                    MW->ExeCmd(e_Cmd_ApplyStyleBGColor_LightBlue);
+                break;
+                case e_UITD_ContextMenu_StyleBGColor_LightGreen:
+                    MW->ExeCmd(e_Cmd_ApplyStyleBGColor_LightGreen);
+                break;
+                case e_UITD_ContextMenu_StyleBGColor_LightCyan:
+                    MW->ExeCmd(e_Cmd_ApplyStyleBGColor_LightCyan);
+                break;
+                case e_UITD_ContextMenu_StyleBGColor_LightRed:
+                    MW->ExeCmd(e_Cmd_ApplyStyleBGColor_LightRed);
+                break;
+                case e_UITD_ContextMenu_StyleBGColor_LightMagenta:
+                    MW->ExeCmd(e_Cmd_ApplyStyleBGColor_LightMagenta);
+                break;
+                case e_UITD_ContextMenu_StyleBGColor_Yellow:
+                    MW->ExeCmd(e_Cmd_ApplyStyleBGColor_Yellow);
+                break;
+                case e_UITD_ContextMenu_StyleBGColor_BrightWhite:
+                    MW->ExeCmd(e_Cmd_ApplyStyleBGColor_BrightWhite);
+                break;
                 case e_UITD_ContextMenu_EndianSwap:
                 case e_UITD_ContextMenu_Edit:
                 case e_UITD_ContextMenuMAX:
@@ -6514,6 +6574,33 @@ t_UIContextMenuCtrl *Connection::GetContextMenuHandle(e_UITD_ContextMenuType UIO
 
 /*******************************************************************************
  * NAME:
+ *    Connection::GetContextSubMenuHandle
+ *
+ * SYNOPSIS:
+ *    t_UIContextMenuCtrl *Connection::GetContextSubMenuHandle(
+ *              e_UITD_ContextMenuType UIObj)
+ *
+ * PARAMETERS:
+ *    UIObj [I] -- The context menu item to get the handle for.
+ *
+ * FUNCTION:
+ *    This function gets a context menu item's handle.
+ *
+ * RETURNS:
+ *    The context sub menu item's handle or NULL if it was not found.  If this
+ *    is not supported (because there is no menu for example) then this will
+ *    return NULL.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIContextSubMenuCtrl *Connection::GetContextSubMenuHandle(e_UITD_ContextSubMenuType UIObj)
+{
+    return Display->GetContextSubMenuHandle(UIObj);
+}
+
+/*******************************************************************************
+ * NAME:
  *    Connection::DoBell
  *
  * SYNOPSIS:
@@ -6749,3 +6836,89 @@ void Connection::HandleFailed2OpenErrorMessage(void)
 
     UIAsk("Failed",Msg.c_str(),e_AskBox_Error,e_AskBttns_Ok);
 }
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::ApplyAttribs2Selection
+ *
+ * SYNOPSIS:
+ *    void Connection::ApplyAttribs2Selection(uint32_t Attribs);
+ *
+ * PARAMETERS:
+ *    Attribs [I] -- The TXT_ATTRIB_ attribs to toggle.
+ *
+ * FUNCTION:
+ *    This function applies attribs to the current selection of this connection.
+ *    This will toggle the attribs on/off.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::ApplyAttribs2Selection(uint32_t Attribs)
+{
+    if(Display==NULL)
+        return;
+
+    Display->ToggleAttribs2Selection(Attribs);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::IsThisAttribInSelection
+ *
+ * SYNOPSIS:
+ *    bool Connection::IsThisAttribInSelection(uint32_t Attrib);
+ *
+ * PARAMETERS:
+ *    Attrib [I] -- The attrib to check
+ *
+ * FUNCTION:
+ *    This function checks to see if the requested attrib is in any of the
+ *    bytes of the selection.
+ *
+ * RETURNS:
+ *    true -- This attrib was set in the selection
+ *    false -- Not found in the selection.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::IsThisAttribInSelection(uint32_t Attrib)
+{
+    if(Display==NULL)
+        return false;
+
+    return Display->IsAttribSetInSelection(Attrib);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::ApplyBGColor2Selection
+ *
+ * SYNOPSIS:
+ *    void Connection::ApplyBGColor2Selection(uint32_t Color);
+ *
+ * PARAMETERS:
+ *    Color [I] -- The color to change the background of the selection to
+ *
+ * FUNCTION:
+ *    This function changes the cells in the selections background color
+ *    to the requested color.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::ApplyBGColor2Selection(uint32_t Color)
+{
+    if(Display==NULL)
+        return;
+
+    Display->ApplyBGColor2Selection(Color);
+}
+

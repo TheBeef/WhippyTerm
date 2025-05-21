@@ -189,7 +189,63 @@ t_UIContextMenuCtrl *UITC_GetContextMenuHandle(t_UITextDisplayCtrl *ctrl,e_UITD_
             return (t_UIContextMenuCtrl *)TextDisplay->ui->actionEdit;
         case e_UITD_ContextMenu_EndianSwap:
             return (t_UIContextMenuCtrl *)TextDisplay->ui->actionEndian_Swap;
+        case e_UITD_ContextMenu_Bold:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBold;
+        case e_UITD_ContextMenu_Italics:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleItalics;
+        case e_UITD_ContextMenu_Underline:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleUnderline;
+        case e_UITD_ContextMenu_StrikeThrough:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleStrike_Through;
+        case e_UITD_ContextMenu_StyleBGColor_Black:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_Black;
+        case e_UITD_ContextMenu_StyleBGColor_Blue:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_Blue;
+        case e_UITD_ContextMenu_StyleBGColor_Green:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_Green;
+        case e_UITD_ContextMenu_StyleBGColor_Cyan:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_Cyan;
+        case e_UITD_ContextMenu_StyleBGColor_Red:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_Red;
+        case e_UITD_ContextMenu_StyleBGColor_Magenta:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_Magenta;
+        case e_UITD_ContextMenu_StyleBGColor_Brown:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_Brown;
+        case e_UITD_ContextMenu_StyleBGColor_White:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_White;
+        case e_UITD_ContextMenu_StyleBGColor_Gray:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_Gray;
+        case e_UITD_ContextMenu_StyleBGColor_LightBlue:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_LightBlue;
+        case e_UITD_ContextMenu_StyleBGColor_LightGreen:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_LightGreen;
+        case e_UITD_ContextMenu_StyleBGColor_LightCyan:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_LightCyan;
+        case e_UITD_ContextMenu_StyleBGColor_LightRed:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_LightRed;
+        case e_UITD_ContextMenu_StyleBGColor_LightMagenta:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_LightMagenta;
+        case e_UITD_ContextMenu_StyleBGColor_Yellow:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_Yellow;
+        case e_UITD_ContextMenu_StyleBGColor_BrightWhite:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_BrightWhite;
+
         case e_UITD_ContextMenuMAX:
+        default:
+            break;
+    }
+    return NULL;
+}
+
+t_UIContextSubMenuCtrl *UITC_GetContextSubMenuHandle(t_UITextDisplayCtrl *ctrl,e_UITD_ContextSubMenuType UIObj)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    switch(UIObj)
+    {
+        case e_UITD_ContextSubMenu_BGColor:
+            return (t_UIContextSubMenuCtrl *)TextDisplay->ColorBGSubmenu;
+        case e_UITD_ContextSubMenuMAX:
         default:
             break;
     }
@@ -1259,6 +1315,26 @@ t_UIContainerFrameCtrl *UITC_GetSendHexDisplayContainerFrameCtrlHandle(t_UITextD
     return (t_UIContainerFrameCtrl *)TextDisplay->ui->BlockSendHex_frame;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    UITC_SendPanelShowHexOrTextInput
+ *
+ * SYNOPSIS:
+ *    void UITC_SendPanelShowHexOrTextInput(t_UITextDisplayCtrl *ctrl,bool ShowText);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- What control to work on
+ *    ShowText [I] -- Show the text input or the hex input
+ *
+ * FUNCTION:
+ *    This function shows the text input or the hex input.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void UITC_SendPanelShowHexOrTextInput(t_UITextDisplayCtrl *ctrl,bool ShowText)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
@@ -1274,3 +1350,4 @@ void UITC_SendPanelShowHexOrTextInput(t_UITextDisplayCtrl *ctrl,bool ShowText)
         TextDisplay->ui->SendPanelHexView_widget->setVisible(true);
     }
 }
+

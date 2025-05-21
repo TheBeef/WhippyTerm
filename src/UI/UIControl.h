@@ -83,6 +83,9 @@ typedef struct UISubMenu e_UISubMenuCtrl;
 struct UIContextMenu {int x;};
 typedef struct UIContextMenu t_UIContextMenuCtrl;
 
+struct UIContextSubMenu {int x;};
+typedef struct UIContextMenu t_UIContextSubMenuCtrl;
+
 struct UICheckbox {int x;};
 typedef struct UICheckbox t_UICheckboxCtrl;
 
@@ -112,6 +115,9 @@ typedef struct UIDoubleInput t_UIDoubleInput;
 
 struct UIToolbar {int x;};
 typedef struct UIToolbar t_UIToolbarCtrl;
+
+struct UIToolbarMenu {int x;};
+typedef struct UIToolbarMenu t_UIToolbarMenuCtrl;
 
 struct UIGroupBox {int x;};
 typedef struct UIGroupBox t_UIGroupBox;
@@ -172,12 +178,20 @@ bool UIGetMenuCheckStatus(e_UIMenuCtrl *Menu);
 void UISetMenuKeySeq(e_UIMenuCtrl *Menu,uint8_t Mod,e_UIKeys Key,char Letter);
 void UISetMenuLabel(e_UIMenuCtrl *Menu,const char *NewLabel);
 
+///* Submenu */
+//void UIEnableSubMenu(t_UISubMenuCtrl *Menu,bool Enable);
+//void UISetSubMenuVisible(t_UISubMenuCtrl *Menu,bool Show);
+
 /* UIContextMenuCtrl */
 void UIEnableContextMenu(t_UIContextMenuCtrl *Menu,bool Enable);
 void UICheckContextMenu(t_UIContextMenuCtrl *Menu,bool Checked);
 bool UIGetContextMenuCheckStatus(t_UIContextMenuCtrl *Menu);
 void UISetContextMenuLabel(t_UIContextMenuCtrl *Menu,const char *NewLabel);
 void UISetContextMenuVisible(t_UIContextMenuCtrl *Menu,bool Show);
+
+/* UIContextSubMenuCtrl */
+void UIEnableContextSubMenu(t_UIContextSubMenuCtrl *SubMenu,bool Enable);
+void UISetContextSubMenuVisible(t_UIContextSubMenuCtrl *SubMenu,bool Show);
 
 /* Checkbox */
 void UIEnableCheckbox(t_UICheckboxCtrl *Checkbox,bool Enable);
@@ -286,6 +300,11 @@ void UISetDoubleInputCtrlDecimals(t_UIDoubleInput *DoubleInputCtrl,int Points);
 void UIEnableToolbar(t_UIToolbarCtrl *Toolbar,bool Enable);
 void UICheckToolbar(t_UIToolbarCtrl *Toolbar,bool Checked);
 bool UIGetToolbarCheckStatus(t_UIToolbarCtrl *Toolbar);
+
+/* Toolbar menu */
+void UIEnableToolbarMenu(t_UIToolbarCtrl *Toolbar,t_UIToolbarMenuCtrl *ToolbarMenu,bool Enable);
+void UICheckToolbarMenu(t_UIToolbarCtrl *Toolbar,t_UIToolbarMenuCtrl *ToolbarMenu,bool Checked);
+bool UIGetToolbarMenuCheckStatus(t_UIToolbarCtrl *Toolbar,t_UIToolbarMenuCtrl *ToolbarMenu);
 
 /* GroupBox */
 void UIEnableGroupBox(t_UIGroupBox *GroupBox,bool Enable);

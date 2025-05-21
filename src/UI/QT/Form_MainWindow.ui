@@ -217,6 +217,149 @@
            </widget>
           </item>
           <item>
+           <widget class="QToolButton" name="StyleBold_toolButton">
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="text">
+             <string>Bold</string>
+            </property>
+            <property name="icon">
+             <iconset resource="MainResource.qrc">
+              <normaloff>:/G/Graphics/text_bold.png</normaloff>:/G/Graphics/text_bold.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>31</width>
+              <height>29</height>
+             </size>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="autoRaise">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="StyleItalics_toolButton">
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="text">
+             <string>Italics</string>
+            </property>
+            <property name="icon">
+             <iconset resource="MainResource.qrc">
+              <normaloff>:/G/Graphics/text_italic.png</normaloff>:/G/Graphics/text_italic.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>31</width>
+              <height>29</height>
+             </size>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="autoRaise">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="StyleUnderline_toolButton">
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="text">
+             <string>Underline</string>
+            </property>
+            <property name="icon">
+             <iconset resource="MainResource.qrc">
+              <normaloff>:/G/Graphics/text_underline.png</normaloff>:/G/Graphics/text_underline.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>31</width>
+              <height>29</height>
+             </size>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="autoRaise">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="StyleStrikeThrough_toolButton">
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="text">
+             <string>Strike Through</string>
+            </property>
+            <property name="icon">
+             <iconset resource="MainResource.qrc">
+              <normaloff>:/G/Graphics/text_strikethrough.png</normaloff>:/G/Graphics/text_strikethrough.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>31</width>
+              <height>29</height>
+             </size>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="autoRaise">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="StyleColor_toolButton">
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="text">
+             <string>Highlight</string>
+            </property>
+            <property name="icon">
+             <iconset resource="MainResource.qrc">
+              <normaloff>:/G/Graphics/color_swatch.png</normaloff>:/G/Graphics/color_swatch.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>31</width>
+              <height>29</height>
+             </size>
+            </property>
+            <property name="popupMode">
+             <enum>QToolButton::MenuButtonPopup</enum>
+            </property>
+            <property name="autoRaise">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_7">
+            <property name="styleSheet">
+             <string notr="true">color:lightgray;</string>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QToolButton" name="Clear_Screen_toolButton">
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
@@ -1998,11 +2141,38 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
+    <widget class="QMenu" name="menuStyle">
+     <property name="title">
+      <string>BG Color</string>
+     </property>
+     <addaction name="actionStyleBGColor_Black"/>
+     <addaction name="actionStyleBGColor_Blue"/>
+     <addaction name="actionStyleBGColor_Green"/>
+     <addaction name="actionStyleBGColor_Cyan"/>
+     <addaction name="actionStyleBGColor_Red"/>
+     <addaction name="actionStyleBGColor_Magenta"/>
+     <addaction name="actionStyleBGColor_Brown"/>
+     <addaction name="actionStyleBGColor_White"/>
+     <addaction name="actionStyleBGColor_Gray"/>
+     <addaction name="actionStyleBGColor_LightBlue"/>
+     <addaction name="actionStyleBGColor_LightGreen"/>
+     <addaction name="actionStyleBGColor_LightCyan"/>
+     <addaction name="actionStyleBGColor_LightRed"/>
+     <addaction name="actionStyleBGColor_LightMagenta"/>
+     <addaction name="actionStyleBGColor_Yellow"/>
+     <addaction name="actionStyleBGColor_BrightWhite"/>
+    </widget>
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
     <addaction name="actionFind"/>
     <addaction name="actionFind_Next"/>
     <addaction name="actionFind_First"/>
+    <addaction name="separator"/>
+    <addaction name="actionBold"/>
+    <addaction name="actionItalics"/>
+    <addaction name="actionUnderline"/>
+    <addaction name="actionStrike_Through"/>
+    <addaction name="menuStyle"/>
     <addaction name="separator"/>
     <addaction name="actionGoto_Column"/>
     <addaction name="actionGoto_Line"/>
@@ -3052,6 +3222,470 @@
    </property>
    <property name="text">
     <string>Auto Reconnect</string>
+   </property>
+  </action>
+  <action name="actionToolbarMenu_ColorSel_Black">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_000000.png</normaloff>:/G/Graphics/ColorSelect_000000.png</iconset>
+   </property>
+   <property name="text">
+    <string>Black</string>
+   </property>
+   <property name="toolTip">
+    <string>Black</string>
+   </property>
+  </action>
+  <action name="actionToolbarMenu_ColorSel_Blue">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_000080.png</normaloff>:/G/Graphics/ColorSelect_000080.png</iconset>
+   </property>
+   <property name="text">
+    <string>Blue</string>
+   </property>
+   <property name="toolTip">
+    <string>Blue</string>
+   </property>
+  </action>
+  <action name="actionToolbarMenu_ColorSel_Green">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_008000.png</normaloff>:/G/Graphics/ColorSelect_008000.png</iconset>
+   </property>
+   <property name="text">
+    <string>Green</string>
+   </property>
+   <property name="toolTip">
+    <string>Green</string>
+   </property>
+  </action>
+  <action name="actionToolbarMenu_ColorSel_Cyan">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_008080.png</normaloff>:/G/Graphics/ColorSelect_008080.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cyan</string>
+   </property>
+   <property name="toolTip">
+    <string>Cyan</string>
+   </property>
+  </action>
+  <action name="actionToolbarMenu_ColorSel_Red">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_800000.png</normaloff>:/G/Graphics/ColorSelect_800000.png</iconset>
+   </property>
+   <property name="text">
+    <string>Red</string>
+   </property>
+   <property name="toolTip">
+    <string>Red</string>
+   </property>
+  </action>
+  <action name="actionToolbarMenu_ColorSel_Magenta">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_800080.png</normaloff>:/G/Graphics/ColorSelect_800080.png</iconset>
+   </property>
+   <property name="text">
+    <string>Magenta</string>
+   </property>
+   <property name="toolTip">
+    <string>Magenta</string>
+   </property>
+  </action>
+  <action name="actionToolbarMenu_ColorSel_Brown">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_808000.png</normaloff>:/G/Graphics/ColorSelect_808000.png</iconset>
+   </property>
+   <property name="text">
+    <string>Brown</string>
+   </property>
+   <property name="toolTip">
+    <string>Brown</string>
+   </property>
+  </action>
+  <action name="actionToolbarMenu_ColorSel_White">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_AAAAAA.png</normaloff>:/G/Graphics/ColorSelect_AAAAAA.png</iconset>
+   </property>
+   <property name="text">
+    <string>White</string>
+   </property>
+   <property name="toolTip">
+    <string>White</string>
+   </property>
+  </action>
+  <action name="actionToolbarMenu_ColorSel_Gray">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_808080.png</normaloff>:/G/Graphics/ColorSelect_808080.png</iconset>
+   </property>
+   <property name="text">
+    <string>Gray</string>
+   </property>
+   <property name="toolTip">
+    <string>Gray</string>
+   </property>
+  </action>
+  <action name="actionToolbarMenu_ColorSel_LightBlue">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_0000FF.png</normaloff>:/G/Graphics/ColorSelect_0000FF.png</iconset>
+   </property>
+   <property name="text">
+    <string>Light Blue</string>
+   </property>
+   <property name="toolTip">
+    <string>Light Blue</string>
+   </property>
+  </action>
+  <action name="actionToolbarMenu_ColorSel_LightGreen">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_00FF00.png</normaloff>:/G/Graphics/ColorSelect_00FF00.png</iconset>
+   </property>
+   <property name="text">
+    <string>Light Green</string>
+   </property>
+   <property name="toolTip">
+    <string>Light Green</string>
+   </property>
+  </action>
+  <action name="actionToolbarMenu_ColorSel_LightCyan">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_00FFFF.png</normaloff>:/G/Graphics/ColorSelect_00FFFF.png</iconset>
+   </property>
+   <property name="text">
+    <string>Light Cyan</string>
+   </property>
+   <property name="toolTip">
+    <string>Light Cyan</string>
+   </property>
+  </action>
+  <action name="actionToolbarMenu_ColorSel_LightRed">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_FF0000.png</normaloff>:/G/Graphics/ColorSelect_FF0000.png</iconset>
+   </property>
+   <property name="text">
+    <string>Light Red</string>
+   </property>
+   <property name="toolTip">
+    <string>Light Red</string>
+   </property>
+  </action>
+  <action name="actionToolbarMenu_ColorSel_LightMagenta">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_FF00FF.png</normaloff>:/G/Graphics/ColorSelect_FF00FF.png</iconset>
+   </property>
+   <property name="text">
+    <string>Light Magenta</string>
+   </property>
+   <property name="toolTip">
+    <string>Light Magenta</string>
+   </property>
+  </action>
+  <action name="actionToolbarMenu_ColorSel_Yellow">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_FFFF00.png</normaloff>:/G/Graphics/ColorSelect_FFFF00.png</iconset>
+   </property>
+   <property name="text">
+    <string>Yellow</string>
+   </property>
+   <property name="toolTip">
+    <string>Yellow</string>
+   </property>
+  </action>
+  <action name="actionToolbarMenu_ColorSel_BrightWhite">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_FFFFFF.png</normaloff>:/G/Graphics/ColorSelect_FFFFFF.png</iconset>
+   </property>
+   <property name="text">
+    <string>Bright White</string>
+   </property>
+   <property name="toolTip">
+    <string>Bright White</string>
+   </property>
+  </action>
+  <action name="actionBold">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Bold</string>
+   </property>
+  </action>
+  <action name="actionItalics">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Italics</string>
+   </property>
+  </action>
+  <action name="actionUnderline">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Underline</string>
+   </property>
+  </action>
+  <action name="actionStyleBGColor_Black">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_000000.png</normaloff>:/G/Graphics/ColorSelect_000000.png</iconset>
+   </property>
+   <property name="text">
+    <string>Black</string>
+   </property>
+   <property name="toolTip">
+    <string>Black</string>
+   </property>
+  </action>
+  <action name="actionStyleBGColor_Blue">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_000080.png</normaloff>:/G/Graphics/ColorSelect_000080.png</iconset>
+   </property>
+   <property name="text">
+    <string>Blue</string>
+   </property>
+   <property name="toolTip">
+    <string>Blue</string>
+   </property>
+  </action>
+  <action name="actionStyleBGColor_Green">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_008000.png</normaloff>:/G/Graphics/ColorSelect_008000.png</iconset>
+   </property>
+   <property name="text">
+    <string>Green</string>
+   </property>
+   <property name="toolTip">
+    <string>Green</string>
+   </property>
+  </action>
+  <action name="actionStyleBGColor_Cyan">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_008080.png</normaloff>:/G/Graphics/ColorSelect_008080.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cyan</string>
+   </property>
+   <property name="toolTip">
+    <string>Cyan</string>
+   </property>
+  </action>
+  <action name="actionStyleBGColor_Red">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_800000.png</normaloff>:/G/Graphics/ColorSelect_800000.png</iconset>
+   </property>
+   <property name="text">
+    <string>Red</string>
+   </property>
+   <property name="toolTip">
+    <string>Red</string>
+   </property>
+  </action>
+  <action name="actionStyleBGColor_Magenta">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_800080.png</normaloff>:/G/Graphics/ColorSelect_800080.png</iconset>
+   </property>
+   <property name="text">
+    <string>Magenta</string>
+   </property>
+   <property name="toolTip">
+    <string>Magenta</string>
+   </property>
+  </action>
+  <action name="actionStyleBGColor_Brown">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_808000.png</normaloff>:/G/Graphics/ColorSelect_808000.png</iconset>
+   </property>
+   <property name="text">
+    <string>Brown</string>
+   </property>
+   <property name="toolTip">
+    <string>Brown</string>
+   </property>
+  </action>
+  <action name="actionStyleBGColor_White">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_AAAAAA.png</normaloff>:/G/Graphics/ColorSelect_AAAAAA.png</iconset>
+   </property>
+   <property name="text">
+    <string>White</string>
+   </property>
+   <property name="toolTip">
+    <string>White</string>
+   </property>
+  </action>
+  <action name="actionStyleBGColor_Gray">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_808080.png</normaloff>:/G/Graphics/ColorSelect_808080.png</iconset>
+   </property>
+   <property name="text">
+    <string>Gray</string>
+   </property>
+   <property name="toolTip">
+    <string>Gray</string>
+   </property>
+  </action>
+  <action name="actionStyleBGColor_LightBlue">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_0000FF.png</normaloff>:/G/Graphics/ColorSelect_0000FF.png</iconset>
+   </property>
+   <property name="text">
+    <string>Light Blue</string>
+   </property>
+   <property name="toolTip">
+    <string>Light Blue</string>
+   </property>
+  </action>
+  <action name="actionStyleBGColor_LightGreen">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_00FF00.png</normaloff>:/G/Graphics/ColorSelect_00FF00.png</iconset>
+   </property>
+   <property name="text">
+    <string>Light Green</string>
+   </property>
+   <property name="toolTip">
+    <string>Light Green</string>
+   </property>
+  </action>
+  <action name="actionStyleBGColor_LightCyan">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_00FFFF.png</normaloff>:/G/Graphics/ColorSelect_00FFFF.png</iconset>
+   </property>
+   <property name="text">
+    <string>Light Cyan</string>
+   </property>
+   <property name="toolTip">
+    <string>Light Cyan</string>
+   </property>
+  </action>
+  <action name="actionStyleBGColor_LightRed">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_FF0000.png</normaloff>:/G/Graphics/ColorSelect_FF0000.png</iconset>
+   </property>
+   <property name="text">
+    <string>Light Red</string>
+   </property>
+   <property name="toolTip">
+    <string>Light Red</string>
+   </property>
+  </action>
+  <action name="actionStyleBGColor_LightMagenta">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_FF00FF.png</normaloff>:/G/Graphics/ColorSelect_FF00FF.png</iconset>
+   </property>
+   <property name="text">
+    <string>Light Magenta</string>
+   </property>
+   <property name="toolTip">
+    <string>Light Magenta</string>
+   </property>
+  </action>
+  <action name="actionStyleBGColor_Yellow">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_FFFF00.png</normaloff>:/G/Graphics/ColorSelect_FFFF00.png</iconset>
+   </property>
+   <property name="text">
+    <string>Yellow</string>
+   </property>
+   <property name="toolTip">
+    <string>Yellow</string>
+   </property>
+  </action>
+  <action name="actionStyleBGColor_BrightWhite">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/ColorSelect_FFFFFF.png</normaloff>:/G/Graphics/ColorSelect_FFFFFF.png</iconset>
+   </property>
+   <property name="text">
+    <string>Bright White</string>
+   </property>
+   <property name="toolTip">
+    <string>Bright White</string>
+   </property>
+  </action>
+  <action name="actionStrike_Through">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Strike Through</string>
    </property>
   </action>
  </widget>

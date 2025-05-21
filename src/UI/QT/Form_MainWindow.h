@@ -346,6 +346,88 @@ private slots:
     
     void on_URI_lineEdit_returnPressed();
     
+    void on_StyleBold_toolButton_clicked();
+    
+    void on_StyleItalics_toolButton_clicked();
+    
+    void on_StyleUnderline_toolButton_clicked();
+    
+    void on_StyleStrikeThrough_toolButton_clicked();
+    
+    void on_StyleColor_toolButton_clicked();
+    
+    void on_actionToolbarMenu_ColorSel_Black_triggered();
+    
+    void on_actionToolbarMenu_ColorSel_Blue_triggered();
+    
+    void on_actionToolbarMenu_ColorSel_Green_triggered();
+    
+    void on_actionToolbarMenu_ColorSel_Cyan_triggered();
+    
+    void on_actionToolbarMenu_ColorSel_Red_triggered();
+    
+    void on_actionToolbarMenu_ColorSel_Magenta_triggered();
+    
+    void on_actionToolbarMenu_ColorSel_Brown_triggered();
+    
+    void on_actionToolbarMenu_ColorSel_White_triggered();
+    
+    void on_actionToolbarMenu_ColorSel_Gray_triggered();
+    
+    void on_actionToolbarMenu_ColorSel_LightGreen_triggered();
+    
+    void on_actionToolbarMenu_ColorSel_LightCyan_triggered();
+    
+    void on_actionToolbarMenu_ColorSel_LightRed_triggered();
+    
+    void on_actionToolbarMenu_ColorSel_LightMagenta_triggered();
+    
+    void on_actionToolbarMenu_ColorSel_Yellow_triggered();
+    
+    void on_actionToolbarMenu_ColorSel_LightBlue_triggered();
+    
+    void on_actionToolbarMenu_ColorSel_BrightWhite_triggered();
+
+    void on_actionStyleBGColor_Black_triggered();
+
+    void on_actionStyleBGColor_Blue_triggered();
+
+    void on_actionStyleBGColor_Green_triggered();
+
+    void on_actionStyleBGColor_Cyan_triggered();
+
+    void on_actionStyleBGColor_Red_triggered();
+
+    void on_actionStyleBGColor_Magenta_triggered();
+
+    void on_actionStyleBGColor_Brown_triggered();
+
+    void on_actionStyleBGColor_White_triggered();
+
+    void on_actionStyleBGColor_Gray_triggered();
+
+    void on_actionStyleBGColor_LightBlue_triggered();
+
+    void on_actionStyleBGColor_LightGreen_triggered();
+
+    void on_actionStyleBGColor_LightCyan_triggered();
+
+    void on_actionStyleBGColor_LightRed_triggered();
+
+    void on_actionStyleBGColor_LightMagenta_triggered();
+
+    void on_actionStyleBGColor_Yellow_triggered();
+
+    void on_actionStyleBGColor_BrightWhite_triggered();
+    
+    void on_actionBold_triggered();
+    
+    void on_actionItalics_triggered();
+    
+    void on_actionUnderline_triggered();
+    
+    void on_actionStrike_Through_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);
@@ -355,6 +437,7 @@ private:
     void DoMenuTriggered(e_UIMWMenuType MenuID);
     void DoContextMenuTriggered(e_UIMW_ContextMenuType MenuID);
     void DoToolbarTriggered(e_UIMWToolbarType ToolID);
+    void DoToolbarMenuTriggered(e_UIMWToolbarMenuType ToolMenuID);
     void DoBttnTriggered(e_UIMWBttnType BttnID);
     void DoCheckboxTriggered(e_UIMWCheckboxType CheckboxID,bool Checked);
     void DoTextInputChanged(e_UIMWTxtInputType InputID,const char *FinalText);

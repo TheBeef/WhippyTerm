@@ -44,17 +44,7 @@
 /***  MACROS                           ***/
 
 /***  TYPE DEFINITIONS                 ***/
-struct DisBin_SelectionPair
-{
-    uint8_t *Line;
-    int Offset;
-};
-
-struct DisBin_SelectionBlock
-{
-    struct DisBin_SelectionPair Start;
-    struct DisBin_SelectionPair End;
-};
+struct DisBin_SelectionBlock;
 
 /***  CLASS DEFINITIONS                ***/
 class DisplayBinary : public DisplayBase
@@ -75,12 +65,16 @@ class DisplayBinary : public DisplayBase
         void ClearScrollBackBuffer(void);
         void ResetTerm(void);
         t_UIContextMenuCtrl *GetContextMenuHandle(e_UITD_ContextMenuType UIObj);
+        t_UIContextSubMenuCtrl *GetContextSubMenuHandle(e_UITD_ContextSubMenuType UIObj);
         void ClearSelection(void);
         bool GetSelectionString(std::string &Clip);
         void SelectAll(void);
         bool IsThereASelection(void);
         void ApplySettings(void);
         void SetCursorBlinking(bool Blinking);
+        void ToggleAttribs2Selection(uint32_t Attribs);
+        void ApplyBGColor2Selection(uint32_t RGB);
+        bool IsAttribSetInSelection(uint32_t Attribs);
 
     private:
         bool InitCalled;
@@ -144,6 +138,9 @@ class DisplayBinary : public DisplayBase
         t_UIMuliLineTextInputCtrl *GetSendPanel_TextInput(void);
         t_UIComboBoxCtrl *GetSendPanel_LineEndInput(void);
         void SendPanel_ShowHexOrText(bool Text);
+        struct CharStyling *GetColorPtrFromLinePtr(const uint8_t *Line);
+        void FillAttrib(struct DisBin_SelectionBlock *SelBlock,uint32_t Attribs,bool Set);
+        bool CheckIfAttribSet(struct DisBin_SelectionBlock *SelBlock,uint32_t Attribs);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

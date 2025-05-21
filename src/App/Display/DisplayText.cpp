@@ -4711,6 +4711,36 @@ t_UIContextMenuCtrl *DisplayText::GetContextMenuHandle(e_UITD_ContextMenuType UI
 
 /*******************************************************************************
  * NAME:
+ *    DisplayText::GetContextSubMenuHandle
+ *
+ * SYNOPSIS:
+ *    t_UIContextMenuCtrl *DisplayText::GetContextSubMenuHandle(
+ *              e_UITD_ContextMenuType UIObj)
+ *
+ * PARAMETERS:
+ *    UIObj [I] -- The context menu item to get the handle for.
+ *
+ * FUNCTION:
+ *    This function gets a context menu item's handle.
+ *
+ * RETURNS:
+ *    The context sub menu item's handle or NULL if it was not found.  If this
+ *    is not supported (because there is no menu for example) then this will
+ *    return NULL.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIContextSubMenuCtrl *DisplayText::GetContextSubMenuHandle(e_UITD_ContextSubMenuType UIObj)
+{
+    if(TextDisplayCtrl==NULL)
+        return NULL;
+
+    return UITC_GetContextSubMenuHandle(TextDisplayCtrl,UIObj);
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayText::DEBUG_ForceRedrawOfScreen
  *
  * SYNOPSIS:

@@ -1053,6 +1053,33 @@ t_UIContextMenuCtrl *DisplayBase::GetContextMenuHandle(e_UITD_ContextMenuType UI
 
 /*******************************************************************************
  * NAME:
+ *    DisplayBase::GetContextSubMenuHandle
+ *
+ * SYNOPSIS:
+ *    t_UIContextMenuCtrl *DisplayBase::GetContextSubMenuHandle(
+ *              e_UITD_ContextMenuType UIObj)
+ *
+ * PARAMETERS:
+ *    UIObj [I] -- The context menu item to get the handle for.
+ *
+ * FUNCTION:
+ *    This function gets a context menu item's handle.
+ *
+ * RETURNS:
+ *    The context sub menu item's handle or NULL if it was not found.  If this
+ *    is not supported (because there is no menu for example) then this will
+ *    return NULL.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIContextSubMenuCtrl *DisplayBase::GetContextSubMenuHandle(e_UITD_ContextSubMenuType UIObj)
+{
+    return NULL;
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayBase::ClearArea
  *
  * SYNOPSIS:
@@ -1701,5 +1728,81 @@ void DisplayBase::Block_SetHexOrTextMode(bool TextMode)
  ******************************************************************************/
 void DisplayBase::SendPanel_ShowHexOrText(bool Text)
 {
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::ToggleAttribs2Selection
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::ToggleAttribs2Selection(uint32_t Attribs);
+ *
+ * PARAMETERS:
+ *    Attribs [I] -- The TXT_ATTRIB_ attribs to toggle.
+ *
+ * FUNCTION:
+ *    This function takes the current selection and check if any of the
+ *    selected bytes has these attribs turned on.  If they do it removes that
+ *    attrib, if not it turns the attribs on.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::ToggleAttribs2Selection(uint32_t Attribs)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::ApplyBGColor2Selection
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::ApplyBGColor2Selection(uint32_t RGB);
+ *
+ * PARAMETERS:
+ *    RGB [I] -- The color to apply
+ *
+ * FUNCTION:
+ *    This function takes the current selection and changes the background
+ *    color for all the text selected.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::ApplyBGColor2Selection(uint32_t RGB)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::IsAttribSetInSelection
+ *
+ * SYNOPSIS:
+ *    bool DisplayBase::IsAttribSetInSelection(uint32_t Attribs);
+ *
+ * PARAMETERS:
+ *    Attribs [I] -- The attrib to check
+ *
+ * FUNCTION:
+ *    This function checks the bytes in the selection and return true if
+ *    any of them have this attrib set.
+ *
+ * RETURNS:
+ *    true -- At least 1 byte of the selection has this attrib
+ *    false -- There is no selection or the selection does not have this
+ *             attrib in it.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayBase::IsAttribSetInSelection(uint32_t Attribs)
+{
+    return false;
 }
 

@@ -58,6 +58,17 @@ using namespace std;
 /*** MACROS                   ***/
 
 /*** TYPE DEFINITIONS         ***/
+struct DisBin_SelectionPair
+{
+    uint8_t *Line;
+    int Offset;
+};
+
+struct DisBin_SelectionBlock
+{
+    struct DisBin_SelectionPair Start;
+    struct DisBin_SelectionPair End;
+};
 
 /*** FUNCTION PROTOTYPES      ***/
 bool DisplayBin_EventHandlerCB(const struct TextDisplayEvent *Event);
@@ -449,7 +460,6 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
 
         RethinkYScrollBar();
 
-//`
         if(WasAtBottom)
         {
             int TotalLines;
@@ -975,6 +985,9 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
     unsigned int HighLightMaxSize;
     unsigned int HighLightLineSize;
     struct DisBin_SelectionBlock SelBlocks[2];
+    struct CharStyling NextColor;
+    struct CharStyling ApplyColor;
+    uint16_t NextAttrib;
 
     /* Make sure the padding is all 0x00's */
     memset(ColorBuff,0x00,sizeof(ColorBuff));
@@ -997,7 +1010,34 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
         tmp=x*3+0;
         ColorBuff[tmp++]=ColorLine[x];
         ColorBuff[tmp++]=ColorLine[x];
-        ColorBuff[tmp++]=ColorLine[x];
+
+        /* Figure out what to do to the space between bytes */
+        ApplyColor=ColorLine[x];
+
+        /* Sneak a peek at the next char's attribs */
+        NextColor=ColorLine[x];
+        if(x+1<Bytes)
+            NextColor=ColorLine[x+1];
+
+        NextAttrib=NextColor.Attribs;
+        if(ColorLine[x].Attribs!=NextAttrib)
+        {
+            /* Ok, the attribs are changing apply a number of rules because it
+               looks really odd having underline or strike hang off the end. */
+            NextAttrib&=~(TXT_ATTRIB_BOLD|TXT_ATTRIB_ITALIC);  // Ignore Bold and Italic
+            if(NextAttrib==0)
+                ApplyColor.Attribs=0;
+        }
+        if(NextColor.BGColor==SpaceStyle.BGColor)
+        {
+            /* Ok, the next char is using the space bg color, apply the
+               BG color to the space */
+            ApplyColor.BGColor=SpaceStyle.BGColor;
+        }
+
+        ColorBuff[tmp]=ApplyColor;
+
+        tmp++;
 
         if(c<32 || c>127)
             c='.';
@@ -1009,6 +1049,10 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
     memset(&LineBuff[x*3],' ',START_OF_ASCII_CHAR-(x*3));
     for(r=0;r<START_OF_ASCII_CHAR-(x*3);r++)
         ColorBuff[x*3+r]=SpaceStyle;
+
+    /* Kill of the trailing space after the last byte */
+    if(x>0)
+        ColorBuff[x*3-1]=SpaceStyle;
 
     memset(&LineBuff[START_OF_ASCII_CHAR+x],' ',HEX_BYTES_PER_LINE-x);
     for(r=0;r<HEX_BYTES_PER_LINE-x;r++)
@@ -1435,6 +1479,36 @@ t_UIContextMenuCtrl *DisplayBinary::GetContextMenuHandle(e_UITD_ContextMenuType 
     if(TextDisplayCtrl==NULL)
         return NULL;
     return UITC_GetContextMenuHandle(TextDisplayCtrl,UIObj);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetContextSubMenuHandle
+ *
+ * SYNOPSIS:
+ *    t_UIContextMenuCtrl *DisplayBinary::GetContextSubMenuHandle(
+ *              e_UITD_ContextMenuType UIObj)
+ *
+ * PARAMETERS:
+ *    UIObj [I] -- The context menu item to get the handle for.
+ *
+ * FUNCTION:
+ *    This function gets a context menu item's handle.
+ *
+ * RETURNS:
+ *    The context sub menu item's handle or NULL if it was not found.  If this
+ *    is not supported (because there is no menu for example) then this will
+ *    return NULL.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIContextSubMenuCtrl *DisplayBinary::GetContextSubMenuHandle(e_UITD_ContextSubMenuType UIObj)
+{
+    if(TextDisplayCtrl==NULL)
+        return NULL;
+
+    return UITC_GetContextSubMenuHandle(TextDisplayCtrl,UIObj);
 }
 
 /*******************************************************************************
@@ -2071,8 +2145,8 @@ bool DisplayBinary::GetNormalizedSelectionBlocks(struct DisBin_SelectionBlock *B
         {
             Blocks[0].Start.Line=SelectionLine;
             Blocks[0].Start.Offset=SelectionLineOffset;
-            Blocks[0].End.Line=EndOfHexBuffer;
-            Blocks[0].End.Offset=0;
+            Blocks[0].End.Line=EndOfHexBuffer-HEX_BYTES_PER_LINE;
+            Blocks[0].End.Offset=HEX_BYTES_PER_LINE-1;
 
             Blocks[1].Start.Line=HexBuffer;
             Blocks[1].Start.Offset=0;
@@ -2083,8 +2157,8 @@ bool DisplayBinary::GetNormalizedSelectionBlocks(struct DisBin_SelectionBlock *B
         {
             Blocks[0].Start.Line=SelectionAnchorLine;
             Blocks[0].Start.Offset=SelectionLineAnchorOffset;
-            Blocks[0].End.Line=EndOfHexBuffer;
-            Blocks[0].End.Offset=0;
+            Blocks[0].End.Line=EndOfHexBuffer-HEX_BYTES_PER_LINE;
+            Blocks[0].End.Offset=HEX_BYTES_PER_LINE-1;
 
             Blocks[1].Start.Line=HexBuffer;
             Blocks[1].Start.Offset=0;
@@ -2304,4 +2378,271 @@ t_UIComboBoxCtrl *DisplayBinary::GetSendPanel_LineEndInput(void)
 void DisplayBinary::SendPanel_ShowHexOrText(bool Text)
 {
     UITC_SendPanelShowHexOrTextInput(TextDisplayCtrl,Text);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ToggleAttribs2Selection
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::ToggleAttribs2Selection(uint32_t Attribs);
+ *
+ * PARAMETERS:
+ *    Attribs [I] -- The TXT_ATTRIB_ attribs to toggle.
+ *
+ * FUNCTION:
+ *    This function takes the current selection and check if any of the
+ *    selected bytes has these attribs turned on.  If they do it removes that
+ *    attrib, if not it turns the attribs on.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::ToggleAttribs2Selection(uint32_t Attribs)
+{
+    struct DisBin_SelectionBlock SelBlocks[2];
+    bool IsSet;
+
+    if(!SelectionActive)
+        return;
+
+    if(!GetNormalizedSelectionBlocks(SelBlocks))
+        return;
+
+    IsSet=false;
+    if(CheckIfAttribSet(&SelBlocks[0],Attribs))
+        IsSet=true;
+    if(SelBlocks[1].Start.Line!=NULL)
+        if(CheckIfAttribSet(&SelBlocks[0],Attribs))
+            IsSet=true;
+
+    FillAttrib(&SelBlocks[0],Attribs,!IsSet);
+
+    /* We need to do it again for block 2 */
+    if(SelBlocks[1].Start.Line!=NULL)
+        FillAttrib(&SelBlocks[1],Attribs,!IsSet);
+
+    RedrawScreen();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::FillAttrib
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::FillAttrib(struct DisBin_SelectionBlock *SelBlock,
+ *          uint32_t Attribs,bool Set);
+ *
+ * PARAMETERS:
+ *    SelBlock [I] -- The selection block to fill the attrib on
+ *    Attribs [I] -- The attribs to set or clear (bits)
+ *    Set [I] -- If this is true then we set the attrib, else we clear
+ *
+ * FUNCTION:
+ *    This function is a helper function that fills a selection with an
+ *    attribute.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DisplayBinary::ToggleAttribs2Selection()
+ ******************************************************************************/
+void DisplayBinary::FillAttrib(struct DisBin_SelectionBlock *SelBlock,
+        uint32_t Attribs,bool Set)
+{
+    struct CharStyling *ColStart;
+    struct CharStyling *ColEnd;
+    struct CharStyling *FillPos;
+
+    /* Get the pointers into the color buffers for this selection */
+    ColStart=GetColorPtrFromLinePtr(&SelBlock->Start.Line[SelBlock->Start.Offset]);
+    ColEnd=GetColorPtrFromLinePtr(&SelBlock->End.Line[SelBlock->End.Offset]);
+
+    FillPos=ColStart;
+    while(FillPos<=ColEnd)
+    {
+        if(Set)
+            FillPos->Attribs|=Attribs;
+        else
+            FillPos->Attribs&=~Attribs;
+        FillPos++;
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::CheckIfAttribSet
+ *
+ * SYNOPSIS:
+ *    bool DisplayBinary::CheckIfAttribSet(struct DisBin_SelectionBlock *SelBlock,
+ *          uint32_t Attribs);
+ *
+ * PARAMETERS:
+ *    SelBlock [I] -- The selection block to check the attrib on
+ *    Attribs [I] -- The attribs to check
+ *
+ * FUNCTION:
+ *    This function checks if attribs are send in a block
+ *
+ * RETURNS:
+ *    true -- The attrib is set somewhere in the block.
+ *    false -- The attrib is not in the block.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayBinary::CheckIfAttribSet(struct DisBin_SelectionBlock *SelBlock,
+        uint32_t Attribs)
+{
+    struct CharStyling *ColStart;
+    struct CharStyling *ColEnd;
+    struct CharStyling *FillPos;
+
+    /* Get the pointers into the color buffers for this selection */
+    ColStart=GetColorPtrFromLinePtr(&SelBlock->Start.Line[SelBlock->Start.Offset]);
+    ColEnd=GetColorPtrFromLinePtr(&SelBlock->End.Line[SelBlock->End.Offset]);
+
+    FillPos=ColStart;
+    while(FillPos<=ColEnd)
+    {
+        if(FillPos->Attribs&Attribs)
+            return true;
+        FillPos++;
+    }
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetColorPtrFromLinePtr
+ *
+ * SYNOPSIS:
+ *    struct CharStyling *DisplayBinary::GetColorPtrFromLinePtr(
+ *          const uint8_t *Line);
+ *
+ * PARAMETERS:
+ *    Line [I] -- A pointer to the line we are interested in finding the
+ *                matching spot in 'ColorBuffer'.
+ *
+ * FUNCTION:
+ *    This function finds a matching position from 'HexBuffer' in 'ColorBuffer'.
+ *    You can use this function to find the start of the screen or selection
+ *    positions in the color buffer.
+ *
+ * RETURNS:
+ *    A pointer that matches 'Line' in the color buffer.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+struct CharStyling *DisplayBinary::GetColorPtrFromLinePtr(const uint8_t *Line)
+{
+    unsigned int Offset;
+
+    /* Step 1, find the offset from the 'HexBuffer' */
+    Offset=Line-HexBuffer;
+
+    /* Step 2, find this offset in the color buffer */
+    return &ColorBuffer[Offset];
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ApplyBGColor2Selection
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::ApplyBGColor2Selection(uint32_t RGB);
+ *
+ * PARAMETERS:
+ *    RGB [I] -- The color to apply
+ *
+ * FUNCTION:
+ *    This function takes the current selection and changes the background
+ *    color for all the text selected.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::ApplyBGColor2Selection(uint32_t RGB)
+{
+    struct DisBin_SelectionBlock SelBlocks[2];
+    struct CharStyling *ColStart;
+    struct CharStyling *ColEnd;
+    struct CharStyling *FillPos;
+    int s;
+
+    if(!SelectionActive)
+        return;
+
+    if(!GetNormalizedSelectionBlocks(SelBlocks))
+        return;
+
+    for(s=0;s<2;s++)
+    {
+        if(SelBlocks[s].Start.Line==NULL || SelBlocks[s].End.Line==NULL)
+            break;
+
+        /* Get the pointers into the color buffers for this selection */
+        ColStart=GetColorPtrFromLinePtr(&SelBlocks[s].Start.Line[SelBlocks[s].Start.Offset]);
+        ColEnd=GetColorPtrFromLinePtr(&SelBlocks[s].End.Line[SelBlocks[s].End.Offset]);
+
+        FillPos=ColStart;
+        while(FillPos<=ColEnd)
+        {
+            FillPos->BGColor=RGB;
+            FillPos++;
+        }
+    }
+
+    RedrawScreen();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::IsAttribSetInSelection
+ *
+ * SYNOPSIS:
+ *    bool DisplayBinary::IsAttribSetInSelection(uint32_t Attribs);
+ *
+ * PARAMETERS:
+ *    Attribs [I] -- The attrib to check
+ *
+ * FUNCTION:
+ *    This function checks the bytes in the selection and return true if
+ *    any of them have this attrib set.
+ *
+ * RETURNS:
+ *    true -- At least 1 byte of the selection has this attrib
+ *    false -- There is no selection or the selection does not have this
+ *             attrib in it.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayBinary::IsAttribSetInSelection(uint32_t Attribs)
+{
+    struct DisBin_SelectionBlock SelBlocks[2];
+    bool IsSet;
+
+    if(!SelectionActive)
+        return false;
+
+    if(!GetNormalizedSelectionBlocks(SelBlocks))
+        return false;
+
+    IsSet=false;
+    if(CheckIfAttribSet(&SelBlocks[0],Attribs))
+        IsSet=true;
+    if(SelBlocks[1].Start.Line!=NULL)
+        if(CheckIfAttribSet(&SelBlocks[0],Attribs))
+            IsSet=true;
+
+    return IsSet;
 }

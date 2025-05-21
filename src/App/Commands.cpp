@@ -163,6 +163,27 @@ const char *m_CmdNames[]=
     "URIHelp",                              // e_Cmd_URIHelp
     "DefaultSettings",                      // e_Cmd_Default_Settings
     "ToggleAutoReconnect",                  // e_Cmd_ToggleAutoReconnect
+    "StyleSelectionBold",                   // e_Cmd_StyleSelectionBold
+    "StyleSelectionItalics",                // e_Cmd_StyleSelectionItalics
+    "StyleSelectionUnderline",              // e_Cmd_StyleSelectionUnderline
+    "StyleSelectionBGColor",                // e_Cmd_StyleSelectionBGColor
+    "StyleSelectionStrikeThrough",          // e_Cmd_StyleSelectionStrikeThrough
+    "ApplyStyleBGColor_Black",              // e_Cmd_ApplyStyleBGColor_Black
+    "ApplyStyleBGColor_Blue",               // e_Cmd_ApplyStyleBGColor_Blue
+    "ApplyStyleBGColor_Green",              // e_Cmd_ApplyStyleBGColor_Green
+    "ApplyStyleBGColor_Cyan",               // e_Cmd_ApplyStyleBGColor_Cyan
+    "ApplyStyleBGColor_Red",                // e_Cmd_ApplyStyleBGColor_Red
+    "ApplyStyleBGColor_Magenta",            // e_Cmd_ApplyStyleBGColor_Magenta
+    "ApplyStyleBGColor_Brown",              // e_Cmd_ApplyStyleBGColor_Brown
+    "ApplyStyleBGColor_White",              // e_Cmd_ApplyStyleBGColor_White
+    "ApplyStyleBGColor_Gray",               // e_Cmd_ApplyStyleBGColor_Gray
+    "ApplyStyleBGColor_LightBlue",          // e_Cmd_ApplyStyleBGColor_LightBlue
+    "ApplyStyleBGColor_LightGreen",         // e_Cmd_ApplyStyleBGColor_LightGreen
+    "ApplyStyleBGColor_LightCyan",          // e_Cmd_ApplyStyleBGColor_LightCyan
+    "ApplyStyleBGColor_LightRed",           // e_Cmd_ApplyStyleBGColor_LightRed
+    "ApplyStyleBGColor_LightMagenta",       // e_Cmd_ApplyStyleBGColor_LightMagenta
+    "ApplyStyleBGColor_Yellow",             // e_Cmd_ApplyStyleBGColor_Yellow
+    "ApplyStyleBGColor_BrightWhite",        // e_Cmd_ApplyStyleBGColor_BrightWhite
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -251,6 +272,26 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_SendBuffer_EditPrompted,      // e_UIMWMenu_Buffers_EditSenderBuffer
     e_Cmd_Default_Settings,             // e_UIMWMenu_DefaultSettings
     e_Cmd_ToggleAutoReconnect,          // e_UIMWMenu_ToggleAutoReconnect
+    e_Cmd_ApplyStyleBGColor_Black,      // e_UIMWMenu_StyleBGColor_Black
+    e_Cmd_ApplyStyleBGColor_Blue,       // e_UIMWMenu_StyleBGColor_Blue
+    e_Cmd_ApplyStyleBGColor_Green,      // e_UIMWMenu_StyleBGColor_Green
+    e_Cmd_ApplyStyleBGColor_Cyan,       // e_UIMWMenu_StyleBGColor_Cyan
+    e_Cmd_ApplyStyleBGColor_Red,        // e_UIMWMenu_StyleBGColor_Red
+    e_Cmd_ApplyStyleBGColor_Magenta,    // e_UIMWMenu_StyleBGColor_Magenta
+    e_Cmd_ApplyStyleBGColor_Brown,      // e_UIMWMenu_StyleBGColor_Brown
+    e_Cmd_ApplyStyleBGColor_White,      // e_UIMWMenu_StyleBGColor_White
+    e_Cmd_ApplyStyleBGColor_Gray,       // e_UIMWMenu_StyleBGColor_Gray
+    e_Cmd_ApplyStyleBGColor_LightBlue,  // e_UIMWMenu_StyleBGColor_LightBlue
+    e_Cmd_ApplyStyleBGColor_LightGreen, // e_UIMWMenu_StyleBGColor_LightGreen
+    e_Cmd_ApplyStyleBGColor_LightCyan,  // e_UIMWMenu_StyleBGColor_LightCyan
+    e_Cmd_ApplyStyleBGColor_LightRed,   // e_UIMWMenu_StyleBGColor_LightRed
+    e_Cmd_ApplyStyleBGColor_LightMagenta,   // e_UIMWMenu_StyleBGColor_LightMagenta
+    e_Cmd_ApplyStyleBGColor_Yellow,     // e_UIMWMenu_StyleBGColor_Yellow
+    e_Cmd_ApplyStyleBGColor_BrightWhite,// e_UIMWMenu_StyleBGColor_BrightWhite
+    e_Cmd_StyleSelectionBold,           // e_UIMWMenu_StyleBold
+    e_Cmd_StyleSelectionItalics,        // e_UIMWMenu_StyleItalics
+    e_Cmd_StyleSelectionUnderline,      // e_UIMWMenu_StyleUnderline
+    e_Cmd_StyleSelectionStrikeThrough,  // e_UIMWMenu_StyleStrikeThrough
 };
 
 e_CmdType m_Cmd2SendBufferContextMenuMapping[]=
@@ -272,6 +313,11 @@ e_CmdType m_Cmd2ToolbarMapping[]=
     e_Cmd_Paste,                        // e_UIMWToolbar_Paste
     e_Cmd_URIHelp,                      // e_UIMWToolbar_URIHelp
     e_Cmd_ClearScreen,                  // e_UIMWToolbar_ClearScreen
+    e_Cmd_StyleSelectionBold,           // e_UIMWToolbar_StyleBold
+    e_Cmd_StyleSelectionItalics,        // e_UIMWToolbar_StyleItalics
+    e_Cmd_StyleSelectionUnderline,      // e_UIMWToolbar_StyleUnderline
+    e_Cmd_StyleSelectionBGColor,        // e_UIMWToolbar_StyleBGColor
+    e_Cmd_StyleSelectionStrikeThrough,  // e_UIMWToolbar_StyleStrikeThrough
 };
 
 e_CmdType m_Cmd2ButtonMapping[]=
@@ -721,6 +767,27 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     SetKeySeq(&KeyMapping[e_Cmd_PrevConnectionTab],KEYMOD_CONTROL|KEYMOD_SHIFT,e_UIKeys_Backtab,0);
     // e_Cmd_Default_Settings
     // e_Cmd_ToggleAutoReconnect
+    // e_Cmd_StyleSelectionBold
+    // e_Cmd_StyleSelectionItalics
+    // e_Cmd_StyleSelectionUnderline
+    // e_Cmd_StyleSelectionBGColor
+    // e_Cmd_StyleSelectionStrikeThrough
+    // e_Cmd_ApplyStyleBGColor_Black
+    // e_Cmd_ApplyStyleBGColor_Blue
+    // e_Cmd_ApplyStyleBGColor_Green
+    // e_Cmd_ApplyStyleBGColor_Cyan
+    // e_Cmd_ApplyStyleBGColor_Red
+    // e_Cmd_ApplyStyleBGColor_Magenta
+    // e_Cmd_ApplyStyleBGColor_Brown
+    // e_Cmd_ApplyStyleBGColor_White
+    // e_Cmd_ApplyStyleBGColor_Gray
+    // e_Cmd_ApplyStyleBGColor_LightBlue
+    // e_Cmd_ApplyStyleBGColor_LightGreen
+    // e_Cmd_ApplyStyleBGColor_LightCyan
+    // e_Cmd_ApplyStyleBGColor_LightRed
+    // e_Cmd_ApplyStyleBGColor_LightMagenta
+    // e_Cmd_ApplyStyleBGColor_Yellow
+    // e_Cmd_ApplyStyleBGColor_BrightWhite
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A

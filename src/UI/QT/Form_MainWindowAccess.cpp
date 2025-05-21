@@ -254,7 +254,46 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionDefault_Settings;
         case e_UIMWMenu_ToggleAutoReconnect:
             return (e_UIMenuCtrl *)realwin->ui->actionAuto_Reconnect;
-
+        case e_UIMWMenu_StyleBGColor_Black:
+            return (e_UIMenuCtrl *)realwin->ui->actionStyleBGColor_Black;
+        case e_UIMWMenu_StyleBGColor_Blue:
+            return (e_UIMenuCtrl *)realwin->ui->actionStyleBGColor_Blue;
+        case e_UIMWMenu_StyleBGColor_Green:
+            return (e_UIMenuCtrl *)realwin->ui->actionStyleBGColor_Green;
+        case e_UIMWMenu_StyleBGColor_Cyan:
+            return (e_UIMenuCtrl *)realwin->ui->actionStyleBGColor_Cyan;
+        case e_UIMWMenu_StyleBGColor_Red:
+            return (e_UIMenuCtrl *)realwin->ui->actionStyleBGColor_Red;
+        case e_UIMWMenu_StyleBGColor_Magenta:
+            return (e_UIMenuCtrl *)realwin->ui->actionStyleBGColor_Magenta;
+        case e_UIMWMenu_StyleBGColor_Brown:
+            return (e_UIMenuCtrl *)realwin->ui->actionStyleBGColor_Brown;
+        case e_UIMWMenu_StyleBGColor_White:
+            return (e_UIMenuCtrl *)realwin->ui->actionStyleBGColor_White;
+        case e_UIMWMenu_StyleBGColor_Gray:
+            return (e_UIMenuCtrl *)realwin->ui->actionStyleBGColor_Gray;
+        case e_UIMWMenu_StyleBGColor_LightBlue:
+            return (e_UIMenuCtrl *)realwin->ui->actionStyleBGColor_LightBlue;
+        case e_UIMWMenu_StyleBGColor_LightGreen:
+            return (e_UIMenuCtrl *)realwin->ui->actionStyleBGColor_LightGreen;
+        case e_UIMWMenu_StyleBGColor_LightCyan:
+            return (e_UIMenuCtrl *)realwin->ui->actionStyleBGColor_LightCyan;
+        case e_UIMWMenu_StyleBGColor_LightRed:
+            return (e_UIMenuCtrl *)realwin->ui->actionStyleBGColor_LightRed;
+        case e_UIMWMenu_StyleBGColor_LightMagenta:
+            return (e_UIMenuCtrl *)realwin->ui->actionStyleBGColor_LightMagenta;
+        case e_UIMWMenu_StyleBGColor_Yellow:
+            return (e_UIMenuCtrl *)realwin->ui->actionStyleBGColor_Yellow;
+        case e_UIMWMenu_StyleBGColor_BrightWhite:
+            return (e_UIMenuCtrl *)realwin->ui->actionStyleBGColor_BrightWhite;
+        case e_UIMWMenu_StyleBold:
+            return (e_UIMenuCtrl *)realwin->ui->actionBold;
+        case e_UIMWMenu_StyleItalics:
+            return (e_UIMenuCtrl *)realwin->ui->actionItalics;
+        case e_UIMWMenu_StyleUnderline:
+            return (e_UIMenuCtrl *)realwin->ui->actionUnderline;
+        case e_UIMWMenu_StyleStrikeThrough:
+            return (e_UIMenuCtrl *)realwin->ui->actionStrike_Through;
         case e_UIMWMenuMAX:
         default:
         break;
@@ -283,7 +322,63 @@ t_UIToolbarCtrl *UIMW_GetToolbarHandle(t_UIMainWindow *win,
             return (t_UIToolbarCtrl *)realwin->ui->URIHelp_toolButton;
         case e_UIMWToolbar_ClearScreen:
             return (t_UIToolbarCtrl *)realwin->ui->Clear_Screen_toolButton;
+        case e_UIMWToolbar_StyleBold:
+            return (t_UIToolbarCtrl *)realwin->ui->StyleBold_toolButton;
+        case e_UIMWToolbar_StyleItalics:
+            return (t_UIToolbarCtrl *)realwin->ui->StyleItalics_toolButton;
+        case e_UIMWToolbar_StyleUnderline:
+            return (t_UIToolbarCtrl *)realwin->ui->StyleUnderline_toolButton;
+        case e_UIMWToolbar_StyleBGColor:
+            return (t_UIToolbarCtrl *)realwin->ui->StyleColor_toolButton;
+        case e_UIMWToolbar_StyleStrikeThrough:
+            return (t_UIToolbarCtrl *)realwin->ui->StyleStrikeThrough_toolButton;
         case e_UIMWToolbarMAX:
+        default:
+        break;
+    }
+    return NULL;
+}
+
+t_UIToolbarMenuCtrl *UIMW_GetToolbarMenuHandle(t_UIMainWindow *win,
+        e_UIMWToolbarMenuType UIObj)
+{
+    Form_MainWindow *realwin=(Form_MainWindow *)win;
+
+    switch(UIObj)
+    {
+        case e_UIMWToolbarPopUpMenu_StyleBG_Black:
+            return (t_UIToolbarMenuCtrl *)realwin->ui->actionToolbarMenu_ColorSel_Black;
+        case e_UIMWToolbarPopUpMenu_StyleBG_Blue:
+            return (t_UIToolbarMenuCtrl *)realwin->ui->actionToolbarMenu_ColorSel_Blue;
+        case e_UIMWToolbarPopUpMenu_StyleBG_Green:
+            return (t_UIToolbarMenuCtrl *)realwin->ui->actionToolbarMenu_ColorSel_Green;
+        case e_UIMWToolbarPopUpMenu_StyleBG_Cyan:
+            return (t_UIToolbarMenuCtrl *)realwin->ui->actionToolbarMenu_ColorSel_Cyan;
+        case e_UIMWToolbarPopUpMenu_StyleBG_Red:
+            return (t_UIToolbarMenuCtrl *)realwin->ui->actionToolbarMenu_ColorSel_Red;
+        case e_UIMWToolbarPopUpMenu_StyleBG_Magenta:
+            return (t_UIToolbarMenuCtrl *)realwin->ui->actionToolbarMenu_ColorSel_Magenta;
+        case e_UIMWToolbarPopUpMenu_StyleBG_Brown:
+            return (t_UIToolbarMenuCtrl *)realwin->ui->actionToolbarMenu_ColorSel_Brown;
+        case e_UIMWToolbarPopUpMenu_StyleBG_White:
+            return (t_UIToolbarMenuCtrl *)realwin->ui->actionToolbarMenu_ColorSel_White;
+        case e_UIMWToolbarPopUpMenu_StyleBG_Gray:
+            return (t_UIToolbarMenuCtrl *)realwin->ui->actionToolbarMenu_ColorSel_Gray;
+        case e_UIMWToolbarPopUpMenu_StyleBG_LightBlue:
+            return (t_UIToolbarMenuCtrl *)realwin->ui->actionToolbarMenu_ColorSel_LightBlue;
+        case e_UIMWToolbarPopUpMenu_StyleBG_LightGreen:
+            return (t_UIToolbarMenuCtrl *)realwin->ui->actionToolbarMenu_ColorSel_LightGreen;
+        case e_UIMWToolbarPopUpMenu_StyleBG_LightCyan:
+            return (t_UIToolbarMenuCtrl *)realwin->ui->actionToolbarMenu_ColorSel_LightCyan;
+        case e_UIMWToolbarPopUpMenu_StyleBG_LightRed:
+            return (t_UIToolbarMenuCtrl *)realwin->ui->actionToolbarMenu_ColorSel_LightRed;
+        case e_UIMWToolbarPopUpMenu_StyleBG_LightMagenta:
+            return (t_UIToolbarMenuCtrl *)realwin->ui->actionToolbarMenu_ColorSel_LightMagenta;
+        case e_UIMWToolbarPopUpMenu_StyleBG_Yellow:
+            return (t_UIToolbarMenuCtrl *)realwin->ui->actionToolbarMenu_ColorSel_Yellow;
+        case e_UIMWToolbarPopUpMenu_StyleBG_BrightWhite:
+            return (t_UIToolbarMenuCtrl *)realwin->ui->actionToolbarMenu_ColorSel_BrightWhite;
+        case e_UIMWToolbarPopUpMenuMAX:
         default:
         break;
     }

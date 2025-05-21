@@ -159,6 +159,26 @@ typedef enum
     e_UIMWMenu_Buffers_EditSenderBuffer,
     e_UIMWMenu_DefaultSettings,
     e_UIMWMenu_ToggleAutoReconnect,
+    e_UIMWMenu_StyleBGColor_Black,
+    e_UIMWMenu_StyleBGColor_Blue,
+    e_UIMWMenu_StyleBGColor_Green,
+    e_UIMWMenu_StyleBGColor_Cyan,
+    e_UIMWMenu_StyleBGColor_Red,
+    e_UIMWMenu_StyleBGColor_Magenta,
+    e_UIMWMenu_StyleBGColor_Brown,
+    e_UIMWMenu_StyleBGColor_White,
+    e_UIMWMenu_StyleBGColor_Gray,
+    e_UIMWMenu_StyleBGColor_LightBlue,
+    e_UIMWMenu_StyleBGColor_LightGreen,
+    e_UIMWMenu_StyleBGColor_LightCyan,
+    e_UIMWMenu_StyleBGColor_LightRed,
+    e_UIMWMenu_StyleBGColor_LightMagenta,
+    e_UIMWMenu_StyleBGColor_Yellow,
+    e_UIMWMenu_StyleBGColor_BrightWhite,
+    e_UIMWMenu_StyleBold,
+    e_UIMWMenu_StyleItalics,
+    e_UIMWMenu_StyleUnderline,
+    e_UIMWMenu_StyleStrikeThrough,
     e_UIMWMenuMAX
 } e_UIMWMenuType;
 
@@ -180,8 +200,35 @@ typedef enum
     e_UIMWToolbar_Paste,
     e_UIMWToolbar_URIHelp,
     e_UIMWToolbar_ClearScreen,
+    e_UIMWToolbar_StyleBold,
+    e_UIMWToolbar_StyleItalics,
+    e_UIMWToolbar_StyleUnderline,
+    e_UIMWToolbar_StyleBGColor,
+    e_UIMWToolbar_StyleStrikeThrough,
     e_UIMWToolbarMAX
 } e_UIMWToolbarType;
+
+typedef enum
+{
+    e_UIMWToolbarPopUpMenu_StyleBG_Black,
+    e_UIMWToolbarPopUpMenu_StyleBG_Blue,
+    e_UIMWToolbarPopUpMenu_StyleBG_Green,
+    e_UIMWToolbarPopUpMenu_StyleBG_Cyan,
+    e_UIMWToolbarPopUpMenu_StyleBG_Red,
+    e_UIMWToolbarPopUpMenu_StyleBG_Magenta,
+    e_UIMWToolbarPopUpMenu_StyleBG_Brown,
+    e_UIMWToolbarPopUpMenu_StyleBG_White,
+    e_UIMWToolbarPopUpMenu_StyleBG_Gray,
+    e_UIMWToolbarPopUpMenu_StyleBG_LightBlue,
+    e_UIMWToolbarPopUpMenu_StyleBG_LightGreen,
+    e_UIMWToolbarPopUpMenu_StyleBG_LightCyan,
+    e_UIMWToolbarPopUpMenu_StyleBG_LightRed,
+    e_UIMWToolbarPopUpMenu_StyleBG_LightMagenta,
+    e_UIMWToolbarPopUpMenu_StyleBG_Yellow,
+    e_UIMWToolbarPopUpMenu_StyleBG_BrightWhite,
+    e_UIMWToolbarPopUpMenuMAX
+} e_UIMWToolbarMenuType;
+
 
 /* Don't forget to add to 'm_Cmd2ButtonMapping' in Commands.cpp */
 typedef enum
@@ -288,6 +335,7 @@ typedef enum
     e_MWEvent_MenuTriggered,
     e_MWEvent_BttnTriggered,
     e_MWEvent_ToolbarTriggered,
+    e_MWEvent_ToolbarMenuTriggered,
     e_MWEvent_CheckboxTriggered,
     e_MWEvent_TxtInputEditFinished,
     e_MWEvent_ComboBoxChanged,
@@ -330,6 +378,11 @@ struct MWEventDataBttn
 struct MWEventDataToolbar
 {
     e_UIMWToolbarType InputID;
+};
+
+struct MWEventDataToolbarMenu
+{
+    e_UIMWToolbarMenuType InputID;
 };
 
 struct MWEventDataCheckbox
@@ -404,6 +457,7 @@ union MWEventData
     struct MWEventDataContextMenu ContextMenu;
     struct MWEventDataBttn Bttn;
     struct MWEventDataToolbar Toolbar;
+    struct MWEventDataToolbarMenu ToolbarMenu;
     struct MWEventDataCheckbox Checkbox;
     struct MWEventDataSize NewSize;
     struct MWEventDataPanelSize PanelInfo;
@@ -488,6 +542,7 @@ void UIMW_EnableApplyTerminalEmulationMenu(t_UIMainWindow *win,bool Enabled);
 
 e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj);
 t_UIToolbarCtrl *UIMW_GetToolbarHandle(t_UIMainWindow *win,e_UIMWToolbarType UIObj);
+t_UIToolbarMenuCtrl *UIMW_GetToolbarMenuHandle(t_UIMainWindow *win,e_UIMWToolbarMenuType UIObj);
 t_UIButtonCtrl *UIMW_GetButtonHandle(t_UIMainWindow *win,e_UIMWBttnType UIObj);
 t_UICheckboxCtrl *UIMW_GetCheckboxHandle(t_UIMainWindow *win,e_UIMWCheckboxType UIObj);
 t_UIListViewCtrl *UIMW_GetListViewHandle(t_UIMainWindow *win,e_UIMWListViewType UIObj);

@@ -54,6 +54,7 @@
 #include <QStackedWidget>
 #include <QtGlobal>
 #include <QToolButton>
+#include <QMenu>
 
 //include <stdio.h>
 
@@ -179,6 +180,33 @@ void UISetContextMenuLabel(t_UIContextMenuCtrl *Menu,const char *NewLabel)
 void UISetContextMenuVisible(t_UIContextMenuCtrl *Menu,bool Show)
 {
     QAction *action=(QAction *)Menu;
+
+    action->setVisible(Show);
+}
+
+/*************************************/
+/* Context SubMenus                  */
+/*************************************/
+void UIEnableContextSubMenu(t_UIContextSubMenuCtrl *SubMenu,bool Enable)
+{
+    QMenu *themenu=(QMenu *)SubMenu;
+    QAction *action;
+
+    action=themenu->menuAction();
+    if(action==NULL)
+        return;
+
+    action->setEnabled(Enable);
+}
+
+void UISetContextSubMenuVisible(t_UIContextSubMenuCtrl *SubMenu,bool Show)
+{
+    QMenu *themenu=(QMenu *)SubMenu;
+    QAction *action;
+
+    action=themenu->menuAction();
+    if(action==NULL)
+        return;
 
     action->setVisible(Show);
 }
@@ -1269,6 +1297,30 @@ bool UIGetToolbarCheckStatus(t_UIToolbarCtrl *Toolbar)
     QToolButton *bttn=(QToolButton *)Toolbar;
 
     return bttn->isChecked();
+}
+
+/*************************************/
+/* Toolbar Menu                      */
+/*************************************/
+void UIEnableToolbarMenu(t_UIToolbarCtrl *Toolbar,t_UIToolbarMenuCtrl *ToolbarMenu,bool Enable)
+{
+    QAction *action=(QAction *)ToolbarMenu;
+
+    action->setEnabled(Enable);
+}
+
+void UICheckToolbarMenu(t_UIToolbarCtrl *Toolbar,t_UIToolbarMenuCtrl *ToolbarMenu,bool Checked)
+{
+    QAction *action=(QAction *)ToolbarMenu;
+
+    action->setChecked(Checked);
+}
+
+bool UIGetToolbarMenuCheckStatus(t_UIToolbarCtrl *Toolbar,t_UIToolbarMenuCtrl *ToolbarMenu)
+{
+    QAction *action=(QAction *)ToolbarMenu;
+
+    return action->isChecked();
 }
 
 /*************************************/

@@ -336,6 +336,8 @@ TheMainWindow::TheMainWindow()
     BridgeActive=false;
     BridgedCon1=NULL;
     BridgedCon2=NULL;
+    CurrentBGStyleColor=e_SysCol_Black;
+    CurrentBGStyleShade=e_SysColShade_Normal;
 
     UIWin=UIMW_AllocMainWindow(this,0);
     if(UIWin==NULL)
@@ -503,6 +505,8 @@ void TheMainWindow::Init(void)
     /* Update the names of the send buffers in the menu */
     for(r=0;r<MAX_QUICK_SEND_BUFFERS;r++)
         InformOfSendBufferChange(r);
+
+    ChangeStyleBGColorSelectedColor(e_SysCol_Blue,e_SysColShade_Normal);
 }
 
 /*******************************************************************************
@@ -1300,12 +1304,19 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     bool ActivatePanels;
     t_UITabCtrl *MainTabs;
     class Connection *Con;
+    bool EnableSelectionBased;
     bool RestoreConnectionSettingsActive;
+    bool Checked;
     i_BookmarkList bm;
     t_UIToolbarCtrl *ConnectToggle;
     t_UIToolbarCtrl *CopyTool;
     t_UIToolbarCtrl *PasteTool;
     t_UIToolbarCtrl *ClearScreenTool;
+    t_UIToolbarCtrl *StyleBoldTool;
+    t_UIToolbarCtrl *StyleItalicsTool;
+    t_UIToolbarCtrl *StyleUnderlineTool;
+    t_UIToolbarCtrl *StyleBGColorTool;
+    t_UIToolbarCtrl *StyleStrikeThroughTool;
     e_UIMenuCtrl *CloseTabMenu;
     e_UIMenuCtrl *CloseAllMenu;
     e_UIMenuCtrl *ConnectMenu;
@@ -1353,6 +1364,26 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *SendBuffer12;
     e_UIMenuCtrl *SendBufferSendGeneric;
     e_UIMenuCtrl *AutoReconnectMenu;
+    e_UIMenuCtrl *StyleBGColor_Black;
+    e_UIMenuCtrl *StyleBGColor_Blue;
+    e_UIMenuCtrl *StyleBGColor_Green;
+    e_UIMenuCtrl *StyleBGColor_Cyan;
+    e_UIMenuCtrl *StyleBGColor_Red;
+    e_UIMenuCtrl *StyleBGColor_Magenta;
+    e_UIMenuCtrl *StyleBGColor_Brown;
+    e_UIMenuCtrl *StyleBGColor_White;
+    e_UIMenuCtrl *StyleBGColor_Gray;
+    e_UIMenuCtrl *StyleBGColor_LightBlue;
+    e_UIMenuCtrl *StyleBGColor_LightGreen;
+    e_UIMenuCtrl *StyleBGColor_LightCyan;
+    e_UIMenuCtrl *StyleBGColor_LightRed;
+    e_UIMenuCtrl *StyleBGColor_LightMagenta;
+    e_UIMenuCtrl *StyleBGColor_Yellow;
+    e_UIMenuCtrl *StyleBGColor_BrightWhite;
+    e_UIMenuCtrl *StyleBold;
+    e_UIMenuCtrl *StyleItalics;
+    e_UIMenuCtrl *StyleUnderline;
+    e_UIMenuCtrl *StyleStrikeThrough;
     t_UIContextMenuCtrl *ContextMenu_SendBuffer;
     t_UIContextMenuCtrl *ContextMenu_Copy;
     t_UIContextMenuCtrl *ContextMenu_Paste;
@@ -1361,12 +1392,39 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
 //    t_UIContextMenuCtrl *ContextMenu_ZoomOut;
     t_UIContextMenuCtrl *ContextMenu_Edit;
     t_UIContextMenuCtrl *ContextMenu_EndianSwap;
+    t_UIContextMenuCtrl *ContextMenu_Bold;
+    t_UIContextMenuCtrl *ContextMenu_Italics;
+    t_UIContextMenuCtrl *ContextMenu_Underline;
+    t_UIContextMenuCtrl *ContextMenu_StrikeThrough;
+    t_UIContextMenuCtrl *ContextMenu_StyleBGColor_Black;
+    t_UIContextMenuCtrl *ContextMenu_StyleBGColor_Blue;
+    t_UIContextMenuCtrl *ContextMenu_StyleBGColor_Green;
+    t_UIContextMenuCtrl *ContextMenu_StyleBGColor_Cyan;
+    t_UIContextMenuCtrl *ContextMenu_StyleBGColor_Red;
+    t_UIContextMenuCtrl *ContextMenu_StyleBGColor_Magenta;
+    t_UIContextMenuCtrl *ContextMenu_StyleBGColor_Brown;
+    t_UIContextMenuCtrl *ContextMenu_StyleBGColor_White;
+    t_UIContextMenuCtrl *ContextMenu_StyleBGColor_Gray;
+    t_UIContextMenuCtrl *ContextMenu_StyleBGColor_LightBlue;
+    t_UIContextMenuCtrl *ContextMenu_StyleBGColor_LightGreen;
+    t_UIContextMenuCtrl *ContextMenu_StyleBGColor_LightCyan;
+    t_UIContextMenuCtrl *ContextMenu_StyleBGColor_LightRed;
+    t_UIContextMenuCtrl *ContextMenu_StyleBGColor_LightMagenta;
+    t_UIContextMenuCtrl *ContextMenu_StyleBGColor_Yellow;
+    t_UIContextMenuCtrl *ContextMenu_StyleBGColor_BrightWhite;
+    t_UIContextSubMenuCtrl *ContextSubMenu_BGColor;
 
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
     ConnectToggle=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_ConnectToggle);
     CopyTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_Copy);
     PasteTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_Paste);
     ClearScreenTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_ClearScreen);
+    StyleBoldTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_StyleBold);
+    StyleItalicsTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_StyleItalics);
+    StyleUnderlineTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_StyleUnderline);
+    StyleBGColorTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_StyleBGColor);
+    StyleStrikeThroughTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_StyleStrikeThrough);
+
     CloseTabMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_CloseTab);
     CloseAllMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_CloseAll);
     ConnectMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Connect);
@@ -1401,7 +1459,26 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     Send_Delete=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Delete);
     Send_Other=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Send_Other);
     AutoReconnectMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ToggleAutoReconnect);
-
+    StyleBGColor_Black=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBGColor_Black);
+    StyleBGColor_Blue=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBGColor_Blue);
+    StyleBGColor_Green=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBGColor_Green);
+    StyleBGColor_Cyan=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBGColor_Cyan);
+    StyleBGColor_Red=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBGColor_Red);
+    StyleBGColor_Magenta=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBGColor_Magenta);
+    StyleBGColor_Brown=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBGColor_Brown);
+    StyleBGColor_White=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBGColor_White);
+    StyleBGColor_Gray=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBGColor_Gray);
+    StyleBGColor_LightBlue=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBGColor_LightBlue);
+    StyleBGColor_LightGreen=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBGColor_LightGreen);
+    StyleBGColor_LightCyan=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBGColor_LightCyan);
+    StyleBGColor_LightRed=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBGColor_LightRed);
+    StyleBGColor_LightMagenta=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBGColor_LightMagenta);
+    StyleBGColor_Yellow=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBGColor_Yellow);
+    StyleBGColor_BrightWhite=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBGColor_BrightWhite);
+    StyleBold=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleBold);
+    StyleItalics=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleItalics);
+    StyleUnderline=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleUnderline);
+    StyleStrikeThrough=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StyleStrikeThrough);
     SendBuffer1=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer1);
     SendBuffer2=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer2);
     SendBuffer3=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer3);
@@ -1466,12 +1543,36 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(SendBuffer12,false);
         UIEnableMenu(SendBufferSendGeneric,false);
         UIEnableMenu(AutoReconnectMenu,false);
-
+        UIEnableMenu(StyleBGColor_Black,false);
+        UIEnableMenu(StyleBGColor_Blue,false);
+        UIEnableMenu(StyleBGColor_Green,false);
+        UIEnableMenu(StyleBGColor_Cyan,false);
+        UIEnableMenu(StyleBGColor_Red,false);
+        UIEnableMenu(StyleBGColor_Magenta,false);
+        UIEnableMenu(StyleBGColor_Brown,false);
+        UIEnableMenu(StyleBGColor_White,false);
+        UIEnableMenu(StyleBGColor_Gray,false);
+        UIEnableMenu(StyleBGColor_LightBlue,false);
+        UIEnableMenu(StyleBGColor_LightGreen,false);
+        UIEnableMenu(StyleBGColor_LightCyan,false);
+        UIEnableMenu(StyleBGColor_LightRed,false);
+        UIEnableMenu(StyleBGColor_LightMagenta,false);
+        UIEnableMenu(StyleBGColor_Yellow,false);
+        UIEnableMenu(StyleBGColor_BrightWhite,false);
+        UIEnableMenu(StyleBold,false);
+        UIEnableMenu(StyleItalics,false);
+        UIEnableMenu(StyleUnderline,false);
+        UIEnableMenu(StyleStrikeThrough,false);
         UIEnableToolbar(ConnectToggle,false);
         UICheckToolbar(ConnectToggle,false);
         UIEnableToolbar(CopyTool,false);
         UIEnableToolbar(PasteTool,false);
         UIEnableToolbar(ClearScreenTool,false);
+        UIEnableToolbar(StyleBoldTool,false);
+        UIEnableToolbar(StyleItalicsTool,false);
+        UIEnableToolbar(StyleUnderlineTool,false);
+        UIEnableToolbar(StyleBGColorTool,false);
+        UIEnableToolbar(StyleStrikeThroughTool,false);
 
         UIMW_EnableApplyTerminalEmulationMenu(UIWin,false);
 
@@ -1525,9 +1626,35 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         ContextMenu_Paste=Con->GetContextMenuHandle(e_UITD_ContextMenu_Paste);
         ContextMenu_Edit=Con->GetContextMenuHandle(e_UITD_ContextMenu_Edit);
         ContextMenu_EndianSwap=Con->GetContextMenuHandle(e_UITD_ContextMenu_EndianSwap);
+        ContextMenu_Bold=Con->GetContextMenuHandle(e_UITD_ContextMenu_Bold);
+        ContextMenu_Italics=Con->GetContextMenuHandle(e_UITD_ContextMenu_Italics);
+        ContextMenu_Underline=Con->GetContextMenuHandle(e_UITD_ContextMenu_Underline);
+        ContextMenu_StrikeThrough=Con->GetContextMenuHandle(e_UITD_ContextMenu_StrikeThrough);
+        ContextMenu_StyleBGColor_Black=Con->GetContextMenuHandle(e_UITD_ContextMenu_StyleBGColor_Black);
+        ContextMenu_StyleBGColor_Blue=Con->GetContextMenuHandle(e_UITD_ContextMenu_StyleBGColor_Blue);
+        ContextMenu_StyleBGColor_Green=Con->GetContextMenuHandle(e_UITD_ContextMenu_StyleBGColor_Green);
+        ContextMenu_StyleBGColor_Cyan=Con->GetContextMenuHandle(e_UITD_ContextMenu_StyleBGColor_Cyan);
+        ContextMenu_StyleBGColor_Red=Con->GetContextMenuHandle(e_UITD_ContextMenu_StyleBGColor_Red);
+        ContextMenu_StyleBGColor_Magenta=Con->GetContextMenuHandle(e_UITD_ContextMenu_StyleBGColor_Magenta);
+        ContextMenu_StyleBGColor_Brown=Con->GetContextMenuHandle(e_UITD_ContextMenu_StyleBGColor_Brown);
+        ContextMenu_StyleBGColor_White=Con->GetContextMenuHandle(e_UITD_ContextMenu_StyleBGColor_White);
+        ContextMenu_StyleBGColor_Gray=Con->GetContextMenuHandle(e_UITD_ContextMenu_StyleBGColor_Gray);
+        ContextMenu_StyleBGColor_LightBlue=Con->GetContextMenuHandle(e_UITD_ContextMenu_StyleBGColor_LightBlue);
+        ContextMenu_StyleBGColor_LightGreen=Con->GetContextMenuHandle(e_UITD_ContextMenu_StyleBGColor_LightGreen);
+        ContextMenu_StyleBGColor_LightCyan=Con->GetContextMenuHandle(e_UITD_ContextMenu_StyleBGColor_LightCyan);
+        ContextMenu_StyleBGColor_LightRed=Con->GetContextMenuHandle(e_UITD_ContextMenu_StyleBGColor_LightRed);
+        ContextMenu_StyleBGColor_LightMagenta=Con->GetContextMenuHandle(e_UITD_ContextMenu_StyleBGColor_LightMagenta);
+        ContextMenu_StyleBGColor_Yellow=Con->GetContextMenuHandle(e_UITD_ContextMenu_StyleBGColor_Yellow);
+        ContextMenu_StyleBGColor_BrightWhite=Con->GetContextMenuHandle(e_UITD_ContextMenu_StyleBGColor_BrightWhite);
+        ContextSubMenu_BGColor=Con->GetContextSubMenuHandle(e_UITD_ContextSubMenu_BGColor);
 
         UISetContextMenuVisible(ContextMenu_Edit,false);
         UISetContextMenuVisible(ContextMenu_EndianSwap,false);
+        UISetContextMenuVisible(ContextMenu_Bold,true);
+        UISetContextMenuVisible(ContextMenu_Italics,true);
+        UISetContextMenuVisible(ContextMenu_Underline,true);
+        UISetContextMenuVisible(ContextMenu_StrikeThrough,true);
+        UISetContextSubMenuVisible(ContextSubMenu_BGColor,true);
 
         Connected=Con->GetConnectedStatus();
         UICheckToolbar(ConnectToggle,Connected);
@@ -1559,23 +1686,139 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UICheckMenu(ShowNonPrintable,Con->GetShowNonPrintable());
         UICheckMenu(ShowEndOfLines,Con->GetShowEndOfLines());
 
-        if(Con->IsThereASelection())
+        /* Things that are effected by selection */
+        EnableSelectionBased=Con->IsThereASelection();
+        UIEnableMenu(Copy,EnableSelectionBased);
+        UIEnableToolbar(CopyTool,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_Copy,EnableSelectionBased);
+        UIEnableToolbar(StyleBoldTool,EnableSelectionBased);
+        UIEnableToolbar(StyleItalicsTool,EnableSelectionBased);
+        UIEnableToolbar(StyleUnderlineTool,EnableSelectionBased);
+        UIEnableToolbar(StyleBGColorTool,EnableSelectionBased);
+        UIEnableToolbar(StyleStrikeThroughTool,EnableSelectionBased);
+        UIEnableMenu(StyleBGColor_Black,EnableSelectionBased);
+        UIEnableMenu(StyleBGColor_Blue,EnableSelectionBased);
+        UIEnableMenu(StyleBGColor_Green,EnableSelectionBased);
+        UIEnableMenu(StyleBGColor_Cyan,EnableSelectionBased);
+        UIEnableMenu(StyleBGColor_Red,EnableSelectionBased);
+        UIEnableMenu(StyleBGColor_Magenta,EnableSelectionBased);
+        UIEnableMenu(StyleBGColor_Brown,EnableSelectionBased);
+        UIEnableMenu(StyleBGColor_White,EnableSelectionBased);
+        UIEnableMenu(StyleBGColor_Gray,EnableSelectionBased);
+        UIEnableMenu(StyleBGColor_LightBlue,EnableSelectionBased);
+        UIEnableMenu(StyleBGColor_LightGreen,EnableSelectionBased);
+        UIEnableMenu(StyleBGColor_LightCyan,EnableSelectionBased);
+        UIEnableMenu(StyleBGColor_LightRed,EnableSelectionBased);
+        UIEnableMenu(StyleBGColor_LightMagenta,EnableSelectionBased);
+        UIEnableMenu(StyleBGColor_Yellow,EnableSelectionBased);
+        UIEnableMenu(StyleBGColor_BrightWhite,EnableSelectionBased);
+        UIEnableMenu(StyleBold,EnableSelectionBased);
+        UIEnableMenu(StyleItalics,EnableSelectionBased);
+        UIEnableMenu(StyleUnderline,EnableSelectionBased);
+        UIEnableMenu(StyleStrikeThrough,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_Bold,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_Italics,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_Underline,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StrikeThrough,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StyleBGColor_Black,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StyleBGColor_Blue,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StyleBGColor_Green,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StyleBGColor_Cyan,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StyleBGColor_Red,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StyleBGColor_Magenta,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StyleBGColor_Brown,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StyleBGColor_White,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StyleBGColor_Gray,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StyleBGColor_LightBlue,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StyleBGColor_LightGreen,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StyleBGColor_LightCyan,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StyleBGColor_LightRed,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StyleBGColor_LightMagenta,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StyleBGColor_Yellow,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_StyleBGColor_BrightWhite,EnableSelectionBased);
+
+/* DEBUG PAUL: We disable the styling stuff in text mode for now, until we
+   update the text mode to be able to apply the styling (just so we can commit
+   with having a broken feature) */
+        if(!Con->IsConnectionBinary())
         {
-            UIEnableMenu(Copy,true);
-            UIEnableToolbar(CopyTool,true);
-            UIEnableContextMenu(ContextMenu_Copy,true);
-        }
-        else
-        {
-            UIEnableMenu(Copy,false);
-            UIEnableToolbar(CopyTool,false);
-            UIEnableContextMenu(ContextMenu_Copy,false);
+            UIEnableToolbar(StyleBoldTool,false);
+            UIEnableToolbar(StyleItalicsTool,false);
+            UIEnableToolbar(StyleUnderlineTool,false);
+            UIEnableToolbar(StyleBGColorTool,false);
+            UIEnableToolbar(StyleStrikeThroughTool,false);
+            UIEnableMenu(StyleBGColor_Black,false);
+            UIEnableMenu(StyleBGColor_Blue,false);
+            UIEnableMenu(StyleBGColor_Green,false);
+            UIEnableMenu(StyleBGColor_Cyan,false);
+            UIEnableMenu(StyleBGColor_Red,false);
+            UIEnableMenu(StyleBGColor_Magenta,false);
+            UIEnableMenu(StyleBGColor_Brown,false);
+            UIEnableMenu(StyleBGColor_White,false);
+            UIEnableMenu(StyleBGColor_Gray,false);
+            UIEnableMenu(StyleBGColor_LightBlue,false);
+            UIEnableMenu(StyleBGColor_LightGreen,false);
+            UIEnableMenu(StyleBGColor_LightCyan,false);
+            UIEnableMenu(StyleBGColor_LightRed,false);
+            UIEnableMenu(StyleBGColor_LightMagenta,false);
+            UIEnableMenu(StyleBGColor_Yellow,false);
+            UIEnableMenu(StyleBGColor_BrightWhite,false);
+            UIEnableMenu(StyleBold,false);
+            UIEnableMenu(StyleItalics,false);
+            UIEnableMenu(StyleUnderline,false);
+            UIEnableMenu(StyleStrikeThrough,false);
+            UIEnableContextMenu(ContextMenu_Bold,false);
+            UIEnableContextMenu(ContextMenu_Italics,false);
+            UIEnableContextMenu(ContextMenu_Underline,false);
+            UIEnableContextMenu(ContextMenu_StrikeThrough,false);
+            UIEnableContextMenu(ContextMenu_StyleBGColor_Black,false);
+            UIEnableContextMenu(ContextMenu_StyleBGColor_Blue,false);
+            UIEnableContextMenu(ContextMenu_StyleBGColor_Green,false);
+            UIEnableContextMenu(ContextMenu_StyleBGColor_Cyan,false);
+            UIEnableContextMenu(ContextMenu_StyleBGColor_Red,false);
+            UIEnableContextMenu(ContextMenu_StyleBGColor_Magenta,false);
+            UIEnableContextMenu(ContextMenu_StyleBGColor_Brown,false);
+            UIEnableContextMenu(ContextMenu_StyleBGColor_White,false);
+            UIEnableContextMenu(ContextMenu_StyleBGColor_Gray,false);
+            UIEnableContextMenu(ContextMenu_StyleBGColor_LightBlue,false);
+            UIEnableContextMenu(ContextMenu_StyleBGColor_LightGreen,false);
+            UIEnableContextMenu(ContextMenu_StyleBGColor_LightCyan,false);
+            UIEnableContextMenu(ContextMenu_StyleBGColor_LightRed,false);
+            UIEnableContextMenu(ContextMenu_StyleBGColor_LightMagenta,false);
+            UIEnableContextMenu(ContextMenu_StyleBGColor_Yellow,false);
+            UIEnableContextMenu(ContextMenu_StyleBGColor_BrightWhite,false);
         }
 
+        /* Things that are effected by binary vs text */
         if(Con->IsConnectionBinary())
             UIEnableMenu(InsertHorizontalRule,false);
         else
             UIEnableMenu(InsertHorizontalRule,true);
+
+        /* Styling checked or not */
+        Checked=Con->IsThisAttribInSelection(TXT_ATTRIB_BOLD);
+        UICheckToolbar(StyleBoldTool,Checked);
+        UICheckContextMenu(ContextMenu_Bold,Checked);
+
+        Checked=Con->IsThisAttribInSelection(TXT_ATTRIB_ITALIC);
+        UICheckToolbar(StyleItalicsTool,Checked);
+        UICheckContextMenu(ContextMenu_Italics,Checked);
+
+        Checked=Con->IsThisAttribInSelection(TXT_ATTRIB_UNDERLINE);
+        UICheckToolbar(StyleUnderlineTool,Checked);
+        UICheckContextMenu(ContextMenu_Underline,Checked);
+
+        Checked=Con->IsThisAttribInSelection(TXT_ATTRIB_LINETHROUGHT);
+        UICheckToolbar(StyleStrikeThroughTool,Checked);
+        UICheckContextMenu(ContextMenu_StrikeThrough,Checked);
+
+        UICheckMenu(StyleBold,Con->IsThisAttribInSelection(TXT_ATTRIB_BOLD));
+        UICheckMenu(StyleItalics,
+                Con->IsThisAttribInSelection(TXT_ATTRIB_ITALIC));
+        UICheckMenu(StyleUnderline,
+                Con->IsThisAttribInSelection(TXT_ATTRIB_UNDERLINE));
+        UICheckMenu(StyleStrikeThrough,
+                Con->IsThisAttribInSelection(TXT_ATTRIB_LINETHROUGHT));
 
         UICheckMenu(AutoReconnectMenu,Con->GetCurrentAutoReopenStatus());
 
@@ -2418,6 +2661,136 @@ void TheMainWindow::DoSendByte(uint8_t Byte)
     TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
     if(TabCon!=NULL)
         TabCon->WriteData(&Byte,1,e_ConWriteSource_Keyboard);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::ApplyAttrib2Selection
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::ApplyAttrib2Selection(uint32_t Attribs);
+ *
+ * PARAMETERS:
+ *    Attribs [I] -- The TXT_ATTRIB_ attribs to toggle.
+ *
+ * FUNCTION:
+ *    This function applies attribs to the current selection for the active
+ *    tab.  This will toggle the attribs on/off.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::ApplyAttrib2Selection(uint32_t Attribs)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+    {
+        TabCon->ApplyAttribs2Selection(Attribs);
+        RethinkActiveConnectionUI();
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::ApplyBGColor2Selection
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::ApplyBGColor2Selection(void);
+ *    void TheMainWindow::ApplyBGColor2Selection(e_SysColType Color,
+ *              e_SysColShadeType Shade);
+ *
+ * PARAMETERS:
+ *    Color [I] -- The color to apply
+ *    Shade [I] -- The shade of the color to apply
+ *
+ * FUNCTION:
+ *    This function takes the current color and applies it to the current
+ *    selection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::ApplyBGColor2Selection(void)
+{
+    ApplyBGColor2Selection(CurrentBGStyleColor,CurrentBGStyleShade);
+}
+void TheMainWindow::ApplyBGColor2Selection(e_SysColType Color,
+        e_SysColShadeType Shade)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+    uint32_t RGB;
+
+    /* Convert the current color to an RGB value */
+    switch(Color)
+    {
+        case e_SysCol_Black:
+            if(Shade==e_SysColShade_Normal)
+                RGB=0x000000;
+            else
+                RGB=0x808080;
+        break;
+        case e_SysCol_Red:
+            if(Shade==e_SysColShade_Normal)
+                RGB=0x800000;
+            else
+                RGB=0xFF0000;
+        break;
+        case e_SysCol_Green:
+            if(Shade==e_SysColShade_Normal)
+                RGB=0x008000;
+            else
+                RGB=0x00FF00;
+        break;
+        case e_SysCol_Yellow:
+            if(Shade==e_SysColShade_Normal)
+                RGB=0x808000;
+            else
+                RGB=0xFFFF00;
+        break;
+        case e_SysCol_Blue:
+            if(Shade==e_SysColShade_Normal)
+                RGB=0x000080;
+            else
+                RGB=0x0000FF;
+        break;
+        case e_SysCol_Magenta:
+            if(Shade==e_SysColShade_Normal)
+                RGB=0x800080;
+            else
+                RGB=0xFF00FF;
+        break;
+        case e_SysCol_Cyan:
+            if(Shade==e_SysColShade_Normal)
+                RGB=0x008080;
+            else
+                RGB=0x00FFFF;
+        break;
+        case e_SysCol_White:
+            if(Shade==e_SysColShade_Normal)
+                RGB=0xAAAAAA;
+            else
+                RGB=0xFFFFFF;
+        break;
+        default:
+        case e_SysColMAX:
+        return;
+    }
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+        TabCon->ApplyBGColor2Selection(RGB);
 }
 
 /*******************************************************************************
@@ -3737,6 +4110,253 @@ void TheMainWindow::MoveToPrevTab(void)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::ChangeStyleBGColorSelectedColor
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::ChangeStyleBGColorSelectedColor(e_SysColType Color,
+ *              e_SysColShadeType Shade);
+ *
+ * PARAMETERS:
+ *    Color [I] -- The color to select
+ *    Shade [I] -- What shade of color to select
+ *
+ * FUNCTION:
+ *    This function changes the color that will be used for the highlight
+ *    background color styling.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::ChangeStyleBGColorSelectedColor(e_SysColType Color,
+        e_SysColShadeType Shade)
+{
+    t_UIToolbarCtrl *BGColorToolbar;
+    t_UIToolbarMenuCtrl *BlackTMenu;
+    t_UIToolbarMenuCtrl *BlueTMenu;
+    t_UIToolbarMenuCtrl *GreenTMenu;
+    t_UIToolbarMenuCtrl *CyanTMenu;
+    t_UIToolbarMenuCtrl *RedTMenu;
+    t_UIToolbarMenuCtrl *MagentaTMenu;
+    t_UIToolbarMenuCtrl *BrownTMenu;
+    t_UIToolbarMenuCtrl *WhiteTMenu;
+    t_UIToolbarMenuCtrl *GrayTMenu;
+    t_UIToolbarMenuCtrl *LightBlueTMenu;
+    t_UIToolbarMenuCtrl *LightGreenTMenu;
+    t_UIToolbarMenuCtrl *LightCyanTMenu;
+    t_UIToolbarMenuCtrl *LightRedTMenu;
+    t_UIToolbarMenuCtrl *LightMagentaTMenu;
+    t_UIToolbarMenuCtrl *YellowTMenu;
+    t_UIToolbarMenuCtrl *BrightWhiteTMenu;
+
+    BGColorToolbar=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_StyleBGColor);
+    BlackTMenu=UIMW_GetToolbarMenuHandle(UIWin,e_UIMWToolbarPopUpMenu_StyleBG_Black);
+    BlueTMenu=UIMW_GetToolbarMenuHandle(UIWin,e_UIMWToolbarPopUpMenu_StyleBG_Blue);
+    GreenTMenu=UIMW_GetToolbarMenuHandle(UIWin,e_UIMWToolbarPopUpMenu_StyleBG_Green);
+    CyanTMenu=UIMW_GetToolbarMenuHandle(UIWin,e_UIMWToolbarPopUpMenu_StyleBG_Cyan);
+    RedTMenu=UIMW_GetToolbarMenuHandle(UIWin,e_UIMWToolbarPopUpMenu_StyleBG_Red);
+    MagentaTMenu=UIMW_GetToolbarMenuHandle(UIWin,e_UIMWToolbarPopUpMenu_StyleBG_Magenta);
+    BrownTMenu=UIMW_GetToolbarMenuHandle(UIWin,e_UIMWToolbarPopUpMenu_StyleBG_Brown);
+    WhiteTMenu=UIMW_GetToolbarMenuHandle(UIWin,e_UIMWToolbarPopUpMenu_StyleBG_White);
+    GrayTMenu=UIMW_GetToolbarMenuHandle(UIWin,e_UIMWToolbarPopUpMenu_StyleBG_Gray);
+    LightBlueTMenu=UIMW_GetToolbarMenuHandle(UIWin,e_UIMWToolbarPopUpMenu_StyleBG_LightBlue);
+    LightGreenTMenu=UIMW_GetToolbarMenuHandle(UIWin,e_UIMWToolbarPopUpMenu_StyleBG_LightGreen);
+    LightCyanTMenu=UIMW_GetToolbarMenuHandle(UIWin,e_UIMWToolbarPopUpMenu_StyleBG_LightCyan);
+    LightRedTMenu=UIMW_GetToolbarMenuHandle(UIWin,e_UIMWToolbarPopUpMenu_StyleBG_LightRed);
+    LightMagentaTMenu=UIMW_GetToolbarMenuHandle(UIWin,e_UIMWToolbarPopUpMenu_StyleBG_LightMagenta);
+    YellowTMenu=UIMW_GetToolbarMenuHandle(UIWin,e_UIMWToolbarPopUpMenu_StyleBG_Yellow);
+    BrightWhiteTMenu=UIMW_GetToolbarMenuHandle(UIWin,e_UIMWToolbarPopUpMenu_StyleBG_BrightWhite);
+
+    /* Clear all the selected colors */
+    UICheckToolbarMenu(BGColorToolbar,BlackTMenu,false);
+    UICheckToolbarMenu(BGColorToolbar,BlueTMenu,false);
+    UICheckToolbarMenu(BGColorToolbar,GreenTMenu,false);
+    UICheckToolbarMenu(BGColorToolbar,CyanTMenu,false);
+    UICheckToolbarMenu(BGColorToolbar,RedTMenu,false);
+    UICheckToolbarMenu(BGColorToolbar,MagentaTMenu,false);
+    UICheckToolbarMenu(BGColorToolbar,BrownTMenu,false);
+    UICheckToolbarMenu(BGColorToolbar,WhiteTMenu,false);
+    UICheckToolbarMenu(BGColorToolbar,GrayTMenu,false);
+    UICheckToolbarMenu(BGColorToolbar,LightBlueTMenu,false);
+    UICheckToolbarMenu(BGColorToolbar,LightGreenTMenu,false);
+    UICheckToolbarMenu(BGColorToolbar,LightCyanTMenu,false);
+    UICheckToolbarMenu(BGColorToolbar,LightRedTMenu,false);
+    UICheckToolbarMenu(BGColorToolbar,LightMagentaTMenu,false);
+    UICheckToolbarMenu(BGColorToolbar,YellowTMenu,false);
+    UICheckToolbarMenu(BGColorToolbar,BrightWhiteTMenu,false);
+
+    switch(Color)
+    {
+        case e_SysCol_Black:
+            if(Shade==e_SysColShade_Normal)
+            {
+                UICheckToolbarMenu(BGColorToolbar,BlackTMenu,true);
+            }
+            else
+            {
+                UICheckToolbarMenu(BGColorToolbar,GrayTMenu,true);
+            }
+        break;
+        case e_SysCol_Red:
+            if(Shade==e_SysColShade_Normal)
+            {
+                UICheckToolbarMenu(BGColorToolbar,RedTMenu,true);
+            }
+            else
+            {
+                UICheckToolbarMenu(BGColorToolbar,LightRedTMenu,true);
+            }
+        break;
+        case e_SysCol_Green:
+            if(Shade==e_SysColShade_Normal)
+            {
+                UICheckToolbarMenu(BGColorToolbar,GreenTMenu,true);
+            }
+            else
+            {
+                UICheckToolbarMenu(BGColorToolbar,LightGreenTMenu,true);
+            }
+        break;
+        case e_SysCol_Yellow:
+            if(Shade==e_SysColShade_Normal)
+            {
+                UICheckToolbarMenu(BGColorToolbar,BrownTMenu,true);
+            }
+            else
+            {
+                UICheckToolbarMenu(BGColorToolbar,YellowTMenu,true);
+            }
+        break;
+        case e_SysCol_Blue:
+            if(Shade==e_SysColShade_Normal)
+            {
+                UICheckToolbarMenu(BGColorToolbar,BlueTMenu,true);
+            }
+            else
+            {
+                UICheckToolbarMenu(BGColorToolbar,LightBlueTMenu,true);
+            }
+        break;
+        case e_SysCol_Magenta:
+            if(Shade==e_SysColShade_Normal)
+            {
+                UICheckToolbarMenu(BGColorToolbar,MagentaTMenu,true);
+            }
+            else
+            {
+                UICheckToolbarMenu(BGColorToolbar,LightMagentaTMenu,true);
+            }
+        break;
+        case e_SysCol_Cyan:
+            if(Shade==e_SysColShade_Normal)
+            {
+                UICheckToolbarMenu(BGColorToolbar,CyanTMenu,true);
+            }
+            else
+            {
+                UICheckToolbarMenu(BGColorToolbar,LightCyanTMenu,true);
+            }
+        break;
+        case e_SysCol_White:
+            if(Shade==e_SysColShade_Normal)
+            {
+                UICheckToolbarMenu(BGColorToolbar,WhiteTMenu,true);
+            }
+            else
+            {
+                UICheckToolbarMenu(BGColorToolbar,BrightWhiteTMenu,true);
+            }
+        break;
+        case e_SysColMAX:
+        default:
+        break;
+    }
+
+    CurrentBGStyleColor=Color;
+    CurrentBGStyleShade=Shade;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::ToolbarMenuSelected
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::ToolbarMenuSelected(e_UIMWToolbarMenuType InputID);
+ *
+ * PARAMETERS:
+ *    InputID [I] -- The input that was picked
+ *
+ * FUNCTION:
+ *    This function is called when a toolbar menu item is selected.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::ToolbarMenuSelected(e_UIMWToolbarMenuType InputID)
+{
+    switch(InputID)
+    {
+        case e_UIMWToolbarPopUpMenu_StyleBG_Black:
+            ChangeStyleBGColorSelectedColor(e_SysCol_Black,e_SysColShade_Normal);
+        break;
+        case e_UIMWToolbarPopUpMenu_StyleBG_Blue:
+            ChangeStyleBGColorSelectedColor(e_SysCol_Blue,e_SysColShade_Normal);
+        break;
+        case e_UIMWToolbarPopUpMenu_StyleBG_Green:
+            ChangeStyleBGColorSelectedColor(e_SysCol_Green,e_SysColShade_Normal);
+        break;
+        case e_UIMWToolbarPopUpMenu_StyleBG_Cyan:
+            ChangeStyleBGColorSelectedColor(e_SysCol_Cyan,e_SysColShade_Normal);
+        break;
+        case e_UIMWToolbarPopUpMenu_StyleBG_Red:
+            ChangeStyleBGColorSelectedColor(e_SysCol_Red,e_SysColShade_Normal);
+        break;
+        case e_UIMWToolbarPopUpMenu_StyleBG_Magenta:
+            ChangeStyleBGColorSelectedColor(e_SysCol_Magenta,e_SysColShade_Normal);
+        break;
+        case e_UIMWToolbarPopUpMenu_StyleBG_Brown:
+            ChangeStyleBGColorSelectedColor(e_SysCol_Yellow,e_SysColShade_Normal);
+        break;
+        case e_UIMWToolbarPopUpMenu_StyleBG_White:
+            ChangeStyleBGColorSelectedColor(e_SysCol_White,e_SysColShade_Normal);
+        break;
+        case e_UIMWToolbarPopUpMenu_StyleBG_Gray:
+            ChangeStyleBGColorSelectedColor(e_SysCol_Black,e_SysColShade_Bright);
+        break;
+        case e_UIMWToolbarPopUpMenu_StyleBG_LightBlue:
+            ChangeStyleBGColorSelectedColor(e_SysCol_Blue,e_SysColShade_Bright);
+        break;
+        case e_UIMWToolbarPopUpMenu_StyleBG_LightGreen:
+            ChangeStyleBGColorSelectedColor(e_SysCol_Green,e_SysColShade_Bright);
+        break;
+        case e_UIMWToolbarPopUpMenu_StyleBG_LightCyan:
+            ChangeStyleBGColorSelectedColor(e_SysCol_Cyan,e_SysColShade_Bright);
+        break;
+        case e_UIMWToolbarPopUpMenu_StyleBG_LightRed:
+            ChangeStyleBGColorSelectedColor(e_SysCol_Red,e_SysColShade_Bright);
+        break;
+        case e_UIMWToolbarPopUpMenu_StyleBG_LightMagenta:
+            ChangeStyleBGColorSelectedColor(e_SysCol_Magenta,e_SysColShade_Bright);
+        break;
+        case e_UIMWToolbarPopUpMenu_StyleBG_Yellow:
+            ChangeStyleBGColorSelectedColor(e_SysCol_Yellow,e_SysColShade_Bright);
+        break;
+        case e_UIMWToolbarPopUpMenu_StyleBG_BrightWhite:
+            ChangeStyleBGColorSelectedColor(e_SysCol_White,e_SysColShade_Bright);
+        break;
+        case e_UIMWToolbarPopUpMenuMAX:
+        default:
+        break;
+    }
+}
+
+/*******************************************************************************
+ * NAME:
  *    MW_Event
  *
  * SYNOPSIS:
@@ -3806,6 +4426,9 @@ bool MW_Event(const struct MWEvent *Event)
         break;
         case e_MWEvent_ToolbarTriggered:
             Event->MW->ExeCmd(MainToolBar2Cmd(Event->Info.Toolbar.InputID));
+        break;
+        case e_MWEvent_ToolbarMenuTriggered:
+            Event->MW->ToolbarMenuSelected(Event->Info.ToolbarMenu.InputID);
         break;
         case e_MWEvent_CheckboxTriggered:
             Event->MW->ExeCmd(MainCheckboxes2Cmd(Event->Info.Checkbox.InputID));
@@ -4038,6 +4661,27 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_URIHelp -- User select to copy the URI info the connect URI dialog
  *                  e_Cmd_Default_Settings -- Default the settings
  *                  e_Cmd_ToggleAutoReconnect -- Toggles the auto reconnect on the active connection
+ *                  e_Cmd_StyleSelectionBold -- Apply (toggle) bold to the current selection
+ *                  e_Cmd_StyleSelectionItalics -- Apply (toggle) italic to the current selection
+ *                  e_Cmd_StyleSelectionUnderline -- Apply (toggle) underline to the current selection
+ *                  e_Cmd_StyleSelectionStrikeThrough -- Apply (toggle) strike through to the current selection
+ *                  e_Cmd_StyleSelectionBGColor -- Apply background color to teh current selection
+ *                  e_Cmd_ApplyStyleBGColor_Black -- Apply this color to the background of the selection
+ *                  e_Cmd_ApplyStyleBGColor_Blue -- Apply this color to the background of the selection
+ *                  e_Cmd_ApplyStyleBGColor_Green -- Apply this color to the background of the selection
+ *                  e_Cmd_ApplyStyleBGColor_Cyan -- Apply this color to the background of the selection
+ *                  e_Cmd_ApplyStyleBGColor_Red -- Apply this color to the background of the selection
+ *                  e_Cmd_ApplyStyleBGColor_Magenta -- Apply this color to the background of the selection
+ *                  e_Cmd_ApplyStyleBGColor_Brown -- Apply this color to the background of the selection
+ *                  e_Cmd_ApplyStyleBGColor_White -- Apply this color to the background of the selection
+ *                  e_Cmd_ApplyStyleBGColor_Gray -- Apply this color to the background of the selection
+ *                  e_Cmd_ApplyStyleBGColor_LightBlue -- Apply this color to the background of the selection
+ *                  e_Cmd_ApplyStyleBGColor_LightGreen -- Apply this color to the background of the selection
+ *                  e_Cmd_ApplyStyleBGColor_LightCyan -- Apply this color to the background of the selection
+ *                  e_Cmd_ApplyStyleBGColor_LightRed -- Apply this color to the background of the selection
+ *                  e_Cmd_ApplyStyleBGColor_LightMagenta -- Apply this color to the background of the selection
+ *                  e_Cmd_ApplyStyleBGColor_Yellow -- Apply this color to the background of the selection
+ *                  e_Cmd_ApplyStyleBGColor_BrightWhite -- Apply this color to the background of the selection
  *
  * FUNCTION:
  *    This function executes a command.
@@ -4479,6 +5123,70 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_ToggleAutoReconnect:
             ToggleAutoReconnect();
+        break;
+        case e_Cmd_StyleSelectionBold:
+            ApplyAttrib2Selection(TXT_ATTRIB_BOLD);
+        break;
+        case e_Cmd_StyleSelectionItalics:
+            ApplyAttrib2Selection(TXT_ATTRIB_ITALIC);
+        break;
+        case e_Cmd_StyleSelectionUnderline:
+            ApplyAttrib2Selection(TXT_ATTRIB_UNDERLINE);
+        break;
+        case e_Cmd_StyleSelectionBGColor:
+            ApplyBGColor2Selection();
+        break;
+        case e_Cmd_StyleSelectionStrikeThrough:
+            ApplyAttrib2Selection(TXT_ATTRIB_LINETHROUGHT);
+        break;
+        case e_Cmd_ApplyStyleBGColor_Black:
+            ApplyBGColor2Selection(e_SysCol_Black,e_SysColShade_Normal);
+        break;
+        case e_Cmd_ApplyStyleBGColor_Blue:
+            ApplyBGColor2Selection(e_SysCol_Blue,e_SysColShade_Normal);
+        break;
+        case e_Cmd_ApplyStyleBGColor_Green:
+            ApplyBGColor2Selection(e_SysCol_Green,e_SysColShade_Normal);
+        break;
+        case e_Cmd_ApplyStyleBGColor_Cyan:
+            ApplyBGColor2Selection(e_SysCol_Cyan,e_SysColShade_Normal);
+        break;
+        case e_Cmd_ApplyStyleBGColor_Red:
+            ApplyBGColor2Selection(e_SysCol_Red,e_SysColShade_Normal);
+        break;
+        case e_Cmd_ApplyStyleBGColor_Magenta:
+            ApplyBGColor2Selection(e_SysCol_Magenta,e_SysColShade_Normal);
+        break;
+        case e_Cmd_ApplyStyleBGColor_Brown:
+            ApplyBGColor2Selection(e_SysCol_Yellow,e_SysColShade_Normal);
+        break;
+        case e_Cmd_ApplyStyleBGColor_White:
+            ApplyBGColor2Selection(e_SysCol_White,e_SysColShade_Normal);
+        break;
+        case e_Cmd_ApplyStyleBGColor_Gray:
+            ApplyBGColor2Selection(e_SysCol_Black,e_SysColShade_Bright);
+        break;
+        case e_Cmd_ApplyStyleBGColor_LightBlue:
+            ApplyBGColor2Selection(e_SysCol_Blue,e_SysColShade_Bright);
+        break;
+        case e_Cmd_ApplyStyleBGColor_LightGreen:
+            ApplyBGColor2Selection(e_SysCol_Green,e_SysColShade_Bright);
+        break;
+        case e_Cmd_ApplyStyleBGColor_LightCyan:
+            ApplyBGColor2Selection(e_SysCol_Cyan,e_SysColShade_Bright);
+        break;
+        case e_Cmd_ApplyStyleBGColor_LightRed:
+            ApplyBGColor2Selection(e_SysCol_Red,e_SysColShade_Bright);
+        break;
+        case e_Cmd_ApplyStyleBGColor_LightMagenta:
+            ApplyBGColor2Selection(e_SysCol_Magenta,e_SysColShade_Bright);
+        break;
+        case e_Cmd_ApplyStyleBGColor_Yellow:
+            ApplyBGColor2Selection(e_SysCol_Yellow,e_SysColShade_Bright);
+        break;
+        case e_Cmd_ApplyStyleBGColor_BrightWhite:
+            ApplyBGColor2Selection(e_SysCol_White,e_SysColShade_Bright);
+        break;
         break;
         case e_CmdMAX:
         default:

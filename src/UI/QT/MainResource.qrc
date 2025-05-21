@@ -59,6 +59,27 @@
         <file>Graphics/text_horizontalrule.png</file>
         <file>Graphics/lightning.png</file>
         <file>Graphics/bell_feathered.png</file>
+        <file>Graphics/color_swatch.png</file>
+        <file>Graphics/text_bold.png</file>
+        <file>Graphics/text_italic.png</file>
+        <file>Graphics/text_underline.png</file>
+        <file>Graphics/text_strikethrough.png</file>
+        <file>Graphics/ColorSelect_FF0000.png</file>
+        <file>Graphics/ColorSelect_000000.png</file>
+        <file>Graphics/ColorSelect_0000FF.png</file>
+        <file>Graphics/ColorSelect_00FF00.png</file>
+        <file>Graphics/ColorSelect_000080.png</file>
+        <file>Graphics/ColorSelect_008000.png</file>
+        <file>Graphics/ColorSelect_008080.png</file>
+        <file>Graphics/ColorSelect_800000.png</file>
+        <file>Graphics/ColorSelect_800080.png</file>
+        <file>Graphics/ColorSelect_808000.png</file>
+        <file>Graphics/ColorSelect_808080.png</file>
+        <file>Graphics/ColorSelect_FF00FF.png</file>
+        <file>Graphics/ColorSelect_FFFF00.png</file>
+        <file>Graphics/ColorSelect_FFFFFF.png</file>
+        <file>Graphics/ColorSelect_00FFFF.png</file>
+        <file>Graphics/ColorSelect_AAAAAA.png</file>
     </qresource>
     <qresource prefix="/S">
         <file>Sounds/Computer_Error_Alert_Short.wav</file>

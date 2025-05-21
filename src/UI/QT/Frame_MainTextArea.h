@@ -23,6 +23,7 @@ public:
     uintptr_t ID;
     bool (*EventHandler)(const struct TextDisplayEvent *Event);
     QMenu *ContextMenu;
+    QMenu *ColorBGSubmenu;
 
     int WorkingLine;
 
@@ -59,7 +60,48 @@ private slots:
     
     void on_BlockSend_LineEnd_comboBox_activated(int index);
     
+    void on_actionStyleStrike_Through_triggered();
+    
+    void on_actionStyleUnderline_triggered();
+    
+    void on_actionStyleItalics_triggered();
+    
+    void on_actionStyleBold_triggered();
+    
+    void on_actionStyleBGColor_Black_triggered();
+
+    void on_actionStyleBGColor_Blue_triggered();
+
+    void on_actionStyleBGColor_Green_triggered();
+
+    void on_actionStyleBGColor_Cyan_triggered();
+
+    void on_actionStyleBGColor_Red_triggered();
+
+    void on_actionStyleBGColor_Magenta_triggered();
+
+    void on_actionStyleBGColor_Brown_triggered();
+
+    void on_actionStyleBGColor_White_triggered();
+
+    void on_actionStyleBGColor_Gray_triggered();
+
+    void on_actionStyleBGColor_LightBlue_triggered();
+
+    void on_actionStyleBGColor_LightGreen_triggered();
+
+    void on_actionStyleBGColor_LightCyan_triggered();
+
+    void on_actionStyleBGColor_LightRed_triggered();
+
+    void on_actionStyleBGColor_LightMagenta_triggered();
+
+    void on_actionStyleBGColor_Yellow_triggered();
+
+    void on_actionStyleBGColor_BrightWhite_triggered();
+
 private:
+    void SendContextMenuEvent(e_UITD_ContextMenuType EventMenu);
 };
 
 #endif // FRAME_MAINTEXTAREA_H

@@ -94,8 +94,28 @@ Form_MainWindow::Form_MainWindow(QWidget *parent) :
 {
     FirstShow=true;
     IgnoreNextKeyEvent=false;
+    QMenu *menu;
 
     ui->setupUi(this);
+
+    menu=new QMenu();
+    menu->addAction(ui->actionToolbarMenu_ColorSel_Black);
+    menu->addAction(ui->actionToolbarMenu_ColorSel_Blue);
+    menu->addAction(ui->actionToolbarMenu_ColorSel_Green);
+    menu->addAction(ui->actionToolbarMenu_ColorSel_Cyan);
+    menu->addAction(ui->actionToolbarMenu_ColorSel_Red);
+    menu->addAction(ui->actionToolbarMenu_ColorSel_Magenta);
+    menu->addAction(ui->actionToolbarMenu_ColorSel_Brown);
+    menu->addAction(ui->actionToolbarMenu_ColorSel_White);
+    menu->addAction(ui->actionToolbarMenu_ColorSel_Gray);
+    menu->addAction(ui->actionToolbarMenu_ColorSel_LightBlue);
+    menu->addAction(ui->actionToolbarMenu_ColorSel_LightGreen);
+    menu->addAction(ui->actionToolbarMenu_ColorSel_LightCyan);
+    menu->addAction(ui->actionToolbarMenu_ColorSel_LightRed);
+    menu->addAction(ui->actionToolbarMenu_ColorSel_LightMagenta);
+    menu->addAction(ui->actionToolbarMenu_ColorSel_Yellow);
+    menu->addAction(ui->actionToolbarMenu_ColorSel_BrightWhite);
+    ui->StyleColor_toolButton->setMenu(menu);
 
     StopWatchTimer=new QTimer(this);
     StopWatchTimer->setInterval(13);   // 13ms so the updates look like they are coming in faster
@@ -301,6 +321,14 @@ void Form_MainWindow::DoToolbarTriggered(e_UIMWToolbarType ToolID)
 
     EventData.Toolbar.InputID=ToolID;
     SendEvent(e_MWEvent_ToolbarTriggered,&EventData);
+}
+
+void Form_MainWindow::DoToolbarMenuTriggered(e_UIMWToolbarMenuType ToolMenuID)
+{
+    union MWEventData EventData;
+
+    EventData.ToolbarMenu.InputID=ToolMenuID;
+    SendEvent(e_MWEvent_ToolbarMenuTriggered,&EventData);
 }
 
 void Form_MainWindow::DoCheckboxTriggered(e_UIMWCheckboxType CheckboxID,bool Checked)
@@ -1678,5 +1706,225 @@ void Form_MainWindow::on_URI_lineEdit_returnPressed()
 {
     DoToolbarTriggered(e_UIMWToolbar_URIGo);
     IgnoreNextKeyEvent=true;
+}
+
+void Form_MainWindow::on_StyleBold_toolButton_clicked()
+{
+    DoToolbarTriggered(e_UIMWToolbar_StyleBold);
+}
+
+void Form_MainWindow::on_StyleItalics_toolButton_clicked()
+{
+    DoToolbarTriggered(e_UIMWToolbar_StyleItalics);
+}
+
+void Form_MainWindow::on_StyleUnderline_toolButton_clicked()
+{
+    DoToolbarTriggered(e_UIMWToolbar_StyleUnderline);
+}
+
+void Form_MainWindow::on_StyleStrikeThrough_toolButton_clicked()
+{
+    DoToolbarTriggered(e_UIMWToolbar_StyleStrikeThrough);
+}
+
+void Form_MainWindow::on_StyleColor_toolButton_clicked()
+{
+    DoToolbarTriggered(e_UIMWToolbar_StyleBGColor);
+}
+
+void Form_MainWindow::on_actionToolbarMenu_ColorSel_Black_triggered()
+{
+    DoToolbarMenuTriggered(e_UIMWToolbarPopUpMenu_StyleBG_Black);
+}
+
+
+void Form_MainWindow::on_actionToolbarMenu_ColorSel_Blue_triggered()
+{
+    DoToolbarMenuTriggered(e_UIMWToolbarPopUpMenu_StyleBG_Blue);
+}
+
+
+void Form_MainWindow::on_actionToolbarMenu_ColorSel_Green_triggered()
+{
+    DoToolbarMenuTriggered(e_UIMWToolbarPopUpMenu_StyleBG_Green);
+}
+
+
+void Form_MainWindow::on_actionToolbarMenu_ColorSel_Cyan_triggered()
+{
+    DoToolbarMenuTriggered(e_UIMWToolbarPopUpMenu_StyleBG_Cyan);
+}
+
+
+void Form_MainWindow::on_actionToolbarMenu_ColorSel_Red_triggered()
+{
+    DoToolbarMenuTriggered(e_UIMWToolbarPopUpMenu_StyleBG_Red);
+}
+
+
+void Form_MainWindow::on_actionToolbarMenu_ColorSel_Magenta_triggered()
+{
+    DoToolbarMenuTriggered(e_UIMWToolbarPopUpMenu_StyleBG_Magenta);
+}
+
+
+void Form_MainWindow::on_actionToolbarMenu_ColorSel_Brown_triggered()
+{
+    DoToolbarMenuTriggered(e_UIMWToolbarPopUpMenu_StyleBG_Brown);
+}
+
+
+void Form_MainWindow::on_actionToolbarMenu_ColorSel_White_triggered()
+{
+    DoToolbarMenuTriggered(e_UIMWToolbarPopUpMenu_StyleBG_White);
+}
+
+
+void Form_MainWindow::on_actionToolbarMenu_ColorSel_Gray_triggered()
+{
+    DoToolbarMenuTriggered(e_UIMWToolbarPopUpMenu_StyleBG_Gray);
+}
+
+
+void Form_MainWindow::on_actionToolbarMenu_ColorSel_LightGreen_triggered()
+{
+    DoToolbarMenuTriggered(e_UIMWToolbarPopUpMenu_StyleBG_LightGreen);
+}
+
+
+void Form_MainWindow::on_actionToolbarMenu_ColorSel_LightCyan_triggered()
+{
+    DoToolbarMenuTriggered(e_UIMWToolbarPopUpMenu_StyleBG_LightCyan);
+}
+
+
+void Form_MainWindow::on_actionToolbarMenu_ColorSel_LightRed_triggered()
+{
+    DoToolbarMenuTriggered(e_UIMWToolbarPopUpMenu_StyleBG_LightRed);
+}
+
+
+void Form_MainWindow::on_actionToolbarMenu_ColorSel_LightMagenta_triggered()
+{
+    DoToolbarMenuTriggered(e_UIMWToolbarPopUpMenu_StyleBG_LightMagenta);
+}
+
+
+void Form_MainWindow::on_actionToolbarMenu_ColorSel_Yellow_triggered()
+{
+    DoToolbarMenuTriggered(e_UIMWToolbarPopUpMenu_StyleBG_Yellow);
+}
+
+
+void Form_MainWindow::on_actionToolbarMenu_ColorSel_LightBlue_triggered()
+{
+    DoToolbarMenuTriggered(e_UIMWToolbarPopUpMenu_StyleBG_LightBlue);
+}
+
+
+void Form_MainWindow::on_actionToolbarMenu_ColorSel_BrightWhite_triggered()
+{
+    DoToolbarMenuTriggered(e_UIMWToolbarPopUpMenu_StyleBG_BrightWhite);
+}
+
+void Form_MainWindow::on_actionStyleBGColor_Black_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBGColor_Black);
+}
+
+void Form_MainWindow::on_actionStyleBGColor_Blue_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBGColor_Blue);
+}
+
+void Form_MainWindow::on_actionStyleBGColor_Green_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBGColor_Green);
+}
+
+void Form_MainWindow::on_actionStyleBGColor_Cyan_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBGColor_Cyan);
+}
+
+void Form_MainWindow::on_actionStyleBGColor_Red_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBGColor_Red);
+}
+
+void Form_MainWindow::on_actionStyleBGColor_Magenta_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBGColor_Magenta);
+}
+
+void Form_MainWindow::on_actionStyleBGColor_Brown_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBGColor_Brown);
+}
+
+void Form_MainWindow::on_actionStyleBGColor_White_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBGColor_White);
+}
+
+void Form_MainWindow::on_actionStyleBGColor_Gray_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBGColor_Gray);
+}
+
+void Form_MainWindow::on_actionStyleBGColor_LightBlue_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBGColor_LightBlue);
+}
+
+void Form_MainWindow::on_actionStyleBGColor_LightGreen_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBGColor_LightGreen);
+}
+
+void Form_MainWindow::on_actionStyleBGColor_LightCyan_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBGColor_LightCyan);
+}
+
+void Form_MainWindow::on_actionStyleBGColor_LightRed_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBGColor_LightRed);
+}
+
+void Form_MainWindow::on_actionStyleBGColor_LightMagenta_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBGColor_LightMagenta);
+}
+
+void Form_MainWindow::on_actionStyleBGColor_Yellow_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBGColor_Yellow);
+}
+
+void Form_MainWindow::on_actionStyleBGColor_BrightWhite_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBGColor_BrightWhite);
+}
+
+void Form_MainWindow::on_actionBold_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleBold);
+}
+
+void Form_MainWindow::on_actionItalics_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleItalics);
+}
+
+void Form_MainWindow::on_actionUnderline_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleUnderline);
+}
+
+void Form_MainWindow::on_actionStrike_Through_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StyleStrikeThrough);
 }
 

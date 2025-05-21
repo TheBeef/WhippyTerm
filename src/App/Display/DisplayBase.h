@@ -172,7 +172,11 @@ class DisplayBase
         virtual void SetupCanvas(void);
         virtual void SetDrawMask(uint16_t Mask);
         virtual t_UIContextMenuCtrl *GetContextMenuHandle(e_UITD_ContextMenuType UIObj);
+        virtual t_UIContextSubMenuCtrl *GetContextSubMenuHandle(e_UITD_ContextSubMenuType UIObj);
         virtual void ShowBell(void);
+        virtual void ToggleAttribs2Selection(uint32_t Attribs);
+        virtual void ApplyBGColor2Selection(uint32_t RGB);
+        virtual bool IsAttribSetInSelection(uint32_t Attribs);
 
         void SetCustomSettings(class ConSettings *NewSettingsPtr);
         class ConSettings *GetCustomSettings(void);

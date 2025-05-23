@@ -239,7 +239,9 @@
 
 #define MAX_SEARCH_ABORT_COUNT  128
 
-//#define LOG_UNKNOWN_CODES                   // Write a log when we see an unknown code
+#if OFFICIAL_RELEASE==0             // Only unofficial builds can do the logging
+ #define LOG_UNKNOWN_CODES                   // Write a log when we see an unknown code
+#endif
 #define LOG_UNKNOWN_CODES_FILENAME          "/ram/unknowncodes.txt"
 
 /*** MACROS                   ***/

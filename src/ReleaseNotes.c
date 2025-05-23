@@ -29,6 +29,13 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_ENHANCEMENT,"Added user styling/color of the selection",
+            "The user can now style or change the background color of the"
+            " selected text.  This allows the user to highlight text"
+            " of interest.  This is most useful in binary mode as they"
+            " can select different messages or parts of a packet and highlight"
+            " them.  Bold, italics, underline, strike through, and the"
+            " background color can be changed."},
     {   NOTETYPE_ENHANCEMENT,"Added Lock window scroll when not on bottom line",
             "When the scroll bar is at the bottom the screen will be scrolled"
             " to the bottom when new text is added.  If the scroll bar is"

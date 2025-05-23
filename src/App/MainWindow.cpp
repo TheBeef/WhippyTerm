@@ -1737,58 +1737,6 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableContextMenu(ContextMenu_StyleBGColor_Yellow,EnableSelectionBased);
         UIEnableContextMenu(ContextMenu_StyleBGColor_BrightWhite,EnableSelectionBased);
 
-/* DEBUG PAUL: We disable the styling stuff in text mode for now, until we
-   update the text mode to be able to apply the styling (just so we can commit
-   with having a broken feature) */
-        if(!Con->IsConnectionBinary())
-        {
-            UIEnableToolbar(StyleBoldTool,false);
-            UIEnableToolbar(StyleItalicsTool,false);
-            UIEnableToolbar(StyleUnderlineTool,false);
-            UIEnableToolbar(StyleBGColorTool,false);
-            UIEnableToolbar(StyleStrikeThroughTool,false);
-            UIEnableMenu(StyleBGColor_Black,false);
-            UIEnableMenu(StyleBGColor_Blue,false);
-            UIEnableMenu(StyleBGColor_Green,false);
-            UIEnableMenu(StyleBGColor_Cyan,false);
-            UIEnableMenu(StyleBGColor_Red,false);
-            UIEnableMenu(StyleBGColor_Magenta,false);
-            UIEnableMenu(StyleBGColor_Brown,false);
-            UIEnableMenu(StyleBGColor_White,false);
-            UIEnableMenu(StyleBGColor_Gray,false);
-            UIEnableMenu(StyleBGColor_LightBlue,false);
-            UIEnableMenu(StyleBGColor_LightGreen,false);
-            UIEnableMenu(StyleBGColor_LightCyan,false);
-            UIEnableMenu(StyleBGColor_LightRed,false);
-            UIEnableMenu(StyleBGColor_LightMagenta,false);
-            UIEnableMenu(StyleBGColor_Yellow,false);
-            UIEnableMenu(StyleBGColor_BrightWhite,false);
-            UIEnableMenu(StyleBold,false);
-            UIEnableMenu(StyleItalics,false);
-            UIEnableMenu(StyleUnderline,false);
-            UIEnableMenu(StyleStrikeThrough,false);
-            UIEnableContextMenu(ContextMenu_Bold,false);
-            UIEnableContextMenu(ContextMenu_Italics,false);
-            UIEnableContextMenu(ContextMenu_Underline,false);
-            UIEnableContextMenu(ContextMenu_StrikeThrough,false);
-            UIEnableContextMenu(ContextMenu_StyleBGColor_Black,false);
-            UIEnableContextMenu(ContextMenu_StyleBGColor_Blue,false);
-            UIEnableContextMenu(ContextMenu_StyleBGColor_Green,false);
-            UIEnableContextMenu(ContextMenu_StyleBGColor_Cyan,false);
-            UIEnableContextMenu(ContextMenu_StyleBGColor_Red,false);
-            UIEnableContextMenu(ContextMenu_StyleBGColor_Magenta,false);
-            UIEnableContextMenu(ContextMenu_StyleBGColor_Brown,false);
-            UIEnableContextMenu(ContextMenu_StyleBGColor_White,false);
-            UIEnableContextMenu(ContextMenu_StyleBGColor_Gray,false);
-            UIEnableContextMenu(ContextMenu_StyleBGColor_LightBlue,false);
-            UIEnableContextMenu(ContextMenu_StyleBGColor_LightGreen,false);
-            UIEnableContextMenu(ContextMenu_StyleBGColor_LightCyan,false);
-            UIEnableContextMenu(ContextMenu_StyleBGColor_LightRed,false);
-            UIEnableContextMenu(ContextMenu_StyleBGColor_LightMagenta,false);
-            UIEnableContextMenu(ContextMenu_StyleBGColor_Yellow,false);
-            UIEnableContextMenu(ContextMenu_StyleBGColor_BrightWhite,false);
-        }
-
         /* Things that are effected by binary vs text */
         if(Con->IsConnectionBinary())
             UIEnableMenu(InsertHorizontalRule,false);

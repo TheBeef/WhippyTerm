@@ -75,6 +75,13 @@ struct TextLine
 typedef std::list<struct TextLine> t_TextLines;
 typedef t_TextLines::iterator i_TextLines;
 
+struct DTPoint
+{
+    i_TextLines Line;               // The line in 'Lines'
+    i_TextLineFrags Frag;           // The frag in 'Line'
+    int_fast32_t StrPos;            // The offset into 'Frag' string
+};
+
 /***  CLASS DEFINITIONS                ***/
 
 /*
@@ -145,6 +152,9 @@ class DisplayText : public DisplayBase
         t_UIContextMenuCtrl *GetContextMenuHandle(e_UITD_ContextMenuType UIObj);
         t_UIContextSubMenuCtrl *GetContextSubMenuHandle(e_UITD_ContextSubMenuType UIObj);
         void ShowBell(void);
+        void ToggleAttribs2Selection(uint32_t Attribs);
+        void ApplyBGColor2Selection(uint32_t RGB);
+        bool IsAttribSetInSelection(uint32_t Attribs);
 
         void SetBlockDeviceMode(bool On);
 
@@ -203,11 +213,9 @@ class DisplayText : public DisplayBase
         int Selection_AnchorX;      // The selection end left pos (in chars)
         int Selection_AnchorY;      // The selection end top pos (in lines)
 
-        void ScrollScreenByXLines(int Lines2Scroll);
         bool DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event);
         void DoScrollTimerTimeout(void);
         void RedrawActiveLine(void);
-        void RedrawFullScreen(void);
         bool RethinkInsertFrag(void);
         void AppendChar(uint8_t *Chr);
         i_TextLineFrags AddNewEmptyFragToLine(struct TextLine *Line,i_TextLineFrags InsertPoint);
@@ -231,21 +239,35 @@ class DisplayText : public DisplayBase
         i_TextLineFrags AddSpecialFrag(struct TextLineFrag &SpecialFrag);
         i_TextLineFrags InsertSpecialFragInMiddleOfString(struct TextLineFrag &SpecialFrag);
 
-        bool CursorLineVisible(void);
         void RethinkCursorHidden(void);
         int CalcCorrectedCursorPos(void);
         void MoveToNextLine(int &NewCursorY);
-        bool ScrollBarAtBottom(void);
-        void ScrollScreen(int dx,int dy);
-
         void HandleLeftMousePress(bool Down,int x,int y);
         void HandleMouseMove(int x,int y);
-        void GetNormalizedSelection(int &X1,int &Y1,int &X2,int &Y2);
-        bool ConvertScreenXY2Chars(int x,int y,int *CharX,int *CharY);
-        void ScrollScreen2MakeCursorVisible(void);
-        int CalcCursorXPx(void);
         int CharUnderCursorWidthPx(void);
+        void ScrollVertAreaDown(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dy);
+        void ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dy);
+        void DEBUG_ForceRedrawOfScreen(void);
+        int CalcCursorXPx(void);
+
+        /* NOTE PAUL: These comment headings where added long after so they might
+           be missing functions from the grouping */
+
+        /* Screen handling */
+        bool CursorLineVisible(void);
+        bool ScrollBarAtBottom(void);
+        void ScrollScreen(int dx,int dy);
+        void ScrollScreen2MakeCursorVisible(void);
+        bool ConvertScreenXY2Chars(int x,int y,int *CharX,int *CharY);
         void PadOutScreenWithBlankLines(void);
+        void ScrollScreenByXLines(int Lines2Scroll);
+        void RedrawFullScreen(void);
+
+        /* Selection handling */
+        void GetNormalizedSelection(int &X1,int &Y1,int &X2,int &Y2);
+        bool FindPointsOfSelection(struct DTPoint &Start,struct DTPoint &End);
+
+        /* Line handling */
         bool IsLineBlank(i_TextLines Line);
         bool TextLine_FindFragAndPos(i_TextLines Line,int_fast32_t Offset,i_TextLineFrags *FoundFrag,int_fast32_t *FoundPos);
         void TextLine_SplitFrag(i_TextLines Line,int_fast32_t Offset,bool SplitEvenIfResultEmpty=false,i_TextLineFrags *Frag1=NULL,i_TextLineFrags *Frag2=NULL);
@@ -253,9 +275,12 @@ class DisplayText : public DisplayBase
         void TextLine_Insert(i_TextLines Line,int_fast32_t Offset,const struct CharStyling *Style,const char *Str);
         void TextLine_Fill(i_TextLines Line,int_fast32_t Offset,uint_fast32_t Count,const struct CharStyling *Style,const char *Chr);
         void TextLine_Clear(i_TextLines Line);
-        void ScrollVertAreaDown(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dy);
-        void ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dy);
-        void DEBUG_ForceRedrawOfScreen(void);
+
+        /* Frag handling */
+        void TxtFrag_SplitFrag(i_TextLines Line,i_TextLineFrags Frag,int_fast32_t StrPos,bool SplitEvenIfResultEmpty,i_TextLineFrags *Frag1,i_TextLineFrags *Frag2);
+        i_TextLineFrags FindLastTextFragOnLine(const i_TextLines &Line);
+
+        /* Send panel */
         t_UITextInputCtrl *GetSendPanel_HexPosInput(void);
         t_UIRadioBttnCtrl *GetSendPanel_HexRadioBttn(void);
         t_UIRadioBttnCtrl *GetSendPanel_TextRadioBttn(void);

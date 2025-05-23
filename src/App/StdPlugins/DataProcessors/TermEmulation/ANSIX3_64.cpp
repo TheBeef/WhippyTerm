@@ -239,7 +239,7 @@
 
 #define MAX_SEARCH_ABORT_COUNT  128
 
-#define LOG_UNKNOWN_CODES                   // Write a log when we see an unknown code
+//#define LOG_UNKNOWN_CODES                   // Write a log when we see an unknown code
 #define LOG_UNKNOWN_CODES_FILENAME          "/ram/unknowncodes.txt"
 
 /*** MACROS                   ***/

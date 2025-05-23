@@ -40,6 +40,7 @@
 #include <string.h>
 #include <string>
 #include <limits.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -3480,232 +3481,62 @@ bool DisplayText::ConvertScreenXY2Chars(int x,int y,int *CharX,int *CharY)
  ******************************************************************************/
 bool DisplayText::GetSelectionString(std::string &Clip)
 {
-    int SelX1;
-    int SelY1;
-    int SelX2;
-    int SelY2;
-    i_TextLines Line;
-    int Delta;
+    struct DTPoint Start;
+    struct DTPoint End;
+    i_TextLines CurLine;
     i_TextLineFrags CurFrag;
-    i_TextLineFrags StartFrag;
-    i_TextLineFrags EndFrag;
-    int r;
-    int CharsOver;
     string::iterator StartOfStr;
     string::iterator EndOfStr;
-    int Chars;
-    int StartOfFragCharsOver1;
-    int StartOfFragCharsOver2;
 
     Clip="";
 
-    /* The select is also not valid if y=y and x=x */
-    if(!IsThereASelection())
+    if(!FindPointsOfSelection(Start,End))
         return false;
 
-    GetNormalizedSelection(SelX1,SelY1,SelX2,SelY2);
-
-    /* We need to find the line with the start of the selection on it */
-
-    /* We always go from 'TopLine' because most likely the user coping
-       text near it (the need to move 'TopLine' to select the text in the
-       first place. */
-    Line=TopLine;
-    if(TopLineY<SelY1)
+    if(Start.Line==End.Line && Start.Frag==End.Frag)
     {
-        /* TopLine is above the selection (go forward) */
-        Delta=SelY1-TopLineY;
-        for(r=0;r<Delta && Line!=Lines.end();r++)
-            Line++;
-
-        if(Line==Lines.end())
-        {
-            /* Hu? we don't have any lines to copy */
-            return false;
-        }
+        /* On the same line and frag */
+        Clip.assign(Start.Frag->Text,Start.StrPos,End.StrPos-Start.StrPos);
     }
     else
     {
-        /* TopLine is below (or on) the selection (go backward) */
-        Delta=TopLineY-SelY1;
-        for(r=0;r<Delta && Line!=Lines.begin();r++)
-            Line--;
-    }
+        /* Take from Start to the end of frag */
+        Clip.assign(Start.Frag->Text,Start.StrPos);
 
-    if(SelY1==SelY2)
-    {
-        /* Just part of a line */
-        /* Find the frags that we start and end in */
-        CharsOver=0;
-        StartFrag=Line->Frags.end();
-        EndFrag=Line->Frags.end();
-        for(CurFrag=Line->Frags.begin();CurFrag!=Line->Frags.end();CurFrag++)
+        /* Now copy all the frag from here to end frag */
+        CurLine=Start.Line;
+        CurFrag=Start.Frag;
+        CurFrag++;
+        while(CurFrag!=End.Frag)
         {
-            if(CurFrag->FragType!=e_TextCanvasFrag_String)
-                continue;
-
-            Chars=utf8::unchecked::distance(CurFrag->Text.begin(),
-                    CurFrag->Text.end());
-            if(SelX1>=CharsOver && SelX1<CharsOver+Chars)
+            if(CurFrag==CurLine->Frags.end())
             {
-                StartOfFragCharsOver1=CharsOver;
-                StartFrag=CurFrag;
-            }
-            if(SelX2>=CharsOver && SelX2<=CharsOver+Chars)
-            {
-                StartOfFragCharsOver2=CharsOver;
-                EndFrag=CurFrag;
-                break;
-            }
-            CharsOver+=Chars;
-        }
-        if(StartFrag==Line->Frags.end() || EndFrag==Line->Frags.end())
-        {
-            /* Hu? We didn't find the start or end??? */
-            return false;
-        }
-        if(StartFrag==EndFrag)
-        {
-            /* We are coping in the same frag */
-            /* Find the start */
-            StartOfStr=StartFrag->Text.begin();
-            CharsOver=StartOfFragCharsOver1;
-            while(CharsOver<SelX1)
-            {
-                utf8::unchecked::next(StartOfStr);
-                CharsOver++;
-            }
-
-            /* Find the end */
-            EndOfStr=StartOfStr;
-            while(CharsOver<SelX2)
-            {
-                utf8::unchecked::next(EndOfStr);
-                CharsOver++;
-            }
-            Clip.assign(StartOfStr,EndOfStr);
-        }
-        else
-        {
-            /* Copy the first part of frag 1 */
-            /* Find the start */
-            StartOfStr=StartFrag->Text.begin();
-            CharsOver=StartOfFragCharsOver1;
-            while(CharsOver<SelX1)
-            {
-                utf8::unchecked::next(StartOfStr);
-                CharsOver++;
-            }
-            Clip.append(StartOfStr,StartFrag->Text.end());
-
-            /* Copy any full frags */
-            CurFrag=StartFrag;
-            CurFrag++;
-            for(;CurFrag!=EndFrag && CurFrag!=Line->Frags.end();CurFrag++)
-            {
-                if(CurFrag->FragType!=e_TextCanvasFrag_String)
-                    continue;
-
-                Clip+=CurFrag->Text;
-            }
-
-            if(CurFrag!=Line->Frags.end())
-            {
-                /* Copy the end */
-                EndOfStr=CurFrag->Text.begin();
-                CharsOver=StartOfFragCharsOver2;
-                while(CharsOver<SelX2)
+                /* End of the line move to the next */
+                CurLine++;
+                if(CurLine==Lines.end())
                 {
-                    utf8::unchecked::next(EndOfStr);
-                    CharsOver++;
+                    /* Unexpected end */
+                    return false;
                 }
-                Clip.append(CurFrag->Text.begin(),EndOfStr);
-            }
-        }
-    }
-    else
-    {
-        /* Ok, we are copy many lines, do a part of the first line the a number
-           of full lines, then part of the last */
-
-        /* Copy the first partial line */
-
-        /* Find the spot to start coping from */
-        CharsOver=0;
-        for(CurFrag=Line->Frags.begin();CurFrag!=Line->Frags.end();CurFrag++)
-        {
-            if(CurFrag->FragType!=e_TextCanvasFrag_String)
+                CurFrag=CurLine->Frags.begin();
+                Clip.append("\n");
                 continue;
-
-            Chars=utf8::unchecked::distance(CurFrag->Text.begin(),
-                    CurFrag->Text.end());
-            if(SelX1>=CharsOver && SelX1<CharsOver+Chars)
-                break;
-            CharsOver+=Chars;
-        }
-
-        if(CurFrag!=Line->Frags.end())
-        {
-            /* This is the frag we need to split */
-            StartOfStr=CurFrag->Text.begin();
-            for(;CharsOver<SelX1;CharsOver++)
-                utf8::unchecked::next(StartOfStr);
-            Clip.append(StartOfStr,CurFrag->Text.end());
-
-            CurFrag++;  // Move to the next frag
-
-            /* Now add any extra frags */
-            for(;CurFrag!=Line->Frags.end();CurFrag++)
-            {
-                if(CurFrag->FragType!=e_TextCanvasFrag_String)
-                    continue;
-                Clip+=CurFrag->Text;
             }
-        }
-        Clip+="\n";
-        Line++; // Move to the next line
 
-        /* Copy the middle full lines */
-        Delta=SelY2-SelY1+1;
-        Delta-=2;   // Ignore the first and last lines
-        for(r=0;r<Delta;r++)
-        {
-            /* Copy the text from this line */
-            for(CurFrag=Line->Frags.begin();CurFrag!=Line->Frags.end();
-                    CurFrag++)
+            if(CurFrag!=CurLine->Frags.end() &&
+                    CurFrag->FragType==e_TextCanvasFrag_String)
             {
-                if(CurFrag->FragType!=e_TextCanvasFrag_String)
-                    continue;
-                Clip+=CurFrag->Text;
+                Clip.append(CurFrag->Text);
             }
-            Clip+="\n";
-            Line++;
+
+            CurFrag++;
         }
 
-        /* Copy the last partial line */
-
-        /* Copy until we hit the end spot */
-        CharsOver=0;
-        for(CurFrag=Line->Frags.begin();CurFrag!=Line->Frags.end();CurFrag++)
+        /* Now take the last part of the string */
+        if(CurFrag!=CurLine->Frags.end() &&
+                CurFrag->FragType==e_TextCanvasFrag_String)
         {
-            if(CurFrag->FragType!=e_TextCanvasFrag_String)
-                continue;
-
-            Chars=utf8::unchecked::distance(CurFrag->Text.begin(),
-                    CurFrag->Text.end());
-            if(SelX2>=CharsOver && SelX2<=CharsOver+Chars)
-                break;
-            Clip+=CurFrag->Text;
-            CharsOver+=Chars;
-        }
-
-        if(CurFrag!=Line->Frags.end())
-        {
-            /* This is the frag we need to split */
-            EndOfStr=CurFrag->Text.begin();
-            for(;CharsOver<SelX2;CharsOver++)
-                utf8::unchecked::next(EndOfStr);
-            Clip.append(CurFrag->Text.begin(),EndOfStr);
+            Clip.append(End.Frag->Text,0,End.StrPos);
         }
     }
 
@@ -5291,6 +5122,7 @@ void DisplayText::ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,
  *    bool DisplayText::TextLine_FindFragAndPos(i_TextLines Line,
  *              int_fast32_t Offset,i_TextLineFrags *FoundFrag,
  *              int_fast32_t *FoundPos);
+
  *
  * PARAMETERS:
  *    Line [I] -- The line to search
@@ -5299,6 +5131,8 @@ void DisplayText::ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,
  *    FoundFrag [O] -- This is set to the frag that 'Offset' was in
  *    FoundPos [O] -- This is set to the position from the start of the
  *                    string in 'FoundFrag'
+ *    StrPos [O] -- This is a string iterator that will be set to the point
+ *                  in the string.
  *
  * FUNCTION:
  *    This function finds a string offset on a line.  This function searchs
@@ -5323,6 +5157,9 @@ bool DisplayText::TextLine_FindFragAndPos(i_TextLines Line,
 
     try
     {
+        *FoundFrag=Line->Frags.end();
+        *FoundPos=0;
+
         /* We need to walk the line until we find Offset */
         CalX=0;
         for(CurFrag=Line->Frags.begin();CurFrag!=Line->Frags.end();CurFrag++)
@@ -5408,7 +5245,8 @@ bool DisplayText::TextLine_FindFragAndPos(i_TextLines Line,
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    TextLine_FindFragAndPos(), TextLine_ErasePos2Pos(), TextLine_Insert(),
+ *    TextLine_Fill(), TextLine_Clear()
  ******************************************************************************/
 void DisplayText::TextLine_SplitFrag(i_TextLines Line,int_fast32_t Offset,
         bool SplitEvenIfResultEmpty,i_TextLineFrags *Frag1,i_TextLineFrags *Frag2)
@@ -5436,6 +5274,11 @@ void DisplayText::TextLine_SplitFrag(i_TextLines Line,int_fast32_t Offset,
             return;
         }
 
+/* DEBUG PAUL: This should work, but we need to fully test it, so for now
+   we use the old code that we know works */
+#if 0
+        TxtFrag_SplitFrag(Line,Frag,Pos,SplitEvenIfResultEmpty,Frag1,Frag2);
+#else
         if(Frag2!=NULL)
             *Frag2=Frag;
 
@@ -5458,6 +5301,107 @@ void DisplayText::TextLine_SplitFrag(i_TextLines Line,int_fast32_t Offset,
 
         /* Remove the end of the org string  */
         Frag->Text.erase(0,Pos);
+
+        RethinkFragWidth(FirstFrag);
+        RethinkFragWidth(Frag);
+#endif
+    }
+    catch(...)
+    {
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::TxtFrag_SplitFrag
+ *
+ * SYNOPSIS:
+ *    void DisplayText::TxtFrag_SplitFrag(i_TextLines Line,i_TextLineFrags Frag,
+ *          int_fast32_t StrPos,bool SplitEvenIfResultEmpty,
+ *          i_TextLineFrags *Frag1,i_TextLineFrags *Frag2);
+ *
+ * PARAMETERS:
+ *    Line [I] -- The line to work on
+ *    Frag [I] -- The frag to work on
+ *    StrPos [I] -- The position to split this frag
+ *    SplitEvenIfResultEmpty [I] -- Normally if spliting the fragment will
+ *                                  end up with empty fragment then this
+ *                                  function will not split the fragment
+ *                                  (Frag2 will be set to the existing
+ *                                  fragment).  If this is true then the
+ *                                  fragment is split anyway and an empty
+ *                                  fragment is added.
+ *    Frag1 [O] -- The first fragment.  This is the one that 'Offset' was in
+ *                 (note that it maybe a copy).  This can be NULL.
+ *    Frag2 [O] -- The second fragment.  This can be NULL.
+ *
+ * FUNCTION:
+ *    This function takes a fragment and splits it into 2 fragments, 'Frag1'
+ *    and 'Frag2'.
+ *
+ *    So for example if you have:
+ *          AAAA->BBBB->CCCC
+ *    and you tell this function to split BBBB in half (Offset=6) then the
+ *    result will be:
+ *          AAAA->BB->BB->CCCC
+ *                ^   ^
+ *            Frag1   Frag2
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    This is like TextLine_SplitFrag() but works where you already have the
+ *    frag you are interested in.
+ *
+ * SEE ALSO:
+ *    TextLine_SplitFrag()
+ ******************************************************************************/
+void DisplayText::TxtFrag_SplitFrag(i_TextLines Line,i_TextLineFrags Frag,
+        int_fast32_t StrPos,bool SplitEvenIfResultEmpty,i_TextLineFrags *Frag1,
+        i_TextLineFrags *Frag2)
+{
+    i_TextLineFrags NextFrag;
+    i_TextLineFrags FirstFrag;
+    i_TextLineFrags SecondFrag;
+    struct TextLineFrag EmptyFrag;
+
+    try
+    {
+        if(Frag1!=NULL)
+            *Frag1=Line->Frags.end();
+        if(Frag2!=NULL)
+            *Frag2=Line->Frags.end();
+
+        /* We can only split text frags */
+        if(Frag->FragType!=e_TextCanvasFrag_String)
+            return;
+
+        if(StrPos>=(int_fast32_t)Frag->Text.length())
+            return;
+
+        if(Frag2!=NULL)
+            *Frag2=Frag;
+
+        /* Check if we are going to be adding blank strings */
+        if(!SplitEvenIfResultEmpty &&
+                (StrPos==0 || StrPos==(int_fast32_t)Frag->Text.length()))
+        {
+            return;
+        }
+
+        /* Add a copy of the frag */
+        FirstFrag=Line->Frags.insert(Frag,*Frag);
+
+        /* Remove the start of the copy of the string.  Because we insert
+           BEFORE frag, the order is now:
+                a -> b -> FirstFrag -> Frag -> c -> d) */
+        FirstFrag->Text.erase(StrPos);
+        if(Frag1!=NULL)
+            *Frag1=FirstFrag;
+
+        /* Remove the end of the org string  */
+        Frag->Text.erase(0,StrPos);
 
         RethinkFragWidth(FirstFrag);
         RethinkFragWidth(Frag);
@@ -5868,3 +5812,365 @@ void DisplayText::SendPanel_ShowHexOrText(bool Text)
 {
     UITC_SendPanelShowHexOrTextInput(TextDisplayCtrl,Text);
 }
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ToggleAttribs2Selection
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ToggleAttribs2Selection(uint32_t Attribs);
+ *
+ * PARAMETERS:
+ *    Attribs [I] -- The TXT_ATTRIB_ attribs to toggle.
+ *
+ * FUNCTION:
+ *    This function takes the current selection and check if any of the
+ *    selected bytes has these attribs turned on.  If they do it removes that
+ *    attrib, if not it turns the attribs on.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::ToggleAttribs2Selection(uint32_t Attribs)
+{
+    struct DTPoint Start;
+    struct DTPoint End;
+    i_TextLines CurLine;
+    i_TextLineFrags CurFrag;
+    string::iterator StartOfStr;
+    string::iterator EndOfStr;
+    i_TextLineFrags FirstFrag;
+    i_TextLineFrags LastFrag;
+    i_TextLineFrags StopFrag;
+    bool Setting;
+    int SelX1;
+    int SelY1;
+    int SelX2;
+    int SelY2;
+
+    if(!FindPointsOfSelection(Start,End))
+        return;
+
+    Setting=true;
+    if(IsAttribSetInSelection(Attribs))
+        Setting=false;
+
+    GetNormalizedSelection(SelX1,SelY1,SelX2,SelY2);
+
+    if(Start.Line==End.Line && Start.Frag==End.Frag)
+    {
+        /* On the same line and frag */
+
+        /* Split the frags */
+        TextLine_SplitFrag(Start.Line,SelX1,false,NULL,NULL);
+        TextLine_SplitFrag(End.Line,SelX2,false,&LastFrag,NULL);
+
+        if(Setting)
+            LastFrag->Styling.Attribs|=Attribs;
+        else
+            LastFrag->Styling.Attribs&=~Attribs;
+        LastFrag->Styling.ULineColor=LastFrag->Styling.FGColor;
+    }
+    else
+    {
+        /* First thing we need to do is split the first and last fragments */
+
+        /* Split the end first */
+        TextLine_SplitFrag(Start.Line,SelX1,false,NULL,&FirstFrag);
+        TextLine_SplitFrag(End.Line,SelX2,false,NULL,&StopFrag);
+
+        /* Look at all the frags between the start and end */
+        CurLine=Start.Line;
+        CurFrag=FirstFrag;
+        while(CurFrag!=StopFrag)
+        {
+            if(CurFrag==CurLine->Frags.end())
+            {
+                /* End of the line move to the next */
+                CurLine++;
+                if(CurLine==Lines.end())
+                {
+                    /* Unexpected end */
+                    return;
+                }
+                CurFrag=CurLine->Frags.begin();
+                continue;
+            }
+
+            if(CurFrag!=CurLine->Frags.end() &&
+                    CurFrag->FragType==e_TextCanvasFrag_String)
+            {
+                if(Setting)
+                    CurFrag->Styling.Attribs|=Attribs;
+                else
+                    CurFrag->Styling.Attribs&=~Attribs;
+                CurFrag->Styling.ULineColor=CurFrag->Styling.FGColor;
+            }
+
+            CurFrag++;
+        }
+    }
+    RedrawFullScreen();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::IsAttribSetInSelection
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::IsAttribSetInSelection(uint32_t Attribs);
+ *
+ * PARAMETERS:
+ *    Attribs [I] -- The attrib to check
+ *
+ * FUNCTION:
+ *    This function checks the bytes in the selection and return true if
+ *    any of them have this attrib set.
+ *
+ * RETURNS:
+ *    true -- At least 1 byte of the selection has this attrib
+ *    false -- There is no selection or the selection does not have this
+ *             attrib in it.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayText::IsAttribSetInSelection(uint32_t Attribs)
+{
+    struct DTPoint Start;
+    struct DTPoint End;
+    i_TextLines CurLine;
+    i_TextLineFrags CurFrag;
+    string::iterator StartOfStr;
+    string::iterator EndOfStr;
+
+    if(!FindPointsOfSelection(Start,End))
+        return false;
+
+    if(Start.Line==End.Line && Start.Frag==End.Frag)
+    {
+        /* On the same line and frag */
+        if((Start.Frag->Styling.Attribs&Attribs)==Attribs)
+            return true;
+    }
+    else
+    {
+        /* Look at all the frags between the start and end */
+        CurLine=Start.Line;
+        CurFrag=Start.Frag;
+        while(CurFrag!=End.Frag)
+        {
+            if(CurFrag==CurLine->Frags.end())
+            {
+                /* End of the line move to the next */
+                CurLine++;
+                if(CurLine==Lines.end())
+                {
+                    /* Unexpected end */
+                    return false;
+                }
+                CurFrag=CurLine->Frags.begin();
+                continue;
+            }
+
+            if(CurFrag!=CurLine->Frags.end() &&
+                    CurFrag->FragType==e_TextCanvasFrag_String)
+            {
+                if((CurFrag->Styling.Attribs&Attribs)==Attribs)
+                    return true;
+            }
+
+            CurFrag++;
+        }
+
+        /* Now take the last part of the string */
+        if(CurFrag!=CurLine->Frags.end() && End.StrPos!=0 &&
+                CurFrag->FragType==e_TextCanvasFrag_String)
+        {
+            if((CurFrag->Styling.Attribs&Attribs)==Attribs)
+                return true;
+        }
+    }
+
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::FindPointsOfSelection
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::FindPointsOfSelection(struct DTPoint &Start,
+ *              struct DTPoint &End);
+ *
+ * PARAMETERS:
+ *    Start [O] -- Where in the buffer does the start of the selection points.
+ *                 Start will always be earlier in the buffer (so you
+ *                 can always begin at 'Start' and work increasing towards
+ *                 'End'.
+ *    End [O] -- Where in the buffer does the end of the selection points.
+ *               Because the end point can be off the end of a line you have
+ *               to handle where some parts are invalid.
+ *                      Line -- Always valid
+ *                      Frag -- Maybe set to Line->Frags.end()
+ *                      StrPos -- If 'Frag' is at end then this is invalid.
+ *
+ * FUNCTION:
+ *    This function takes the active selection and converts it to a start
+ *    and end point in the data.
+ *
+ * RETURNS:
+ *    true -- We converted the points
+ *    false -- We couldn't convert the points (or there was no selection)
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayText::FindPointsOfSelection(struct DTPoint &Start,
+        struct DTPoint &End)
+{
+    int SelX1;
+    int SelY1;
+    int SelX2;
+    int SelY2;
+    i_TextLines CurLine;
+    int Delta;
+    int Pos;
+    i_TextLineFrags CurFrag;
+    int r;
+    i_TextLines StartLine;
+    i_TextLines EndLine;
+    i_TextLineFrags StartFrag;
+    i_TextLineFrags EndFrag;
+    int_fast32_t StartOfStr;
+    int_fast32_t EndOfStr;
+
+    Start.Line=Lines.end();
+    End.Line=Lines.end();
+
+    /* The select is also not valid if y=y and x=x */
+    if(!IsThereASelection())
+        return false;
+
+    GetNormalizedSelection(SelX1,SelY1,SelX2,SelY2);
+
+    /* We need to find the line with the start of the selection on it */
+
+    /* We always go from 'TopLine' because most likely the selection is near
+       it (the need to move 'TopLine' to select the text in the first place). */
+    StartLine=TopLine;
+    if(TopLineY<SelY1)
+    {
+        /* TopLine is above the selection (go forward) */
+        Delta=SelY1-TopLineY;
+        for(r=0;r<Delta && StartLine!=Lines.end();r++)
+            StartLine++;
+
+        if(StartLine==Lines.end())
+        {
+            /* Hu? we don't have any lines to copy */
+            return false;
+        }
+    }
+    else
+    {
+        /* TopLine is below (or on) the selection (go backward) */
+        Delta=TopLineY-SelY1;
+        for(r=0;r<Delta && StartLine!=Lines.begin();r++)
+            StartLine--;
+    }
+
+    /* Find the end line */
+    Pos=SelY1;
+    for(EndLine=StartLine;EndLine!=Lines.end();EndLine++,Pos++)
+        if(Pos==SelY2)
+            break;
+    if(EndLine==Lines.end())
+    {
+        /* Hu? We didn't find the end line? */
+        return false;
+    }
+
+    /* Find the starting and end frag and offsets */
+    if(!TextLine_FindFragAndPos(StartLine,SelX1,&StartFrag,&StartOfStr))
+        return false;
+    TextLine_FindFragAndPos(EndLine,SelX2,&EndFrag,&EndOfStr);
+
+    Start.Line=StartLine;
+    Start.Frag=StartFrag;
+    Start.StrPos=StartOfStr;
+    End.Line=EndLine;
+    End.Frag=EndFrag;
+    End.StrPos=EndOfStr;
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::FindLastTextFragOnLine
+ *
+ * SYNOPSIS:
+ *    i_TextLineFrags DisplayText::FindLastTextFragOnLine(const i_TextLines &Line);
+ *
+ * PARAMETERS:
+ *    Line [I] -- The line to find the frag on
+ *
+ * FUNCTION:
+ *    This function returns the last frag on a line that is of
+ *    'e_TextCanvasFrag_String' type.
+ *
+ * RETURNS:
+ *    The last frag with text in it or Line->Frags.end() if there are no
+ *    string fragments on this line.
+ *
+ * SEE ALSO:
+ *    TextLine_FindFragAndPos()
+ ******************************************************************************/
+i_TextLineFrags DisplayText::FindLastTextFragOnLine(const i_TextLines &Line)
+{
+    i_TextLineFrags Frag;
+
+    Frag=Line->Frags.end();
+    if(!Line->Frags.empty())
+    {
+        while(Frag!=Line->Frags.begin())
+        {
+            Frag--;
+            if(Frag->FragType==e_TextCanvasFrag_String)
+                break;
+        }
+        if(Frag->FragType!=e_TextCanvasFrag_String)
+            Frag=Line->Frags.end();
+    }
+
+    return Frag;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ApplyBGColor2Selection
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ApplyBGColor2Selection(uint32_t RGB);
+ *
+ * PARAMETERS:
+ *    RGB [I] -- The color to apply
+ *
+ * FUNCTION:
+ *    This function takes the current selection and changes the background
+ *    color for all the text selected.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::ApplyBGColor2Selection(uint32_t RGB)
+{
+}
+

@@ -6172,5 +6172,70 @@ i_TextLineFrags DisplayText::FindLastTextFragOnLine(const i_TextLines &Line)
  ******************************************************************************/
 void DisplayText::ApplyBGColor2Selection(uint32_t RGB)
 {
+    struct DTPoint Start;
+    struct DTPoint End;
+    i_TextLines CurLine;
+    i_TextLineFrags CurFrag;
+    string::iterator StartOfStr;
+    string::iterator EndOfStr;
+    i_TextLineFrags FirstFrag;
+    i_TextLineFrags LastFrag;
+    i_TextLineFrags StopFrag;
+    int SelX1;
+    int SelY1;
+    int SelX2;
+    int SelY2;
+
+    if(!FindPointsOfSelection(Start,End))
+        return;
+
+    GetNormalizedSelection(SelX1,SelY1,SelX2,SelY2);
+
+    if(Start.Line==End.Line && Start.Frag==End.Frag)
+    {
+        /* On the same line and frag */
+
+        /* Split the frags */
+        TextLine_SplitFrag(Start.Line,SelX1,false,NULL,NULL);
+        TextLine_SplitFrag(End.Line,SelX2,false,&LastFrag,NULL);
+
+        LastFrag->Styling.BGColor=RGB;
+    }
+    else
+    {
+        /* First thing we need to do is split the first and last fragments */
+
+        /* Split the end first */
+        TextLine_SplitFrag(Start.Line,SelX1,false,NULL,&FirstFrag);
+        TextLine_SplitFrag(End.Line,SelX2,false,NULL,&StopFrag);
+
+        /* Look at all the frags between the start and end */
+        CurLine=Start.Line;
+        CurFrag=FirstFrag;
+        while(CurFrag!=StopFrag)
+        {
+            if(CurFrag==CurLine->Frags.end())
+            {
+                /* End of the line move to the next */
+                CurLine++;
+                if(CurLine==Lines.end())
+                {
+                    /* Unexpected end */
+                    return;
+                }
+                CurFrag=CurLine->Frags.begin();
+                continue;
+            }
+
+            if(CurFrag!=CurLine->Frags.end() &&
+                    CurFrag->FragType==e_TextCanvasFrag_String)
+            {
+                CurFrag->Styling.BGColor=RGB;
+            }
+
+            CurFrag++;
+        }
+    }
+    RedrawFullScreen();
 }
 

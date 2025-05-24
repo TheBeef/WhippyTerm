@@ -1928,3 +1928,9 @@ void Form_MainWindow::on_actionStrike_Through_triggered()
     DoMenuTriggered(e_UIMWMenu_StyleStrikeThrough);
 }
 
+
+void Form_MainWindow::on_actionCTRL_C_Handling_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_SettingsQuickJump_CtrlCHandling);
+}
+

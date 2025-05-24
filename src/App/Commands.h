@@ -175,6 +175,7 @@ typedef enum
     e_Cmd_ApplyStyleBGColor_LightMagenta,
     e_Cmd_ApplyStyleBGColor_Yellow,
     e_Cmd_ApplyStyleBGColor_BrightWhite,
+    e_Cmd_SettingsQuickJump_CtrlCHandling,
     e_CmdMAX
 } e_CmdType;
 

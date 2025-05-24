@@ -465,6 +465,10 @@ bool RunSettingsDialog(class TheMainWindow *MW,
             FirstSelectedArea=e_DS_SettingsArea_Display;
             SelectDisplayPage=e_UIS_TabCtrl_Display_Page_Colors;
         break;
+        case e_SettingsJump2_ClipboardHandling:
+            FirstSelectedArea=e_DS_SettingsArea_Terminal;
+            SelectTerminalPage=e_UIS_TabCtrl_Terminal_Page_Keyboard;
+        break;
         case e_SettingsJump2_Default:
         case e_SettingsJump2MAX:
         default:

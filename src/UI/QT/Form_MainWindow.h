@@ -428,6 +428,8 @@ private slots:
     
     void on_actionStrike_Through_triggered();
     
+    void on_actionCTRL_C_Handling_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

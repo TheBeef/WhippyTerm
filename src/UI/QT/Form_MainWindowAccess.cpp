@@ -294,6 +294,8 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionUnderline;
         case e_UIMWMenu_StyleStrikeThrough:
             return (e_UIMenuCtrl *)realwin->ui->actionStrike_Through;
+        case e_UIMWMenu_SettingsQuickJump_CtrlCHandling:
+            return (e_UIMenuCtrl *)realwin->ui->actionCTRL_C_Handling;
         case e_UIMWMenuMAX:
         default:
         break;

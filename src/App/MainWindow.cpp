@@ -4602,6 +4602,7 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_SettingsQuickJump_TermEmu -- Goto settings term emu
  *                  e_Cmd_SettingsQuickJump_Font -- Goto settings font
  *                  e_Cmd_SettingsQuickJump_Colors -- Goto settings colors
+ *                  e_Cmd_SettingsQuickJump_CtrlCHandling -- Goto the clipboard handling
  *                  e_Cmd_SaveSendBufferSet -- Prompt and save a send buffer set to disk
  *                  e_Cmd_LoadSendBufferSet -- Prompt and load a send buffer set from disk
  *                  e_Cmd_SendBufferSendGeneric -- Prompt user for what buffer to send
@@ -5035,6 +5036,9 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_SettingsQuickJump_Colors:
             RunSettingsDialog(this,NULL,e_SettingsJump2_Colors);
+        break;
+        case e_Cmd_SettingsQuickJump_CtrlCHandling:
+            RunSettingsDialog(this,NULL,e_SettingsJump2_ClipboardHandling);
         break;
         case e_Cmd_NextConnectionTab:
             MoveToNextTab();

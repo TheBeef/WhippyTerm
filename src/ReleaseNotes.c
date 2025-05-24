@@ -29,6 +29,9 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_ENHANCEMENT,"Added quick jump for CTRL-C handling",
+            "A new menu option was added to the settings menu to let the"
+            " user jump to the clipboard (CTRL-C) handling settings."},
     {   NOTETYPE_ENHANCEMENT,"Added user styling/color of the selection",
             "The user can now style or change the background color of the"
             " selected text.  This allows the user to highlight text"

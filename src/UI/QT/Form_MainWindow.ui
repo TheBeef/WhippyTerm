@@ -2102,6 +2102,7 @@
     <addaction name="actionTerminal_Size"/>
     <addaction name="actionFont"/>
     <addaction name="actionColors"/>
+    <addaction name="actionCTRL_C_Handling"/>
     <addaction name="separator"/>
     <addaction name="actionImport_Settings"/>
     <addaction name="actionExport_Settings"/>
@@ -3686,6 +3687,11 @@
    </property>
    <property name="text">
     <string>Strike Through</string>
+   </property>
+  </action>
+  <action name="actionCTRL_C_Handling">
+   <property name="text">
+    <string>CTRL-C Handling...</string>
    </property>
   </action>
  </widget>

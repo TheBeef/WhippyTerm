@@ -637,7 +637,7 @@ static void DNC_OpenConnection(class TheMainWindow *MW)
             throw("Failed to make a URI for this connection");
 
         NewConnection=MW->AllocNewTab(ConnectionName.c_str(),NULL,URI.c_str(),
-                *SelectedConOptions);
+                SelectedConOptions);
         if(NewConnection==nullptr)
             throw(nullptr);    // We have already prompted
 

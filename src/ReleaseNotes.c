@@ -23,6 +23,10 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   "Fixed bug that the URI didn't always set all options",
+            "With some plugins when the user input a URI the decoder"
+            " didn't set all the options which could lead to failure"
+            " to open a connection.  This has been fixed."},
     {   "Fixed a crash in the edit send buffer dialog",
             "If you where in the edit buffer on the second nibble and cleared"
             " the buffer it would crash when you clicked on the hex."},

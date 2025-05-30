@@ -303,7 +303,7 @@ static void DNCFU_OpenConnection(class TheMainWindow *MW)
         if(!IOS_UpdateOptionsFromURI(URI.c_str(),Options))
             throw("Invalid URI");
 
-        NewConnection=MW->AllocNewTab(NULL,NULL,URI.c_str(),Options);
+        NewConnection=MW->AllocNewTab(NULL,NULL,URI.c_str(),&Options);
         if(NewConnection==NULL)
             throw(nullptr);    // We have already prompted
     }

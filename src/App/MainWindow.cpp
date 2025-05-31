@@ -803,14 +803,15 @@ void TheMainWindow::NewConnection(void)
  * SYNOPSIS:
  *    class Connection *TheMainWindow::AllocNewTab(const char *TabLabel,
  *              class ConSettings *UseSettings,const char *URI,
- *              t_KVList &Options);
+ *              t_KVList *Options);
  *
  * PARAMETERS:
  *    TabLabel [I] -- The display label for this new tab.
  *    UseSettings [I] -- The settings to apply to this connection (or NULL
  *                       for global settings).
  *    URI [I] -- The URI to open the connection with
- *    Options [I] -- The options to apply to this new connection
+ *    Options [I] -- The options to apply to this new connection or NULL to
+ *                   just use the options from the URI.
  *
  * FUNCTION:
  *    This function allocates a new tab and adds it to the main window.
@@ -823,7 +824,7 @@ void TheMainWindow::NewConnection(void)
  *    TheMainWindow::ReloadTabFromURI()
  ******************************************************************************/
 class Connection *TheMainWindow::AllocNewTab(const char *TabLabel,
-        class ConSettings *UseSettings,const char *URI,t_KVList &Options)
+        class ConSettings *UseSettings,const char *URI,t_KVList *Options)
 {
     t_UITabCtrl *MainTabs;
     t_UITab *NewTab;
@@ -904,7 +905,8 @@ class Connection *TheMainWindow::AllocNewTab(const char *TabLabel,
 
         SetActiveTab(NewConnection);
 
-        NewConnection->SetConnectionOptions(Options);
+        if(Options!=NULL)
+            NewConnection->SetConnectionOptions(*Options);
 
         AuxControlsPanel.NewConnection(NewConnection);
 
@@ -967,7 +969,6 @@ class Connection *TheMainWindow::ReloadTabFromURI(const char *TabLabel,
     class Connection *NewConnection;
     t_UITab *ActiveTab;
     t_UIContainerFrameCtrl *ContainerFrame;
-    t_KVList EmptyOptions;
 
     try
     {
@@ -1043,7 +1044,7 @@ class Connection *TheMainWindow::ReloadTabFromURI(const char *TabLabel,
         else
         {
             /* Allocate a new tab and connection */
-            NewConnection=AllocNewTab(TabLabel,UseSettings,URI,EmptyOptions);
+            NewConnection=AllocNewTab(TabLabel,UseSettings,URI,NULL);
         }
     }
     catch(const char *Msg)
@@ -2945,7 +2946,7 @@ void TheMainWindow::GotoBookmark(uintptr_t ID)
     {
         /* Ok, open a new tab */
         NewCon=AllocNewTab(bm->Name.c_str(),UseSettings,bm->URI.c_str(),
-                bm->Options);
+                &bm->Options);
         if(NewCon==nullptr)
             return;    // We have already prompted
     }

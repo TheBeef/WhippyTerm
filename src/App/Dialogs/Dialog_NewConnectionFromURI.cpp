@@ -335,7 +335,7 @@ static bool DNCFU_OpenConnection(class TheMainWindow *MW)
         if(!IOS_UpdateOptionsFromURI(URI.c_str(),Options))
             return false;
 
-        NewConnection=MW->AllocNewTab(NULL,NULL,URI.c_str(),Options);
+        NewConnection=MW->AllocNewTab(NULL,NULL,URI.c_str(),&Options);
         if(NewConnection==NULL)
             throw(nullptr);    // We have already prompted
     }

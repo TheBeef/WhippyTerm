@@ -286,6 +286,10 @@ static struct PI_UIAPI IOS_UIAPI=
     IOS_FreeIndicator,
     PIUSDefault_SetIndicator,
     PIUSDefault_Ask,
+
+    /* Version 2 */
+    PIUSDefault_FileReq,
+    PIUSDefault_FreeFileReqPathAndFile,
 };
 
 bool m_NeverScanned4Connections;

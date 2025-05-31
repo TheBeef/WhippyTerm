@@ -38,6 +38,7 @@
 /***  DEFINES                          ***/
 /* Versions of struct PI_UIAPI */
 #define PI_UIAPI_API_VERSION_1          1
+#define PI_UIAPI_API_VERSION_2          2
 
 /* Ask Types */
 #define PIUI_ASK_OK             0x0001
@@ -222,6 +223,13 @@ struct PI_Indicator
     void *UIData;
 };
 
+typedef enum
+{
+    e_FileReqType_Load,
+    e_FileReqType_Save,
+    e_FileReqTypeMAX
+} e_FileReqTypeType;
+
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */
 struct PI_UIAPI
 {
@@ -298,7 +306,13 @@ struct PI_UIAPI
 
     /* Ask */
     int (*Ask)(const char *Message,int Type);
-    /********* Start of PI_UIAPI_API_VERSION_1 *********/
+    /********* End of PI_UIAPI_API_VERSION_1 *********/
+
+    /********* Start of PI_UIAPI_API_VERSION_2 *********/
+    PG_BOOL (*FileReq)(e_FileReqTypeType Req,const char *Title,char **Path,char **Filename,const char *Filters,int SelectedFilter);
+    void (*FreeFileReqPathAndFile)(char **Path,char **Filename);
+
+    /********* End of PI_UIAPI_API_VERSION_2 *********/
 };
 
 /***  CLASS DEFINITIONS                ***/

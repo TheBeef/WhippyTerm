@@ -29,6 +29,10 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {
+        NOTETYPE_ENHANCEMENT,"Added support for a file requester to the UI API",
+            "A new API was added so plugins can prompt the user for a filename"
+            " and path"},
     {   NOTETYPE_ENHANCEMENT,"Added quick jump for CTRL-C handling",
             "A new menu option was added to the settings menu to let the"
             " user jump to the clipboard (CTRL-C) handling settings."},

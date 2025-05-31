@@ -41,6 +41,8 @@
 #include "UI/UIAsk.h"
 #include "UI/UIPlugins.h"
 #include "UI/UIControl.h"
+#include "UI/UIFileReq.h"
+#include <string.h>
 #include <string>
 
 using namespace std;
@@ -118,6 +120,10 @@ struct PI_UIAPI m_PIUSDefault_UIAPI=
     PIUSDefault_SetIndicator,
 
     PIUSDefault_Ask,
+
+    /* Version 2 */
+    PIUSDefault_FileReq,
+    PIUSDefault_FreeFileReqPathAndFile,
 };
 
 /*******************************************************************************
@@ -528,10 +534,10 @@ void PIUSDefault_SetIndicator(t_WidgetSysHandle *WidgetHandle,
 
 /*******************************************************************************
  * NAME:
- *    IOS_Ask
+ *    PIUSDefault_Ask
  *
  * SYNOPSIS:
- *    static int IOS_Ask(const char *Message,int Type);
+ *    static int PIUSDefault_Ask(const char *Message,int Type);
  *
  * PARAMETERS:
  *    Message [I] -- The message to show to the user
@@ -605,4 +611,109 @@ int PIUSDefault_Ask(const char *Message,int Type)
         default:
         return -1;
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_FileReq
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_FileReq(e_FileReqTypeType Req,const char *Title,
+ *          char **Path,char **Filename,const char *Filters,int SelectedFilter);
+ *
+ * PARAMETERS:
+ *    Req [I] -- What type of request are we making
+ *    Title [I] -- The title for the req
+ *    Path [O] -- A pointer that we will malloc a string into for the path.
+ *                You must call FreeFileReqPathAndFile() to free this.
+ *    Filename [O] -- A pointer that we will malloc a string into for the
+ *                    filename.  You must call FreeFileReqPathAndFile() to free
+ *                    this.
+ *    Filters [I] -- This is a list of filters split by \n chars.  The format
+ *                   of the filters is: DisplayName|Filter\n.  For example:
+ *                      All Files|*\n
+ *                      Image|*.png;*.bmp;*.jpg;*.jpeg\n
+ *    SelectedFilter [I] -- The filter selected by default.  This is an index
+ *                          into the 'Filters' list.
+ *
+ * FUNCTION:
+ *    This function request the user select a filename and path.
+ *
+ * RETURNS:
+ *    true -- Things worked out and user pressed ok
+ *    false -- There was an error or the user press cancel
+ *
+ * NOTES:
+ *    You must call FreeFileReqPathAndFile() with the path and filename to
+ *    free the memory.  This only needs to be done if this function returns
+ *    true.
+ *
+ * SEE ALSO:
+ *    FreeFileReqPathAndFile()
+void PIUSDefault_FreeFileReqPathAndFile(char **Path,char **Filename)
+ ******************************************************************************/
+PG_BOOL PIUSDefault_FileReq(e_FileReqTypeType Req,const char *Title,char **Path,
+        char **Filename,const char *Filters,int SelectedFilter)
+{
+    string SelPath;
+    string SelFile;
+
+    *Path=NULL;
+    *Filename=NULL;
+
+    switch(Req)
+    {
+        case e_FileReqType_Load:
+            if(!UI_LoadFileReq(Title,SelPath,SelFile,Filters,SelectedFilter))
+                return false;
+        break;
+        case e_FileReqType_Save:
+            if(!UI_SaveFileReq(Title,SelPath,SelFile,Filters,SelectedFilter))
+                return false;
+        break;
+        case e_FileReqTypeMAX:
+        default:
+            return false;
+    }
+    *Path=(char *)malloc(SelPath.length()+1);
+    if(*Path==NULL)
+        return false;
+    *Filename=(char *)malloc(SelFile.length()+1);
+    if(*Filename==NULL)
+    {
+        free(*Path);
+        return false;
+    }
+    strcpy(*Path,SelPath.c_str());
+    strcpy(*Filename,SelFile.c_str());
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_FreeFileReqPathAndFile
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_FreeFileReqPathAndFile(char **Path,char **Filename);
+ *
+ * PARAMETERS:
+ *    Path [I] -- The path pointer to free.  This will also be set to NULL.
+ *    Filename [I] -- The filename pointer to free.  This will also be set to
+ *                    NULL.
+ *
+ * FUNCTION:
+ *    This function frees the memory allocated with PIUSDefault_FileReq().
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_FileReq()
+ ******************************************************************************/
+void PIUSDefault_FreeFileReqPathAndFile(char **Path,char **Filename)
+{
+    free(*Path);
+    *Path=NULL;
+    free(*Filename);
+    *Filename=NULL;
 }

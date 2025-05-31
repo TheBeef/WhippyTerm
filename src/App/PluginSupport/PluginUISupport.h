@@ -107,4 +107,7 @@ void PIUSDefault_SetIndicator(t_WidgetSysHandle *WidgetHandle,t_PIUIIndicatorCtr
 
 int PIUSDefault_Ask(const char *Message,int Type);
 
+PG_BOOL PIUSDefault_FileReq(e_FileReqTypeType Req,const char *Title,char **Path,char **Filename,const char *Filters,int SelectedFilter);
+void PIUSDefault_FreeFileReqPathAndFile(char **Path,char **Filename);
+
 #endif

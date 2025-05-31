@@ -1391,32 +1391,12 @@ PG_BOOL Comport_GetConnectionInfo(const char *DeviceUniqueID,t_PIKVList *Options
 void Comport_CustomizeComportInfo(struct IODriverInfo *ComportInfo)
 {
     ComportInfo->URIHelpString=
-            "<h3>FORMAT</h3>"
-            "<p style='margin-left:60px;text-indent: -30px;'>"
-            "COM[Port]:[Bit Rate],[Data Bits],[Parity],[Stop Bits]"
-            "</p>"
-            "<h3>WHERE</h3>"
-            "<p style='margin-left:60px;text-indent: -30px;'>"
-            "Port -- Which com port to use for this connection."
-            "</p>"
-            "<p style='margin-left:60px;text-indent: -30px;'>"
-            "Bit Rate -- The speed to use for this connection."
-            "</p>"
-            "<p style='margin-left:60px;text-indent: -30px;'>"
-            "Data Bits -- The number of data bits for this connection.  "
-            "Supported values are 7 or 8 bits."
-            "</p>"
-            "<p style='margin-left:60px;text-indent: -30px;'>"
-            "Parity -- What parity to use for this connection.  Supported "
-            "values are n=none, o=odd, e=even, m=mark, s=space."
-            "</p>"
-            "<p style='margin-left:60px;text-indent: -30px;'>"
-            "Stop Bits -- How many stop bits to use.  Supported values are "
-            "1 or 2 stop bits."
-            "</p>"
-            "<h3>EXAMPLE</h3>"
-            "<p style='margin-left:60px;text-indent: -30px;'>"
-            "COM1:9600,8,n,1"
-            "</p>";
+            "<URI>COM[Port]:[Bit Rate],[Data Bits],[Parity],[Stop Bits]</URI>"
+            "<ARG>Port -- Which com port to use for this connection.</ARG>"
+            "<ARG>Bit Rate -- The speed to use for this connection.</ARG>"
+            "<ARG>Data Bits -- The number of data bits for this connection.  Supported values are 7 or 8 bits.</ARG>"
+            "<ARG>Parity -- What parity to use for this connection.  Supported values are n=none, o=odd, e=even, m=mark, s=space.</ARG>"
+            "<ARG>Stop Bits -- How many stop bits to use.  Supported values are 1 or 2 stop bits.</ARG>"
+            "<Example>COM1:9600,8,n,1</Example>";
 }
 

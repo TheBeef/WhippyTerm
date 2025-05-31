@@ -34,6 +34,7 @@
 #include "App/IOSystem.h"
 #include "UI/UIAsk.h"
 #include "UI/UINewConnectionFromURI.h"
+#include <string.h>
 #include <string>
 
 using namespace std;
@@ -49,6 +50,8 @@ static void FillInDriverList(void);
 static void DNCFU_UpdateInfoPanel(void);
 static void DNCFU_RethinkGUI(void);
 static void DNCFU_OpenConnection(class TheMainWindow *MW);
+static void DNCFU_SetURIAndUpdate(std::string &NewURI);
+static void DNCFU_PullApartHelpStr(const char *Help);
 
 /*** VARIABLE DEFINITIONS     ***/
 struct DriverInfoList *m_RNCFUD_DriverList;
@@ -220,14 +223,140 @@ static void DNCFU_UpdateInfoPanel(void)
 {
     t_UIListViewCtrl *DriversCtrl;
     struct DriverInfoList *SelectedEntry;
-    t_UIHTMLViewCtrl *Info;
 
+    try
+    {
     DriversCtrl=UINC_GetListViewInputHandle(e_UINCFU_ListView_Driver);
-    Info=UINC_GetHTMLViewInputHandle(e_UINCFU_HTMLView_Info);
-
     SelectedEntry=(struct DriverInfoList *)UIGetListViewSelectedEntry(DriversCtrl);
 
-    UISetHTMLViewCtrlText(Info,SelectedEntry->DriverURIHelpString.c_str());
+        UINC_PrivURIHelp_ClearCtrlText();
+        if(SelectedEntry->DriverURIHelpString=="")
+        {
+            UINC_PrivURIHelp_AppendText("Not available",
+                    e_PrivURIHelp_Style_TextLine);
+        }
+        else
+        {
+            DNCFU_PullApartHelpStr(SelectedEntry->DriverURIHelpString.c_str());
+        }
+    }
+    catch(...)
+    {
+        UINC_PrivURIHelp_ClearCtrlText();
+        UINC_PrivURIHelp_AppendText("Error",e_PrivURIHelp_Style_TextLine);
+    }
+}
+
+static void DNCFU_PullApartHelpStr(const char *Help)
+{
+    const char *Pos;
+    const char *Start;
+    string Tag;
+    string Value;
+    bool FoundURI;
+    bool FoundAnArg;
+    bool FoundExample;
+
+    try
+    {
+        UINC_PrivURIHelp_ClearCtrlText();
+
+        FoundURI=false;
+        FoundAnArg=false;
+        FoundExample=false;
+
+        /* We need to pull the help string apart */
+        Pos=Help;
+        while(*Pos!=0)
+        {
+            if(*Pos=='<')
+            {
+                /* A tag of some kind, find the end */
+                Start=Pos+1;
+                while(*Pos!='>' && *Pos!=0)
+                    Pos++;
+                if(*Pos==0)
+                    throw(0);
+                Tag.assign(Start,Pos-Start);
+
+                /* Find the end of the tag */
+                Pos++;
+                Start=Pos;
+                while(*Pos!=0)
+                {
+                    if(*Pos=='<' && *(Pos+1)=='/')
+                    {
+                        /* See if it's the closing tag */
+                        if(strncmp(Pos+2,Tag.c_str(),Tag.length())==0)
+                        {
+                            /* Found it */
+                            Value.assign(Start,Pos-Start);
+                            /* Move to the end of the tag */
+                            Pos+=2+Tag.length();  // "</"+tag
+                            break;
+                        }
+                    }
+                    Pos++;
+                }
+                if(*Pos==0)
+                    throw(0);
+
+                /* See that kind of tag we got */
+                if(Tag=="URI")
+                {
+                    /* It's the URI line */
+                    if(FoundURI)
+                    {
+                        /* We already found the URI */
+                        throw(0);
+                    }
+                    UINC_PrivURIHelp_AppendText("FORMAT",
+                            e_PrivURIHelp_Style_Heading);
+                    UINC_PrivURIHelp_AppendText(Value.c_str(),
+                            e_PrivURIHelp_Style_Def);
+                    FoundURI=true;
+                }
+                else if(Tag=="ARG")
+                {
+                    if(!FoundAnArg)
+                    {
+                        UINC_PrivURIHelp_AppendText("WHERE",
+                                e_PrivURIHelp_Style_Heading);
+                    }
+                    UINC_PrivURIHelp_AppendText(Value.c_str(),
+                            e_PrivURIHelp_Style_Def);
+                    FoundAnArg=true;
+                }
+                else if(Tag=="Example")
+                {
+                    if(!FoundExample)
+                    {
+                        UINC_PrivURIHelp_AppendText("EXAMPLE",
+                                e_PrivURIHelp_Style_Heading);
+                    }
+                    UINC_PrivURIHelp_AppendText(Value.c_str(),
+                            e_PrivURIHelp_Style_Def);
+                    FoundExample=true;
+                }
+            }
+            Pos++;
+        }
+        if(!FoundURI)
+        {
+            /* We didn't find the URI */
+            throw(0);
+        }
+//    "<URI>RTT://[SerialNumber][:USBAddress]/[TargetDeviceType]</URI>"
+//    "<ARG>SerialNumber -- The serial number of the J-Link debug probe<ARG>"
+//    "<ARG>USBAddress -- If using an older-J-Link you need to provide the USBaddress as the Serial Number will always be 123456<ARG>"
+//    "<ARG>TargetDeviceType -- The type of target that will be connected to the JLink<ARG>"
+//    "<Example>RTT://158007529/CS32F103C8</Example>"
+    }
+    catch(...)
+    {
+        UINC_PrivURIHelp_ClearCtrlText();
+        UINC_PrivURIHelp_AppendText("Error",e_PrivURIHelp_Style_TextLine);
+    }
 }
 
 /*******************************************************************************

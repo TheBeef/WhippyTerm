@@ -107,21 +107,10 @@ const struct IODriverAPI g_UDPClientPluginAPI=
 struct IODriverInfo m_UDPClientInfo=
 {
     IODRVINFOFLAG_BLOCKDEV,
-    "<h3>FORMAT</h3>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "UDP://[host]:[port]"
-    "</p>"
-    "<h3>WHERE</h3>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "host -- The server to connect to"
-    "</p>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "port -- The port to connect to"
-    "</p>"
-    "<h3>EXAMPLE</h3>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "UDP://localhost:80"
-    "</p>"
+    "<URI>UDP://[host]:[port]</URI>"
+    "<ARG>host -- The server to connect to</ARG>"
+    "<ARG>port -- The port to connect to</ARG>"
+    "<Example>UDP://localhost:80</Example>"
 };
 
 const struct IOS_API *g_UDPC_IOSystem;

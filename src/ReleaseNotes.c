@@ -23,6 +23,12 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   "Fixed a bug where the plugin IODriver Init() wasn't being called on install",
+            "When a new plugin was installed the system was not calling"
+            " the IODriver Init() function."},
+    {   "Changed how URI help works.",
+            "Plugins now provide a more strict version of the help that"
+            " WhippyTerm can parse."},
     {   "Fixed bug that the URI didn't always set all options",
             "With some plugins when the user input a URI the decoder"
             " didn't set all the options which could lead to failure"

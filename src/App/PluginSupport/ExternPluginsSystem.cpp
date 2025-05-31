@@ -366,7 +366,7 @@ bool LoadPlugin(const char *File,const char *Name)
         return false;
     }
 
-    /* Call the init in the plugin */
+    /* Find the register function in the plugin */
     RegisterPlugin=(RegisterPluginFnType)DLL2Function(Plugin,"RegisterPlugin");
     if(RegisterPlugin==NULL)
     {
@@ -378,7 +378,7 @@ bool LoadPlugin(const char *File,const char *Name)
         return false;
     }
 
-    /* Ok, call the init function */
+    /* Ok, call the register function */
     ReqVer=RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
     if(ReqVer!=0)
     {
@@ -1229,11 +1229,7 @@ void PromptAndInstallPlugin(void)
 void ImformOfNewPluginInstalled(struct ExternPluginInfo *Info)
 {
     if(Info->PluginClass==e_ExtPluginClass_IODriver)
-    {
-        /* We just installed a IO Driver we need to tell the IO system
-           to rescan so this new entries from this driver show up */
-        IOS_ScanForConnections();
-    }
+        IOS_InitNewlyInstalledPlugin(Info);
 
     MW_InformOfNewPluginInstalled(Info);
 }

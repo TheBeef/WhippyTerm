@@ -81,6 +81,7 @@ extern const struct IOS_API g_IOS_API;
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
 void IOS_Init(void);
 void IOS_InitPlugins(void);
+void IOS_InitNewlyInstalledPlugin(struct ExternPluginInfo *Info);
 void IOS_Shutdown(void);
 
 void IOS_ScanForConnections(void);

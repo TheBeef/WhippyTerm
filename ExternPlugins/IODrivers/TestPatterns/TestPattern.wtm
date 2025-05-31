@@ -11,9 +11,9 @@
     <Description>A test plugin to fill the rx buffer with test data.</Description>
     <Contributors>Paul Hutchinson</Contributors>
     <Copyright>2025</Copyright>
-    <ReleaseDate>25 Feb 2025</ReleaseDate>
-    <Version>1.0</Version>
-    <APIVersion>1.0.0.0</APIVersion>
+    <ReleaseDate>31 May 2025</ReleaseDate>
+    <Version>1.1</Version>
+    <APIVersion>1.0.4.0</APIVersion>
     <PluginClass>2</PluginClass>
     <PluginSubClass>0</PluginSubClass>
 </ExternPluginMaker>

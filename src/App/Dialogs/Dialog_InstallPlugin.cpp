@@ -79,7 +79,7 @@ void RunInstallPluginDialog(const char *PluginFilename)
 
     if(!UIAlloc_InstallPlugin())
     {
-        UIAsk("Error","Failed to allocate manage plugins dialog",
+        UIAsk("Error","Failed to allocate install plugin dialog",
                 e_AskBox_Error,e_AskBttns_Ok);
         return;
     }

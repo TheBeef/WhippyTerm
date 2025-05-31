@@ -172,24 +172,11 @@ const struct IODriverAPI g_RemoteSPIPluginAPI=
 struct IODriverInfo m_RemoteSPIInfo=
 {
     IODRVINFOFLAG_BLOCKDEV,
-    "<h3>FORMAT</h3>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "RSPI://[host]:[port]/[device]"
-    "</p>"
-    "<h3>WHERE</h3>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "host -- The remote server to connect to"
-    "</p>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "port -- The remote servers port to connect to"
-    "</p>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "device -- The SPI channel to use"
-    "</p>"
-    "<h3>EXAMPLE</h3>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "RSPI://localhost:2000/1"
-    "</p>"
+    "<URI>RSPI://[host]:[port]/[device]</URI>"
+    "<ARG>host -- The remote server to connect to</ARG>"
+    "<ARG>port -- The remote servers port to connect to</ARG>"
+    "<ARG>device -- The SPI channel to use</ARG>"
+    "<Example>RSPI://localhost:2000/1</Example>"
 };
 
 const struct IOS_API *g_RSPI_IOSystem;

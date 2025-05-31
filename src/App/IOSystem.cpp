@@ -79,6 +79,7 @@ struct IODriver
     struct IODriverAPI API;
     t_IODriverAvailCon AvailableConnections;
     struct IODriverInfo Info;
+    bool InitBeenCalled;
 };
 typedef list<struct IODriver> t_IODriverListType;
 typedef t_IODriverListType::iterator i_IODriverListType;
@@ -1002,6 +1003,7 @@ PG_BOOL IOS_RegisterDriver(const char *DriverName,const char *BaseURI,
         if(Size2Copy>sizeof(NewDriver.API))
             Size2Copy=sizeof(NewDriver.API);
         memcpy(&NewDriver.API,DriverAPI,Size2Copy);
+        NewDriver.InitBeenCalled=false;
 
         /* Make sure we have the min API */
         if(NewDriver.API.Convert_URI_To_Options==NULL ||
@@ -1149,16 +1151,48 @@ void IOS_InitPlugins(void)
     /* Ask each driver to fill in supported connections */
     for(drv=m_IODriverList.begin();drv!=m_IODriverList.end();drv++)
     {
-        if(drv->API.Init!=NULL && !drv->API.Init())
+        if(!drv->InitBeenCalled)
         {
-            /* Ok, we couldn't init this plugin, remove it from the list */
-            m_IODriverList.erase(drv);
-            drv=m_IODriverList.begin();
+            drv->InitBeenCalled=true;
+            if(drv->API.Init!=NULL && !drv->API.Init())
+            {
+                /* Ok, we couldn't init this plugin, remove it from the list */
+                m_IODriverList.erase(drv);
+                drv=m_IODriverList.begin();
+            }
         }
     }
 
 /* DEBUG PAUL: Add setting for "force rescan at startup" */
     IOS_ScanForConnections();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_InitNewlyInstalledPlugin
+ *
+ * SYNOPSIS:
+ *    void IOS_InitNewlyInstalledPlugin(struct ExternPluginInfo *Info);
+ *
+ * PARAMETERS:
+ *    Info [I] -- Info about this plugin.
+ *
+ * FUNCTION:
+ *    This function is called when a new IODriver plugin is installed.
+ *    It call's it's init() function and rescans for new connections.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void IOS_InitNewlyInstalledPlugin(struct ExternPluginInfo *Info)
+{
+    /* Ok the new plugin will have it's 'InitBeenCalled' set to false so
+       we can call IOS_InitPlugins() again to just call the new plugins
+       init() */
+    IOS_InitPlugins();
 }
 
 /*******************************************************************************
@@ -4807,7 +4841,7 @@ struct DriverInfoList *IOS_GetListOfDrivers(void)
             NewDriverInfo->Name=drv->DriverName;
             NewDriverInfo->BaseURI=drv->BaseURI;
             if(drv->Info.URIHelpString==NULL)
-                NewDriverInfo->DriverURIHelpString="Not available";
+                NewDriverInfo->DriverURIHelpString="";
             else
                 NewDriverInfo->DriverURIHelpString=drv->Info.URIHelpString;
 

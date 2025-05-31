@@ -75,20 +75,6 @@ t_UIListViewCtrl *UINC_GetListViewInputHandle(e_UINCFU_ListViewType UIObj)
     return NULL;
 }
 
-t_UIHTMLViewCtrl *UINC_GetHTMLViewInputHandle(e_UINCFU_HTMLViewType UIObj)
-{
-    switch(UIObj)
-    {
-        case e_UINCFU_HTMLView_Info:
-            return (t_UIHTMLViewCtrl *)g_NewConnectionFromURIDialog->ui->Details_textEdit;
-        break;
-        default:
-        case e_UINCFU_HTMLViewMAX:
-        break;
-    }
-    return NULL;
-}
-
 t_UIButtonCtrl *UINC_GetButtonInputHandle(e_UINCFU_ButtonInput UIObj)
 {
     switch(UIObj)
@@ -206,4 +192,106 @@ void UIFree_NewConnectionFromURI(void)
     delete g_NewConnectionFromURIDialog;
 
     g_NewConnectionFromURIDialog=NULL;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UINC_PrivURIHelp_ClearCtrlText
+ *
+ * SYNOPSIS:
+ *    void UINC_PrivURIHelp_ClearCtrlText(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function clears the URI help control.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UINC_PrivURIHelp_ClearCtrlText(void)
+{
+    QTextEdit *textinput=g_NewConnectionFromURIDialog->ui->Details_textEdit;
+
+    try
+    {
+        g_NewConnectionFromURIDialog->PrivURIRawHTML="";
+        textinput->blockSignals(true);
+        textinput->setHtml("");
+    }
+    catch(...)
+    {
+    }
+    textinput->blockSignals(false);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UINC_PrivURIHelp_AppendText
+ *
+ * SYNOPSIS:
+ *    void UINC_PrivURIHelp_AppendText(const char *NewLine,
+ *              e_PrivURIHelp_StyleType Style);
+ *
+ * PARAMETERS:
+ *    NewLine [I] -- The new line to add.  Newline chars are ignored.
+ *    Style [I] -- How to render this line
+ *
+ * FUNCTION:
+ *    This function adds a line (or a few if that's how the line gets rendered)
+ *    to the URI help ctrl.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UINC_PrivURIHelp_AppendText(const char *NewLine,e_PrivURIHelp_StyleType Style)
+{
+    QTextEdit *textinput=g_NewConnectionFromURIDialog->ui->Details_textEdit;
+    QString HTMLText;
+    QString EscHTML;
+
+    try
+    {
+        EscHTML=NewLine;
+        EscHTML=EscHTML.toHtmlEscaped();
+
+        HTMLText=g_NewConnectionFromURIDialog->PrivURIRawHTML;
+
+        switch(Style)
+        {
+            case e_PrivURIHelp_Style_Heading:
+                HTMLText+="<h3>";
+                HTMLText+=EscHTML;
+                HTMLText+="</h3>";
+            break;
+            case e_PrivURIHelp_Style_Def:
+                HTMLText+="<p style='margin-left:60px;text-indent: -30px;'>";
+                HTMLText+=EscHTML;
+                HTMLText+="</p>";
+            break;
+            case e_PrivURIHelp_Style_TextLine:
+                HTMLText+=EscHTML;
+            break;
+            case e_PrivURIHelp_StyleMAX:
+            default:
+                throw(0);
+            break;
+        }
+
+        g_NewConnectionFromURIDialog->PrivURIRawHTML=HTMLText;
+
+        textinput->blockSignals(true);
+        textinput->setHtml(HTMLText);
+    }
+    catch(...)
+    {
+    }
+    textinput->blockSignals(false);
 }

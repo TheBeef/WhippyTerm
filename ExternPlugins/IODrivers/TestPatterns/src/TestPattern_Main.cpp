@@ -307,21 +307,10 @@ const struct IODriverAPI g_TestPatternPluginAPI=
 struct IODriverInfo m_TestPatternInfo=
 {
     0,
-    "<h3>FORMAT</h3>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "TestPattern:[pattern]"
-    "</p>"
-    "<h3>WHERE</h3>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "pattern -- What pattern to fill in"
-    "</p>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "parm2 -- description"
-    "</p>"
-    "<h3>EXAMPLE</h3>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "TestPattern:1"
-    "</p>"
+    "<URI>TestPattern:[pattern]</URI>"
+    "<ARG>pattern -- What pattern to fill in</ARG>"
+    "<ARG>parm2 -- description</ARG>"
+    "<Example>TestPattern:1</Example>"
 };
 
 /*******************************************************************************

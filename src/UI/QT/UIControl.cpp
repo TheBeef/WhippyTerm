@@ -1460,24 +1460,6 @@ void UIEnableMuliLineTextCtrl(t_UIMuliLineTextInputCtrl *TextInput,bool Enable)
     textinput->setEnabled(Enable);
 }
 
-/****************************/
-/* t_UIHTMLViewCtrl         */
-/****************************/
-void UISetHTMLViewCtrlText(t_UIHTMLViewCtrl *HTMLView,const char *HTMLText)
-{
-    QTextEdit *textinput=(QTextEdit *)HTMLView;
-
-    try
-    {
-        textinput->blockSignals(true);
-        textinput->setHtml(HTMLText);
-    }
-    catch(...)
-    {
-    }
-    textinput->blockSignals(false);
-}
-
 /*************************************/
 /* UITreeViewCtrl                    */
 /*************************************/

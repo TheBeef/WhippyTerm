@@ -136,21 +136,10 @@ const struct IODriverAPI g_LB2PluginAPI=
 struct IODriverInfo m_LB2Info=
 {
     0,
-    "<h3>FORMAT</h3>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "LB[Instance]:[Channel]"
-    "</p>"
-    "<h3>WHERE</h3>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "Instance -- What instance for the loopback to use"
-    "</p>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "Channel -- What channel on this loopback to use"
-    "</p>"
-    "<h3>EXAMPLE</h3>"
-    "<p style='margin-left:60px;text-indent: -30px;'>"
-    "LB7:1"
-    "</p>"
+    "<URI>LB[Instance]:[Channel]</URI>"
+    "<ARG>Instance -- What instance for the loopback to use</ARG>"
+    "<ARG>Channel -- What channel on this loopback to use</ARG>"
+    "<Example>LB7:1</Example>"
 };
 
 /*******************************************************************************

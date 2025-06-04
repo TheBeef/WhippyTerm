@@ -84,6 +84,22 @@ static struct ReleaseNote m_Notes_NEXT[]=
             "Under the Settings menu a new menu item was added that lets"
             " the user set settings back to defaults."},
 };
+static struct ReleaseNote m_Notes_Rel1_0_4_0[]=
+{
+    {   "Fixed a bug where the plugin IODriver Init() wasn't being called on install",
+            "When a new plugin was installed the system was not calling"
+            " the IODriver Init() function."},
+    {   "Changed how URI help works.",
+            "Plugins now provide a more strict version of the help that"
+            " WhippyTerm can parse."},
+    {   "Fixed bug that the URI didn't always set all options",
+            "With some plugins when the user input a URI the decoder"
+            " didn't set all the options which could lead to failure"
+            " to open a connection.  This has been fixed."},
+    {   "Fixed a crash in the edit send buffer dialog",
+            "If you where in the edit buffer on the second nibble and cleared"
+            " the buffer it would crash when you clicked on the hex."},
+};
 static struct ReleaseNote m_Notes_Rel1_0_3_0[]=
 {
     {   NOTETYPE_BUG_FIX,"Fixed problem where file download didn't know that xmodem was selected by default",
@@ -115,6 +131,7 @@ static struct ReleaseNote m_Notes_Rel1_0_0_0[]=
 const struct ReleaseInfo m_ReleaseNotes[]=
 {
 //    {"x.x.x.x","dd Mmm yyyy","NEXT",m_Notes_NEXT,sizeof(m_Notes_NEXT)/sizeof(struct ReleaseNote)},
+    {"1.0.4.0","31 May 2025",NULL,m_Notes_Rel1_0_4_0,sizeof(m_Notes_Rel1_0_4_0)/sizeof(struct ReleaseNote)},
     {"1.0.3.0","27 Apr 2025",NULL,m_Notes_Rel1_0_3_0,sizeof(m_Notes_Rel1_0_3_0)/sizeof(struct ReleaseNote)},
     {"1.0.2.0","23 Apr 2025",NULL,m_Notes_Rel1_0_2_0,sizeof(m_Notes_Rel1_0_2_0)/sizeof(struct ReleaseNote)},
     {"1.0.1.0","16 Mar 2025",NULL,m_Notes_Rel1_0_1_0,sizeof(m_Notes_Rel1_0_1_0)/sizeof(struct ReleaseNote)},

@@ -187,6 +187,8 @@ t_UIContextMenuCtrl *UICTW_GetContextMenuHandle(t_UICustomTextWidgetCtrl *ctrl,e
             return (t_UIContextMenuCtrl *)TextDisplay->ui->actionEdit;
         case e_UICTW_ContextMenu_EndianSwap:
             return (t_UIContextMenuCtrl *)TextDisplay->ui->actionEndian_Swap;
+        case e_UICTW_ContextMenu_FindCRCAlgorithm:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionFind_CRC_Algorithm;
         case e_UICTW_ContextMenuMAX:
         default:
             break;

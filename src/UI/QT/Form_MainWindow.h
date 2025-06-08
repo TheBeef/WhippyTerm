@@ -430,6 +430,8 @@ private slots:
     
     void on_actionCTRL_C_Handling_triggered();
     
+    void on_actionCRC_Algorithm_Finder_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

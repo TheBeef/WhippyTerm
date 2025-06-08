@@ -35,6 +35,7 @@
 #include "UI/UIControl.h"
 #include <stdint.h>
 #include <string>
+#include <list>
 
 /***  DEFINES                          ***/
 
@@ -107,6 +108,9 @@ typedef enum
     e_CRCMAX
 } e_CRCType;
 
+typedef std::list<e_CRCType> t_CRCListType;
+typedef t_CRCListType::iterator i_CRCListType;
+
 /***  CLASS DEFINITIONS                ***/
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
@@ -117,5 +121,6 @@ void CRC_CalCRCStr(e_CRCType CRCType,const uint8_t *Data,int Bytes,char *buff);
 int CRC_CalcCRC(e_CRCType CRCType,const uint8_t *Data,int Bytes,uint64_t *CRC);
 bool CRC_GetListOfAvailableCRCs(t_ListViewItemListType &CRCList);
 bool CRC_BuildSource4CRC(e_CRCType CRCType,std::string &OutStr);
+t_CRCListType CRC_FindCRC(const uint8_t *Data,int DataSize,const char *CRCstr);
 
 #endif

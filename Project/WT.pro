@@ -45,6 +45,7 @@ RC_ICONS = ..\WindowsInstaller\WhippyTerm.ico
 }
 
 SOURCES += ../src/UI/QT/main.cpp\
+    ../src/App/Dialogs/Dialog_CRCFinder.cpp \
     ../src/BuildOptions/BuildOptions.cpp \
     ../src/App/Dialogs/Dialog_NewConnectionFromURI.cpp \
     ../src/App/Dialogs/Dialog_SendBufferSelect.cpp \
@@ -55,6 +56,8 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/StdPlugins/IODrivers/UDPClient/src/UDPClient_Main.cpp \
     ../src/App/StdPlugins/IODrivers/UDPServer/src/UDPServer_Main.cpp \
     ../src/UI/QT/ContextMenuHelper.cpp \
+    ../src/UI/QT/Form_CRCFinder.cpp \
+    ../src/UI/QT/Form_CRCFinderAccess.cpp \
     ../src/UI/QT/Form_DebugPrintLog.cpp \
     ../src/UI/QT/Form_DebugPrintLogAccess.cpp \
     ../src/UI/QT/Form_MainWindow.cpp \
@@ -249,6 +252,7 @@ macx {
 }
 
 HEADERS  += ../src/UI/QT/Form_MainWindow.h \
+    ../src/UI/QT/Form_CRCFinder.h \
     ../src/UI/QT/Form_DebugPrintLog.h \
     ../src/UI/QT/Form_NewConnectionFromURI.h \
     ../src/UI/QT/Form_SendBufferSelect.h \
@@ -288,6 +292,7 @@ HEADERS  += ../src/UI/QT/Form_MainWindow.h \
     ../src/UI/QT/Widget_TextCanvas.h
 
 FORMS    += ../src/UI/QT/Form_MainWindow.ui \
+    ../src/UI/QT/Form_CRCFinder.ui \
     ../src/UI/QT/Form_DebugPrintLog.ui \
     ../src/UI/QT/Form_FontDialog.ui \
     ../src/UI/QT/Form_NewConnectionFromURI.ui \

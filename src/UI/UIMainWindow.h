@@ -180,6 +180,7 @@ typedef enum
     e_UIMWMenu_StyleUnderline,
     e_UIMWMenu_StyleStrikeThrough,
     e_UIMWMenu_SettingsQuickJump_CtrlCHandling,
+    e_UIMWMenu_CRCFinder,
     e_UIMWMenuMAX
 } e_UIMWMenuType;
 

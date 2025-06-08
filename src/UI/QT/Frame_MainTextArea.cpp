@@ -15,6 +15,7 @@ Frame_MainTextArea::Frame_MainTextArea(QWidget *parent) :
     ContextMenu = new QMenu;
     ContextMenu->addAction(ui->actionSend_Buffer);
     ContextMenu->addAction(ui->actionEdit);
+    ContextMenu->addAction(ui->actionFind_CRC_Algorithm);
     ContextMenu->addSeparator();
     ContextMenu->addAction(ui->actionCopy);
     ContextMenu->addAction(ui->actionPaste);
@@ -325,3 +326,9 @@ void Frame_MainTextArea::on_actionStyleBGColor_BrightWhite_triggered()
 {
     SendContextMenuEvent(e_UITD_ContextMenu_StyleBGColor_BrightWhite);
 }
+
+void Frame_MainTextArea::on_actionFind_CRC_Algorithm_triggered()
+{
+    SendContextMenuEvent(e_UITD_ContextMenu_FindCRCAlgorithm);
+}
+

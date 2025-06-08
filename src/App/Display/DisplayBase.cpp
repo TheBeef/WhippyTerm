@@ -1216,6 +1216,7 @@ bool DisplayBase::DoHexInputEvent(const struct HDEvent *Event)
                 case e_UICTW_ContextMenu_Edit:
                     DoBlock_EditHex();
                 break;
+                case e_UICTW_ContextMenu_FindCRCAlgorithm:
                 case e_UICTW_ContextMenu_EndianSwap:
                 case e_UICTW_ContextMenu_ZoomIn:
                 case e_UICTW_ContextMenu_ZoomOut:
@@ -1806,3 +1807,7 @@ bool DisplayBase::IsAttribSetInSelection(uint32_t Attribs)
     return false;
 }
 
+uint8_t *DisplayBase::GetSelectionRAW(unsigned int *Bytes)
+{
+    return NULL;
+}

@@ -2025,7 +2025,7 @@
      <x>0</x>
      <y>0</y>
      <width>1114</width>
-     <height>28</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -2261,6 +2261,7 @@
      <string>Tools</string>
     </property>
     <addaction name="actionCom_Test"/>
+    <addaction name="actionCRC_Algorithm_Finder"/>
    </widget>
    <widget class="QMenu" name="menuBuffers">
     <property name="title">
@@ -3692,6 +3693,11 @@
   <action name="actionCTRL_C_Handling">
    <property name="text">
     <string>CTRL-C Handling...</string>
+   </property>
+  </action>
+  <action name="actionCRC_Algorithm_Finder">
+   <property name="text">
+    <string>CRC Algorithm Finder...</string>
    </property>
   </action>
  </widget>

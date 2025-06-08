@@ -41,6 +41,7 @@
 #include "App/Dialogs/Dialog_Settings.h"
 #include "App/Dialogs/Dialog_TransmitDelay.h"
 #include "App/Dialogs/Dialog_SendBufferSelect.h"
+#include "App/Dialogs/Dialog_CRCFinder.h"
 #include "App/Bookmarks.h"
 #include "App/Connections.h"
 #include "App/MainApp.h"
@@ -1306,6 +1307,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     t_UITabCtrl *MainTabs;
     class Connection *Con;
     bool EnableSelectionBased;
+    bool IsBinaryCon;
     bool RestoreConnectionSettingsActive;
     bool Checked;
     i_BookmarkList bm;
@@ -1386,6 +1388,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *StyleUnderline;
     e_UIMenuCtrl *StyleStrikeThrough;
     t_UIContextMenuCtrl *ContextMenu_SendBuffer;
+    t_UIContextMenuCtrl *ContextMenu_FindCRCAlgorithm;
     t_UIContextMenuCtrl *ContextMenu_Copy;
     t_UIContextMenuCtrl *ContextMenu_Paste;
 //    t_UIContextMenuCtrl *ContextMenu_ClearScreen;
@@ -1623,6 +1626,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
             return;
 
         ContextMenu_SendBuffer=Con->GetContextMenuHandle(e_UITD_ContextMenu_SendBuffers);
+        ContextMenu_FindCRCAlgorithm=Con->GetContextMenuHandle(e_UITD_ContextMenu_FindCRCAlgorithm);
         ContextMenu_Copy=Con->GetContextMenuHandle(e_UITD_ContextMenu_Copy);
         ContextMenu_Paste=Con->GetContextMenuHandle(e_UITD_ContextMenu_Paste);
         ContextMenu_Edit=Con->GetContextMenuHandle(e_UITD_ContextMenu_Edit);
@@ -1717,6 +1721,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(StyleItalics,EnableSelectionBased);
         UIEnableMenu(StyleUnderline,EnableSelectionBased);
         UIEnableMenu(StyleStrikeThrough,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_FindCRCAlgorithm,EnableSelectionBased);
         UIEnableContextMenu(ContextMenu_Bold,EnableSelectionBased);
         UIEnableContextMenu(ContextMenu_Italics,EnableSelectionBased);
         UIEnableContextMenu(ContextMenu_Underline,EnableSelectionBased);
@@ -1739,10 +1744,9 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableContextMenu(ContextMenu_StyleBGColor_BrightWhite,EnableSelectionBased);
 
         /* Things that are effected by binary vs text */
-        if(Con->IsConnectionBinary())
-            UIEnableMenu(InsertHorizontalRule,false);
-        else
-            UIEnableMenu(InsertHorizontalRule,true);
+        IsBinaryCon=Con->IsConnectionBinary();
+        UIEnableMenu(InsertHorizontalRule,!IsBinaryCon);
+        UISetContextMenuVisible(ContextMenu_FindCRCAlgorithm,IsBinaryCon);
 
         /* Styling checked or not */
         Checked=Con->IsThisAttribInSelection(TXT_ATTRIB_BOLD);
@@ -4306,6 +4310,36 @@ void TheMainWindow::ToolbarMenuSelected(e_UIMWToolbarMenuType InputID)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::DoFindCRCFromSelection
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::DoFindCRCFromSelection(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function tells the connection to do it's find crc from selection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void TheMainWindow::DoFindCRCFromSelection(void)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+        TabCon->FindCRCFromSelection();
+}
+
+/*******************************************************************************
+ * NAME:
  *    MW_Event
  *
  * SYNOPSIS:
@@ -4632,6 +4666,8 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_ApplyStyleBGColor_LightMagenta -- Apply this color to the background of the selection
  *                  e_Cmd_ApplyStyleBGColor_Yellow -- Apply this color to the background of the selection
  *                  e_Cmd_ApplyStyleBGColor_BrightWhite -- Apply this color to the background of the selection
+ *                  e_Cmd_CRCFinder -- Show the crc finder dialog
+ *                  e_Cmd_CRCFinderFromSelection -- Show the CRC finder dialog but copy in the currently selected bytes
  *
  * FUNCTION:
  *    This function executes a command.
@@ -5140,6 +5176,11 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         case e_Cmd_ApplyStyleBGColor_BrightWhite:
             ApplyBGColor2Selection(e_SysCol_White,e_SysColShade_Bright);
         break;
+        case e_Cmd_CRCFinder:
+            RunCRCFinderDialog(NULL,0);
+        break;
+        case e_Cmd_CRCFinderFromSelection:
+            DoFindCRCFromSelection();
         break;
         case e_CmdMAX:
         default:

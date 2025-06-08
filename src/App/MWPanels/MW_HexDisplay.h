@@ -71,6 +71,7 @@ class MWHexDisplay
         bool PanelActive;
         class HexDisplayBuffer *IncomingHistoryHexDisplay;
         void SendSelection2Clipboard(e_ClipboardType Clip);
+        void OpenFindCRCAlgDialog(void);
 
         void RethinkUI(void);
 };

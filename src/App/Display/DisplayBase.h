@@ -177,6 +177,7 @@ class DisplayBase
         virtual void ToggleAttribs2Selection(uint32_t Attribs);
         virtual void ApplyBGColor2Selection(uint32_t RGB);
         virtual bool IsAttribSetInSelection(uint32_t Attribs);
+        virtual uint8_t *GetSelectionRAW(unsigned int *Bytes);
 
         void SetCustomSettings(class ConSettings *NewSettingsPtr);
         class ConSettings *GetCustomSettings(void);

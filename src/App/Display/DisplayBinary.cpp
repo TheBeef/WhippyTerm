@@ -1874,7 +1874,6 @@ bool DisplayBinary::GetSelectionString(std::string &Clip)
             continue;
 
         Line=Start;
-        /* We are doing the AscII copy the RAW bytes */
         if(Start!=End)
         {
             /* The first line (partal line) */
@@ -2645,4 +2644,145 @@ bool DisplayBinary::IsAttribSetInSelection(uint32_t Attribs)
             IsSet=true;
 
     return IsSet;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetSelectionRAW
+ *
+ * SYNOPSIS:
+ *    uint8_t *DisplayBinary::GetSelectionRAW(unsigned int *Bytes);
+ *
+ * PARAMETERS:
+ *    Bytes [O] -- The number of bytes in the selection.
+ *
+ * FUNCTION:
+ *    This function gets a copy of the selection as RAW bytes.
+ *
+ * RETURNS:
+ *    A buffer with the selection copied into it or NULL if there was an error.
+ *    You must free this buffer with free() (it will be allocated with
+ *    malloc()).
+ *
+ * SEE ALSO:
+ *    IsThereASelection(), SelectAll(), ClearSelection()
+ ******************************************************************************/
+uint8_t *DisplayBinary::GetSelectionRAW(unsigned int *Bytes)
+{
+    uint8_t *Start;
+    uint8_t *End;
+    int StartOffset;
+    int EndOffset;
+    uint8_t *Line;
+    string TmpStr;
+    unsigned int s;
+    struct DisBin_SelectionBlock SelBlocks[2];
+    unsigned int TotalBytes;
+    uint8_t *RetBuff;
+    uint8_t *RetBuffInsertPos;
+
+    if(!SelectionActive || SelectionLine==NULL || SelectionAnchorLine==NULL)
+        return NULL;
+
+    GetNormalizedSelectionBlocks(SelBlocks);
+
+    /* See how many bytes we will be copying */
+    TotalBytes=0;
+    for(s=0;s<2;s++)
+    {
+        Start=SelBlocks[s].Start.Line;
+        End=SelBlocks[s].End.Line;
+        StartOffset=SelBlocks[s].Start.Offset;
+        EndOffset=SelBlocks[s].End.Offset;
+
+        if(Start==NULL || End==NULL)
+            continue;
+
+        Line=Start;
+        if(Start!=End)
+        {
+            /* The first line (partal line) */
+            TotalBytes+=HEX_BYTES_PER_LINE-StartOffset;
+            Line+=HEX_BYTES_PER_LINE;
+
+            /* Full lines */
+            TotalBytes+=End-Line;
+
+            /* The last line (partal line) */
+            if(End<EndOfHexBuffer)
+                TotalBytes+=EndOffset+1;
+        }
+        else
+        {
+            /* All on the same line */
+            if(EndOffset>StartOffset)
+                TotalBytes+=EndOffset-StartOffset+1;
+            else
+                TotalBytes+=StartOffset-EndOffset+1;
+        }
+    }
+
+    if(TotalBytes==0)
+    {
+        /* A blank selection */
+        return NULL;
+    }
+
+    *Bytes=TotalBytes;
+
+    RetBuff=(uint8_t *)malloc(TotalBytes);
+    if(RetBuff==NULL)
+        return NULL;
+
+    RetBuffInsertPos=RetBuff;
+    for(s=0;s<2;s++)
+    {
+        Start=SelBlocks[s].Start.Line;
+        End=SelBlocks[s].End.Line;
+        StartOffset=SelBlocks[s].Start.Offset;
+        EndOffset=SelBlocks[s].End.Offset;
+
+        if(Start==NULL || End==NULL)
+            continue;
+
+        Line=Start;
+        if(Start!=End)
+        {
+            /* The first line (partal line) */
+            memcpy(RetBuffInsertPos,&Line[StartOffset],
+                    HEX_BYTES_PER_LINE-StartOffset);
+            RetBuffInsertPos+=HEX_BYTES_PER_LINE-StartOffset;
+            Line+=HEX_BYTES_PER_LINE;
+
+            /* Full lines */
+            memcpy(RetBuffInsertPos,Line,End-Line);
+            RetBuffInsertPos+=End-Line;
+            Line+=End-Line;
+
+            /* The last line (partal line) */
+            if(End<EndOfHexBuffer)
+            {
+                memcpy(RetBuffInsertPos,Line,EndOffset+1);
+                RetBuffInsertPos+=EndOffset+1;
+            }
+        }
+        else
+        {
+            /* Just part of one line */
+            if(EndOffset>StartOffset)
+            {
+                memcpy(RetBuffInsertPos,&Line[StartOffset],
+                        EndOffset-StartOffset+1);
+                RetBuffInsertPos+=EndOffset-StartOffset+1;
+            }
+            else
+            {
+                memcpy(RetBuffInsertPos,&Line[EndOffset],
+                        StartOffset-EndOffset+1);
+                RetBuffInsertPos+=StartOffset-EndOffset+1;
+            }
+        }
+    }
+
+    return RetBuff;
 }

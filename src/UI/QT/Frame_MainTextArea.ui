@@ -641,6 +641,11 @@
     <string>Bright White</string>
    </property>
   </action>
+  <action name="actionFind_CRC_Algorithm">
+   <property name="text">
+    <string>Find CRC Algorithm...</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

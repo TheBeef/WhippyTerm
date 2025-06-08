@@ -33,6 +33,7 @@
  ******************************************************************************/
 
 /*** HEADER FILES TO INCLUDE  ***/
+#include "App/Dialogs/Dialog_CRCFinder.h"
 #include "App/Connections.h"
 #include "App/ConnectionsGlobal.h"
 #include "App/MainWindow.h"
@@ -2820,6 +2821,9 @@ bool Connection::ProcessDisplayEvent(const struct DBEvent *Event)
             {
                 case e_UITD_ContextMenu_SendBuffers:
                     MW->ExeCmd(e_Cmd_SendBufferSendGeneric);
+                break;
+                case e_UITD_ContextMenu_FindCRCAlgorithm:
+                    MW->ExeCmd(e_Cmd_CRCFinderFromSelection);
                 break;
                 case e_UITD_ContextMenu_Copy:
                     MW->ExeCmd(e_Cmd_Copy);
@@ -6922,3 +6926,38 @@ void Connection::ApplyBGColor2Selection(uint32_t Color)
     Display->ApplyBGColor2Selection(Color);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Connection::FindCRCFromSelection
+ *
+ * SYNOPSIS:
+ *    void Connection::FindCRCFromSelection(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function starts the find crc dialog from the selection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::FindCRCFromSelection(void)
+{
+    string SelectContents;
+    uint8_t *Buffer;
+    unsigned int Bytes;
+
+    if(Display==NULL)
+        return;
+
+    Buffer=Display->GetSelectionRAW(&Bytes);
+    if(Buffer!=NULL)
+    {
+        RunCRCFinderDialog(Buffer,Bytes);
+        free(Buffer);
+    }
+}

@@ -1934,3 +1934,9 @@ void Form_MainWindow::on_actionCTRL_C_Handling_triggered()
     DoMenuTriggered(e_UIMWMenu_SettingsQuickJump_CtrlCHandling);
 }
 
+
+void Form_MainWindow::on_actionCRC_Algorithm_Finder_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_CRCFinder);
+}
+

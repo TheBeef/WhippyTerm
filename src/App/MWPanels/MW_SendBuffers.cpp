@@ -437,6 +437,7 @@ bool MWSendBuffers::SendBuffersBufferEvent(const struct HDEvent *Event)
                 case e_UICTW_ContextMenu_Copy:
                     Copy2Clip();
                 break;
+                case e_UICTW_ContextMenu_FindCRCAlgorithm:
                 case e_UICTW_ContextMenu_EndianSwap:
                 case e_UICTW_ContextMenu_ClearScreen:
                 case e_UICTW_ContextMenu_Paste:

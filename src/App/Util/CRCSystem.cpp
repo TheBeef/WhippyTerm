@@ -304,7 +304,6 @@ int CRC_CalcCRC(e_CRCType CRCType,const uint8_t *Data,int Bytes,uint64_t *CRC)
 static bool CRC_GetCRCParam(e_CRCType CRCType,int &Bits,uint64_t &Poly,
         uint64_t &Start,uint64_t &XOR,bool &RefIn,bool &RefOut)
 {
-
     /* https://reveng.sourceforge.io/crc-catalogue/all.htm */
     switch(CRCType)
     {
@@ -1061,14 +1060,17 @@ bool CRC_BuildSource4CRC(e_CRCType CRCType,std::string &OutStr)
             CRC_Append2String(OutStr,"}\n");
         }
 
-        CRC_Append2String(OutStr,"/* Copyright %s Paul Hutchinson\n","2021");
-        CRC_Append2String(OutStr,"\n");
-        CRC_Append2String(OutStr,"Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n");
-        CRC_Append2String(OutStr,"\n");
-        CRC_Append2String(OutStr,"The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n");
-        CRC_Append2String(OutStr,"\n");
-        CRC_Append2String(OutStr,"THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */\n");
-        CRC_Append2String(OutStr,"\n");
+        CRC_Append2String(OutStr,"/* This code is public domain do what you want with it just don't blame me if it mess up.\n\n");
+        CRC_Append2String(OutStr,"   THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */\n");
+
+//        CRC_Append2String(OutStr,"/* Copyright %s Paul Hutchinson\n","2021");
+//        CRC_Append2String(OutStr,"\n");
+//        CRC_Append2String(OutStr,"Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n");
+//        CRC_Append2String(OutStr,"\n");
+//        CRC_Append2String(OutStr,"The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n");
+//        CRC_Append2String(OutStr,"\n");
+//        CRC_Append2String(OutStr,"THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */\n");
+//        CRC_Append2String(OutStr,"\n");
 
     }
     catch(...)
@@ -1112,5 +1114,75 @@ static void CRC_Append2String(std::string &Str,const char *fmt,...)
     vsnprintf(buff,sizeof(buff),fmt,args);
     Str+=buff;
     va_end(args);
+}
+
+t_CRCListType CRC_FindCRC(const uint8_t *Data,int DataSize,const char *CRCstr)
+{
+    t_CRCListType FoundCRCs;
+    int Len;
+    int SearchBits;
+    uint64_t SearchCRC;
+    uint64_t CalcCRC;
+    int Bits;
+    uint64_t Poly;
+    uint64_t Start;
+    uint64_t XOR;
+    bool RefIn;
+    bool RefOut;
+    int alg;
+    e_CRCType CRCType;
+
+    /* First select what types of CRC we are look through based on the length
+       of the CRC */
+    Len=strlen(CRCstr);
+    switch(Len)
+    {
+        case 2:  // 8 bit
+            SearchBits=8;
+        break;
+        case 4:  // 16 bit
+            SearchBits=16;
+        break;
+        case 8:  // 32 bit
+            SearchBits=32;
+        break;
+        case 16: // 64 bit
+            SearchBits=64;
+        break;
+        break;
+        default:
+            /* Can't convert */
+            return FoundCRCs;
+    }
+
+    SearchCRC=strtoull(CRCstr,NULL,16);
+
+    /* Try all the CRC alg's we have and see if we get a hit */
+    for(alg=0;alg<e_CRCMAX;alg++)
+    {
+        CRCType=(e_CRCType)alg;
+        if(!CRC_GetCRCParam(CRCType,Bits,Poly,Start,XOR,RefIn,RefOut))
+            continue;
+
+        /* If it's the wrong size, skip */
+        if(Bits!=SearchBits)
+            continue;
+
+        /* Find the CRC for this data */
+        if(m_CRCLookups[CRCType]==NULL)
+            m_CRCLookups[CRCType]=CRC_CalcCRCTable(Bits,Poly);
+        if(m_CRCLookups[CRCType]==NULL)
+            continue;
+
+        CalcCRC=CRC_DoCRCFromParam(Data,DataSize,m_CRCLookups[CRCType],Bits,
+                Poly,Start,XOR,RefIn,RefOut);
+        if(CalcCRC==SearchCRC)
+        {
+            /* Found it, add it to the list */
+            FoundCRCs.push_back(CRCType);
+        }
+    }
+
+    return FoundCRCs;
 }
 

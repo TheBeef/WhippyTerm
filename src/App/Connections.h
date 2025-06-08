@@ -393,6 +393,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void GiveFocus(void);
         void CopySelectionToClipboard(void);
         void PasteFromClipboard(void);
+        void FindCRCFromSelection(void);
         void GotoColumn(int Column);
         void GotoRow(int Row);
         bool GetURI(std::string &URI);

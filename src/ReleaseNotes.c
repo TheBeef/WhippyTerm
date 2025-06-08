@@ -4,6 +4,7 @@
 #define NOTETYPE_ENHANCEMENT           2
 #define NOTETYPE_FUNCTIONALLY_FIX      3
 #define NOTETYPE_POLISH                4
+#define NOTETYPE_NEW_FEATURE           5
 
 struct ReleaseNote
 {
@@ -30,24 +31,35 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
-        NOTETYPE_ENHANCEMENT,"Added support for a file requester to the UI API",
+        NOTETYPE_NEW_FEATURE,"Added a new find CRC dialog"
+            "You can now input some data and input a CRC value for that data"
+            " and have it analyzed.  The system will then tell you the CRC"
+            " algorithm that will make that CRC given that data."},
+    {
+        NOTETYPE_ENHANCEMENT,"Changed copyright message for generated code"
+            "The copyright message has been changed when code is generated."
+            "  The old message was a copyright message saying you had"
+            " to copy the message.  The new one just says do what you want"
+            " but don't blame me."},
+    {
+        NOTETYPE_NEW_FEATURE,"Added support for a file requester to the UI API",
             "A new API was added so plugins can prompt the user for a filename"
             " and path"},
     {   NOTETYPE_ENHANCEMENT,"Added quick jump for CTRL-C handling",
             "A new menu option was added to the settings menu to let the"
             " user jump to the clipboard (CTRL-C) handling settings."},
-    {   NOTETYPE_ENHANCEMENT,"Added user styling/color of the selection",
+    {   NOTETYPE_NEW_FEATURE,"Added user styling/color of the selection",
             "The user can now style or change the background color of the"
             " selected text.  This allows the user to highlight text"
             " of interest.  This is most useful in binary mode as they"
             " can select different messages or parts of a packet and highlight"
             " them.  Bold, italics, underline, strike through, and the"
             " background color can be changed."},
-    {   NOTETYPE_ENHANCEMENT,"Added Lock window scroll when not on bottom line",
+    {   NOTETYPE_POLISH,"Added Lock window scroll when not on bottom line",
             "When the scroll bar is at the bottom the screen will be scrolled"
             " to the bottom when new text is added.  If the scroll bar is"
             " not at the bottom it will say at it's current display."},
-    {   NOTETYPE_ENHANCEMENT,"Improved open errors dialog with OS messages",
+    {   NOTETYPE_POLISH,"Improved open errors dialog with OS messages",
             "When an open connection fails the user is now prompted with"
             " and error message.  This message can include more details from"
             " the plugin."},
@@ -72,31 +84,31 @@ static struct ReleaseNote m_Notes_NEXT[]=
     {   NOTETYPE_BUG_FIX,"Fixed bug where binary display doesn't stop the cursor from blinking",
             "When using the binary decoder if the main text area loses focus"
             " the cursor should stop blinking.  It wasn't"},
-    {   NOTETYPE_ENHANCEMENT,"Added a help button to URI input",
+    {   NOTETYPE_POLISH,"Added a help button to URI input",
             "A new help button was added after the URI input on the main window."
             " This button opens the open connection using URI dialog and fills"
             " in the URI from the main window.  It also selects the drive"
             " matching the URI."},
-    {   NOTETYPE_ENHANCEMENT,"Changed menu buffers to use send buffers name instead of static text",
+    {   NOTETYPE_POLISH,"Changed menu buffers to use send buffers name instead of static text",
             "In the main window \"Buffers\" menu the 12 shortcut buffer"
             " entries have been renamed to include the buffers name."},
-    {   NOTETYPE_ENHANCEMENT,"Added a set setting to defaults menu option",
+    {   NOTETYPE_POLISH,"Added a set setting to defaults menu option",
             "Under the Settings menu a new menu item was added that lets"
             " the user set settings back to defaults."},
 };
 static struct ReleaseNote m_Notes_Rel1_0_4_0[]=
 {
-    {   "Fixed a bug where the plugin IODriver Init() wasn't being called on install",
+    {   NOTETYPE_BUG_FIX,"Fixed a bug where the plugin IODriver Init() wasn't being called on install",
             "When a new plugin was installed the system was not calling"
             " the IODriver Init() function."},
-    {   "Changed how URI help works.",
+    {   NOTETYPE_BUG_FIX,"Changed how URI help works.",
             "Plugins now provide a more strict version of the help that"
             " WhippyTerm can parse."},
-    {   "Fixed bug that the URI didn't always set all options",
+    {   NOTETYPE_BUG_FIX,"Fixed bug that the URI didn't always set all options",
             "With some plugins when the user input a URI the decoder"
             " didn't set all the options which could lead to failure"
             " to open a connection.  This has been fixed."},
-    {   "Fixed a crash in the edit send buffer dialog",
+    {   NOTETYPE_BUG_FIX,"Fixed a crash in the edit send buffer dialog",
             "If you where in the edit buffer on the second nibble and cleared"
             " the buffer it would crash when you clicked on the hex."},
 };

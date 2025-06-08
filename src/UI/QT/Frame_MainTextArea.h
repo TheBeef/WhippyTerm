@@ -99,7 +99,9 @@ private slots:
     void on_actionStyleBGColor_Yellow_triggered();
 
     void on_actionStyleBGColor_BrightWhite_triggered();
-
+    
+    void on_actionFind_CRC_Algorithm_triggered();
+    
 private:
     void SendContextMenuEvent(e_UITD_ContextMenuType EventMenu);
 };

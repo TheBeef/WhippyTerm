@@ -46,6 +46,8 @@ private slots:
     
     void on_actionEndian_Swap_triggered();
     
+    void on_actionFind_CRC_Algorithm_triggered();
+    
 private:
 };
 

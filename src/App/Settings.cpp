@@ -81,6 +81,14 @@ class DefaultColorCFG : public TinyCFGBaseData
       bool SaveData(string &StoreString);
 };
 
+class SelectionColorCFG : public TinyCFGBaseData
+{
+   public:
+      uint32_t *Ptr;
+      bool LoadData(string &LoadedString);
+      bool SaveData(string &StoreString);
+};
+
 class KeyCommandsCFG : public TinyCFGBaseData
 {
     public:
@@ -93,6 +101,8 @@ class KeyCommandsCFG : public TinyCFGBaseData
 bool Settings_RegisterSysColorType(class TinyCFG &cfg,const char *XmlName,
         uint32_t (*Data)[e_SysColMAX]);
 bool Settings_RegisterDefaultColorType(class TinyCFG &cfg,const char *XmlName,
+      uint32_t &Data);
+bool Settings_RegisterSelectionColorType(class TinyCFG &cfg,const char *XmlName,
       uint32_t &Data);
 bool Settings_RegisterDataProcessorType(class TinyCFG &cfg,const char *XmlName,
       e_DataProcessorTypeType &Data);
@@ -437,6 +447,43 @@ bool Settings_RegisterDefaultColorType(class TinyCFG &cfg,const char *XmlName,
     try
     {
         NewDataClass=new DefaultColorCFG;
+    }
+    catch(std::bad_alloc const &)
+    {
+        return false;
+    }
+
+    /* Setup the data */
+    NewDataClass->Ptr=&Data;
+    NewDataClass->XmlName=XmlName;
+
+    return cfg.RegisterGeneric(NewDataClass);
+}
+////////////////////
+bool SelectionColorCFG::LoadData(string &LoadedString)
+{
+    *Ptr=strtol(LoadedString.c_str(),NULL,16);
+
+    return true;
+}
+
+bool SelectionColorCFG::SaveData(string &StoreString)
+{
+    char buff[100];
+    sprintf(buff,"%06X",*Ptr);
+    StoreString=buff;
+    return true;
+}
+
+bool Settings_RegisterSelectionColorType(class TinyCFG &cfg,const char *XmlName,
+      uint32_t &Data)
+{
+    class SelectionColorCFG *NewDataClass;
+
+    /* Make a new class to handle this new piece of data */
+    try
+    {
+        NewDataClass=new SelectionColorCFG;
     }
     catch(std::bad_alloc const &)
     {
@@ -977,6 +1024,8 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
     Settings_RegisterSysColorType(cfg,"ColorsDark",&SysColors[e_SysColShade_Dark]);
     Settings_RegisterDefaultColorType(cfg,"DefaultBackgroundColor",DefaultColors[e_DefaultColors_BG]);
     Settings_RegisterDefaultColorType(cfg,"DefaultForgroundColor",DefaultColors[e_DefaultColors_FG]);
+    Settings_RegisterSelectionColorType(cfg,"SelectionBackgroundColor",SelectionColors[e_Color_BG]);
+    Settings_RegisterSelectionColorType(cfg,"SelectionForgroundColor",SelectionColors[e_Color_FG]);
 
     cfg.Register("FixedWidth",TermSizeFixedWidth);
     cfg.Register("FixedHeight",TermSizeFixedHeight);
@@ -1044,6 +1093,11 @@ bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
         return false;
     if(memcmp(Con1.DefaultColors,Con2.DefaultColors,
             sizeof(Con1.DefaultColors))!=0)
+    {
+        return false;
+    }
+    if(memcmp(Con1.SelectionColors,Con2.SelectionColors,
+            sizeof(Con1.SelectionColors))!=0)
     {
         return false;
     }
@@ -1150,7 +1204,7 @@ void Settings::DefaultSettings(void)
     HexDisplayBufferSize=100000;
     HexDisplaysFGColor=0xFFFFFF;
     HexDisplaysBGColor=0x000000;
-    HexDisplaysSelBGColor=0x5d81a9;
+    HexDisplaysSelBGColor=SELECTION_BG_COLOR_DEFAULT;
     UI_GetDefaultFixedWidthFont(HexDisplaysFontName);
     HexDisplaysFontSize=12;
     HexDisplaysFontBold=false;
@@ -1171,6 +1225,8 @@ void ConSettings::DefaultSettings(void)
     GetPresetSysColors(e_SysColPreset_WhippyTerm,SysColors);
     DefaultColors[e_DefaultColors_BG]=SysColors[e_SysColShade_Normal][e_SysCol_Black];
     DefaultColors[e_DefaultColors_FG]=SysColors[e_SysColShade_Normal][e_SysCol_White];
+    SelectionColors[e_Color_BG]=SELECTION_BG_COLOR_DEFAULT;
+    SelectionColors[e_Color_FG]=SELECTION_FG_COLOR_DEFAULT;
 
     AutoReopen=false;
     AutoReopenWaitTime=100; // 100ms

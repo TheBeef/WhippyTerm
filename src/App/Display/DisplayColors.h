@@ -37,6 +37,8 @@
 #include <stdint.h>
 
 /***  DEFINES                          ***/
+#define SELECTION_BG_COLOR_DEFAULT          0x5d81a9
+#define SELECTION_FG_COLOR_DEFAULT          0xFFFFFF
 
 /***  MACROS                           ***/
 
@@ -54,11 +56,19 @@ typedef enum
     e_SysColPresetMAX
 } e_SysColPresetType;
 
+typedef enum
+{
+    e_Color_BG,
+    e_Color_FG,
+    e_ColorMAX
+} e_ColorType;
+
 /***  CLASS DEFINITIONS                ***/
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
 void GetPresetSysColors(e_SysColPresetType Preset,uint32_t Colors[e_SysColShadeMAX][e_SysColMAX]);
+void GetPresetSelectionColors(uint32_t Colors[e_ColorMAX]);
 
 #endif

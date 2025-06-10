@@ -393,3 +393,29 @@ void GetPresetSysColors(e_SysColPresetType Preset,
         break;
     }
 }
+
+/*******************************************************************************
+ * NAME:
+ *    GetPresetSelectionColors
+ *
+ * SYNOPSIS:
+ *    void GetPresetSelectionColors(uint32_t Colors[e_ColorMAX]);
+ *
+ * PARAMETERS:
+ *    Colors [O] -- The colors to fill in
+ *
+ * FUNCTION:
+ *    This function gets the default colors for the selection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void GetPresetSelectionColors(uint32_t Colors[e_ColorMAX])
+{
+    Colors[e_Color_BG]=SELECTION_BG_COLOR_DEFAULT;
+    Colors[e_Color_FG]=SELECTION_FG_COLOR_DEFAULT;
+}
+

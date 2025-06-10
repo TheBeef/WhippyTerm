@@ -18,6 +18,7 @@
 /***  HEADER FILES TO INCLUDE          ***/
 #include "UI/UIControl.h"
 #include "App/Display/DisplayColors.h"
+#include "App/Settings.h"
 
 /***  DEFINES                          ***/
 
@@ -177,6 +178,8 @@ enum e_UIS_RadioBttns
     e_UIS_RadioBttn_SysBell_BuiltIn,
     e_UIS_RadioBttn_SysBell_AudioOnly,
     e_UIS_RadioBttn_SysBell_VisualOnly,
+    e_UIS_RadioBttn_SelectionColorPrev_Forground,
+    e_UIS_RadioBttn_SelectionColorPrev_Background,
     e_UIS_RadioBttnMAX
 };
 
@@ -357,6 +360,7 @@ t_UIColorPreviewCtrl *UIS_GetColorPreviewHandle(e_UIS_ColorPreview UIObj);
 t_UILabelCtrl *UIS_GetLabelHandle(e_UIS_Labels UIObj);
 t_UIPagePanelCtrl *UIS_GetPagePanelHandle(e_UIS_PagePanel UIObj);
 void UIS_SetDefaultPreviewColor(e_DefaultColorsType Color,uint32_t RGB);
+void UIS_SetSelectionPreviewColor(e_ColorType Color,uint32_t RGB);
 
 void UIS_SetPresetPreviewColor(e_SysColType Color,uint32_t RGB);
 void UIS_SetSysColPreviewColor(e_SysColType Color,uint32_t RGB);

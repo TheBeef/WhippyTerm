@@ -350,6 +350,10 @@ t_UIRadioBttnCtrl *UIS_GetRadioBttnHandle(e_UIS_RadioBttns UIObj)
             return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->SysBell_AudioOnly_radioButton;
         case e_UIS_RadioBttn_SysBell_VisualOnly:
             return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->SysBell_VisualOnly_radioButton;
+        case e_UIS_RadioBttn_SelectionColorPrev_Forground:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->SysColPrev_SelectionFG_radioButton;
+        case e_UIS_RadioBttn_SelectionColorPrev_Background:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->SysColPrev_SelectionBG_radioButton;
         case e_UIS_RadioBttnMAX:
         default:
         break;
@@ -650,6 +654,30 @@ void UIS_SetDefaultPreviewColor(e_DefaultColorsType Color,uint32_t RGB)
             g_SettingsDialog->ui->SysCol_DefaultFG_frame->setPalette(pal);
         break;
         case e_DefaultColorsMAX:
+        default:
+        break;
+    }
+}
+
+void UIS_SetSelectionPreviewColor(e_ColorType Color,uint32_t RGB)
+{
+    QPalette pal;
+    QColor col;
+
+    col.setRgb(RGB);
+    pal=QApplication::palette();
+//    pal.setColor(QPalette::Background,col);
+    pal.setColor(QPalette::Window,col);
+
+    switch(Color)
+    {
+        case e_Color_BG:
+            g_SettingsDialog->ui->SysCol_SelectionBG_frame->setPalette(pal);
+        break;
+        case e_Color_FG:
+            g_SettingsDialog->ui->SysCol_SelectionFG_frame->setPalette(pal);
+        break;
+        case e_ColorMAX:
         default:
         break;
     }

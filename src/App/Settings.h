@@ -116,6 +116,7 @@ class ConSettings
         /* Colors */
         uint32_t SysColors[e_SysColShadeMAX][e_SysColMAX];
         uint32_t DefaultColors[e_DefaultColorsMAX];
+        uint32_t SelectionColors[e_ColorMAX];
         bool CursorBlink;
 
         /***** Terminal *****/

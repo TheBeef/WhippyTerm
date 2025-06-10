@@ -976,10 +976,9 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
             SavedFGColor=DisplayFrag.Styling.FGColor;
             SavedBGColor=DisplayFrag.Styling.BGColor;
             SavedAttribs=DisplayFrag.Styling.Attribs;
-            DisplayFrag.Styling.FGColor=
-                    Settings->DefaultColors[e_DefaultColors_BG];
-            DisplayFrag.Styling.BGColor=
-                    Settings->DefaultColors[e_DefaultColors_FG];
+
+            DisplayFrag.Styling.FGColor=Settings->SelectionColors[e_Color_FG];
+            DisplayFrag.Styling.BGColor=Settings->SelectionColors[e_Color_BG];
             DisplayFrag.Styling.Attribs=TXT_ATTRIB_FORCE;
             UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
 
@@ -995,10 +994,8 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
 
         if(FragSelected)
         {
-            DisplayFrag.Styling.FGColor=
-                    Settings->DefaultColors[e_DefaultColors_BG];
-            DisplayFrag.Styling.BGColor=
-                    Settings->DefaultColors[e_DefaultColors_FG];
+            DisplayFrag.Styling.FGColor=Settings->SelectionColors[e_Color_FG];
+            DisplayFrag.Styling.BGColor=Settings->SelectionColors[e_Color_BG];
             DisplayFrag.Styling.Attribs=TXT_ATTRIB_FORCE;
         }
 

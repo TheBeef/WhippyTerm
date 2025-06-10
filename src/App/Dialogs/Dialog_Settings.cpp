@@ -65,6 +65,11 @@ using namespace std;
 #define MIN_TERM_SCROLLBUFFER_LINES 0
 #define MAX_TERM_SCROLLBUFFER_LINES 10000
 
+/* Flags for DS_UnselectColorRadioButtons() */
+#define DS_USCRB_DEFAULT            (1<<0)
+#define DS_USCRB_COLORS             (1<<1)
+#define DS_USCRB_SELECTION          (1<<2)
+
 /*** MACROS                   ***/
 
 /*** TYPE DEFINITIONS         ***/
@@ -77,6 +82,14 @@ enum e_DS_SettingsArea
     e_DS_SettingsArea_Terminal,
     e_DS_SettingsArea_Behaviour,
     e_DS_SettingsAreaMAX
+};
+
+enum e_DS_EditingColorType
+{
+    e_DS_EditingColor_Defaults,
+    e_DS_EditingColor_Colors,
+    e_DS_EditingColor_Selection,
+    e_DS_EditingColorMAX
 };
 
 /*** FUNCTION PROTOTYPES      ***/
@@ -110,6 +123,9 @@ static void UIS_HandleKeyBindingsCmdListChange(uintptr_t ID);
 static void UIS_HandleKeyBindingsCmdShortCutChange(void);
 static void DS_SetKeyboardRadioBttns(void);
 static void DS_GetSettingsFromGUI_KeyboardRadioBttns(void);
+static void DS_UnselectColorRadioButtons(uint32_t Bttns);
+static void UIS_HandleSysColSelectionColorClick(void);
+static e_DS_EditingColorType DS_FindCurrentEditingColor(int *Color);
 
 /*** VARIABLE DEFINITIONS     ***/
 t_DPS_ProInfoType m_CharEncodingInputPros;
@@ -119,6 +135,7 @@ t_DPS_ProInfoType m_OtherInputPros;
 t_DPS_ProInfoType m_BinaryDecoders;
 uint32_t m_DS_SysColors[e_SysColShadeMAX][e_SysColMAX];
 uint32_t m_DS_DefaultColors[e_DefaultColorsMAX];
+uint32_t m_DS_SelectionColors[e_ColorMAX];
 bool m_DS_UpdatingColorPreview;
 class TheMainWindow *m_SettingsMW;
 struct ConnectionInfoList *m_DS_ConList;
@@ -700,6 +717,7 @@ static void DS_SetSettingGUI(void)
 
     memcpy(m_DS_SysColors,m_SettingConSettings->SysColors,sizeof(m_DS_SysColors));
     memcpy(m_DS_DefaultColors,m_SettingConSettings->DefaultColors,sizeof(m_DS_DefaultColors));
+    memcpy(m_DS_SelectionColors,m_SettingConSettings->SelectionColors,sizeof(m_DS_SelectionColors));
 
     DS_RethinkDisplayDisplay();
     DS_RethinkHexDisplayDisplay();
@@ -1211,6 +1229,7 @@ static void DS_GetSettingsFromGUI(void)
     /********************/
     memcpy(m_SettingConSettings->SysColors,m_DS_SysColors,sizeof(m_DS_SysColors));
     memcpy(m_SettingConSettings->DefaultColors,m_DS_DefaultColors,sizeof(m_DS_DefaultColors));
+    memcpy(m_SettingConSettings->SelectionColors,m_DS_SelectionColors,sizeof(m_DS_SelectionColors));
 }
 
 static void DS_RethinkGUI(void)
@@ -1809,6 +1828,9 @@ void DS_DoSysColApply(void)
                 m_DS_SysColors[e_SysColShade_Normal][e_SysCol_Black];
         m_DS_DefaultColors[e_DefaultColors_FG]=
                 m_DS_SysColors[e_SysColShade_Normal][e_SysCol_White];
+
+        GetPresetSelectionColors(m_DS_SelectionColors);
+
         DS_CopySysColors2GUI();
     }
 }
@@ -1834,117 +1856,58 @@ static void DS_CopySysColors2GUI(void)
         Shade=e_SysColShade_Dark;
 
     for(r=0;r<e_SysColMAX;r++)
-    {
-        UIS_SetSysColPreviewColor((e_SysColType)r,
-                m_DS_SysColors[Shade][r]);
-    }
+        UIS_SetSysColPreviewColor((e_SysColType)r,m_DS_SysColors[Shade][r]);
 
     for(r=0;r<e_DefaultColorsMAX;r++)
     {
         UIS_SetDefaultPreviewColor((e_DefaultColorsType)r,
                 m_DS_DefaultColors[r]);
     }
-}
 
-/*******************************************************************************
- * NAME:
- *    UIS_HandleSysColPreviewColorClick
- *
- * SYNOPSIS:
- *    void UIS_HandleSysColPreviewColorClick(void);
- *
- * PARAMETERS:
- *    NONE
- *
- * FUNCTION:
- *    This function is called when one of the preview colors is clicked.
- *
- * RETURNS:
- *    NONE
- *
- * SEE ALSO:
- *    
- ******************************************************************************/
-void UIS_HandleSysColPreviewColorClick(void)
-{
-    t_UIRadioBttnCtrl *DefaultBttn;
-    int Bttn;
-
-    for(Bttn=e_UIS_RadioBttn_DefaultColorPrev_Forground;
-            Bttn<=e_UIS_RadioBttn_DefaultColorPrev_Background;Bttn++)
-    {
-        DefaultBttn=UIS_GetRadioBttnHandle((e_UIS_RadioBttns)(Bttn));
-        UIUnselectRadioBttn(DefaultBttn);
-    }
-
-    DS_UpdateColorPreview(true);
+    for(r=0;r<e_ColorMAX;r++)
+        UIS_SetSelectionPreviewColor((e_ColorType)r,m_DS_SelectionColors[r]);
 }
 
 void DS_SetCurrentColor(uint32_t RGB)
 {
     int Color;
     e_SysColShadeType Shade;
-    int DefaultColor;
     t_UIRadioBttnCtrl *SysColShade_Normal;
     t_UIRadioBttnCtrl *SysColShade_Bright;
     t_UIRadioBttnCtrl *SysColShade_Dark;
-    t_UIRadioBttnCtrl *PreviewBttn;
-    t_UIRadioBttnCtrl *DefaultBttnFG;
-    t_UIRadioBttnCtrl *DefaultBttnBG;
-
-    /* Find the selected color */
-    for(Color=0;Color<e_SysColMAX;Color++)
-    {
-        PreviewBttn=UIS_GetRadioBttnHandle(
-                (e_UIS_RadioBttns)(e_UIS_RadioBttn_SysColPrev_Black+Color));
-        if(UIIsRadioBttnSelected(PreviewBttn))
-        {
-            /* Found it */
-            break;
-        }
-    }
-    if(Color==e_SysColMAX)
-    {
-        /* Check the Default FG & BG */
-        DefaultBttnFG=UIS_GetRadioBttnHandle(
-                e_UIS_RadioBttn_DefaultColorPrev_Forground);
-        DefaultBttnBG=UIS_GetRadioBttnHandle(
-                e_UIS_RadioBttn_DefaultColorPrev_Background);
-
-        if(UIIsRadioBttnSelected(DefaultBttnFG))
-        {
-            DefaultColor=e_DefaultColors_FG;
-        }
-        else if(UIIsRadioBttnSelected(DefaultBttnBG))
-        {
-            DefaultColor=e_DefaultColors_BG;
-        }
-        else
-        {
-            /* Nothing select, use black */
-            Color=e_SysCol_Black;
-        }
-    }
+    e_DS_EditingColorType Editing;
 
     SysColShade_Normal=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Normal);
     SysColShade_Bright=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Bright);
     SysColShade_Dark=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Dark);
 
-    if(Color==e_SysColMAX)
-    {
-        m_DS_DefaultColors[DefaultColor]=RGB;
-    }
-    else
-    {
-        Shade=e_SysColShade_Normal;
-        if(UIIsRadioBttnSelected(SysColShade_Normal))
-            Shade=e_SysColShade_Normal;
-        if(UIIsRadioBttnSelected(SysColShade_Bright))
-            Shade=e_SysColShade_Bright;
-        if(UIIsRadioBttnSelected(SysColShade_Dark))
-            Shade=e_SysColShade_Dark;
+    /* Find the selected color */
+    Editing=DS_FindCurrentEditingColor(&Color);
+    if(Editing==e_DS_EditingColorMAX)
+        return;
 
-        m_DS_SysColors[Shade][Color]=RGB;
+    switch(Editing)
+    {
+        case e_DS_EditingColor_Defaults:
+            m_DS_DefaultColors[Color]=RGB;
+        break;
+        case e_DS_EditingColor_Colors:
+            Shade=e_SysColShade_Normal;
+            if(UIIsRadioBttnSelected(SysColShade_Normal))
+                Shade=e_SysColShade_Normal;
+            if(UIIsRadioBttnSelected(SysColShade_Bright))
+                Shade=e_SysColShade_Bright;
+            if(UIIsRadioBttnSelected(SysColShade_Dark))
+                Shade=e_SysColShade_Dark;
+
+            m_DS_SysColors[Shade][Color]=RGB;
+        break;
+        case e_DS_EditingColor_Selection:
+            m_DS_SelectionColors[Color]=RGB;
+        break;
+        case e_DS_EditingColorMAX:
+        default:
+        break;
     }
 }
 
@@ -1952,67 +1915,41 @@ uint32_t DS_GetCurrentColor(void)
 {
     int Color;
     e_SysColShadeType Shade;
-    int DefaultColor;
     t_UIRadioBttnCtrl *SysColShade_Normal;
     t_UIRadioBttnCtrl *SysColShade_Bright;
     t_UIRadioBttnCtrl *SysColShade_Dark;
-    t_UIRadioBttnCtrl *PreviewBttn;
-    t_UIRadioBttnCtrl *DefaultBttnFG;
-    t_UIRadioBttnCtrl *DefaultBttnBG;
-
-    /* Find the selected color */
-    for(Color=0;Color<e_SysColMAX;Color++)
-    {
-        PreviewBttn=UIS_GetRadioBttnHandle(
-                (e_UIS_RadioBttns)(e_UIS_RadioBttn_SysColPrev_Black+Color));
-        if(UIIsRadioBttnSelected(PreviewBttn))
-        {
-            /* Found it */
-            break;
-        }
-    }
-    if(Color==e_SysColMAX)
-    {
-        /* Check the Default FG & BG */
-        DefaultBttnFG=UIS_GetRadioBttnHandle(
-                e_UIS_RadioBttn_DefaultColorPrev_Forground);
-        DefaultBttnBG=UIS_GetRadioBttnHandle(
-                e_UIS_RadioBttn_DefaultColorPrev_Background);
-
-        if(UIIsRadioBttnSelected(DefaultBttnFG))
-        {
-            DefaultColor=e_DefaultColors_FG;
-        }
-        else if(UIIsRadioBttnSelected(DefaultBttnBG))
-        {
-            DefaultColor=e_DefaultColors_BG;
-        }
-        else
-        {
-            /* Nothing select, use black */
-            Color=e_SysCol_Black;
-        }
-    }
+    e_DS_EditingColorType Editing;
 
     SysColShade_Normal=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Normal);
     SysColShade_Bright=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Bright);
     SysColShade_Dark=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Dark);
 
-    if(Color==e_SysColMAX)
-    {
-        return m_DS_DefaultColors[DefaultColor];
-    }
-    else
-    {
-        Shade=e_SysColShade_Normal;
-        if(UIIsRadioBttnSelected(SysColShade_Normal))
-            Shade=e_SysColShade_Normal;
-        if(UIIsRadioBttnSelected(SysColShade_Bright))
-            Shade=e_SysColShade_Bright;
-        if(UIIsRadioBttnSelected(SysColShade_Dark))
-            Shade=e_SysColShade_Dark;
+    /* Find the selected color */
+    Editing=DS_FindCurrentEditingColor(&Color);
+    if(Editing==e_DS_EditingColorMAX)
+        return 0;
 
-        return m_DS_SysColors[Shade][Color];
+    switch(Editing)
+    {
+        case e_DS_EditingColor_Defaults:
+            return m_DS_DefaultColors[Color];
+        case e_DS_EditingColor_Colors:
+            Shade=e_SysColShade_Normal;
+            if(UIIsRadioBttnSelected(SysColShade_Normal))
+                Shade=e_SysColShade_Normal;
+            if(UIIsRadioBttnSelected(SysColShade_Bright))
+                Shade=e_SysColShade_Bright;
+            if(UIIsRadioBttnSelected(SysColShade_Dark))
+                Shade=e_SysColShade_Dark;
+
+            return m_DS_SysColors[Shade][Color];
+        break;
+        case e_DS_EditingColor_Selection:
+            return m_DS_SelectionColors[Color];
+        case e_DS_EditingColorMAX:
+        default:
+            return 0x000000;
+        break;
     }
 }
 
@@ -2030,47 +1967,11 @@ void DS_UpdateColorPreview(bool UpdateWeb)
     t_UINumberInput *GreenInput;
     t_UINumberInput *BlueInput;
     t_UITextInputCtrl *WebInput;
-    t_UIRadioBttnCtrl *PreviewBttn;
-    t_UIRadioBttnCtrl *DefaultBttnFG;
-    t_UIRadioBttnCtrl *DefaultBttnBG;
-    int DefaultColor;
     uint32_t RGB;
     char buff[100];
+    e_DS_EditingColorType Editing;
 
     m_DS_UpdatingColorPreview=true;
-
-    /* Find the selected color */
-    for(Color=0;Color<e_SysColMAX;Color++)
-    {
-        PreviewBttn=UIS_GetRadioBttnHandle(
-                (e_UIS_RadioBttns)(e_UIS_RadioBttn_SysColPrev_Black+Color));
-        if(UIIsRadioBttnSelected(PreviewBttn))
-        {
-            /* Found it */
-            break;
-        }
-    }
-    if(Color==e_SysColMAX)
-    {
-        /* Check the Default FG & BG */
-        DefaultBttnFG=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_DefaultColorPrev_Forground);
-        DefaultBttnBG=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_DefaultColorPrev_Background);
-
-        if(UIIsRadioBttnSelected(DefaultBttnFG))
-        {
-            DefaultColor=e_DefaultColors_FG;
-        }
-        else if(UIIsRadioBttnSelected(DefaultBttnBG))
-        {
-            DefaultColor=e_DefaultColors_BG;
-        }
-        else
-        {
-            /* Nothing select, use black */
-            Color=e_SysCol_Black;
-            DefaultColor=e_DefaultColors_BG;
-        }
-    }
 
     SysColShade_Normal=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Normal);
     SysColShade_Bright=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysCol_Shade_Bright);
@@ -2083,21 +1984,33 @@ void DS_UpdateColorPreview(bool UpdateWeb)
     BlueInput=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_SysCol_BlueInput);
     WebInput=UIS_GetTextInputHandle(e_UIS_TextInput_SysCol_Web);
 
-    if(Color==e_SysColMAX)
-    {
-        RGB=m_DS_DefaultColors[DefaultColor];
-    }
-    else
-    {
-        Shade=e_SysColShade_Normal;
-        if(UIIsRadioBttnSelected(SysColShade_Normal))
-            Shade=e_SysColShade_Normal;
-        if(UIIsRadioBttnSelected(SysColShade_Bright))
-            Shade=e_SysColShade_Bright;
-        if(UIIsRadioBttnSelected(SysColShade_Dark))
-            Shade=e_SysColShade_Dark;
+    Editing=DS_FindCurrentEditingColor(&Color);
+    if(Editing==e_DS_EditingColorMAX)
+        return;
 
-        RGB=m_DS_SysColors[Shade][Color];
+    switch(Editing)
+    {
+        case e_DS_EditingColor_Defaults:
+            RGB=m_DS_DefaultColors[Color];
+        break;
+        case e_DS_EditingColor_Colors:
+            Shade=e_SysColShade_Normal;
+            if(UIIsRadioBttnSelected(SysColShade_Normal))
+                Shade=e_SysColShade_Normal;
+            if(UIIsRadioBttnSelected(SysColShade_Bright))
+                Shade=e_SysColShade_Bright;
+            if(UIIsRadioBttnSelected(SysColShade_Dark))
+                Shade=e_SysColShade_Dark;
+
+            RGB=m_DS_SysColors[Shade][Color];
+        break;
+        case e_DS_EditingColor_Selection:
+            RGB=m_DS_SelectionColors[Color];
+        break;
+        case e_DS_EditingColorMAX:
+        default:
+            RGB=0;
+        break;
     }
 
     UISetScrollBarPos(RedScroll,(RGB>>16)&0xFF);
@@ -2114,10 +2027,22 @@ void DS_UpdateColorPreview(bool UpdateWeb)
         UISetTextCtrlText(WebInput,buff);
     }
 
-    if(Color==e_SysColMAX)
-        UIS_SetDefaultPreviewColor((e_DefaultColorsType)DefaultColor,RGB);
-    else
-        UIS_SetSysColPreviewColor((e_SysColType)Color,RGB);
+    switch(Editing)
+    {
+        case e_DS_EditingColor_Defaults:
+            UIS_SetDefaultPreviewColor((e_DefaultColorsType)Color,RGB);
+        break;
+        case e_DS_EditingColor_Colors:
+            UIS_SetSysColPreviewColor((e_SysColType)Color,RGB);
+        break;
+        case e_DS_EditingColor_Selection:
+            UIS_SetSelectionPreviewColor((e_ColorType)Color,RGB);
+        break;
+        case e_DS_EditingColorMAX:
+        default:
+        break;
+    }
+
     m_DS_UpdatingColorPreview=false;
 }
 
@@ -2195,40 +2120,6 @@ void UIS_ProcessSysColWebInputValue(const char *Text)
     }
     DS_SetCurrentColor(RGB);
     DS_UpdateColorPreview(false);
-}
-
-/*******************************************************************************
- * NAME:
- *    UIS_HandleSysColDefaultColorClick
- *
- * SYNOPSIS:
- *    void UIS_HandleSysColDefaultColorClick(void);
- *
- * PARAMETERS:
- *    NONE
- *
- * FUNCTION:
- *    This function is called when one of the default color button are clicked.
- *
- * RETURNS:
- *    NONE
- *
- * SEE ALSO:
- *    
- ******************************************************************************/
-void UIS_HandleSysColDefaultColorClick(void)
-{
-    t_UIRadioBttnCtrl *PreviewBttn;
-    int Color;
-
-    for(Color=0;Color<e_SysColMAX;Color++)
-    {
-        PreviewBttn=UIS_GetRadioBttnHandle(
-                (e_UIS_RadioBttns)(e_UIS_RadioBttn_SysColPrev_Black+Color));
-        UIUnselectRadioBttn(PreviewBttn);
-    }
-
-    DS_UpdateColorPreview(true);
 }
 
 /*******************************************************************************
@@ -2474,6 +2365,10 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_RadioBttn_DefaultColorPrev_Forground:
                 case e_UIS_RadioBttn_DefaultColorPrev_Background:
                     UIS_HandleSysColDefaultColorClick();
+                break;
+                case e_UIS_RadioBttn_SelectionColorPrev_Forground:
+                case e_UIS_RadioBttn_SelectionColorPrev_Background:
+                    UIS_HandleSysColSelectionColorClick();
                 break;
                 case e_UIS_RadioBttn_Display_ClearScreen_Clear:
                 case e_UIS_RadioBttn_Display_ClearScreen_Scroll:
@@ -2889,4 +2784,228 @@ static void DS_GetSettingsFromGUI_KeyboardRadioBttns(void)
         m_SettingConSettings->ClipboardMode=e_ClipboardMode_Alt;
     if(UIIsRadioBttnSelected(Keyboard_Clipboard_Smart))
         m_SettingConSettings->ClipboardMode=e_ClipboardMode_Smart;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DS_UnselectColorRadioButtons
+ *
+ * SYNOPSIS:
+ *    static void DS_UnselectColorRadioButtons(uint32_t Bttns);
+ *
+ * PARAMETERS:
+ *    Bttns [I] -- What radio buttons to unselect.  This is bit field
+ *                  DS_USCRB_DEFAULT -- The default colors
+ *                  DS_USCRB_COLORS -- The colors definitions
+ *                  DS_USCRB_SELECTION -- The selected text colors
+ *
+ * FUNCTION:
+ *    This function unselects buttons for what color is being edited in the
+ *    colors tab.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void DS_UnselectColorRadioButtons(uint32_t Bttns)
+{
+    t_UIRadioBttnCtrl *UIBttn;
+    int Bttn;
+    int Color;
+
+    if(Bttns&DS_USCRB_DEFAULT)
+    {
+        for(Bttn=e_UIS_RadioBttn_DefaultColorPrev_Forground;
+                Bttn<=e_UIS_RadioBttn_DefaultColorPrev_Background;Bttn++)
+        {
+            UIBttn=UIS_GetRadioBttnHandle((e_UIS_RadioBttns)(Bttn));
+            UIUnselectRadioBttn(UIBttn);
+        }
+    }
+    if(Bttns&DS_USCRB_COLORS)
+    {
+        for(Color=0;Color<e_SysColMAX;Color++)
+        {
+            UIBttn=UIS_GetRadioBttnHandle(
+                    (e_UIS_RadioBttns)(e_UIS_RadioBttn_SysColPrev_Black+Color));
+            UIUnselectRadioBttn(UIBttn);
+        }
+    }
+    if(Bttns&DS_USCRB_SELECTION)
+    {
+        for(Bttn=e_UIS_RadioBttn_SelectionColorPrev_Forground;
+                Bttn<=e_UIS_RadioBttn_SelectionColorPrev_Background;Bttn++)
+        {
+            UIBttn=UIS_GetRadioBttnHandle((e_UIS_RadioBttns)(Bttn));
+            UIUnselectRadioBttn(UIBttn);
+        }
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleSysColPreviewColorClick
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleSysColPreviewColorClick(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when one of the preview colors is clicked.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleSysColPreviewColorClick(void)
+{
+    DS_UnselectColorRadioButtons(DS_USCRB_DEFAULT|DS_USCRB_SELECTION);
+
+    DS_UpdateColorPreview(true);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleSysColDefaultColorClick
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleSysColDefaultColorClick(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when one of the default color button are clicked.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleSysColDefaultColorClick(void)
+{
+    DS_UnselectColorRadioButtons(DS_USCRB_COLORS|DS_USCRB_SELECTION);
+    DS_UpdateColorPreview(true);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleSysColSelectionColorClick
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleSysColSelectionColorClick(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when one of the selection color buttons are
+ *    clicked.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void UIS_HandleSysColSelectionColorClick(void)
+{
+    DS_UnselectColorRadioButtons(DS_USCRB_COLORS|DS_USCRB_DEFAULT);
+
+    DS_UpdateColorPreview(true);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DS_FindCurrentEditingColor
+ *
+ * SYNOPSIS:
+ *    e_DS_EditingColorType DS_FindCurrentEditingColor(int *Color);
+ *
+ * PARAMETERS:
+ *    Color [O] -- What color index was selected.  The type will depend on
+ *                 what is selected for editing.
+ *                      e_DS_EditingColor_Defaults -- 'e_DefaultColorsType'
+ *                      e_DS_EditingColor_Colors -- 'e_SysColType'
+ *                      e_DS_EditingColor_Selection -- 'e_ColorType'
+ *
+ * FUNCTION:
+ *    This function figures out what color is currently selected for editing
+ *    in the color tab.
+ *
+ * RETURNS:
+ *    What is current selected for editing.
+ *          e_DS_EditingColor_Defaults -- The defaults
+ *          e_DS_EditingColor_Colors -- The colors
+ *          e_DS_EditingColor_Selection -- The selection colors
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+e_DS_EditingColorType DS_FindCurrentEditingColor(int *Color)
+{
+    int Index;
+    t_UIRadioBttnCtrl *DefaultBttnFG;
+    t_UIRadioBttnCtrl *DefaultBttnBG;
+    t_UIRadioBttnCtrl *SelBttnFG;
+    t_UIRadioBttnCtrl *SelBttnBG;
+    t_UIRadioBttnCtrl *PreviewBttn;
+    e_DS_EditingColorType RetValue;
+
+    DefaultBttnFG=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_DefaultColorPrev_Forground);
+    DefaultBttnBG=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_DefaultColorPrev_Background);
+    SelBttnFG=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SelectionColorPrev_Forground);
+    SelBttnBG=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SelectionColorPrev_Background);
+
+    /* Figure out what we are editing */
+    for(Index=0;Index<e_SysColMAX;Index++)
+    {
+        PreviewBttn=UIS_GetRadioBttnHandle(
+                (e_UIS_RadioBttns)(e_UIS_RadioBttn_SysColPrev_Black+Index));
+        if(UIIsRadioBttnSelected(PreviewBttn))
+        {
+            /* Found it */
+            break;
+        }
+    }
+
+    if(Index!=e_SysColMAX)
+    {
+        *Color=Index;
+        RetValue=e_DS_EditingColor_Colors;
+    }
+    else if(UIIsRadioBttnSelected(DefaultBttnFG))
+    {
+        *Color=e_DefaultColors_FG;
+        RetValue=e_DS_EditingColor_Defaults;
+    }
+    else if(UIIsRadioBttnSelected(DefaultBttnBG))
+    {
+        *Color=e_DefaultColors_BG;
+        RetValue=e_DS_EditingColor_Defaults;
+    }
+    else if(UIIsRadioBttnSelected(SelBttnFG))
+    {
+        *Color=e_Color_FG;
+        RetValue=e_DS_EditingColor_Selection;
+    }
+    else if(UIIsRadioBttnSelected(SelBttnBG))
+    {
+        *Color=e_Color_BG;
+        RetValue=e_DS_EditingColor_Selection;
+    }
+    else
+    {
+        /* Don't have anything selected? */
+        RetValue=e_DS_EditingColorMAX;
+    }
+
+    return RetValue;
 }

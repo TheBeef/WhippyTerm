@@ -623,7 +623,6 @@ void Form_Settings::on_ClipboardKeys_Normal_radioButton_toggled(bool checked)
     }
 }
 
-
 void Form_Settings::on_ClipboardKeys_ShiftCtrlClip_radioButton_toggled(bool checked)
 {
     union DSEventData EventData;
@@ -735,6 +734,22 @@ void Form_Settings::on_SysBell_VisualOnly_radioButton_clicked()
     union DSEventData EventData;
 
     EventData.RadioBttn.InputID=e_UIS_RadioBttn_SysBell_VisualOnly;
+    SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+}
+
+void Form_Settings::on_SysColPrev_SelectionFG_radioButton_clicked()
+{
+    union DSEventData EventData;
+
+    EventData.RadioBttn.InputID=e_UIS_RadioBttn_SelectionColorPrev_Forground;
+    SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+}
+
+void Form_Settings::on_SysColPrev_SelectionBG_radioButton_clicked()
+{
+    union DSEventData EventData;
+
+    EventData.RadioBttn.InputID=e_UIS_RadioBttn_SelectionColorPrev_Background;
     SendEvent(e_DSEvent_RadioBttnClick,&EventData);
 }
 

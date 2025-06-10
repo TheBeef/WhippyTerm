@@ -153,6 +153,10 @@ private slots:
     
     void on_SysBell_VisualOnly_radioButton_clicked();
     
+    void on_SysColPrev_SelectionFG_radioButton_clicked();
+    
+    void on_SysColPrev_SelectionBG_radioButton_clicked();
+    
 private:
     bool DoingEvent;
 

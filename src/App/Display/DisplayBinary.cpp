@@ -1076,7 +1076,7 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
             }
             else
             {
-                /* times 3 because we use 3 chars per hex value, and -1 because
+                /* Times 3 because we use 3 chars per hex value, and -1 because
                    we don't highlight the last char */
                 Offset=0;
                 HighLightStart=SelBlocks[s].Start.Offset*3;
@@ -1090,24 +1090,45 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
             {
                 for(r=0;r<HighLightLineSize;r++)
                 {
-                    ColorBuff[Offset+HighLightStart+r].Attribs=
-                            TXT_ATTRIB_REVERSE;
+                    ColorBuff[Offset+HighLightStart+r].FGColor=
+                            Settings->SelectionColors[e_Color_FG];
+                    ColorBuff[Offset+HighLightStart+r].BGColor=
+                            Settings->SelectionColors[e_Color_BG];
+                    ColorBuff[Offset+HighLightStart+r].Attribs=TXT_ATTRIB_FORCE;
                 }
             }
             else if(Line==SelBlocks[s].Start.Line)
             {
                 for(r=HighLightStart;r<HighLightMaxSize;r++)
-                    ColorBuff[Offset+r].Attribs=TXT_ATTRIB_REVERSE;
+                {
+                    ColorBuff[Offset+r].FGColor=Settings->
+                            SelectionColors[e_Color_FG];
+                    ColorBuff[Offset+r].BGColor=Settings->
+                            SelectionColors[e_Color_BG];
+                    ColorBuff[Offset+r].Attribs=TXT_ATTRIB_FORCE;
+                }
             }
             else if(Line==SelBlocks[s].End.Line)
             {
                 for(r=0;r<HighLightEnd;r++)
-                    ColorBuff[Offset+r].Attribs=TXT_ATTRIB_REVERSE;
+                {
+                    ColorBuff[Offset+r].FGColor=Settings->
+                            SelectionColors[e_Color_FG];
+                    ColorBuff[Offset+r].BGColor=Settings->
+                            SelectionColors[e_Color_BG];
+                    ColorBuff[Offset+r].Attribs=TXT_ATTRIB_FORCE;
+                }
             }
             else
             {
                 for(r=0;r<HighLightMaxSize;r++)
-                    ColorBuff[Offset+r].Attribs=TXT_ATTRIB_REVERSE;
+                {
+                    ColorBuff[Offset+r].FGColor=Settings->
+                            SelectionColors[e_Color_FG];
+                    ColorBuff[Offset+r].BGColor=Settings->
+                            SelectionColors[e_Color_BG];
+                    ColorBuff[Offset+r].Attribs=TXT_ATTRIB_FORCE;
+                }
             }
         }
     }

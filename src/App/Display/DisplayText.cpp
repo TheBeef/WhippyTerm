@@ -3498,7 +3498,7 @@ bool DisplayText::GetSelectionString(std::string &Clip)
     else
     {
         /* Take from Start to the end of frag */
-        Clip.assign(Start.Frag->Text,Start.StrPos);
+        Clip.assign(Start.Frag->Text,Start.StrPos,string::npos);
 
         /* Now copy all the frag from here to end frag */
         CurLine=Start.Line;

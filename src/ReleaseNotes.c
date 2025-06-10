@@ -31,6 +31,10 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added selection colors to settings"
+            "You can now pick the colors you want for selections in the"
+            " main area (binary and text)."},
+    {
         NOTETYPE_NEW_FEATURE,"Added a new find CRC dialog"
             "You can now input some data and input a CRC value for that data"
             " and have it analyzed.  The system will then tell you the CRC"

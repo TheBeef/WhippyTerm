@@ -118,6 +118,7 @@ class DisplayBinary : public DisplayBase
         void RedrawCurrentLine(void);
         void ScreenResize(void);
         void SetupCanvas(void);
+        void SetDrawMask(uint16_t Mask);
         void RethinkYScrollBar(void);
         void RethinkWindowSize(void);
         void RedrawScreen(void);

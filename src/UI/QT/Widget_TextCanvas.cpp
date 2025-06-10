@@ -128,7 +128,7 @@ bool Widget_TextCanvas::SendEvent(e_WTCEventType EventType)
 
 void Widget_TextCanvas::Setup4Paint(void)
 {
-    QFontMetrics fm(RenderFont);
+    QFontMetrics fm(RenderFont,this);
 
     GUICharHeight=fm.lineSpacing()+1;   // +1 Had some problems with _ not always showing up when using some fonts.
     GUICharWidth=fm.averageCharWidth();
@@ -458,7 +458,7 @@ void Widget_TextCanvas::paintEvent(QPaintEvent *event)
     QColor FocusColor;
     QPen FocusPen;
     QPalette FocusPal;
-    QFontMetrics fm(RenderFont);
+    QFontMetrics fm(RenderFont,this);
     int px;
     QColor TmpColor;
     QRegion OldRegion;
@@ -618,7 +618,7 @@ void Widget_TextCanvas::RethinkCursor(void)
     int p;
     QString FirstHalf;
     unsigned int xpos;
-    QFontMetrics fm(RenderFont);
+    QFontMetrics fm(RenderFont,this);
     i_WTCLineFrags Frag;
 
     if(CursorY>=Lines.size())
@@ -1405,7 +1405,7 @@ void Widget_TextCanvas::ChangeCursorStyle(e_TextCursorStyleType Style)
 
 void Widget_TextCanvas::RedrawCursor(void)
 {
-    QFontMetrics fm(RenderFont);
+    QFontMetrics fm(RenderFont,this);
 
     update(DisplayLeftEdgePx+CursorPx-ScrollOffsetX,
             DisplayTopEdgePx+CursorY*GUICharHeight,CalcCursorWidth(&fm),
@@ -1438,7 +1438,7 @@ void Widget_TextCanvas::SetCursorPos(int NewCursorX,int NewCursorY)
 
 int Widget_TextCanvas::GetTextWidth(const struct TextCanvasFrag *Frag)
 {
-    QFontMetrics fm(RenderFont);
+    QFontMetrics fm(RenderFont,this);
     struct WTCFrag NewFrag;
 
     /* Convert the frag */

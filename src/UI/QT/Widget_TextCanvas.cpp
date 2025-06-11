@@ -70,11 +70,20 @@ Widget_TextCanvas::Widget_TextCanvas(QWidget *parent) : QWidget(parent)
     a->setEndValue(0);
     a->setEasingCurve(QEasingCurve::OutBack);
     a->start(QPropertyAnimation::DeleteWhenStopped);
+
+//    connect(this->screen(),&QScreen::logicalDotsPerInchChanged,this,&Widget_TextCanvas::DPIChange);
 }
 
 Widget_TextCanvas::~Widget_TextCanvas()
 {
 }
+
+/* This was to fix the wrong DPI problems, but is only available in QT6 (and
+   wasn't tested) */
+//void Widget_TextCanvas::DPIChange()
+//{
+//    qDebug() << "Here" << screen()->logicalDotsPerInch();
+//}
 
 void Widget_TextCanvas::SetEventHandler(bool (*EventHandler)(const struct WTCEvent *Event),uintptr_t UserData)
 {
@@ -395,6 +404,10 @@ void Widget_TextCanvas::resizeEvent(QResizeEvent *event)
 
 void Widget_TextCanvas::RedrawScreen(void)
 {
+    /* Ok, this should be done in the DPI change but because that is a QT6
+       this we do it on a resize instead */
+    Setup4Paint();
+
     update();
 }
 

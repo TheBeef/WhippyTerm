@@ -146,6 +146,7 @@ public:
 
 public slots:
         void CursorTimerTick();
+//        void DPIChange();
 
 protected:
     void paintEvent(QPaintEvent *);

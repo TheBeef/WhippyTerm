@@ -30,6 +30,10 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_BUG_FIX,"Fixed a bug with screen DPI settings on Windows",
+            "When you set the DPI something other than 96 (scale %) then"
+            " selecting text did not work correctly.  This (hopefully)"
+            " has been fixed."},
     {
         NOTETYPE_ENHANCEMENT,"Added selection colors to settings"
             "You can now pick the colors you want for selections in the"

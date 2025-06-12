@@ -30,6 +30,13 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+
+    void (*ProcessOutGoingData)(t_DataProcessorHandleType *DataHandle,
+            const uint8_t *Data,int Bytes);
+
+    {
+        NOTETYPE_ENHANCEMENT,"Added new API to the Data Processor so they can see all outgoing bytes"
+            "The new API ProcessOutGoingData() was added."},
     {   NOTETYPE_BUG_FIX,"Fixed a bug with screen DPI settings on Windows",
             "When you set the DPI something other than 96 (scale %) then"
             " selecting text did not work correctly.  This (hopefully)"

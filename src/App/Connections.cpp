@@ -1598,7 +1598,7 @@ e_ConWriteType Connection::WriteData(const uint8_t *Data,int Bytes,
  *
  * FUNCTION:
  *    This is an internal helper function that writes bytes out to the device.
- *    This handles converting device errors into 
+ *    This handles converting device errors into ... DEBUG PAUL: Do what???
  *
  * RETURNS:
  *    e_ConWrite_Success -- Things worked.  The bytes have been sent
@@ -1608,7 +1608,9 @@ e_ConWriteType Connection::WriteData(const uint8_t *Data,int Bytes,
  *    e_ConWrite_Ignored -- Because of the mode we are in we didn't send it.
  *
  * NOTES:
- *    This is for internal use, see Connection::WriteData() instead
+ *    This is for internal use, see Connection::WriteData() instead.  Never
+ *    call IOS_WriteData() directly, call this or better WriteData().
+ *    (ya ya I know ComTest doesn't follow this rule, but you should)
  *
  * SEE ALSO:
  *    Connection::WriteData()
@@ -1616,6 +1618,12 @@ e_ConWriteType Connection::WriteData(const uint8_t *Data,int Bytes,
 e_ConWriteType Connection::InternalWriteBytes(const uint8_t *Data,int Bytes)
 {
     e_ConWriteType RetValue;
+
+    /* We need to call the Data Processor System so it can pass on writes to
+       the plugins */
+    Con_SetActiveConnection(this);
+    DPS_ProcessorOutGoingBytes(Data,Bytes);
+    Con_SetActiveConnection(NULL);
 
     RetValue=e_ConWrite_Failed;
     switch(IOS_WriteData(IOHandle,Data,Bytes))

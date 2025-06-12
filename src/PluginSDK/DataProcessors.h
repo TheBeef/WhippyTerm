@@ -39,6 +39,7 @@
 /***  DEFINES                          ***/
 /* Versions of struct DataProcessorAPI */
 #define DATA_PROCESSORS_API_VERSION_1       1
+#define DATA_PROCESSORS_API_VERSION_2       2
 
 /* Versions of struct DPS_API */
 #define DPS_API_VERSION_1                   1
@@ -145,6 +146,10 @@ struct DataProcessorAPI
     void (*ProcessIncomingBinaryByte)(t_DataProcessorHandleType *DataHandle,
             const uint8_t Byte);
     /********* End of DATA_PROCESSORS_API_VERSION_1 *********/
+    /********* Start of DATA_PROCESSORS_API_VERSION_2 *********/
+    void (*ProcessOutGoingData)(t_DataProcessorHandleType *DataHandle,
+            const uint8_t *Data,int Bytes);
+    /********* End of DATA_PROCESSORS_API_VERSION_2 *********/
 };
 
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */
@@ -194,4 +199,3 @@ struct DPS_API
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
 
 #endif
-//                TmpCol=g_Settings.SysColors[Shade][Data->CSIArg[r]-30];

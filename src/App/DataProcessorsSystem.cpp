@@ -382,6 +382,34 @@ void DPS_Init(void)
  *      false -- This key should continue on it's way though the key press
  *               processor list.
  *==============================================================================
+ * NAME:
+ *    ProcessOutGoingData
+ *
+ * SYNOPSIS:
+ *    void ProcessOutGoingData(t_DataProcessorHandleType *DataHandle,
+ *          const uint8_t *Data,int Bytes);
+ *
+ * PARAMETERS:
+ *      DataHandle [I] -- The data handle to work on.  This is your internal
+ *                        data.
+ *      Data [I] -- This is the block of data that is about to be sent
+ *      Bytes [I] -- The number of bytes in the 'Data' block.
+ *
+ * FUNCTION:
+ *      This function is called for block of data being send to a IO driver.
+ *      This is in addition to ProcessKeyPress(), this is called for every
+ *      byte being sent, where as ProcessKeyPress() is only called for
+ *      key presses.  You will be called 2 times for key presses, one for
+ *      ProcessKeyPress(), and then this function.  For things like Send Buffers
+ *      no ProcessKeyPress() will be called only this function.
+ *      So if you want to see all bytes going out use this function.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    ProcessKeyPress()
+ *==============================================================================
  *
  * SEE ALSO:
  *    
@@ -773,6 +801,53 @@ bool DPS_ProcessorKeyPress(const uint8_t *KeyChar,int KeyCharLen,
     }
 
     return Consumed;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_ProcessorOutGoingBytes
+ *
+ * SYNOPSIS:
+ *    void DPS_ProcessorOutGoingBytes(const uint8_t *outbuff,int bytes);
+ *
+ * PARAMETERS:
+ *    outbuff [I] -- The buffer with outgoing bytes in it
+ *    bytes [I] -- The number of bytes being sent
+ *
+ * FUNCTION:
+ *    This function is called just before bytes are sent out to the IO driver.
+ *    It sends the bytes to data processor plugin so it can know what is 
+ *    being sent (for styling?).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DPS_ProcessorOutGoingBytes(const uint8_t *outbuff,int bytes)
+{
+    i_DPSDataProcessorsType CurProcessor;
+    struct ProcessorConData *FData;
+    unsigned int Index;
+
+    FData=Con_GetCurrentProcessorData();
+    if(FData==NULL)
+        return;
+
+    /* Send it to all the term emulations */
+    for(CurProcessor=FData->DataProcessorsList.begin(),Index=0;
+            CurProcessor!=FData->DataProcessorsList.end();
+            CurProcessor++,Index++)
+    {
+        m_ActiveDataProcessor=&*CurProcessor;
+        if(CurProcessor->API.ProcessOutGoingData!=NULL)
+        {
+            CurProcessor->API.ProcessOutGoingData(FData->ProcessorsData[Index],
+                    outbuff,bytes);
+        }
+        m_ActiveDataProcessor=NULL;
+    }
 }
 
 /*******************************************************************************

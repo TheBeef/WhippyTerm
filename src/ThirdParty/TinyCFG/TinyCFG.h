@@ -1,4 +1,4 @@
-/* Prerelease Version 0.6 */
+/* Prerelease Version 0.9 */
 
 /*******************************************************************************
  * FILENAME: TinyCFG.h
@@ -107,6 +107,9 @@ class TinyCFG
         void WriteDataElement(const char *XmlName,const char *Value);
         const char *ReadDataElement(const char *DataElementName);
         const char *ReadNextDataElement(const char *DataElementName);
+        bool ReadFirstTag(std::string &XmlName,std::string &DataElement);
+        bool ReadNextTag(const char **XmlName,const char **DataElement);
+        bool ReadNextTag(std::string &XmlName,std::string &DataElement);
         /* For advanced data types */
         void ConnectToParentCFGForReading(class TinyCFG *OrgCFG);
         bool WriteCFGUsingParentCFG(class TinyCFG *OrgCFG);
@@ -151,6 +154,7 @@ class TinyCFG
         bool SkipToEndTag(const char *ElementName);
         struct TinyCFG_RegData *FindDataEntry(const char *DataName);
         char *FindElementAtThisLevel(const char *ElementName,bool EndTag);
+        bool FindNextTagStartAndEndAtThisLevel(char **Start,char **Data,char **End);
 };
 
 /***  CLASS DEFINITIONS                ***/

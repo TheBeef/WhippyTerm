@@ -66,6 +66,7 @@ Example plugins:
 #include "App/DataProcessorsSystem.h"
 #include "App/Settings.h"
 #include "App/PluginSupport/PluginUISupport.h"
+#include "App/PluginSupport/KeyValueSupport.h"
 #include "PluginSDK/Plugin.h"
 #include "UI/UIAsk.h"
 #include "UI/UIDebug.h"
@@ -106,7 +107,9 @@ uint32_t DPS_GetSysDefaultColor(uint32_t DefaultColor);
 void DPS_NoteNonPrintable(const char *CodeStr);
 void DPS_DoTab(void);
 void DPS_DoPrevTab(void);
-void DPS_SetTitle(const char *Title);
+static void DPS_SetTitle(const char *Title);
+static void DPS_SetCurrentSettingsTabName(const char *Name);
+static t_WidgetSysHandle *DPS_AddNewSettingsTab(const char *Name);
 void DPS_SendBackspace(void);
 void DPS_SendEnter(void);
 void DPS_BinaryAddText(const char *Str);
@@ -114,6 +117,8 @@ void DPS_BinaryAddHex(uint8_t Byte);
 void DPS_DoSystemBell(int VisualOnly);
 void DPS_DoScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,
         int32_t DeltaX,int32_t DeltaY);
+static struct PluginSettings *DPS_FindPluginSetting(const char *IDStr,
+        class ConSettings *Settings);
 
 /*** VARIABLE DEFINITIONS     ***/
 static struct DataProcessor *m_ActiveDataProcessor;
@@ -153,8 +158,13 @@ struct DPS_API g_DPSAPI=
     DPS_BinaryAddText,
     DPS_BinaryAddHex,
     DPS_InsertString,
+    /* V2 */
+    DPS_SetCurrentSettingsTabName,
+    DPS_AddNewSettingsTab,
 };
 t_DPSDataProcessorsType m_DataProcessors;     // All available data processors
+
+static void *(*DPS_PS_GuiCtrlFn)(e_DataProPlugSettingsFnType Fn,void *Arg1,void *Arg2);
 
 /*******************************************************************************
  * NAME:
@@ -390,25 +400,99 @@ void DPS_Init(void)
  *          const uint8_t *Data,int Bytes);
  *
  * PARAMETERS:
- *      DataHandle [I] -- The data handle to work on.  This is your internal
- *                        data.
- *      Data [I] -- This is the block of data that is about to be sent
- *      Bytes [I] -- The number of bytes in the 'Data' block.
+ *    DataHandle [I] -- The data handle to work on.  This is your internal
+ *                      data.
+ *    Data [I] -- This is the block of data that is about to be sent
+ *    Bytes [I] -- The number of bytes in the 'Data' block.
  *
  * FUNCTION:
- *      This function is called for block of data being send to a IO driver.
- *      This is in addition to ProcessKeyPress(), this is called for every
- *      byte being sent, where as ProcessKeyPress() is only called for
- *      key presses.  You will be called 2 times for key presses, one for
- *      ProcessKeyPress(), and then this function.  For things like Send Buffers
- *      no ProcessKeyPress() will be called only this function.
- *      So if you want to see all bytes going out use this function.
+ *    This function is called for block of data being send to a IO driver.
+ *    This is in addition to ProcessKeyPress(), this is called for every
+ *    byte being sent, where as ProcessKeyPress() is only called for
+ *    key presses.  You will be called 2 times for key presses, one for
+ *    ProcessKeyPress(), and then this function.  For things like Send Buffers
+ *    no ProcessKeyPress() will be called only this function.
+ *    So if you want to see all bytes going out use this function.
  *
  * RETURNS:
  *    NONE
  *
  * SEE ALSO:
  *    ProcessKeyPress()
+ *==============================================================================
+ * NAME:
+ *    AllocSettingsWidgets
+ *
+ * SYNOPSIS:
+ *    t_DataProSettingsWidgetsType *AllocSettingsWidgets(
+ *              t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to add new widgets to
+ *    Settings [I] -- The current settings.  This is a standard key/value
+ *                    list.
+ *
+ * FUNCTION:
+ *    This function is called when the user presses the "Settings" button
+ *    to change any settings for this plugin (in the settings dialog).  If
+ *    this is NULL then the user can not press the settings button.
+ *
+ *    When the plugin settings dialog is open it will have a tab control in
+ *    it with a "Generic" tab opened.  Your widgets will be added to this
+ *    tab.  If you want to add a new tab use can call the DPS_API
+ *    function AddNewSettingsTab().  If you want to change the name of the
+ *    first tab call SetCurrentSettingsTabName() before you add a new tab.
+ *
+ * RETURNS:
+ *    The private settings data that you want to use.  This is a private
+ *    structure that you allocate and then cast to
+ *    (t_DataProSettingsWidgetsType *) when you return.  It's up to you what
+ *    you want to do with this data (if you do not want to use it return
+ *    a fixed int set to 1, and ignore it in FreeSettingsWidgets.  If you
+ *    return NULL it is considered an error.
+ *
+ * SEE ALSO:
+ *    FreeSettingsWidgets(), SetCurrentSettingsTabName(), AddNewSettingsTab()
+ *==============================================================================
+ * NAME:
+ *    FreeSettingsWidgets
+ *
+ * SYNOPSIS:
+ *    void FreeSettingsWidgets(t_DataProSettingsWidgetsType *PrivData);
+ *
+ * PARAMETERS:
+ *    PrivData [I] -- The private data to free
+ *
+ * FUNCTION:
+ *      This function is called when the system frees the settings widets.
+ *      It should free any private data you allocated in AllocSettingsWidgets().
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    AllocSettingsWidgets()
+ *==============================================================================
+ * NAME:
+ *    StoreSettings
+ *
+ * SYNOPSIS:
+ *    void StoreSettings(t_DataProSettingsWidgetsType *PrivData,
+ *              t_PIKVList *Settings);
+ *
+ * PARAMETERS:
+ *    PrivData [I] -- Your private data allocated in AllocSettingsWidgets()
+ *    Settings [O] -- This is where you store the settings.
+ *
+ * FUNCTION:
+ *    This function takes the widgets added with AllocSettingsWidgets() and
+ *    stores them is a key/value pair list in 'Settings'.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    AllocSettingsWidgets()
  *==============================================================================
  *
  * SEE ALSO:
@@ -1002,6 +1086,422 @@ const struct DataProcessor *DPS_GetProcessorsInfo(const char *IDStr)
         }
     }
     return NULL;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_DoesPluginHaveSettings
+ *
+ * SYNOPSIS:
+ *    bool DPS_DoesPluginHaveSettings(const char *IDStr);
+ *
+ * PARAMETERS:
+ *    IDStr [I] -- The ID string for this processor to lookup
+ *
+ * FUNCTION:
+ *    This function checks if a plugin has a settings dialog.
+ *
+ * RETURNS:
+ *    true -- It does use a settings dialog
+ *    false -- There are no settings for this plugin.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DPS_DoesPluginHaveSettings(const char *IDStr)
+{
+    const struct DataProcessor *ProData;
+
+    ProData=DPS_GetProcessorsInfo(IDStr);
+    if(ProData!=NULL)
+        if(ProData->API.AllocSettingsWidgets!=NULL)
+            return true;
+
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_PluginSettings_SetActiveCtrls
+ *
+ * SYNOPSIS:
+ *    void DPS_PluginSettings_SetActiveCtrls(void *(*GuiCtrl)(e_DataProPlugSettingsFnType Fn,void *Arg1,void *Arg2))
+ *
+ * PARAMETERS:
+ *    GuiCtrl [I] -- The function to call when the plugin makes a GUI request
+ *                   for the settings.  See below.
+ *
+ * FUNCTION:
+ *    This function sets the callback function when the plugin makes a
+ *    settings GUI request.  When you are done with the settings you should
+ *    call this will NULL (so you don't get unexpected callbacks).
+ *
+ * CALLBACKS:
+ * =============================================================================
+ * NAME:
+ *    GuiCtrl
+ *
+ * SYNOPSIS:
+ *    void *GuiCtrl(e_DataProPlugSettingsFnType Fn,void *Arg1,void *Arg2);
+ *
+ * PARAMETERS:
+ *    Fn [I] -- What function is the plugin trying to do.  Supported fns:
+ *                  e_DataProPlugSettingsFn_SetCurrentTabName -- Changes the
+ *                          name of the current tab that widgets are being
+ *                          added to.
+ *                              Arg1 -- "const char *" with the new name in it.
+ *                              Arg2 -- ignored.
+ *                              Return value: NULL
+ *                  e_DataProPlugSettingsFn_AddNewTab -- A new tab should
+ *                          be allocated and the t_UIContainerFrameCtrl for
+ *                          this tab should be returned.
+ *                              Arg1 -- "const char *" with the tab name in it.
+ *                              Arg2 -- ignored.
+ *                              Return value: "t_UIContainerFrameCtrl *" with
+ *                                      the handle to the container for the
+ *                                      new tab in it.
+ *
+ * FUNCTION:
+ *    This function is called when a plugin is in its settings and wants
+ *    to preform an action.  See above for the actions.
+ *
+ * RETURNS:
+ *    Depends on the 'Fn'  See above.
+ *
+ * SEE ALSO:
+ *    
+ * =============================================================================
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DPS_PluginSettings_SetActiveCtrls(void *(*GuiCtrl)(e_DataProPlugSettingsFnType Fn,void *Arg1,void *Arg2))
+{
+    DPS_PS_GuiCtrlFn=GuiCtrl;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_PluginSettings_AddWidgets
+ *
+ * SYNOPSIS:
+ *    t_DataProSettingsWidgetsType *DPS_PluginSettings_AddWidgets(class ConSettings *Settings,
+ *              const char *IDStr,t_UIContainerFrameCtrl *Cont);
+ *
+ * PARAMETERS:
+ *    Settings [I] -- The settings with the plugin settings in it.
+ *    IDStr [I] -- The ID string for this processor to lookup
+ *    Cont [I] -- This is the GUI container that the plugin will add it's
+ *                widgets to.
+ *
+ * FUNCTION:
+ *    This function tells the plugin to add it's settings widgets to a
+ *    container and allocate it's private data.
+ *
+ * RETURNS:
+ *    A pointer to the private data the plugin allocated or NULL if there was
+ *    an error.
+ *
+ * NOTES:
+ *    The plugin can call DPS_AddNewSettingsTab() to add a new tab to the
+ *    current GUI for more settings.  You need to support this (you need
+ *    to have container in a tab input) and you need to support the callbacks
+ *    from the plugin using the DPS_PluginSettings_SetActiveCtrls() function.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_DataProSettingsWidgetsType *DPS_PluginSettings_AddWidgets(class ConSettings *Settings,
+        const char *IDStr,t_UIContainerFrameCtrl *Cont)
+{
+    const struct DataProcessor *ProData;
+    t_DataProSettingsWidgetsType *PrivData;
+    struct PluginSettings *PlugSettings;
+    t_KVList BlankKVList;
+    t_KVList *UseSettings;
+
+    ProData=DPS_GetProcessorsInfo(IDStr);
+    if(ProData==NULL || ProData->API.AllocSettingsWidgets==NULL)
+        return NULL;
+
+    /* We need to find the settings for this plugin */
+    PlugSettings=DPS_FindPluginSetting(IDStr,Settings);
+    if(PlugSettings==NULL)
+    {
+        /* Ok, we don't have settings for this plugin yet use a blank copy */
+        UseSettings=&BlankKVList;
+    }
+    else
+    {
+        UseSettings=&PlugSettings->Settings;
+    }
+
+    PrivData=ProData->API.AllocSettingsWidgets((t_WidgetSysHandle *)Cont,
+            PIS_ConvertKVList2PIKVList(*UseSettings));
+
+    return PrivData;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_FindPluginSetting
+ *
+ * SYNOPSIS:
+ *    static struct PluginSettings *DPS_FindPluginSetting(const char *IDStr,
+ *              class ConSettings *Settings);
+ *
+ * PARAMETERS:
+ *    IDStr [I] -- The ID string for this processor to lookup
+ *    Settings [I] -- The connection settings to search.
+ *
+ * FUNCTION:
+ *    This function finds a plugins settings in connection settings.
+ *
+ * RETURNS:
+ *    A pointer to the connection settings or NULL if it was not found.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static struct PluginSettings *DPS_FindPluginSetting(const char *IDStr,
+        class ConSettings *Settings)
+{
+    i_PluginSettings plug;
+    for(plug=Settings->PluginsSettings.begin();
+            plug!=Settings->PluginsSettings.end();plug++)
+    {
+        if(strcmp(IDStr,plug->IDStr.c_str())==0)
+        {
+            /* Found */
+            return &*plug;
+        }
+    }
+    return NULL;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_PluginSettings_FreeWidgets
+ *
+ * SYNOPSIS:
+ *    void DPS_PluginSettings_FreeWidgets(const char *IDStr,
+ *              t_DataProSettingsWidgetsType *PrivData);
+ *
+ * PARAMETERS:
+ *    IDStr [I] -- The ID string for this processor to lookup
+ *    PrivData [I] -- The plugins private data that was allocated with
+ *                    DPS_PluginSettings_AddWidgets()
+ *
+ * FUNCTION:
+ *    This function tells the plugin to free the widgets it allocated with
+ *    DPS_PluginSettings_AddWidgets()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_PluginSettings_AddWidgets()
+ ******************************************************************************/
+void DPS_PluginSettings_FreeWidgets(const char *IDStr,t_DataProSettingsWidgetsType *PrivData)
+{
+    const struct DataProcessor *ProData;
+
+    ProData=DPS_GetProcessorsInfo(IDStr);
+    if(ProData==NULL || ProData->API.FreeSettingsWidgets==NULL)
+        return;
+
+    ProData->API.FreeSettingsWidgets(PrivData);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_PluginSettings_StoreSettings
+ *
+ * SYNOPSIS:
+ *    void DPS_PluginSettings_StoreSettings(class ConSettings *Settings,
+ *          const char *IDStr,t_DataProSettingsWidgetsType *PrivData);
+ *
+ * PARAMETERS:
+ *    Settings [I] -- The settings with the plugin settings in it.
+ *    IDStr [I] -- The ID string for this processor to lookup
+ *    PrivData [I] -- The plugins private data that was allocated with
+ *                    DPS_PluginSettings_AddWidgets()
+ *
+ * FUNCTION:
+ *    This function tells the plugin to grab it's settings from the GUI into
+ *    it's settings.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_PluginSettings_AddWidgets()
+ ******************************************************************************/
+void DPS_PluginSettings_StoreSettings(class ConSettings *Settings,
+        const char *IDStr,t_DataProSettingsWidgetsType *PrivData)
+{
+    const struct DataProcessor *ProData;
+    struct PluginSettings *PlugSettings;
+    struct PluginSettings NewPluginSettings;
+
+    try
+    {
+        ProData=DPS_GetProcessorsInfo(IDStr);
+        if(ProData==NULL || ProData->API.StoreSettings==NULL)
+            return;
+
+        /* We need to find the settings for this plugin */
+        PlugSettings=DPS_FindPluginSetting(IDStr,Settings);
+        if(PlugSettings==NULL)
+        {
+            /* Ok, we don't have settings for this plugin yet add one */
+            NewPluginSettings.IDStr=IDStr;
+            Settings->PluginsSettings.push_back(NewPluginSettings);
+            PlugSettings=&Settings->PluginsSettings.back();
+        }
+
+        ProData->API.StoreSettings(PrivData,
+                PIS_ConvertKVList2PIKVList(PlugSettings->Settings));
+    }
+    catch(...)
+    {
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_PrunePluginSettings
+ *
+ * SYNOPSIS:
+ *    void DPS_PrunePluginSettings(class ConSettings *Settings);
+ *
+ * PARAMETERS:
+ *    Settings [I] -- The settings to prune.
+ *
+ * FUNCTION:
+ *    This function will go though the list of plugin settings and delete
+ *    any plugins that are no longer installed.  This is to keep the
+ *    settings from just continuously growing.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DPS_PrunePluginSettings(class ConSettings *Settings)
+{
+    i_PluginSettings plug;
+    i_PluginSettings delme;
+    i_DPSDataProcessorsType CurProcessor;
+
+    /* Go though all the settings and see if we can find the plugin */
+    for(plug=Settings->PluginsSettings.begin();
+            plug!=Settings->PluginsSettings.end();)
+    {
+        for(CurProcessor=m_DataProcessors.begin();
+                CurProcessor!=m_DataProcessors.end();CurProcessor++)
+        {
+            if(CurProcessor->ProID==plug->IDStr)
+                break;
+        }
+        if(CurProcessor==m_DataProcessors.end())
+        {
+            /* This plugin wasn't found, delete it */
+            delme=plug;
+            plug++;
+            Settings->PluginsSettings.erase(delme);
+            continue;
+        }
+        plug++;
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_SetCurrentSettingsTabName
+ *
+ * SYNOPSIS:
+ *    static void DPS_SetCurrentSettingsTabName(const char *Name);
+ *
+ * PARAMETERS:
+ *    Name [I] -- The new name for the tab.
+ *
+ * FUNCTION:
+ *    This function is used as part of the settings for the plugin.  It changes
+ *    the settings dialogs current tabs name.  When the settings dialog is
+ *    first allocated the default tab will have a generic name and this
+ *    function lets the plugin change it's name.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * LIMITATIONS:
+ *    It is only valid to call this when in AllocSettingsWidgets() or a call
+ *    back from one of the widgets that was allocated in AllocSettingsWidgets().
+ *
+ * SEE ALSO:
+ *    DPS_AddNewSettingsTab()
+ ******************************************************************************/
+static void DPS_SetCurrentSettingsTabName(const char *Name)
+{
+    if(DPS_PS_GuiCtrlFn!=NULL)
+    {
+        DPS_PS_GuiCtrlFn(e_DataProPlugSettingsFn_SetCurrentTabName,(void *)Name,
+                NULL);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_AddNewSettingsTab
+ *
+ * SYNOPSIS:
+ *    static t_WidgetSysHandle *DPS_AddNewSettingsTab(const char *Name);
+ *
+ * PARAMETERS:
+ *    Name [I] -- The name for the new tab.
+ *
+ * FUNCTION:
+ *    This function adds a new tab to the plugin settings dialog.
+ *
+ * RETURNS:
+ *    A new handle for adding widgets or NULL if there was an error.
+ *
+ * NOTES:
+ *    You must use the handle returned from this function with any widgets
+ *    added from this point until we add a new tab.  That is to says when you
+ *    call a UI function to access a widget you must pass the t_WidgetSysHandle
+ *    that was active when you added the widget.
+ *
+ *    For example:
+ *      AllocSettingsWidgets(t_WidgetSysHandle *StartingHandle)
+ *      {
+ *          t_WidgetSysHandle *NewHandle;
+ *
+ *          Check1=UI->AddCheckbox(StartingHandle,"One",NULL,NULL);
+ *          NewHandle=API->AddNewSettingsTab("Tab2");
+ *          Check2=UI->AddCheckbox(NewHandle,"Two",NULL,NULL);
+ *
+ *          // You must use 'StartingHandle' when accessing Check1
+ *          UI->SetCheckboxChecked(StartingHandle,Check1,true);
+ *
+ *          // You must use 'NewHandle' when accessing Check2
+ *          UI->SetCheckboxChecked(NewHandle,Check2,true);
+ *      }
+ *
+ * SEE ALSO:
+ *    DPS_SetCurrentSettingsTabName()
+ ******************************************************************************/
+static t_WidgetSysHandle *DPS_AddNewSettingsTab(const char *Name)
+{
+    if(DPS_PS_GuiCtrlFn==NULL)
+        return NULL;
+
+    return (t_WidgetSysHandle *)DPS_PS_GuiCtrlFn(
+            e_DataProPlugSettingsFn_AddNewTab,(void *)Name,NULL);
 }
 
 /*******************************************************************************

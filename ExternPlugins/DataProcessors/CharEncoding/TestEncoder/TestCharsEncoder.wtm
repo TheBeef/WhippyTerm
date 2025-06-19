@@ -1,0 +1,19 @@
+<?xml version="1.0" standalone="no" ?>
+<ExternPluginMaker>
+    <LastBuildFile></LastBuildFile>
+    <LinuxFilename>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/DataProcessors/CharEncoding/TestEncoder/Linux/TestEncoder.so</LinuxFilename>
+    <WindowsFilename></WindowsFilename>
+    <MacFilename></MacFilename>
+    <RPI64Filename></RPI64Filename>
+    <RPI32Filename></RPI32Filename>
+    <PluginName>TestCharsEncoder</PluginName>
+    <InstallFilename>TestCharsEncoder</InstallFilename>
+    <Description>Test Data Encoder</Description>
+    <Contributors>Paul Hutchinson</Contributors>
+    <Copyright>2025</Copyright>
+    <ReleaseDate>xx</ReleaseDate>
+    <Version>1.0</Version>
+    <APIVersion>1.1</APIVersion>
+    <PluginClass>1</PluginClass>
+    <PluginSubClass>0</PluginSubClass>
+</ExternPluginMaker>

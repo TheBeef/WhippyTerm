@@ -37,6 +37,7 @@
 #include "App/Display/DisplayBase.h"
 #include "App/MainWindow.h"
 #include "App/Util/StorageHelpers.h"
+#include "App/Util/KeyValue.h"
 #include "PluginSDK/DataProcessors.h"
 #include "ThirdParty/TinyCFG/TinyCFG.h"
 #include <string>
@@ -94,6 +95,17 @@ typedef enum
 } e_ClipboardModeType;
 
 /***  CLASS DEFINITIONS                ***/
+struct PluginSettings
+{
+    public:
+        std::string IDStr;
+        t_KVList Settings;
+
+        void RegisterAllMembers(class TinyCFG &cfg);
+};
+typedef std::list<struct PluginSettings> t_PluginSettings;
+typedef t_PluginSettings::iterator i_PluginSettings;
+
 /* These are settings that can be changed per connection */
 class ConSettings
 {
@@ -147,6 +159,9 @@ class ConSettings
         e_BeepType BeepMode;
         bool UseCustomSound;
         std::string BeepFilename;
+
+        /* Plugins */
+        t_PluginSettings PluginsSettings;
 
         void RegisterAllMembers(class TinyCFG &cfg);
         void DefaultSettings(void);

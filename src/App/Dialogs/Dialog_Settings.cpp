@@ -1,3 +1,13 @@
+/* DEBUG PAUL:
+I think the settings need to be copied, and restored on cancel button.  This
+is because I see some stuff that changes the data in the global structure
+instead of in the GUI (window pos for example, and plugin settings)
+
+ * All the settings buttons
+ * Add setting button to binary misc
+ * 
+*/
+
 /*******************************************************************************
  * FILENAME: Dialog_Settings.cpp
  *
@@ -30,6 +40,7 @@
 
 /*** HEADER FILES TO INCLUDE  ***/
 #include "App/Dialogs/Dialog_Settings.h"
+#include "App/Dialogs/Dialog_DataProPluginSettings.h"
 #include "App/Display/DisplayColors.h"
 #include "App/DataProcessorsSystem.h"
 #include "App/Settings.h"
@@ -117,6 +128,8 @@ static void UIS_HandleWindowStartPosChanged(uintptr_t ID);
 static void UIS_HandleInputProcessingChange(uintptr_t ID);
 static void UIS_HandleInputProcessingCharEncChange(void);
 static void UIS_HandleInputProcessingTermEmuChange(void);
+static void UIS_HandleInputProcessingHighlighterChange(void);
+static void UIS_HandleInputProcessingOtherChange(void);
 static void UIS_HandleSysColPresetChange(uintptr_t ID);
 static void UIS_HandleAreaChanged(uintptr_t ID);
 static void UIS_HandleKeyBindingsCmdListChange(uintptr_t ID);
@@ -159,7 +172,7 @@ struct ProInfoSortCB
 };
 struct DPS_ProInfo DS_DPSNoneEntry=
 {
-    NULL,
+    "",             // ID
     "NONE",
     NULL,
     NULL
@@ -510,6 +523,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         RetValue=true;
 
         DS_GetSettingsFromGUI();
+        DPS_PrunePluginSettings(m_SettingConSettings);
 
         if(!m_SettingConSettingsOnly)
         {
@@ -1707,10 +1721,20 @@ void UIS_HandleInputProcessingCharEncChange(void)
 {
     bool DataProcessorHasSettings;
     t_UIButtonCtrl *InputProCharEnc_Settings;
+    t_UIComboBoxCtrl *TextProCharEnc;
+    unsigned int Selected;
 
+    TextProCharEnc=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_TextProCharEnc);
     InputProCharEnc_Settings=UIS_GetButtonHandle(e_UIS_Button_InputProCharEnc_Settings);
 
-    DataProcessorHasSettings=false;
+    Selected=UIGetComboBoxSelectedEntry(TextProCharEnc);
+    if(Selected>=m_CharEncodingInputPros.size())
+        return;
+
+    if(DPS_DoesPluginHaveSettings(m_CharEncodingInputPros[Selected].IDStr))
+        DataProcessorHasSettings=true;
+    else
+        DataProcessorHasSettings=false;
 
     UIEnableButton(InputProCharEnc_Settings,DataProcessorHasSettings);
 }
@@ -1739,12 +1763,106 @@ void UIS_HandleInputProcessingTermEmuChange(void)
 {
     bool DataProcessorHasSettings;
     t_UIButtonCtrl *InputProTermEmu_Settings;
+    t_UIComboBoxCtrl *TextProTermEmu;
+    unsigned int Selected;
 
+    TextProTermEmu=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_TextProTermEmu);
     InputProTermEmu_Settings=UIS_GetButtonHandle(e_UIS_Button_InputProTermEmu_Settings);
 
-    DataProcessorHasSettings=false;
+    Selected=UIGetComboBoxSelectedEntry(TextProTermEmu);
+    if(Selected>=m_TermEmulationInputPros.size())
+        return;
+
+    if(DPS_DoesPluginHaveSettings(m_TermEmulationInputPros[Selected].IDStr))
+        DataProcessorHasSettings=true;
+    else
+        DataProcessorHasSettings=false;
 
     UIEnableButton(InputProTermEmu_Settings,DataProcessorHasSettings);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleInputProcessingHighlighterChange
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleInputProcessingHighlighterChange(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function updates the UI when the input processing highlighter
+ *    changes.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleInputProcessingHighlighterChange(void)
+{
+    bool DataProcessorHasSettings;
+    t_UIButtonCtrl *SettingsBttn;
+    t_UIListViewCtrl *ListView;
+    unsigned int Selected;
+
+    ListView=UIS_GetListViewHandle(e_UIS_ListView_InputProTextHighlight);
+    SettingsBttn=UIS_GetButtonHandle(e_UIS_Button_InputProHighLighting_Settings);
+
+    Selected=UIGetListViewSelectedEntry(ListView);
+    if(Selected>=m_HighlighterInputPros.size())
+        return;
+
+    if(DPS_DoesPluginHaveSettings(m_HighlighterInputPros[Selected].IDStr))
+        DataProcessorHasSettings=true;
+    else
+        DataProcessorHasSettings=false;
+
+    UIEnableButton(SettingsBttn,DataProcessorHasSettings);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleInputProcessingOtherChange
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleInputProcessingOtherChange(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function updates the UI when the input processing other
+ *    changes.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleInputProcessingOtherChange(void)
+{
+    bool DataProcessorHasSettings;
+    t_UIButtonCtrl *SettingsBttn;
+    t_UIListViewCtrl *ListView;
+    unsigned int Selected;
+
+    ListView=UIS_GetListViewHandle(e_UIS_ListView_InputProTextOther);
+    SettingsBttn=UIS_GetButtonHandle(e_UIS_Button_InputProOther_Settings);
+
+    Selected=UIGetListViewSelectedEntry(ListView);
+    if(Selected>=m_OtherInputPros.size())
+        return;
+
+    if(DPS_DoesPluginHaveSettings(m_OtherInputPros[Selected].IDStr))
+        DataProcessorHasSettings=true;
+    else
+        DataProcessorHasSettings=false;
+
+    UIEnableButton(SettingsBttn,DataProcessorHasSettings);
 }
 
 /*******************************************************************************
@@ -2150,11 +2268,14 @@ bool DS_Event(const struct DSEvent *Event)
     t_UIButtonCtrl *InputProHighLighting_Settings;
     t_UIButtonCtrl *InputProOther_Settings;
     t_UIColorPreviewCtrl *ColorPreviewHandle;
+    t_UIComboBoxCtrl *ComboxBox;
+    t_UIListViewCtrl *ListView;
     t_UITextInputCtrl *TxtHandle;
     string FileNameStr;
     string PathStr;
     const char *FilePart;
     const char *TmpCStr;
+    unsigned int Selected;
 
     AcceptEvent=true;
     switch(Event->EventType)
@@ -2183,12 +2304,40 @@ bool DS_Event(const struct DSEvent *Event)
                     }
                 break;
                 case e_UIS_Button_InputProCharEnc_Settings:
+                    ComboxBox=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_TextProCharEnc);
+                    Selected=UIGetComboBoxSelectedEntry(ComboxBox);
+                    if(Selected!=0 && Selected<m_CharEncodingInputPros.size())
+                    {
+                        RunDataProPluginSettingsDialog(m_SettingConSettings,
+                                m_CharEncodingInputPros[Selected].IDStr);
+                    }
                 break;
                 case e_UIS_Button_InputProTermEmu_Settings:
+                    ComboxBox=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_TextProTermEmu);
+                    Selected=UIGetComboBoxSelectedEntry(ComboxBox);
+                    if(Selected!=0 && Selected<m_TermEmulationInputPros.size())
+                    {
+                        RunDataProPluginSettingsDialog(m_SettingConSettings,
+                                m_TermEmulationInputPros[Selected].IDStr);
+                    }
                 break;
                 case e_UIS_Button_InputProHighLighting_Settings:
+                    ListView=UIS_GetListViewHandle(e_UIS_ListView_InputProTextHighlight);
+                    Selected=UIGetListViewSelectedEntry(ListView);
+                    if(Selected<m_HighlighterInputPros.size())
+                    {
+                        RunDataProPluginSettingsDialog(m_SettingConSettings,
+                                m_HighlighterInputPros[Selected].IDStr);
+                    }
                 break;
                 case e_UIS_Button_InputProOther_Settings:
+                    ListView=UIS_GetListViewHandle(e_UIS_ListView_InputProTextOther);
+                    Selected=UIGetListViewSelectedEntry(ListView);
+                    if(Selected<m_OtherInputPros.size())
+                    {
+                        RunDataProPluginSettingsDialog(m_SettingConSettings,
+                                m_OtherInputPros[Selected].IDStr);
+                    }
                 break;
                 case e_UIS_Button_SysCol_Apply:
                     DS_DoSysColApply();
@@ -2524,16 +2673,10 @@ bool DS_Event(const struct DSEvent *Event)
                     UIS_HandleAreaChanged(Event->ID);
                 break;
                 case e_UIS_ListView_InputProTextHighlight:
-                    InputProHighLighting_Settings=UIS_GetButtonHandle(
-                            e_UIS_Button_InputProHighLighting_Settings);
-
-                    UIEnableButton(InputProHighLighting_Settings,false);
+                    UIS_HandleInputProcessingHighlighterChange();
                 break;
                 case e_UIS_ListView_InputProTextOther:
-                    InputProOther_Settings=UIS_GetButtonHandle(
-                            e_UIS_Button_InputProOther_Settings);
-
-                    UIEnableButton(InputProOther_Settings,false);
+                    UIS_HandleInputProcessingOtherChange();
                 break;
                 case e_UIS_ListView_KeyBinding_CommandList:
                     UIS_HandleKeyBindingsCmdListChange(Event->ID);

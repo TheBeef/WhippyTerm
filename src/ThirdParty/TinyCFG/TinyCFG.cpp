@@ -1,4 +1,4 @@
-/* Prerelease Version 0.8 */
+/* Prerelease Version 0.9 */
 
 /*******************************************************************************
  * FILENAME: TinyCFG.cpp
@@ -567,7 +567,7 @@ bool TinyCFG::Register(const char *XmlName,string &Data)
     {
         NewDataClass=new TinyCFG_DefaultStringData;
     }
-    catch(std::bad_alloc const&)
+    catch(std::bad_alloc &)
     {
         Failure=true;
         return false;
@@ -635,7 +635,7 @@ bool TinyCFG::RegisterInt(const char *XmlName,unsigned int *Data,bool OutputHex,
     {
         NewDataClass=new TinyCFG_DefaultIntData(IsUnsigned,OutputHex);
     }
-    catch(std::bad_alloc const&)
+    catch(std::bad_alloc &)
     {
         Failure=true;
         return false;
@@ -663,7 +663,7 @@ bool TinyCFG::RegisterShort(const char *XmlName,unsigned short *Data,
     {
         NewDataClass=new TinyCFG_DefaultShortData(IsUnsigned);
     }
-    catch(std::bad_alloc const&)
+    catch(std::bad_alloc &)
     {
         Failure=true;
         return false;
@@ -691,7 +691,7 @@ bool TinyCFG::RegisterLong(const char *XmlName,unsigned long *Data,
     {
         NewDataClass=new TinyCFG_DefaultLongData(IsUnsigned);
     }
-    catch(std::bad_alloc const&)
+    catch(std::bad_alloc &)
     {
         Failure=true;
         return false;
@@ -719,7 +719,7 @@ bool TinyCFG::RegisterLongLong(const char *XmlName,unsigned long long *Data,
     {
         NewDataClass=new TinyCFG_DefaultLongLongData(IsUnsigned);
     }
-    catch(std::bad_alloc const&)
+    catch(std::bad_alloc &)
     {
         Failure=true;
         return false;
@@ -747,7 +747,7 @@ bool TinyCFG::Register(const char *XmlName,char *Data,int MaxSize)
     {
         NewDataClass=new TinyCFG_DefaultCharData(MaxSize);
     }
-    catch(std::bad_alloc const&)
+    catch(std::bad_alloc &)
     {
         Failure=true;
         return false;
@@ -774,7 +774,7 @@ bool TinyCFG::Register(const char *XmlName,bool &Data)
     {
         NewDataClass=new TinyCFG_DefaultBoolData;
     }
-    catch(std::bad_alloc const&)
+    catch(std::bad_alloc &)
     {
         Failure=true;
         return false;
@@ -801,7 +801,7 @@ bool TinyCFG::Register(const char *XmlName,double &Data,const char *FormatStr)
     {
         NewDataClass=new TinyCFG_DefaultDoubleData;
     }
-    catch(std::bad_alloc const&)
+    catch(std::bad_alloc &)
     {
         Failure=true;
         return false;
@@ -829,7 +829,7 @@ bool TinyCFG::Register(const char *XmlName,list<string> &Data)
     {
         NewDataClass=new TinyCFG_DefaultStringListData;
     }
-    catch(std::bad_alloc const&)
+    catch(std::bad_alloc &)
     {
         Failure=true;
         return false;
@@ -856,7 +856,7 @@ bool TinyCFG::Register(const char *XmlName,list<int> &Data)
     {
         NewDataClass=new TinyCFG_DefaultIntListData;
     }
-    catch(std::bad_alloc const&)
+    catch(std::bad_alloc &)
     {
         Failure=true;
         return false;
@@ -954,7 +954,7 @@ bool TinyCFG::RegisterEnum(const char *XmlName,int &Data,int DefaultValue,
     {
         NewDataClass=new TinyCFG_EnumData;
     }
-    catch(std::bad_alloc const&)
+    catch(std::bad_alloc &)
     {
         Failure=true;
         return false;
@@ -1035,7 +1035,7 @@ bool TinyCFG::RegisterGeneric(class TinyCFGBaseData *Generic)
     {
         NewData=new struct TinyCFG_RegData;
     }
-    catch(std::bad_alloc const&)
+    catch(std::bad_alloc &)
     {
         Failure=true;
         return false;
@@ -1108,7 +1108,7 @@ bool TinyCFG::StartBlock(const char *BlockName)
     {
         NewEntry=new struct TinyCFG_Entry;
     }
-    catch(std::bad_alloc const&)
+    catch(std::bad_alloc &)
     {
         Failure=true;
         return false;
@@ -2016,9 +2016,6 @@ bool TinyCFG::CheckXMLName(const char *CheckName)
  ******************************************************************************/
 const char *TinyCFG::ReadDataElement(const char *DataElementName)
 {
-//    char *StartOfElementData;
-//    char *p;
-
     /* Start at the top of the data block again */
     LoadDataReadPoint=LoadDataDataStart;
 
@@ -2110,6 +2107,235 @@ const char *TinyCFG::ReadNextDataElement(const char *DataElementName)
     LoadDataReadPoint++;    // Move past the >
 
     return StartOfElementData;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TinyCFG::ReadFirstTag()
+ *
+ * SYNOPSIS:
+ *    bool ReadFirstTag(std::string &XmlName,std::string &DataElement);
+ *
+ * PARAMETERS:
+ *    XmlName [O] -- The tag that was read
+ *    DataElement [O] -- The data in this xml tags element.
+ *
+ * FUNCTION:
+ *    This function starts at the top of the current element block that started
+ *    the LoadElement() call.
+ *
+ *    So for example if you registered a data type of "MyStuff" and added
+ *    a LoadElement() callback.  Then for this XML:
+ *
+ *    <Root>
+ *      <MyStuff>
+ *          <Element1>Value1</Element1>
+ *          <Element2>Value2</Element2>
+ *          <Element3>Value3</Element3>
+ *          <Element1>Value4</Element1>
+ *          <Element2>Value5</Element2>
+ *          <Element3>Value6</Element3>
+ *      </MyStuff>
+ *    </Root>
+ *
+ *    When LoadElement() is called it will start searching at the top of
+ *    the <MyStuff> block.
+ *
+ *    If you call ReadFirstTag(Tag,Data) then Tag will be "Element1" and
+ *    Data will be "Value1".  If you call it again it will return the same
+ *    tag and element data.
+ *
+ * RETURNS:
+ *    true -- A tag was found
+ *    false -- There where no tags to read
+ *
+ * SEE ALSO:
+ *    ReadNextTag(), ReadNextDataElement()
+ ******************************************************************************/
+bool TinyCFG::ReadFirstTag(std::string &XmlName,std::string &DataElement)
+{
+    /* Start at the top of the data block again */
+    LoadDataReadPoint=LoadDataDataStart;
+
+    return ReadNextTag(XmlName,DataElement);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TinyCFG::ReadNextTag()
+ *
+ * SYNOPSIS:
+ *    bool TinyCFG::ReadNextTag(std::string &XmlName,std::string &DataElement);
+ *
+ * PARAMETERS:
+ *    XmlName [O] -- The tag that was read
+ *    DataElement [O] -- The data in this xml tags element.
+ *
+ * FUNCTION:
+ *    This function search from the current position in the element block that
+ *    started the LoadElement() call.
+ *
+ *    This continues searching from the last element found instead of the top
+ *    of the element block.
+ *
+ *    So for example if you registered a data type of "MyStuff" and added
+ *    a LoadElement() callback.  Then for this XML:
+ *
+ *    <Root>
+ *      <MyStuff>
+ *          <Element1>Value1</Element1>
+ *          <Element2>Value2</Element2>
+ *          <Element3>Value3</Element3>
+ *          <Element1>Value4</Element1>
+ *          <Element2>Value5</Element2>
+ *          <Element3>Value6</Element3>
+ *      </MyStuff>
+ *    </Root>
+ *
+ *    When LoadElement() is called it will start searching at the top of
+ *    the <MyStuff> block.
+ *
+ *    If you call ReadNextTag(Tag,Data) then Tag will be set to "Element1" and
+ *    Data will be set to "Value1".
+ *    If you call it again it will set Tag to "Element2" and Data to "Value2".
+ *    The return sequence will be (from the start):
+ *          'Tag'       'Data'
+ *          Element1    Value1
+ *          Element2    Value2
+ *          Element3    Value3
+ *          Element1    Value4
+ *          Element2    Value5
+ *          Element3    Value6
+ *    The next call will return false and Tag and Data will not be set.
+ *
+ * RETURNS:
+ *    true -- We loaded the next tag
+ *    false -- There where no more tags to load.
+ *
+ * SEE ALSO:
+ *    TinyCFG::ReadFirstTag()
+ ******************************************************************************/
+bool TinyCFG::ReadNextTag(const char **XmlName,const char **DataElement)
+{
+    char *Tag;
+    char *Data;
+    char *EndTag;
+
+    if(!FindNextTagStartAndEndAtThisLevel(&Tag,&Data,&EndTag))
+        return false;
+
+    *XmlName=Tag;
+    *DataElement=Data;
+
+    return true;
+}
+bool TinyCFG::ReadNextTag(std::string &XmlName,std::string &DataElement)
+{
+    char *Tag;
+    char *Data;
+    char *EndTag;
+
+    if(!FindNextTagStartAndEndAtThisLevel(&Tag,&Data,&EndTag))
+        return false;
+
+    XmlName=Tag;
+    DataElement=Data;
+
+    return true;
+}
+
+bool TinyCFG::FindNextTagStartAndEndAtThisLevel(char **Start,char **Data,char **End)
+{
+    int Level;
+    char c;
+    bool InComment;
+
+    *Start=NULL;
+    *Data=NULL;
+    *End=NULL;
+
+    Level=0;
+
+    InComment=false;
+    while(LoadDataReadPoint<ReadBuffEnd)
+    {
+        c=*LoadDataReadPoint;
+        if(InComment)
+        {
+            if(c=='-')
+            {
+                if(strncmp(LoadDataReadPoint,"-->",3)==0)
+                {
+                    InComment=false;
+                    continue;
+                }
+            }
+        }
+        if(c=='<' || c==0)  // 0 because when we return a string with convert the '<' into a '\0'.  This ONLY applies to searching user type blocks.  The main parser NEVER goes backward
+        {
+            if(LoadDataReadPoint[1]=='/')
+            {
+                if(Level==1)
+                {
+                    /* Check if this is the element we are looking for */
+                    if(&LoadDataReadPoint[2]>=ReadBuffEnd)
+                        throw(0);
+
+                    *LoadDataReadPoint=0;   // String it (Data)
+
+                    LoadDataReadPoint+=2;
+                    *End=LoadDataReadPoint;
+
+                    /* Find the end of the element tag */
+                    while(LoadDataReadPoint<ReadBuffEnd &&
+                            (*LoadDataReadPoint!='>' && *LoadDataReadPoint!=0))
+                    {
+                        LoadDataReadPoint++;
+                    }
+                    if(LoadDataReadPoint>=ReadBuffEnd)
+                        throw(0);
+
+                    *LoadDataReadPoint=0;   // String it (End)
+                    LoadDataReadPoint++;
+
+                    /* See if this really was the expected tag (if not
+                       then we didn't find this block at all) */
+                    if(strcmp(*Start,*End)!=0)
+                        return false;
+
+                    return true;
+                }
+                Level--;
+                if(Level<0)
+                    return false;
+            }
+            else if(LoadDataReadPoint[1]=='!')
+            {
+                /* Comment */
+                InComment=true;
+            }
+            else
+            {
+                if(Level==0)
+                {
+                    /* Find the end of the element tag */
+                    *Start=LoadDataReadPoint+1;
+                    while(LoadDataReadPoint<ReadBuffEnd &&
+                            (*LoadDataReadPoint!='>' && *LoadDataReadPoint!=0))
+                    {
+                        LoadDataReadPoint++;
+                    }
+                    if(LoadDataReadPoint>=ReadBuffEnd)
+                        throw(0);
+                    *LoadDataReadPoint=0;   // String it (Start)
+                    *Data=LoadDataReadPoint+1;
+                }
+                Level++;
+            }
+        }
+        LoadDataReadPoint++;
+    }
+    return false;
 }
 
 char *TinyCFG::FindElementAtThisLevel(const char *ElementName,bool EndTag)
@@ -2270,7 +2496,7 @@ bool RegisterStructDataList(class TinyCFG &cfg,const char *XmlName,
     {
         NewDataClass=new TestStructList;
     }
-    catch(std::bad_alloc)
+    catch(std::bad_alloc &)
     {
         return false;
     }

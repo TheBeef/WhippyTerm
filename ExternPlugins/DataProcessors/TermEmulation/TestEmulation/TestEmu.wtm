@@ -1,0 +1,19 @@
+<?xml version="1.0" standalone="no" ?>
+<ExternPluginMaker>
+    <LastBuildFile></LastBuildFile>
+    <LinuxFilename>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/DataProcessors/TermEmulation/TestEmulation/Linux/TestEmu.so</LinuxFilename>
+    <WindowsFilename></WindowsFilename>
+    <MacFilename></MacFilename>
+    <RPI64Filename></RPI64Filename>
+    <RPI32Filename></RPI32Filename>
+    <PluginName>TestEmu</PluginName>
+    <InstallFilename>TestEmu</InstallFilename>
+    <Description>Test Emu</Description>
+    <Contributors>Paul Hutchinson</Contributors>
+    <Copyright>2025</Copyright>
+    <ReleaseDate>xx</ReleaseDate>
+    <Version>1.0</Version>
+    <APIVersion>1.1</APIVersion>
+    <PluginClass>1</PluginClass>
+    <PluginSubClass>1</PluginSubClass>
+</ExternPluginMaker>

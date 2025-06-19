@@ -34,6 +34,7 @@
 
 /***  HEADER FILES TO INCLUDE          ***/
 #include "PluginTypes.h"
+#include "PluginUI.h"
 #include "KeyDefines.h"
 
 /***  DEFINES                          ***/
@@ -43,6 +44,7 @@
 
 /* Versions of struct DPS_API */
 #define DPS_API_VERSION_1                   1
+#define DPS_API_VERSION_2                   2
 
 #define TXT_ATTRIB_UNDERLINE                0x0001
 #define TXT_ATTRIB_UNDERLINE_DOUBLE         0x0002
@@ -92,6 +94,8 @@ typedef enum
 
 struct DataProcessorHandle {int AllPrivate;};  // Fake type holder
 typedef struct DataProcessorHandle t_DataProcessorHandleType;
+
+typedef struct DataProSettingsWidgets {int PrivateDataHere;} t_DataProSettingsWidgetsType;    // Fake type holder
 
 typedef enum
 {
@@ -149,6 +153,9 @@ struct DataProcessorAPI
     /********* Start of DATA_PROCESSORS_API_VERSION_2 *********/
     void (*ProcessOutGoingData)(t_DataProcessorHandleType *DataHandle,
             const uint8_t *Data,int Bytes);
+    t_DataProSettingsWidgetsType *(*AllocSettingsWidgets)(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings);
+    void (*FreeSettingsWidgets)(t_DataProSettingsWidgetsType *PrivData);
+    void (*StoreSettings)(t_DataProSettingsWidgetsType *PrivData,t_PIKVList *Settings);
     /********* End of DATA_PROCESSORS_API_VERSION_2 *********/
 };
 
@@ -190,6 +197,10 @@ struct DPS_API
     void (*BinaryAddHex)(uint8_t Byte);
     void (*InsertString)(uint8_t *Str,uint32_t Len);
     /********* End of DPS_API_VERSION_1 *********/
+    /********* Start of DPS_API_VERSION_2 *********/
+    void (*SetCurrentSettingsTabName)(const char *Name);
+    t_WidgetSysHandle *(*AddNewSettingsTab)(const char *Name);
+    /********* End of DPS_API_VERSION_2 *********/
 };
 
 /***  CLASS DEFINITIONS                ***/

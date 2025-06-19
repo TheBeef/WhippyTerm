@@ -186,7 +186,10 @@ struct FTPS_API g_FTPSAPI=
  * RETURNS:
  *    The private options data that you want to use.  This is a private
  *    structure that you allocate and then cast to
- *    (t_FTPOptionsWidgetsType *) when you return.
+ *    (t_FTPOptionsWidgetsType *) when you return.  It's up to you what
+ *    you want to do with this data (if you do not want to use it return
+ *    a fixed int set to 1, and ignore it in FreeOptionsWidgets).  If you
+ *    return NULL it is considered an error.
  *
  * NOTES:
  *    This function must be reentrant.  The system may allocate many sets

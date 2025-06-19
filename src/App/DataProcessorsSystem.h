@@ -32,7 +32,9 @@
 #define __DATAPROCESSORSSYSTEM_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
+#include "App/Util/KeyValue.h"
 #include "PluginSDK/Plugin.h"
+#include "UI/UIControl.h"
 #include <string>
 #include <vector>
 #include <list>
@@ -42,7 +44,6 @@
 /***  MACROS                           ***/
 
 /***  TYPE DEFINITIONS                 ***/
-
 struct DPS_ProInfo
 {
     const char *IDStr;
@@ -72,6 +73,13 @@ struct ProcessorConData
     class ConSettings *Settings;
 };
 
+typedef enum
+{
+    e_DataProPlugSettingsFn_SetCurrentTabName,
+    e_DataProPlugSettingsFn_AddNewTab,
+    e_DataProPlugSettingsFnMAX
+} e_DataProPlugSettingsFnType;
+
 /***  CLASS DEFINITIONS                ***/
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
@@ -92,5 +100,12 @@ bool DPS_ProcessorKeyPress(const uint8_t *KeyChar,int KeyCharLen,
 void DPS_ProcessorIncomingBytes(const uint8_t *inbuff,int bytes);
 void DPS_ProcessorOutGoingBytes(const uint8_t *outbuff,int bytes);
 const struct DataProcessor *DPS_GetProcessorsInfo(const char *IDStr);
+
+bool DPS_DoesPluginHaveSettings(const char *IDStr);
+void DPS_PluginSettings_SetActiveCtrls(void *(*GuiCtrl)(e_DataProPlugSettingsFnType Fn,void *Arg1,void *Arg2));
+t_DataProSettingsWidgetsType *DPS_PluginSettings_AddWidgets(class ConSettings *Settings,const char *IDStr,t_UIContainerFrameCtrl *Cont);
+void DPS_PluginSettings_FreeWidgets(const char *IDStr,t_DataProSettingsWidgetsType *PrivData);
+void DPS_PluginSettings_StoreSettings(class ConSettings *Settings,const char *IDStr,t_DataProSettingsWidgetsType *PrivData);
+void DPS_PrunePluginSettings(class ConSettings *Settings);
 
 #endif

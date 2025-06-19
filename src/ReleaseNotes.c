@@ -31,6 +31,10 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Made settings button work for plugins"
+            "In the settings dialog there is a settings button to configure"
+            " a plugin.  The button now works."},
+    {
         NOTETYPE_ENHANCEMENT,"Added new API to the Data Processor so they can see all outgoing bytes"
             "The new API ProcessOutGoingData() was added."},
     {   NOTETYPE_BUG_FIX,"Fixed a bug with screen DPI settings on Windows",

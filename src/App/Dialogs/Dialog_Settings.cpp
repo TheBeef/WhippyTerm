@@ -130,6 +130,7 @@ static void UIS_HandleInputProcessingCharEncChange(void);
 static void UIS_HandleInputProcessingTermEmuChange(void);
 static void UIS_HandleInputProcessingHighlighterChange(void);
 static void UIS_HandleInputProcessingOtherChange(void);
+static void UIS_HandleInputProcessingBinaryDecoderChange(void);
 static void UIS_HandleSysColPresetChange(uintptr_t ID);
 static void UIS_HandleAreaChanged(uintptr_t ID);
 static void UIS_HandleKeyBindingsCmdListChange(uintptr_t ID);
@@ -1266,13 +1267,9 @@ static void DS_RethinkGUI(void)
 
     ListViewHandle=UIS_GetListViewHandle(e_UIS_ListView_InputProTextHighlight);
     UIClearListViewSelectedEntry(ListViewHandle);
-    ButtonHandle=UIS_GetButtonHandle(e_UIS_Button_InputProHighLighting_Settings);
-    UIEnableButton(ButtonHandle,false);
 
     ListViewHandle=UIS_GetListViewHandle(e_UIS_ListView_InputProTextOther);
     UIClearListViewSelectedEntry(ListViewHandle);
-    ButtonHandle=UIS_GetButtonHandle(e_UIS_Button_InputProOther_Settings);
-    UIEnableButton(ButtonHandle,false);
 
     DS_UpdateColorPreview(true);
 
@@ -1296,6 +1293,12 @@ static void DS_RethinkGUI(void)
         UIEnableTextCtrl(TxtHandle,false);
         UIEnableButton(ButtonHandle,false);
     }
+
+    UIS_HandleInputProcessingHighlighterChange();
+    UIS_HandleInputProcessingOtherChange();
+    UIS_HandleInputProcessingCharEncChange();
+    UIS_HandleInputProcessingTermEmuChange();
+    UIS_HandleInputProcessingBinaryDecoderChange();
 }
 
 /*******************************************************************************
@@ -1811,14 +1814,19 @@ void UIS_HandleInputProcessingHighlighterChange(void)
     ListView=UIS_GetListViewHandle(e_UIS_ListView_InputProTextHighlight);
     SettingsBttn=UIS_GetButtonHandle(e_UIS_Button_InputProHighLighting_Settings);
 
-    Selected=UIGetListViewSelectedEntry(ListView);
-    if(Selected>=m_HighlighterInputPros.size())
-        return;
-
-    if(DPS_DoesPluginHaveSettings(m_HighlighterInputPros[Selected].IDStr))
-        DataProcessorHasSettings=true;
-    else
-        DataProcessorHasSettings=false;
+    DataProcessorHasSettings=false;
+    if(UIListViewHasSelectedEntry(ListView))
+    {
+        Selected=UIGetListViewSelectedEntry(ListView);
+        if(Selected<m_HighlighterInputPros.size())
+        {
+            if(DPS_DoesPluginHaveSettings(m_HighlighterInputPros[Selected].
+                    IDStr))
+            {
+                DataProcessorHasSettings=true;
+            }
+        }
+    }
 
     UIEnableButton(SettingsBttn,DataProcessorHasSettings);
 }
@@ -1853,11 +1861,54 @@ void UIS_HandleInputProcessingOtherChange(void)
     ListView=UIS_GetListViewHandle(e_UIS_ListView_InputProTextOther);
     SettingsBttn=UIS_GetButtonHandle(e_UIS_Button_InputProOther_Settings);
 
+    DataProcessorHasSettings=false;
+    if(UIListViewHasSelectedEntry(ListView))
+    {
+        Selected=UIGetListViewSelectedEntry(ListView);
+        if(Selected<m_OtherInputPros.size())
+        {
+            if(DPS_DoesPluginHaveSettings(m_OtherInputPros[Selected].IDStr))
+                DataProcessorHasSettings=true;
+        }
+    }
+
+    UIEnableButton(SettingsBttn,DataProcessorHasSettings);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_HandleInputProcessingBinaryDecoderChange
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleInputProcessingBinaryDecoderChange(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function updates the UI when the binary processing changes.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleInputProcessingBinaryDecoderChange(void)
+{
+    bool DataProcessorHasSettings;
+    t_UIButtonCtrl *SettingsBttn;
+    t_UIListViewCtrl *ListView;
+    unsigned int Selected;
+
+    ListView=UIS_GetListViewHandle(e_UIS_ListView_BinaryProcessorDecoder);
+    SettingsBttn=UIS_GetButtonHandle(e_UIS_Button_BinaryPro_Settings);
+
     Selected=UIGetListViewSelectedEntry(ListView);
-    if(Selected>=m_OtherInputPros.size())
+    if(Selected>=m_BinaryDecoders.size())
         return;
 
-    if(DPS_DoesPluginHaveSettings(m_OtherInputPros[Selected].IDStr))
+    if(DPS_DoesPluginHaveSettings(m_BinaryDecoders[Selected].IDStr))
         DataProcessorHasSettings=true;
     else
         DataProcessorHasSettings=false;
@@ -2265,8 +2316,6 @@ bool DS_Event(const struct DSEvent *Event)
     bool AcceptEvent;
     uint32_t SelColor;
     uint32_t RGB;
-    t_UIButtonCtrl *InputProHighLighting_Settings;
-    t_UIButtonCtrl *InputProOther_Settings;
     t_UIColorPreviewCtrl *ColorPreviewHandle;
     t_UIComboBoxCtrl *ComboxBox;
     t_UIListViewCtrl *ListView;
@@ -2337,6 +2386,15 @@ bool DS_Event(const struct DSEvent *Event)
                     {
                         RunDataProPluginSettingsDialog(m_SettingConSettings,
                                 m_OtherInputPros[Selected].IDStr);
+                    }
+                break;
+                case e_UIS_Button_BinaryPro_Settings:
+                    ListView=UIS_GetListViewHandle(e_UIS_ListView_BinaryProcessorDecoder);
+                    Selected=UIGetListViewSelectedEntry(ListView);
+                    if(Selected<m_BinaryDecoders.size())
+                    {
+                        RunDataProPluginSettingsDialog(m_SettingConSettings,
+                                m_BinaryDecoders[Selected].IDStr);
                     }
                 break;
                 case e_UIS_Button_SysCol_Apply:
@@ -2682,6 +2740,8 @@ bool DS_Event(const struct DSEvent *Event)
                     UIS_HandleKeyBindingsCmdListChange(Event->ID);
                 break;
                 case e_UIS_ListView_BinaryProcessorDecoder:
+                    UIS_HandleInputProcessingBinaryDecoderChange();
+                break;
                 case e_UIS_ListViewMAX:
                 default:
                 break;

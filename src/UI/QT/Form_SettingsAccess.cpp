@@ -161,6 +161,8 @@ t_UIButtonCtrl *UIS_GetButtonHandle(e_UIS_Button UIObj)
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->TextHighSettings_pushButton;
         case e_UIS_Button_InputProOther_Settings:
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->OtherSettings_pushButton;
+        case e_UIS_Button_BinaryPro_Settings:
+            return (t_UIButtonCtrl *)g_SettingsDialog->ui->BinaryProSettings_pushButton;
         case e_UIS_Button_SysCol_Apply:
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->SysCol_Apply_pushButton;
         case e_UIS_Button_SelectFont:

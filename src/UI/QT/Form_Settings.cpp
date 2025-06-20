@@ -753,3 +753,24 @@ void Form_Settings::on_SysColPrev_SelectionBG_radioButton_clicked()
     SendEvent(e_DSEvent_RadioBttnClick,&EventData);
 }
 
+
+void Form_Settings::on_BinaryProSettings_pushButton_clicked()
+{
+    union DSEventData EventData;
+
+    EventData.Bttn.InputID=e_UIS_Button_BinaryPro_Settings;
+    SendEvent(e_DSEvent_BttnTriggered,&EventData);
+}
+
+
+void Form_Settings::on_Binary_Processor_Decoder_listWidget_itemClicked(QListWidgetItem *item)
+{
+    uintptr_t ID;   // The ID for this item
+    union DSEventData EventData;
+
+    ID=(uintptr_t)(item->data(Qt::UserRole).toULongLong());
+
+    EventData.ListView.InputID=e_UIS_ListView_BinaryProcessorDecoder;
+    SendEvent(e_DSEvent_ListViewChange,&EventData,ID);
+}
+

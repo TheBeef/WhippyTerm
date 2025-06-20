@@ -157,6 +157,10 @@ private slots:
     
     void on_SysColPrev_SelectionBG_radioButton_clicked();
     
+    void on_BinaryProSettings_pushButton_clicked();
+    
+    void on_Binary_Processor_Decoder_listWidget_itemClicked(QListWidgetItem *item);
+    
 private:
     bool DoingEvent;
 

@@ -99,6 +99,7 @@ enum e_UIS_Button
     e_UIS_Button_InputProTermEmu_Settings,
     e_UIS_Button_InputProHighLighting_Settings,
     e_UIS_Button_InputProOther_Settings,
+    e_UIS_Button_BinaryPro_Settings,
     e_UIS_Button_SysCol_Apply,
     e_UIS_Button_SelectFont,
     e_UIS_Button_SelectCursorColor,

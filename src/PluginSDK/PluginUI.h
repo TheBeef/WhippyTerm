@@ -93,6 +93,9 @@ typedef struct PIUIRadioBttnCtrl t_PIUIRadioBttnCtrl;
 struct PIUICheckboxCtrl {int PrivateData;};
 typedef struct PIUICheckboxCtrl t_PIUICheckboxCtrl;
 
+struct PIUITextBoxCtrl {int PrivateData;};
+typedef struct PIUITextBoxCtrl t_PIUITextBoxCtrl;
+
 /* PI_Event_ComboxBox */
 typedef enum
 {
@@ -223,6 +226,13 @@ struct PI_Indicator
     void *UIData;
 };
 
+struct PI_TextBox
+{
+    t_PIUITextBoxCtrl *Ctrl;
+    t_PIUILabelCtrl *Label;
+    void *UIData;
+};
+
 typedef enum
 {
     e_FileReqType_Load,
@@ -311,6 +321,11 @@ struct PI_UIAPI
     /********* Start of PI_UIAPI_API_VERSION_2 *********/
     PG_BOOL (*FileReq)(e_FileReqTypeType Req,const char *Title,char **Path,char **Filename,const char *Filters,int SelectedFilter);
     void (*FreeFileReqPathAndFile)(char **Path,char **Filename);
+
+    /* TextBox (display only) */
+    struct PI_TextBox *(*AddTextBox)(t_WidgetSysHandle *WidgetHandle,const char *Label,const char *Text);
+    void (*FreeTextBox)(t_WidgetSysHandle *WidgetHandle,struct PI_TextBox *BoxHandle);
+    void (*SetTextBox)(t_WidgetSysHandle *WidgetHandle,t_PIUITextBoxCtrl *UICtrl,const char *Text);
 
     /********* End of PI_UIAPI_API_VERSION_2 *********/
 };

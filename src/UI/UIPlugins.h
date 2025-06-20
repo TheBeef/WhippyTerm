@@ -113,4 +113,9 @@ void UIPI_FreeIndicator(struct PI_Indicator *UICtrl);
 void UIPI_ShowIndicator(struct PI_Indicator *UICtrl,bool Show);
 void UIPI_SetIndicator(t_PIUIIndicatorCtrl *UICtrl,bool On);
 
+struct PI_TextBox *UIPI_AddTextBox(t_UIContainerCtrl *ContainerWidget,const char *Label,const char *Text);
+void UIPI_FreeTextBox(struct PI_TextBox *UICtrl);
+void UIPI_SetTextBoxText(t_PIUITextBoxCtrl *UICtrl,const char *NewText);
+
+
 #endif

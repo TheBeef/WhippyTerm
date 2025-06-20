@@ -1180,3 +1180,91 @@ void PIQIndicator::paintEvent(QPaintEvent *event)
 //    }
 }
 
+
+
+/*******************************************************************************
+ * NAME:
+ *    UIPI_AddTextBox
+ *
+ * SYNOPSIS:
+ *    struct PI_TextBox *UIPI_AddTextBox(
+ *              t_UIContainerCtrl *ContainerWidget,const char *Label,
+ *              const char *Text);
+ *
+ * PARAMETERS:
+ *    ContainerWidget [I] -- The parent widget to add this combox box to
+ *    Label [I] -- The label for this box.
+ *    Text [I] -- The text to put in the box
+ *
+ * FUNCTION:
+ *    This is standard version of text box (a widget to display plain text).
+ *
+ * RETURNS:
+ *    The text box handle.
+ *
+ * SEE ALSO:
+ *    UIPI_FreeTextBox()
+ ******************************************************************************/
+struct PI_TextBox *UIPI_AddTextBox(t_UIContainerCtrl *ContainerWidget,
+        const char *Label,const char *Text)
+{
+    struct PI_TextBox *NewPIC;
+    QFormLayout *Layout=(QFormLayout *)ContainerWidget;
+    QLabel *NewCtrl;
+    QLabel *NewLabel;
+
+    NewCtrl=NULL;
+    NewLabel=NULL;
+    try
+    {
+        NewPIC=new PI_TextBox();
+        NewCtrl=new QLabel(Layout->parentWidget());
+
+        NewCtrl->setTextFormat(Qt::PlainText);
+        NewCtrl->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop);
+        NewCtrl->setWordWrap(true);
+        NewCtrl->setTextInteractionFlags(Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
+        NewCtrl->setText(Text);
+
+        NewLabel=new QLabel(Layout->parentWidget());
+
+        NewLabel->setText(Label);
+
+        Layout->addRow(NewLabel,NewCtrl);
+
+        NewPIC->Ctrl=(t_PIUITextBoxCtrl *)NewCtrl;
+        NewPIC->Label=(t_PIUILabelCtrl *)NewLabel;
+        NewPIC->UIData=NULL;
+    }
+    catch(...)
+    {
+        if(NewCtrl!=NULL)
+            delete NewCtrl;
+        if(NewLabel!=NULL)
+            delete NewLabel;
+
+        return NULL;
+    }
+
+    return NewPIC;
+}
+
+void UIPI_FreeTextBox(struct PI_TextBox *UICtrl)
+{
+    QLabel *Ctrl;
+    QLabel *Label;
+
+    Ctrl=(QLabel *)UICtrl->Ctrl;
+    Label=(QLabel *)UICtrl->Label;
+
+    delete Ctrl;
+    delete Label;
+    delete UICtrl;
+}
+
+void UIPI_SetTextBoxText(t_PIUITextBoxCtrl *UICtrl,const char *NewText)
+{
+    QLabel *Ctrl=(QLabel *)UICtrl;
+
+    Ctrl->setText(NewText);
+}

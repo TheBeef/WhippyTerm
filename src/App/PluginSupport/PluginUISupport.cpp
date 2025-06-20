@@ -124,6 +124,10 @@ struct PI_UIAPI m_PIUSDefault_UIAPI=
     /* Version 2 */
     PIUSDefault_FileReq,
     PIUSDefault_FreeFileReqPathAndFile,
+
+    PIUSDefault_AddTextBox,
+    PIUSDefault_FreeTextBox,
+    PIUSDefault_SetTextBox,
 };
 
 /*******************************************************************************
@@ -717,3 +721,88 @@ void PIUSDefault_FreeFileReqPathAndFile(char **Path,char **Filename)
     free(*Filename);
     *Filename=NULL;
 }
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AddTextBox
+ *
+ * SYNOPSIS:
+ *    struct PI_TextBox *PIUSDefault_AddTextBox(t_WidgetSysHandle *WidgetHandle,
+ *              const char *Label,const char *Text);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Text [I] -- The text for inside this text display.
+ *
+ * FUNCTION:
+ *    This function allocates a text box widget.  A text box widget is for
+ *    displaying plain text.
+ *
+ * RETURNS:
+ *    A handle to the text box.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_FreeTextBox(), PIUSDefault_SetTextBox()
+ ******************************************************************************/
+struct PI_TextBox *PIUSDefault_AddTextBox(t_WidgetSysHandle *WidgetHandle,
+        const char *Label,const char *Text)
+{
+    return UIPI_AddTextBox((t_UIContainerCtrl *)WidgetHandle,Label,Text);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_FreeTextBox
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_FreeTextBox(t_WidgetSysHandle *WidgetHandle,
+ *              struct PI_TextBox *BoxHandle);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    BoxHandle [I] -- The handle to the widget to free.  Allocated with
+ *                     PIUSDefault_AddTextBox()
+ *
+ * FUNCTION:
+ *    This function frees the widget allocated with PIUSDefault_AddTextBox()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddTextBox()
+ ******************************************************************************/
+void PIUSDefault_FreeTextBox(t_WidgetSysHandle *WidgetHandle,
+        struct PI_TextBox *BoxHandle)
+{
+    UIPI_FreeTextBox(BoxHandle);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetTextBox
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetTextBox(t_WidgetSysHandle *WidgetHandle,
+ *          struct PI_TextBox *UICtrl,const char *Text);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Text [I] -- The new text to put in the widget
+ *
+ * FUNCTION:
+ *    This function replaces the text in the text box with new text.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddTextBox()
+ ******************************************************************************/
+void PIUSDefault_SetTextBox(t_WidgetSysHandle *WidgetHandle,
+        t_PIUITextBoxCtrl *UICtrl,const char *Text)
+{
+    UIPI_SetTextBoxText(UICtrl,Text);
+}
+

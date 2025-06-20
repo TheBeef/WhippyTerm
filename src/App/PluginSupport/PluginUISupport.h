@@ -110,4 +110,8 @@ int PIUSDefault_Ask(const char *Message,int Type);
 PG_BOOL PIUSDefault_FileReq(e_FileReqTypeType Req,const char *Title,char **Path,char **Filename,const char *Filters,int SelectedFilter);
 void PIUSDefault_FreeFileReqPathAndFile(char **Path,char **Filename);
 
+struct PI_TextBox *PIUSDefault_AddTextBox(t_WidgetSysHandle *WidgetHandle,const char *Label,const char *Text);
+void PIUSDefault_FreeTextBox(t_WidgetSysHandle *WidgetHandle,struct PI_TextBox *BoxHandle);
+void PIUSDefault_SetTextBox(t_WidgetSysHandle *WidgetHandle,t_PIUITextBoxCtrl *UICtrl,const char *Text);
+
 #endif

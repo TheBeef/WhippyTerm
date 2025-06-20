@@ -73,7 +73,7 @@ struct DataProcessorInfo m_BasicHexDecoder_Info=
     "Hexdump of binary data",
     "Prints out hex values of incoming data",
     e_DataProcessorType_Binary,
-    e_TextDataProcessorClassMAX,
+    .BinClass=e_BinaryDataProcessorClass_Decoder,
     e_BinaryDataProcessorMode_Hex,
 };
 

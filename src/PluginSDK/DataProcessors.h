@@ -109,6 +109,13 @@ typedef enum
 
 typedef enum
 {
+    e_BinaryDataProcessorClass_Other,
+    e_BinaryDataProcessorClass_Decoder,
+    e_BinaryDataProcessorClassMAX
+} e_BinaryDataProcessorClassType;
+
+typedef enum
+{
     e_BinaryDataProcessorMode_Text,
     e_BinaryDataProcessorMode_Hex,
 //    e_BinaryDataProcessorMode_Table,
@@ -130,7 +137,11 @@ struct DataProcessorInfo
     const char *Help;
     e_DataProcessorTypeType ProType;
 
-    e_TextDataProcessorClassType TxtClass;      // Only applies to text processors
+    union
+    {
+        e_TextDataProcessorClassType TxtClass;      // Only applies to text processors
+        e_BinaryDataProcessorClassType BinClass;    // Only applies to binary processors
+    };
     e_BinaryDataProcessorModeType BinMode;      // Only applies to binary processors
 };
 

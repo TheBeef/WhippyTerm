@@ -94,7 +94,8 @@ bool DPS_ReapplyProcessor2Connection(struct ProcessorConData *FData,
         class ConSettings *CustomSettings);
 void DPS_GetListOfTextProcessors(e_TextDataProcessorClassType TxtClass,
         t_DPS_ProInfoType &RetData);
-void DPS_GetListOfBinaryProcessors(t_DPS_ProInfoType &RetData);
+void DPS_GetListOfBinaryProcessors(e_BinaryDataProcessorClassType BinClass,
+        t_DPS_ProInfoType &RetData);
 bool DPS_ProcessorKeyPress(const uint8_t *KeyChar,int KeyCharLen,
         e_UIKeys ExtendedKey,uint8_t Mod);
 void DPS_ProcessorIncomingBytes(const uint8_t *inbuff,int bytes);

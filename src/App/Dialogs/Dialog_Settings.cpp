@@ -131,6 +131,7 @@ static void UIS_HandleInputProcessingTermEmuChange(void);
 static void UIS_HandleInputProcessingHighlighterChange(void);
 static void UIS_HandleInputProcessingOtherChange(void);
 static void UIS_HandleInputProcessingBinaryDecoderChange(void);
+static void UIS_HandleInputProcessingBinaryOtherChange(void);
 static void UIS_HandleSysColPresetChange(uintptr_t ID);
 static void UIS_HandleAreaChanged(uintptr_t ID);
 static void UIS_HandleKeyBindingsCmdListChange(uintptr_t ID);
@@ -147,6 +148,7 @@ t_DPS_ProInfoType m_TermEmulationInputPros;
 t_DPS_ProInfoType m_HighlighterInputPros;
 t_DPS_ProInfoType m_OtherInputPros;
 t_DPS_ProInfoType m_BinaryDecoders;
+t_DPS_ProInfoType m_BinaryOtherDecoders;
 uint32_t m_DS_SysColors[e_SysColShadeMAX][e_SysColMAX];
 uint32_t m_DS_DefaultColors[e_DefaultColorsMAX];
 uint32_t m_DS_SelectionColors[e_ColorMAX];
@@ -321,7 +323,10 @@ bool RunSettingsDialog(class TheMainWindow *MW,
             m_HighlighterInputPros);
     DPS_GetListOfTextProcessors(e_TextDataProcessorClass_Other,
             m_OtherInputPros);
-    DPS_GetListOfBinaryProcessors(m_BinaryDecoders);
+    DPS_GetListOfBinaryProcessors(e_BinaryDataProcessorClass_Decoder,
+            m_BinaryDecoders);
+    DPS_GetListOfBinaryProcessors(e_BinaryDataProcessorClass_Other,
+            m_BinaryOtherDecoders);
 
     /* Sort them */
     std::sort(m_CharEncodingInputPros.begin(),m_CharEncodingInputPros.end(),
@@ -332,6 +337,8 @@ bool RunSettingsDialog(class TheMainWindow *MW,
             ProInfoSortCB());
     std::sort(m_OtherInputPros.begin(),m_OtherInputPros.end(),ProInfoSortCB());
     std::sort(m_BinaryDecoders.begin(),m_BinaryDecoders.end(),ProInfoSortCB());
+    std::sort(m_BinaryOtherDecoders.begin(),m_BinaryOtherDecoders.end(),
+            ProInfoSortCB());
 
     /* Add NONE to the top */
     m_CharEncodingInputPros.insert(m_CharEncodingInputPros.begin(),
@@ -381,11 +388,9 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     UIClearListView(InputProTextOther);
     for(r=0;r<m_OtherInputPros.size();r++)
     {
-        UIAddItem2ListView(InputProTextOther,
-                m_OtherInputPros[r].DisplayName,r);
+        UIAddItem2ListView(InputProTextOther,m_OtherInputPros[r].DisplayName,r);
         UISetListViewEntryCheckable(InputProTextOther,r,true);
-        UISetListViewEntryToolTip(InputProTextOther,r,
-                m_OtherInputPros[r].Tip);
+        UISetListViewEntryToolTip(InputProTextOther,r,m_OtherInputPros[r].Tip);
     }
 
     BinaryProcessorsDecoder=UIS_GetListViewHandle(e_UIS_ListView_BinaryProcessorDecoder);
@@ -399,6 +404,20 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         {
             UISetListViewEntryToolTip(BinaryProcessorsDecoder,r,
                     m_BinaryDecoders[r].Tip);
+        }
+    }
+
+    BinaryProcessorsDecoder=UIS_GetListViewHandle(e_UIS_ListView_BinaryProcessorOther);
+    UIClearListView(BinaryProcessorsDecoder);
+    for(r=0;r<m_BinaryOtherDecoders.size();r++)
+    {
+        UIAddItem2ListView(BinaryProcessorsDecoder,
+                m_BinaryOtherDecoders[r].DisplayName,r);
+
+        if(m_BinaryOtherDecoders[r].Tip!=NULL)
+        {
+            UISetListViewEntryToolTip(BinaryProcessorsDecoder,r,
+                    m_BinaryOtherDecoders[r].Tip);
         }
     }
 
@@ -894,6 +913,17 @@ static void DS_SetSettingGUI(void)
                 break;
             }
         }
+
+        for(r=0;r<m_BinaryOtherDecoders.size();r++)
+        {
+            if(strcmp(m_BinaryOtherDecoders[r].IDStr,CurStr->c_str())==0)
+            {
+                /* Found it */
+                ListViewHandle=UIS_GetListViewHandle(e_UIS_ListView_BinaryProcessorOther);
+                UISetListViewEntryCheckedState(ListViewHandle,r,true);
+                break;
+            }
+        }
     }
 }
 
@@ -1239,6 +1269,17 @@ static void DS_GetSettingsFromGUI(void)
                 push_back(m_BinaryDecoders[ID].IDStr);
     }
 
+    /* Binary Other */
+    ListViewHandle=UIS_GetListViewHandle(e_UIS_ListView_BinaryProcessorOther);
+    for(ID=0;ID<m_BinaryOtherDecoders.size();ID++)
+    {
+        if(UIGetListViewEntryCheckedState(ListViewHandle,ID))
+        {
+            m_SettingConSettings->EnabledBinaryDataProcessors.
+                    push_back(m_BinaryOtherDecoders[ID].IDStr);
+        }
+    }
+
     /********************/
     /* Colors           */
     /********************/
@@ -1299,6 +1340,7 @@ static void DS_RethinkGUI(void)
     UIS_HandleInputProcessingCharEncChange();
     UIS_HandleInputProcessingTermEmuChange();
     UIS_HandleInputProcessingBinaryDecoderChange();
+    UIS_HandleInputProcessingBinaryOtherChange();
 }
 
 /*******************************************************************************
@@ -1918,6 +1960,47 @@ void UIS_HandleInputProcessingBinaryDecoderChange(void)
 
 /*******************************************************************************
  * NAME:
+ *    UIS_HandleInputProcessingBinaryOtherChange
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleInputProcessingBinaryOtherChange(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function updates the UI when the binary other processors changes.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleInputProcessingBinaryOtherChange(void)
+{
+    bool DataProcessorHasSettings;
+    t_UIButtonCtrl *SettingsBttn;
+    t_UIListViewCtrl *ListView;
+    unsigned int Selected;
+
+    ListView=UIS_GetListViewHandle(e_UIS_ListView_BinaryProcessorOther);
+    SettingsBttn=UIS_GetButtonHandle(e_UIS_Button_BinaryProOther_Settings);
+
+    Selected=UIGetListViewSelectedEntry(ListView);
+    if(Selected>=m_BinaryOtherDecoders.size())
+        return;
+
+    if(DPS_DoesPluginHaveSettings(m_BinaryOtherDecoders[Selected].IDStr))
+        DataProcessorHasSettings=true;
+    else
+        DataProcessorHasSettings=false;
+
+    UIEnableButton(SettingsBttn,DataProcessorHasSettings);
+}
+
+/*******************************************************************************
+ * NAME:
  *    UIS_HandleSysColPresetChange
  *
  * SYNOPSIS:
@@ -2397,6 +2480,15 @@ bool DS_Event(const struct DSEvent *Event)
                                 m_BinaryDecoders[Selected].IDStr);
                     }
                 break;
+                case e_UIS_Button_BinaryProOther_Settings:
+                    ListView=UIS_GetListViewHandle(e_UIS_ListView_BinaryProcessorOther);
+                    Selected=UIGetListViewSelectedEntry(ListView);
+                    if(Selected<m_BinaryOtherDecoders.size())
+                    {
+                        RunDataProPluginSettingsDialog(m_SettingConSettings,
+                                m_BinaryOtherDecoders[Selected].IDStr);
+                    }
+                break;
                 case e_UIS_Button_SysCol_Apply:
                     DS_DoSysColApply();
                 break;
@@ -2741,6 +2833,9 @@ bool DS_Event(const struct DSEvent *Event)
                 break;
                 case e_UIS_ListView_BinaryProcessorDecoder:
                     UIS_HandleInputProcessingBinaryDecoderChange();
+                break;
+                case e_UIS_ListView_BinaryProcessorOther:
+                    UIS_HandleInputProcessingBinaryOtherChange();
                 break;
                 case e_UIS_ListViewMAX:
                 default:

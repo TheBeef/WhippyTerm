@@ -3880,7 +3880,7 @@ void TheMainWindow::RebuildTerminalEmulationMenu(void)
 
     DPS_GetListOfTextProcessors(e_TextDataProcessorClass_TermEmulation,
             TxtTerms);
-    DPS_GetListOfBinaryProcessors(BinTerms);
+    DPS_GetListOfBinaryProcessors(e_BinaryDataProcessorClass_Decoder,BinTerms);
 
     /* Sort them */
     std::sort(TxtTerms.begin(),TxtTerms.end(),

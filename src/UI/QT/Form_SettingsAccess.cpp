@@ -133,6 +133,8 @@ t_UIListViewCtrl *UIS_GetListViewHandle(e_UIS_ListView UIObj)
             return (t_UIListViewCtrl *)g_SettingsDialog->ui->KeyBinding_CommandList_listWidget;
         case e_UIS_ListView_BinaryProcessorDecoder:
             return (t_UIListViewCtrl *)g_SettingsDialog->ui->Binary_Processor_Decoder_listWidget;
+        case e_UIS_ListView_BinaryProcessorOther:
+            return (t_UIListViewCtrl *)g_SettingsDialog->ui->Binary_Other_listWidget;
 
         case e_UIS_ListViewMAX:
         default:
@@ -163,6 +165,8 @@ t_UIButtonCtrl *UIS_GetButtonHandle(e_UIS_Button UIObj)
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->OtherSettings_pushButton;
         case e_UIS_Button_BinaryPro_Settings:
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->BinaryProSettings_pushButton;
+        case e_UIS_Button_BinaryProOther_Settings:
+            return (t_UIButtonCtrl *)g_SettingsDialog->ui->Binary_OtherSettings_pushButton;
         case e_UIS_Button_SysCol_Apply:
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->SysCol_Apply_pushButton;
         case e_UIS_Button_SelectFont:

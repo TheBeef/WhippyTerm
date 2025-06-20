@@ -1001,9 +1001,11 @@ void DPS_GetListOfTextProcessors(e_TextDataProcessorClassType TxtClass,
  *    DPS_GetListOfBinaryProcessors
  *
  * SYNOPSIS:
- *    void DPS_GetListOfBinaryProcessors(t_DPS_ProInfoType &RetData);
+ *    void DPS_GetListOfBinaryProcessors(e_BinaryDataProcessorClassType BinClass,
+ *          t_DPS_ProInfoType &RetData);
  *
  * PARAMETERS:
+ *    BinClass [I] -- What type of binary processors to get
  *    RetData [O] -- This is filled with info about the input processors.
  *                   The data return will be a vector of a structure with
  *                   the following fields:
@@ -1028,7 +1030,8 @@ void DPS_GetListOfTextProcessors(e_TextDataProcessorClassType TxtClass,
  * SEE ALSO:
  *    DPS_GetListOfTextProcessors()
  ******************************************************************************/
-void DPS_GetListOfBinaryProcessors(t_DPS_ProInfoType &RetData)
+void DPS_GetListOfBinaryProcessors(e_BinaryDataProcessorClassType BinClass,
+        t_DPS_ProInfoType &RetData)
 {
     i_DPSDataProcessorsType CurProcessor;
     struct DPS_ProInfo NewEntry;
@@ -1038,7 +1041,8 @@ void DPS_GetListOfBinaryProcessors(t_DPS_ProInfoType &RetData)
     for(CurProcessor=m_DataProcessors.begin();
             CurProcessor!=m_DataProcessors.end();CurProcessor++)
     {
-        if(CurProcessor->Info.ProType==e_DataProcessorType_Binary)
+        if(CurProcessor->Info.ProType==e_DataProcessorType_Binary &&
+                CurProcessor->Info.BinClass==BinClass)
         {
             NewEntry.IDStr=CurProcessor->ProID.c_str();
             NewEntry.DisplayName=CurProcessor->Info.DisplayName;

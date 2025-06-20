@@ -774,3 +774,24 @@ void Form_Settings::on_Binary_Processor_Decoder_listWidget_itemClicked(QListWidg
     SendEvent(e_DSEvent_ListViewChange,&EventData,ID);
 }
 
+
+void Form_Settings::on_Binary_Other_listWidget_itemClicked(QListWidgetItem *item)
+{
+    uintptr_t ID;   // The ID for this item
+    union DSEventData EventData;
+    
+    ID=(uintptr_t)(item->data(Qt::UserRole).toULongLong());
+    
+    EventData.ListView.InputID=e_UIS_ListView_BinaryProcessorOther;
+    SendEvent(e_DSEvent_ListViewChange,&EventData,ID);
+}
+
+
+void Form_Settings::on_Binary_OtherSettings_pushButton_clicked()
+{
+    union DSEventData EventData;
+
+    EventData.Bttn.InputID=e_UIS_Button_BinaryProOther_Settings;
+    SendEvent(e_DSEvent_BttnTriggered,&EventData);
+}
+

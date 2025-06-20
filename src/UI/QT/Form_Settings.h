@@ -161,6 +161,10 @@ private slots:
     
     void on_Binary_Processor_Decoder_listWidget_itemClicked(QListWidgetItem *item);
     
+    void on_Binary_Other_listWidget_itemClicked(QListWidgetItem *item);
+    
+    void on_Binary_OtherSettings_pushButton_clicked();
+    
 private:
     bool DoingEvent;
 

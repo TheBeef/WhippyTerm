@@ -67,6 +67,11 @@ struct DataProcessorAPI m_UnicodeDecoderCBs=
     NULL,
     UnicodeDecoder_ProcessByte,
     NULL, // ProcessIncomingBinaryByte
+    /* V2 */
+    NULL,       // ProcessOutGoingData
+    NULL,       // AllocSettingsWidgets
+    NULL,       // FreeSettingsWidgets
+    NULL,       // StoreSettings
 };
 struct DataProcessorInfo m_UnicodeDecoder_Info=
 {

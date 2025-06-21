@@ -102,6 +102,8 @@ const struct IODriverAPI g_UDPClientPluginAPI=
     UDPClient_Transmit,
     NULL,                                               // ConnectionAuxCtrlWidgets_AllocWidgets
     NULL,                                               // ConnectionAuxCtrlWidgets_FreeWidgets
+    /* V2 */
+    NULL,   // GetLastErrorMessage
 };
 
 struct IODriverInfo m_UDPClientInfo=

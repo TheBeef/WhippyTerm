@@ -329,6 +329,11 @@ struct DataProcessorAPI m_ANSIX364DecoderAPI=
     ANSIX364Decoder_ProcessKeyPress,
     ANSIX364Decoder_ProcessIncomingTextByte,
     NULL, // ProcessIncomingBinaryByte
+    /* V2 */
+    NULL,       // ProcessOutGoingData
+    NULL,       // AllocSettingsWidgets
+    NULL,       // FreeSettingsWidgets
+    NULL,       // StoreSettings
 };
 struct DataProcessorInfo m_ANSIX364Decoder_Info=
 {

@@ -107,6 +107,8 @@ const struct IODriverAPI g_TCPServerPluginAPI=
     NULL,                                               // Transmit
     NULL,                                               // ConnectionAuxCtrlWidgets_AllocWidgets
     NULL,                                               // ConnectionAuxCtrlWidgets_FreeWidgets
+    /* V2 */
+    NULL,   // GetLastErrorMessage
 };
 extern const struct IODriverAPI g_TCPServerPluginAPI;
 

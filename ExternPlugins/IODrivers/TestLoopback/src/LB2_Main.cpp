@@ -132,6 +132,8 @@ const struct IODriverAPI g_LB2PluginAPI=
     NULL,                                           // Transmit
     LB2_ConnectionAuxCtrlWidgets_AllocWidgets,
     LB2_ConnectionAuxCtrlWidgets_FreeWidgets,
+    /* V2 */
+    NULL,   // GetLastErrorMessage
 };
 struct IODriverInfo m_LB2Info=
 {

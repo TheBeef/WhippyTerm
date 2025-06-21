@@ -61,6 +61,11 @@ struct DataProcessorAPI m_BasicCtrlCharsDecoderCBs=
     BasicCtrlCharsDecoder_ProcessKeyPress,
     BasicCtrlCharsDecoder_ProcessByte,
     NULL, // ProcessIncomingBinaryByte
+    /* V2 */
+    NULL,       // ProcessOutGoingData
+    NULL,       // AllocSettingsWidgets
+    NULL,       // FreeSettingsWidgets
+    NULL,       // StoreSettings
 };
 
 struct DataProcessorInfo m_BasicCtrlCharsDecoder_Info=

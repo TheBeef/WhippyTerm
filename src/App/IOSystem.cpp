@@ -123,6 +123,7 @@ struct CWD_WidgetData
     struct PI_ColumnViewInput *ColumnViewInput;
     struct PI_ButtonInput *ButtonInput;
     struct PI_Indicator *Indicator;
+    struct PI_TextBox *TextBox;
     struct ConnectionWidgetData *Owner;
     void *UserData;
     void (*EventCB)(const struct PICBEvent *Event,void *UserData);
@@ -222,6 +223,8 @@ static struct PI_Indicator *IOS_AddIndicator(t_WidgetSysHandle *WidgetHandle,
         const char *Label);
 static void IOS_FreeIndicator(t_WidgetSysHandle *WidgetHandle,
         struct PI_Indicator *UICtrl);
+static struct PI_TextBox *IOS_AddTextBox(t_WidgetSysHandle *WidgetHandle,const char *Label,const char *Text);
+static void IOS_FreeTextBox(t_WidgetSysHandle *WidgetHandle,struct PI_TextBox *BoxHandle);
 
 /*** VARIABLE DEFINITIONS     ***/
 const struct IOS_API g_IOS_API=
@@ -291,6 +294,9 @@ static struct PI_UIAPI IOS_UIAPI=
     /* Version 2 */
     PIUSDefault_FileReq,
     PIUSDefault_FreeFileReqPathAndFile,
+    IOS_AddTextBox,
+    IOS_FreeTextBox,
+    PIUSDefault_SetTextBox,
 };
 
 bool m_NeverScanned4Connections;
@@ -4995,4 +5001,115 @@ const char *IOS_GetLastErrorMessage(t_IOSystemHandle *Handle)
         return DrvHandle->IOdrv->API.GetLastErrorMessage(DrvHandle->DriverData);
 
     return NULL;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AddTextBox
+ *
+ * SYNOPSIS:
+ *    struct PI_TextBox *PIUSDefault_AddTextBox(t_WidgetSysHandle *WidgetHandle,
+ *              const char *Label,const char *Text);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data we allocated in
+ *                        IOS_AllocConnectionOptions()
+ *    Text [I] -- The text for inside this text display.
+ *
+ * FUNCTION:
+ *    This is a version of add an text box for the IO system.
+ *
+ * RETURNS:
+ *    A handle to the text box.
+ *
+ * SEE ALSO:
+ *    IOS_FreeTextBox(), PIUSDefault_SetTextBox()
+ ******************************************************************************/
+struct PI_TextBox *IOS_AddTextBox(t_WidgetSysHandle *WidgetHandle,
+        const char *Label,const char *Text)
+{
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct PI_TextBox *NewTextBox;
+
+    NewTextBox=NULL;
+    ExtraData=NULL;
+    try
+    {
+        ExtraData=(struct CWD_WidgetData *)
+                malloc(sizeof(struct CWD_WidgetData));
+        memset(ExtraData,0x00,sizeof(struct CWD_WidgetData));
+        ExtraData->Owner=ConWidgetData;
+
+        NewTextBox=UIPI_AddTextBox(ConWidgetData->ContainerWidget,Label,Text);
+        if(NewTextBox==NULL)
+            throw(0);
+        ExtraData->TextBox=NewTextBox;
+
+        /* Link in */
+        ExtraData->Next=ConWidgetData->WidgetExtraData;
+        ConWidgetData->WidgetExtraData=ExtraData;
+    }
+    catch(...)
+    {
+        if(NewTextBox!=NULL)
+            UIPI_FreeTextBox(NewTextBox);
+        if(ExtraData==NULL)
+            free(ExtraData);
+        NewTextBox=NULL;
+    }
+    return NewTextBox;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_FreeTextBox
+ *
+ * SYNOPSIS:
+ *    void IOS_FreeTextBox(t_WidgetSysHandle *WidgetHandle,
+ *              struct PI_TextBox *BoxHandle);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data we allocated in
+ *                        IOS_AllocConnectionOptions()
+ *    BoxHandle [I] -- The input to free.
+ *
+ * FUNCTION:
+ *    This function frees an indicator allocated with the IO system version
+ *    of add text box.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddTextBox()
+ ******************************************************************************/
+void IOS_FreeTextBox(t_WidgetSysHandle *WidgetHandle,
+        struct PI_TextBox *BoxHandle)
+{
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct CWD_WidgetData *PrevExtraData;
+
+    /* Find and unlink (and free) this text box */
+    PrevExtraData=NULL;
+    for(ExtraData=ConWidgetData->WidgetExtraData;ExtraData!=NULL;
+            ExtraData=ExtraData->Next)
+    {
+        if(ExtraData->TextBox==BoxHandle)
+        {
+            /* Found it, unlink and free */
+            if(PrevExtraData==NULL)
+                ConWidgetData->WidgetExtraData=ExtraData->Next;
+            else
+                PrevExtraData->Next=ExtraData->Next;
+
+            free(ExtraData);
+
+            break;
+        }
+        PrevExtraData=ExtraData;
+    }
+
+    UIPI_FreeTextBox(BoxHandle);
 }

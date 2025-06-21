@@ -96,6 +96,9 @@ typedef struct PIUICheckboxCtrl t_PIUICheckboxCtrl;
 struct PIUITextBoxCtrl {int PrivateData;};
 typedef struct PIUITextBoxCtrl t_PIUITextBoxCtrl;
 
+struct PIUIGroupBoxCtrl {int PrivateData;};
+typedef struct PIUIGroupBoxCtrl t_PIUIGroupBoxCtrl;
+
 /* PI_Event_ComboxBox */
 typedef enum
 {
@@ -233,6 +236,12 @@ struct PI_TextBox
     void *UIData;
 };
 
+struct PI_GroupBox
+{
+    t_PIUIGroupBoxCtrl *Ctrl;
+    t_WidgetSysHandle *GroupWidgetHandle;
+};
+
 typedef enum
 {
     e_FileReqType_Load,
@@ -326,6 +335,11 @@ struct PI_UIAPI
     struct PI_TextBox *(*AddTextBox)(t_WidgetSysHandle *WidgetHandle,const char *Label,const char *Text);
     void (*FreeTextBox)(t_WidgetSysHandle *WidgetHandle,struct PI_TextBox *BoxHandle);
     void (*SetTextBox)(t_WidgetSysHandle *WidgetHandle,t_PIUITextBoxCtrl *UICtrl,const char *Text);
+
+//    /* GroupBox */
+//    struct PI_GroupBox *(*AddGroupBox)(t_WidgetSysHandle *WidgetHandle,const char *Label);
+//    void (*FreeGroupBox)(t_WidgetSysHandle *WidgetHandle,struct PI_GroupBox *BoxHandle);
+//    void (*SetGroupBox)(t_WidgetSysHandle *WidgetHandle,t_PIUIGroupBoxCtrl *UICtrl,const char *Label);
 
     /********* End of PI_UIAPI_API_VERSION_2 *********/
 };

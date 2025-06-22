@@ -128,6 +128,10 @@ struct PI_UIAPI m_PIUSDefault_UIAPI=
     PIUSDefault_AddTextBox,
     PIUSDefault_FreeTextBox,
     PIUSDefault_SetTextBox,
+
+    PIUSDefault_AddGroupBox,
+    PIUSDefault_FreeGroupBox,
+    PIUSDefault_SetGroupBoxLabel,
 };
 
 /*******************************************************************************
@@ -806,3 +810,85 @@ void PIUSDefault_SetTextBox(t_WidgetSysHandle *WidgetHandle,
     UIPI_SetTextBoxText(UICtrl,Text);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AddGroupBox
+ *
+ * SYNOPSIS:
+ *    struct PI_GroupBox *PIUSDefault_AddGroupBox(
+ *              t_WidgetSysHandle *WidgetHandle,const char *Label);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Label [I] -- The label text for this group box (the title).
+ *
+ * FUNCTION:
+ *    This function allocates a group box widget.  A text box widget has
+ *    other widgets in it.
+ *
+ * RETURNS:
+ *    A handle to the group box.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_FreeGroupBox(), PIUSDefault_SetGroupBoxLabel()
+ ******************************************************************************/
+struct PI_GroupBox *PIUSDefault_AddGroupBox(t_WidgetSysHandle *WidgetHandle,const char *Label)
+{
+    return UIPI_AddGroupBox((t_UIContainerCtrl *)WidgetHandle,Label);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_FreeGroupBox
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_FreeGroupBox(t_WidgetSysHandle *WidgetHandle,
+ *              struct PI_GroupBox *BoxHandle);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    BoxHandle [I] -- The handle to the widget to free.  Allocated with
+ *                     PIUSDefault_AddGroupBox()
+ *
+ * FUNCTION:
+ *    This function frees the widget allocated with PIUSDefault_AddGroupBox()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddGroupBox()
+ ******************************************************************************/
+void PIUSDefault_FreeGroupBox(t_WidgetSysHandle *WidgetHandle,
+        struct PI_GroupBox *BoxHandle)
+{
+    UIPI_FreeGroupBox(BoxHandle);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetGroupBoxLabel
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetGroupBoxLabel(t_WidgetSysHandle *WidgetHandle,
+ *              t_PIUIGroupBoxCtrl *UICtrl,const char *Label);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Label [I] -- The new label for this group box.
+ *
+ * FUNCTION:
+ *    This function replaces sets a new label (title) for this group box
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddGroupBox()
+ ******************************************************************************/
+void PIUSDefault_SetGroupBoxLabel(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIGroupBoxCtrl *UICtrl,const char *Label)
+{
+    UIPI_SetGroupBoxLabel(UICtrl,Label);
+}

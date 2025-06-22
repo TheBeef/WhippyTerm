@@ -38,6 +38,7 @@
 #include <QRadioButton>
 #include <QVBoxLayout>
 #include <QPainter>
+#include <QGroupBox>
 
 /*** DEFINES                  ***/
 
@@ -51,9 +52,17 @@ struct RadioBttnGroup
     QLabel *Label;
 };
 
+struct GroupBoxData
+{
+    QGroupBox *GroupBoxWidget;
+    QFormLayout *FormLayout;
+    QLabel *Label;
+};
+
 /*** FUNCTION PROTOTYPES      ***/
 
 /*** VARIABLE DEFINITIONS     ***/
+
 /*******************************************************************************
  * NAME:
  *    UIPI_AddComboBox
@@ -1262,9 +1271,101 @@ void UIPI_FreeTextBox(struct PI_TextBox *UICtrl)
     delete UICtrl;
 }
 
+void UIPI_ShowTextBox(struct PI_TextBox *UICtrl,bool Show)
+{
+    QLabel *Ctrl;
+    QLabel *Label;
+
+    Ctrl=(QLabel *)UICtrl->Ctrl;
+    Label=(QLabel *)UICtrl->Label;
+
+    Ctrl->setVisible(Show);
+    Label->setVisible(Show);
+}
+
 void UIPI_SetTextBoxText(t_PIUITextBoxCtrl *UICtrl,const char *NewText)
 {
     QLabel *Ctrl=(QLabel *)UICtrl;
 
     Ctrl->setText(NewText);
+}
+
+struct PI_GroupBox *UIPI_AddGroupBox(t_UIContainerCtrl *ContainerWidget,const char *Label)
+{
+    QFormLayout *Layout=(QFormLayout *)ContainerWidget;
+    struct PI_GroupBox *NewPIC;
+    struct GroupBoxData *GroupData;
+
+    NewPIC=NULL;
+    GroupData=NULL;
+    try
+    {
+        NewPIC=new PI_GroupBox();
+        GroupData=new struct GroupBoxData;
+        GroupData->GroupBoxWidget=NULL;
+        GroupData->FormLayout=NULL;
+        GroupData->Label=NULL;
+
+        GroupData->GroupBoxWidget=new QGroupBox(Layout->parentWidget());
+        GroupData->FormLayout=new QFormLayout(GroupData->GroupBoxWidget);
+        GroupData->Label=new QLabel(Layout->parentWidget());;
+
+        GroupData->Label->setText("");
+        GroupData->GroupBoxWidget->setTitle(Label);
+
+        Layout->addRow(GroupData->Label,GroupData->GroupBoxWidget);
+
+        NewPIC->Ctrl=(t_PIUIGroupBoxCtrl *)GroupData;
+        NewPIC->Label=(t_PIUILabelCtrl *)GroupData->Label;
+        NewPIC->GroupWidgetHandle=(t_WidgetSysHandle *)GroupData->FormLayout;
+    }
+    catch(...)
+    {
+        if(GroupData!=NULL)
+        {
+            if(GroupData->Label!=NULL)
+                delete GroupData->Label;
+
+            if(GroupData->FormLayout!=NULL)
+                delete GroupData->FormLayout;
+
+            if(GroupData->GroupBoxWidget!=NULL)
+                delete GroupData->GroupBoxWidget;
+
+            delete GroupData;
+        }
+
+        if(NewPIC!=NULL)
+            delete NewPIC;
+
+        NewPIC=NULL;
+    }
+
+    return NewPIC;
+}
+
+void UIPI_FreeGroupBox(struct PI_GroupBox *BoxHandle)
+{
+    struct GroupBoxData *Group=(struct GroupBoxData *)BoxHandle->Ctrl;
+
+    delete Group->Label;
+    delete Group->FormLayout;
+    delete Group->GroupBoxWidget;
+
+    delete Group;
+}
+
+void UIPI_ShowGroupBox(struct PI_GroupBox *BoxHandle,bool Show)
+{
+    struct GroupBoxData *Group=(struct GroupBoxData *)BoxHandle->Ctrl;
+
+    Group->Label->setVisible(Show);
+    Group->GroupBoxWidget->setVisible(Show);
+}
+
+void UIPI_SetGroupBoxLabel(t_PIUIGroupBoxCtrl *UICtrl,const char *NewLabel)
+{
+    struct GroupBoxData *Group=(struct GroupBoxData *)UICtrl;
+
+    Group->GroupBoxWidget->setTitle(NewLabel);
 }

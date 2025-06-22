@@ -115,7 +115,12 @@ void UIPI_SetIndicator(t_PIUIIndicatorCtrl *UICtrl,bool On);
 
 struct PI_TextBox *UIPI_AddTextBox(t_UIContainerCtrl *ContainerWidget,const char *Label,const char *Text);
 void UIPI_FreeTextBox(struct PI_TextBox *UICtrl);
+void UIPI_ShowTextBox(struct PI_TextBox *UICtrl,bool Show);
 void UIPI_SetTextBoxText(t_PIUITextBoxCtrl *UICtrl,const char *NewText);
 
+struct PI_GroupBox *UIPI_AddGroupBox(t_UIContainerCtrl *ContainerWidget,const char *Label);
+void UIPI_FreeGroupBox(struct PI_GroupBox *BoxHandle);
+void UIPI_ShowGroupBox(struct PI_GroupBox *BoxHandle,bool Show);
+void UIPI_SetGroupBoxLabel(t_PIUIGroupBoxCtrl *UICtrl,const char *NewLabel);
 
 #endif

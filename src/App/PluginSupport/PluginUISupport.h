@@ -114,4 +114,8 @@ struct PI_TextBox *PIUSDefault_AddTextBox(t_WidgetSysHandle *WidgetHandle,const 
 void PIUSDefault_FreeTextBox(t_WidgetSysHandle *WidgetHandle,struct PI_TextBox *BoxHandle);
 void PIUSDefault_SetTextBox(t_WidgetSysHandle *WidgetHandle,t_PIUITextBoxCtrl *UICtrl,const char *Text);
 
+struct PI_GroupBox *PIUSDefault_AddGroupBox(t_WidgetSysHandle *WidgetHandle,const char *Label);
+void PIUSDefault_FreeGroupBox(t_WidgetSysHandle *WidgetHandle,struct PI_GroupBox *BoxHandle);
+void PIUSDefault_SetGroupBoxLabel(t_WidgetSysHandle *WidgetHandle,t_PIUIGroupBoxCtrl *UICtrl,const char *Label);
+
 #endif

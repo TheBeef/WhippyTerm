@@ -239,6 +239,7 @@ struct PI_TextBox
 struct PI_GroupBox
 {
     t_PIUIGroupBoxCtrl *Ctrl;
+    t_PIUILabelCtrl *Label;
     t_WidgetSysHandle *GroupWidgetHandle;
 };
 
@@ -336,10 +337,10 @@ struct PI_UIAPI
     void (*FreeTextBox)(t_WidgetSysHandle *WidgetHandle,struct PI_TextBox *BoxHandle);
     void (*SetTextBox)(t_WidgetSysHandle *WidgetHandle,t_PIUITextBoxCtrl *UICtrl,const char *Text);
 
-//    /* GroupBox */
-//    struct PI_GroupBox *(*AddGroupBox)(t_WidgetSysHandle *WidgetHandle,const char *Label);
-//    void (*FreeGroupBox)(t_WidgetSysHandle *WidgetHandle,struct PI_GroupBox *BoxHandle);
-//    void (*SetGroupBox)(t_WidgetSysHandle *WidgetHandle,t_PIUIGroupBoxCtrl *UICtrl,const char *Label);
+    /* GroupBox */
+    struct PI_GroupBox *(*AddGroupBox)(t_WidgetSysHandle *WidgetHandle,const char *Label);
+    void (*FreeGroupBox)(t_WidgetSysHandle *WidgetHandle,struct PI_GroupBox *BoxHandle);
+    void (*SetGroupBoxLabel)(t_WidgetSysHandle *WidgetHandle,t_PIUIGroupBoxCtrl *UICtrl,const char *Label);
 
     /********* End of PI_UIAPI_API_VERSION_2 *********/
 };

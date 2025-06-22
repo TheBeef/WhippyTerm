@@ -31,6 +31,25 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added new misc type of binary plugins"
+            "A new sub class of plugin has been added, you can now"
+            " add binary misc types of plugins.  These plugins"
+            " show up in the misc area of the binary type of data processing."},
+    {
+        NOTETYPE_ENHANCEMENT,"Added a text box to the plugin UI API"
+            "Plugins can now add a text box to the widgets they can add"
+            " for aux controls, options, and settings.  These are displays"
+            " for text.  The text will wrap and can be selected for copy"
+            " paste, but can not be changed."},
+    {
+        NOTETYPE_ENHANCEMENT,"Added a color picker to the plugin UI API"
+            "Plugins can now add a color picker to the widgets they can add"
+            " for aux controls, options, and settings."},
+    {
+        NOTETYPE_ENHANCEMENT,"Added a groupbox to the plugin UI API"
+            "Plugins can now add groupbox to the widgets they can add"
+            " for aux controls, options, and settings."},
+    {
         NOTETYPE_ENHANCEMENT,"Made settings button work for plugins"
             "In the settings dialog there is a settings button to configure"
             " a plugin.  The button now works."},

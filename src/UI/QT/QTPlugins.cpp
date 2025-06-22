@@ -31,6 +31,7 @@
 /*** HEADER FILES TO INCLUDE  ***/
 #include "UI/UIPlugins.h"
 #include "QTPlugins.h"
+#include "Frame_ColorPickerWidget.h"
 #include <QFormLayout>
 #include <QComboBox>
 #include <QLabel>
@@ -996,6 +997,7 @@ void PIQPushButtonInput::Buttonclicked(bool checked)
     if(EventCB!=NULL)
     {
         Event.EventType=e_PIEButton_Press;
+        Event.Index=0;  // Not used, so we set it to 0
 
         EventCB(&Event,UserData);
     }
@@ -1369,3 +1371,78 @@ void UIPI_SetGroupBoxLabel(t_PIUIGroupBoxCtrl *UICtrl,const char *NewLabel)
 
     Group->GroupBoxWidget->setTitle(NewLabel);
 }
+
+struct PI_ColorPick *UIPI_AddColorPickInput(t_UIContainerCtrl *WidgetHandle,
+        const char *Label,uint32_t RGB,
+        void (*EventCB)(const struct PIColorPickEvent *Event,void *UserData),
+        void *UserData)
+{
+    struct PI_ColorPick *NewPIC;
+    QFormLayout *Layout=(QFormLayout *)WidgetHandle;
+    Frame_ColorPickerWidget *NewCtrl;
+    QLabel *NewLabel;
+
+    NewCtrl=NULL;
+    NewLabel=NULL;
+    try
+    {
+        NewPIC=new PI_ColorPick();
+        NewCtrl=new Frame_ColorPickerWidget(Layout->parentWidget());
+        NewLabel=new QLabel(Layout->parentWidget());
+
+        NewLabel->setText(Label);
+        NewCtrl->Init(EventCB,UserData,RGB);
+
+        Layout->addRow(NewLabel,NewCtrl);
+
+        NewPIC->Ctrl=(t_PIUIColorPickCtrl *)NewCtrl;
+        NewPIC->Label=(t_PIUILabelCtrl *)NewLabel;
+        NewPIC->UIData=NULL;
+    }
+    catch(...)
+    {
+        if(NewCtrl!=NULL)
+            delete NewCtrl;
+        if(NewLabel!=NULL)
+            delete NewLabel;
+
+        return NULL;
+    }
+
+    return (struct PI_ColorPick *)NewPIC;
+}
+
+void UIPI_FreeColorPickInput(struct PI_ColorPick *Handle)
+{
+    Frame_ColorPickerWidget *Ctrl;
+    QLabel *Label;
+
+    Ctrl=(Frame_ColorPickerWidget *)Handle->Ctrl;
+    Label=(QLabel *)Handle->Label;
+
+    delete Ctrl;
+    delete Label;
+    delete Handle;
+}
+
+void UIPI_ShowColorPickInput(struct PI_ColorPick *Handle,bool Show)
+{
+    Frame_ColorPickerWidget *Ctrl=(Frame_ColorPickerWidget *)Handle->Ctrl;
+    QLabel *Label=(QLabel *)Handle->Label;;
+
+    Ctrl->setVisible(Show);
+    Label->setVisible(Show);
+}
+
+uint32_t UIPI_GetColorPickValue(t_PIUIColorPickCtrl *UICtrl)
+{
+    Frame_ColorPickerWidget *Ctrl=(Frame_ColorPickerWidget *)UICtrl;
+    return Ctrl->GetRGBValue();
+}
+
+void UIPI_SetColorPickValue(t_PIUIColorPickCtrl *UICtrl,uint32_t RGB)
+{
+    Frame_ColorPickerWidget *Ctrl=(Frame_ColorPickerWidget *)UICtrl;
+    Ctrl->SetRGBValue(RGB);
+}
+

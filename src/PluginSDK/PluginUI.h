@@ -99,6 +99,9 @@ typedef struct PIUITextBoxCtrl t_PIUITextBoxCtrl;
 struct PIUIGroupBoxCtrl {int PrivateData;};
 typedef struct PIUIGroupBoxCtrl t_PIUIGroupBoxCtrl;
 
+struct PIUIColorPickCtrl {int PrivateData;};
+typedef struct PIUIColorPickCtrl t_PIUIColorPickCtrl;
+
 /* PI_Event_ComboxBox */
 typedef enum
 {
@@ -162,7 +165,19 @@ typedef enum
 struct PIButtonEvent
 {
     e_PIEButtonType EventType;
-    int Index;
+    int Index;      // Not used.  Seems to have just been copied and wasn't cleaned up, so now it lives on forever...
+};
+
+/* PIColorPickEvent */
+typedef enum
+{
+    e_PIEColorPick_Press,
+    e_PIEColorPickMAX
+} e_PIEColorPickType;
+
+struct PIColorPickEvent
+{
+    e_PIEColorPickType EventType;
 };
 
 struct PI_ComboBox
@@ -241,6 +256,14 @@ struct PI_GroupBox
     t_PIUIGroupBoxCtrl *Ctrl;
     t_PIUILabelCtrl *Label;
     t_WidgetSysHandle *GroupWidgetHandle;
+    void *UIData;
+};
+
+struct PI_ColorPick
+{
+    t_PIUIColorPickCtrl *Ctrl;
+    t_PIUILabelCtrl *Label;
+    void *UIData;
 };
 
 typedef enum
@@ -341,6 +364,12 @@ struct PI_UIAPI
     struct PI_GroupBox *(*AddGroupBox)(t_WidgetSysHandle *WidgetHandle,const char *Label);
     void (*FreeGroupBox)(t_WidgetSysHandle *WidgetHandle,struct PI_GroupBox *BoxHandle);
     void (*SetGroupBoxLabel)(t_WidgetSysHandle *WidgetHandle,t_PIUIGroupBoxCtrl *UICtrl,const char *Label);
+
+    /* Color Pick */
+    struct PI_ColorPick *(*AddColorPick)(t_WidgetSysHandle *WidgetHandle,const char *Label,uint32_t RGB,void (*EventCB)(const struct PIColorPickEvent *Event,void *UserData),void *UserData);
+    void (*FreeColorPick)(t_WidgetSysHandle *WidgetHandle,struct PI_ColorPick *Handle);
+    uint32_t (*GetColorPickValue)(t_WidgetSysHandle *WidgetHandle,t_PIUIColorPickCtrl *UICtrl);
+    void (*SetColorPickValue)(t_WidgetSysHandle *WidgetHandle,t_PIUIColorPickCtrl *UICtrl,uint32_t RGB);
 
     /********* End of PI_UIAPI_API_VERSION_2 *********/
 };

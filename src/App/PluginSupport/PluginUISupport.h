@@ -118,4 +118,9 @@ struct PI_GroupBox *PIUSDefault_AddGroupBox(t_WidgetSysHandle *WidgetHandle,cons
 void PIUSDefault_FreeGroupBox(t_WidgetSysHandle *WidgetHandle,struct PI_GroupBox *BoxHandle);
 void PIUSDefault_SetGroupBoxLabel(t_WidgetSysHandle *WidgetHandle,t_PIUIGroupBoxCtrl *UICtrl,const char *Label);
 
+struct PI_ColorPick *PIUSDefault_AddColorPick(t_WidgetSysHandle *WidgetHandle,const char *Label,uint32_t RGB,void (*EventCB)(const struct PIColorPickEvent *Event,void *UserData),void *UserData);
+void PIUSDefault_FreeColorPick(t_WidgetSysHandle *WidgetHandle,struct PI_ColorPick *Handle);
+uint32_t PIUSDefault_GetColorPickValue(t_WidgetSysHandle *WidgetHandle,t_PIUIColorPickCtrl *UICtrl);
+void PIUSDefault_SetColorPickValue(t_WidgetSysHandle *WidgetHandle,t_PIUIColorPickCtrl *UICtrl,uint32_t RGB);
+
 #endif

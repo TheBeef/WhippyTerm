@@ -123,4 +123,12 @@ void UIPI_FreeGroupBox(struct PI_GroupBox *BoxHandle);
 void UIPI_ShowGroupBox(struct PI_GroupBox *BoxHandle,bool Show);
 void UIPI_SetGroupBoxLabel(t_PIUIGroupBoxCtrl *UICtrl,const char *NewLabel);
 
+struct PI_ColorPick *UIPI_AddColorPickInput(t_UIContainerCtrl *WidgetHandle,
+        const char *Label,uint32_t RGB,
+        void (*EventCB)(const struct PIColorPickEvent *Event,void *UserData),
+        void *UserData);
+void UIPI_FreeColorPickInput(struct PI_ColorPick *Handle);
+uint32_t UIPI_GetColorPickValue(t_PIUIColorPickCtrl *UICtrl);
+void UIPI_SetColorPickValue(t_PIUIColorPickCtrl *UICtrl,uint32_t RGB);
+
 #endif

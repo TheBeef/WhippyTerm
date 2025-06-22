@@ -70,6 +70,7 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/UI/QT/Form_SendBufferSelectAccess.cpp \
     ../src/UI/QT/Form_SendByte.cpp \
     ../src/UI/QT/Form_SendByteAccess.cpp \
+    ../src/UI/QT/Frame_ColorPickerWidget.cpp \
     ../src/UI/QT/Frame_CustomTextWidget.cpp \
     ../src/UI/QT/Frame_CustomTextWidgetAccess.cpp \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.cpp \
@@ -261,6 +262,7 @@ HEADERS  += ../src/UI/QT/Form_MainWindow.h \
     ../src/UI/QT/Form_NewConnectionFromURI.h \
     ../src/UI/QT/Form_SendBufferSelect.h \
     ../src/UI/QT/Form_SendByte.h \
+    ../src/UI/QT/Frame_ColorPickerWidget.h \
     ../src/UI/QT/Frame_CustomTextWidget.h \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.h \
     ../src/UI/QT/VerPanelHandle.h \
@@ -320,6 +322,7 @@ FORMS    += ../src/UI/QT/Form_MainWindow.ui \
     ../src/UI/QT/Form_TransmitDelay.ui \
     ../src/UI/QT/Form_ManagePlugins.ui \
     ../src/UI/QT/Form_InstallPlugin.ui \
+    ../src/UI/QT/Frame_ColorPickerWidget.ui \
     ../src/UI/QT/Frame_CustomTextWidget.ui \
     ../src/UI/QT/Frame_MainTextArea.ui \
     ../src/UI/QT/Form_BridgeConnection.ui \

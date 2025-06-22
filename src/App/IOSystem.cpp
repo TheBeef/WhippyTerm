@@ -310,6 +310,10 @@ static struct PI_UIAPI IOS_UIAPI=
     IOS_AddGroupBox,
     IOS_FreeGroupBox,
     PIUSDefault_SetGroupBoxLabel,
+//    struct PI_ColorPick *(*AddColorPick)(t_WidgetSysHandle *WidgetHandle,const char *Label,uint32_t RGB,void (*EventCB)(const struct PIColorPickEvent *Event,void *UserData),void *UserData);
+//    void (*FreeColorPick)(t_WidgetSysHandle *WidgetHandle,struct PI_ColorPick *Handle);
+//    uint32_t (*GetColorPickValue)(t_WidgetSysHandle *WidgetHandle,t_PIUIColorPickCtrl *UICtrl);
+//    void (*SetColorPickValue)(t_WidgetSysHandle *WidgetHandle,t_PIUIColorPickCtrl *UICtrl,uint32_t RGB);
 };
 
 bool m_NeverScanned4Connections;

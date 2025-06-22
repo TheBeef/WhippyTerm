@@ -132,6 +132,11 @@ struct PI_UIAPI m_PIUSDefault_UIAPI=
     PIUSDefault_AddGroupBox,
     PIUSDefault_FreeGroupBox,
     PIUSDefault_SetGroupBoxLabel,
+
+    PIUSDefault_AddColorPick,
+    PIUSDefault_FreeColorPick,
+    PIUSDefault_GetColorPickValue,
+    PIUSDefault_SetColorPickValue,
 };
 
 /*******************************************************************************
@@ -891,4 +896,124 @@ void PIUSDefault_SetGroupBoxLabel(t_WidgetSysHandle *WidgetHandle,
         t_PIUIGroupBoxCtrl *UICtrl,const char *Label)
 {
     UIPI_SetGroupBoxLabel(UICtrl,Label);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AddColorPick
+ *
+ * SYNOPSIS:
+ *    struct PI_ColorPick *PIUSDefault_AddColorPick(t_WidgetSysHandle *WidgetHandle,
+ *          const char *Label,uint32_t RGB,
+ *          void (*EventCB)(const struct PIColorPickEvent *Event,void *UserData),
+ *          void *UserData)
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Label [I] -- The label text for this color picker.
+ *    RGB [I] -- The RGB value to set the widget to at the start
+ *    EventCB [I] -- The event callback when the user changes picker color.
+ *                   This can be NULL
+ *    Event [I] -- The color picker event
+ *    UserData [I] -- The user data that will be sent back into event callback.
+ *
+ * FUNCTION:
+ *    This function allocates a color picker widget.
+ *
+ * RETURNS:
+ *    A handle to the color picker.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_FreeColorPick(), PIUSDefault_GetColorPickValue(),
+ *    PIUSDefault_SetColorPickValue()
+ ******************************************************************************/
+struct PI_ColorPick *PIUSDefault_AddColorPick(t_WidgetSysHandle *WidgetHandle,
+        const char *Label,uint32_t RGB,
+        void (*EventCB)(const struct PIColorPickEvent *Event,void *UserData),
+        void *UserData)
+{
+    return UIPI_AddColorPickInput((t_UIContainerCtrl *)WidgetHandle,Label,RGB,
+            EventCB,UserData);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_FreeColorPick
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_FreeColorPick(t_WidgetSysHandle *WidgetHandle,
+ *              struct PI_ColorPick *Handle)
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Handle [I] -- The handle to the widget to free.  Allocated with
+ *                     PIUSDefault_AddColorPick()
+ *
+ * FUNCTION:
+ *    This function frees the widget allocated with PIUSDefault_AddGroupBox()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddColorPick()
+ ******************************************************************************/
+void PIUSDefault_FreeColorPick(t_WidgetSysHandle *WidgetHandle,struct PI_ColorPick *Handle)
+{
+    UIPI_FreeColorPickInput(Handle);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_GetColorPickValue
+ *
+ * SYNOPSIS:
+ *    uint32_t PIUSDefault_GetColorPickValue(t_WidgetSysHandle *WidgetHandle,
+ *              t_PIUIColorPickCtrl *UICtrl);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *
+ * FUNCTION:
+ *    This function reads the current color value from the widget.
+ *
+ * RETURNS:
+ *    The current color value in the widget
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddColorPick()
+ ******************************************************************************/
+uint32_t PIUSDefault_GetColorPickValue(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIColorPickCtrl *UICtrl)
+{
+    return UIPI_GetColorPickValue(UICtrl);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetColorPickValue
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetColorPickValue(t_WidgetSysHandle *WidgetHandle,
+ *              t_PIUIColorPickCtrl *UICtrl,uint32_t RGB);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    RGB [I] -- The new color to set this widget to
+ *
+ * FUNCTION:
+ *    This function sets the current color value in the widget.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddColorPick()
+ ******************************************************************************/
+void PIUSDefault_SetColorPickValue(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIColorPickCtrl *UICtrl,uint32_t RGB)
+{
+    UIPI_SetColorPickValue(UICtrl,RGB);
 }

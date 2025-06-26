@@ -52,7 +52,7 @@
 #define TXT_ATTRIB_UNDERLINE_DASHED         0x0008
 #define TXT_ATTRIB_UNDERLINE_WAVY           0x0010
 #define TXT_ATTRIB_OVERLINE                 0x0020
-#define TXT_ATTRIB_LINETHROUGHT             0x0040
+#define TXT_ATTRIB_LINETHROUGH              0x0040
 #define TXT_ATTRIB_BOLD                     0x0080
 #define TXT_ATTRIB_ITALIC                   0x0100
 #define TXT_ATTRIB_OUTLINE                  0x0200
@@ -60,6 +60,9 @@
 #define TXT_ATTRIB_ROUNDBOX                 0x0800
 #define TXT_ATTRIB_REVERSE                  0x1000
 #define TXT_ATTRIB_FORCE                    0x2000
+
+/* Goes back to version 1.0 (just here for compatibility) */
+#define TXT_ATTRIB_LINETHROUGHT             TXT_ATTRIB_LINETHROUGH
 
 /***  MACROS                           ***/
 
@@ -92,10 +95,8 @@ typedef enum
     e_DefaultColorsMAX
 } e_DefaultColorsType;
 
-struct DataProcessorHandle {int AllPrivate;};  // Fake type holder
-typedef struct DataProcessorHandle t_DataProcessorHandleType;
-
-typedef struct DataProSettingsWidgets {int PrivateDataHere;} t_DataProSettingsWidgetsType;    // Fake type holder
+typedef struct DataProcessorHandle {int PrivateDataHere;} t_DataProcessorHandleType;            // Fake type holder
+typedef struct DataProSettingsWidgets {int PrivateDataHere;} t_DataProSettingsWidgetsType;      // Fake type holder
 
 typedef enum
 {
@@ -163,10 +164,11 @@ struct DataProcessorAPI
     /********* End of DATA_PROCESSORS_API_VERSION_1 *********/
     /********* Start of DATA_PROCESSORS_API_VERSION_2 *********/
     void (*ProcessOutGoingData)(t_DataProcessorHandleType *DataHandle,
-            const uint8_t *Data,int Bytes);
+            const uint8_t *TxData,int Bytes);
     t_DataProSettingsWidgetsType *(*AllocSettingsWidgets)(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings);
     void (*FreeSettingsWidgets)(t_DataProSettingsWidgetsType *PrivData);
-    void (*StoreSettings)(t_DataProSettingsWidgetsType *PrivData,t_PIKVList *Settings);
+    void (*SetSettingsFromWidgets)(t_DataProSettingsWidgetsType *PrivData,t_PIKVList *Settings);
+    void (*ApplySettings)(t_DataProcessorHandleType *DataHandle,t_PIKVList *Settings);
     /********* End of DATA_PROCESSORS_API_VERSION_2 *********/
 };
 

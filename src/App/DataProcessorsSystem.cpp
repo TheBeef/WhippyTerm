@@ -397,12 +397,12 @@ void DPS_Init(void)
  *
  * SYNOPSIS:
  *    void ProcessOutGoingData(t_DataProcessorHandleType *DataHandle,
- *          const uint8_t *Data,int Bytes);
+ *          const uint8_t *TxData,int Bytes);
  *
  * PARAMETERS:
  *    DataHandle [I] -- The data handle to work on.  This is your internal
  *                      data.
- *    Data [I] -- This is the block of data that is about to be sent
+ *    TxData [I] -- This is the block of data that is about to be sent
  *    Bytes [I] -- The number of bytes in the 'Data' block.
  *
  * FUNCTION:
@@ -474,10 +474,10 @@ void DPS_Init(void)
  *    AllocSettingsWidgets()
  *==============================================================================
  * NAME:
- *    StoreSettings
+ *    SetSettingsFromWidgets
  *
  * SYNOPSIS:
- *    void StoreSettings(t_DataProSettingsWidgetsType *PrivData,
+ *    void SetSettingsFromWidgets(t_DataProSettingsWidgetsType *PrivData,
  *              t_PIKVList *Settings);
  *
  * PARAMETERS:
@@ -493,6 +493,107 @@ void DPS_Init(void)
  *
  * SEE ALSO:
  *    AllocSettingsWidgets()
+ *==============================================================================
+ * NAME:
+ *    DefaultSettings
+ *
+ * SYNOPSIS:
+ *    void DefaultSettings(t_PIKVList *Settings);
+ *
+ * PARAMETERS:
+ *    Settings [O] -- This is where you store the settings.
+ *
+ * FUNCTION:
+ *    This function sets 'Settings' to default values.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    AllocSettingsWidgets()
+ *==============================================================================
+ * NAME:
+ *    AllocConnectionData
+ *
+ * SYNOPSIS:
+ *    t_DataProConnectionHandleType *(*AllocConnectionData)(
+ *              t_DataProcessorHandleType *DataHandle);
+ *
+ * PARAMETERS:
+ *    DataHandle [I] -- Your private data that was allocated with AllocateData()
+ *
+ * FUNCTION:
+ *    This function is called when a connection is allocated.  It lets you
+ *    allocate data per-connection (for example so each connection can have
+ *    different settings).
+ *
+ * RETURNS:
+ *    Your private connection data.
+ *
+ * SEE ALSO:
+ *    
+ *==============================================================================
+ * NAME:
+ *    FreeConnectionData
+ *
+ * SYNOPSIS:
+ *    void FreeConnectionData(t_DataProConnectionHandleType *ConDataHandle);
+ *
+ * PARAMETERS:
+ *    ConDataHandle [I] -- The data allocated with AllocConnectionData()
+ *
+ * FUNCTION:
+ *    This function is called to free the per-connection data when a connection
+ *    is closed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    AllocConnectionData()
+ *==============================================================================
+ * NAME:
+ *    LoadSettings
+ *
+ * SYNOPSIS:
+ *    void LoadSettings(t_DataProConnectionHandleType *ConDataHandle,
+ *              t_PIKVList *Settings);
+ *
+ * PARAMETERS:
+ *    ConDataHandle [I] -- The data allocated with AllocConnectionData()
+ *    Settings [I] -- The settings for this connection.
+ *
+ * FUNCTION:
+ *    This function is called to take the settings and apply them to a
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    AllocConnectionData()
+ *==============================================================================
+ * NAME:
+ *    GetActiveConnectionData
+ *
+ * SYNOPSIS:
+ *    t_DataProConnectionHandleType *GetActiveConnectionData(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is used to get the per-connection private data.  This only
+ *    works in functions that are called when a connection is active
+ *    (like ProcessKeyPress(), ProcessIncomingTextByte(),
+ *    ProcessIncomingBinaryByte()).
+ *
+ * RETURNS:
+ *    A pointer to your pre-connection private data.  If there is no active
+ *    connection then this return NULL.
+ *
+ * SEE ALSO:
+ *    AllocConnectionData()
  *==============================================================================
  *
  * SEE ALSO:
@@ -582,6 +683,7 @@ bool DPS_AllocProcessorConData(struct ProcessorConData *FData,
     t_DataProcessorHandleType *NewProcessorData;
     i_DPSDataProcessorsType CurProcessor;
     i_StringListType CurStr;
+    struct PluginSettings *PlugSettings;
 
     FData->Settings=CustomSettings;
 
@@ -655,6 +757,15 @@ bool DPS_AllocProcessorConData(struct ProcessorConData *FData,
             NewProcessorData=CurProcessor->API.AllocateData();
             if(NewProcessorData==NULL)
                 return false;
+
+            if(CurProcessor->API.ApplySettings!=NULL)
+            {
+                PlugSettings=DPS_FindPluginSetting(CurProcessor->ProID.c_str(),
+                        CustomSettings);
+
+                CurProcessor->API.ApplySettings(NewProcessorData,
+                        PIS_ConvertKVList2PIKVList(PlugSettings->Settings));
+            }
         }
         FData->ProcessorsData.push_back(NewProcessorData);
     }
@@ -1321,11 +1432,12 @@ void DPS_PluginSettings_FreeWidgets(const char *IDStr,t_DataProSettingsWidgetsTy
 
 /*******************************************************************************
  * NAME:
- *    DPS_PluginSettings_StoreSettings
+ *    DPS_PluginSettings_SetSettingsFromWidgets
  *
  * SYNOPSIS:
- *    void DPS_PluginSettings_StoreSettings(class ConSettings *Settings,
- *          const char *IDStr,t_DataProSettingsWidgetsType *PrivData);
+ *    void DPS_PluginSettings_SetSettingsFromWidgets(
+ *          class ConSettings *Settings,const char *IDStr,
+ *          t_DataProSettingsWidgetsType *PrivData);
  *
  * PARAMETERS:
  *    Settings [I] -- The settings with the plugin settings in it.
@@ -1343,7 +1455,7 @@ void DPS_PluginSettings_FreeWidgets(const char *IDStr,t_DataProSettingsWidgetsTy
  * SEE ALSO:
  *    DPS_PluginSettings_AddWidgets()
  ******************************************************************************/
-void DPS_PluginSettings_StoreSettings(class ConSettings *Settings,
+void DPS_PluginSettings_SetSettingsFromWidgets(class ConSettings *Settings,
         const char *IDStr,t_DataProSettingsWidgetsType *PrivData)
 {
     const struct DataProcessor *ProData;
@@ -1353,7 +1465,7 @@ void DPS_PluginSettings_StoreSettings(class ConSettings *Settings,
     try
     {
         ProData=DPS_GetProcessorsInfo(IDStr);
-        if(ProData==NULL || ProData->API.StoreSettings==NULL)
+        if(ProData==NULL || ProData->API.SetSettingsFromWidgets==NULL)
             return;
 
         /* We need to find the settings for this plugin */
@@ -1366,7 +1478,7 @@ void DPS_PluginSettings_StoreSettings(class ConSettings *Settings,
             PlugSettings=&Settings->PluginsSettings.back();
         }
 
-        ProData->API.StoreSettings(PrivData,
+        ProData->API.SetSettingsFromWidgets(PrivData,
                 PIS_ConvertKVList2PIKVList(PlugSettings->Settings));
     }
     catch(...)
@@ -1421,6 +1533,31 @@ void DPS_PrunePluginSettings(class ConSettings *Settings)
         }
         plug++;
     }
+}
+
+void DPS_PluginSettings_Load(class ConSettings *Settings,const char *IDStr)
+{
+//    const struct DataProcessor *ProData;
+//    struct PluginSettings *PlugSettings;
+//    struct PluginSettings NewPluginSettings;
+//
+//    try
+//    {
+//        ProData=DPS_GetProcessorsInfo(IDStr);
+//        if(ProData==NULL || ProData->API.LoadSettings==NULL)
+//            return;
+//
+//        /* We need to find the settings for this plugin */
+//        PlugSettings=DPS_FindPluginSetting(IDStr,Settings);
+//        if(PlugSettings==NULL)
+//            return;
+//
+//        ProData->API.LoadSettings(FData->ProcessorsData[Index],PIS_ConvertKVList2PIKVList(PlugSettings->
+//                Settings));
+//    }
+//    catch(...)
+//    {
+//    }
 }
 
 /*******************************************************************************

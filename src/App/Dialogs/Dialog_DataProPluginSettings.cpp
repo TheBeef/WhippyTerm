@@ -95,7 +95,7 @@ void RunDataProPluginSettingsDialog(class ConSettings *Settings,
 
     if(UIShow_DataProPluginSettings())
     {
-        DPS_PluginSettings_StoreSettings(Settings,DataProIDStr,
+        DPS_PluginSettings_SetSettingsFromWidgets(Settings,DataProIDStr,
                 m_DDPPS_PluginPrivData);
     }
 

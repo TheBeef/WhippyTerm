@@ -1279,6 +1279,8 @@ bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
 
 void Settings::DefaultSettings(void)
 {
+    i_PluginSettings p;
+
     RestoreWindowPos=e_WindowStartupPos_OSDefault;
     LeftPanelFromSettings=false;
     RightPanelFromSettings=false;
@@ -1338,6 +1340,9 @@ void Settings::DefaultSettings(void)
     HexDisplaysFontItalic=false;
 
     DefaultConSettings.DefaultSettings();
+
+    /* Default all the plugins */
+    DefaultConSettings.PluginsSettings.clear();
 }
 
 void ConSettings::DefaultSettings(void)

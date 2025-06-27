@@ -684,6 +684,8 @@ bool DPS_AllocProcessorConData(struct ProcessorConData *FData,
     i_DPSDataProcessorsType CurProcessor;
     i_StringListType CurStr;
     struct PluginSettings *PlugSettings;
+    t_KVList BlankKVList;
+    t_KVList *SettingsKVList;
 
     FData->Settings=CustomSettings;
 
@@ -763,8 +765,13 @@ bool DPS_AllocProcessorConData(struct ProcessorConData *FData,
                 PlugSettings=DPS_FindPluginSetting(CurProcessor->ProID.c_str(),
                         CustomSettings);
 
+                if(PlugSettings!=NULL)
+                    SettingsKVList=&PlugSettings->Settings;
+                else
+                    SettingsKVList=&BlankKVList;
+
                 CurProcessor->API.ApplySettings(NewProcessorData,
-                        PIS_ConvertKVList2PIKVList(PlugSettings->Settings));
+                        PIS_ConvertKVList2PIKVList(*SettingsKVList));
             }
         }
         FData->ProcessorsData.push_back(NewProcessorData);

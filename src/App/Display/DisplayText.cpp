@@ -2747,7 +2747,8 @@ void DisplayText::MoveCursor(unsigned int x,unsigned y,bool CursorXPxPrecaled)
 
     UITC_SetCursorPos(TextDisplayCtrl,CursorX,CalcCorrectedCursorPos());
 
-    ScrollScreen2MakeCursorVisible();
+    /* This line will make the screen always scroll to the bottom */
+    /* ScrollScreen2MakeCursorVisible(); */
 
     RethinkCursorHidden();
 
@@ -3015,6 +3016,7 @@ void DisplayText::ScrollScreenByXLines(int Lines2Scroll)
                     /* We are about to remove this line so we need to move
                        top line as well */
                     TopLine++;
+                    TopLineY++;
                 }
 
                 /* We are removing the oldest line so we need to move TopLineY

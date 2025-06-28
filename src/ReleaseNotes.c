@@ -31,6 +31,10 @@ static struct ReleaseNote m_Notes_NEXT[]=
             "You can suppress drawing of different attributes in the settings."
             "  In text mode changing this hide that attribute, but in binary"
             " mode the attribute was still drawn.  This has been fixed."},
+    {   "Added Lock window scroll when not on bottom line",
+            "When the scroll bar is at the bottom the screen will be scrolled"
+            " to the bottom when new text is added.  If the scroll bar is"
+            " not at the bottom it will say at it's current display."},
 };
 
 static struct ReleaseNote m_Notes_Rel1_0_4_0[]=

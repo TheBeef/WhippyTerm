@@ -23,6 +23,14 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   "Fixed a bug with screen DPI settings on Windows",
+            "When you set the DPI something other than 96 (scale %) then"
+            " selecting text did not work correctly.  This (hopefully)"
+            " has been fixed."},
+};
+
+static struct ReleaseNote m_Notes_Rel1_0_4_0[]=
+{
     {   "Fixed a bug where the plugin IODriver Init() wasn't being called on install",
             "When a new plugin was installed the system was not calling"
             " the IODriver Init() function."},
@@ -68,6 +76,7 @@ static struct ReleaseNote m_Notes_Rel1_0_0_0[]=
 const struct ReleaseInfo m_ReleaseNotes[]=
 {
 //    {"x.x.x.x","dd Mmm yyyy","NEXT",m_Notes_NEXT,sizeof(m_Notes_NEXT)/sizeof(struct ReleaseNote)},
+    {"1.0.4.0","31 May 2025",NULL,m_Notes_Rel1_0_4_0,sizeof(m_Notes_Rel1_0_4_0)/sizeof(struct ReleaseNote)},
     {"1.0.3.0","27 Apr 2025",NULL,m_Notes_Rel1_0_3_0,sizeof(m_Notes_Rel1_0_3_0)/sizeof(struct ReleaseNote)},
     {"1.0.2.0","23 Apr 2025",NULL,m_Notes_Rel1_0_2_0,sizeof(m_Notes_Rel1_0_2_0)/sizeof(struct ReleaseNote)},
     {"1.0.1.0","16 Mar 2025",NULL,m_Notes_Rel1_0_1_0,sizeof(m_Notes_Rel1_0_1_0)/sizeof(struct ReleaseNote)},

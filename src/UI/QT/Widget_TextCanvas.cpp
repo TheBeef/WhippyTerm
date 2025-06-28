@@ -67,11 +67,20 @@ Widget_TextCanvas::Widget_TextCanvas(QWidget *parent) : QWidget(parent)
     a->setEndValue(0);
     a->setEasingCurve(QEasingCurve::OutBack);
     a->start(QPropertyAnimation::DeleteWhenStopped);
+
+//    connect(this->screen(),&QScreen::logicalDotsPerInchChanged,this,&Widget_TextCanvas::DPIChange);
 }
 
 Widget_TextCanvas::~Widget_TextCanvas()
 {
 }
+
+/* This was to fix the wrong DPI problems, but is only available in QT6 (and
+   wasn't tested) */
+//void Widget_TextCanvas::DPIChange()
+//{
+//    qDebug() << "Here" << screen()->logicalDotsPerInch();
+//}
 
 void Widget_TextCanvas::SetEventHandler(bool (*EventHandler)(const struct WTCEvent *Event),uintptr_t UserData)
 {
@@ -125,7 +134,7 @@ bool Widget_TextCanvas::SendEvent(e_WTCEventType EventType)
 
 void Widget_TextCanvas::Setup4Paint(void)
 {
-    QFontMetrics fm(RenderFont);
+    QFontMetrics fm(RenderFont,this);
 
     GUICharHeight=fm.lineSpacing()+1;   // +1 Had some problems with _ not always showing up when using some fonts.
     GUICharWidth=fm.averageCharWidth();
@@ -392,6 +401,10 @@ void Widget_TextCanvas::resizeEvent(QResizeEvent *event)
 
 void Widget_TextCanvas::RedrawScreen(void)
 {
+    /* Ok, this should be done in the DPI change but because that is a QT6
+       this we do it on a resize instead */
+    Setup4Paint();
+
     update();
 }
 
@@ -455,7 +468,7 @@ void Widget_TextCanvas::paintEvent(QPaintEvent *event)
     QColor FocusColor;
     QPen FocusPen;
     QPalette FocusPal;
-    QFontMetrics fm(RenderFont);
+    QFontMetrics fm(RenderFont,this);
     int px;
     QColor TmpColor;
     QRegion OldRegion;
@@ -615,7 +628,7 @@ void Widget_TextCanvas::RethinkCursor(void)
     int p;
     QString FirstHalf;
     unsigned int xpos;
-    QFontMetrics fm(RenderFont);
+    QFontMetrics fm(RenderFont,this);
     i_WTCLineFrags Frag;
 
     if(CursorY>=Lines.size())
@@ -1402,7 +1415,7 @@ void Widget_TextCanvas::ChangeCursorStyle(e_TextCursorStyleType Style)
 
 void Widget_TextCanvas::RedrawCursor(void)
 {
-    QFontMetrics fm(RenderFont);
+    QFontMetrics fm(RenderFont,this);
 
     update(DisplayLeftEdgePx+CursorPx-ScrollOffsetX,
             DisplayTopEdgePx+CursorY*GUICharHeight,CalcCursorWidth(&fm),
@@ -1435,7 +1448,7 @@ void Widget_TextCanvas::SetCursorPos(int NewCursorX,int NewCursorY)
 
 int Widget_TextCanvas::GetTextWidth(const struct TextCanvasFrag *Frag)
 {
-    QFontMetrics fm(RenderFont);
+    QFontMetrics fm(RenderFont,this);
     struct WTCFrag NewFrag;
 
     /* Convert the frag */

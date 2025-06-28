@@ -27,6 +27,10 @@ static struct ReleaseNote m_Notes_NEXT[]=
             "When you set the DPI something other than 96 (scale %) then"
             " selecting text did not work correctly.  This (hopefully)"
             " has been fixed."},
+    {   "Fixed a bug with binary displays not ignore attribs that are turned off",
+            "You can suppress drawing of different attributes in the settings."
+            "  In text mode changing this hide that attribute, but in binary"
+            " mode the attribute was still drawn.  This has been fixed."},
 };
 
 static struct ReleaseNote m_Notes_Rel1_0_4_0[]=

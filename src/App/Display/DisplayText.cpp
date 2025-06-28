@@ -4618,10 +4618,10 @@ bool DisplayText::IsLineBlank(i_TextLines Line)
 
 /*******************************************************************************
  * NAME:
- *    DisplayText::SetupCanvas
+ *    DisplayText::SetDrawMask
  *
  * SYNOPSIS:
- *    void DisplayText::SetupCanvas(uint16_t Mask);
+ *    void DisplayText::SetDrawMask(uint16_t Mask);
  *
  * PARAMETERS:
  *    Mask [I] -- What mask to apply to drawing attributes.  If the bit is

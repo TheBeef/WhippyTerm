@@ -1346,6 +1346,36 @@ void DisplayBinary::ClearScrollBackBuffer(void)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayBinary::SetDrawMask
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::SetDrawMask(uint16_t Mask);
+ *
+ * PARAMETERS:
+ *    Mask [I] -- What mask to apply to drawing attributes.  If the bit is
+ *                set then this is drawen.  These are the bits from
+ *                UITC_SetDrawMask() UI control.
+ *
+ * FUNCTION:
+ *    This function sets the draw mask for this display.  The draw mask is
+ *    what attributes / styles can be drawn (IE bold, color, etc).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::SetDrawMask(uint16_t Mask)
+{
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    UITC_SetDrawMask(TextDisplayCtrl,Mask);
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayBinary::GetContextMenuHandle
  *
  * SYNOPSIS:

@@ -21,7 +21,7 @@ struct ReleaseInfo
 //            "Descrition"},
 //};
 
-static struct ReleaseNote m_Notes_NEXT[]=
+static struct ReleaseNote m_Notes_Rel1_0_5_0[]=
 {
     {   "Fixed a bug with screen DPI settings on Windows",
             "When you set the DPI something other than 96 (scale %) then"
@@ -35,6 +35,16 @@ static struct ReleaseNote m_Notes_NEXT[]=
             "When the scroll bar is at the bottom the screen will be scrolled"
             " to the bottom when new text is added.  If the scroll bar is"
             " not at the bottom it will say at it's current display."},
+    {   "Improved open errors dialog with OS messages",
+            "When an open connection fails the user is now prompted with"
+            " and error message.  This message can include more details from"
+            " the plugin."},
+    {   "Added option to auto reconnect when a connection is closed",
+            "A new feature was added that will auto retry opening a connection"
+            " if it fails to open.  A setting was added to say if this should"
+            " be done and how long to wait between tries.  This can be set"
+            " per-connection and toggled with a menu option under the"
+            " connection menu."},
 };
 
 static struct ReleaseNote m_Notes_Rel1_0_4_0[]=
@@ -84,6 +94,7 @@ static struct ReleaseNote m_Notes_Rel1_0_0_0[]=
 const struct ReleaseInfo m_ReleaseNotes[]=
 {
 //    {"x.x.x.x","dd Mmm yyyy","NEXT",m_Notes_NEXT,sizeof(m_Notes_NEXT)/sizeof(struct ReleaseNote)},
+    {"1.0.5.0","29 Jun 2025",NULL,m_Notes_Rel1_0_5_0,sizeof(m_Notes_Rel1_0_5_0)/sizeof(struct ReleaseNote)},
     {"1.0.4.0","31 May 2025",NULL,m_Notes_Rel1_0_4_0,sizeof(m_Notes_Rel1_0_4_0)/sizeof(struct ReleaseNote)},
     {"1.0.3.0","27 Apr 2025",NULL,m_Notes_Rel1_0_3_0,sizeof(m_Notes_Rel1_0_3_0)/sizeof(struct ReleaseNote)},
     {"1.0.2.0","23 Apr 2025",NULL,m_Notes_Rel1_0_2_0,sizeof(m_Notes_Rel1_0_2_0)/sizeof(struct ReleaseNote)},

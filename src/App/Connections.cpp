@@ -1622,7 +1622,7 @@ e_ConWriteType Connection::InternalWriteBytes(const uint8_t *Data,int Bytes)
     /* We need to call the Data Processor System so it can pass on writes to
        the plugins */
     Con_SetActiveConnection(this);
-//`    DPS_ProcessorOutGoingBytes(Data,Bytes);
+    DPS_ProcessorOutGoingBytes(Data,Bytes);
     Con_SetActiveConnection(NULL);
 
     RetValue=e_ConWrite_Failed;

@@ -39,6 +39,7 @@
 /***  DEFINES                          ***/
 /* Versions of struct DataProcessorAPI */
 #define DATA_PROCESSORS_API_VERSION_1       1
+#define DATA_PROCESSORS_API_VERSION_2       2
 
 /* Versions of struct DPS_API */
 #define DPS_API_VERSION_1                   1
@@ -49,7 +50,7 @@
 #define TXT_ATTRIB_UNDERLINE_DASHED         0x0008
 #define TXT_ATTRIB_UNDERLINE_WAVY           0x0010
 #define TXT_ATTRIB_OVERLINE                 0x0020
-#define TXT_ATTRIB_LINETHROUGHT             0x0040
+#define TXT_ATTRIB_LINETHROUGH              0x0040
 #define TXT_ATTRIB_BOLD                     0x0080
 #define TXT_ATTRIB_ITALIC                   0x0100
 #define TXT_ATTRIB_OUTLINE                  0x0200
@@ -57,6 +58,9 @@
 #define TXT_ATTRIB_ROUNDBOX                 0x0800
 #define TXT_ATTRIB_REVERSE                  0x1000
 #define TXT_ATTRIB_FORCE                    0x2000
+
+/* Goes back to version 1.0 (just here for compatibility) */
+#define TXT_ATTRIB_LINETHROUGHT             TXT_ATTRIB_LINETHROUGH
 
 /***  MACROS                           ***/
 
@@ -145,6 +149,10 @@ struct DataProcessorAPI
     void (*ProcessIncomingBinaryByte)(t_DataProcessorHandleType *DataHandle,
             const uint8_t Byte);
     /********* End of DATA_PROCESSORS_API_VERSION_1 *********/
+    /********* Start of DATA_PROCESSORS_API_VERSION_2 *********/
+    void (*ProcessOutGoingData)(t_DataProcessorHandleType *DataHandle,
+            const uint8_t *TxData,int Bytes);
+    /********* End of DATA_PROCESSORS_API_VERSION_2 *********/
 };
 
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */
@@ -194,4 +202,3 @@ struct DPS_API
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
 
 #endif
-//                TmpCol=g_Settings.SysColors[Shade][Data->CSIArg[r]-30];

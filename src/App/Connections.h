@@ -227,6 +227,7 @@ typedef enum
     ConMWEvent_BridgeStateChange,
     ConMWEvent_HexDisplayBufferChange,
     ConMWEvent_SelectionChanged,
+    ConMWEvent_AutoReopenChanged,
     ConMWEventMAX
 } ConMWEventType;
 
@@ -254,12 +255,18 @@ struct ConMWBridgeData
     class Connection *BridgedTo;
 };
 
+struct ConAutoReopenData
+{
+    bool Enabled;
+};
+
 union ConMWInfo
 {
     struct ConMWNameChangeData NameChange;
     struct ConMWStopWatchData SW;
     struct ConMWHexDisplayData HexDis;
     struct ConMWBridgeData Bridged;
+    struct ConAutoReopenData AutoReopen;
 };
 
 struct ConMWEvent
@@ -274,6 +281,7 @@ class Connection
 {
     friend void Con_DelayTransmitTimeout(uintptr_t UserData);
     friend void Con_SmartClipTimeout(uintptr_t UserData);
+    friend void Con_AutoReopenTimeout(uintptr_t UserData);
     friend void Con_ComTestTimeout(uintptr_t UserData);
     friend void Con_FileTransTick(void);
     friend bool Con_DisplayBufferEvent(const struct DBEvent *Event);
@@ -352,6 +360,8 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void ZoomOut(void);
         void ResetZoom(void);
         void DoBell(bool VisualOnly);
+        void ToggleAutoReopen(void);
+        bool GetCurrentAutoReopenStatus(void);
 
         void InformOfConnected(void);
         void InformOfDisconnected(void);
@@ -457,6 +467,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         unsigned int TransmitDelayBufferReadPos;
         struct UITimer *TransmitDelayTimer;
         struct UITimer *SmartClipTimer;
+        struct UITimer *AutoReopenTimer;
         bool BlockSendDevice;
         bool WhenBridgedLockoutConnection;
         bool ConnectionLockedOut;
@@ -469,6 +480,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         int FontSize;
         bool BinaryConnection;
         uint64_t LastBellPlayed;
+        bool DoAutoReopen;
 
         void FreeConnectionResources(bool FreeDB);
         void HandleCaptureIncomingData(const uint8_t *Inbuff,int bytes);
@@ -485,11 +497,15 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void HandleMouseWheelZoom(int Steps);
         e_CmdType HandleSmartClipboard(char key);
         bool IsProcessorATextProcessor(struct ProcessorConData &PData);
+        void SendReopenChangeEvent(void);
+        void DoAutoReopenIfNeeded(void);
+        void HandleFailed2OpenErrorMessage(void);
 
         /* Call backs */
         void InformOfDelayTransmitTimeout(void);
         void InformOfComTestTimeout(void);
         void InformOfSmartClipTimeout(void);
+        void InformOfAutoReopenTimeout(void);
         void FileTransTick(void);
         bool ProcessDisplayEvent(const struct DBEvent *Event);
 };

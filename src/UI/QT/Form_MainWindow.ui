@@ -1713,6 +1713,7 @@
     </property>
     <addaction name="actionConnect_Menu"/>
     <addaction name="actionDisconnect_Menu"/>
+    <addaction name="actionAuto_Reconnect"/>
     <addaction name="separator"/>
     <addaction name="actionBridge_Connections"/>
     <addaction name="actionRelease_Bridged_Connections"/>
@@ -2817,6 +2818,14 @@
   <action name="actionNew_Tab_From_URI">
    <property name="text">
     <string>New Tab From URI...</string>
+   </property>
+  </action>
+  <action name="actionAuto_Reconnect">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Auto Reconnect</string>
    </property>
   </action>
  </widget>

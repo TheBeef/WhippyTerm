@@ -63,6 +63,7 @@ enum e_UIS_Checkbox
     e_UIS_Checkbox_ColorEnable,
     e_UIS_Checkbox_UseCustomSounds,
     e_UIS_Checkbox_MouseCursorUseIBeam,
+    e_UIS_Checkbox_AutoReopen,
     e_UIS_CheckboxMAX
 };
 
@@ -129,6 +130,7 @@ enum e_UIS_NumberInput
     e_UIS_NumberInput_SysCol_GreenInput,
     e_UIS_NumberInput_SysCol_BlueInput,
     e_UIS_NumberInput_HexDisplay_BufferSize,
+    e_UIS_NumberInput_AutoReopenWaitTime,
     e_UIS_NumberInputMAX
 };
 

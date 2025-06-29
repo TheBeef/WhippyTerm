@@ -110,6 +110,8 @@ t_UICheckboxCtrl *UIS_GetCheckboxHandle(e_UIS_Checkbox UIObj)
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->UseCustomSounds_checkBox;
         case e_UIS_Checkbox_MouseCursorUseIBeam:
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->MouseCursor_UseIBeam_checkBox;
+        case e_UIS_Checkbox_AutoReopen:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->AutoReopen_checkBox;
         case e_UIS_CheckboxMAX:
         default:
         break;
@@ -251,6 +253,8 @@ t_UINumberInput *UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput UIObj)
             return (t_UINumberInput *)g_SettingsDialog->ui->SysCol_B_spinBox;
         case e_UIS_NumberInput_HexDisplay_BufferSize:
             return (t_UINumberInput *)g_SettingsDialog->ui->HexDisplay_BufferSize_spinBox;
+        case e_UIS_NumberInput_AutoReopenWaitTime:
+            return (t_UINumberInput *)g_SettingsDialog->ui->AutoReopenWaitTime_spinBox;
         case e_UIS_NumberInputMAX:
         default:
         break;

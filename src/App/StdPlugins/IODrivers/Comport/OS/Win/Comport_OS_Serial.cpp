@@ -70,6 +70,7 @@ struct OpenComportInfo
     volatile DWORD ModemBits;
     volatile DWORD CommErrors;
     DWORD LastCommErrors;
+    string LastErrorMsg;
 };
 
 /*** FUNCTION PROTOTYPES      ***/
@@ -275,6 +276,7 @@ t_DriverIOHandleType *Comport_AllocateHandle(const char *DeviceUniqueID,
         NewComInfo->AuxWidgets=NULL;
         NewComInfo->CommErrors=0;
         NewComInfo->LastCommErrors=0;
+        NewComInfo->LastErrorMsg="";
 
         NewComInfo->ThreadMutex=CreateMutex(NULL,FALSE,NULL);
         if(NewComInfo->ThreadMutex==NULL)
@@ -327,6 +329,8 @@ void Comport_FreeHandle(t_DriverIOHandleType *DriverIO)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
 
+    ComInfo->LastErrorMsg="";
+
     /* Tell thread to quit */
     ComInfo->RequestThreadQuit=true;
 
@@ -367,10 +371,26 @@ PG_BOOL Comport_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
     struct ComportPortOptions PortOptions;
 
+    ComInfo->LastErrorMsg="";
+
     ComInfo->hComm=CreateFileA(ComInfo->DriverName.c_str(),
             GENERIC_READ|GENERIC_WRITE,0,0,OPEN_EXISTING,0,0);
     if(ComInfo->hComm==INVALID_HANDLE_VALUE)
+    {
+        LPTSTR errorText;
+
+        FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_IGNORE_INSERTS,
+                NULL,GetLastError(),MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                (LPTSTR)&errorText,
+                0,
+                NULL);
+        if(errorText!=NULL)
+        {
+            ComInfo->LastErrorMsg=errorText;
+            LocalFree(errorText);
+        }
         return false;
+    }
 
     Comport_ConvertFromKVList(&PortOptions,Options);
 
@@ -392,6 +412,46 @@ PG_BOOL Comport_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
     ComInfo->Opened=true;
 
     return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Comport_GetLastErrorMessage
+ *
+ * SYNOPSIS:
+ *    const char *Comport_GetLastErrorMessage(t_DriverIOHandleType *DriverIO);
+ *
+ * PARAMETERS:
+ *    DriverIO [I] -- The handle to this connection
+ *
+ * FUNCTION:
+ *    This function is optional.
+ *
+ *    This function gets info about the last error.  If there wasn't an error
+ *    or no error info is available then this function returns NULL.
+ *
+ * RETURNS:
+ *    A static buffer with the error message in it.  This buffer must remain
+ *    valid until another call to the driver (at which point it can be free'ed
+ *    for overriden).
+ *
+ *    If there isn't an error or an error message could not be built then
+ *    this function can return NULL.
+ *
+ * API VERSION:
+ *    2
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+const char *Comport_GetLastErrorMessage(t_DriverIOHandleType *DriverIO)
+{
+    struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    if(ComInfo->LastErrorMsg=="")
+        return NULL;
+
+    return ComInfo->LastErrorMsg.c_str();
 }
 
 /*******************************************************************************
@@ -421,6 +481,8 @@ PG_BOOL Comport_ChangeOptions(t_DriverIOHandleType *DriverIO,
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
     struct ComportPortOptions PortOptions;
+
+    ComInfo->LastErrorMsg="";
 
     Comport_ConvertFromKVList(&PortOptions,Options);
 
@@ -455,6 +517,8 @@ PG_BOOL Comport_ChangeOptions(t_DriverIOHandleType *DriverIO,
 void Comport_Close(t_DriverIOHandleType *DriverIO)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    ComInfo->LastErrorMsg="";
 
     if(ComInfo->hComm!=INVALID_HANDLE_VALUE)
         CloseHandle(ComInfo->hComm);
@@ -501,6 +565,8 @@ int Comport_Read(t_DriverIOHandleType *DriverIO,uint8_t *Data,int Bytes)
     HaveMutex=false;
     try
     {
+        ComInfo->LastErrorMsg="";
+
         /* Grab the com port */
         WaitForSingleObject(ComInfo->ThreadMutex,INFINITE);
         HaveMutex=true;
@@ -616,6 +682,8 @@ int Comport_Write(t_DriverIOHandleType *DriverIO,const uint8_t *Data,int Bytes)
 
     try
     {
+        ComInfo->LastErrorMsg="";
+
         /* Grab the com port */
         WaitForSingleObject(ComInfo->ThreadMutex,INFINITE);
         HaveMutex=true;
@@ -673,6 +741,8 @@ t_ConnectionWidgetsType *Comport_ConnectionAuxCtrlWidgets_AllocWidgets(t_DriverI
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
 
+    ComInfo->LastErrorMsg="";
+
     ComInfo->AuxWidgets=Comport_AllocAuxWidgets(DriverIO,WidgetHandle);
 
     return (t_ConnectionWidgetsType *)ComInfo->AuxWidgets;
@@ -706,6 +776,8 @@ void Comport_ConnectionAuxCtrlWidgets_FreeWidgets(t_DriverIOHandleType *DriverIO
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
 
+    ComInfo->LastErrorMsg="";
+
     Comport_FreeAuxWidgets(WidgetHandle,(struct Comport_ConAuxWidgets *)ConAuxCtrls);
     ComInfo->AuxWidgets=NULL;
 }
@@ -713,6 +785,8 @@ void Comport_ConnectionAuxCtrlWidgets_FreeWidgets(t_DriverIOHandleType *DriverIO
 void Comport_UpdateDTR(t_DriverIOHandleType *DriverIO,bool DTR)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    ComInfo->LastErrorMsg="";
 
     if(ComInfo->hComm==INVALID_HANDLE_VALUE)
         return;
@@ -725,6 +799,8 @@ void Comport_UpdateRTS(t_DriverIOHandleType *DriverIO,bool RTS)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
 
+    ComInfo->LastErrorMsg="";
+
     if(ComInfo->hComm==INVALID_HANDLE_VALUE)
         return;
 
@@ -735,6 +811,8 @@ void Comport_UpdateRTS(t_DriverIOHandleType *DriverIO,bool RTS)
 void Comport_SendBreak(t_DriverIOHandleType *DriverIO)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    ComInfo->LastErrorMsg="";
 
     if(ComInfo->hComm==INVALID_HANDLE_VALUE)
         return;

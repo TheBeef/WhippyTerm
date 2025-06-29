@@ -73,6 +73,7 @@ struct OpenComportInfo
     int SetModemBits;
     struct Comport_ConAuxWidgets *AuxWidgets;
     int ReadEsc;   // Did we see the 0xFF esc values and are in esc bytes?
+    string LastErrorMsg;
 };
 
 typedef list<string> t_PossibleComPortList;
@@ -367,6 +368,7 @@ t_DriverIOHandleType *Comport_AllocateHandle(const char *DeviceUniqueID,
         NewComInfo->SetModemBits=0;
         NewComInfo->AuxWidgets=NULL;
         NewComInfo->ReadEsc=0;
+        NewComInfo->LastErrorMsg="";
 
         if(pthread_mutex_init(&NewComInfo->UpdateMutex,NULL)!=0)
             throw(0);
@@ -412,6 +414,8 @@ void Comport_FreeHandle(t_DriverIOHandleType *DriverIO)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
 
+    ComInfo->LastErrorMsg="";
+
     /* Tell thread to quit */
     ComInfo->RequestThreadQuit=true;
 
@@ -454,9 +458,13 @@ PG_BOOL Comport_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
     struct ComportPortOptions PortOptions;
 
+    ComInfo->LastErrorMsg="";
     ComInfo->fd=open(ComInfo->DriverName.c_str(),O_RDWR|O_NOCTTY|O_NONBLOCK);
     if(ComInfo->fd<0)
+    {
+        ComInfo->LastErrorMsg=strerror(errno);
         return false;
+    }
 
     Comport_UpdateRTS(DriverIO,Comport_ReadAuxRTSCheckbox(ComInfo->AuxWidgets));
     Comport_UpdateDTR(DriverIO,Comport_ReadAuxDTRCheckbox(ComInfo->AuxWidgets));
@@ -486,6 +494,46 @@ PG_BOOL Comport_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
 
 /*******************************************************************************
  * NAME:
+ *    Comport_GetLastErrorMessage
+ *
+ * SYNOPSIS:
+ *    const char *Comport_GetLastErrorMessage(t_DriverIOHandleType *DriverIO);
+ *
+ * PARAMETERS:
+ *    DriverIO [I] -- The handle to this connection
+ *
+ * FUNCTION:
+ *    This function is optional.
+ *
+ *    This function gets info about the last error.  If there wasn't an error
+ *    or no error info is available then this function returns NULL.
+ *
+ * RETURNS:
+ *    A static buffer with the error message in it.  This buffer must remain
+ *    valid until another call to the driver (at which point it can be free'ed
+ *    for overriden).
+ *
+ *    If there isn't an error or an error message could not be built then
+ *    this function can return NULL.
+ *
+ * API VERSION:
+ *    2
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+const char *Comport_GetLastErrorMessage(t_DriverIOHandleType *DriverIO)
+{
+    struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    if(ComInfo->LastErrorMsg=="")
+        return NULL;
+
+    return ComInfo->LastErrorMsg.c_str();
+}
+
+/*******************************************************************************
+ * NAME:
  *    Comport_ChangeOptions
  *
  * SYNOPSIS:
@@ -511,6 +559,8 @@ PG_BOOL Comport_ChangeOptions(t_DriverIOHandleType *DriverIO,
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
     struct ComportPortOptions PortOptions;
+
+    ComInfo->LastErrorMsg="";
 
     Comport_ConvertFromKVList(&PortOptions,Options);
 
@@ -545,6 +595,8 @@ PG_BOOL Comport_ChangeOptions(t_DriverIOHandleType *DriverIO,
 void Comport_Close(t_DriverIOHandleType *DriverIO)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    ComInfo->LastErrorMsg="";
 
     if(ComInfo->fd>=0)
         close(ComInfo->fd);
@@ -590,6 +642,8 @@ int Comport_Read(t_DriverIOHandleType *DriverIO,uint8_t *Data,int Bytes)
     int RetBytes;
     uint8_t *Dest;
     uint8_t *Src;
+
+    ComInfo->LastErrorMsg="";
 
     if(ComInfo->ModemBits!=ComInfo->LastModemBits)
     {
@@ -729,6 +783,8 @@ int Comport_Write(t_DriverIOHandleType *DriverIO,const uint8_t *Data,int Bytes)
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
     int RetBytes;
 
+    ComInfo->LastErrorMsg="";
+
     RetBytes=write(ComInfo->fd,Data,Bytes);
     if(RetBytes<0)
     {
@@ -797,6 +853,8 @@ t_ConnectionWidgetsType *Comport_ConnectionAuxCtrlWidgets_AllocWidgets(t_DriverI
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
 
+    ComInfo->LastErrorMsg="";
+
     ComInfo->AuxWidgets=Comport_AllocAuxWidgets(DriverIO,WidgetHandle);
 
     return (t_ConnectionWidgetsType *)ComInfo->AuxWidgets;
@@ -830,6 +888,8 @@ void Comport_ConnectionAuxCtrlWidgets_FreeWidgets(t_DriverIOHandleType *DriverIO
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
 
+    ComInfo->LastErrorMsg="";
+
     Comport_FreeAuxWidgets(WidgetHandle,(struct Comport_ConAuxWidgets *)ConAuxCtrls);
     ComInfo->AuxWidgets=NULL;
 }
@@ -837,6 +897,8 @@ void Comport_ConnectionAuxCtrlWidgets_FreeWidgets(t_DriverIOHandleType *DriverIO
 void Comport_UpdateDTR(t_DriverIOHandleType *DriverIO,bool DTR)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    ComInfo->LastErrorMsg="";
 
     if(ComInfo->fd<0)
         return;
@@ -853,6 +915,8 @@ void Comport_UpdateRTS(t_DriverIOHandleType *DriverIO,bool RTS)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
 
+    ComInfo->LastErrorMsg="";
+
     if(ComInfo->fd<0)
         return;
 
@@ -867,6 +931,8 @@ void Comport_UpdateRTS(t_DriverIOHandleType *DriverIO,bool RTS)
 void Comport_SendBreak(t_DriverIOHandleType *DriverIO)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
+
+    ComInfo->LastErrorMsg="";
 
     if(ComInfo->fd<0)
         return;

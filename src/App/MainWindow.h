@@ -140,6 +140,7 @@ void Debug6(void);
         void GotoColumn(void);
         void GotoRow(void);
         void ToggleConnectStatus(void);
+        void ToggleAutoReconnect(void);
         void RemoveAllTabPanelControls(void);
         void ApplyConnectionOptions(void);
         class Connection *ReloadTabFromURI(const char *TabLabel,class ConSettings *UseSettings,const char *URI);

@@ -84,6 +84,9 @@ const struct IODriverAPI g_ComportPluginAPI=
     NULL,                                               // Transmit
     Comport_ConnectionAuxCtrlWidgets_AllocWidgets,
     Comport_ConnectionAuxCtrlWidgets_FreeWidgets,
+
+    /********* Start of IODRIVER_API_VERSION_2 *********/
+    Comport_GetLastErrorMessage,
 };
 
 struct IODriverInfo m_ComportInfo=

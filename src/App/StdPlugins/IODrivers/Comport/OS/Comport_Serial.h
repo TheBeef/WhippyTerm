@@ -67,6 +67,7 @@ PG_BOOL Comport_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options);
 void Comport_Close(t_DriverIOHandleType *DriverIO);
 int Comport_Read(t_DriverIOHandleType *DriverIO,uint8_t *Data,int Bytes);
 int Comport_Write(t_DriverIOHandleType *DriverIO,const uint8_t *Data,int Bytes);
+const char *Comport_GetLastErrorMessage(t_DriverIOHandleType *DriverIO);
 PG_BOOL Comport_ChangeOptions(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options);
 PG_BOOL Comport_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,
             char *DeviceUniqueID,unsigned int MaxDeviceUniqueIDLen,

@@ -968,6 +968,10 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
     cfg.Register("FontBold",FontBold);
     cfg.Register("FontItalic",FontItalic);
 
+    /***** Connections *****/
+    cfg.Register("AutoReopen",AutoReopen);
+    cfg.Register("AutoReopenWaitTime",AutoReopenWaitTime);
+
     Settings_RegisterSysColorType(cfg,"ColorsNormal",&SysColors[e_SysColShade_Normal]);
     Settings_RegisterSysColorType(cfg,"ColorsBright",&SysColors[e_SysColShade_Bright]);
     Settings_RegisterSysColorType(cfg,"ColorsDark",&SysColors[e_SysColShade_Dark]);
@@ -1029,6 +1033,11 @@ bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
     if(Con1.FontBold!=Con2.FontBold)
         return false;
     if(Con1.FontItalic!=Con2.FontItalic)
+        return false;
+
+    if(Con1.AutoReopen!=Con2.AutoReopen)
+        return false;
+    if(Con1.AutoReopenWaitTime!=Con2.AutoReopenWaitTime)
         return false;
 
     if(memcmp(Con1.SysColors,Con2.SysColors,sizeof(Con1.SysColors))!=0)
@@ -1162,6 +1171,9 @@ void ConSettings::DefaultSettings(void)
     GetPresetSysColors(e_SysColPreset_WhippyTerm,SysColors);
     DefaultColors[e_DefaultColors_BG]=SysColors[e_SysColShade_Normal][e_SysCol_Black];
     DefaultColors[e_DefaultColors_FG]=SysColors[e_SysColShade_Normal][e_SysCol_White];
+
+    AutoReopen=false;
+    AutoReopenWaitTime=100; // 100ms
 
     TermSizeFixedWidth=false;
     TermSizeFixedHeight=false;

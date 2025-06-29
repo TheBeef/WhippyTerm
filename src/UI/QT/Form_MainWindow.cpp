@@ -1645,3 +1645,8 @@ void Form_MainWindow::on_actionNew_Tab_From_URI_triggered()
     DoMenuTriggered(e_UIMWMenu_NewTabFromURI);
 }
 
+void Form_MainWindow::on_actionAuto_Reconnect_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ToggleAutoReconnect);
+}
+

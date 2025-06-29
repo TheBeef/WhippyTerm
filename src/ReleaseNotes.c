@@ -94,7 +94,7 @@ static struct ReleaseNote m_Notes_Rel1_0_0_0[]=
 const struct ReleaseInfo m_ReleaseNotes[]=
 {
 //    {"x.x.x.x","dd Mmm yyyy","NEXT",m_Notes_NEXT,sizeof(m_Notes_NEXT)/sizeof(struct ReleaseNote)},
-    {"1.0.5.0","29 Jun 2025",NULL,m_Notes_Rel1_0_5_0,sizeof(m_Notes_Rel1_0_5_0)/sizeof(struct ReleaseNote)},
+    {"1.0.5.0","29 Jun 2025","Added most requested features",m_Notes_Rel1_0_5_0,sizeof(m_Notes_Rel1_0_5_0)/sizeof(struct ReleaseNote)},
     {"1.0.4.0","31 May 2025",NULL,m_Notes_Rel1_0_4_0,sizeof(m_Notes_Rel1_0_4_0)/sizeof(struct ReleaseNote)},
     {"1.0.3.0","27 Apr 2025",NULL,m_Notes_Rel1_0_3_0,sizeof(m_Notes_Rel1_0_3_0)/sizeof(struct ReleaseNote)},
     {"1.0.2.0","23 Apr 2025",NULL,m_Notes_Rel1_0_2_0,sizeof(m_Notes_Rel1_0_2_0)/sizeof(struct ReleaseNote)},

@@ -165,11 +165,11 @@ struct DataProcessorAPI
     /********* Start of DATA_PROCESSORS_API_VERSION_2 *********/
     void (*ProcessOutGoingData)(t_DataProcessorHandleType *DataHandle,
             const uint8_t *TxData,int Bytes);
+    /********* End of DATA_PROCESSORS_API_VERSION_2 *********/
     t_DataProSettingsWidgetsType *(*AllocSettingsWidgets)(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings);
     void (*FreeSettingsWidgets)(t_DataProSettingsWidgetsType *PrivData);
     void (*SetSettingsFromWidgets)(t_DataProSettingsWidgetsType *PrivData,t_PIKVList *Settings);
     void (*ApplySettings)(t_DataProcessorHandleType *DataHandle,t_PIKVList *Settings);
-    /********* End of DATA_PROCESSORS_API_VERSION_2 *********/
 };
 
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */

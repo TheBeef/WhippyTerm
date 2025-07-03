@@ -31,46 +31,39 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
-        NOTETYPE_ENHANCEMENT,"Added new misc type of binary plugins"
+        NOTETYPE_ENHANCEMENT,"Added new misc type of binary plugins",
             "A new sub class of plugin has been added, you can now"
             " add binary misc types of plugins.  These plugins"
             " show up in the misc area of the binary type of data processing."},
     {
-        NOTETYPE_ENHANCEMENT,"Added a text box to the plugin UI API"
+        NOTETYPE_ENHANCEMENT,"Added a text box to the plugin UI API",
             "Plugins can now add a text box to the widgets they can add"
             " for aux controls, options, and settings.  These are displays"
             " for text.  The text will wrap and can be selected for copy"
             " paste, but can not be changed."},
     {
-        NOTETYPE_ENHANCEMENT,"Added a color picker to the plugin UI API"
+        NOTETYPE_ENHANCEMENT,"Added a color picker to the plugin UI API",
             "Plugins can now add a color picker to the widgets they can add"
             " for aux controls, options, and settings."},
     {
-        NOTETYPE_ENHANCEMENT,"Added a groupbox to the plugin UI API"
+        NOTETYPE_ENHANCEMENT,"Added a groupbox to the plugin UI API",
             "Plugins can now add groupbox to the widgets they can add"
             " for aux controls, options, and settings."},
     {
-        NOTETYPE_ENHANCEMENT,"Made settings button work for plugins"
+        NOTETYPE_ENHANCEMENT,"Made settings button work for plugins",
             "In the settings dialog there is a settings button to configure"
             " a plugin.  The button now works."},
     {
-        NOTETYPE_ENHANCEMENT,"Added new API to the Data Processor so they can see all outgoing bytes"
-            "The new API ProcessOutGoingData() was added."},
-    {   NOTETYPE_BUG_FIX,"Fixed a bug with screen DPI settings on Windows",
-            "When you set the DPI something other than 96 (scale %) then"
-            " selecting text did not work correctly.  This (hopefully)"
-            " has been fixed."},
-    {
-        NOTETYPE_ENHANCEMENT,"Added selection colors to settings"
+        NOTETYPE_ENHANCEMENT,"Added selection colors to settings",
             "You can now pick the colors you want for selections in the"
             " main area (binary and text)."},
     {
-        NOTETYPE_NEW_FEATURE,"Added a new find CRC dialog"
+        NOTETYPE_NEW_FEATURE,"Added a new find CRC dialog",
             "You can now input some data and input a CRC value for that data"
             " and have it analyzed.  The system will then tell you the CRC"
             " algorithm that will make that CRC given that data."},
     {
-        NOTETYPE_ENHANCEMENT,"Changed copyright message for generated code"
+        NOTETYPE_ENHANCEMENT,"Changed copyright message for generated code",
             "The copyright message has been changed when code is generated."
             "  The old message was a copyright message saying you had"
             " to copy the message.  The new one just says do what you want"
@@ -89,20 +82,6 @@ static struct ReleaseNote m_Notes_NEXT[]=
             " can select different messages or parts of a packet and highlight"
             " them.  Bold, italics, underline, strike through, and the"
             " background color can be changed."},
-    {   NOTETYPE_POLISH,"Added Lock window scroll when not on bottom line",
-            "When the scroll bar is at the bottom the screen will be scrolled"
-            " to the bottom when new text is added.  If the scroll bar is"
-            " not at the bottom it will say at it's current display."},
-    {   NOTETYPE_POLISH,"Improved open errors dialog with OS messages",
-            "When an open connection fails the user is now prompted with"
-            " and error message.  This message can include more details from"
-            " the plugin."},
-    {   NOTETYPE_ENHANCEMENT,"Added option to auto reconnect when a connection is closed",
-            "A new feature was added that will auto retry opening a connection"
-            " if it fails to open.  A setting was added to say if this should"
-            " be done and how long to wait between tries.  This can be set"
-            " per-connection and toggled with a menu option under the"
-            " connection menu."},
     {   NOTETYPE_ENHANCEMENT,"Updated send block panel to support hex",
             "Added a hex input to the send block panel on binary and block connections."
             " A hex input with edit button (that goes the send buffer dialog)"
@@ -129,6 +108,37 @@ static struct ReleaseNote m_Notes_NEXT[]=
     {   NOTETYPE_POLISH,"Added a set setting to defaults menu option",
             "Under the Settings menu a new menu item was added that lets"
             " the user set settings back to defaults."},
+};
+
+static struct ReleaseNote m_Notes_Rel1_1_0_0[]=
+{
+    {   NOTETYPE_BUG_FIX,"Fixed a bug with screen DPI settings on Windows",
+            "When you set the DPI something other than 96 (scale %) then"
+            " selecting text did not work correctly.  This (hopefully)"
+            " has been fixed."},
+    {   NOTETYPE_BUG_FIX,"Fixed a bug with binary displays not ignore attribs that are turned off",
+            "You can suppress drawing of different attributes in the settings."
+            "  In text mode changing this hide that attribute, but in binary"
+            " mode the attribute was still drawn.  This has been fixed."},
+    {   NOTETYPE_ENHANCEMENT,"Added Lock window scroll when not on bottom line",
+            "When the scroll bar is at the bottom the screen will be scrolled"
+            " to the bottom when new text is added.  If the scroll bar is"
+            " not at the bottom it will say at it's current display."},
+    {   NOTETYPE_ENHANCEMENT,"Improved open errors dialog with OS messages",
+            "When an open connection fails the user is now prompted with"
+            " and error message.  This message can include more details from"
+            " the plugin."},
+    {   NOTETYPE_ENHANCEMENT,"Added option to auto reconnect when a connection is closed",
+            "A new feature was added that will auto retry opening a connection"
+            " if it fails to open.  A setting was added to say if this should"
+            " be done and how long to wait between tries.  This can be set"
+            " per-connection and toggled with a menu option under the"
+            " connection menu."},
+    {
+        NOTETYPE_ENHANCEMENT,"Extended plugin API so data processor plugin's can see bytes sent",
+            "The data processors API has a new callback function that will"
+            " be called when data is send out of a connection."
+            "  See ProcessOutGoingData()."},
 };
 static struct ReleaseNote m_Notes_Rel1_0_4_0[]=
 {
@@ -174,14 +184,16 @@ static struct ReleaseNote m_Notes_Rel1_0_0_0[]=
             "The first release 1.0"},
 };
 
+#define RELEASE_NOTE(x,y,z,a) x,y,z,a,sizeof(a)/sizeof(struct ReleaseNote)
 const struct ReleaseInfo m_ReleaseNotes[]=
 {
-//    {"x.x.x.x","dd Mmm yyyy","NEXT",m_Notes_NEXT,sizeof(m_Notes_NEXT)/sizeof(struct ReleaseNote)},
-    {"1.0.4.0","31 May 2025",NULL,m_Notes_Rel1_0_4_0,sizeof(m_Notes_Rel1_0_4_0)/sizeof(struct ReleaseNote)},
-    {"1.0.3.0","27 Apr 2025",NULL,m_Notes_Rel1_0_3_0,sizeof(m_Notes_Rel1_0_3_0)/sizeof(struct ReleaseNote)},
-    {"1.0.2.0","23 Apr 2025",NULL,m_Notes_Rel1_0_2_0,sizeof(m_Notes_Rel1_0_2_0)/sizeof(struct ReleaseNote)},
-    {"1.0.1.0","16 Mar 2025",NULL,m_Notes_Rel1_0_1_0,sizeof(m_Notes_Rel1_0_1_0)/sizeof(struct ReleaseNote)},
-    {"1.0.0.0","01 Mar 2025","First Release",m_Notes_Rel1_0_0_0,sizeof(m_Notes_Rel1_0_0_0)/sizeof(struct ReleaseNote)},
+    {RELEASE_NOTE("x.x.x.x","dd Mmm yyyy","NEXT",m_Notes_NEXT)},
+    {RELEASE_NOTE("1.1.0.0","29 Jun 2025","Added most requested features",m_Notes_Rel1_1_0_0)},
+    {RELEASE_NOTE("1.0.4.0","31 May 2025",NULL,m_Notes_Rel1_0_4_0)},
+    {RELEASE_NOTE("1.0.3.0","27 Apr 2025",NULL,m_Notes_Rel1_0_3_0)},
+    {RELEASE_NOTE("1.0.2.0","23 Apr 2025",NULL,m_Notes_Rel1_0_2_0)},
+    {RELEASE_NOTE("1.0.1.0","16 Mar 2025",NULL,m_Notes_Rel1_0_1_0)},
+    {RELEASE_NOTE("1.0.0.0","01 Mar 2025","First Release",m_Notes_Rel1_0_0_0)},
 };
 
 const unsigned long m_ReleaseNoteCount=sizeof(m_ReleaseNotes)/sizeof(struct ReleaseInfo);

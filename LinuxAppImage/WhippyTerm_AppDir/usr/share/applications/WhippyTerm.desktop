@@ -2,7 +2,7 @@
 Name=Whippy Term
 Comment=A modern term program.
 Exec=whippyterm
-Icon=WhippyTerm.png
+Icon=WhippyTerm
 Categories=Development
 Terminal=false
 Type=Application

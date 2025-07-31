@@ -413,6 +413,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     {
         UIAddItem2ListView(BinaryProcessorsDecoder,
                 m_BinaryOtherDecoders[r].DisplayName,r);
+        UISetListViewEntryCheckable(BinaryProcessorsDecoder,r,true);
 
         if(m_BinaryOtherDecoders[r].Tip!=NULL)
         {

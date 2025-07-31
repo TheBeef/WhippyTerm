@@ -120,6 +120,19 @@ void DPS_DoScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,
 static struct PluginSettings *DPS_FindPluginSetting(const char *IDStr,
         class ConSettings *Settings);
 
+static t_DataProMark *DPS_AllocateMark(void);
+static void DPS_FreeMark(t_DataProMark *Mark);
+static PG_BOOL DPS_IsMarkValid(t_DataProMark *Mark);
+static void DPS_SetMark2CursorPos(t_DataProMark *Mark);
+static void DPS_ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,uint32_t Len);
+static void DPS_RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,uint32_t Len);
+static void DPS_ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,uint32_t Offset,uint32_t Len);
+static void DPS_ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,uint32_t Offset,uint32_t Len);
+static void DPS_MoveMark(t_DataProMark *Mark,int Amount);
+static void DPS_FreezeStream(void);
+static void DPS_ClearFrozenStream(void);
+static void DPS_ReleaseFrozenStream(void);
+
 /*** VARIABLE DEFINITIONS     ***/
 static struct DataProcessor *m_ActiveDataProcessor;
 
@@ -161,6 +174,18 @@ struct DPS_API g_DPSAPI=
     /* V2 */
     DPS_SetCurrentSettingsTabName,
     DPS_AddNewSettingsTab,
+    DPS_AllocateMark,
+    DPS_FreeMark,
+    DPS_IsMarkValid,
+    DPS_SetMark2CursorPos,
+    DPS_ApplyAttrib2Mark,
+    DPS_RemoveAttribFromMark,
+    DPS_ApplyFGColor2Mark,
+    DPS_ApplyBGColor2Mark,
+    DPS_MoveMark,
+    DPS_FreezeStream,
+    DPS_ClearFrozenStream,
+    DPS_ReleaseFrozenStream,
 };
 t_DPSDataProcessorsType m_DataProcessors;     // All available data processors
 
@@ -216,36 +241,40 @@ void DPS_Init(void)
  *
  * CALLBACKS:
  *==============================================================================
- *    NAME:
- *      AllocateData
+ * NAME:
+ *    AllocateData
  *
- *    SYNOPSIS:
- *      t_DataProcessorHandleType *AllocateData(void);
+ * SYNOPSIS:
+ *    t_DataProcessorHandleType *AllocateData(void);
  *
- *    PARAMETERS:
- *      NONE
+ * PARAMETERS:
+ *    NONE
  *
- *    FUNCTION:
- *      This function allocates any needed data for this data processor.
+ * FUNCTION:
+ *    This function allocates any needed data for this data processor.
  *
- *    RETURNS:
- *      A pointer to the data, NULL if there was an error.
+ * NOTES:
+ *    You can not use most of the API 'DPS_API' because there is no connection
+ *    when AllocateData() is called.
+ *
+ * RETURNS:
+ *   A pointer to the data, NULL if there was an error.
  *==============================================================================
- *    NAME:
- *      FreeData
+ * NAME:
+ *    FreeData
  *
- *    SYNOPSIS:
- *      void FreeData(t_DataProcessorHandleType *DataHandle);
+ * SYNOPSIS:
+ *    void FreeData(t_DataProcessorHandleType *DataHandle);
  *
- *    PARAMETERS:
- *      DataHandle [I] -- The data handle to free.  This will need to be
- *                        case to your internal data type before you use it.
+ * PARAMETERS:
+ *    DataHandle [I] -- The data handle to free.  This will need to be
+ *                      case to your internal data type before you use it.
  *
- *    FUNCTION:
- *      This function frees the memory allocated with AllocateData().
+ * FUNCTION:
+ *    This function frees the memory allocated with AllocateData().
  *
- *    RETURNS:
- *      NONE
+ * RETURNS:
+ *    NONE
  *==============================================================================
  *    NAME:
  *      GetProcessorInfo
@@ -921,21 +950,42 @@ DB_StopTimer(e_DBT_AddChar2Display);
     }
     else
     {
-        /* binary data processors */
-        CurProcessor=FData->DataProcessorsList.begin();
-        if(CurProcessor!=FData->DataProcessorsList.end())
+        /* Binary data processors */
+        for(byte=0;byte<bytes;byte++)
         {
-            m_ActiveDataProcessor=&*CurProcessor;
-            CharLen=0;
-            ProcessedChar[0]=0;
-            Consumed=true;
-            for(byte=0;byte<bytes;byte++)
+            /* Decoders first */
+            for(CurProcessor=FData->DataProcessorsList.begin(),Index=0;
+                    CurProcessor!=FData->DataProcessorsList.end();
+                    CurProcessor++,Index++)
             {
-                /* Text mode data processors */
-                if(CurProcessor->API.ProcessIncomingBinaryByte!=NULL)
+                m_ActiveDataProcessor=&*CurProcessor;
+
+                if(CurProcessor->Info.BinClass==
+                        e_BinaryDataProcessorClass_Decoder)
                 {
-                    CurProcessor->API.ProcessIncomingBinaryByte(
-                            FData->ProcessorsData[0],inbuff[byte]);
+                    if(CurProcessor->API.ProcessIncomingBinaryByte!=NULL)
+                    {
+                        CurProcessor->API.ProcessIncomingBinaryByte(
+                                FData->ProcessorsData[Index],inbuff[byte]);
+                    }
+                }
+            }
+
+            /* Everything that isn't a decoder */
+            for(CurProcessor=FData->DataProcessorsList.begin(),Index=0;
+                    CurProcessor!=FData->DataProcessorsList.end();
+                    CurProcessor++,Index++)
+            {
+                m_ActiveDataProcessor=&*CurProcessor;
+
+                if(CurProcessor->Info.BinClass!=
+                        e_BinaryDataProcessorClass_Decoder)
+                {
+                    if(CurProcessor->API.ProcessIncomingBinaryByte!=NULL)
+                    {
+                        CurProcessor->API.ProcessIncomingBinaryByte(
+                                FData->ProcessorsData[Index],inbuff[byte]);
+                    }
                 }
             }
         }
@@ -1038,17 +1088,57 @@ void DPS_ProcessorOutGoingBytes(const uint8_t *outbuff,int bytes)
         return;
 
     /* Send it to all the term emulations */
-    for(CurProcessor=FData->DataProcessorsList.begin(),Index=0;
-            CurProcessor!=FData->DataProcessorsList.end();
-            CurProcessor++,Index++)
+    if(FData->Settings->DataProcessorType==e_DataProcessorType_Text)
     {
-        m_ActiveDataProcessor=&*CurProcessor;
-        if(CurProcessor->API.ProcessOutGoingData!=NULL)
+        /* Decoder's first */
+        for(CurProcessor=FData->DataProcessorsList.begin(),Index=0;
+                CurProcessor!=FData->DataProcessorsList.end();
+                CurProcessor++,Index++)
         {
-            CurProcessor->API.ProcessOutGoingData(FData->ProcessorsData[Index],
-                    outbuff,bytes);
+            m_ActiveDataProcessor=&*CurProcessor;
+            if(CurProcessor->API.ProcessOutGoingData!=NULL)
+            {
+                CurProcessor->API.ProcessOutGoingData(FData->
+                        ProcessorsData[Index],outbuff,bytes);
+            }
+            m_ActiveDataProcessor=NULL;
         }
-        m_ActiveDataProcessor=NULL;
+    }
+    else
+    {
+        /* Decoder's first */
+        for(CurProcessor=FData->DataProcessorsList.begin(),Index=0;
+                CurProcessor!=FData->DataProcessorsList.end();
+                CurProcessor++,Index++)
+        {
+            m_ActiveDataProcessor=&*CurProcessor;
+            if(CurProcessor->Info.BinClass==e_BinaryDataProcessorClass_Decoder)
+            {
+                if(CurProcessor->API.ProcessOutGoingData!=NULL)
+                {
+                    CurProcessor->API.ProcessOutGoingData(FData->ProcessorsData[Index],
+                            outbuff,bytes);
+                }
+            }
+            m_ActiveDataProcessor=NULL;
+        }
+
+        /* Everything that's not a decoder */
+        for(CurProcessor=FData->DataProcessorsList.begin(),Index=0;
+                CurProcessor!=FData->DataProcessorsList.end();
+                CurProcessor++,Index++)
+        {
+            m_ActiveDataProcessor=&*CurProcessor;
+            if(CurProcessor->Info.BinClass!=e_BinaryDataProcessorClass_Decoder)
+            {
+                if(CurProcessor->API.ProcessOutGoingData!=NULL)
+                {
+                    CurProcessor->API.ProcessOutGoingData(FData->
+                            ProcessorsData[Index],outbuff,bytes);
+                }
+            }
+            m_ActiveDataProcessor=NULL;
+        }
     }
 }
 
@@ -1821,8 +1911,6 @@ uint32_t DPS_GetULineColor(void)
  *                      TXT_ATTRIB_ITALIC -- Italic Text
  *                      TXT_ATTRIB_OUTLINE -- Draw an outline around the leters.
  *                      TXT_ATTRIB_REVERSE -- Reverse video
- *                      TXT_ATTRIB_FORCE -- Ignore the user settings and apply
- *                                          all the attributes.
  *
  * FUNCTION:
  *    This function sets the underline color.
@@ -2363,6 +2451,10 @@ void DPS_BinaryAddText(const char *Str)
     if(m_ActiveDataProcessor->Info.BinMode!=e_BinaryDataProcessorMode_Text)
         return;
 
+    /* Only decoders can add text (or hex) */
+    if(m_ActiveDataProcessor->Info.BinClass!=e_BinaryDataProcessorClass_Decoder)
+        return;
+
     buff[1]=0;
     while(*Str!=0)
     {
@@ -2401,6 +2493,10 @@ void DPS_BinaryAddHex(uint8_t Byte)
         return;
 
     if(m_ActiveDataProcessor->Info.BinMode!=e_BinaryDataProcessorMode_Hex)
+        return;
+
+    /* Only decoders can add hex (or text) */
+    if(m_ActiveDataProcessor->Info.BinClass!=e_BinaryDataProcessorClass_Decoder)
         return;
 
     buff[0]=Byte;
@@ -2489,5 +2585,287 @@ void DPS_DoScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,
 void DPS_SetTitle(const char *Title)
 {
     Con_SetTitle(Title);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_AllocateMark
+ *
+ * SYNOPSIS:
+ *    t_DataProMark *DPS_AllocateMark(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function allocates a new mark.  A mark is a point in the data that
+ *    the system is currently inserting bytes.  You can use it to remember
+ *    the current point in the stream and apply changes after.
+ *
+ *    Because this mark is a point of older data it may be overwritten,
+ *    destroyed or removed, in this case then the mark becomes invalid and
+ *    you can no longer use it.  You still need to free the mark even if
+ *    it becomes invalid.
+ *
+ *    The new marker will be set to the current cursor position.
+ *
+ * RETURNS:
+ *    A pointer to the mark in the data.
+ *
+ * SEE ALSO:
+ *    DPS_FreeMark(), DPS_IsMarkValid(), DPS_SetMark2CursorPos(),
+ *    DPS_ApplyAttrib2Mark(), DPS_RemoveAttribFromMark(),
+ *    DPS_ApplyFGColor2Mark(), DPS_ApplyBGColor2Mark(), DPS_MoveMark()
+ ******************************************************************************/
+t_DataProMark *DPS_AllocateMark(void)
+{
+    return Con_AllocateMark();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_FreeMark
+ *
+ * SYNOPSIS:
+ *    void DPS_FreeMark(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to free
+ *
+ * FUNCTION:
+ *    This function frees the mark allocated with DPS_AllocateMark().  You
+ *    do not need to call this on your mark's when your plugin is shutting
+ *    down.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_AllocateMark()
+ ******************************************************************************/
+void DPS_FreeMark(t_DataProMark *Mark)
+{
+    Con_FreeMark(Mark);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_IsMarkValid
+ *
+ * SYNOPSIS:
+ *    PG_BOOL DPS_IsMarkValid(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *
+ * FUNCTION:
+ *    This function checks if a mark is still valid.  The system can move
+ *    things around after you set a mark and it will make a mark invalid.
+ *    For example if the user clears the screen any marks you have will be
+ *    marked invalid.
+ *
+ * RETURNS:
+ *    true -- Mark is still value
+ *    false -- The mark is no longer valid
+ *
+ * SEE ALSO:
+ *    DPS_AllocateMark()
+ ******************************************************************************/
+PG_BOOL DPS_IsMarkValid(t_DataProMark *Mark)
+{
+    return Con_IsMarkValid(Mark);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_SetMark2CursorPos
+ *
+ * SYNOPSIS:
+ *    void DPS_SetMark2CursorPos(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *
+ * FUNCTION:
+ *    This function will take a mark and move it to the current cursor position.
+ *    It will also set this mark to valid.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_AllocateMark()
+ ******************************************************************************/
+void DPS_SetMark2CursorPos(t_DataProMark *Mark)
+{
+    return Con_SetMark2CursorPos(Mark);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_ApplyAttrib2Mark
+ *
+ * SYNOPSIS:
+ *    void DPS_ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Attrib [I] -- The new attrib(s) to set
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the attribs.
+ *    Len [I] -- The number of chars to apply these new attributes to.
+ *
+ * FUNCTION:
+ *    This function takes and sets a attrib (or more than one) between the
+ *    mark and the cursor.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_AllocateMark()
+ ******************************************************************************/
+void DPS_ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,
+        uint32_t Len)
+{
+    Con_ApplyAttrib2Mark(Mark,Attrib,Offset,Len);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_RemoveAttribFromMark
+ *
+ * SYNOPSIS:
+ *    void DPS_RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Attrib [I] -- The new attrib(s) to clear
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to remove the attribs.
+ *    Len [I] -- The number of chars to remove these new attributes from.
+ *
+ * FUNCTION:
+ *    This function takes and clears a attrib (or more than one) between the
+ *    mark and the cursor.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_AllocateMark()
+ ******************************************************************************/
+void DPS_RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,
+        uint32_t Offset,uint32_t Len)
+{
+    Con_RemoveAttribFromMark(Mark,Attrib,Offset,Len);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_ApplyFGColor2Mark
+ *
+ * SYNOPSIS:
+ *    void DPS_ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    FGColor [I] -- The colors to apply
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the color.
+ *    Len [I] -- The number of chars to apply this color to
+ *
+ * FUNCTION:
+ *    This function takes and colors between the mark and the cursor.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_AllocateMark()
+ ******************************************************************************/
+void DPS_ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,
+        uint32_t Offset,uint32_t Len)
+{
+    Con_ApplyFGColor2Mark(Mark,FGColor,Offset,Len);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_ApplyBGColor2Mark
+ *
+ * SYNOPSIS:
+ *    void DPS_ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    FGColor [I] -- The colors to apply
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the color.
+ *    Len [I] -- The number of chars to apply this color to
+ *
+ * FUNCTION:
+ *    This function takes and colors between the mark and the cursor.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_AllocateMark()
+ ******************************************************************************/
+void DPS_ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,uint32_t Offset,
+        uint32_t Len)
+{
+    Con_ApplyBGColor2Mark(Mark,BGColor,Offset,Len);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_MoveMark
+ *
+ * SYNOPSIS:
+ *    void DPS_MoveMark(t_DataProMark *Mark,int Amount);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Amount [I] -- How much to move the mark by (plus for toward the cursor,
+ *                  neg to move toward the start of the buffer).
+ *
+ * FUNCTION:
+ *    This function moves the point that a mark points to.  This is moved
+ *    by char's (or bytes if binary) and it moves in the post processing
+ *    text (after all the other plugin have modified the text).
+ *
+ *    The mark is not be moved past the cursor (or insert point) or back before
+ *    the start of the screen / data.  It will just clip the move.  So for
+ *    example if you told the system to move the mark 1000000 chars (and there
+ *    aren't over 1000000 chars) then the mark will be moved to the cursor
+ *    and stop moving.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_AllocateMark()
+ ******************************************************************************/
+void DPS_MoveMark(t_DataProMark *Mark,int Amount)
+{
+    Con_MoveMark(Mark,Amount);
+}
+
+void DPS_FreezeStream(void)
+{
+}
+
+void DPS_ClearFrozenStream(void)
+{
+}
+
+void DPS_ReleaseFrozenStream(void)
+{
 }
 

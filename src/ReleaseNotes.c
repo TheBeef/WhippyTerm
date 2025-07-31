@@ -31,6 +31,16 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_BUG_FIX,"Fixed bug where selection would move if back buffer filled",
+            "When the back buffer filled and a new line was added the selection"
+            " would change what lines where selected (the line would move up,"
+            " but the selection would say on the old line making it look like"
+            " the seleciton had moved)."},
+    {
+        NOTETYPE_BUG_FIX,"Fixed bug where selection was being cleared when clipboard mode wasn't smart",
+            "The selection was being cleared when the selection mode was not"
+            " set to smart clipboard."},
+    {
         NOTETYPE_ENHANCEMENT,"Added new misc type of binary plugins",
             "A new sub class of plugin has been added, you can now"
             " add binary misc types of plugins.  These plugins"

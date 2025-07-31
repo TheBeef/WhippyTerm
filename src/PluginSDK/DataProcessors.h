@@ -41,10 +41,12 @@
 /* Versions of struct DataProcessorAPI */
 #define DATA_PROCESSORS_API_VERSION_1       1
 #define DATA_PROCESSORS_API_VERSION_2       2
+#define DATA_PROCESSORS_API_VERSION_3       3
 
 /* Versions of struct DPS_API */
 #define DPS_API_VERSION_1                   1
 #define DPS_API_VERSION_2                   2
+#define DPS_API_VERSION_3                   3
 
 #define TXT_ATTRIB_UNDERLINE                0x0001
 #define TXT_ATTRIB_UNDERLINE_DOUBLE         0x0002
@@ -59,7 +61,7 @@
 #define TXT_ATTRIB_BOX                      0x0400  // Future
 #define TXT_ATTRIB_ROUNDBOX                 0x0800
 #define TXT_ATTRIB_REVERSE                  0x1000
-#define TXT_ATTRIB_FORCE                    0x2000
+#define TXT_ATTRIB_RESERVED                 0x8000  // Do not use
 
 /* Goes back to version 1.0 (just here for compatibility) */
 #define TXT_ATTRIB_LINETHROUGHT             TXT_ATTRIB_LINETHROUGH
@@ -97,6 +99,7 @@ typedef enum
 
 typedef struct DataProcessorHandle {int PrivateDataHere;} t_DataProcessorHandleType;            // Fake type holder
 typedef struct DataProSettingsWidgets {int PrivateDataHere;} t_DataProSettingsWidgetsType;      // Fake type holder
+typedef struct DataProMark {int PrivateDataHere;} t_DataProMark;                                // Fake type holder
 
 typedef enum
 {
@@ -166,10 +169,12 @@ struct DataProcessorAPI
     void (*ProcessOutGoingData)(t_DataProcessorHandleType *DataHandle,
             const uint8_t *TxData,int Bytes);
     /********* End of DATA_PROCESSORS_API_VERSION_2 *********/
+    /********* Start of DATA_PROCESSORS_API_VERSION_3 *********/
     t_DataProSettingsWidgetsType *(*AllocSettingsWidgets)(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings);
     void (*FreeSettingsWidgets)(t_DataProSettingsWidgetsType *PrivData);
     void (*SetSettingsFromWidgets)(t_DataProSettingsWidgetsType *PrivData,t_PIKVList *Settings);
     void (*ApplySettings)(t_DataProcessorHandleType *DataHandle,t_PIKVList *Settings);
+    /********* End of DATA_PROCESSORS_API_VERSION_3 *********/
 };
 
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */
@@ -213,6 +218,18 @@ struct DPS_API
     /********* Start of DPS_API_VERSION_2 *********/
     void (*SetCurrentSettingsTabName)(const char *Name);
     t_WidgetSysHandle *(*AddNewSettingsTab)(const char *Name);
+    t_DataProMark *(*AllocateMark)(void);
+    void (*FreeMark)(t_DataProMark *Mark);
+    PG_BOOL (*IsMarkValid)(t_DataProMark *Mark);
+    void (*SetMark2CursorPos)(t_DataProMark *Mark);
+    void (*ApplyAttrib2Mark)(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,uint32_t Len);
+    void (*RemoveAttribFromMark)(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,uint32_t Len);
+    void (*ApplyFGColor2Mark)(t_DataProMark *Mark,uint32_t FGColor,uint32_t Offset,uint32_t Len);
+    void (*ApplyBGColor2Mark)(t_DataProMark *Mark,uint32_t BGColor,uint32_t Offset,uint32_t Len);
+    void (*MoveMark)(t_DataProMark *Mark,int Amount);
+    void (*FreezeStream)(void);
+    void (*ClearFrozenStream)(void);
+    void (*ReleaseFrozenStream)(void);
     /********* End of DPS_API_VERSION_2 *********/
 };
 

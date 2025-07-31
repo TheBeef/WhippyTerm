@@ -2593,8 +2593,20 @@ void Connection::CopySelectionToClipboard(void)
         UI_SetClipboardText(SelectContents,e_Clipboard_Selection);
         UI_SetClipboardText(SelectContents,e_Clipboard_Clipboard);
 
-        /* We also clear the selection on success */
-        Display->ClearSelection();
+        /* We also clear the selection on success (if we are using smart) */
+        switch(CustomSettings.ClipboardMode)
+        {
+            case e_ClipboardMode_None:
+            case e_ClipboardMode_Normal:
+            case e_ClipboardMode_ShiftCtrl:
+            case e_ClipboardMode_Alt:
+            break;
+            case e_ClipboardMode_Smart:
+            case e_ClipboardModeMAX:
+            default:
+                Display->ClearSelection();
+            break;
+        }
     }
 }
 
@@ -6968,4 +6980,263 @@ void Connection::FindCRCFromSelection(void)
         RunCRCFinderDialog(Buffer,Bytes);
         free(Buffer);
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::AllocateMark
+ *
+ * SYNOPSIS:
+ *    t_DataProMark *Connection::AllocateMark(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function tells the display to allocate a new mark.
+ *
+ * RETURNS:
+ *    A pointer to the mark.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_DataProMark *Connection::AllocateMark(void)
+{
+    if(Display!=NULL)
+        return Display->AllocateMark();
+    return NULL;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::FreeMark
+ *
+ * SYNOPSIS:
+ *    void Connection::FreeMark(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to free
+ *
+ * FUNCTION:
+ *    This function frees a mark allocated with AllocateMark()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::FreeMark(t_DataProMark *Mark)
+{
+    if(Display!=NULL)
+        Display->FreeMark(Mark);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::IsMarkValid
+ *
+ * SYNOPSIS:
+ *    bool Connection::IsMarkValid(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *
+ * FUNCTION:
+ *    This function checks if a marker is valid or not.
+ *
+ * RETURNS:
+ *    true -- Mark is still valid
+ *    false -- Mark is invalid
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::IsMarkValid(t_DataProMark *Mark)
+{
+    if(Display!=NULL)
+        return Display->IsMarkValid(Mark);
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::SetMark2CursorPos
+ *
+ * SYNOPSIS:
+ *    void Connection::SetMark2CursorPos(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *
+ * FUNCTION:
+ *    This function will take a mark and move it to the current cursor position.
+ *    It will also set this mark to valid.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_SetMark2CursorPos()
+ ******************************************************************************/
+void Connection::SetMark2CursorPos(t_DataProMark *Mark)
+{
+    if(Display!=NULL)
+        Display->SetMark2CursorPos(Mark);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::ApplyAttrib2Mark
+ *
+ * SYNOPSIS:
+ *    void Connection::ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Attrib [I] -- The new attrib(s) to set
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the attribs.
+ *    Len [I] -- The number of chars to apply these new attributes to.
+ *
+ * FUNCTION:
+ *    This function does the DPS_ApplyAttrib2Mark() function to this
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_ApplyAttrib2Mark()
+ ******************************************************************************/
+void Connection::ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,
+        uint32_t Offset,uint32_t Len)
+{
+    if(Display!=NULL)
+        Display->ApplyAttrib2Mark(Mark,Attrib,Offset,Len);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::RemoveAttribFromMark
+ *
+ * SYNOPSIS:
+ *    void Connection::RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,
+ *          uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Attrib [I] -- The new attrib(s) to clear
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to remove the attribs.
+ *    Len [I] -- The number of chars to remove these new attributes from.
+ *
+ * FUNCTION:
+ *    This function does the DPS_RemoveAttribFromMark() function to the
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_RemoveAttribFromMark()
+ ******************************************************************************/
+void Connection::RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,
+        uint32_t Offset,uint32_t Len)
+{
+    if(Display!=NULL)
+        Display->RemoveAttribFromMark(Mark,Attrib,Offset,Len);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::ApplyFGColor2Mark
+ *
+ * SYNOPSIS:
+ *    void DPS_ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    FGColor [I] -- The colors to apply
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the color.
+ *    Len [I] -- The number of chars to apply this color to
+ *
+ * FUNCTION:
+ *    This function does the DPS_ApplyFGColor2Mark() function to the
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_ApplyFGColor2Mark()
+ ******************************************************************************/
+void Connection::ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,
+        uint32_t Offset,uint32_t Len)
+{
+    if(Display!=NULL)
+        Display->ApplyFGColor2Mark(Mark,FGColor,Offset,Len);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::ApplyBGColor2Mark
+ *
+ * SYNOPSIS:
+ *    void Connection::ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    BGColor [I] -- The colors to apply
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the color.
+ *    Len [I] -- The number of chars to apply this color to
+ *
+ * FUNCTION:
+ *    This function does the DPS_ApplyBGColor2Mark() function to the
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_ApplyBGColor2Mark()
+ ******************************************************************************/
+void Connection::ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,
+        uint32_t Offset,uint32_t Len)
+{
+    if(Display!=NULL)
+        Display->ApplyBGColor2Mark(Mark,BGColor,Offset,Len);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::MoveMark
+ *
+ * SYNOPSIS:
+ *    void Connection::MoveMark(t_DataProMark *Mark,int Amount);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Amount [I] -- How much to move the mark by (plus for toward the cursor,
+ *                  neg to move toward the start of the buffer).
+ *
+ * FUNCTION:
+ *    This function does the DPS_MoveMark() function to the connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_MoveMark()
+ ******************************************************************************/
+void Connection::MoveMark(t_DataProMark *Mark,int Amount)
+{
+    if(Display!=NULL)
+        Display->MoveMark(Mark,Amount);
 }

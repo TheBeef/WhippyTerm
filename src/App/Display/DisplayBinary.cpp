@@ -58,16 +58,25 @@ using namespace std;
 /*** MACROS                   ***/
 
 /*** TYPE DEFINITIONS         ***/
-struct DisBin_SelectionPair
+struct DisBin_PointPair
 {
     uint8_t *Line;
     int Offset;
 };
 
-struct DisBin_SelectionBlock
+struct DisBin_Block
 {
-    struct DisBin_SelectionPair Start;
-    struct DisBin_SelectionPair End;
+    struct DisBin_PointPair Start;
+    struct DisBin_PointPair End;
+};
+
+struct BinaryPointMarker
+{
+    bool Valid;
+    uint8_t *Line;
+    int Offset;
+    struct BinaryPointMarker *Prev;
+    struct BinaryPointMarker *Next;
 };
 
 /*** FUNCTION PROTOTYPES      ***/
@@ -155,6 +164,7 @@ void DisplayBin_ScrollTimer_Timeout(uintptr_t UserData)
 DisplayBinary::DisplayBinary()
 {
     TextDisplayCtrl=NULL;
+    MarkerList=NULL;
 
     HexBufferSize=0;
     HexBuffer=NULL;
@@ -330,9 +340,19 @@ bool DisplayBinary::Init(void *ParentWidget,class ConSettings *SettingsPtr,
  ******************************************************************************/
 DisplayBinary::~DisplayBinary()
 {
+    struct BinaryPointMarker *Marker;
+
     InitCalled=false;
 
     FreeHexInput();
+
+    /* Free the marker list */
+    while(MarkerList!=NULL)
+    {
+        Marker=MarkerList->Next;
+        delete MarkerList;
+        MarkerList=Marker;
+    }
 
     if(ScrollTimer!=NULL)
         FreeUITimer(ScrollTimer);
@@ -436,6 +456,10 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
             if(SelectionAnchorLine==TopOfBufferLine)
                 SelectionAnchorLine+=HEX_BYTES_PER_LINE;
 
+            /* Handle marks */
+            InvalidateMarksOnScroll();
+
+            /* Handle topline */
             if(TopLine==TopOfBufferLine || WasAtBottom)
             {
                 /* Ok, we ran out of data, move topline too */
@@ -449,6 +473,7 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
                 NeedRedraw=true;
             }
 
+            /* Move the start of the buffer */
             TopOfBufferLine+=HEX_BYTES_PER_LINE;
             ColorTopOfBufferLine+=HEX_BYTES_PER_LINE;
             if(TopOfBufferLine>=EndOfHexBuffer)
@@ -984,7 +1009,7 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
     unsigned int HighLightEnd;
     unsigned int HighLightMaxSize;
     unsigned int HighLightLineSize;
-    struct DisBin_SelectionBlock SelBlocks[2];
+    struct DisBin_Block SelBlocks[2];
     struct CharStyling NextColor;
     struct CharStyling ApplyColor;
     uint16_t NextAttrib;
@@ -1289,6 +1314,8 @@ void DisplayBinary::ClearScreen(e_ScreenClearType Type)
     SelectionActive=false;
     SelectionLine=NULL;
     SelectionAnchorLine=NULL;
+
+    InvalidateAllMarks();
 
     UITC_ClearAllLines(TextDisplayCtrl);
     RethinkYScrollBar();
@@ -1812,6 +1839,75 @@ bool DisplayBinary::ConvertScreenXY2BufferLinePtr(int x,int y,uint8_t **Ptr,
 
 /*******************************************************************************
  * NAME:
+ *    DisplayBinary::ConvertPoint2Offset
+ *
+ * SYNOPSIS:
+ *    uint32_t DisplayBinary::ConvertPoint2Offset(struct DisBin_PointPair *Point);
+ *
+ * PARAMETERS:
+ *    Point [I] -- The point to convert
+ *
+ * FUNCTION:
+ *    This function converts a point to an offset from 'TopOfBufferLine'
+ *
+ * RETURNS:
+ *    The offset from 'TopOfBufferLine'
+ *
+ * SEE ALSO:
+ *    ConvertOffset2Point()
+ ******************************************************************************/
+uint32_t DisplayBinary::ConvertPoint2Offset(struct DisBin_PointPair *Point)
+{
+    uint32_t Offset;
+
+    if(Point->Line>=TopOfBufferLine)
+        Offset=Point->Line-TopOfBufferLine;
+    else
+        Offset=(EndOfHexBuffer-TopOfBufferLine)+(Point->Line-HexBuffer);
+
+    Offset+=Point->Offset;
+
+    return Offset;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ConvertOffset2Point
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::ConvertOffset2Point(uint32_t Offset,
+ *              struct DisBin_PointPair *Point);
+ *
+ * PARAMETERS:
+ *    Offset [I] -- The offset to convert
+ *    Point [O] -- The point this offset is at
+ *
+ * FUNCTION:
+ *    This function converts from an offset to a point.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    ConvertPoint2Offset()
+ ******************************************************************************/
+void DisplayBinary::ConvertOffset2Point(uint32_t Offset,
+        struct DisBin_PointPair *Point)
+{
+    uint32_t Lines;
+    uint8_t *Ptr;
+
+    Lines=Offset/HEX_BYTES_PER_LINE;
+    Ptr=TopOfBufferLine+Lines*HEX_BYTES_PER_LINE;
+    if(Ptr>=EndOfHexBuffer)
+        Ptr-=HexBufferSize;
+
+    Point->Line=Ptr;
+    Point->Offset=Offset%HEX_BYTES_PER_LINE;
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayBinary::ScrollScreen
  *
  * SYNOPSIS:
@@ -1906,7 +2002,7 @@ bool DisplayBinary::GetSelectionString(std::string &Clip)
     uint8_t *Line;
     string TmpStr;
     unsigned int s;
-    struct DisBin_SelectionBlock SelBlocks[2];
+    struct DisBin_Block SelBlocks[2];
 
     if(!SelectionActive || SelectionLine==NULL || SelectionAnchorLine==NULL)
         return false;
@@ -2114,7 +2210,7 @@ void DisplayBinary::ClearSelection(void)
  *
  * SYNOPSIS:
  *    bool DisplayBinary::GetNormalizedSelectionBlocks(
- *              struct DisBin_SelectionBlock *Blocks);
+ *              struct DisBin_Block *Blocks);
  *
  * PARAMETERS:
  *    Blocks [O] -- This is a 2 dim array of selection data for the two blocks
@@ -2135,11 +2231,58 @@ void DisplayBinary::ClearSelection(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool DisplayBinary::GetNormalizedSelectionBlocks(struct DisBin_SelectionBlock *Blocks)
+bool DisplayBinary::GetNormalizedSelectionBlocks(struct DisBin_Block *Blocks)
+{
+    struct DisBin_PointPair P1;
+    struct DisBin_PointPair P2;
+
+    if(!SelectionActive || SelectionLine==NULL || SelectionAnchorLine==NULL)
+        return false;
+
+    P1.Line=SelectionLine;
+    P1.Offset=SelectionLineOffset;
+    P2.Line=SelectionAnchorLine;
+    P2.Offset=SelectionLineAnchorOffset;
+
+    GetNormalizedPoints(&P1,&P2,Blocks);
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetNormalizedPoints
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::GetNormalizedPoints(struct DisBin_PointPair *P1,
+ *              struct DisBin_PointPair *P2,struct DisBin_Block *Blocks);
+ *
+ * PARAMETERS:
+ *    P1 [I] -- The first point
+ *    P2 [I] -- The second point
+ *    Blocks [O] -- This is a 2 dim array of for the two points
+ *                  that make up the selection.
+ *
+ * FUNCTION:
+ *    This function takes 2 points and normalizes it (makes sure start point
+ *    is before end point) and split the selection into blocks.
+ *
+ *    The blocks are needed because the hex buffer is circular and loops.  This
+ *    means that you can end up with one block that goes to the end of the
+ *    buffer and another that is at the top with a hole in the middle.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::GetNormalizedPoints(struct DisBin_PointPair *P1,
+        struct DisBin_PointPair *P2,struct DisBin_Block *Blocks)
 {
     unsigned int s;
 
-    /* Setup the selection */
+    /* Setup the return values */
     for(s=0;s<2;s++)
     {
         Blocks[s].Start.Line=NULL;
@@ -2148,75 +2291,71 @@ bool DisplayBinary::GetNormalizedSelectionBlocks(struct DisBin_SelectionBlock *B
         Blocks[s].End.Offset=0;
     }
 
-    if(!SelectionActive || SelectionLine==NULL || SelectionAnchorLine==NULL)
-        return false;
-
-    if(SelectionLine==SelectionAnchorLine)
+    if(P1->Line==P2->Line)
     {
         /* They are on the same line */
-        Blocks[0].Start.Line=SelectionLine;
-        Blocks[0].End.Line=SelectionAnchorLine;
-        if(SelectionLineAnchorOffset>SelectionLineOffset)
+        Blocks[0].Start.Line=P1->Line;
+        Blocks[0].End.Line=P2->Line;
+        if(P2->Offset>P1->Offset)
         {
-            Blocks[0].Start.Offset=SelectionLineOffset;
-            Blocks[0].End.Offset=SelectionLineAnchorOffset;
+            Blocks[0].Start.Offset=P1->Offset;
+            Blocks[0].End.Offset=P2->Offset;
         }
         else
         {
-            Blocks[0].Start.Offset=SelectionLineAnchorOffset;
-            Blocks[0].End.Offset=SelectionLineOffset;
+            Blocks[0].Start.Offset=P2->Offset;
+            Blocks[0].End.Offset=P1->Offset;
         }
     }
-    else if((SelectionLine<TopOfBufferLine &&
-            SelectionAnchorLine<TopOfBufferLine) ||
-            (SelectionLine>=TopOfBufferLine &&
-            SelectionAnchorLine>=TopOfBufferLine))
+    else if((P1->Line<TopOfBufferLine &&
+            P2->Line<TopOfBufferLine) ||
+            (P1->Line>=TopOfBufferLine &&
+            P2->Line>=TopOfBufferLine))
     {
         /* Both are above or below the start of the data, just setup one */
-        if(SelectionAnchorLine>SelectionLine)
+        if(P2->Line>P1->Line)
         {
-            Blocks[0].Start.Line=SelectionLine;
-            Blocks[0].Start.Offset=SelectionLineOffset;
-            Blocks[0].End.Line=SelectionAnchorLine;
-            Blocks[0].End.Offset=SelectionLineAnchorOffset;
+            Blocks[0].Start.Line=P1->Line;
+            Blocks[0].Start.Offset=P1->Offset;
+            Blocks[0].End.Line=P2->Line;
+            Blocks[0].End.Offset=P2->Offset;
         }
         else
         {
-            Blocks[0].Start.Line=SelectionAnchorLine;
-            Blocks[0].Start.Offset=SelectionLineAnchorOffset;
-            Blocks[0].End.Line=SelectionLine;
-            Blocks[0].End.Offset=SelectionLineOffset;
+            Blocks[0].Start.Line=P2->Line;
+            Blocks[0].Start.Offset=P2->Offset;
+            Blocks[0].End.Line=P1->Line;
+            Blocks[0].End.Offset=P1->Offset;
         }
     }
     else
     {
         /* One is above and one below, we need to highlight blocks */
-        if(SelectionLine>TopOfBufferLine)
+        if(P1->Line>TopOfBufferLine)
         {
-            Blocks[0].Start.Line=SelectionLine;
-            Blocks[0].Start.Offset=SelectionLineOffset;
+            Blocks[0].Start.Line=P1->Line;
+            Blocks[0].Start.Offset=P1->Offset;
             Blocks[0].End.Line=EndOfHexBuffer-HEX_BYTES_PER_LINE;
             Blocks[0].End.Offset=HEX_BYTES_PER_LINE-1;
 
             Blocks[1].Start.Line=HexBuffer;
             Blocks[1].Start.Offset=0;
-            Blocks[1].End.Line=SelectionAnchorLine;
-            Blocks[1].End.Offset=SelectionLineAnchorOffset;
+            Blocks[1].End.Line=P2->Line;
+            Blocks[1].End.Offset=P2->Offset;
         }
         else
         {
-            Blocks[0].Start.Line=SelectionAnchorLine;
-            Blocks[0].Start.Offset=SelectionLineAnchorOffset;
+            Blocks[0].Start.Line=P2->Line;
+            Blocks[0].Start.Offset=P2->Offset;
             Blocks[0].End.Line=EndOfHexBuffer-HEX_BYTES_PER_LINE;
             Blocks[0].End.Offset=HEX_BYTES_PER_LINE-1;
 
             Blocks[1].Start.Line=HexBuffer;
             Blocks[1].Start.Offset=0;
-            Blocks[1].End.Line=SelectionLine;
-            Blocks[1].End.Offset=SelectionLineOffset;
+            Blocks[1].End.Line=P1->Line;
+            Blocks[1].End.Offset=P1->Offset;
         }
     }
-    return true;
 }
 
 /*******************************************************************************
@@ -2453,7 +2592,7 @@ void DisplayBinary::SendPanel_ShowHexOrText(bool Text)
  ******************************************************************************/
 void DisplayBinary::ToggleAttribs2Selection(uint32_t Attribs)
 {
-    struct DisBin_SelectionBlock SelBlocks[2];
+    struct DisBin_Block SelBlocks[2];
     bool IsSet;
 
     if(!SelectionActive)
@@ -2483,7 +2622,7 @@ void DisplayBinary::ToggleAttribs2Selection(uint32_t Attribs)
  *    DisplayBinary::FillAttrib
  *
  * SYNOPSIS:
- *    void DisplayBinary::FillAttrib(struct DisBin_SelectionBlock *SelBlock,
+ *    void DisplayBinary::FillAttrib(struct DisBin_Block *SelBlock,
  *          uint32_t Attribs,bool Set);
  *
  * PARAMETERS:
@@ -2501,7 +2640,7 @@ void DisplayBinary::ToggleAttribs2Selection(uint32_t Attribs)
  * SEE ALSO:
  *    DisplayBinary::ToggleAttribs2Selection()
  ******************************************************************************/
-void DisplayBinary::FillAttrib(struct DisBin_SelectionBlock *SelBlock,
+void DisplayBinary::FillAttrib(struct DisBin_Block *SelBlock,
         uint32_t Attribs,bool Set)
 {
     struct CharStyling *ColStart;
@@ -2528,7 +2667,7 @@ void DisplayBinary::FillAttrib(struct DisBin_SelectionBlock *SelBlock,
  *    DisplayBinary::CheckIfAttribSet
  *
  * SYNOPSIS:
- *    bool DisplayBinary::CheckIfAttribSet(struct DisBin_SelectionBlock *SelBlock,
+ *    bool DisplayBinary::CheckIfAttribSet(struct DisBin_Block *SelBlock,
  *          uint32_t Attribs);
  *
  * PARAMETERS:
@@ -2545,7 +2684,7 @@ void DisplayBinary::FillAttrib(struct DisBin_SelectionBlock *SelBlock,
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool DisplayBinary::CheckIfAttribSet(struct DisBin_SelectionBlock *SelBlock,
+bool DisplayBinary::CheckIfAttribSet(struct DisBin_Block *SelBlock,
         uint32_t Attribs)
 {
     struct CharStyling *ColStart;
@@ -2622,7 +2761,7 @@ struct CharStyling *DisplayBinary::GetColorPtrFromLinePtr(const uint8_t *Line)
  ******************************************************************************/
 void DisplayBinary::ApplyBGColor2Selection(uint32_t RGB)
 {
-    struct DisBin_SelectionBlock SelBlocks[2];
+    struct DisBin_Block SelBlocks[2];
     struct CharStyling *ColStart;
     struct CharStyling *ColEnd;
     struct CharStyling *FillPos;
@@ -2678,7 +2817,7 @@ void DisplayBinary::ApplyBGColor2Selection(uint32_t RGB)
  ******************************************************************************/
 bool DisplayBinary::IsAttribSetInSelection(uint32_t Attribs)
 {
-    struct DisBin_SelectionBlock SelBlocks[2];
+    struct DisBin_Block SelBlocks[2];
     bool IsSet;
 
     if(!SelectionActive)
@@ -2727,7 +2866,7 @@ uint8_t *DisplayBinary::GetSelectionRAW(unsigned int *Bytes)
     uint8_t *Line;
     string TmpStr;
     unsigned int s;
-    struct DisBin_SelectionBlock SelBlocks[2];
+    struct DisBin_Block SelBlocks[2];
     unsigned int TotalBytes;
     uint8_t *RetBuff;
     uint8_t *RetBuffInsertPos;
@@ -2836,4 +2975,600 @@ uint8_t *DisplayBinary::GetSelectionRAW(unsigned int *Bytes)
     }
 
     return RetBuff;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::InvalidateAllMarks
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::InvalidateAllMarks(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function takes all the allocated marks and marks them as invalid.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::InvalidateAllMarks(void)
+{
+    struct BinaryPointMarker *Marker;
+
+    for(Marker=MarkerList;Marker!=NULL;Marker=Marker->Next)
+        Marker->Valid=false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::InvalidateMarksOnScroll
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::InvalidateMarksOnScroll(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function goes thought all the valid marks and sees if they will
+ *    be invalid after a scroll.  If they will become invalid then they are
+ *    marked as invalid.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::InvalidateMarksOnScroll(void)
+{
+    struct BinaryPointMarker *Marker;
+
+    for(Marker=MarkerList;Marker!=NULL;Marker=Marker->Next)
+    {
+        if(Marker->Valid)
+        {
+            if(Marker->Line==TopOfBufferLine)
+                Marker->Valid=false;
+        }
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::AdvancePoint
+ *
+ * SYNOPSIS:
+ *    void DisplayText::AdvancePoint(struct DisBin_PointPair *Point,int Amount);
+ *
+ * PARAMETERS:
+ *    Point [I/O] -- The point to move
+ *    Amount [I] -- The amount to move the point
+ *
+ * FUNCTION:
+ *    This function moves a point backward or forward on the line.  It will not
+ *    to past the start of the buffer or the current insert point.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::AdvancePoint(struct DisBin_PointPair *Point,int Amount)
+{
+    struct DisBin_PointPair BottomPoint;
+    uint32_t Offset;
+    uint32_t BottomOffset;
+    int UseAmount;
+
+    UseAmount=Amount;
+
+    BottomPoint.Line=BottomOfBufferLine;
+    BottomPoint.Offset=InsertPoint;
+    BottomOffset=ConvertPoint2Offset(&BottomPoint);
+
+    Offset=ConvertPoint2Offset(Point);
+
+    if(UseAmount<0)
+    {
+        /* Check if we will overflow */
+        if(-UseAmount>(int)Offset)
+        {
+            /* We can't go neg so 0 it */
+            UseAmount=-Offset;
+        }
+    }
+
+    Offset+=UseAmount;
+
+    if(Offset>BottomOffset)
+    {
+        /* Clip to bottom offset */
+        Point->Line=BottomOfBufferLine;
+        Point->Offset=InsertPoint;
+    }
+    else
+    {
+        ConvertOffset2Point(Offset,Point);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::AllocateMark
+ *
+ * SYNOPSIS:
+ *    t_DataProMark *DisplayBinary::AllocateMark(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function allocates a mark for this display.  A mark is a point in
+ *    the display that we are currently adding chars to.  This mark is
+ *    used to reference this insert point again in the future.  The mark
+ *    can become invalid if the insert point goes away.  The mark remains
+ *    allocated and can be used but will not do anything.
+ *
+ *    The display keeps a list of all the marks that have been allocated.
+ *    This is so it can go through the list and invalid any that become
+ *    invalid because of a change to the display.
+ *
+ * RETURNS:
+ *    A pointer to the mark.
+ *
+ * SEE ALSO:
+ *    DPS_AllocateMark()
+ ******************************************************************************/
+t_DataProMark *DisplayBinary::AllocateMark(void)
+{
+    struct BinaryPointMarker *NewMarker;
+
+    try
+    {
+        NewMarker=new struct BinaryPointMarker;
+        NewMarker->Valid=false;
+
+        /* Add it to the list of markers */
+        NewMarker->Prev=NULL;
+        NewMarker->Next=MarkerList;
+        if(MarkerList!=NULL)
+            MarkerList->Prev=NewMarker;
+        MarkerList=NewMarker;
+
+        /* Move this marker to the current cursor pos */
+        SetMark2CursorPos((t_DataProMark *)NewMarker);
+    }
+    catch(...)
+    {
+        NewMarker=NULL;
+    }
+
+    return (t_DataProMark *)NewMarker;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::FreeMark
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::FreeMark(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to free
+ *
+ * FUNCTION:
+ *    This function frees a mark that was allocated with AllocateMark()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    When a display text is free'ed the users of Mark's can't call FreeMark()
+ *    because the connection is no longer connected.  There for when a
+ *    display text is free'ed it must free the list of marks.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::FreeMark(t_DataProMark *Mark)
+{
+    struct BinaryPointMarker *Marker=(struct BinaryPointMarker *)Mark;
+
+    /* Unlink this item and free it */
+    if(MarkerList==Marker)
+        MarkerList=Marker->Next;
+
+    if(Marker->Next!=NULL)
+        Marker->Next->Prev=Marker->Prev;
+
+    if(Marker->Prev!=NULL)
+        Marker->Prev->Next=Marker->Next;
+
+    delete Marker;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::IsMarkValid
+ *
+ * SYNOPSIS:
+ *    bool DisplayBinary::IsMarkValid(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *
+ * FUNCTION:
+ *    This function checks if a marker is valid or not.
+ *
+ * RETURNS:
+ *    true -- Mark is still valid
+ *    false -- Mark is invalid
+ *
+ * SEE ALSO:
+ *    DPS_IsMarkValid()
+ ******************************************************************************/
+bool DisplayBinary::IsMarkValid(t_DataProMark *Mark)
+{
+    struct BinaryPointMarker *Marker=(struct BinaryPointMarker *)Mark;
+
+    return Marker->Valid;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::SetMark2CursorPos
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::SetMark2CursorPos(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *
+ * FUNCTION:
+ *    This function will take a mark and move it to the current cursor position.
+ *    It will also set this mark to valid.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_SetMark2CursorPos()
+ ******************************************************************************/
+void DisplayBinary::SetMark2CursorPos(t_DataProMark *Mark)
+{
+    struct BinaryPointMarker *Marker=(struct BinaryPointMarker *)Mark;
+
+    Marker->Line=BottomOfBufferLine;
+    Marker->Offset=InsertPoint;
+    Marker->Valid=true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ApplyAttrib2Mark
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Attrib [I] -- The new attrib(s) to set
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the attribs.
+ *    Len [I] -- The number of chars to apply these new attributes to.
+ *
+ * FUNCTION:
+ *    This function does the DPS_ApplyAttrib2Mark() function to the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_ApplyAttrib2Mark()
+ ******************************************************************************/
+void DisplayBinary::ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,
+        uint32_t Offset,uint32_t Len)
+{
+    struct BinaryPointMarker *Marker=(struct BinaryPointMarker *)Mark;
+    struct DisBin_PointPair P1;
+    struct DisBin_PointPair P2;
+    struct DisBin_Block Blocks[2];
+    struct CharStyling *ColStart;
+    struct CharStyling *ColEnd;
+    struct CharStyling *FillPos;
+    int s;
+
+    if(!Marker->Valid)
+        return;
+
+    P1.Line=Marker->Line;
+    P1.Offset=Marker->Offset;
+    AdvancePoint(&P1,Offset);
+
+    P2.Line=P1.Line;
+    P2.Offset=P1.Offset;
+    AdvancePoint(&P2,Len);
+
+    GetNormalizedPoints(&P1,&P2,Blocks);
+
+    for(s=0;s<2;s++)
+    {
+        if(Blocks[s].Start.Line==NULL || Blocks[s].End.Line==NULL)
+            break;
+
+        /* Get the pointers into the color buffers for this selection */
+        ColStart=GetColorPtrFromLinePtr(&Blocks[s].Start.Line[
+                Blocks[s].Start.Offset]);
+        ColEnd=GetColorPtrFromLinePtr(&Blocks[s].End.Line[
+                Blocks[s].End.Offset]);
+
+        FillPos=ColStart;
+        while(FillPos<=ColEnd)
+        {
+            FillPos->Attribs|=Attrib;
+            FillPos++;
+        }
+    }
+
+    RedrawScreen();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::RemoveAttribFromMark
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::RemoveAttribFromMark(t_DataProMark *Mark,
+ *          uint32_t Attrib,uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Attrib [I] -- The new attrib(s) to clear
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to remove the attribs.
+ *    Len [I] -- The number of chars to remove these new attributes from.
+ *
+ * FUNCTION:
+ *    This function does the DPS_RemoveAttribFromMark() function to the active
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_RemoveAttribFromMark()
+ ******************************************************************************/
+void DisplayBinary::RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,
+        uint32_t Offset,uint32_t Len)
+{
+    struct BinaryPointMarker *Marker=(struct BinaryPointMarker *)Mark;
+    struct DisBin_PointPair P1;
+    struct DisBin_PointPair P2;
+    struct DisBin_Block Blocks[2];
+    struct CharStyling *ColStart;
+    struct CharStyling *ColEnd;
+    struct CharStyling *FillPos;
+    int s;
+
+    if(!Marker->Valid)
+        return;
+
+    P1.Line=Marker->Line;
+    P1.Offset=Marker->Offset;
+    AdvancePoint(&P1,Offset);
+
+    P2.Line=P1.Line;
+    P2.Offset=P1.Offset;
+    AdvancePoint(&P2,Len);
+
+    GetNormalizedPoints(&P1,&P2,Blocks);
+
+    for(s=0;s<2;s++)
+    {
+        if(Blocks[s].Start.Line==NULL || Blocks[s].End.Line==NULL)
+            break;
+
+        /* Get the pointers into the color buffers for this selection */
+        ColStart=GetColorPtrFromLinePtr(&Blocks[s].Start.Line[
+                Blocks[s].Start.Offset]);
+        ColEnd=GetColorPtrFromLinePtr(&Blocks[s].End.Line[
+                Blocks[s].End.Offset]);
+
+        FillPos=ColStart;
+        while(FillPos<=ColEnd)
+        {
+            FillPos->Attribs&=~Attrib;
+            FillPos++;
+        }
+    }
+
+    RedrawScreen();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ApplyFGColor2Mark
+ *
+ * SYNOPSIS:
+ *    void DPS_ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    FGColor [I] -- The colors to apply
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the color.
+ *    Len [I] -- The number of chars to apply this color to
+ *
+ * FUNCTION:
+ *    This function does the DPS_ApplyFGColor2Mark() function to the active
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_ApplyFGColor2Mark()
+ ******************************************************************************/
+void DisplayBinary::ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,
+        uint32_t Offset,uint32_t Len)
+{
+    struct BinaryPointMarker *Marker=(struct BinaryPointMarker *)Mark;
+    struct DisBin_PointPair P1;
+    struct DisBin_PointPair P2;
+    struct DisBin_Block Blocks[2];
+    struct CharStyling *ColStart;
+    struct CharStyling *ColEnd;
+    struct CharStyling *FillPos;
+    int s;
+
+    if(!Marker->Valid)
+        return;
+
+    P1.Line=Marker->Line;
+    P1.Offset=Marker->Offset;
+    AdvancePoint(&P1,Offset);
+
+    P2.Line=P1.Line;
+    P2.Offset=P1.Offset;
+    AdvancePoint(&P2,Len);
+
+    GetNormalizedPoints(&P1,&P2,Blocks);
+
+    for(s=0;s<2;s++)
+    {
+        if(Blocks[s].Start.Line==NULL || Blocks[s].End.Line==NULL)
+            break;
+
+        /* Get the pointers into the color buffers for this selection */
+        ColStart=GetColorPtrFromLinePtr(&Blocks[s].Start.Line[
+                Blocks[s].Start.Offset]);
+        ColEnd=GetColorPtrFromLinePtr(&Blocks[s].End.Line[
+                Blocks[s].End.Offset]);
+
+        FillPos=ColStart;
+        while(FillPos<=ColEnd)
+        {
+            FillPos->FGColor=FGColor;
+            FillPos->ULineColor=FGColor;
+            FillPos++;
+        }
+    }
+
+    RedrawScreen();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ApplyBGColor2Mark
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    BGColor [I] -- The colors to apply
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the color.
+ *    Len [I] -- The number of chars to apply this color to
+ *
+ * FUNCTION:
+ *    This function does the DPS_ApplyBGColor2Mark() function to the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_ApplyBGColor2Mark()
+ ******************************************************************************/
+void DisplayBinary::ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,
+        uint32_t Offset,uint32_t Len)
+{
+    struct BinaryPointMarker *Marker=(struct BinaryPointMarker *)Mark;
+    struct DisBin_PointPair P1;
+    struct DisBin_PointPair P2;
+    struct DisBin_Block Blocks[2];
+    struct CharStyling *ColStart;
+    struct CharStyling *ColEnd;
+    struct CharStyling *FillPos;
+    int s;
+
+    if(!Marker->Valid)
+        return;
+
+    P1.Line=Marker->Line;
+    P1.Offset=Marker->Offset;
+    AdvancePoint(&P1,Offset);
+
+    P2.Line=P1.Line;
+    P2.Offset=P1.Offset;
+    AdvancePoint(&P2,Len);
+
+    GetNormalizedPoints(&P1,&P2,Blocks);
+
+    for(s=0;s<2;s++)
+    {
+        if(Blocks[s].Start.Line==NULL || Blocks[s].End.Line==NULL)
+            break;
+
+        /* Get the pointers into the color buffers for this selection */
+        ColStart=GetColorPtrFromLinePtr(&Blocks[s].Start.Line[
+                Blocks[s].Start.Offset]);
+        ColEnd=GetColorPtrFromLinePtr(&Blocks[s].End.Line[
+                Blocks[s].End.Offset]);
+
+        FillPos=ColStart;
+        while(FillPos<=ColEnd)
+        {
+            FillPos->BGColor=BGColor;
+            FillPos++;
+        }
+    }
+
+    RedrawScreen();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::MoveMark
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::MoveMark(t_DataProMark *Mark,int Amount);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Amount [I] -- How much to move the mark by (plus for toward the cursor,
+ *                  neg to move toward the start of the buffer).
+ *
+ * FUNCTION:
+ *    This function does the DPS_MoveMark() function to the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_MoveMark()
+ ******************************************************************************/
+void DisplayBinary::MoveMark(t_DataProMark *Mark,int Amount)
+{
+    struct BinaryPointMarker *Marker=(struct BinaryPointMarker *)Mark;
+    struct DisBin_PointPair P1;
+
+    if(!Marker->Valid)
+        return;
+
+    P1.Line=Marker->Line;
+    P1.Offset=Marker->Offset;
+    AdvancePoint(&P1,Amount);
+    Marker->Line=P1.Line;
+    Marker->Offset=P1.Offset;
 }

@@ -40,6 +40,11 @@
 #include <list>
 
 /***  DEFINES                          ***/
+#define DTXT_APPLY_SET_ATTRIB   0x0001
+#define DTXT_APPLY_CLR_ATTRIB   0x0002
+#define DTXT_APPLY_FOREGROUND   0x0004
+#define DTXT_APPLY_BACKGROUND   0x0008
+#define DTXT_APPLY_ULINE_COLOR  0x0010
 
 /***  MACROS                           ***/
 
@@ -75,9 +80,19 @@ struct TextLine
 typedef std::list<struct TextLine> t_TextLines;
 typedef t_TextLines::iterator i_TextLines;
 
+struct TextPointMarker
+{
+    bool Valid;
+    int X;      // The marker left pos (in chars)
+    int Y;      // The marker top pos (in lines)
+    struct TextPointMarker *Prev;
+    struct TextPointMarker *Next;
+};
+
 struct DTPoint
 {
     i_TextLines Line;               // The line in 'Lines'
+    int LineY;                      // The number of lines from the start of the buffer (where 'Line' lives)
     i_TextLineFrags Frag;           // The frag in 'Line'
     int_fast32_t StrPos;            // The offset into 'Frag' string
 };
@@ -156,6 +171,16 @@ class DisplayText : public DisplayBase
         void ApplyBGColor2Selection(uint32_t RGB);
         bool IsAttribSetInSelection(uint32_t Attribs);
 
+        t_DataProMark *AllocateMark(void);
+        void FreeMark(t_DataProMark *Mark);
+        bool IsMarkValid(t_DataProMark *Mark);
+        void SetMark2CursorPos(t_DataProMark *Mark);
+        void ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,uint32_t Len);
+        void RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,uint32_t Len);
+        void ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,uint32_t Offset,uint32_t Len);
+        void ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,uint32_t Offset,uint32_t Len);
+        void MoveMark(t_DataProMark *Mark,int Amount);
+
         void SetBlockDeviceMode(bool On);
 
     private:
@@ -213,12 +238,13 @@ class DisplayText : public DisplayBase
         int Selection_AnchorX;      // The selection end left pos (in chars)
         int Selection_AnchorY;      // The selection end top pos (in lines)
 
+        /* Markers */
+        struct TextPointMarker *MarkerList;
+
         bool DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event);
         void DoScrollTimerTimeout(void);
         void RedrawActiveLine(void);
-        bool RethinkInsertFrag(void);
         void AppendChar(uint8_t *Chr);
-        i_TextLineFrags AddNewEmptyFragToLine(struct TextLine *Line,i_TextLineFrags InsertPoint);
         void DoOverwriteInsertPos(uint8_t *Chr);
         void PadOutCurrentLine2Cursor(void);
         void PadOutLine(struct TextLine *Line,int Pos);
@@ -233,11 +259,7 @@ class DisplayText : public DisplayBase
         int GetLineEndSize(struct TextLine *Line);
         int DrawLine(int LineY,int ScreenLine,struct TextLine *Line);
 
-        void RethinkFragWidth(i_TextLineFrags Frag);
         void HandleDeletingNPAfterOverwrite(void);
-
-        i_TextLineFrags AddSpecialFrag(struct TextLineFrag &SpecialFrag);
-        i_TextLineFrags InsertSpecialFragInMiddleOfString(struct TextLineFrag &SpecialFrag);
 
         void RethinkCursorHidden(void);
         int CalcCorrectedCursorPos(void);
@@ -267,6 +289,11 @@ class DisplayText : public DisplayBase
         void GetNormalizedSelection(int &X1,int &Y1,int &X2,int &Y2);
         bool FindPointsOfSelection(struct DTPoint &Start,struct DTPoint &End);
 
+        /* Points (X,Y stuff) */
+        bool FindPoint(int PX,int PY,struct DTPoint &Pos,i_TextLines HintLine,int HintStartY);
+        void FindPointHelper_FindDelta(int PY,i_TextLines StartLine,int StartingY,unsigned int *LastMinDelta,i_TextLines *RetStartLine,int *RetStartingY);
+        void AdvancePoint(int &PX,int &PY,int Amount,int MinX,int MinY,int MaxX,int MaxY);
+
         /* Line handling */
         bool IsLineBlank(i_TextLines Line);
         bool TextLine_FindFragAndPos(i_TextLines Line,int_fast32_t Offset,i_TextLineFrags *FoundFrag,int_fast32_t *FoundPos);
@@ -275,10 +302,19 @@ class DisplayText : public DisplayBase
         void TextLine_Insert(i_TextLines Line,int_fast32_t Offset,const struct CharStyling *Style,const char *Str);
         void TextLine_Fill(i_TextLines Line,int_fast32_t Offset,uint_fast32_t Count,const struct CharStyling *Style,const char *Chr);
         void TextLine_Clear(i_TextLines Line);
+        int TextLine_FindLineLen(i_TextLines Line);
 
         /* Frag handling */
         void TxtFrag_SplitFrag(i_TextLines Line,i_TextLineFrags Frag,int_fast32_t StrPos,bool SplitEvenIfResultEmpty,i_TextLineFrags *Frag1,i_TextLineFrags *Frag2);
         i_TextLineFrags FindLastTextFragOnLine(const i_TextLines &Line);
+        i_TextLineFrags AddSpecialFrag(struct TextLineFrag &SpecialFrag);
+        i_TextLineFrags InsertSpecialFragInMiddleOfString(struct TextLineFrag &SpecialFrag);
+        void RethinkFragWidth(i_TextLineFrags Frag);
+        bool RethinkInsertFrag(void);
+        i_TextLineFrags AddNewEmptyFragToLine(struct TextLine *Line,i_TextLineFrags InsertPoint);
+
+        /* Blocks */
+        void ChangeAttribsBetweenPoints(int P1X,int P1Y,int P2X,int P2Y,uint32_t Attribs,uint32_t FGColor,uint32_t BGColor,uint32_t ULineColor,uint32_t What);
 
         /* Send panel */
         t_UITextInputCtrl *GetSendPanel_HexPosInput(void);
@@ -287,6 +323,11 @@ class DisplayText : public DisplayBase
         t_UIMuliLineTextInputCtrl *GetSendPanel_TextInput(void);
         t_UIComboBoxCtrl *GetSendPanel_LineEndInput(void);
         void SendPanel_ShowHexOrText(bool Text);
+
+        /* Markers */
+        void InvalidateAllMarks(void);
+        void InvalidateOutOfRangeMarks(void);
+        void DoApplyToMark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,uint32_t Len,uint32_t What);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

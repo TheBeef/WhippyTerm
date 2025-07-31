@@ -36,6 +36,8 @@
 #include <stdint.h>
 
 /***  DEFINES                          ***/
+/* Hidden attribs */
+#define TXT_ATTRIB_FORCE                    0x8000 // Ignore the user settings and apply all the attributes.
 
 /***  MACROS                           ***/
 

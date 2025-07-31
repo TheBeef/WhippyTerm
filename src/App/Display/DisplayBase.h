@@ -178,6 +178,15 @@ class DisplayBase
         virtual void ApplyBGColor2Selection(uint32_t RGB);
         virtual bool IsAttribSetInSelection(uint32_t Attribs);
         virtual uint8_t *GetSelectionRAW(unsigned int *Bytes);
+        virtual t_DataProMark *AllocateMark(void);
+        virtual void FreeMark(t_DataProMark *Mark);
+        virtual bool IsMarkValid(t_DataProMark *Mark);
+        virtual void SetMark2CursorPos(t_DataProMark *Mark);
+        virtual void ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,uint32_t Len);
+        virtual void RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,uint32_t Len);
+        virtual void ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,uint32_t Offset,uint32_t Len);
+        virtual void ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,uint32_t Offset,uint32_t Len);
+        virtual void MoveMark(t_DataProMark *Mark,int Amount);
 
         void SetCustomSettings(class ConSettings *NewSettingsPtr);
         class ConSettings *GetCustomSettings(void);

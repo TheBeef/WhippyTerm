@@ -4229,6 +4229,7 @@ void TheMainWindow::ChangeStyleBGColorSelectedColor(e_SysColType Color,
 
     CurrentBGStyleColor=Color;
     CurrentBGStyleShade=Shade;
+    ApplyBGColor2Selection();
 }
 
 /*******************************************************************************

@@ -36,7 +36,7 @@
       <item>
        <widget class="QStackedWidget" name="Editing_stackedWidget">
         <property name="currentIndex">
-         <number>3</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="page_Panel">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -12640,7 +12640,7 @@
           <item>
            <widget class="QTabWidget" name="Terminal_tabWidget">
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="Terminal_tab">
              <attribute name="title">
@@ -12946,7 +12946,7 @@ p, li { white-space: pre-wrap; }
                  <enum>QFrame::Plain</enum>
                 </property>
                 <property name="currentIndex">
-                 <number>1</number>
+                 <number>0</number>
                 </property>
                 <widget class="QWidget" name="TextProcessingSettings_page">
                  <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -12971,7 +12971,7 @@ p, li { white-space: pre-wrap; }
                      <item>
                       <widget class="QGroupBox" name="groupBox_10">
                        <property name="title">
-                        <string>Charactor Encoding</string>
+                        <string>Character Encoding</string>
                        </property>
                        <layout class="QHBoxLayout" name="horizontalLayout_13">
                         <property name="leftMargin">

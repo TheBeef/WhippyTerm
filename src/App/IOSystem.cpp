@@ -125,6 +125,7 @@ struct CWD_WidgetData
     struct PI_Indicator *Indicator;
     struct PI_TextBox *TextBox;
     struct PI_GroupBox *GroupBox;
+    struct PI_ColorPick *ColorPick;
     struct ConnectionOptionsData *Owner;
     void *UserData;
     void (*EventCB)(const struct PICBEvent *Event,void *UserData);
@@ -235,6 +236,12 @@ static struct PI_TextBox *IOS_AddTextBox(t_WidgetSysHandle *WidgetHandle,const c
 static void IOS_FreeTextBox(t_WidgetSysHandle *WidgetHandle,struct PI_TextBox *BoxHandle);
 static struct PI_GroupBox *IOS_AddGroupBox(t_WidgetSysHandle *WidgetHandle,const char *Label);
 static void IOS_FreeGroupBox(t_WidgetSysHandle *WidgetHandle,struct PI_GroupBox *BoxHandle);
+static struct PI_ColorPick *IOS_AddColorPick(t_WidgetSysHandle *WidgetHandle,
+        const char *Label,uint32_t RGB,
+        void (*EventCB)(const struct PIColorPickEvent *Event,void *UserData),
+        void *UserData);
+static void IOS_FreeColorPick(t_WidgetSysHandle *WidgetHandle,
+        struct PI_ColorPick *Handle);
 
 /*** VARIABLE DEFINITIONS     ***/
 const struct IOS_API g_IOS_API=
@@ -310,10 +317,11 @@ static struct PI_UIAPI IOS_UIAPI=
     IOS_AddGroupBox,
     IOS_FreeGroupBox,
     PIUSDefault_SetGroupBoxLabel,
-//    struct PI_ColorPick *(*AddColorPick)(t_WidgetSysHandle *WidgetHandle,const char *Label,uint32_t RGB,void (*EventCB)(const struct PIColorPickEvent *Event,void *UserData),void *UserData);
-//    void (*FreeColorPick)(t_WidgetSysHandle *WidgetHandle,struct PI_ColorPick *Handle);
-//    uint32_t (*GetColorPickValue)(t_WidgetSysHandle *WidgetHandle,t_PIUIColorPickCtrl *UICtrl);
-//    void (*SetColorPickValue)(t_WidgetSysHandle *WidgetHandle,t_PIUIColorPickCtrl *UICtrl,uint32_t RGB);
+
+    IOS_AddColorPick,
+    IOS_FreeColorPick,
+    PIUSDefault_GetColorPickValue,
+    PIUSDefault_SetColorPickValue,
 };
 
 bool m_NeverScanned4Connections;
@@ -5351,4 +5359,124 @@ void IOS_FreeGroupBox(t_WidgetSysHandle *WidgetHandle,
     }
 
     UIPI_FreeGroupBox(BoxHandle);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_AddColorPick
+ *
+ * SYNOPSIS:
+ *    struct PI_ColorPick *IOS_AddColorPick(t_WidgetSysHandle *WidgetHandle,
+ *          const char *Label,uint32_t RGB,
+ *          void (*EventCB)(const struct PIColorPickEvent *Event,void *UserData),
+ *          void *UserData)
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Label [I] -- The label text for this color picker.
+ *    RGB [I] -- The RGB value to set the widget to at the start
+ *    EventCB [I] -- The event callback when the user changes picker color.
+ *                   This can be NULL
+ *    Event [I] -- The color picker event
+ *    UserData [I] -- The user data that will be sent back into event callback.
+ *
+ * FUNCTION:
+ *    This is a version of add a color picker widget for the IO system.
+ *
+ * RETURNS:
+ *    A handle to the color picker.
+ *
+ * SEE ALSO:
+ *    IOS_FreeColorPick(), PIUSDefault_GetColorPickValue(),
+ *    PIUSDefault_SetColorPickValue()
+ ******************************************************************************/
+struct PI_ColorPick *IOS_AddColorPick(t_WidgetSysHandle *WidgetHandle,
+        const char *Label,uint32_t RGB,
+        void (*EventCB)(const struct PIColorPickEvent *Event,void *UserData),
+        void *UserData)
+{
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct PI_ColorPick *NewColorPick;
+
+    NewColorPick=NULL;
+    ExtraData=NULL;
+    try
+    {
+        ExtraData=(struct CWD_WidgetData *)
+                malloc(sizeof(struct CWD_WidgetData));
+        memset(ExtraData,0x00,sizeof(struct CWD_WidgetData));
+        ExtraData->Owner=ConWidgetData->COD;
+
+        NewColorPick=UIPI_AddColorPickInput(ConWidgetData->ContainerWidget,
+                Label,RGB,EventCB,UserData);
+        if(NewColorPick==NULL)
+            throw(0);
+        ExtraData->ColorPick=NewColorPick;
+
+        /* Link in */
+        ExtraData->Next=ConWidgetData->COD->WidgetExtraData;
+        ConWidgetData->COD->WidgetExtraData=ExtraData;
+    }
+    catch(...)
+    {
+        if(NewColorPick!=NULL)
+            UIPI_FreeColorPickInput(NewColorPick);
+        if(ExtraData==NULL)
+            free(ExtraData);
+        NewColorPick=NULL;
+    }
+    return NewColorPick;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_FreeColorPick
+ *
+ * SYNOPSIS:
+ *    void IOS_FreeColorPick(t_WidgetSysHandle *WidgetHandle,
+ *              struct PI_ColorPick *Handle)
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Handle [I] -- The handle to the widget to free.  Allocated with
+ *                     PIUSDefault_AddColorPick()
+ *
+ * FUNCTION:
+ *    This function frees the widget allocated with PIUSDefault_AddGroupBox()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    IOS_AddColorPick()
+ ******************************************************************************/
+void IOS_FreeColorPick(t_WidgetSysHandle *WidgetHandle,
+        struct PI_ColorPick *Handle)
+{
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct CWD_WidgetData *PrevExtraData;
+
+    /* Find and unlink (and free) this color picker */
+    PrevExtraData=NULL;
+    for(ExtraData=ConWidgetData->COD->WidgetExtraData;ExtraData!=NULL;
+            ExtraData=ExtraData->Next)
+    {
+        if(ExtraData->ColorPick==Handle)
+        {
+            /* Found it, unlink and free */
+            if(PrevExtraData==NULL)
+                ConWidgetData->COD->WidgetExtraData=ExtraData->Next;
+            else
+                PrevExtraData->Next=ExtraData->Next;
+
+            free(ExtraData);
+
+            break;
+        }
+        PrevExtraData=ExtraData;
+    }
+
+    UIPI_FreeColorPickInput(Handle);
 }

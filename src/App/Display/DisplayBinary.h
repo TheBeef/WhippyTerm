@@ -44,9 +44,35 @@
 /***  MACROS                           ***/
 
 /***  TYPE DEFINITIONS                 ***/
-struct DisBin_SelectionBlock;
+struct DisBin_Block;
+struct DisBin_PointPair;
+struct BinaryPointMarker;
 
 /***  CLASS DEFINITIONS                ***/
+/*
+
+ Wrapped buffer (at 50%)
+ +-------------------+  <- HexBuffer (ColorBuffer)                          Alloced memory
+ |                   |
+ |                   |
+ |                   |
+ |-------------------|  <- BottomOfBufferLine (ColorBottomOfBufferLine)     Insert Point
+ |                   |
+ |                   |
+ |                   |
+ |-------------------|  <- TopOfBufferLine (ColorTopOfBufferLine)           Oldest data
+ |                   |
+ |                   |
+ |                   |
+ |                   |
+ |                   |
+ |-------------------|  <- TopLine (ColorTopLine)                           Display Window Top
+ |                   |
+ +-------------------+
+                        <- EndOfHexBuffer
+
+*/
+
 class DisplayBinary : public DisplayBase
 {
     friend bool DisplayBinary_EventHandlerCB(const struct TextDisplayEvent *Event);
@@ -76,6 +102,16 @@ class DisplayBinary : public DisplayBase
         void ApplyBGColor2Selection(uint32_t RGB);
         bool IsAttribSetInSelection(uint32_t Attribs);
         uint8_t *GetSelectionRAW(unsigned int *Bytes);
+
+        t_DataProMark *AllocateMark(void);
+        void FreeMark(t_DataProMark *Mark);
+        bool IsMarkValid(t_DataProMark *Mark);
+        void SetMark2CursorPos(t_DataProMark *Mark);
+        void ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,uint32_t Len);
+        void RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,uint32_t Len);
+        void ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,uint32_t Offset,uint32_t Len);
+        void ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,uint32_t Offset,uint32_t Len);
+        void MoveMark(t_DataProMark *Mark,int Amount);
 
     private:
         bool InitCalled;
@@ -114,6 +150,10 @@ class DisplayBinary : public DisplayBase
         int AutoSelectionScrolldx;
         int AutoSelectionScrolldy;
 
+        /* Markers */
+        struct BinaryPointMarker *MarkerList;
+
+        /* Big list that hasn't been grouped (was before started grouping) */
         bool DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event);
         void RedrawCurrentLine(void);
         void ScreenResize(void);
@@ -122,16 +162,13 @@ class DisplayBinary : public DisplayBase
         void RethinkYScrollBar(void);
         void RethinkWindowSize(void);
         void RedrawScreen(void);
-        void DrawLine(const uint8_t *Line,const struct CharStyling *ColorLine,
-                int ScreenLine,unsigned int Bytes);
+        void DrawLine(const uint8_t *Line,const struct CharStyling *ColorLine,int ScreenLine,unsigned int Bytes);
         bool ScrollBarAtBottom(void);
         void RethinkCursor(void);
-        bool ConvertScreenXY2BufferLinePtr(int x,int y,uint8_t **Ptr,int *Offset,bool *InAscII);
         void HandleLeftMousePress(bool Down,int x,int y);
         void HandleMouseMove(int x,int y);
         void DoScrollTimerTimeout(void);
         void ScrollScreen(int dxpx,int dy);
-        bool GetNormalizedSelectionBlocks(struct DisBin_SelectionBlock *Blocks);
         void BuildSelOutputAndAppendData(std::string &Dest,const uint8_t *Src,int Bytes,bool AscII);
         bool DoHexInputEvent(const struct HDEvent *Event);
         t_UITextInputCtrl *GetSendPanel_HexPosInput(void);
@@ -141,8 +178,22 @@ class DisplayBinary : public DisplayBase
         t_UIComboBoxCtrl *GetSendPanel_LineEndInput(void);
         void SendPanel_ShowHexOrText(bool Text);
         struct CharStyling *GetColorPtrFromLinePtr(const uint8_t *Line);
-        void FillAttrib(struct DisBin_SelectionBlock *SelBlock,uint32_t Attribs,bool Set);
-        bool CheckIfAttribSet(struct DisBin_SelectionBlock *SelBlock,uint32_t Attribs);
+        void FillAttrib(struct DisBin_Block *SelBlock,uint32_t Attribs,bool Set);
+        bool CheckIfAttribSet(struct DisBin_Block *SelBlock,uint32_t Attribs);
+
+        /* Selection */
+        bool GetNormalizedSelectionBlocks(struct DisBin_Block *Blocks);
+
+        /* Marks */
+        void InvalidateMarksOnScroll(void);
+        void InvalidateAllMarks(void);
+
+        /* Points */
+        bool ConvertScreenXY2BufferLinePtr(int x,int y,uint8_t **Ptr,int *Offset,bool *InAscII);
+        void GetNormalizedPoints(struct DisBin_PointPair *P1,struct DisBin_PointPair *P2,struct DisBin_Block *Blocks);
+        uint32_t ConvertPoint2Offset(struct DisBin_PointPair *Point);
+        void ConvertOffset2Point(uint32_t Offset,struct DisBin_PointPair *Point);
+        void AdvancePoint(struct DisBin_PointPair *Point,int Amount);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

@@ -71,5 +71,14 @@ uint32_t Con_GetSysColor(e_SysColShadeType SysColShade,e_SysColType SysColor);
 uint32_t Con_GetSysDefaultColor(e_DefaultColorsType DefaultColor);
 void Con_DoBell(bool VisualOnly);
 void Con_SetTitle(const char *Title);
+t_DataProMark *Con_AllocateMark(void);
+void Con_FreeMark(t_DataProMark *Mark);
+bool Con_IsMarkValid(t_DataProMark *Mark);
+void Con_SetMark2CursorPos(t_DataProMark *Mark);
+void Con_ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,uint32_t Len);
+void Con_RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,uint32_t Len);
+void Con_ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,uint32_t Offset,uint32_t Len);
+void Con_ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,uint32_t Offset,uint32_t Len);
+void Con_MoveMark(t_DataProMark *Mark,int Amount);
 
 #endif

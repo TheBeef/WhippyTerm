@@ -1811,3 +1811,249 @@ uint8_t *DisplayBase::GetSelectionRAW(unsigned int *Bytes)
 {
     return NULL;
 }
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::AllocateMark
+ *
+ * SYNOPSIS:
+ *    t_DataProMark *DisplayBase::AllocateMark(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function allocates a mark for this display.  A mark is a point in
+ *    the display that we are currently adding chars to.  This mark is
+ *    used to reference this insert point again in the future.  The mark
+ *    can become invalid if the insert point goes away.  The mark remains
+ *    allocated and can be used but will not do anything.
+ *
+ *    The display keeps a list of all the marks that have been allocated.
+ *    This is so it can go through the list and invalid any that become
+ *    invalid because of a change to the display.
+ *
+ * RETURNS:
+ *    A pointer to the mark.
+ *
+ * SEE ALSO:
+ *    DPS_AllocateMark()
+ ******************************************************************************/
+t_DataProMark *DisplayBase::AllocateMark(void)
+{
+    return NULL;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::FreeMark
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::FreeMark(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to free
+ *
+ * FUNCTION:
+ *    This function frees a mark that was allocated with AllocateMark()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::FreeMark(t_DataProMark *Mark)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::IsMarkValid
+ *
+ * SYNOPSIS:
+ *    bool DisplayBase::IsMarkValid(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *
+ * FUNCTION:
+ *    This function checks if a marker is valid or not.
+ *
+ * RETURNS:
+ *    true -- Mark is still valid
+ *    false -- Mark is invalid
+ *
+ * SEE ALSO:
+ *    DPS_IsMarkValid()
+ ******************************************************************************/
+bool DisplayBase::IsMarkValid(t_DataProMark *Mark)
+{
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetMark2CursorPos
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetMark2CursorPos(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *
+ * FUNCTION:
+ *    This function will take a mark and move it to the current cursor position.
+ *    It will also set this mark to valid.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_SetMark2CursorPos()
+ ******************************************************************************/
+void DisplayBase::SetMark2CursorPos(t_DataProMark *Mark)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::ApplyAttrib2Mark
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Attrib [I] -- The new attrib(s) to set
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the attribs.
+ *    Len [I] -- The number of chars to apply these new attributes to.
+ *
+ * FUNCTION:
+ *    This function does the DPS_ApplyAttrib2Mark() function to the a display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_ApplyAttrib2Mark()
+ ******************************************************************************/
+void DisplayBase::ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,
+        uint32_t Offset,uint32_t Len)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::RemoveAttribFromMark
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,
+ *          uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Attrib [I] -- The new attrib(s) to clear
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to remove the attribs.
+ *    Len [I] -- The number of chars to remove these new attributes from.
+ *
+ * FUNCTION:
+ *    This function does the DPS_RemoveAttribFromMark() function to the active
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_RemoveAttribFromMark()
+ ******************************************************************************/
+void DisplayBase::RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,
+        uint32_t Offset,uint32_t Len)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::ApplyFGColor2Mark
+ *
+ * SYNOPSIS:
+ *    void DPS_ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    FGColor [I] -- The colors to apply
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the color.
+ *    Len [I] -- The number of chars to apply this color to
+ *
+ * FUNCTION:
+ *    This function does the DPS_ApplyFGColor2Mark() function to the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_ApplyFGColor2Mark()
+ ******************************************************************************/
+void DisplayBase::ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,
+        uint32_t Offset,uint32_t Len)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::ApplyBGColor2Mark
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    BGColor [I] -- The colors to apply
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the color.
+ *    Len [I] -- The number of chars to apply this color to
+ *
+ * FUNCTION:
+ *    This function does the DPS_ApplyBGColor2Mark() function to the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_ApplyBGColor2Mark()
+ ******************************************************************************/
+void DisplayBase::ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,
+        uint32_t Offset,uint32_t Len)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::MoveMark
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::MoveMark(t_DataProMark *Mark,int Amount);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Amount [I] -- How much to move the mark by (plus for toward the cursor,
+ *                  neg to move toward the start of the buffer).
+ *
+ * FUNCTION:
+ *    This function does the DPS_MoveMark() function to the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_MoveMark()
+ ******************************************************************************/
+void DisplayBase::MoveMark(t_DataProMark *Mark,int Amount)
+{
+}

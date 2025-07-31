@@ -70,8 +70,8 @@ struct DataProcessorAPI m_URLHighlighterCBs=
 struct DataProcessorInfo m_URLHighlighter_Info=
 {
     "URL Highlighter",
-    "Underlines URL's starting with http://",
-    "Underlines URL's starting with http://",
+    "Underlines URL's starting with http:// or https://",
+    "Underlines URL's starting with http:// or https://",
     e_DataProcessorType_Text,
     e_TextDataProcessorClass_Highlighter
 };
@@ -296,17 +296,6 @@ void URLHighlighter_ProcessByte(t_DataProcessorHandleType *DataHandle,
     unsigned int r;
     unsigned int SearchStrLen;
     uint16_t Attribs;
-
-    /* DEBUG PAUL: This really doesn't work.  This is because this processor
-       really needs to work on chars, however control chars are being striped
-       (as they should).  So this processor wants to work on chars, but also
-       wants to work on char chars.
-       In the case of a processor that takes chars that might also include
-       control chars (UTF16 maybe?) we need to ignore them when they aren't
-       control chars but handle them when they are.... Don't know how....
-        */
-//    if(*Consumed)
-//        return;
 
     if(Data->DoingHighlight)
     {

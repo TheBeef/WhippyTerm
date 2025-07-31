@@ -45,6 +45,8 @@
 using namespace std;
 
 /*** DEFINES                  ***/
+//#define DEBUG_SHOW_BUFFER_POS               1       // Show the pointers to parts of the screen (only some)
+
 #define CHARS_IN_A_TAB                          8
 #define SELECTION_SCROLL_SPEED_TIMER            50 // ms
 
@@ -118,6 +120,7 @@ void DisplayText_ScrollTimer_Timeout(uintptr_t UserData)
 DisplayText::DisplayText()
 {
     TextDisplayCtrl=NULL;
+    MarkerList=NULL;
 
     InitCalled=false;
 
@@ -153,10 +156,20 @@ DisplayText::DisplayText()
 
 DisplayText::~DisplayText()
 {
+    struct TextPointMarker *Marker;
+
     FreeHexInput();
 
     if(ScrollTimer!=NULL)
         FreeUITimer(ScrollTimer);
+
+    /* Free the marker list */
+    while(MarkerList!=NULL)
+    {
+        Marker=MarkerList->Next;
+        delete MarkerList;
+        MarkerList=Marker;
+    }
 
     if(TextDisplayCtrl!=NULL)
     {
@@ -807,7 +820,10 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
     uint32_t SavedBGColor;
     uint32_t SavedAttribs;
     string::iterator StartOfStr;
-
+#ifdef DEBUG_SHOW_BUFFER_POS
+    int DebugX=0;
+    string TmpStr;
+#endif
     FragSelected=false;
 
     /* We use -1 and INT_MAX as our no selection so we can just use a
@@ -897,6 +913,32 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
         DisplayFrag.Data=CurFrag->Data;
         CharsLeft=utf8::unchecked::distance(CurFrag->Text.begin(),
                 CurFrag->Text.end());
+
+#ifdef DEBUG_SHOW_BUFFER_POS
+        {
+            struct TextPointMarker *Marker;
+
+            /* Show markers */
+            for(Marker=MarkerList;Marker!=NULL;Marker=Marker->Next)
+            {
+                if(Marker->Valid)
+                {
+                    if(LineY==Marker->Y)
+                    {
+                        if(Marker->X>=DebugX &&
+                                Marker->X<=DebugX+(int)CurFrag->Text.length())
+                        {
+                            /* Marker in this frag */
+                            TmpStr=CurFrag->Text;
+                            TmpStr[Marker->X-DebugX]='$';
+                            DisplayFrag.Text=TmpStr.c_str();
+                        }
+                    }
+                }
+            }
+            DebugX+=CurFrag->Text.length();
+        }
+#endif
 
         if(FragIndex==SelectFrag1)
         {
@@ -1591,6 +1633,8 @@ void DisplayText::SetCursorXY(unsigned int x,unsigned y)
         ActiveLine->EOL=e_DTEOL_Hard;
 
     MoveCursor(x,y,false);
+
+    InvalidateAllMarks();
 }
 
 /*******************************************************************************
@@ -2473,6 +2517,8 @@ void DisplayText::AddReverseTab(void)
     NewPos=CursorX-Amount;
 
     MoveCursor(NewPos,CursorY,false);
+
+    InvalidateAllMarks();
 }
 
 /*******************************************************************************
@@ -2653,6 +2699,9 @@ void DisplayText::RethinkWindowSize(void)
 
         UITC_SetClippingWindow(TextDisplayCtrl,LeftEdge,TopEdge,Width,Height);
     }
+
+    /* We need to invalidate any markers that are off the top of the screen */
+    InvalidateOutOfRangeMarks();
 
     if(RedrawNeeded)
     {
@@ -2880,6 +2929,7 @@ void DisplayText::DoBackspace(void)
     }
 
     MoveCursor(NewPos,NewCursorY,false);
+    InvalidateAllMarks();
 }
 
 /*******************************************************************************
@@ -3017,6 +3067,7 @@ void DisplayText::ScrollScreenByXLines(int Lines2Scroll)
     int y;
     int TotalLinesBeforeAdjust;
     int LinesScrolled;
+    struct TextPointMarker *Marker;
 
     try
     {
@@ -3053,6 +3104,38 @@ void DisplayText::ScrollScreenByXLines(int Lines2Scroll)
                    up */
                 TopLineY--;
 
+                /* Adjust the selection (if there is one) */
+                if(SelectionActive)
+                {
+                    if(Selection_Y!=Selection_AnchorY ||
+                            Selection_X!=Selection_AnchorX)
+                    {
+                        /* Ok, we have a valid selection, adjust it */
+                        Selection_Y--;
+                        Selection_AnchorY--;
+                        if(Selection_Y<0 && Selection_AnchorY<0)
+                        {
+                            /* Ok, we are killing the selection */
+                            SelectionActive=false;
+                        }
+                        if(Selection_Y<0)
+                            Selection_Y=0;
+                        if(Selection_AnchorY<0)
+                            Selection_AnchorY=0;
+                    }
+                }
+
+                /* Adjust all the markers */
+                for(Marker=MarkerList;Marker!=NULL;Marker=Marker->Next)
+                {
+                    if(Marker->Valid)
+                    {
+                        Marker->Y--;
+                        if(Marker->Y<0)
+                            Marker->Y=0;
+                    }
+                }
+
                 Lines.pop_front();
                 LinesCount--;
             }
@@ -3080,6 +3163,8 @@ void DisplayText::ScrollScreenByXLines(int Lines2Scroll)
                scroll bars */
             RethinkScrollBars();
         }
+
+        InvalidateOutOfRangeMarks();
     }
     catch(...)
     {
@@ -3497,13 +3582,26 @@ bool DisplayText::GetSelectionString(std::string &Clip)
     }
     else
     {
-        /* Take from Start to the end of frag */
-        Clip.assign(Start.Frag->Text,Start.StrPos,string::npos);
-
-        /* Now copy all the frag from here to end frag */
         CurLine=Start.Line;
         CurFrag=Start.Frag;
-        CurFrag++;
+
+        /* Take from Start to the end of frag */
+        if(Start.Frag!=Start.Line->Frags.end())
+        {
+            Clip.assign(Start.Frag->Text,Start.StrPos,string::npos);
+            CurFrag++;
+        }
+        else
+        {
+            /* The selection was past the end of the line (or it was a
+               blank line) so we add a blank line and then continue the
+               copy. */
+            Clip="\n";
+            CurLine++;  // Move to the end line
+            CurFrag=CurLine->Frags.begin(); // And the first fragment
+        }
+
+        /* Now copy all the frag from here to end frag */
         while(CurFrag!=End.Frag)
         {
             if(CurFrag==CurLine->Frags.end())
@@ -4209,6 +4307,9 @@ void DisplayText::ClearScreen(e_ScreenClearType Type)
         /* Now we have to move the cursor to the top/left */
         SetCursorXY(0,0);
 
+        /* Mark all markers as invalid */
+        InvalidateAllMarks();
+
         RedrawFullScreen();
     }
     catch(...)
@@ -4313,6 +4414,7 @@ void DisplayText::InsertHorizontalRule(void)
         NewCursorY=CursorY;
         MoveToNextLine(NewCursorY);
         MoveCursor(0,NewCursorY,false);
+        InvalidateAllMarks();
     }
     catch(...)
     {
@@ -5119,7 +5221,6 @@ void DisplayText::ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,
  *    bool DisplayText::TextLine_FindFragAndPos(i_TextLines Line,
  *              int_fast32_t Offset,i_TextLineFrags *FoundFrag,
  *              int_fast32_t *FoundPos);
-
  *
  * PARAMETERS:
  *    Line [I] -- The line to search
@@ -5636,6 +5737,49 @@ void DisplayText::TextLine_Clear(i_TextLines Line)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayText::TextLine_FindLineLen
+ *
+ * SYNOPSIS:
+ *    int DisplayText::TextLine_FindLineLen(i_TextLines Line);
+ *
+ * PARAMETERS:
+ *    Line [I] -- The line to work on
+ *
+ * FUNCTION:
+ *    This function counts all the chars (not bytes) on a line in all the
+ *    frags on the line.
+ *
+ * RETURNS:
+ *    The number of chars on this line.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+int DisplayText::TextLine_FindLineLen(i_TextLines Line)
+{
+    i_TextLineFrags CurFrag;
+    int Chars;
+    int TotalChars;
+
+    TotalChars=0;
+
+    /* We need to walk all the frags */
+    for(CurFrag=Line->Frags.begin();CurFrag!=Line->Frags.end();CurFrag++)
+    {
+        if(CurFrag->FragType==e_TextCanvasFrag_String)
+        {
+            Chars=utf8::unchecked::distance(CurFrag->Text.begin(),
+                    CurFrag->Text.end());
+
+            TotalChars+=Chars;
+        }
+    }
+
+    return TotalChars;
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayText::ShowBell
  *
  * SYNOPSIS:
@@ -5812,18 +5956,31 @@ void DisplayText::SendPanel_ShowHexOrText(bool Text)
 
 /*******************************************************************************
  * NAME:
- *    DisplayText::ToggleAttribs2Selection
+ *    DisplayText::ChangeAttribsBetweenPoints
  *
  * SYNOPSIS:
- *    void DisplayText::ToggleAttribs2Selection(uint32_t Attribs);
+ *    void DisplayText::ChangeAttribsBetweenPoints(int P1X,int P1Y,int P2X,
+ *      int P2Y,uint32_t Attribs,uint32_t FGColor,uint32_t BGColor,
+ *      uint32_t ULineColor,uint32_t What);
  *
  * PARAMETERS:
- *    Attribs [I] -- The TXT_ATTRIB_ attribs to toggle.
+ *    P1X [I] -- The X pos of the first point
+ *    P1Y [I] -- The Y pos of the first point
+ *    P2X [I] -- The X pos of the second point (this must come after P1X,P1Y)
+ *    P2Y [I] -- The Y pos of the second point (this must come after P1X,P1Y)
+ *    Attribs [I] -- What attribs to clear/set for this block
+ *    FGColor [I] -- The foreground color to set
+ *    BGColor [I] -- The background color to set
+ *    ULineColor [I] -- The under line color to use
+ *    What [I] -- What are we changing.  Supported values:
+ *                  DTXT_APPLY_SET_ATTRIB -- Set 'Attribs'
+ *                  DTXT_APPLY_CLR_ATTRIB -- Clear 'Attribs'
+ *                  DTXT_APPLY_FOREGROUND -- Set 'FGColor'
+ *                  DTXT_APPLY_BACKGROUND -- Set 'BGColor'
+ *                  DTXT_APPLY_ULINE_COLOR -- Set 'ULineColor'
  *
  * FUNCTION:
- *    This function takes the current selection and check if any of the
- *    selected bytes has these attribs turned on.  If they do it removes that
- *    attrib, if not it turns the attribs on.
+ *    This function sets or clears the attributes/colors between to points.
  *
  * RETURNS:
  *    NONE
@@ -5831,7 +5988,9 @@ void DisplayText::SendPanel_ShowHexOrText(bool Text)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void DisplayText::ToggleAttribs2Selection(uint32_t Attribs)
+void DisplayText::ChangeAttribsBetweenPoints(int P1X,int P1Y,int P2X,int P2Y,
+        uint32_t Attribs,uint32_t FGColor,uint32_t BGColor,uint32_t ULineColor,
+        uint32_t What)
 {
     struct DTPoint Start;
     struct DTPoint End;
@@ -5842,42 +6001,43 @@ void DisplayText::ToggleAttribs2Selection(uint32_t Attribs)
     i_TextLineFrags FirstFrag;
     i_TextLineFrags LastFrag;
     i_TextLineFrags StopFrag;
-    bool Setting;
-    int SelX1;
-    int SelY1;
-    int SelX2;
-    int SelY2;
 
-    if(!FindPointsOfSelection(Start,End))
+    if(!FindPoint(P1X,P1Y,Start,Lines.end(),0))
         return;
 
-    Setting=true;
-    if(IsAttribSetInSelection(Attribs))
-        Setting=false;
-
-    GetNormalizedSelection(SelX1,SelY1,SelX2,SelY2);
+    if(!FindPoint(P2X,P2Y,End,Start.Line,Start.LineY))
+        return;
 
     if(Start.Line==End.Line && Start.Frag==End.Frag)
     {
         /* On the same line and frag */
 
         /* Split the frags */
-        TextLine_SplitFrag(Start.Line,SelX1,false,NULL,NULL);
-        TextLine_SplitFrag(End.Line,SelX2,false,&LastFrag,NULL);
+        TextLine_SplitFrag(Start.Line,P1X,false,NULL,NULL);
+        TextLine_SplitFrag(End.Line,P2X,false,&LastFrag,NULL);
 
-        if(Setting)
+        if(What&DTXT_APPLY_SET_ATTRIB)
+        {
             LastFrag->Styling.Attribs|=Attribs;
-        else
+            /* Make sure to also set the uline color */
+            LastFrag->Styling.ULineColor=LastFrag->Styling.FGColor;
+        }
+        if(What&DTXT_APPLY_CLR_ATTRIB)
             LastFrag->Styling.Attribs&=~Attribs;
-        LastFrag->Styling.ULineColor=LastFrag->Styling.FGColor;
+        if(What&DTXT_APPLY_FOREGROUND)
+            LastFrag->Styling.FGColor=FGColor;
+        if(What&DTXT_APPLY_BACKGROUND)
+            LastFrag->Styling.BGColor=BGColor;
+        if(What&DTXT_APPLY_ULINE_COLOR)
+            LastFrag->Styling.ULineColor=ULineColor;
     }
     else
     {
         /* First thing we need to do is split the first and last fragments */
 
         /* Split the end first */
-        TextLine_SplitFrag(Start.Line,SelX1,false,NULL,&FirstFrag);
-        TextLine_SplitFrag(End.Line,SelX2,false,NULL,&StopFrag);
+        TextLine_SplitFrag(Start.Line,P1X,false,NULL,&FirstFrag);
+        TextLine_SplitFrag(End.Line,P2X,false,NULL,&StopFrag);
 
         /* Look at all the frags between the start and end */
         CurLine=Start.Line;
@@ -5900,16 +6060,64 @@ void DisplayText::ToggleAttribs2Selection(uint32_t Attribs)
             if(CurFrag!=CurLine->Frags.end() &&
                     CurFrag->FragType==e_TextCanvasFrag_String)
             {
-                if(Setting)
+                if(What&DTXT_APPLY_SET_ATTRIB)
+                {
                     CurFrag->Styling.Attribs|=Attribs;
-                else
+                    /* Make sure to also set the uline color */
+                    CurFrag->Styling.ULineColor=CurFrag->Styling.FGColor;
+                }
+                if(What&DTXT_APPLY_CLR_ATTRIB)
                     CurFrag->Styling.Attribs&=~Attribs;
-                CurFrag->Styling.ULineColor=CurFrag->Styling.FGColor;
+                if(What&DTXT_APPLY_FOREGROUND)
+                    CurFrag->Styling.FGColor=FGColor;
+                if(What&DTXT_APPLY_BACKGROUND)
+                    CurFrag->Styling.BGColor=BGColor;
+                if(What&DTXT_APPLY_ULINE_COLOR)
+                    CurFrag->Styling.ULineColor=ULineColor;
             }
 
             CurFrag++;
         }
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ToggleAttribs2Selection
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ToggleAttribs2Selection(uint32_t Attribs);
+ *
+ * PARAMETERS:
+ *    Attribs [I] -- The TXT_ATTRIB_ attribs to toggle.
+ *
+ * FUNCTION:
+ *    This function takes the current selection and check if any of the
+ *    selected bytes has these attribs turned on.  If they do it removes that
+ *    attrib, if not it turns the attribs on.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::ToggleAttribs2Selection(uint32_t Attribs)
+{
+    int SelX1;
+    int SelY1;
+    int SelX2;
+    int SelY2;
+    uint32_t WhatFlags;
+
+    WhatFlags=DTXT_APPLY_SET_ATTRIB;
+    if(IsAttribSetInSelection(Attribs))
+        WhatFlags=DTXT_APPLY_CLR_ATTRIB;
+
+    GetNormalizedSelection(SelX1,SelY1,SelX2,SelY2);
+
+    ChangeAttribsBetweenPoints(SelX1,SelY1,SelX2,SelY2,Attribs,0,0,0,WhatFlags);
+
     RedrawFullScreen();
 }
 
@@ -6007,7 +6215,9 @@ bool DisplayText::IsAttribSetInSelection(uint32_t Attribs)
  *    Start [O] -- Where in the buffer does the start of the selection points.
  *                 Start will always be earlier in the buffer (so you
  *                 can always begin at 'Start' and work increasing towards
- *                 'End'.
+ *                 'End').  The Start.Frag maybe set to Line->Frags.end(), if
+ *                 that is the case that means the X was off the end of the line
+ *                 (or the line was blank).
  *    End [O] -- Where in the buffer does the end of the selection points.
  *               Because the end point can be off the end of a line you have
  *               to handle where some parts are invalid.
@@ -6024,7 +6234,7 @@ bool DisplayText::IsAttribSetInSelection(uint32_t Attribs)
  *    false -- We couldn't convert the points (or there was no selection)
  *
  * SEE ALSO:
- *    
+ *    FindPoint()
  ******************************************************************************/
 bool DisplayText::FindPointsOfSelection(struct DTPoint &Start,
         struct DTPoint &End)
@@ -6033,17 +6243,6 @@ bool DisplayText::FindPointsOfSelection(struct DTPoint &Start,
     int SelY1;
     int SelX2;
     int SelY2;
-    i_TextLines CurLine;
-    int Delta;
-    int Pos;
-    i_TextLineFrags CurFrag;
-    int r;
-    i_TextLines StartLine;
-    i_TextLines EndLine;
-    i_TextLineFrags StartFrag;
-    i_TextLineFrags EndFrag;
-    int_fast32_t StartOfStr;
-    int_fast32_t EndOfStr;
 
     Start.Line=Lines.end();
     End.Line=Lines.end();
@@ -6054,15 +6253,98 @@ bool DisplayText::FindPointsOfSelection(struct DTPoint &Start,
 
     GetNormalizedSelection(SelX1,SelY1,SelX2,SelY2);
 
-    /* We need to find the line with the start of the selection on it */
+    if(!FindPoint(SelX1,SelY1,Start,Lines.end(),0))
+        return false;
+    if(!FindPoint(SelX2,SelY2,End,Start.Line,Start.LineY))
+        return false;
 
-    /* We always go from 'TopLine' because most likely the selection is near
-       it (the need to move 'TopLine' to select the text in the first place). */
-    StartLine=TopLine;
-    if(TopLineY<SelY1)
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::FindPoint
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::FindPoint(int PX,int PY,struct DTPoint &Pos,
+ *              i_TextLines HintLine,int HintStartY);
+ *
+ * PARAMETERS:
+ *    PX [I] -- The X pos to look up
+ *    PY [I] -- The Y pos to look up
+ *    End [O] -- Where in the buffer that this X,Y points.
+ *               Because the point can be off the end of a line you have
+ *               to handle where some parts are invalid.
+ *                      Line -- Always valid
+ *                      Frag -- Maybe set to Line->Frags.end()
+ *                      StrPos -- If 'Frag' is at end then this is invalid.
+ *    HintLine [I] -- A hint of where to start searching from.  Normally
+ *                    you want to set this to the thing that is closest
+ *                    to where the X,Y point will be found (just speeds things
+ *                    up).  Set to Lines.end() to ignore.
+ *    HintStartY [I] -- Used with 'HintLine'.
+ *
+ * FUNCTION:
+ *    This function takes a x,y point in the buffer and converts it to a start
+ *    and end point in the data.
+ *
+ * RETURNS:
+ *    true -- We converted the point.  You can still get a return of true even
+ *            if 'PX' is not on text.  See NOTES.
+ *    false -- We could not convert the point.  Both 'PX' and 'PY' could not
+ *             be found.
+ *
+ * NOTES:
+ *    'PX' is still considered valid if it's at the end of the line.  In that
+ *    case 'Pos.Frag' will be set to 'Pos.Line->Frags.end()'
+ *
+ * SEE ALSO:
+ *    FindPointsOfSelection()
+ ******************************************************************************/
+bool DisplayText::FindPoint(int PX,int PY,struct DTPoint &Pos,
+        i_TextLines HintLine,int HintStartY)
+{
+    i_TextLines CurLine;
+    int Delta;
+    unsigned int MinDelta;
+    unsigned int TmpStart;
+    i_TextLineFrags CurFrag;
+    int r;
+    int StartingY;
+    i_TextLines StartLine;
+    i_TextLineFrags StartFrag;
+    int_fast32_t StartOfStr;
+    int TargetLineY;
+
+    /* Mark everything we don't support to .end() */
+    Pos.Line=Lines.end();
+
+    /* Find the quickest way to the line we are looking for */
+    MinDelta=~0;
+
+    if(HintLine!=Lines.end())
+    {
+        /* Try the hint line */
+        FindPointHelper_FindDelta(PY,HintLine,HintStartY,&MinDelta,
+                &StartLine,&StartingY);
+    }
+    /* ScreenFirstLine */
+    if(ScreenHeightChars<LinesCount)
+        TmpStart=LinesCount-ScreenHeightChars;
+    else
+        TmpStart=0;
+    FindPointHelper_FindDelta(PY,ScreenFirstLine,TmpStart,&MinDelta,&StartLine,&StartingY);
+    /* TopLine */
+    FindPointHelper_FindDelta(PY,TopLine,TopLineY,&MinDelta,&StartLine,&StartingY);
+    /* Top */
+    FindPointHelper_FindDelta(PY,Lines.begin(),0,&MinDelta,&StartLine,&StartingY);
+    /* Bottom */
+    FindPointHelper_FindDelta(PY,Lines.end(),LinesCount,&MinDelta,&StartLine,&StartingY);
+
+    if(StartingY<PY)
     {
         /* TopLine is above the selection (go forward) */
-        Delta=SelY1-TopLineY;
+        Delta=PY-StartingY;
         for(r=0;r<Delta && StartLine!=Lines.end();r++)
             StartLine++;
 
@@ -6071,39 +6353,80 @@ bool DisplayText::FindPointsOfSelection(struct DTPoint &Start,
             /* Hu? we don't have any lines to copy */
             return false;
         }
+        TargetLineY=StartingY+Delta;
     }
     else
     {
-        /* TopLine is below (or on) the selection (go backward) */
-        Delta=TopLineY-SelY1;
+        /* TopLine is below (or on) the point (go backward) */
+        Delta=StartingY-PY;
         for(r=0;r<Delta && StartLine!=Lines.begin();r++)
             StartLine--;
-    }
-
-    /* Find the end line */
-    Pos=SelY1;
-    for(EndLine=StartLine;EndLine!=Lines.end();EndLine++,Pos++)
-        if(Pos==SelY2)
-            break;
-    if(EndLine==Lines.end())
-    {
-        /* Hu? We didn't find the end line? */
-        return false;
+        TargetLineY=StartingY-Delta;
+        if(StartLine==Lines.begin())
+            TargetLineY=0;
     }
 
     /* Find the starting and end frag and offsets */
-    if(!TextLine_FindFragAndPos(StartLine,SelX1,&StartFrag,&StartOfStr))
-        return false;
-    TextLine_FindFragAndPos(EndLine,SelX2,&EndFrag,&EndOfStr);
+    TextLine_FindFragAndPos(StartLine,PX,&StartFrag,&StartOfStr);
 
-    Start.Line=StartLine;
-    Start.Frag=StartFrag;
-    Start.StrPos=StartOfStr;
-    End.Line=EndLine;
-    End.Frag=EndFrag;
-    End.StrPos=EndOfStr;
+    Pos.Line=StartLine;
+    Pos.LineY=TargetLineY;
+    Pos.Frag=StartFrag;
+    Pos.StrPos=StartOfStr;
 
     return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::FindPointHelper_FindDelta
+ *
+ * SYNOPSIS:
+ *    void DisplayText::FindPointHelper_FindDelta(int PY,
+ *          i_TextLines StartLine,int StartingY,unsigned int *LastMinDelta,
+ *          i_TextLines *RetStartLine,int *RetStartingY);
+ *
+ * PARAMETERS:
+ *    PY [I] -- The Y pos of the point we want to find (from top of buffer)
+ *    StartLine [I] -- The start line to eval
+ *    StartingY [I] -- The Y of 'StartLine' (from top of buffer)
+ *    LastMinDelta [I/O] -- This will be used for the min delta that has
+ *                          been found so far.  If the new delta is smaller
+ *                          then this will be updated to the new min delta.
+ *                          On the first call this should be set to ~0.
+ *    RetStartLine [O] -- If this new delta is smaller than 'LastMinDelta' then
+ *                        this will be set to the 'StartLine'
+ *    RetStartingY [O] -- If this new delta is smaller than 'LastMinDelta' then
+ *                        this will be set to the 'StartingY'
+ *
+ * FUNCTION:
+ *    This is a helper function for FindPoint().  It checks if the number of
+ *    lines between 'StartLine' is smaller than the last value
+ *    checked ('LastMinDelta').
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    FindPoint()
+ ******************************************************************************/
+void DisplayText::FindPointHelper_FindDelta(int PY,
+        i_TextLines StartLine,int StartingY,unsigned int *LastMinDelta,
+        i_TextLines *RetStartLine,int *RetStartingY)
+{
+    unsigned int Delta;
+
+    if(StartingY<PY)
+        Delta=PY-StartingY;
+    else
+        Delta=StartingY-PY;
+
+    if(Delta<*LastMinDelta)
+    {
+        *RetStartLine=StartLine;
+        *RetStartingY=StartingY;
+        *LastMinDelta=Delta;
+    }
 }
 
 /*******************************************************************************
@@ -6149,6 +6472,118 @@ i_TextLineFrags DisplayText::FindLastTextFragOnLine(const i_TextLines &Line)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayText::AdvancePoint
+ *
+ * SYNOPSIS:
+ *    void DisplayText::AdvancePoint(int &PX,int &PY,int Amount,int MinX,
+ *              int MinY,int MaxX,int MaxY);
+ *
+ * PARAMETERS:
+ *    PX [I/O] -- The X point to move
+ *    PY [I/O] -- The Y point.  If X goes before the start of the line or
+ *                past the end this will be changed.
+ *    Amount [I] -- The amount to move the point
+ *    MinX [I] -- The min X point we can move the point
+ *    MinY [I] -- The min Y point we can move the point
+ *    MaxX [I] -- The max X point we can move the point
+ *    MaxY [I] -- The max Y point we can move the point
+ *
+ * FUNCTION:
+ *    This function moves a point backward or forward on the line, moving to
+ *    the next / prev line as needed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::AdvancePoint(int &PX,int &PY,int Amount,int MinX,
+        int MinY,int MaxX,int MaxY)
+{
+    int AmountLeft;
+    struct DTPoint Point;
+    int CharsOnLine;
+
+    /* First find this line */
+    if(!FindPoint(PX,PY,Point,Lines.end(),0))
+        return;
+
+    AmountLeft=Amount;
+    if(AmountLeft<0)
+        AmountLeft=-AmountLeft;
+
+    while(AmountLeft>0)
+    {
+        if(Amount<0)
+        {
+            /* Backwards */
+            if(PX-AmountLeft<0)
+            {
+                /* Wrap to prev line */
+                AmountLeft-=PX;
+                if(PY==0 || Point.Line==Lines.begin() || PY==MinY)
+                {
+                    /* No place to go, done */
+                    PX=MinX;
+                    AmountLeft=0;
+                }
+                else
+                {
+                    PY--;
+                    Point.Line--;
+                    PX=TextLine_FindLineLen(Point.Line);
+                }
+            }
+            else
+            {
+                PX-=AmountLeft;
+                if(PY==MinY && PX<MinX)
+                    PX=MinX;
+                AmountLeft=0;
+            }
+        }
+        else
+        {
+            /* Forward */
+            CharsOnLine=TextLine_FindLineLen(Point.Line);
+            if(PX+AmountLeft>=CharsOnLine)
+            {
+                /* We are moving more that the line has, wrap */
+                AmountLeft-=CharsOnLine-PX;
+                if(PY==MaxY)
+                {
+                    /* No place to go, done */
+                    PX=MaxX;
+                    AmountLeft=0;
+                }
+                else
+                {
+                    PY++;
+                    Point.Line++;
+                    if(Point.Line==Lines.end())
+                    {
+                        /* We are at the end, back up and we are done */
+                        Point.Line--;
+                        PX=MaxX;
+                        AmountLeft=0;
+                    }
+                    PX=0;
+                }
+            }
+            else
+            {
+                PX+=AmountLeft;
+                if(PY==MaxY && PX>MaxX)
+                    PX=MaxX;
+                AmountLeft=0;
+            }
+        }
+    }
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayText::ApplyBGColor2Selection
  *
  * SYNOPSIS:
@@ -6169,70 +6604,475 @@ i_TextLineFrags DisplayText::FindLastTextFragOnLine(const i_TextLines &Line)
  ******************************************************************************/
 void DisplayText::ApplyBGColor2Selection(uint32_t RGB)
 {
-    struct DTPoint Start;
-    struct DTPoint End;
-    i_TextLines CurLine;
-    i_TextLineFrags CurFrag;
-    string::iterator StartOfStr;
-    string::iterator EndOfStr;
-    i_TextLineFrags FirstFrag;
-    i_TextLineFrags LastFrag;
-    i_TextLineFrags StopFrag;
     int SelX1;
     int SelY1;
     int SelX2;
     int SelY2;
 
-    if(!FindPointsOfSelection(Start,End))
-        return;
-
     GetNormalizedSelection(SelX1,SelY1,SelX2,SelY2);
 
-    if(Start.Line==End.Line && Start.Frag==End.Frag)
-    {
-        /* On the same line and frag */
+    ChangeAttribsBetweenPoints(SelX1,SelY1,SelX2,SelY2,0,0,RGB,0,
+            DTXT_APPLY_BACKGROUND);
 
-        /* Split the frags */
-        TextLine_SplitFrag(Start.Line,SelX1,false,NULL,NULL);
-        TextLine_SplitFrag(End.Line,SelX2,false,&LastFrag,NULL);
-
-        LastFrag->Styling.BGColor=RGB;
-    }
-    else
-    {
-        /* First thing we need to do is split the first and last fragments */
-
-        /* Split the end first */
-        TextLine_SplitFrag(Start.Line,SelX1,false,NULL,&FirstFrag);
-        TextLine_SplitFrag(End.Line,SelX2,false,NULL,&StopFrag);
-
-        /* Look at all the frags between the start and end */
-        CurLine=Start.Line;
-        CurFrag=FirstFrag;
-        while(CurFrag!=StopFrag)
-        {
-            if(CurFrag==CurLine->Frags.end())
-            {
-                /* End of the line move to the next */
-                CurLine++;
-                if(CurLine==Lines.end())
-                {
-                    /* Unexpected end */
-                    return;
-                }
-                CurFrag=CurLine->Frags.begin();
-                continue;
-            }
-
-            if(CurFrag!=CurLine->Frags.end() &&
-                    CurFrag->FragType==e_TextCanvasFrag_String)
-            {
-                CurFrag->Styling.BGColor=RGB;
-            }
-
-            CurFrag++;
-        }
-    }
     RedrawFullScreen();
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::InvalidateAllMarks
+ *
+ * SYNOPSIS:
+ *    void DisplayText::InvalidateAllMarks(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function takes all the allocated marks and marks them as invalid.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::InvalidateAllMarks(void)
+{
+    struct TextPointMarker *Marker;
+
+    for(Marker=MarkerList;Marker!=NULL;Marker=Marker->Next)
+        Marker->Valid=false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::InvalidateOutOfRangeMarks
+ *
+ * SYNOPSIS:
+ *    void DisplayText::InvalidateOutOfRangeMarks(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function goes thought all the valid marks and checks if they should
+ *    be vaild.  If not it marks them as invalid.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::InvalidateOutOfRangeMarks(void)
+{
+    struct TextPointMarker *Marker;
+    int ScreenFirstLineY;
+
+    /* Invalidate any markers that are out of range */
+    if(LinesCount<ScreenHeightChars)
+        ScreenFirstLineY=0;
+    else
+        ScreenFirstLineY=LinesCount-ScreenHeightChars;
+
+    for(Marker=MarkerList;Marker!=NULL;Marker=Marker->Next)
+    {
+        if(Marker->Valid)
+        {
+            if(Marker->Y<ScreenFirstLineY)
+                Marker->Valid=false;
+        }
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::DoApplyToMark
+ *
+ * SYNOPSIS:
+ *    void DisplayText::DoApplyToMark(t_DataProMark *Mark,uint32_t Change2,
+ *              uint32_t Offset,uint32_t Len,uint32_t What);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Change2 [I] -- Change to this value (what this is depends on 'What')
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to remove the attribs.
+ *    Len [I] -- The number of chars to remove these new attributes from.
+ *    What [I] -- What to pass to ChangeAttribsBetweenPoints()
+ *
+ * FUNCTION:
+ *    This is helper function used for the marks that moves where the mark is
+ *    going to be applied.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::DoApplyToMark(t_DataProMark *Mark,uint32_t Change2,
+        uint32_t Offset,uint32_t Len,uint32_t What)
+{
+    struct TextPointMarker *Marker=(struct TextPointMarker *)Mark;
+    int CursorGlobalY;
+    int ScreenFirstLineY;
+    int PX;
+    int PY;
+    int StopX;
+    int StopY;
+
+    if(!Marker->Valid)
+        return;
+
+    if(LinesCount<ScreenHeightChars)
+    {
+        CursorGlobalY=CursorY;
+        ScreenFirstLineY=0;
+    }
+    else
+    {
+        CursorGlobalY=LinesCount-ScreenHeightChars+CursorY;
+        ScreenFirstLineY=LinesCount-ScreenHeightChars;
+    }
+
+    /* Move by offset */
+    PX=Marker->X;
+    PY=Marker->Y;
+    AdvancePoint(PX,PY,Offset,0,ScreenFirstLineY,CursorX,CursorGlobalY);
+
+    /* Figure out where to stop by adding 'Len' to the current point */
+    StopX=PX;
+    StopY=PY;
+    AdvancePoint(StopX,StopY,Len,0,ScreenFirstLineY,CursorX,CursorGlobalY);
+
+    ChangeAttribsBetweenPoints(PX,PY,StopX,StopY,Change2,Change2,Change2,
+            Change2,What);
+
+    RedrawFullScreen();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::AllocateMark
+ *
+ * SYNOPSIS:
+ *    t_DataProMark *DisplayText::AllocateMark(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function allocates a mark for this display.  A mark is a point in
+ *    the display that we are currently adding chars to.  This mark is
+ *    used to reference this insert point again in the future.  The mark
+ *    can become invalid if the insert point goes away.  The mark remains
+ *    allocated and can be used but will not do anything.
+ *
+ *    The display keeps a list of all the marks that have been allocated.
+ *    This is so it can go through the list and invalid any that become
+ *    invalid because of a change to the display.
+ *
+ * RETURNS:
+ *    A pointer to the mark.
+ *
+ * SEE ALSO:
+ *    DPS_AllocateMark()
+ ******************************************************************************/
+t_DataProMark *DisplayText::AllocateMark(void)
+{
+    struct TextPointMarker *NewMarker;
+
+    try
+    {
+        NewMarker=new struct TextPointMarker;
+        NewMarker->Valid=false;
+
+        /* Add it to the list of markers */
+        NewMarker->Prev=NULL;
+        NewMarker->Next=MarkerList;
+        if(MarkerList!=NULL)
+            MarkerList->Prev=NewMarker;
+        MarkerList=NewMarker;
+
+        /* Move this marker to the current cursor pos */
+        SetMark2CursorPos((t_DataProMark *)NewMarker);
+    }
+    catch(...)
+    {
+        NewMarker=NULL;
+    }
+
+    return (t_DataProMark *)NewMarker;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::FreeMark
+ *
+ * SYNOPSIS:
+ *    void DisplayText::FreeMark(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to free
+ *
+ * FUNCTION:
+ *    This function frees a mark that was allocated with AllocateMark()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    When a display text is free'ed the users of Mark's can't call FreeMark()
+ *    because the connection is no longer connected.  There for when a
+ *    display text is free'ed it must free the list of marks.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::FreeMark(t_DataProMark *Mark)
+{
+    struct TextPointMarker *Marker=(struct TextPointMarker *)Mark;
+
+    /* Unlink this item and free it */
+    if(MarkerList==Marker)
+        MarkerList=Marker->Next;
+
+    if(Marker->Next!=NULL)
+        Marker->Next->Prev=Marker->Prev;
+
+    if(Marker->Prev!=NULL)
+        Marker->Prev->Next=Marker->Next;
+
+    delete Marker;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::IsMarkValid
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::IsMarkValid(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *
+ * FUNCTION:
+ *    This function checks if a marker is valid or not.
+ *
+ * RETURNS:
+ *    true -- Mark is still valid
+ *    false -- Mark is invalid
+ *
+ * SEE ALSO:
+ *    DPS_IsMarkValid()
+ ******************************************************************************/
+bool DisplayText::IsMarkValid(t_DataProMark *Mark)
+{
+    struct TextPointMarker *Marker=(struct TextPointMarker *)Mark;
+
+    return Marker->Valid;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::SetMark2CursorPos
+ *
+ * SYNOPSIS:
+ *    void DisplayText::SetMark2CursorPos(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *
+ * FUNCTION:
+ *    This function will take a mark and move it to the current cursor position.
+ *    It will also set this mark to valid.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_SetMark2CursorPos()
+ ******************************************************************************/
+void DisplayText::SetMark2CursorPos(t_DataProMark *Mark)
+{
+    struct TextPointMarker *Marker=(struct TextPointMarker *)Mark;
+    int CursorGlobalY;
+
+    if(LinesCount<ScreenHeightChars)
+        CursorGlobalY=CursorY;
+    else
+        CursorGlobalY=LinesCount-ScreenHeightChars+CursorY;
+
+    Marker->Valid=true;
+    Marker->X=CursorX;
+    Marker->Y=CursorGlobalY;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ApplyAttrib2Mark
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Attrib [I] -- The new attrib(s) to set
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the attribs.
+ *    Len [I] -- The number of chars to apply these new attributes to.
+ *
+ * FUNCTION:
+ *    This function does the DPS_ApplyAttrib2Mark() function to the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_ApplyAttrib2Mark()
+ ******************************************************************************/
+void DisplayText::ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,
+        uint32_t Offset,uint32_t Len)
+{
+    DoApplyToMark(Mark,Attrib,Offset,Len,DTXT_APPLY_SET_ATTRIB);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::RemoveAttribFromMark
+ *
+ * SYNOPSIS:
+ *    void DisplayText::RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,
+ *          uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Attrib [I] -- The new attrib(s) to clear
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to remove the attribs.
+ *    Len [I] -- The number of chars to remove these new attributes from.
+ *
+ * FUNCTION:
+ *    This function does the DPS_RemoveAttribFromMark() function to the active
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_RemoveAttribFromMark()
+ ******************************************************************************/
+void DisplayText::RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,
+        uint32_t Offset,uint32_t Len)
+{
+    DoApplyToMark(Mark,Attrib,Offset,Len,DTXT_APPLY_CLR_ATTRIB);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ApplyFGColor2Mark
+ *
+ * SYNOPSIS:
+ *    void DPS_ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    FGColor [I] -- The colors to apply
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the color.
+ *    Len [I] -- The number of chars to apply this color to
+ *
+ * FUNCTION:
+ *    This function does the DPS_ApplyFGColor2Mark() function to the active
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_ApplyFGColor2Mark()
+ ******************************************************************************/
+void DisplayText::ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,
+        uint32_t Offset,uint32_t Len)
+{
+    DoApplyToMark(Mark,FGColor,Offset,Len,DTXT_APPLY_FOREGROUND);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ApplyBGColor2Mark
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    BGColor [I] -- The colors to apply
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the color.
+ *    Len [I] -- The number of chars to apply this color to
+ *
+ * FUNCTION:
+ *    This function does the DPS_ApplyBGColor2Mark() function to the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_ApplyBGColor2Mark()
+ ******************************************************************************/
+void DisplayText::ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,
+        uint32_t Offset,uint32_t Len)
+{
+    DoApplyToMark(Mark,BGColor,Offset,Len,DTXT_APPLY_BACKGROUND);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::MoveMark
+ *
+ * SYNOPSIS:
+ *    void DisplayText::MoveMark(t_DataProMark *Mark,int Amount);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Amount [I] -- How much to move the mark by (plus for toward the cursor,
+ *                  neg to move toward the start of the buffer).
+ *
+ * FUNCTION:
+ *    This function does the DPS_MoveMark() function to the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_MoveMark()
+ ******************************************************************************/
+void DisplayText::MoveMark(t_DataProMark *Mark,int Amount)
+{
+    struct TextPointMarker *Marker=(struct TextPointMarker *)Mark;
+    int CursorGlobalY;
+    int ScreenFirstLineY;
+
+    if(!Marker->Valid)
+        return;
+
+    if(LinesCount<ScreenHeightChars)
+    {
+        CursorGlobalY=CursorY;
+        ScreenFirstLineY=0;
+    }
+    else
+    {
+        CursorGlobalY=LinesCount-ScreenHeightChars+CursorY;
+        ScreenFirstLineY=LinesCount-ScreenHeightChars;
+    }
+
+    /* Move by Amount */
+    AdvancePoint(Marker->X,Marker->Y,Amount,0,ScreenFirstLineY,
+            CursorX,CursorGlobalY);
+}

@@ -418,6 +418,16 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void InsertHorizontalRule(void);
         void ResetTerm(void);
 
+        t_DataProMark *AllocateMark(void);
+        void FreeMark(t_DataProMark *Mark);
+        bool IsMarkValid(t_DataProMark *Mark);
+        void SetMark2CursorPos(t_DataProMark *Mark);
+        void ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,uint32_t Len);
+        void RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,uint32_t Len);
+        void ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,uint32_t Offset,uint32_t Len);
+        void ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,uint32_t Offset,uint32_t Len);
+        void MoveMark(t_DataProMark *Mark,int Amount);
+
         void SetDownloadProtocol(const char *NewProtocol);
         void GetDownloadProtocol(std::string &SelectedProtocol);
         t_KVList *GetDownloadOptionsPtr(void);

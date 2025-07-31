@@ -667,3 +667,279 @@ void Con_SetTitle(const char *Title)
     m_ActiveConnection->SetDisplayName(Title);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Con_AllocateMark
+ *
+ * SYNOPSIS:
+ *    t_DataProMark *Con_AllocateMark(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function redirects the AllocateMark() data processor to the active
+ *    connection.
+ *
+ * RETURNS:
+ *    A pointer to the allocated mark.
+ *
+ * SEE ALSO:
+ *    DPS_AllocateMark(), DPS_FreeMark()
+ ******************************************************************************/
+t_DataProMark *Con_AllocateMark(void)
+{
+    if(m_ActiveConnection==NULL)
+        return NULL;
+
+    return m_ActiveConnection->AllocateMark();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Con_FreeMark
+ *
+ * SYNOPSIS:
+ *    void Con_FreeMark(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to free
+ *
+ * FUNCTION:
+ *    This function frees a mark allocated with Con_AllocateMark()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Con_FreeMark(t_DataProMark *Mark)
+{
+    if(m_ActiveConnection==NULL)
+        return;
+
+    m_ActiveConnection->FreeMark(Mark);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Con_IsMarkValid
+ *
+ * SYNOPSIS:
+ *    bool Con_IsMarkValid(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *
+ * FUNCTION:
+ *    This function checks if a marker is valid or not.
+ *
+ * RETURNS:
+ *    true -- Mark is still valid
+ *    false -- Mark is invalid
+ *
+ * SEE ALSO:
+ *    DPS_IsMarkValid()
+ ******************************************************************************/
+bool Con_IsMarkValid(t_DataProMark *Mark)
+{
+    if(m_ActiveConnection==NULL)
+        return NULL;
+
+    return m_ActiveConnection->IsMarkValid(Mark);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Con_SetMark2CursorPos
+ *
+ * SYNOPSIS:
+ *    void Con_SetMark2CursorPos(t_DataProMark *Mark);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *
+ * FUNCTION:
+ *    This function will take a mark and move it to the current cursor position.
+ *    It will also set this mark to valid.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_SetMark2CursorPos()
+ ******************************************************************************/
+void Con_SetMark2CursorPos(t_DataProMark *Mark)
+{
+    if(m_ActiveConnection==NULL)
+        return;
+
+    m_ActiveConnection->SetMark2CursorPos(Mark);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Con_ApplyAttrib2Mark
+ *
+ * SYNOPSIS:
+ *    void Con_ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Attrib [I] -- The new attrib(s) to set
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the attribs.
+ *    Len [I] -- The number of chars to apply these new attributes to.
+ *
+ * FUNCTION:
+ *    This function does the DPS_ApplyAttrib2Mark() function to the active
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_ApplyAttrib2Mark()
+ ******************************************************************************/
+void Con_ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,
+        uint32_t Len)
+{
+    if(m_ActiveConnection==NULL)
+        return;
+
+    m_ActiveConnection->ApplyAttrib2Mark(Mark,Attrib,Offset,Len);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Con_RemoveAttribFromMark
+ *
+ * SYNOPSIS:
+ *    void Con_RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,
+ *          uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Attrib [I] -- The new attrib(s) to clear
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to remove the attribs.
+ *    Len [I] -- The number of chars to remove these new attributes from.
+ *
+ * FUNCTION:
+ *    This function does the DPS_RemoveAttribFromMark() function to the active
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_RemoveAttribFromMark()
+ ******************************************************************************/
+void Con_RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,
+        uint32_t Offset,uint32_t Len)
+{
+    if(m_ActiveConnection==NULL)
+        return;
+
+    m_ActiveConnection->RemoveAttribFromMark(Mark,Attrib,Offset,Len);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Con_ApplyFGColor2Mark
+ *
+ * SYNOPSIS:
+ *    void DPS_ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    FGColor [I] -- The colors to apply
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the color.
+ *    Len [I] -- The number of chars to apply this color to
+ *
+ * FUNCTION:
+ *    This function does the DPS_ApplyFGColor2Mark() function to the active
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_ApplyFGColor2Mark()
+ ******************************************************************************/
+void Con_ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,uint32_t Offset,
+        uint32_t Len)
+{
+    if(m_ActiveConnection==NULL)
+        return;
+
+    m_ActiveConnection->ApplyFGColor2Mark(Mark,FGColor,Offset,Len);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Con_ApplyBGColor2Mark
+ *
+ * SYNOPSIS:
+ *    void Con_ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,
+ *              uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    BGColor [I] -- The colors to apply
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to apply the color.
+ *    Len [I] -- The number of chars to apply this color to
+ *
+ * FUNCTION:
+ *    This function does the DPS_ApplyBGColor2Mark() function to the active
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_ApplyBGColor2Mark()
+ ******************************************************************************/
+void Con_ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,uint32_t Offset,
+        uint32_t Len)
+{
+    if(m_ActiveConnection==NULL)
+        return;
+
+    m_ActiveConnection->ApplyBGColor2Mark(Mark,BGColor,Offset,Len);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Con_MoveMark
+ *
+ * SYNOPSIS:
+ *    void Con_MoveMark(t_DataProMark *Mark,int Amount);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Amount [I] -- How much to move the mark by (plus for toward the cursor,
+ *                  neg to move toward the start of the buffer).
+ *
+ * FUNCTION:
+ *    This function does the DPS_MoveMark() function to the active
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_MoveMark()
+ ******************************************************************************/
+void Con_MoveMark(t_DataProMark *Mark,int Amount)
+{
+    if(m_ActiveConnection==NULL)
+        return;
+
+    m_ActiveConnection->MoveMark(Mark,Amount);
+}

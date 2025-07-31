@@ -31,6 +31,11 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added marks to data processors plugin API",
+            "Data processor plugins can now drop \"markers\" as data"
+            " comes in.  The plugin can now color/style from the mark to"
+            " the cursor."},
+    {
         NOTETYPE_BUG_FIX,"Fixed bug where selection would move if back buffer filled",
             "When the back buffer filled and a new line was added the selection"
             " would change what lines where selected (the line would move up,"

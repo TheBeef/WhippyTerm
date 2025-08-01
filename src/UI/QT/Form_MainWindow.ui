@@ -2721,7 +2721,7 @@
      <normaloff>:/G/Graphics/tab_add.png</normaloff>:/G/Graphics/tab_add.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;New Tab...</string>
+    <string>&amp;New Connection Tab...</string>
    </property>
    <property name="toolTip">
     <string>New Tab</string>
@@ -3205,7 +3205,7 @@
   </action>
   <action name="actionNew_Tab_From_URI">
    <property name="text">
-    <string>New Tab From URI...</string>
+    <string>New Connection Tab From URI...</string>
    </property>
   </action>
   <action name="actionDefault_Settings">

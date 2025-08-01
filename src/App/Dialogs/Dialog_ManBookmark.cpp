@@ -62,6 +62,8 @@ static void DMB_HandleDragAndDropped(t_UITreeItem *ItemDragged,t_UITreeItem *Dro
 static void DMB_RunSettings(void);
 static void DMB_RestoreSettings(void);
 static void DMB_DoOptions(void);
+static void DMB_HandleUseGlobalSettingsChange(void);
+static void DMB_RethinkUseGlobalSettings(void);
 
 /*** VARIABLE DEFINITIONS     ***/
 t_DMB_ItemLookup m_DMB_ItemLookup;
@@ -144,15 +146,15 @@ void DMB_ChangeSelectedItem(t_UITreeItem *Item)
     t_UIButtonCtrl *DeleteBttn;
     t_UIButtonCtrl *OptionsBttn;
     t_UIButtonCtrl *SettingsBttn;
-    t_UIButtonCtrl *RestoreSettingsBttn;
+    t_UICheckboxCtrl *UseGlobalSettings;
 
     RenameBttn=UIDMB_GetButton(e_UIDMB_Button_Rename);
     DeleteBttn=UIDMB_GetButton(e_UIDMB_Button_Delete);
     OptionsBttn=UIDMB_GetButton(e_UIDMB_Button_Options);
     SettingsBttn=UIDMB_GetButton(e_UIDMB_Button_Settings);
-    RestoreSettingsBttn=UIDMB_GetButton(e_UIDMB_Button_RestoreSettings);
     BookmarkNameInput=UIDMB_GetTextInput(e_UIDMB_TextInput_BookmarkName);
     URIInput=UIDMB_GetTextInput(e_UIDMB_TextInput_URI);
+    UseGlobalSettings=UIDMB_GetCheckbox(e_UIDMB_Checkbox_UseGlobalSettings);
 
     m_SelectedEntry=m_DMB_ItemLookup.find(Item);
     if(m_SelectedEntry==m_DMB_ItemLookup.end())
@@ -160,11 +162,11 @@ void DMB_ChangeSelectedItem(t_UITreeItem *Item)
         UIEnableButton(RenameBttn,false);
         UIEnableButton(OptionsBttn,false);
         UIEnableButton(SettingsBttn,false);
-        UIEnableButton(RestoreSettingsBttn,false);
         UIEnableTextCtrl(BookmarkNameInput,false);
         UIEnableTextCtrl(URIInput,false);
         UISetTextCtrlText(BookmarkNameInput,"");
         UISetTextCtrlText(URIInput,"");
+        UIEnableCheckbox(UseGlobalSettings,false);
 
         return;
     }
@@ -175,7 +177,7 @@ void DMB_ChangeSelectedItem(t_UITreeItem *Item)
         UIEnableButton(RenameBttn,true);
         UIEnableButton(OptionsBttn,false);
         UIEnableButton(SettingsBttn,false);
-        UIEnableButton(RestoreSettingsBttn,false);
+        UIEnableCheckbox(UseGlobalSettings,false);
 
         UIEnableTextCtrl(BookmarkNameInput,false);
         UIEnableTextCtrl(URIInput,false);
@@ -187,8 +189,7 @@ void DMB_ChangeSelectedItem(t_UITreeItem *Item)
         /* Bookmark */
         UIEnableButton(RenameBttn,false);
         UIEnableButton(OptionsBttn,true);
-        UIEnableButton(SettingsBttn,true);
-        UIEnableButton(RestoreSettingsBttn,true);
+        UIEnableCheckbox(UseGlobalSettings,true);
 
         UIEnableTextCtrl(BookmarkNameInput,true);
         UIEnableTextCtrl(URIInput,true);
@@ -196,6 +197,8 @@ void DMB_ChangeSelectedItem(t_UITreeItem *Item)
         UISetTextCtrlText(BookmarkNameInput,
                 m_SelectedEntry->second->Name.c_str());
         UISetTextCtrlText(URIInput,m_SelectedEntry->second->URI.c_str());
+
+        DMB_RethinkUseGlobalSettings();
     }
     UIEnableButton(DeleteBttn,true);
 }
@@ -553,25 +556,25 @@ static void DMB_ClearSelection(void)
     t_UITextInputCtrl *BookmarkNameInput;
     t_UIButtonCtrl *OptionsBttn;
     t_UIButtonCtrl *SettingsBttn;
-    t_UIButtonCtrl *RestoreSettingsBttn;
     t_UITreeView *Folders;
+    t_UICheckboxCtrl *UseGlobalSettings;
 
     RenameBttn=UIDMB_GetButton(e_UIDMB_Button_Rename);
     DeleteBttn=UIDMB_GetButton(e_UIDMB_Button_Delete);
     OptionsBttn=UIDMB_GetButton(e_UIDMB_Button_Options);
     SettingsBttn=UIDMB_GetButton(e_UIDMB_Button_Settings);
-    RestoreSettingsBttn=UIDMB_GetButton(e_UIDMB_Button_RestoreSettings);
     BookmarkNameInput=UIDMB_GetTextInput(e_UIDMB_TextInput_BookmarkName);
     URIInput=UIDMB_GetTextInput(e_UIDMB_TextInput_URI);
     Folders=UIDMB_GetTreeView(e_UIDMB_TreeView_Folders);
+    UseGlobalSettings=UIDMB_GetCheckbox(e_UIDMB_Checkbox_UseGlobalSettings);
 
     UIEnableButton(RenameBttn,false);
     UIEnableButton(DeleteBttn,false);
     UIEnableButton(OptionsBttn,false);
     UIEnableButton(SettingsBttn,false);
-    UIEnableButton(RestoreSettingsBttn,false);
     UIEnableTextCtrl(BookmarkNameInput,false);
     UIEnableTextCtrl(URIInput,false);
+    UIEnableCheckbox(UseGlobalSettings,false);
     UISetTextCtrlText(BookmarkNameInput,"");
     UISetTextCtrlText(URIInput,"");
     UIClearTreeViewSelection(Folders);
@@ -793,9 +796,6 @@ bool DMB_Event(const struct DMBEvent *Event)
                 case e_UIDMB_Button_Settings:
                     DMB_RunSettings();
                 break;
-                case e_UIDMB_Button_RestoreSettings:
-                    DMB_RestoreSettings();
-                break;
                 case e_UIDMB_ButtonMAX:
                 default:
                 break;
@@ -813,6 +813,17 @@ bool DMB_Event(const struct DMBEvent *Event)
         case e_DMBEvent_FolderDragAndDropped:
             DMB_HandleDragAndDropped(Event->Info.Drag.ItemDragged,
                     Event->Info.Drag.DroppedOn,Event->Info.Drag.DropPlacement);
+        break;
+        case e_DMBEvent_CheckboxChange:
+            switch(Event->Info.Checkbox.BoxID)
+            {
+                case e_UIDMB_Checkbox_UseGlobalSettings:
+                    DMB_HandleUseGlobalSettingsChange();
+                break;
+                case e_UIDMB_CheckboxMAX:
+                default:
+                break;
+            }
         break;
         case e_DMBEventMAX:
         default:
@@ -942,5 +953,110 @@ static void DMB_DoOptions(void)
         m_SelectedEntry->second->URI=URI;
 
         UISetTextCtrlText(URIInput,m_SelectedEntry->second->URI.c_str());
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DMB_HandleUseGlobalSettingsChange
+ *
+ * SYNOPSIS:
+ *    void DMB_HandleUseGlobalSettingsChange(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when the use global settings is clicked on.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DMB_HandleUseGlobalSettingsChange(void)
+{
+    t_UICheckboxCtrl *UseGlobalSettings;
+
+    if(m_SelectedEntry==m_DMB_ItemLookup.end())
+        return;
+
+    if(m_SelectedEntry->second==m_DMB_EditList->end())
+        return;
+
+    UseGlobalSettings=UIDMB_GetCheckbox(e_UIDMB_Checkbox_UseGlobalSettings);
+
+    if(UIGetCheckboxCheckStatus(UseGlobalSettings))
+    {
+        /* They are turning global settings back on, if they have changed
+           the settings then we warn them. */
+        if(!AreConSettingsEqual(m_SelectedEntry->second->CustomSettings,
+                g_Settings.DefaultConSettings))
+        {
+            DMB_RestoreSettings();
+        }
+        else
+        {
+            /* They haven't changed anything, just turn it off */
+            m_SelectedEntry->second->UseCustomSettings=false;
+        }
+    }
+    else
+    {
+        /* They want to use custom settings, copy the global settings and
+           turn it on */
+        m_SelectedEntry->second->CustomSettings=g_Settings.DefaultConSettings;
+        m_SelectedEntry->second->UseCustomSettings=true;
+    }
+
+    DMB_RethinkUseGlobalSettings();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DMB_RethinkUseGlobalSettings
+ *
+ * SYNOPSIS:
+ *    void DMB_RethinkUseGlobalSettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function updates the GUI to reflect the current state of the
+ *    selected bookmarks custom settings.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DMB_RethinkUseGlobalSettings(void)
+{
+    t_UICheckboxCtrl *UseGlobalSettings;
+    t_UIButtonCtrl *SettingsBttn;
+
+    if(m_SelectedEntry==m_DMB_ItemLookup.end())
+        return;
+
+    if(m_SelectedEntry->second==m_DMB_EditList->end())
+        return;
+
+    UseGlobalSettings=UIDMB_GetCheckbox(e_UIDMB_Checkbox_UseGlobalSettings);
+    SettingsBttn=UIDMB_GetButton(e_UIDMB_Button_Settings);
+
+    /* Set the global use global settings checkbox and enable/disable the
+       settings button */
+    if(m_SelectedEntry->second->UseCustomSettings)
+    {
+        UIEnableButton(SettingsBttn,true);
+        UICheckCheckbox(UseGlobalSettings,false);
+    }
+    else
+    {
+        UIEnableButton(SettingsBttn,false);
+        UICheckCheckbox(UseGlobalSettings,true);
     }
 }

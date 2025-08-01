@@ -147,8 +147,6 @@ t_UIButtonCtrl *UIDMB_GetButton(e_UIDMB_Button bttn)
             return (t_UIButtonCtrl *)g_ManBookmarkDialog->ui->Options_pushButton;
         case e_UIDMB_Button_Settings:
             return (t_UIButtonCtrl *)g_ManBookmarkDialog->ui->Settings_pushButton;
-        case e_UIDMB_Button_RestoreSettings:
-            return (t_UIButtonCtrl *)g_ManBookmarkDialog->ui->ResetSettings_pushButton;
         case e_UIDMB_ButtonMAX:
         default:
             return NULL;
@@ -178,6 +176,19 @@ t_UITreeView *UIDMB_GetTreeView(e_UIDMB_TreeView TreeView)
         case e_UIDMB_TreeView_Folders:
             return (t_UITreeView *)g_ManBookmarkDialog->ui->Folder_treeWidget;
         case e_UIDMB_TreeViewMAX:
+        default:
+            return NULL;
+    }
+    return NULL;
+}
+
+t_UICheckboxCtrl *UIDMB_GetCheckbox(e_UIDMB_CheckboxType Checkbox)
+{
+    switch(Checkbox)
+    {
+        case e_UIDMB_Checkbox_UseGlobalSettings:
+            return (t_UICheckboxCtrl *)g_ManBookmarkDialog->ui->GlobalSettings_checkBox;
+        case e_UIDMB_CheckboxMAX:
         default:
             return NULL;
     }

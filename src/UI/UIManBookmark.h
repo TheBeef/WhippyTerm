@@ -46,7 +46,6 @@ enum e_UIDMB_Button
     e_UIDMB_Button_Delete,
     e_UIDMB_Button_Options,
     e_UIDMB_Button_Settings,
-    e_UIDMB_Button_RestoreSettings,
     e_UIDMB_ButtonMAX
 };
 
@@ -65,11 +64,19 @@ enum e_UIDMB_TreeView
 
 typedef enum
 {
+    e_UIDMB_Checkbox_UseGlobalSettings,
+    e_UIDMB_CheckboxMAX
+} e_UIDMB_CheckboxType;
+
+/* Events */
+typedef enum
+{
     e_DMBEvent_BttnTriggered,
     e_DMBEvent_BookmarkNameChanged,
     e_DMBEvent_URITextEditFinished,
     e_DMBEvent_SelectedFolderItemChanged,
     e_DMBEvent_FolderDragAndDropped,
+    e_DMBEvent_CheckboxChange,
     e_DMBEventMAX
 } e_DMBEventType;
 
@@ -95,12 +102,18 @@ struct DMBEventDataDrag
     int DropPlacement;
 };
 
+struct DMBEventDataCheckbox
+{
+    e_UIDMB_CheckboxType BoxID;
+};
+
 union DMBEventData
 {
     struct DMBEventDataBttn Bttn;
     struct DMBEventDataStringChange StringChange;
     struct DMBEventDataItemChange Item;
     struct DMBEventDataDrag Drag;
+    struct DMBEventDataCheckbox Checkbox;
 };
 
 struct DMBEvent
@@ -129,6 +142,7 @@ void UIDMB_GetURIInput(std::string &URI);
 t_UIButtonCtrl *UIDMB_GetButton(e_UIDMB_Button bttn);
 t_UITextInputCtrl *UIDMB_GetTextInput(e_UIDMB_TextInput Input);
 t_UITreeView *UIDMB_GetTreeView(e_UIDMB_TreeView TreeView);
+t_UICheckboxCtrl *UIDMB_GetCheckbox(e_UIDMB_CheckboxType Checkbox);
 
 bool DMB_Event(const struct DMBEvent *Event);
 

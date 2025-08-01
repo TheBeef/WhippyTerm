@@ -53,7 +53,7 @@ private slots:
     
     void on_Settings_pushButton_clicked();
     
-    void on_ResetSettings_pushButton_clicked();
+    void on_GlobalSettings_checkBox_clicked();
     
 private:
     bool DoingEvent;

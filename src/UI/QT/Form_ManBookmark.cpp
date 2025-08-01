@@ -193,12 +193,10 @@ void Form_ManBookmark::on_Settings_pushButton_clicked()
     SendEvent(e_DMBEvent_BttnTriggered,&EventData);
 }
 
-
-void Form_ManBookmark::on_ResetSettings_pushButton_clicked()
+void Form_ManBookmark::on_GlobalSettings_checkBox_clicked()
 {
-    union DMBEventData EventData;
-
-    EventData.Bttn.BttnID=e_UIDMB_Button_RestoreSettings;
-    SendEvent(e_DMBEvent_BttnTriggered,&EventData);
+    union DMBEventData Info;
+    Info.Checkbox.BoxID=e_UIDMB_Checkbox_UseGlobalSettings;
+    SendEvent(e_DMBEvent_CheckboxChange,&Info);
 }
 

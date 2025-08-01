@@ -122,9 +122,19 @@
              </widget>
             </item>
             <item row="3" column="1">
+             <widget class="QCheckBox" name="GlobalSettings_checkBox">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use the global settings (checked) or use custom settings just for this connection (unchecked)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="text">
+               <string>Use global settings</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
              <widget class="QPushButton" name="Settings_pushButton">
               <property name="text">
-               <string>Settings...</string>
+               <string>Customize Connection Settings...</string>
               </property>
              </widget>
             </item>
@@ -140,13 +150,6 @@
                </size>
               </property>
              </spacer>
-            </item>
-            <item row="4" column="1">
-             <widget class="QPushButton" name="ResetSettings_pushButton">
-              <property name="text">
-               <string>Reset Settings...</string>
-              </property>
-             </widget>
             </item>
            </layout>
           </widget>

@@ -65,6 +65,8 @@ typedef enum
     e_BCEventMAX
 } e_BCEventType;
 
+/* Events */
+
 struct BCEventDataCombox
 {
     e_BC_ComboxType BoxID;

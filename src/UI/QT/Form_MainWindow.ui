@@ -2194,6 +2194,7 @@
     <addaction name="actionMenu_Change_Name"/>
     <addaction name="actionConnection_Options"/>
     <addaction name="actionConnection_Settings"/>
+    <addaction name="actionUse_Global_Settings"/>
     <addaction name="actionRestore_Connection_Settings_to_Defaults"/>
     <addaction name="separator"/>
     <addaction name="actionTransmit_delay"/>
@@ -3698,6 +3699,14 @@
   <action name="actionCRC_Algorithm_Finder">
    <property name="text">
     <string>CRC Algorithm Finder...</string>
+   </property>
+  </action>
+  <action name="actionUse_Global_Settings">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Use Global Settings...</string>
    </property>
   </action>
  </widget>

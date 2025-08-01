@@ -943,3 +943,87 @@ void Con_MoveMark(t_DataProMark *Mark,int Amount)
 
     m_ActiveConnection->MoveMark(Mark,Amount);
 }
+
+/*******************************************************************************
+ * NAME:
+ *    Con_FreezeStream
+ *
+ * SYNOPSIS:
+ *    void Con_FreezeStream(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function does the DSP_FreezeStream() function to the active
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DSP_FreezeStream()
+ ******************************************************************************/
+void Con_FreezeStream(void)
+{
+    if(m_ActiveConnection==NULL)
+        return;
+
+    m_ActiveConnection->FreezeStream();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Con_ReleaseFrozenStream
+ *
+ * SYNOPSIS:
+ *    void Con_ReleaseFrozenStream(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function does the DSP_ReleaseFrozenStream() function to the active
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DSP_ReleaseFrozenStream()
+ ******************************************************************************/
+void Con_ReleaseFrozenStream(void)
+{
+    if(m_ActiveConnection==NULL)
+        return;
+
+    m_ActiveConnection->ReleaseFrozenStream();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Con_ClearFrozenStream
+ *
+ * SYNOPSIS:
+ *    void Con_ClearFrozenStream(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function does the DSP_ClearFrozenStream() function to the active
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DSP_ClearFrozenStream()
+ ******************************************************************************/
+void Con_ClearFrozenStream(void)
+{
+    if(m_ActiveConnection==NULL)
+        return;
+
+    m_ActiveConnection->ClearFrozenStream();
+}

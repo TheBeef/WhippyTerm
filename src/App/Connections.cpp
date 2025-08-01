@@ -58,6 +58,7 @@
 #include <time.h>
 #include <string>
 #include <list>
+#include <new> // Required for std::bad_alloc
 
 using namespace std;
 
@@ -72,6 +73,8 @@ using namespace std;
 #define SMART_CLIPBOARD_PASTE_TIME      250     // 250ms
 
 #define MAX_BELL_RATE                   100     // We have to have at least this many ms between bell sounds
+
+#define FROZENINPUT_GROW_SIZE           1000    // How much do we grow the frozen queue by each time
 
 /*** MACROS                   ***/
 
@@ -527,6 +530,13 @@ Connection::Connection(const char *URI)
     LeftPanelInfo=e_LeftPanelTabMAX;
     RightPanelInfo=e_RightPanelTabMAX;
     BottomPanelInfo=e_BottomPanelTabMAX;
+
+    InputFrozenCount=0;
+    FrozenInputQueue=(uint8_t *)malloc(FROZENINPUT_GROW_SIZE);
+    if(FrozenInputQueue==NULL)
+        throw(std::bad_alloc());
+    FrozenInputQueueSize=FROZENINPUT_GROW_SIZE;
+    FrozenInputInsertPos=0;
 }
 
 /*******************************************************************************
@@ -558,6 +568,8 @@ Connection::~Connection()
 
     DPS_FreeProcessorConData(&ProcessorData);
     FTPS_FreeFTPData(FTPConData);
+
+    free(FrozenInputQueue);
 }
 
 /*******************************************************************************
@@ -1938,6 +1950,9 @@ void Connection::WriteChar2Display(uint8_t *Chr)
     if(Display==NULL)
         return;
 
+    if(AddFrozenStrIfNeeded(Chr))
+        return;
+
     Display->WriteChar(Chr);
 }
 
@@ -1950,7 +1965,7 @@ void Connection::WriteChar2Display(uint8_t *Chr)
  *
  * PARAMETERS:
  *    Str [I] -- The UTF8 string to insert
- *    Len [I] -- The number of bytes in the string
+ *    Len [I] -- The number of chars (not bytes) in the string
  *
  * FUNCTION:
  *    This function adds a UTF8 string to the display of this connection.
@@ -1968,6 +1983,9 @@ bool Connection::InsertString(uint8_t *Str,uint32_t Len)
     uint8_t CharBuff[10];
     const uint8_t *StartOfChar;
     const uint8_t *EndOfChar;
+
+    if(AddFrozenStrIfNeeded(Str))
+        return true;
 
     StartOfChar=Str;
     for(r=0;r<Len;r++)
@@ -6323,6 +6341,8 @@ void Connection::ResetTerm(void)
         return;
 
     Display->ResetTerm();
+
+    InputFrozenCount=0; // Unfreeze the connection
 }
 
 /*******************************************************************************
@@ -7240,3 +7260,157 @@ void Connection::MoveMark(t_DataProMark *Mark,int Amount)
     if(Display!=NULL)
         Display->MoveMark(Mark,Amount);
 }
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::AddFrozenStrIfNeeded
+ *
+ * SYNOPSIS:
+ *    bool Connection::AddFrozenStrIfNeeded(uint8_t *Str);
+ *
+ * PARAMETERS:
+ *    Str [I] -- The UTF-8 string to queue if needed (0 term)
+ *
+ * FUNCTION:
+ *    This function queues a UTF-8 char or UTF-8 string if this connection
+ *    is has been frozen.
+ *
+ * RETURNS:
+ *    true -- The string was queued (or we had an error)
+ *    false -- The connection is not frozen and you should handle the string.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::AddFrozenStrIfNeeded(uint8_t *Str)
+{
+    uint8_t *NewQueue;
+    unsigned int Len;
+
+    if(InputFrozenCount>0)
+    {
+        /* Ok, a plugin has frozen adding chars to the display.  Queue them
+           instead */
+        Len=strlen((char *)Str);
+
+        if(FrozenInputInsertPos+Len>=FrozenInputQueueSize)
+        {
+            /* We need to grow the queue */
+            NewQueue=(uint8_t *)realloc(FrozenInputQueue,FrozenInputQueueSize+
+                    FROZENINPUT_GROW_SIZE);
+            if(NewQueue==NULL)
+                return true;
+            FrozenInputQueue=NewQueue;
+        }
+        memcpy(&FrozenInputQueue[FrozenInputInsertPos],Str,Len);
+        FrozenInputInsertPos+=Len;
+        return true;
+    }
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::FreezeStream
+ *
+ * SYNOPSIS:
+ *    void Connection::FreezeStream(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function does the DSP_FreezeStream() function to the connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DSP_FreezeStream()
+ ******************************************************************************/
+void Connection::FreezeStream(void)
+{
+    InputFrozenCount++;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::ReleaseFrozenStream
+ *
+ * SYNOPSIS:
+ *    void Connection::ReleaseFrozenStream(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function does the DSP_ReleaseFrozenStream() function to the
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DSP_ReleaseFrozenStream
+ ******************************************************************************/
+void Connection::ReleaseFrozenStream(void)
+{
+    uint_fast32_t pos;
+    uint8_t CharBuff[10];
+    const uint8_t *StartOfChar;
+    const uint8_t *EndOfChar;
+
+    if(InputFrozenCount>0)
+        InputFrozenCount--;
+
+    if(InputFrozenCount==0)
+    {
+        /* Ok, this connection just became unfrozen, write out all the queued
+           data */
+        pos=0;
+        StartOfChar=FrozenInputQueue;
+        while(pos<FrozenInputInsertPos && *StartOfChar!=0)
+        {
+            EndOfChar=StartOfChar;
+            utf8::unchecked::advance(EndOfChar,1);
+            if(EndOfChar-StartOfChar>(unsigned)sizeof(CharBuff)-1)
+                break;
+            memcpy(CharBuff,StartOfChar,EndOfChar-StartOfChar);
+            CharBuff[EndOfChar-StartOfChar]=0;
+            pos+=EndOfChar-StartOfChar;
+
+            WriteChar2Display(CharBuff);
+
+            /* Move to next char */
+            StartOfChar=EndOfChar;
+        }
+
+        FrozenInputInsertPos=0;
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::ClearFrozenStream
+ *
+ * SYNOPSIS:
+ *    void Connection::ClearFrozenStream(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function does the DSP_ClearFrozenStream() function to the active
+ *    connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DSP_ClearFrozenStream()
+ ******************************************************************************/
+void Connection::ClearFrozenStream(void)
+{
+    FrozenInputInsertPos=0;
+}
+

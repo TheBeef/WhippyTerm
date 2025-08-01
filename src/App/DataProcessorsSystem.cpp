@@ -2857,15 +2857,102 @@ void DPS_MoveMark(t_DataProMark *Mark,int Amount)
     Con_MoveMark(Mark,Amount);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DPS_FreezeStream
+ *
+ * SYNOPSIS:
+ *    void DPS_FreezeStream(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function freezes the display stream.  When a connection has a
+ *    frozen stream any writes to the screen are stopped and the text
+ *    that would be added is queued instead.  When you release the
+ *    freeze then all the chars are added to the display at that point.
+ *
+ *    This is usefull if you want to erase text from the incoming stream
+ *    but don't want the text to flash infront of the user (as it's drawn
+ *    and then erased later).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    You must have a matching call to DPS_ReleaseFrozenStream() or the
+ *    connection will not be able to display any text.
+ *
+ * SEE ALSO:
+ *    DPS_ReleaseFrozenStream(), DPS_ClearFrozenStream()
+ ******************************************************************************/
 void DPS_FreezeStream(void)
 {
+    Con_FreezeStream();
 }
 
-void DPS_ClearFrozenStream(void)
-{
-}
-
+/*******************************************************************************
+ * NAME:
+ *    DPS_ReleaseFrozenStream
+ *
+ * SYNOPSIS:
+ *    void DPS_ReleaseFrozenStream(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function releases a lock added to a display stream that was
+ *    added to DPS_FreezeStream()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    Calls to DPS_FreezeStream() must match the calls to DPS_FreezeStream().
+ *    If you call more times than you called DPS_FreezeStream() you will mess
+ *    with other plugins.
+ *
+ * SEE ALSO:
+ *    DPS_FreezeStream()
+ ******************************************************************************/
 void DPS_ReleaseFrozenStream(void)
 {
+    Con_ReleaseFrozenStream();
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DPS_ClearFrozenStream
+ *
+ * SYNOPSIS:
+ *    void DPS_ClearFrozenStream(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function clears the queue that stores the frozen chars that would
+ *    have been added when DPS_ReleaseFrozenStream() is called.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * LIMITATIONS:
+ *    This function currently clears all chars in the pending queue.  What this
+ *    means is that if plugin A freezes the stream some chars are added and
+ *    plugin B freezes the stream and then clears the stream then all the
+ *    chars in the queue are erased including the chars that plugin A froze.
+ *
+ *    If this becomes an issue then the frozen system will need to reworked
+ *    to note who locked the stream and let them only effect the queued
+ *    chars from that plugin.
+ *
+ * SEE ALSO:
+ *    DPS_FreezeStream()
+ ******************************************************************************/
+void DPS_ClearFrozenStream(void)
+{
+    Con_ClearFrozenStream();
+}

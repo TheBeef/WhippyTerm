@@ -428,6 +428,10 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,uint32_t Offset,uint32_t Len);
         void MoveMark(t_DataProMark *Mark,int Amount);
 
+        void FreezeStream(void);
+        void ReleaseFrozenStream(void);
+        void ClearFrozenStream(void);
+
         void SetDownloadProtocol(const char *NewProtocol);
         void GetDownloadProtocol(std::string &SelectedProtocol);
         t_KVList *GetDownloadOptionsPtr(void);
@@ -496,6 +500,10 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         bool BinaryConnection;
         uint64_t LastBellPlayed;
         bool DoAutoReopen;
+        unsigned int InputFrozenCount;
+        uint8_t *FrozenInputQueue;
+        uint32_t FrozenInputQueueSize;
+        uint32_t FrozenInputInsertPos;
 
         void FreeConnectionResources(bool FreeDB);
         void HandleCaptureIncomingData(const uint8_t *Inbuff,int bytes);
@@ -515,6 +523,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void SendReopenChangeEvent(void);
         void DoAutoReopenIfNeeded(void);
         void HandleFailed2OpenErrorMessage(void);
+        bool AddFrozenStrIfNeeded(uint8_t *Str);
 
         /* Call backs */
         void InformOfDelayTransmitTimeout(void);

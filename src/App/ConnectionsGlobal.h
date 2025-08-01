@@ -80,5 +80,8 @@ void Con_RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offse
 void Con_ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,uint32_t Offset,uint32_t Len);
 void Con_ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,uint32_t Offset,uint32_t Len);
 void Con_MoveMark(t_DataProMark *Mark,int Amount);
+void Con_FreezeStream(void);
+void Con_ReleaseFrozenStream(void);
+void Con_ClearFrozenStream(void);
 
 #endif

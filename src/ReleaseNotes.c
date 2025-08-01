@@ -31,6 +31,14 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_POLISH,"Reworked how manage bookmarks dialog handles custom connection settings",
+            "The manage bookmarks dialog used push buttons to control if the"
+            " bookmark was using custom settings or not.  This was confusing"
+            " and had no way to know if a bookmark was using custom settings"
+            " or not.  This has been reworked to use a checkbox that tells"
+            " the user if a bookmark is using global settings or custom"
+            " settings."},
+    {
         NOTETYPE_ENHANCEMENT,"Added a plugin API to be able to freeze the display",
             "Data processor plugins can now freeze the display so new text"
             " will not be added to the display until they release the"

@@ -31,6 +31,11 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added a plugin API to be able to freeze the display",
+            "Data processor plugins can now freeze the display so new text"
+            " will not be added to the display until they release the"
+            " freeze.  The plugin can also clear any frozen text."},
+    {
         NOTETYPE_ENHANCEMENT,"Added marks to data processors plugin API",
             "Data processor plugins can now drop \"markers\" as data"
             " comes in.  The plugin can now color/style from the mark to"

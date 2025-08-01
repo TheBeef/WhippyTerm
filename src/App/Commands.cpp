@@ -128,7 +128,7 @@ const char *m_CmdNames[]=
     "BridgeLockConnection2",                // e_Cmd_BridgeLockConnection2
     "BridgeCurrentConnection",              // e_Cmd_BridgeCurrentConnection
     "ReleaseBridgedConnections",            // e_Cmd_ReleaseBridgedConnections
-    "RestoreConnectionSettings",            // e_Cmd_RestoreConnectionSettings
+    "ToggleConnectionUseGlobalSettings",    // e_Cmd_ToggleConnectionUseGlobalSettings
     "ShowNonPrintable",                     // e_Cmd_ShowNonPrintable
     "ShowEndOfLines",                       // e_Cmd_ShowEndOfLines
     "SelectAll",                            // e_Cmd_SelectAll
@@ -236,7 +236,7 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_ManagePlugin,                     // e_UIMWMenu_ManagePlugin
     e_Cmd_BridgeCurrentConnection,          // e_UIMWMenu_BridgeConnections
     e_Cmd_ReleaseBridgedConnections,        // e_UIMWMenu_ReleaseBridgedConnections
-    e_Cmd_RestoreConnectionSettings,        // e_UIMWMenu_RestoreConnectionSettings
+    e_Cmd_ToggleConnectionUseGlobalSettings,// e_UIMWMenu_ConnectionUseGlobalSettings
     e_Cmd_ShowNonPrintable,                 // e_UIMWMenu_ShowNonPrintable
     e_Cmd_ShowEndOfLines,                   // e_UIMWMenu_ShowEndOfLines
     e_Cmd_SelectAll,                        // e_UIMWMenu_SelectAll

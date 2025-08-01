@@ -31,6 +31,10 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_POLISH,"Reworked custom connection settings menu work",
+            "Telling when a connection was using custom settings was not"
+            " clear.  The menu has been reworked to make it clearer."},
+    {
         NOTETYPE_POLISH,"Reworked how manage bookmarks dialog handles custom connection settings",
             "The manage bookmarks dialog used push buttons to control if the"
             " bookmark was using custom settings or not.  This was confusing"

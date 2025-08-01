@@ -1308,7 +1308,6 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     class Connection *Con;
     bool EnableSelectionBased;
     bool IsBinaryCon;
-    bool RestoreConnectionSettingsActive;
     bool Checked;
     i_BookmarkList bm;
     t_UIToolbarCtrl *ConnectToggle;
@@ -1329,7 +1328,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *ConnectionSettingsMenu;
     e_UIMenuCtrl *TransmitDelayMenu;
     e_UIMenuCtrl *AddBookmark;
-    e_UIMenuCtrl *RestoreConnectionSettings;
+    e_UIMenuCtrl *ConnectionUseGlobalSettings;
     e_UIMenuCtrl *ShowNonPrintable;
     e_UIMenuCtrl *ShowEndOfLines;
     e_UIMenuCtrl *InsertHorizontalRule;
@@ -1438,7 +1437,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     ConnectionSettingsMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ConnectionSettings);
     TransmitDelayMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_TransmitDelay);
     AddBookmark=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_AddBookmark);
-    RestoreConnectionSettings=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_RestoreConnectionSettings);
+    ConnectionUseGlobalSettings=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ConnectionUseGlobalSettings);
     ShowNonPrintable=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ShowNonPrintable);
     ShowEndOfLines=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ShowEndOfLines);
     InsertHorizontalRule=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_InsertHorizontalRule);
@@ -1497,8 +1496,6 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     SendBuffer12=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer12);
     SendBufferSendGeneric=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBufferSendGeneric);
 
-    RestoreConnectionSettingsActive=false;
-
     if(UITabCtrlGetTabCount(MainTabs)==0)
     {
         UIEnableMenu(CloseTabMenu,false);
@@ -1508,6 +1505,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(ChangeConnectionNameMenu,false);
         UIEnableMenu(ConnectionOptionsMenu,false);
         UIEnableMenu(ConnectionSettingsMenu,false);
+        UIEnableMenu(ConnectionUseGlobalSettings,false);
         UIEnableMenu(TransmitDelayMenu,false);
         UIEnableMenu(AddBookmark,false);
         UIEnableMenu(ShowNonPrintable,false);
@@ -1580,6 +1578,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
 
         UIMW_EnableApplyTerminalEmulationMenu(UIWin,false);
 
+        UICheckMenu(ConnectionUseGlobalSettings,false);
+
         ActivatePanels=false;
     }
     else
@@ -1588,7 +1588,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(CloseAllMenu,true);
         UIEnableMenu(ChangeConnectionNameMenu,true);
         UIEnableMenu(ConnectionOptionsMenu,true);
-        UIEnableMenu(ConnectionSettingsMenu,true);
+        UIEnableMenu(ConnectionUseGlobalSettings,true);
         UIEnableMenu(TransmitDelayMenu,true);
         UIEnableMenu(AddBookmark,true);
         UIEnableMenu(ShowNonPrintable,true);
@@ -1686,7 +1686,15 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableContextMenu(ContextMenu_Paste,Connected);
 
         if(Con->UsingCustomSettings)
-            RestoreConnectionSettingsActive=true;
+        {
+            UICheckMenu(ConnectionUseGlobalSettings,false);
+            UIEnableMenu(ConnectionSettingsMenu,true);
+        }
+        else
+        {
+            UICheckMenu(ConnectionUseGlobalSettings,true);
+            UIEnableMenu(ConnectionSettingsMenu,false);
+        }
 
         UICheckMenu(ShowNonPrintable,Con->GetShowNonPrintable());
         UICheckMenu(ShowEndOfLines,Con->GetShowEndOfLines());
@@ -1777,8 +1785,6 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
 
         ActivatePanels=true;
     }
-
-    UIEnableMenu(RestoreConnectionSettings,RestoreConnectionSettingsActive);
 
     HandleGoURIToolBttnEnabled();
 
@@ -2944,7 +2950,7 @@ void TheMainWindow::GotoBookmark(uintptr_t ID)
     if(bm->UseCustomSettings)
         UseSettings=&bm->CustomSettings;
     else
-        UseSettings=&g_Settings.DefaultConSettings;
+        UseSettings=NULL;
 
     if(g_Settings.BookmarksOpenNewTabs)
     {
@@ -3615,56 +3621,80 @@ void TheMainWindow::ShowConnectionSettings(void)
 
 /*******************************************************************************
  * NAME:
- *    TheMainWindow::ResetConnectionCustomSettings
+ *    TheMainWindow::ToggleConnectionUseGlobalSettings
  *
  * SYNOPSIS:
- *    void TheMainWindow::ResetConnectionCustomSettings(void);
+ *    void TheMainWindow::ToggleConnectionUseGlobalSettings(void);
  *
  * PARAMETERS:
  *    NONE
  *
  * FUNCTION:
- *    This function resets the active connections custom settings to the
- *    defaults.
+ *    This function checks the current "use global setting" flag and toggles
+ *    it for this connection.  It will ask the user questions about if they
+ *    really want to do it and if they want to apply it to the bookmark (if
+ *    any)
  *
  * RETURNS:
  *    NONE
  *
  * SEE ALSO:
- *
+ *    
  ******************************************************************************/
-void TheMainWindow::ResetConnectionCustomSettings(void)
+void TheMainWindow::ToggleConnectionUseGlobalSettings(void)
 {
     i_BookmarkList bm;
 
     if(ActiveCon==NULL)
         return;
 
-    if(UIAsk("Apply Default Settings","Are you sure you want to "
-            "apply default settings to this connection?",
-            e_AskBox_Question,e_AskBttns_YesNo)!=e_AskRet_Yes)
+    if(ActiveCon->UsingCustomSettings)
     {
-        return;
+        /* Connection is not using global settings, switch to global */
+
+        /* Only warn if they are different */
+        if(!AreConSettingsEqual(ActiveCon->CustomSettings,
+                g_Settings.DefaultConSettings))
+        {
+            if(UIAsk("Apply Default Settings","Are you sure you want to "
+                    "change this connection to using global settings?",
+                    e_AskBox_Question,e_AskBttns_YesNo)!=e_AskRet_Yes)
+            {
+                return;
+            }
+        }
+
+        ActiveCon->CustomSettings=g_Settings.DefaultConSettings;
+        ActiveCon->UsingCustomSettings=false;
+    }
+    else
+    {
+        /* Connection is using global settings, switch to custom */
+
+        /* We are turning it on so take a copy of the current settings */
+        ActiveCon->CustomSettings=g_Settings.DefaultConSettings;
+
+        /* Mark that we are using custom settings */
+        ActiveCon->UsingCustomSettings=true;
     }
 
-    ActiveCon->CustomSettings.DefaultSettings();
-    ActiveCon->UsingCustomSettings=false;
-
-    ActiveCon->ApplyCustomSettings();
-
-    /* Find this bookmark */
+    /* Handle bookmarks */
     bm=FindBookmarkByUID(ActiveCon->GetConnectionBookmark());
     if(bm!=g_BookmarkList.end())
     {
-        if(UIAsk("Apply Default Settings","Do you also want to "
-                "apply default settings to the bookmark as well?",
+        /* We are working with a bookmark, ask the user if they want this
+           change to also affect the bookmark */
+        if(UIAsk("Apply Settings to bookmark","Do you want to also apply this "
+                "to the bookmark?",
                 e_AskBox_Question,e_AskBttns_YesNo)==e_AskRet_Yes)
         {
-            bm->CustomSettings.DefaultSettings();
-            bm->UseCustomSettings=false;
+            bm->UseCustomSettings=ActiveCon->UsingCustomSettings;
+            bm->CustomSettings=ActiveCon->CustomSettings;
             SaveBookmarks();
         }
     }
+
+    ActiveCon->ApplyCustomSettings();
     RethinkActiveConnectionUI();
 }
 
@@ -5015,8 +5045,8 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
                 }
             }
         break;
-        case e_Cmd_RestoreConnectionSettings:
-            ResetConnectionCustomSettings();
+        case e_Cmd_ToggleConnectionUseGlobalSettings:
+            ToggleConnectionUseGlobalSettings();
         break;
         case e_Cmd_ShowNonPrintable:
             ToggleShowNonPrintables();

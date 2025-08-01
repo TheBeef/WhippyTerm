@@ -154,7 +154,6 @@ void Debug6(void);
         void ConnectionStatusChange(class Connection *Con);
         void ChangeTabLabel(class Connection *Con,const char *NewLabel);
         void RethinkBridgeMenu(void);
-        void ResetConnectionCustomSettings(void);
         void ShowConnectionSettings(void);
         void RethinkTabCountAfterFree(void);
         void ToggleShowNonPrintables(void);
@@ -176,6 +175,7 @@ void Debug6(void);
         void ApplyBGColor2Selection(e_SysColType Color,e_SysColShadeType Shade);
         void ChangeStyleBGColorSelectedColor(e_SysColType Color,e_SysColShadeType Shade);
         void DoFindCRCFromSelection(void);
+        void ToggleConnectionUseGlobalSettings(void);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

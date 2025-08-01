@@ -218,8 +218,6 @@ private slots:
     
     void on_actionConnection_Settings_triggered();
     
-    void on_actionRestore_Connection_Settings_to_Defaults_triggered();
-    
     void on_actionShow_NonPrintables_triggered();
     
     void on_actionShow_End_Of_Lines_triggered();
@@ -431,6 +429,8 @@ private slots:
     void on_actionCTRL_C_Handling_triggered();
     
     void on_actionCRC_Algorithm_Finder_triggered();
+    
+    void on_actionUse_Global_Settings_triggered();
     
 private:
     void resizeEvent(QResizeEvent *event);

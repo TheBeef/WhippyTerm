@@ -1324,12 +1324,6 @@ void Form_MainWindow::on_actionGet_Plugins_triggered()
     DoMenuTriggered(e_UIMWMenu_GetPlugins);
 }
 
-
-void Form_MainWindow::on_actionRestore_Connection_Settings_to_Defaults_triggered()
-{
-    DoMenuTriggered(e_UIMWMenu_RestoreConnectionSettings);
-}
-
 void Form_MainWindow::on_actionShow_NonPrintables_triggered()
 {
     DoMenuTriggered(e_UIMWMenu_ShowNonPrintable);
@@ -1938,5 +1932,11 @@ void Form_MainWindow::on_actionCTRL_C_Handling_triggered()
 void Form_MainWindow::on_actionCRC_Algorithm_Finder_triggered()
 {
     DoMenuTriggered(e_UIMWMenu_CRCFinder);
+}
+
+
+void Form_MainWindow::on_actionUse_Global_Settings_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ConnectionUseGlobalSettings);
 }
 

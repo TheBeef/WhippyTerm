@@ -175,8 +175,8 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionBridge_Connections;
         case e_UIMWMenu_ReleaseBridgedConnections:
             return (e_UIMenuCtrl *)realwin->ui->actionRelease_Bridged_Connections;
-        case e_UIMWMenu_RestoreConnectionSettings:
-            return (e_UIMenuCtrl *)realwin->ui->actionRestore_Connection_Settings_to_Defaults;
+        case e_UIMWMenu_ConnectionUseGlobalSettings:
+            return (e_UIMenuCtrl *)realwin->ui->actionUse_Global_Settings;
         case e_UIMWMenu_ShowNonPrintable:
             return (e_UIMenuCtrl *)realwin->ui->actionShow_NonPrintables;
         case e_UIMWMenu_ShowEndOfLines:

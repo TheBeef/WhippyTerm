@@ -119,7 +119,7 @@ typedef enum
     e_Cmd_BridgeLockConnection2,
     e_Cmd_BridgeCurrentConnection,
     e_Cmd_ReleaseBridgedConnections,
-    e_Cmd_RestoreConnectionSettings,
+    e_Cmd_ToggleConnectionUseGlobalSettings,
     e_Cmd_ShowNonPrintable,
     e_Cmd_ShowEndOfLines,
     e_Cmd_SelectAll,

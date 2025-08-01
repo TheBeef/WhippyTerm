@@ -120,7 +120,7 @@ typedef enum
     e_UIMWMenu_ManagePlugin,
     e_UIMWMenu_BridgeConnections,
     e_UIMWMenu_ReleaseBridgedConnections,
-    e_UIMWMenu_RestoreConnectionSettings,
+    e_UIMWMenu_ConnectionUseGlobalSettings,
     e_UIMWMenu_ShowNonPrintable,
     e_UIMWMenu_ShowEndOfLines,
     e_UIMWMenu_SelectAll,

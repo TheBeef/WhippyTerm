@@ -7263,6 +7263,38 @@ void Connection::MoveMark(t_DataProMark *Mark,int Amount)
 
 /*******************************************************************************
  * NAME:
+ *    Connection::GetMarkString
+ *
+ * SYNOPSIS:
+ *    const uint8_t *Connection::GetMarkString(t_DataProMark *Mark,
+ *          uint32_t *Size,uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Size [O] -- The number of bytes in the returned buffer.
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to copy the string.
+ *    Len [I] -- The number of chars to copy from this string.
+ *
+ * FUNCTION:
+ *    This function does the DPS_GetMarkString() function to the connection.
+ *
+ * RETURNS:
+ *    A pointer to a buffer with the string in it.
+ *
+ * SEE ALSO:
+ *    DPS_GetMarkString()
+ ******************************************************************************/
+const uint8_t *Connection::GetMarkString(t_DataProMark *Mark,uint32_t *Size,
+        uint32_t Offset,uint32_t Len)
+{
+    if(Display!=NULL)
+        return Display->GetMarkString(Mark,Size,Offset,Len);
+    return NULL;
+}
+
+/*******************************************************************************
+ * NAME:
  *    Connection::AddFrozenStrIfNeeded
  *
  * SYNOPSIS:

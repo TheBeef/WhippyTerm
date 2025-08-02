@@ -129,6 +129,7 @@ static void DPS_RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,uint32_
 static void DPS_ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,uint32_t Offset,uint32_t Len);
 static void DPS_ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,uint32_t Offset,uint32_t Len);
 static void DPS_MoveMark(t_DataProMark *Mark,int Amount);
+static const uint8_t *DPS_GetMarkString(t_DataProMark *Mark,uint32_t *Size,uint32_t Offset,uint32_t Len);
 static void DPS_FreezeStream(void);
 static void DPS_ClearFrozenStream(void);
 static void DPS_ReleaseFrozenStream(void);
@@ -183,6 +184,7 @@ struct DPS_API g_DPSAPI=
     DPS_ApplyFGColor2Mark,
     DPS_ApplyBGColor2Mark,
     DPS_MoveMark,
+    DPS_GetMarkString,
     DPS_FreezeStream,
     DPS_ClearFrozenStream,
     DPS_ReleaseFrozenStream,
@@ -524,105 +526,27 @@ void DPS_Init(void)
  *    AllocSettingsWidgets()
  *==============================================================================
  * NAME:
- *    DefaultSettings
+ *    ApplySettings
  *
  * SYNOPSIS:
- *    void DefaultSettings(t_PIKVList *Settings);
- *
- * PARAMETERS:
- *    Settings [O] -- This is where you store the settings.
- *
- * FUNCTION:
- *    This function sets 'Settings' to default values.
- *
- * RETURNS:
- *    NONE
- *
- * SEE ALSO:
- *    AllocSettingsWidgets()
- *==============================================================================
- * NAME:
- *    AllocConnectionData
- *
- * SYNOPSIS:
- *    t_DataProConnectionHandleType *(*AllocConnectionData)(
- *              t_DataProcessorHandleType *DataHandle);
- *
- * PARAMETERS:
- *    DataHandle [I] -- Your private data that was allocated with AllocateData()
- *
- * FUNCTION:
- *    This function is called when a connection is allocated.  It lets you
- *    allocate data per-connection (for example so each connection can have
- *    different settings).
- *
- * RETURNS:
- *    Your private connection data.
- *
- * SEE ALSO:
- *    
- *==============================================================================
- * NAME:
- *    FreeConnectionData
- *
- * SYNOPSIS:
- *    void FreeConnectionData(t_DataProConnectionHandleType *ConDataHandle);
- *
- * PARAMETERS:
- *    ConDataHandle [I] -- The data allocated with AllocConnectionData()
- *
- * FUNCTION:
- *    This function is called to free the per-connection data when a connection
- *    is closed.
- *
- * RETURNS:
- *    NONE
- *
- * SEE ALSO:
- *    AllocConnectionData()
- *==============================================================================
- * NAME:
- *    LoadSettings
- *
- * SYNOPSIS:
- *    void LoadSettings(t_DataProConnectionHandleType *ConDataHandle,
+ *    void ApplySettings(t_DataProcessorHandleType *DataHandle,
  *              t_PIKVList *Settings);
  *
  * PARAMETERS:
- *    ConDataHandle [I] -- The data allocated with AllocConnectionData()
- *    Settings [I] -- The settings for this connection.
+ *    DataHandle [I] -- The data handle to work on.  This is your internal
+ *                      data.
+ *    Settings [I] -- This is where you get your settings from.
  *
  * FUNCTION:
- *    This function is called to take the settings and apply them to a
- *    connection.
+ *    This function takes the settings from 'Settings' and setups the
+ *    plugin to use them when new bytes come in or out.  It will normally
+ *    copy the settings from key/value pairs to internal data structures.
  *
  * RETURNS:
  *    NONE
  *
  * SEE ALSO:
- *    AllocConnectionData()
- *==============================================================================
- * NAME:
- *    GetActiveConnectionData
- *
- * SYNOPSIS:
- *    t_DataProConnectionHandleType *GetActiveConnectionData(void);
- *
- * PARAMETERS:
- *    NONE
- *
- * FUNCTION:
- *    This function is used to get the per-connection private data.  This only
- *    works in functions that are called when a connection is active
- *    (like ProcessKeyPress(), ProcessIncomingTextByte(),
- *    ProcessIncomingBinaryByte()).
- *
- * RETURNS:
- *    A pointer to your pre-connection private data.  If there is no active
- *    connection then this return NULL.
- *
- * SEE ALSO:
- *    AllocConnectionData()
+ *    
  *==============================================================================
  *
  * SEE ALSO:
@@ -2855,6 +2779,52 @@ void DPS_ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,uint32_t Offset,
 void DPS_MoveMark(t_DataProMark *Mark,int Amount)
 {
     Con_MoveMark(Mark,Amount);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_GetMarkString
+ *
+ * SYNOPSIS:
+ *    static const uint8_t *DPS_GetMarkString(t_DataProMark *Mark,
+ *              uint32_t *Size,uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Size [O] -- The number of bytes in the returned buffer.
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to copy the string.
+ *    Len [I] -- The number of chars to copy from this string.  Pass 0 for
+ *               all the bytes between Mark+Offset to the cursor.
+ *
+ * FUNCTION:
+ *    Gets a copy of the bytes between a mark and the cursor.
+ *
+ * RETURNS:
+ *    A buffer with the data from the mark to the cursor in it.  This buffer
+ *    is valid until the connection is modified.  So you should consider this
+ *    buffer invalid after you call another function that works on the
+ *    connection or when your function goes out of scope.  This function will
+ *    also return NULL if there was an error (or the mark is invalid).
+ *
+ * NOTES:
+ *    The "string" that is returned is not really a string, but instead of
+ *    buffer with the string in it.  This means that the "string" can have
+ *    \0's in it (if this is a binary connection for example).
+ *
+ *    Although the returned buffer is not a real c-string, the buffer will
+ *    actually be (*Size)+1, and a \0 will be added to the end.  This is so
+ *    when you are text based plugin you can just grab the result and
+ *    do string operations on it.  The binary system will also add this zero
+ *    past the end but you shouldn't use it.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static const uint8_t *DPS_GetMarkString(t_DataProMark *Mark,uint32_t *Size,
+        uint32_t Offset,uint32_t Len)
+{
+    return Con_GetMarkString(Mark,Size,Offset,Len);
 }
 
 /*******************************************************************************

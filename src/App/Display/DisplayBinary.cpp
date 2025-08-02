@@ -165,6 +165,8 @@ DisplayBinary::DisplayBinary()
 {
     TextDisplayCtrl=NULL;
     MarkerList=NULL;
+    MarkerGetStrBuffer=NULL;
+    MarkerGetStrBufferSize=0;
 
     HexBufferSize=0;
     HexBuffer=NULL;
@@ -353,6 +355,9 @@ DisplayBinary::~DisplayBinary()
         delete MarkerList;
         MarkerList=Marker;
     }
+
+    if(MarkerGetStrBuffer!=NULL)
+        free(MarkerGetStrBuffer);
 
     if(ScrollTimer!=NULL)
         FreeUITimer(ScrollTimer);
@@ -3571,4 +3576,107 @@ void DisplayBinary::MoveMark(t_DataProMark *Mark,int Amount)
     AdvancePoint(&P1,Amount);
     Marker->Line=P1.Line;
     Marker->Offset=P1.Offset;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetMarkString
+ *
+ * SYNOPSIS:
+ *    const uint8_t *DisplayBinary::GetMarkString(t_DataProMark *Mark,
+ *              uint32_t *Size,uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Size [O] -- The number of bytes in the returned buffer.
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to copy the string.
+ *    Len [I] -- The number of chars to copy from this string.
+ *
+ * FUNCTION:
+ *    This function does the DPS_GetMarkString() function to the display.
+ *
+ * RETURNS:
+ *    A pointer to a buffer with the string in it.
+ *
+ * SEE ALSO:
+ *    DPS_GetMarkString()
+ ******************************************************************************/
+const uint8_t *DisplayBinary::GetMarkString(t_DataProMark *Mark,uint32_t *Size,
+        uint32_t Offset,uint32_t Len)
+{
+    struct BinaryPointMarker *Marker=(struct BinaryPointMarker *)Mark;
+    struct DisBin_PointPair P1;
+    struct DisBin_PointPair P2;
+    struct DisBin_Block Blocks[2];
+    const uint8_t *StartPtr;
+    const uint8_t *EndPtr;
+    int s;
+    uint32_t TotalNeededSize;
+    uint8_t *InsertPos;
+
+    if(!Marker->Valid)
+    {
+        *Size=0;
+        return NULL;
+    }
+
+    P1.Line=Marker->Line;
+    P1.Offset=Marker->Offset;
+    AdvancePoint(&P1,Offset);
+
+    if(Len==0)
+    {
+        P2.Line=BottomOfBufferLine;
+        P2.Offset=InsertPoint;
+    }
+    else
+    {
+        P2.Line=P1.Line;
+        P2.Offset=P1.Offset;
+        AdvancePoint(&P2,Len);
+    }
+
+    GetNormalizedPoints(&P1,&P2,Blocks);
+
+    /* Figure out how many bytes we will be returning */
+    TotalNeededSize=0;
+    for(s=0;s<2;s++)
+    {
+        if(Blocks[s].Start.Line==NULL || Blocks[s].End.Line==NULL)
+            break;
+
+        StartPtr=&Blocks[s].Start.Line[Blocks[s].Start.Offset];
+        EndPtr=&Blocks[s].End.Line[Blocks[s].End.Offset];
+        TotalNeededSize+=EndPtr-StartPtr;
+    }
+    TotalNeededSize+=1; // A spot for the \0 we add (the doc's say will will add it so text processors's life is a little easier)
+
+    /* Resize the buffer as needed */
+    if(MarkerGetStrBufferSize<TotalNeededSize)
+    {
+        /* We need to resize the buffer */
+        free(MarkerGetStrBuffer);
+        MarkerGetStrBuffer=(uint8_t *)malloc(TotalNeededSize);
+        if(MarkerGetStrBuffer==NULL)
+            return NULL;
+    }
+
+    /* Make the return "string" (really a byte buffer) */
+    InsertPos=MarkerGetStrBuffer;
+    for(s=0;s<2;s++)
+    {
+        if(Blocks[s].Start.Line==NULL || Blocks[s].End.Line==NULL)
+            break;
+
+        StartPtr=&Blocks[s].Start.Line[Blocks[s].Start.Offset];
+        EndPtr=&Blocks[s].End.Line[Blocks[s].End.Offset];
+
+        memcpy(InsertPos,StartPtr,EndPtr-StartPtr);
+        InsertPos+=EndPtr-StartPtr;
+    }
+    *InsertPos++=0; // Add the forced \0
+
+    *Size=TotalNeededSize-1;
+    return MarkerGetStrBuffer;
 }

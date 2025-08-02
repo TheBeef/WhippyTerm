@@ -180,6 +180,7 @@ class DisplayText : public DisplayBase
         void ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,uint32_t Offset,uint32_t Len);
         void ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,uint32_t Offset,uint32_t Len);
         void MoveMark(t_DataProMark *Mark,int Amount);
+        const uint8_t *GetMarkString(t_DataProMark *Mark,uint32_t *Size,uint32_t Offset,uint32_t Len);
 
         void SetBlockDeviceMode(bool On);
 
@@ -240,6 +241,7 @@ class DisplayText : public DisplayBase
 
         /* Markers */
         struct TextPointMarker *MarkerList;
+        std::string GetMarkTextBuffer;
 
         bool DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event);
         void DoScrollTimerTimeout(void);
@@ -315,6 +317,7 @@ class DisplayText : public DisplayBase
 
         /* Blocks */
         void ChangeAttribsBetweenPoints(int P1X,int P1Y,int P2X,int P2Y,uint32_t Attribs,uint32_t FGColor,uint32_t BGColor,uint32_t ULineColor,uint32_t What);
+        bool GetStringBetweenPoints(int P1X,int P1Y,int P2X,int P2Y,std::string &Clip);
 
         /* Send panel */
         t_UITextInputCtrl *GetSendPanel_HexPosInput(void);

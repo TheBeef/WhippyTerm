@@ -3563,79 +3563,94 @@ bool DisplayText::ConvertScreenXY2Chars(int x,int y,int *CharX,int *CharY)
  ******************************************************************************/
 bool DisplayText::GetSelectionString(std::string &Clip)
 {
-    struct DTPoint Start;
-    struct DTPoint End;
-    i_TextLines CurLine;
-    i_TextLineFrags CurFrag;
-    string::iterator StartOfStr;
-    string::iterator EndOfStr;
+    int SelX1;
+    int SelY1;
+    int SelX2;
+    int SelY2;
 
     Clip="";
 
-    if(!FindPointsOfSelection(Start,End))
+    /* Return false if there is no selection */
+    if(!IsThereASelection())
         return false;
 
-    if(Start.Line==End.Line && Start.Frag==End.Frag)
-    {
-        /* On the same line and frag */
-        Clip.assign(Start.Frag->Text,Start.StrPos,End.StrPos-Start.StrPos);
-    }
-    else
-    {
-        CurLine=Start.Line;
-        CurFrag=Start.Frag;
+    GetNormalizedSelection(SelX1,SelY1,SelX2,SelY2);
 
-        /* Take from Start to the end of frag */
-        if(Start.Frag!=Start.Line->Frags.end())
-        {
-            Clip.assign(Start.Frag->Text,Start.StrPos,string::npos);
-            CurFrag++;
-        }
-        else
-        {
-            /* The selection was past the end of the line (or it was a
-               blank line) so we add a blank line and then continue the
-               copy. */
-            Clip="\n";
-            CurLine++;  // Move to the end line
-            CurFrag=CurLine->Frags.begin(); // And the first fragment
-        }
+    return GetStringBetweenPoints(SelX1,SelY1,SelX2,SelY2,Clip);
 
-        /* Now copy all the frag from here to end frag */
-        while(CurFrag!=End.Frag)
-        {
-            if(CurFrag==CurLine->Frags.end())
-            {
-                /* End of the line move to the next */
-                CurLine++;
-                if(CurLine==Lines.end())
-                {
-                    /* Unexpected end */
-                    return false;
-                }
-                CurFrag=CurLine->Frags.begin();
-                Clip.append("\n");
-                continue;
-            }
-
-            if(CurFrag!=CurLine->Frags.end() &&
-                    CurFrag->FragType==e_TextCanvasFrag_String)
-            {
-                Clip.append(CurFrag->Text);
-            }
-
-            CurFrag++;
-        }
-
-        /* Now take the last part of the string */
-        if(CurFrag!=CurLine->Frags.end() &&
-                CurFrag->FragType==e_TextCanvasFrag_String)
-        {
-            Clip.append(End.Frag->Text,0,End.StrPos);
-        }
-    }
-
-    return true;
+//    struct DTPoint Start;
+//    struct DTPoint End;
+//    i_TextLines CurLine;
+//    i_TextLineFrags CurFrag;
+//    string::iterator StartOfStr;
+//    string::iterator EndOfStr;
+//
+//    Clip="";
+//
+//    if(!FindPointsOfSelection(Start,End))
+//        return false;
+//
+//    if(Start.Line==End.Line && Start.Frag==End.Frag)
+//    {
+//        /* On the same line and frag */
+//        Clip.assign(Start.Frag->Text,Start.StrPos,End.StrPos-Start.StrPos);
+//    }
+//    else
+//    {
+//        CurLine=Start.Line;
+//        CurFrag=Start.Frag;
+//
+//        /* Take from Start to the end of frag */
+//        if(Start.Frag!=Start.Line->Frags.end())
+//        {
+//            Clip.assign(Start.Frag->Text,Start.StrPos,string::npos);
+//            CurFrag++;
+//        }
+//        else
+//        {
+//            /* The selection was past the end of the line (or it was a
+//               blank line) so we add a blank line and then continue the
+//               copy. */
+//            Clip="\n";
+//            CurLine++;  // Move to the end line
+//            CurFrag=CurLine->Frags.begin(); // And the first fragment
+//        }
+//
+//        /* Now copy all the frag from here to end frag */
+//        while(CurFrag!=End.Frag)
+//        {
+//            if(CurFrag==CurLine->Frags.end())
+//            {
+//                /* End of the line move to the next */
+//                CurLine++;
+//                if(CurLine==Lines.end())
+//                {
+//                    /* Unexpected end */
+//                    return false;
+//                }
+//                CurFrag=CurLine->Frags.begin();
+//                Clip.append("\n");
+//                continue;
+//            }
+//
+//            if(CurFrag!=CurLine->Frags.end() &&
+//                    CurFrag->FragType==e_TextCanvasFrag_String)
+//            {
+//                Clip.append(CurFrag->Text);
+//            }
+//
+//            CurFrag++;
+//        }
+//
+//        /* Now take the last part of the string */
+//        if(CurFrag!=CurLine->Frags.end() &&
+//                CurFrag->FragType==e_TextCanvasFrag_String)
+//        {
+//            Clip.append(End.Frag->Text,0,End.StrPos);
+//        }
+//    }
+//
+//    return true;
 }
 
 /*******************************************************************************
@@ -6083,6 +6098,112 @@ void DisplayText::ChangeAttribsBetweenPoints(int P1X,int P1Y,int P2X,int P2Y,
 
 /*******************************************************************************
  * NAME:
+ *    DisplayText::GetSelectionString
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::GetStringBetweenPoints(int P1X,int P1Y,int P2X,int P2Y,
+ *          std::string &Clip);
+ *
+ * PARAMETERS:
+ *    P1X [I] -- The X pos of the first point
+ *    P1Y [I] -- The Y pos of the first point
+ *    P2X [I] -- The X pos of the second point (this must come after P1X,P1Y)
+ *    P2Y [I] -- The Y pos of the second point (this must come after P1X,P1Y)
+ *    Clip [O] -- The text from the selection
+ *
+ * FUNCTION:
+ *    This function gets a copy of the text between 2 points.
+ *
+ * RETURNS:
+ *    true -- The block was valid and 'Clip' has been set
+ *    false --- One of points we invalid and 'Clip' has been set to ""
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayText::GetStringBetweenPoints(int P1X,int P1Y,int P2X,int P2Y,
+        std::string &Clip)
+{
+    struct DTPoint Start;
+    struct DTPoint End;
+    i_TextLines CurLine;
+    i_TextLineFrags CurFrag;
+    string::iterator StartOfStr;
+    string::iterator EndOfStr;
+
+    Clip="";
+
+    if(!FindPoint(P1X,P1Y,Start,Lines.end(),0))
+        return false;
+
+    if(!FindPoint(P2X,P2Y,End,Start.Line,Start.LineY))
+        return false;
+
+    if(Start.Line==End.Line && Start.Frag==End.Frag)
+    {
+        /* On the same line and frag */
+        Clip.assign(Start.Frag->Text,Start.StrPos,End.StrPos-Start.StrPos);
+    }
+    else
+    {
+        CurLine=Start.Line;
+        CurFrag=Start.Frag;
+
+        /* Take from Start to the end of frag */
+        if(Start.Frag!=Start.Line->Frags.end())
+        {
+            Clip.assign(Start.Frag->Text,Start.StrPos,string::npos);
+            CurFrag++;
+        }
+        else
+        {
+            /* The point was past the end of the line (or it was a
+               blank line) so we add a blank line and then continue the
+               copy. */
+            Clip="\n";
+            CurLine++;  // Move to the end line
+            CurFrag=CurLine->Frags.begin(); // And the first fragment
+        }
+
+        /* Now copy all the frag from here to end frag */
+        while(CurFrag!=End.Frag)
+        {
+            if(CurFrag==CurLine->Frags.end())
+            {
+                /* End of the line move to the next */
+                CurLine++;
+                if(CurLine==Lines.end())
+                {
+                    /* Unexpected end */
+                    return false;
+                }
+                CurFrag=CurLine->Frags.begin();
+                Clip.append("\n");
+                continue;
+            }
+
+            if(CurFrag!=CurLine->Frags.end() &&
+                    CurFrag->FragType==e_TextCanvasFrag_String)
+            {
+                Clip.append(CurFrag->Text);
+            }
+
+            CurFrag++;
+        }
+
+        /* Now take the last part of the string */
+        if(CurFrag!=CurLine->Frags.end() &&
+                CurFrag->FragType==e_TextCanvasFrag_String)
+        {
+            Clip.append(End.Frag->Text,0,End.StrPos);
+        }
+    }
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayText::ToggleAttribs2Selection
  *
  * SYNOPSIS:
@@ -7075,4 +7196,80 @@ void DisplayText::MoveMark(t_DataProMark *Mark,int Amount)
     /* Move by Amount */
     AdvancePoint(Marker->X,Marker->Y,Amount,0,ScreenFirstLineY,
             CursorX,CursorGlobalY);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::GetMarkString
+ *
+ * SYNOPSIS:
+ *    const uint8_t *DisplayText::GetMarkString(t_DataProMark *Mark,
+ *          uint32_t *Size,uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Mark [I] -- The mark to work on
+ *    Size [O] -- The number of bytes in the returned buffer.
+ *    Offset [I] -- The number of chars from the mark to skip before starting
+ *                  to copy the string.
+ *    Len [I] -- The number of chars to copy from this string.
+ *
+ * FUNCTION:
+ *    This function does the DPS_GetMarkString() function to the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_GetMarkString()
+ ******************************************************************************/
+const uint8_t *DisplayText::GetMarkString(t_DataProMark *Mark,uint32_t *Size,
+        uint32_t Offset,uint32_t Len)
+{
+    struct TextPointMarker *Marker=(struct TextPointMarker *)Mark;
+    int CursorGlobalY;
+    int ScreenFirstLineY;
+    int PX;
+    int PY;
+    int StopX;
+    int StopY;
+
+    *Size=0;
+    if(!Marker->Valid)
+        return NULL;
+
+    if(LinesCount<ScreenHeightChars)
+    {
+        CursorGlobalY=CursorY;
+        ScreenFirstLineY=0;
+    }
+    else
+    {
+        CursorGlobalY=LinesCount-ScreenHeightChars+CursorY;
+        ScreenFirstLineY=LinesCount-ScreenHeightChars;
+    }
+
+    /* Move by offset */
+    PX=Marker->X;
+    PY=Marker->Y;
+    AdvancePoint(PX,PY,Offset,0,ScreenFirstLineY,CursorX,CursorGlobalY);
+
+    /* Figure out where to stop by adding 'Len' to the current point */
+    if(Len!=0)
+    {
+        StopX=PX;
+        StopY=PY;
+        AdvancePoint(StopX,StopY,Len,0,ScreenFirstLineY,CursorX,CursorGlobalY);
+    }
+    else
+    {
+        /* Use the cursor pos */
+        StopX=CursorX;
+        StopY=CursorGlobalY;
+    }
+
+    if(!GetStringBetweenPoints(PX,PY,StopX,StopY,GetMarkTextBuffer))
+        return NULL;
+
+    *Size=GetMarkTextBuffer.length();
+    return (const uint8_t *)GetMarkTextBuffer.c_str();
 }

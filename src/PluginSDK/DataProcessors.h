@@ -227,6 +227,7 @@ struct DPS_API
     void (*ApplyFGColor2Mark)(t_DataProMark *Mark,uint32_t FGColor,uint32_t Offset,uint32_t Len);
     void (*ApplyBGColor2Mark)(t_DataProMark *Mark,uint32_t BGColor,uint32_t Offset,uint32_t Len);
     void (*MoveMark)(t_DataProMark *Mark,int Amount);
+    const uint8_t *(*GetMarkString)(t_DataProMark *Mark,uint32_t *Size,uint32_t Offset,uint32_t Len);
     void (*FreezeStream)(void);
     void (*ClearFrozenStream)(void);
     void (*ReleaseFrozenStream)(void);

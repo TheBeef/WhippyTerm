@@ -112,6 +112,7 @@ class DisplayBinary : public DisplayBase
         void ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,uint32_t Offset,uint32_t Len);
         void ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,uint32_t Offset,uint32_t Len);
         void MoveMark(t_DataProMark *Mark,int Amount);
+        const uint8_t *GetMarkString(t_DataProMark *Mark,uint32_t *Size,uint32_t Offset,uint32_t Len);
 
     private:
         bool InitCalled;
@@ -152,6 +153,8 @@ class DisplayBinary : public DisplayBase
 
         /* Markers */
         struct BinaryPointMarker *MarkerList;
+        uint8_t *MarkerGetStrBuffer;
+        uint32_t MarkerGetStrBufferSize;
 
         /* Big list that hasn't been grouped (was before started grouping) */
         bool DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event);

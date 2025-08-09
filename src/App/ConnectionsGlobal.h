@@ -48,7 +48,6 @@
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
 void Con_SetActiveConnection(class Connection *ActiveCon);
-struct ProcessorConData *Con_GetCurrentProcessorData(void);
 void Con_WriteData(const uint8_t *Data,int Bytes);
 void Con_InformOfConnected(uintptr_t ID);
 void Con_InformOfDisconnected(uintptr_t ID);
@@ -84,5 +83,6 @@ const uint8_t *Con_GetMarkString(t_DataProMark *Mark,uint32_t *Size,uint32_t Off
 void Con_FreezeStream(void);
 void Con_ReleaseFrozenStream(void);
 void Con_ClearFrozenStream(void);
+const uint8_t *Con_GetFrozenString(uint32_t *Size);
 
 #endif

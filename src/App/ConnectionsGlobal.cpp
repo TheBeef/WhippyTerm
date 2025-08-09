@@ -76,36 +76,6 @@ void Con_SetActiveConnection(class Connection *ActiveCon)
 
 /*******************************************************************************
  * NAME:
- *    Con_GetCurrentProcessorData
- *
- * SYNOPSIS:
- *    struct ProcessorConData *Con_GetCurrentProcessorData(void);
- *
- * PARAMETERS:
- *    NONE
- *
- * FUNCTION:
- *    This function gets the current processor connection data.  This should
- *    really only be used by the Data Processors System.
- *
- * RETURNS:
- *    A pointer to the processor connection data for the active connection
- *    (the connection that is involved in the current event).
- *    This will be NULL if there is no active connection.
- *
- * SEE ALSO:
- *    
- ******************************************************************************/
-struct ProcessorConData *Con_GetCurrentProcessorData(void)
-{
-    if(m_ActiveConnection==NULL)
-        return NULL;
-
-    return m_ActiveConnection->GetCurrentProcessorData();
-}
-
-/*******************************************************************************
- * NAME:
  *    Con_WriteData
  *
  * SYNOPSIS:
@@ -1060,4 +1030,32 @@ const uint8_t *Con_GetMarkString(t_DataProMark *Mark,uint32_t *Size,
         return NULL;
 
     return m_ActiveConnection->GetMarkString(Mark,Size,Offset,Len);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Con_GetFrozenString
+ *
+ * SYNOPSIS:
+ *    const uint8_t *Con_GetFrozenString(uint32_t *Size);
+ *
+ * PARAMETERS:
+ *    Size [O] -- The number of bytes in the returned buffer.
+ *
+ * FUNCTION:
+ *    This function does the DPS_GetFrozenString() function to the active
+ *    connection.
+ *
+ * RETURNS:
+ *    A pointer to a buffer with the string in it.
+ *
+ * SEE ALSO:
+ *    DPS_GetFrozenString()
+ ******************************************************************************/
+const uint8_t *Con_GetFrozenString(uint32_t *Size)
+{
+    if(m_ActiveConnection==NULL)
+        return NULL;
+
+    return m_ActiveConnection->GetFrozenString(Size);
 }

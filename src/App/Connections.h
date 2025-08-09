@@ -276,6 +276,52 @@ struct ConMWEvent
     const union ConMWInfo *Info;
 };
 
+typedef enum
+{
+    e_ConFrozenQueueEntry_WriteChar2Display,
+    e_ConFrozenQueueEntry_SetFGColor,
+    e_ConFrozenQueueEntry_SetBGColor,
+    e_ConFrozenQueueEntry_SetULineColor,
+    e_ConFrozenQueueEntry_SetAttribs,
+    e_ConFrozenQueueEntry_DoFunction,
+    e_ConFrozenQueueEntry_InsertString,
+    e_ConFrozenQueueEntry_DoBell,
+    e_ConFrozenQueueEntryMAX
+} e_ConFrozenQueueEntryType;
+
+struct Connection_FrozenQueueFn
+{
+    e_ConFuncType Func;
+    uintptr_t Arg1;
+    uintptr_t Arg2;
+    uintptr_t Arg3;
+    uintptr_t Arg4;
+    uintptr_t Arg5;
+    uintptr_t Arg6;
+    uint8_t *Str;
+};
+
+struct Connection_FrozenQueueInsertStr
+{
+    uint8_t *Str;
+    uint_fast32_t Len;
+};
+
+struct Connection_FrozenQueueEntry
+{
+    e_ConFrozenQueueEntryType Type;
+    union
+    {
+        uint8_t *Str;
+        uint32_t Color;
+        uint32_t Attribs;
+        bool VisualOnly;
+        struct Connection_FrozenQueueFn Fn;
+        struct Connection_FrozenQueueInsertStr InsertStr;
+    };
+    struct Connection_FrozenQueueEntry *Next;
+};
+
 /***  CLASS DEFINITIONS                ***/
 class Connection
 {
@@ -300,7 +346,6 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         bool SetConnectionOptions(const t_KVList &Options);
         bool GetConnectionOptions(t_KVList &Options);
         void SetMainWindow(class TheMainWindow *MainWindow);
-        bool AddTab(void);
         void SetDisplayName(const char *Name);
         void GetDisplayName(std::string &Name);
         void TextCanvasResize(int Width,int Height);
@@ -369,7 +414,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void InformOfConnected(void);
         void InformOfDisconnected(void);
         bool InformOfDataAvaiable(void);
-        struct ProcessorConData *GetCurrentProcessorData(void);
+//        struct ProcessorConData *GetCurrentProcessorData(void);
         bool GetConnectedStatus(void);
         void SetFGColor(uint32_t FGColor);
         uint32_t GetFGColor(void);
@@ -432,6 +477,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void FreezeStream(void);
         void ReleaseFrozenStream(void);
         void ClearFrozenStream(void);
+        const uint8_t *GetFrozenString(uint32_t *Size);
 
         void SetDownloadProtocol(const char *NewProtocol);
         void GetDownloadProtocol(std::string &SelectedProtocol);
@@ -501,10 +547,15 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         bool BinaryConnection;
         uint64_t LastBellPlayed;
         bool DoAutoReopen;
-        unsigned int InputFrozenCount;
-        uint8_t *FrozenInputQueue;
-        uint32_t FrozenInputQueueSize;
-        uint32_t FrozenInputInsertPos;
+
+        /* Frozen */
+        bool InputFrozen;
+        struct Connection_FrozenQueueEntry *FrozenQueue;
+        struct Connection_FrozenQueueEntry *FrozenQueueEnd;
+        bool DoingIncomingByteProcessing;
+        uint_fast32_t FrozenQueueStrLen;    // We add up the length that we will be returning from GetFrozenString() so we don't need to loop over the string
+        uint8_t *FrozenRetStr;
+        uint_fast32_t FrozenRetStrBufferSize;
 
         void FreeConnectionResources(bool FreeDB);
         void HandleCaptureIncomingData(const uint8_t *Inbuff,int bytes);
@@ -524,7 +575,19 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void SendReopenChangeEvent(void);
         void DoAutoReopenIfNeeded(void);
         void HandleFailed2OpenErrorMessage(void);
-        bool AddFrozenStrIfNeeded(uint8_t *Str);
+
+        /* Frozen */
+        bool FrozenQueueIfNeeded_Write(uint8_t *Str);
+        bool FrozenQueueIfNeeded_SetFGColor(uint32_t NewColor);
+        bool FrozenQueueIfNeeded_SetBGColor(uint32_t NewColor);
+        bool FrozenQueueIfNeeded_SetULineColor(uint32_t NewColor);
+        bool FrozenQueueIfNeeded_SetAttrib(uint32_t NewAttrib);
+        bool FrozenQueueIfNeeded_Function(e_ConFuncType Func,uintptr_t Arg1,uintptr_t Arg2,uintptr_t Arg3,uintptr_t Arg4,uintptr_t Arg5,uintptr_t Arg6);
+        bool FrozenQueueIfNeeded_InsertStr(uint8_t *Str,uint32_t Len);
+        bool FrozenQueueIfNeeded_Bell(bool VisualOnly);
+        void Add2FrozenQueue(struct Connection_FrozenQueueEntry *Ent);
+        void FreeFrozenQueue(void);
+        void PlayBackFrozenQueue(void);
 
         /* Call backs */
         void InformOfDelayTransmitTimeout(void);

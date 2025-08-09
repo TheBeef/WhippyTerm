@@ -194,19 +194,23 @@ class DisplayText : public DisplayBase
 
         bool ShowNonPrintables;
         bool ShowEndOfLines;
-        int CursorX;                // In chars
-        int CursorY;
         bool LeftMouseDown;         // Is the left mouse button down
         int AutoSelectionScrolldx;
         int AutoSelectionScrolldy;
-        int CursorXPx;              // In pixels
 
         int CharWidthPx;
         int CharHeightPx;
 
+        /* Cursor */
+        int CursorX;                // In chars
+        int CursorY;
         e_TextCursorStyleType CursorStyle;
         e_TextCursorStyleType LastCursorStyle;
         bool LastCursorVisible;
+        int CursorXPx;              // In pixels
+        int MaxCursorX;             // The max value we have been moved to for this line (reset every time Y changes)
+        int MaxCursorY;             // The max value we have been moved to for this screen
+        int LastCursorY;            // The value that we set the cursor to when the cursor was last moved
 
         /* Text Area (the total size of the text area in the widget) in chars */
         int TextAreaWidthPx;
@@ -331,6 +335,7 @@ class DisplayText : public DisplayBase
         void InvalidateAllMarks(void);
         void InvalidateOutOfRangeMarks(void);
         void DoApplyToMark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,uint32_t Len,uint32_t What);
+        void GetMarkMinMaxPoints(struct TextPointMarker *Marker,int &PX,int &PY,int &StopX,int &StopY,uint32_t Offset,uint32_t Len);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

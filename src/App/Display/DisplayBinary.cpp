@@ -3298,9 +3298,17 @@ void DisplayBinary::ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,
     P1.Offset=Marker->Offset;
     AdvancePoint(&P1,Offset);
 
-    P2.Line=P1.Line;
-    P2.Offset=P1.Offset;
-    AdvancePoint(&P2,Len);
+    if(Len==0)
+    {
+        P2.Line=BottomOfBufferLine;
+        P2.Offset=InsertPoint;
+    }
+    else
+    {
+        P2.Line=P1.Line;
+        P2.Offset=P1.Offset;
+        AdvancePoint(&P2,Len);
+    }
 
     GetNormalizedPoints(&P1,&P2,Blocks);
 
@@ -3370,9 +3378,17 @@ void DisplayBinary::RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,
     P1.Offset=Marker->Offset;
     AdvancePoint(&P1,Offset);
 
-    P2.Line=P1.Line;
-    P2.Offset=P1.Offset;
-    AdvancePoint(&P2,Len);
+    if(Len==0)
+    {
+        P2.Line=BottomOfBufferLine;
+        P2.Offset=InsertPoint;
+    }
+    else
+    {
+        P2.Line=P1.Line;
+        P2.Offset=P1.Offset;
+        AdvancePoint(&P2,Len);
+    }
 
     GetNormalizedPoints(&P1,&P2,Blocks);
 
@@ -3442,9 +3458,17 @@ void DisplayBinary::ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,
     P1.Offset=Marker->Offset;
     AdvancePoint(&P1,Offset);
 
-    P2.Line=P1.Line;
-    P2.Offset=P1.Offset;
-    AdvancePoint(&P2,Len);
+    if(Len==0)
+    {
+        P2.Line=BottomOfBufferLine;
+        P2.Offset=InsertPoint;
+    }
+    else
+    {
+        P2.Line=P1.Line;
+        P2.Offset=P1.Offset;
+        AdvancePoint(&P2,Len);
+    }
 
     GetNormalizedPoints(&P1,&P2,Blocks);
 
@@ -3514,9 +3538,17 @@ void DisplayBinary::ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,
     P1.Offset=Marker->Offset;
     AdvancePoint(&P1,Offset);
 
-    P2.Line=P1.Line;
-    P2.Offset=P1.Offset;
-    AdvancePoint(&P2,Len);
+    if(Len==0)
+    {
+        P2.Line=BottomOfBufferLine;
+        P2.Offset=InsertPoint;
+    }
+    else
+    {
+        P2.Line=P1.Line;
+        P2.Offset=P1.Offset;
+        AdvancePoint(&P2,Len);
+    }
 
     GetNormalizedPoints(&P1,&P2,Blocks);
 

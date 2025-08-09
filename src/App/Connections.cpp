@@ -74,8 +74,6 @@ using namespace std;
 
 #define MAX_BELL_RATE                   100     // We have to have at least this many ms between bell sounds
 
-#define FROZENINPUT_GROW_SIZE           1000    // How much do we grow the frozen queue by each time
-
 /*** MACROS                   ***/
 
 /*** TYPE DEFINITIONS         ***/
@@ -102,9 +100,11 @@ void Connection::Debug3(void)
 }
 void Connection::Debug4(void)
 {
+    FreezeStream();
 }
 void Connection::Debug5(void)
 {
+    ReleaseFrozenStream();
 }
 void Connection::Debug6(void)
 {
@@ -416,8 +416,13 @@ Connection::Connection(const char *URI)
     MW=NULL;
     BridgedTo=NULL;
     BridgedFrom=NULL;
+    FrozenQueue=NULL;
+    FrozenRetStr=NULL;
+    FrozenQueueEnd=NULL;
     BinaryConnection=false;
     DoAutoReopen=false;
+    FrozenRetStrBufferSize=0;
+    FrozenQueueStrLen=0;
 
     Bookmark=0;
     ZoomLevel=0;
@@ -531,12 +536,8 @@ Connection::Connection(const char *URI)
     RightPanelInfo=e_RightPanelTabMAX;
     BottomPanelInfo=e_BottomPanelTabMAX;
 
-    InputFrozenCount=0;
-    FrozenInputQueue=(uint8_t *)malloc(FROZENINPUT_GROW_SIZE);
-    if(FrozenInputQueue==NULL)
-        throw(std::bad_alloc());
-    FrozenInputQueueSize=FROZENINPUT_GROW_SIZE;
-    FrozenInputInsertPos=0;
+    InputFrozen=false;
+    DoingIncomingByteProcessing=false;
 }
 
 /*******************************************************************************
@@ -569,7 +570,10 @@ Connection::~Connection()
     DPS_FreeProcessorConData(&ProcessorData);
     FTPS_FreeFTPData(FTPConData);
 
-    free(FrozenInputQueue);
+    FreeFrozenQueue();
+    free(FrozenRetStr);
+    FrozenRetStr=NULL;
+    FrozenRetStrBufferSize=0;
 }
 
 /*******************************************************************************
@@ -1146,30 +1150,30 @@ bool Connection::GetConnectionOptions(t_KVList &Options)
     return true;
 }
 
-/*******************************************************************************
- * NAME:
- *    Connection::GetCurrentProcessorData
- *
- * SYNOPSIS:
- *    struct ProcessorConData *Connection::GetCurrentProcessorData(void);
- *
- * PARAMETERS:
- *    NONE
- *
- * FUNCTION:
- *    This function gets the current processor connection data.  This should
- *    really only be used by the Data Processors System.
- *
- * RETURNS:
- *    A pointer to the processor connection data for this connection.
- *
- * SEE ALSO:
- *    Con_GetCurrentProcessorData()
- ******************************************************************************/
-struct ProcessorConData *Connection::GetCurrentProcessorData(void)
-{
-    return &ProcessorData;
-}
+///*******************************************************************************
+// * NAME:
+// *    Connection::GetCurrentProcessorData
+// *
+// * SYNOPSIS:
+// *    struct ProcessorConData *Connection::GetCurrentProcessorData(void);
+// *
+// * PARAMETERS:
+// *    NONE
+// *
+// * FUNCTION:
+// *    This function gets the current processor connection data.  This should
+// *    really only be used by the Data Processors System.
+// *
+// * RETURNS:
+// *    A pointer to the processor connection data for this connection.
+// *
+// * SEE ALSO:
+// *    Con_GetCurrentProcessorData()
+// ******************************************************************************/
+//struct ProcessorConData *Connection::GetCurrentProcessorData(void)
+//{
+//    return &ProcessorData;
+//}
 
 /*******************************************************************************
  * NAME:
@@ -1454,7 +1458,7 @@ bool Connection::KeyPress(uint8_t Mods,e_UIKeys Key,const uint8_t *TextPtr,
                 RetValue=true;
             }
         }
-        else if(!DPS_ProcessorKeyPress(TextPtr,TextLen,Key,Mods))
+        else if(!DPS_ProcessorKeyPress(&ProcessorData,TextPtr,TextLen,Key,Mods))
         {
             /* Send the key out */
             if(TextLen>0)
@@ -1634,7 +1638,7 @@ e_ConWriteType Connection::InternalWriteBytes(const uint8_t *Data,int Bytes)
     /* We need to call the Data Processor System so it can pass on writes to
        the plugins */
     Con_SetActiveConnection(this);
-    DPS_ProcessorOutGoingBytes(Data,Bytes);
+    DPS_ProcessorOutGoingBytes(&ProcessorData,Data,Bytes);
     Con_SetActiveConnection(NULL);
 
     RetValue=e_ConWrite_Failed;
@@ -1861,7 +1865,11 @@ bool Connection::InformOfDataAvaiable(void)
                 StopWatchHandleAutoLap();
 
                 if(ProcessBlock)
-                    DPS_ProcessorIncomingBytes(inbuff,bytes);
+                {
+                    DoingIncomingByteProcessing=true;
+                    DPS_ProcessorIncomingBytes(&ProcessorData,inbuff,bytes);
+                    DoingIncomingByteProcessing=false;
+                }
             }
         }
 
@@ -1950,7 +1958,7 @@ void Connection::WriteChar2Display(uint8_t *Chr)
     if(Display==NULL)
         return;
 
-    if(AddFrozenStrIfNeeded(Chr))
+    if(FrozenQueueIfNeeded_Write(Chr))
         return;
 
     Display->WriteChar(Chr);
@@ -1984,7 +1992,7 @@ bool Connection::InsertString(uint8_t *Str,uint32_t Len)
     const uint8_t *StartOfChar;
     const uint8_t *EndOfChar;
 
-    if(AddFrozenStrIfNeeded(Str))
+    if(FrozenQueueIfNeeded_InsertStr(Str,Len))
         return true;
 
     StartOfChar=Str;
@@ -2025,6 +2033,9 @@ bool Connection::InsertString(uint8_t *Str,uint32_t Len)
  ******************************************************************************/
 void Connection::SetFGColor(uint32_t FGColor)
 {
+    if(FrozenQueueIfNeeded_SetFGColor(FGColor))
+        return;
+
     if(Display!=NULL)
         Display->CurrentStyle.FGColor=FGColor;
 }
@@ -2076,6 +2087,9 @@ uint32_t Connection::GetFGColor(void)
  ******************************************************************************/
 void Connection::SetBGColor(uint32_t BGColor)
 {
+    if(FrozenQueueIfNeeded_SetBGColor(BGColor))
+        return;
+
     if(Display!=NULL)
         Display->CurrentStyle.BGColor=BGColor;
 }
@@ -2127,6 +2141,9 @@ uint32_t Connection::GetBGColor(void)
  ******************************************************************************/
 void Connection::SetULineColor(uint32_t ULineColor)
 {
+    if(FrozenQueueIfNeeded_SetULineColor(ULineColor))
+        return;
+
     if(Display!=NULL)
         Display->CurrentStyle.ULineColor=ULineColor;
 }
@@ -2178,6 +2195,9 @@ uint32_t Connection::GetULineColor(void)
  ******************************************************************************/
 void Connection::SetAttribs(uint32_t Attribs)
 {
+    if(FrozenQueueIfNeeded_SetAttrib(Attribs))
+        return;
+
     if(Display!=NULL)
         Display->CurrentStyle.Attribs=Attribs;
 }
@@ -2242,6 +2262,9 @@ void Connection::DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
 {
     uint8_t SendBuff[2];
     int Len;
+
+    if(FrozenQueueIfNeeded_Function(Fn,Arg1,Arg2,Arg3,Arg4,Arg5,Arg6))
+        return;
 
     if(Display==NULL)
         return;
@@ -6341,8 +6364,6 @@ void Connection::ResetTerm(void)
         return;
 
     Display->ResetTerm();
-
-    InputFrozenCount=0; // Unfreeze the connection
 }
 
 /*******************************************************************************
@@ -6668,6 +6689,9 @@ void Connection::DoBell(bool VisualOnly)
 {
     bool PlaySound;
     bool ShowGraphic;
+
+    if(FrozenQueueIfNeeded_Bell(VisualOnly))
+        return;
 
     if(Display==NULL)
         return;
@@ -7295,54 +7319,6 @@ const uint8_t *Connection::GetMarkString(t_DataProMark *Mark,uint32_t *Size,
 
 /*******************************************************************************
  * NAME:
- *    Connection::AddFrozenStrIfNeeded
- *
- * SYNOPSIS:
- *    bool Connection::AddFrozenStrIfNeeded(uint8_t *Str);
- *
- * PARAMETERS:
- *    Str [I] -- The UTF-8 string to queue if needed (0 term)
- *
- * FUNCTION:
- *    This function queues a UTF-8 char or UTF-8 string if this connection
- *    is has been frozen.
- *
- * RETURNS:
- *    true -- The string was queued (or we had an error)
- *    false -- The connection is not frozen and you should handle the string.
- *
- * SEE ALSO:
- *    
- ******************************************************************************/
-bool Connection::AddFrozenStrIfNeeded(uint8_t *Str)
-{
-    uint8_t *NewQueue;
-    unsigned int Len;
-
-    if(InputFrozenCount>0)
-    {
-        /* Ok, a plugin has frozen adding chars to the display.  Queue them
-           instead */
-        Len=strlen((char *)Str);
-
-        if(FrozenInputInsertPos+Len>=FrozenInputQueueSize)
-        {
-            /* We need to grow the queue */
-            NewQueue=(uint8_t *)realloc(FrozenInputQueue,FrozenInputQueueSize+
-                    FROZENINPUT_GROW_SIZE);
-            if(NewQueue==NULL)
-                return true;
-            FrozenInputQueue=NewQueue;
-        }
-        memcpy(&FrozenInputQueue[FrozenInputInsertPos],Str,Len);
-        FrozenInputInsertPos+=Len;
-        return true;
-    }
-    return false;
-}
-
-/*******************************************************************************
- * NAME:
  *    Connection::FreezeStream
  *
  * SYNOPSIS:
@@ -7362,7 +7338,9 @@ bool Connection::AddFrozenStrIfNeeded(uint8_t *Str)
  ******************************************************************************/
 void Connection::FreezeStream(void)
 {
-    InputFrozenCount++;
+/* DEBUG PAUL: Add code that notes what plugin did this so we can ignore
+   everyone else wanting to release */
+    InputFrozen=true;
 }
 
 /*******************************************************************************
@@ -7387,38 +7365,9 @@ void Connection::FreezeStream(void)
  ******************************************************************************/
 void Connection::ReleaseFrozenStream(void)
 {
-    uint_fast32_t pos;
-    uint8_t CharBuff[10];
-    const uint8_t *StartOfChar;
-    const uint8_t *EndOfChar;
-
-    if(InputFrozenCount>0)
-        InputFrozenCount--;
-
-    if(InputFrozenCount==0)
-    {
-        /* Ok, this connection just became unfrozen, write out all the queued
-           data */
-        pos=0;
-        StartOfChar=FrozenInputQueue;
-        while(pos<FrozenInputInsertPos && *StartOfChar!=0)
-        {
-            EndOfChar=StartOfChar;
-            utf8::unchecked::advance(EndOfChar,1);
-            if(EndOfChar-StartOfChar>(unsigned)sizeof(CharBuff)-1)
-                break;
-            memcpy(CharBuff,StartOfChar,EndOfChar-StartOfChar);
-            CharBuff[EndOfChar-StartOfChar]=0;
-            pos+=EndOfChar-StartOfChar;
-
-            WriteChar2Display(CharBuff);
-
-            /* Move to next char */
-            StartOfChar=EndOfChar;
-        }
-
-        FrozenInputInsertPos=0;
-    }
+    PlayBackFrozenQueue();
+    FreeFrozenQueue();
+    InputFrozen=false;
 }
 
 /*******************************************************************************
@@ -7443,6 +7392,628 @@ void Connection::ReleaseFrozenStream(void)
  ******************************************************************************/
 void Connection::ClearFrozenStream(void)
 {
-    FrozenInputInsertPos=0;
+    FreeFrozenQueue();
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Connection::GetFrozenString
+ *
+ * SYNOPSIS:
+ *    const uint8_t *Connection::GetFrozenString(uint32_t *Size);
+ *
+ * PARAMETERS:
+ *    Size [O] -- The number of bytes in the buffer returned.
+ *
+ * FUNCTION:
+ *    This function does the DPS_GetFrozenString() function to the connection.
+ *
+ * RETURNS:
+ *    A pointer to the buffer with the frozen data in it.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+const uint8_t *Connection::GetFrozenString(uint32_t *Size)
+{
+    size_t Len;
+    struct Connection_FrozenQueueEntry *Cur;
+    uint8_t *Append;
+
+    *Size=0;
+
+    if(FrozenRetStrBufferSize<FrozenQueueStrLen+1)
+    {
+        free(FrozenRetStr);
+        FrozenRetStr=NULL;
+        FrozenRetStrBufferSize=0;
+
+        FrozenRetStr=(uint8_t *)malloc(FrozenQueueStrLen+1);
+        if(FrozenRetStr==NULL)
+            return NULL;
+        FrozenRetStrBufferSize=FrozenQueueStrLen+1;
+    }
+
+    *Size=FrozenQueueStrLen;
+
+    Append=FrozenRetStr;
+    for(Cur=FrozenQueue;Cur!=NULL;Cur=Cur->Next)
+    {
+        switch(Cur->Type)
+        {
+            case e_ConFrozenQueueEntry_WriteChar2Display:
+                Len=strlen((char *)Cur->Str);
+                memcpy(Append,Cur->Str,Len);
+                Append+=Len;
+            break;
+            case e_ConFrozenQueueEntry_SetFGColor:
+            case e_ConFrozenQueueEntry_SetBGColor:
+            case e_ConFrozenQueueEntry_SetULineColor:
+            case e_ConFrozenQueueEntry_SetAttribs:
+            case e_ConFrozenQueueEntry_DoFunction:
+            case e_ConFrozenQueueEntry_InsertString:
+            case e_ConFrozenQueueEntry_DoBell:
+            default:
+            case e_ConFrozenQueueEntryMAX:
+            break;
+        }
+    }
+    *Append++=0;    // Convenience string
+    return FrozenRetStr;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::FrozenQueueIfNeeded_Write
+ *
+ * SYNOPSIS:
+ *    bool Connection::FrozenQueueIfNeeded_Write(uint8_t *Str);
+ *
+ * PARAMETERS:
+ *    Str [I] -- The string that will be added
+ *
+ * FUNCTION:
+ *    This is a helper function.  It handles if the stream is frozen for
+ *    the WriteChar2Display() function.  It the stream is frozen then it
+ *    queues this data for play back later.
+ *
+ * RETURNS:
+ *    true -- The data was queued and the caller should do nothing else.
+ *    false -- The stream isn't frozen and the caller should do it's normal
+ *             function.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::FrozenQueueIfNeeded_Write(uint8_t *Str)
+{
+    struct Connection_FrozenQueueEntry Entry;
+    size_t Len;
+
+    if(!InputFrozen || !DoingIncomingByteProcessing)
+        return false;
+
+    /* We need to queue this */
+    Len=strlen((char *)Str)+1;
+    Entry.Type=e_ConFrozenQueueEntry_WriteChar2Display;
+    Entry.Str=(uint8_t *)malloc(Len);
+    if(Entry.Str==NULL)
+        return false;
+    memcpy(Entry.Str,Str,Len);
+    Add2FrozenQueue(&Entry);
+
+    FrozenQueueStrLen+=Len;
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::FrozenQueueIfNeeded_SetFGColor
+ *
+ * SYNOPSIS:
+ *    bool Connection::FrozenQueueIfNeeded_SetFGColor(uint32_t NewColor);
+ *
+ * PARAMETERS:
+ *    NewColor [I] -- The new color for this
+ *
+ * FUNCTION:
+ *    This is a helper function.  It handles if the stream is frozen for
+ *    the SetFGColor() function.  It the stream is frozen then it
+ *    queues this data for play back later.
+ *
+ * RETURNS:
+ *    true -- The data was queued and the caller should do nothing else.
+ *    false -- The stream isn't frozen and the caller should do it's normal
+ *             function.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::FrozenQueueIfNeeded_SetFGColor(uint32_t NewColor)
+{
+    struct Connection_FrozenQueueEntry Entry;
+
+    if(!InputFrozen || !DoingIncomingByteProcessing)
+        return false;
+
+    Entry.Type=e_ConFrozenQueueEntry_SetFGColor;
+    Entry.Color=NewColor;
+
+    Add2FrozenQueue(&Entry);
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::FrozenQueueIfNeeded_SetBGColor
+ *
+ * SYNOPSIS:
+ *    bool Connection::FrozenQueueIfNeeded_SetBGColor(uint32_t NewColor);
+ *
+ * PARAMETERS:
+ *    NewColor [I] -- The new color for this
+ *
+ * FUNCTION:
+ *    This is a helper function.  It handles if the stream is frozen for
+ *    the SetBGColor() function.  It the stream is frozen then it
+ *    queues this data for play back later.
+ *
+ * RETURNS:
+ *    true -- The data was queued and the caller should do nothing else.
+ *    false -- The stream isn't frozen and the caller should do it's normal
+ *             function.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::FrozenQueueIfNeeded_SetBGColor(uint32_t NewColor)
+{
+    struct Connection_FrozenQueueEntry Entry;
+
+    if(!InputFrozen || !DoingIncomingByteProcessing)
+        return false;
+
+    Entry.Type=e_ConFrozenQueueEntry_SetBGColor;
+    Entry.Color=NewColor;
+
+    Add2FrozenQueue(&Entry);
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::FrozenQueueIfNeeded_SetULineColor
+ *
+ * SYNOPSIS:
+ *    bool Connection::FrozenQueueIfNeeded_SetULineColor(uint32_t NewColor);
+ *
+ * PARAMETERS:
+ *    NewColor [I] -- The new color for this
+ *
+ * FUNCTION:
+ *    This is a helper function.  It handles if the stream is frozen for
+ *    the SetULineColor() function.  It the stream is frozen then it
+ *    queues this data for play back later.
+ *
+ * RETURNS:
+ *    true -- The data was queued and the caller should do nothing else.
+ *    false -- The stream isn't frozen and the caller should do it's normal
+ *             function.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::FrozenQueueIfNeeded_SetULineColor(uint32_t NewColor)
+{
+    struct Connection_FrozenQueueEntry Entry;
+
+    if(!InputFrozen || !DoingIncomingByteProcessing)
+        return false;
+
+    Entry.Type=e_ConFrozenQueueEntry_SetULineColor;
+    Entry.Color=NewColor;
+
+    Add2FrozenQueue(&Entry);
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::FrozenQueueIfNeeded_SetAttrib
+ *
+ * SYNOPSIS:
+ *    bool Connection::FrozenQueueIfNeeded_SetAttrib(uint32_t NewAttrib);
+ *
+ * PARAMETERS:
+ *    NewAttrib [I] -- The new attribs for this
+ *
+ * FUNCTION:
+ *    This is a helper function.  It handles if the stream is frozen for
+ *    the SetAttribs() function.  It the stream is frozen then it
+ *    queues this data for play back later.
+ *
+ * RETURNS:
+ *    true -- The data was queued and the caller should do nothing else.
+ *    false -- The stream isn't frozen and the caller should do it's normal
+ *             function.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::FrozenQueueIfNeeded_SetAttrib(uint32_t NewAttrib)
+{
+    struct Connection_FrozenQueueEntry Entry;
+
+    if(!InputFrozen || !DoingIncomingByteProcessing)
+        return false;
+
+    Entry.Type=e_ConFrozenQueueEntry_SetAttribs;
+    Entry.Color=NewAttrib;
+
+    Add2FrozenQueue(&Entry);
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::FrozenQueueIfNeeded_Function
+ *
+ * SYNOPSIS:
+ *    bool Connection::FrozenQueueIfNeeded_Function(e_ConFuncType Func,
+ *          uintptr_t Arg1,uintptr_t Arg2,uintptr_t Arg3,uintptr_t Arg4,
+ *          uintptr_t Arg5,uintptr_t Arg6);
+ *
+ * PARAMETERS:
+ *    Func [I] -- The same as DoFunction()
+ *    Arg1 [I] -- The same as DoFunction()
+ *    Arg2 [I] -- The same as DoFunction()
+ *    Arg3 [I] -- The same as DoFunction()
+ *    Arg4 [I] -- The same as DoFunction()
+ *    Arg5 [I] -- The same as DoFunction()
+ *    Arg6 [I] -- The same as DoFunction()
+ *
+ * FUNCTION:
+ *    This is a helper function.  It handles if the stream is frozen for
+ *    the DoFunction() function.  It the stream is frozen then it
+ *    queues this data for play back later.
+ *
+ * RETURNS:
+ *    true -- The data was queued and the caller should do nothing else.
+ *    false -- The stream isn't frozen and the caller should do it's normal
+ *             function.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::FrozenQueueIfNeeded_Function(e_ConFuncType Func,
+        uintptr_t Arg1,uintptr_t Arg2,uintptr_t Arg3,uintptr_t Arg4,
+        uintptr_t Arg5,uintptr_t Arg6)
+{
+    struct Connection_FrozenQueueEntry Entry;
+    size_t Len;
+
+    if(!InputFrozen || !DoingIncomingByteProcessing)
+        return false;
+
+    Entry.Type=e_ConFrozenQueueEntry_DoFunction;
+    Entry.Fn.Func=Func;
+    Entry.Fn.Arg1=Arg1;
+    Entry.Fn.Arg2=Arg2;
+    Entry.Fn.Arg3=Arg3;
+    Entry.Fn.Arg4=Arg4;
+    Entry.Fn.Arg5=Arg5;
+    Entry.Fn.Arg6=Arg6;
+    Entry.Fn.Str=NULL;
+
+    switch(Func)
+    {
+        case e_ConFunc_NewLine:
+        case e_ConFunc_Return:
+        case e_ConFunc_Backspace:
+        break;
+        case e_ConFunc_MoveCursor:
+        case e_ConFunc_ClearScreen:
+        case e_ConFunc_ClearScreenAndBackBuffer:
+        case e_ConFunc_ClearArea:
+            /* All of these cancel the freeze */
+            ReleaseFrozenStream();
+            FreeFrozenQueue();
+            InputFrozen=false;
+            return false;
+        break;
+        case e_ConFunc_Tab:
+        case e_ConFunc_PrevTab:
+        case e_ConFunc_SendBackspace:
+        case e_ConFunc_SendEnter:
+        case e_ConFunc_ScrollArea:
+        break;
+        case e_ConFunc_NoteNonPrintable:
+            Len=strlen((char *)Arg1)+1;
+            Entry.Fn.Str=(uint8_t *)malloc(Len);
+            if(Entry.Fn.Str==NULL)
+                return false;
+            memcpy(Entry.Fn.Str,(void *)Arg1,Len);
+        break;
+        default:
+        case e_ConFuncMAX:
+        break;
+    }
+
+    Add2FrozenQueue(&Entry);
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::FrozenQueueIfNeeded_InsertStr
+ *
+ * SYNOPSIS:
+ *    bool Connection::FrozenQueueIfNeeded_InsertStr(uint8_t *Str,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Str [I] -- The same as InsertString()
+ *    Len [I] -- The same as InsertString()
+ *
+ * FUNCTION:
+ *    This is a helper function.  It handles if the stream is frozen for
+ *    the InsertString() function.  It the stream is frozen then it
+ *    queues this data for play back later.
+ *
+ * RETURNS:
+ *    true -- The data was queued and the caller should do nothing else.
+ *    false -- The stream isn't frozen and the caller should do it's normal
+ *             function.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::FrozenQueueIfNeeded_InsertStr(uint8_t *Str,uint32_t Len)
+{
+    struct Connection_FrozenQueueEntry Entry;
+    size_t StrLen;
+
+    if(!InputFrozen || !DoingIncomingByteProcessing)
+        return false;
+
+    /* We need to queue this */
+    StrLen=strlen((char *)Str)+1;
+    Entry.Type=e_ConFrozenQueueEntry_InsertString;
+    Entry.InsertStr.Len=Len;
+    Entry.InsertStr.Str=(uint8_t *)malloc(StrLen);
+    if(Entry.InsertStr.Str==NULL)
+        return false;
+    memcpy(Entry.InsertStr.Str,Str,StrLen);
+
+    Add2FrozenQueue(&Entry);
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::FrozenQueueIfNeeded_Bell
+ *
+ * SYNOPSIS:
+ *    bool Connection::FrozenQueueIfNeeded_Bell(bool VisualOnly);
+ *
+ * PARAMETERS:
+ *    VisualOnly [I] -- The same as DoBell()
+ *
+ * FUNCTION:
+ *    This is a helper function.  It handles if the stream is frozen for
+ *    the DoBell() function.  It the stream is frozen then it
+ *    queues this data for play back later.
+ *
+ * RETURNS:
+ *    true -- The data was queued and the caller should do nothing else.
+ *    false -- The stream isn't frozen and the caller should do it's normal
+ *             function.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::FrozenQueueIfNeeded_Bell(bool VisualOnly)
+{
+    struct Connection_FrozenQueueEntry Entry;
+
+    if(!InputFrozen || !DoingIncomingByteProcessing)
+        return false;
+
+    Entry.Type=e_ConFrozenQueueEntry_DoBell;
+    Entry.VisualOnly=VisualOnly;
+
+    Add2FrozenQueue(&Entry);
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::Add2FrozenQueue
+ *
+ * SYNOPSIS:
+ *    void Connection::Add2FrozenQueue(struct Connection_FrozenQueueEntry *Ent);
+ *
+ * PARAMETERS:
+ *    Ent [I] -- The new entry to make on the queue.  This will be copied
+ *
+ * FUNCTION:
+ *    This function adds a new entry on the frozen queue.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::Add2FrozenQueue(struct Connection_FrozenQueueEntry *Ent)
+{
+    struct Connection_FrozenQueueEntry *NewEntry;
+
+    NewEntry=(struct Connection_FrozenQueueEntry *)
+            malloc(sizeof(struct Connection_FrozenQueueEntry));
+    if(NewEntry==NULL)
+        return;
+
+    memcpy(NewEntry,Ent,sizeof(struct Connection_FrozenQueueEntry));
+    NewEntry->Next=NULL;
+
+    if(FrozenQueue==NULL)
+    {
+        /* New queue */
+        FrozenQueue=NewEntry;
+    }
+    else
+    {
+        /* Tack on the end */
+        FrozenQueueEnd->Next=NewEntry;
+    }
+    FrozenQueueEnd=NewEntry;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::FreeFrozenQueue
+ *
+ * SYNOPSIS:
+ *    void Connection::FreeFrozenQueue(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function frees the frozen queue and any types that also allocated
+ *    memory.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::FreeFrozenQueue(void)
+{
+    struct Connection_FrozenQueueEntry *Tmp;
+
+    while(FrozenQueue!=NULL)
+    {
+        switch(FrozenQueue->Type)
+        {
+            case e_ConFrozenQueueEntry_WriteChar2Display:
+            case e_ConFrozenQueueEntry_InsertString:
+                free(FrozenQueue->Str);
+            break;
+            case e_ConFrozenQueueEntry_SetFGColor:
+            case e_ConFrozenQueueEntry_SetBGColor:
+            case e_ConFrozenQueueEntry_SetULineColor:
+            case e_ConFrozenQueueEntry_SetAttribs:
+            case e_ConFrozenQueueEntry_DoBell:
+            break;
+            case e_ConFrozenQueueEntry_DoFunction:
+                free(FrozenQueue->Fn.Str);
+            break;
+            default:
+            case e_ConFrozenQueueEntryMAX:
+            break;
+        }
+        Tmp=FrozenQueue->Next;
+        free(FrozenQueue);
+        FrozenQueue=Tmp;
+    }
+    FrozenQueueStrLen=0;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::PlayBackFrozenQueue
+ *
+ * SYNOPSIS:
+ *    void Connection::PlayBackFrozenQueue(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function plays back the queued data.  It turns off frozen and then
+ *    calls the original functions (so they do what they would have done).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::PlayBackFrozenQueue(void)
+{
+    struct Connection_FrozenQueueEntry *Cur;
+
+    /* Release the freeze and restore it when we are done */
+    InputFrozen=false;
+
+    for(Cur=FrozenQueue;Cur!=NULL;Cur=Cur->Next)
+    {
+        switch(Cur->Type)
+        {
+            case e_ConFrozenQueueEntry_WriteChar2Display:
+                WriteChar2Display(Cur->Str);
+            break;
+            case e_ConFrozenQueueEntry_SetFGColor:
+                SetFGColor(Cur->Color);
+            break;
+            case e_ConFrozenQueueEntry_SetBGColor:
+                SetBGColor(Cur->Color);
+            break;
+            case e_ConFrozenQueueEntry_SetULineColor:
+                SetULineColor(Cur->Color);
+            break;
+            case e_ConFrozenQueueEntry_SetAttribs:
+                SetAttribs(Cur->Attribs);
+            break;
+            case e_ConFrozenQueueEntry_DoFunction:
+                switch(Cur->Fn.Func)
+                {
+                    case e_ConFunc_NewLine:
+                    case e_ConFunc_Return:
+                    case e_ConFunc_Backspace:
+                    case e_ConFunc_MoveCursor:
+                    case e_ConFunc_ClearScreen:
+                    case e_ConFunc_ClearScreenAndBackBuffer:
+                    case e_ConFunc_ClearArea:
+                    case e_ConFunc_Tab:
+                    case e_ConFunc_PrevTab:
+                    case e_ConFunc_SendBackspace:
+                    case e_ConFunc_SendEnter:
+                    case e_ConFunc_ScrollArea:
+                        DoFunction(Cur->Fn.Func,Cur->Fn.Arg1,Cur->Fn.Arg2,
+                                Cur->Fn.Arg3,Cur->Fn.Arg4,Cur->Fn.Arg5,
+                                Cur->Fn.Arg6);
+                    break;
+                    case e_ConFunc_NoteNonPrintable:
+                        DoFunction(Cur->Fn.Func,(uintptr_t)Cur->Fn.Str,
+                                Cur->Fn.Arg2,Cur->Fn.Arg3,Cur->Fn.Arg4,
+                                Cur->Fn.Arg5,Cur->Fn.Arg6);
+                    break;
+                    default:
+                    case e_ConFuncMAX:
+                    break;
+                }
+            break;
+            case e_ConFrozenQueueEntry_InsertString:
+                InsertString(Cur->InsertStr.Str,Cur->InsertStr.Len);
+            break;
+            case e_ConFrozenQueueEntry_DoBell:
+                DoBell(Cur->VisualOnly);
+            break;
+            default:
+            case e_ConFrozenQueueEntryMAX:
+            break;
+        }
+    }
+    InputFrozen=true;
+}

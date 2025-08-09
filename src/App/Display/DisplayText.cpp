@@ -126,6 +126,9 @@ DisplayText::DisplayText()
 
     CursorX=0;
     CursorY=0;
+    MaxCursorX=0;
+    MaxCursorY=0;
+    LastCursorY=0;
 
     TextAreaWidthPx=0;
     TextAreaHeightPx=0;
@@ -2810,6 +2813,17 @@ void DisplayText::MoveCursor(unsigned int x,unsigned y,bool CursorXPxPrecaled)
     CursorX=UseX;
     CursorY=UseY;
 
+    /* Track the max X,Y we have moved the cursor */
+    if(CursorY!=LastCursorY)
+    {
+        LastCursorY=CursorY;
+        if(CursorY>MaxCursorY)
+            MaxCursorY=CursorY;
+        MaxCursorX=CursorX;   // Reset the cursor X max (we are on a new line)
+    }
+    if(CursorX>MaxCursorX)
+        MaxCursorX=CursorX;
+
     /* Recalc the X px (if needed) */
     if(!CursorXPxPrecaled)
         CursorXPx=CalcCursorXPx();
@@ -2833,6 +2847,8 @@ void DisplayText::MoveCursor(unsigned int x,unsigned y,bool CursorXPxPrecaled)
 
     if(RedrawNeeded)
         RedrawFullScreen();
+
+    InvalidateOutOfRangeMarks();
 }
 
 /*******************************************************************************
@@ -2912,6 +2928,9 @@ void DisplayText::DoBackspace(void)
 {
     int NewPos;
     int NewCursorY;
+    struct TextPointMarker *Marker;
+    uint_fast32_t CursorOffset;
+    uint_fast32_t MarkOffset;
 
     /* Move the cursor to the next tab pos */
     NewCursorY=CursorY;
@@ -2929,7 +2948,20 @@ void DisplayText::DoBackspace(void)
     }
 
     MoveCursor(NewPos,NewCursorY,false);
-    InvalidateAllMarks();
+
+    /* We invalid the marks if we be less than the mark */
+    CursorOffset=NewCursorY*ScreenWidthChars+NewPos;
+    for(Marker=MarkerList;Marker!=NULL;Marker=Marker->Next)
+    {
+        if(Marker->Valid)
+        {
+            MarkOffset=Marker->Y*ScreenWidthChars+Marker->X;
+
+            /* If we have moved to less than the mark invalid this marker */
+            if(CursorOffset<MarkOffset)
+                Marker->Valid=false;
+        }
+    }
 }
 
 /*******************************************************************************
@@ -4268,7 +4300,7 @@ void DisplayText::ClearScreen(e_ScreenClearType Type)
                         {
                             /* Move the cursor to the top/left before we insert
                                the HR */
-                            SetCursorXY(0,0);
+                            MoveCursor(0,0,false);
 
                             /* Ok, we also need to a HR line to the end of the back
                                buffer */
@@ -4320,7 +4352,10 @@ void DisplayText::ClearScreen(e_ScreenClearType Type)
             UITC_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
 
         /* Now we have to move the cursor to the top/left */
-        SetCursorXY(0,0);
+        /* Reset the max cursor */
+        MaxCursorY=0;
+        MaxCursorX=0;
+        MoveCursor(0,0,false);
 
         /* Mark all markers as invalid */
         InvalidateAllMarks();
@@ -4477,23 +4512,6 @@ void DisplayText::ResetTerm(void)
         Selection_Y=0;
         Selection_AnchorX=0;
         Selection_AnchorY=0;
-
-//        Lines.clear();
-//        LinesCount=0;
-//        FirstLine.LineWidthPx=0;
-//        FirstLine.LineBackgroundColor=Settings->
-//                DefaultColors[e_DefaultColors_BG];
-//        FirstLine.EOL=e_DTEOL_Hard;
-//        Lines.push_back(FirstLine);
-//        LinesCount++;
-//        TopLine=Lines.begin();
-//        ScreenFirstLine=TopLine;
-//        TopLineY=0;
-//        ActiveLine=&*ScreenFirstLine;
-//        ActiveLineY=0;
-//        InsertFrag=ActiveLine->Frags.end();
-//        InsertPos=-1;
-
     }
     catch(...)
     {
@@ -6671,7 +6689,7 @@ void DisplayText::AdvancePoint(int &PX,int &PY,int Amount,int MinX,
             if(PX+AmountLeft>=CharsOnLine)
             {
                 /* We are moving more that the line has, wrap */
-                AmountLeft-=CharsOnLine-PX;
+                AmountLeft-=CharsOnLine-PX+1;   // +1 for the new line char
                 if(PY==MaxY)
                 {
                     /* No place to go, done */
@@ -6802,6 +6820,10 @@ void DisplayText::InvalidateOutOfRangeMarks(void)
         {
             if(Marker->Y<ScreenFirstLineY)
                 Marker->Valid=false;
+            if(Marker->Y>=LinesCount)
+                Marker->Valid=false;
+            if(Marker->X>=ScreenWidthChars)
+                Marker->Valid=false;
         }
     }
 }
@@ -6836,8 +6858,6 @@ void DisplayText::DoApplyToMark(t_DataProMark *Mark,uint32_t Change2,
         uint32_t Offset,uint32_t Len,uint32_t What)
 {
     struct TextPointMarker *Marker=(struct TextPointMarker *)Mark;
-    int CursorGlobalY;
-    int ScreenFirstLineY;
     int PX;
     int PY;
     int StopX;
@@ -6846,26 +6866,7 @@ void DisplayText::DoApplyToMark(t_DataProMark *Mark,uint32_t Change2,
     if(!Marker->Valid)
         return;
 
-    if(LinesCount<ScreenHeightChars)
-    {
-        CursorGlobalY=CursorY;
-        ScreenFirstLineY=0;
-    }
-    else
-    {
-        CursorGlobalY=LinesCount-ScreenHeightChars+CursorY;
-        ScreenFirstLineY=LinesCount-ScreenHeightChars;
-    }
-
-    /* Move by offset */
-    PX=Marker->X;
-    PY=Marker->Y;
-    AdvancePoint(PX,PY,Offset,0,ScreenFirstLineY,CursorX,CursorGlobalY);
-
-    /* Figure out where to stop by adding 'Len' to the current point */
-    StopX=PX;
-    StopY=PY;
-    AdvancePoint(StopX,StopY,Len,0,ScreenFirstLineY,CursorX,CursorGlobalY);
+    GetMarkMinMaxPoints(Marker,PX,PY,StopX,StopY,Offset,Len);
 
     ChangeAttribsBetweenPoints(PX,PY,StopX,StopY,Change2,Change2,Change2,
             Change2,What);
@@ -7176,26 +7177,17 @@ void DisplayText::ApplyBGColor2Mark(t_DataProMark *Mark,uint32_t BGColor,
 void DisplayText::MoveMark(t_DataProMark *Mark,int Amount)
 {
     struct TextPointMarker *Marker=(struct TextPointMarker *)Mark;
-    int CursorGlobalY;
-    int ScreenFirstLineY;
+    int PX;
+    int PY;
+    int StopX;
+    int StopY;
 
     if(!Marker->Valid)
         return;
 
-    if(LinesCount<ScreenHeightChars)
-    {
-        CursorGlobalY=CursorY;
-        ScreenFirstLineY=0;
-    }
-    else
-    {
-        CursorGlobalY=LinesCount-ScreenHeightChars+CursorY;
-        ScreenFirstLineY=LinesCount-ScreenHeightChars;
-    }
-
-    /* Move by Amount */
-    AdvancePoint(Marker->X,Marker->Y,Amount,0,ScreenFirstLineY,
-            CursorX,CursorGlobalY);
+    GetMarkMinMaxPoints(Marker,PX,PY,StopX,StopY,Amount,0);
+    Marker->X=PX;
+    Marker->Y=PY;
 }
 
 /*******************************************************************************
@@ -7226,8 +7218,6 @@ const uint8_t *DisplayText::GetMarkString(t_DataProMark *Mark,uint32_t *Size,
         uint32_t Offset,uint32_t Len)
 {
     struct TextPointMarker *Marker=(struct TextPointMarker *)Mark;
-    int CursorGlobalY;
-    int ScreenFirstLineY;
     int PX;
     int PY;
     int StopX;
@@ -7237,39 +7227,79 @@ const uint8_t *DisplayText::GetMarkString(t_DataProMark *Mark,uint32_t *Size,
     if(!Marker->Valid)
         return NULL;
 
-    if(LinesCount<ScreenHeightChars)
-    {
-        CursorGlobalY=CursorY;
-        ScreenFirstLineY=0;
-    }
-    else
-    {
-        CursorGlobalY=LinesCount-ScreenHeightChars+CursorY;
-        ScreenFirstLineY=LinesCount-ScreenHeightChars;
-    }
-
-    /* Move by offset */
-    PX=Marker->X;
-    PY=Marker->Y;
-    AdvancePoint(PX,PY,Offset,0,ScreenFirstLineY,CursorX,CursorGlobalY);
-
-    /* Figure out where to stop by adding 'Len' to the current point */
-    if(Len!=0)
-    {
-        StopX=PX;
-        StopY=PY;
-        AdvancePoint(StopX,StopY,Len,0,ScreenFirstLineY,CursorX,CursorGlobalY);
-    }
-    else
-    {
-        /* Use the cursor pos */
-        StopX=CursorX;
-        StopY=CursorGlobalY;
-    }
-
+    GetMarkMinMaxPoints(Marker,PX,PY,StopX,StopY,Offset,Len);
     if(!GetStringBetweenPoints(PX,PY,StopX,StopY,GetMarkTextBuffer))
         return NULL;
 
     *Size=GetMarkTextBuffer.length();
     return (const uint8_t *)GetMarkTextBuffer.c_str();
 }
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::GetMarkMinMaxPoints
+ *
+ * SYNOPSIS:
+ *    void DisplayText::GetMarkMinMaxPoints(struct TextPointMarker *Marker,
+ *          int &PX,int &PY,int &StopX,int &StopY,uint32_t Offset,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Marker [I] -- The marker to work on
+ *    PX [O] -- The min X
+ *    PY [O] -- The min Y
+ *    StopX [O] -- The max X
+ *    StopY [O] -- The max Y
+ *    Offset [I] -- How many chars to move (_+)
+ *    Len [I] -- The number of chars to return (not bytes).  0 = all the chars
+ *               we can.
+ *
+ * FUNCTION:
+ *    This is helper function that finds the min and max points a marker can
+ *    apply changes to.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::GetMarkMinMaxPoints(struct TextPointMarker *Marker,
+        int &PX,int &PY,int &StopX,int &StopY,uint32_t Offset,uint32_t Len)
+{
+    int CursorGlobalY;
+    int MaxCursorGlobalY;
+    int ScreenFirstLineY;
+    int BottomOfScreenY;
+
+    if(LinesCount<ScreenHeightChars)
+    {
+        CursorGlobalY=CursorY;
+        MaxCursorGlobalY=MaxCursorY;
+        ScreenFirstLineY=0;
+    }
+    else
+    {
+        CursorGlobalY=LinesCount-ScreenHeightChars+CursorY;
+        MaxCursorGlobalY=LinesCount-ScreenHeightChars+MaxCursorY;
+        ScreenFirstLineY=LinesCount-ScreenHeightChars;
+    }
+
+    /* Move by offset */
+    PX=Marker->X;
+    PY=Marker->Y;
+    AdvancePoint(PX,PY,Offset,0,ScreenFirstLineY,MaxCursorX,MaxCursorY);
+
+    /* Figure out where to stop by adding 'Len' to the current point */
+    if(Len>0)
+    {
+        StopX=PX;
+        StopY=PY;
+        AdvancePoint(StopX,StopY,Len,0,ScreenFirstLineY,MaxCursorX,MaxCursorY);
+    }
+    else
+    {
+        StopX=MaxCursorX;
+        StopY=MaxCursorGlobalY;
+    }
+}
+

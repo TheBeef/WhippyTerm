@@ -231,6 +231,7 @@ struct DPS_API
     void (*FreezeStream)(void);
     void (*ClearFrozenStream)(void);
     void (*ReleaseFrozenStream)(void);
+    const uint8_t *(*GetFrozenString)(uint32_t *Size);
     /********* End of DPS_API_VERSION_2 *********/
 };
 

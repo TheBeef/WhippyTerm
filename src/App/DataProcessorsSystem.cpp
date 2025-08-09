@@ -119,6 +119,7 @@ void DPS_DoScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,
         int32_t DeltaX,int32_t DeltaY);
 static struct PluginSettings *DPS_FindPluginSetting(const char *IDStr,
         class ConSettings *Settings);
+void DPS_DoProcessIncomingTextByteCallbacks(struct ProcessorConData *FData,e_TextDataProcessorClassType CallClass,uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,PG_BOOL *Consumed);
 
 static t_DataProMark *DPS_AllocateMark(void);
 static void DPS_FreeMark(t_DataProMark *Mark);
@@ -133,6 +134,7 @@ static const uint8_t *DPS_GetMarkString(t_DataProMark *Mark,uint32_t *Size,uint3
 static void DPS_FreezeStream(void);
 static void DPS_ClearFrozenStream(void);
 static void DPS_ReleaseFrozenStream(void);
+static const uint8_t *DPS_GetFrozenString(uint32_t *Size);
 
 /*** VARIABLE DEFINITIONS     ***/
 static struct DataProcessor *m_ActiveDataProcessor;
@@ -188,6 +190,7 @@ struct DPS_API g_DPSAPI=
     DPS_FreezeStream,
     DPS_ClearFrozenStream,
     DPS_ReleaseFrozenStream,
+    DPS_GetFrozenString,
 };
 t_DPSDataProcessorsType m_DataProcessors;     // All available data processors
 
@@ -810,9 +813,11 @@ bool DPS_ReapplyProcessor2Connection(struct ProcessorConData *FData,
  *    DPS_ProcessorIncomingBytes
  *
  * SYNOPSIS:
- *    void DPS_ProcessorIncomingBytes(const uint8_t *inbuff,int bytes);
+ *    void DPS_ProcessorIncomingBytes(struct ProcessorConData *FData,
+ *          const uint8_t *inbuff,int bytes);
  *
  * PARAMETERS:
+ *    FData [I] -- The connection processor data for this connection.
  *    inbuff [I] -- The buffer with the data that was read.  This is raw data
  *    bytes [I] -- The number of bytes that was read.
  *
@@ -826,7 +831,8 @@ bool DPS_ReapplyProcessor2Connection(struct ProcessorConData *FData,
  * SEE ALSO:
  *    
  ******************************************************************************/
-void DPS_ProcessorIncomingBytes(const uint8_t *inbuff,int bytes)
+void DPS_ProcessorIncomingBytes(struct ProcessorConData *FData,
+        const uint8_t *inbuff,int bytes)
 {
     uint8_t ProcessedChar[MAX_BYTES_PER_CHAR+1];  // Buffer for the char we will eventually output.  UTF8 seems to be limited to 4 maybe 6 bytes so 10 should be good (it's up the plugin not to go over 6)
     PG_BOOL Consumed;
@@ -834,11 +840,6 @@ void DPS_ProcessorIncomingBytes(const uint8_t *inbuff,int bytes)
     int CharLen;
     i_DPSDataProcessorsType CurProcessor;
     unsigned int Index;
-    struct ProcessorConData *FData;
-
-    FData=Con_GetCurrentProcessorData();
-    if(FData==NULL)
-        return;
 
     if(FData->Settings->DataProcessorType==e_DataProcessorType_Text)
     {
@@ -849,19 +850,23 @@ void DPS_ProcessorIncomingBytes(const uint8_t *inbuff,int bytes)
             CharLen=1;
             ProcessedChar[0]=inbuff[byte];
 
-            for(CurProcessor=FData->DataProcessorsList.begin(),Index=0;
-                    CurProcessor!=FData->DataProcessorsList.end();
-                    CurProcessor++,Index++)
-            {
-                m_ActiveDataProcessor=&*CurProcessor;
-                if(CurProcessor->API.ProcessIncomingTextByte!=NULL)
-                {
-                    CurProcessor->API.ProcessIncomingTextByte(FData->
-                            ProcessorsData[Index],inbuff[byte],ProcessedChar,
-                            &CharLen,&Consumed);
-                }
-            }
-            m_ActiveDataProcessor=NULL;
+            /* We do all the different types of plugins, but we do then
+               an known order */
+            DPS_DoProcessIncomingTextByteCallbacks(FData,
+                    e_TextDataProcessorClass_Logger,inbuff[byte],ProcessedChar,
+                    &CharLen,&Consumed);
+            DPS_DoProcessIncomingTextByteCallbacks(FData,
+                    e_TextDataProcessorClass_CharEncoding,inbuff[byte],
+                    ProcessedChar,&CharLen,&Consumed);
+            DPS_DoProcessIncomingTextByteCallbacks(FData,
+                    e_TextDataProcessorClass_TermEmulation,inbuff[byte],
+                    ProcessedChar,&CharLen,&Consumed);
+            DPS_DoProcessIncomingTextByteCallbacks(FData,
+                    e_TextDataProcessorClass_Highlighter,inbuff[byte],
+                    ProcessedChar,&CharLen,&Consumed);
+            DPS_DoProcessIncomingTextByteCallbacks(FData,
+                    e_TextDataProcessorClass_Other,inbuff[byte],ProcessedChar,
+                    &CharLen,&Consumed);
 
             if(!Consumed)
             {
@@ -919,13 +924,63 @@ DB_StopTimer(e_DBT_AddChar2Display);
 
 /*******************************************************************************
  * NAME:
+ *    DPS_DoProcessIncomingTextByteCallbacks
+ *
+ * SYNOPSIS:
+ *    void DPS_DoProcessIncomingTextByteCallbacks(struct ProcessorConData *FData,
+ *          e_TextDataProcessorClassType CallClass);
+ *
+ * PARAMETERS:
+ *    FData [I] -- The processor connection data to work with
+ *    CallClass [I] -- Call plugins that have this TxtClass.
+ *
+ * FUNCTION:
+ *    This is a helper function for DPS_ProcessorIncomingBytes() it loops
+ *    through all the plugins and if it's a text plugin and matches 'CallClass'
+ *    then the ProcessIncomingTextByte() function is called.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DPS_ProcessorIncomingBytes()
+ ******************************************************************************/
+void DPS_DoProcessIncomingTextByteCallbacks(struct ProcessorConData *FData,
+        e_TextDataProcessorClassType CallClass,uint8_t RawByte,
+        uint8_t *ProcessedChar,int *CharLen,PG_BOOL *Consumed)
+{
+    i_DPSDataProcessorsType CurProcessor;
+    unsigned int Index;
+
+    for(CurProcessor=FData->DataProcessorsList.begin(),Index=0;
+            CurProcessor!=FData->DataProcessorsList.end();
+            CurProcessor++,Index++)
+    {
+        m_ActiveDataProcessor=&*CurProcessor;
+        if(CurProcessor->Info.TxtClass==CallClass)
+        {
+            if(CurProcessor->API.ProcessIncomingTextByte!=NULL)
+            {
+                CurProcessor->API.ProcessIncomingTextByte(FData->
+                        ProcessorsData[Index],RawByte,ProcessedChar,
+                        CharLen,Consumed);
+            }
+        }
+    }
+    m_ActiveDataProcessor=NULL;
+}
+
+/*******************************************************************************
+ * NAME:
  *    DPS_ProcessorKeyPress
  *
  * SYNOPSIS:
- *    bool DPS_ProcessorKeyPress(const uint8_t *KeyChar,int KeyCharLen,
- *              e_UIKeys ExtendedKey,uint8_t Mod);
+ *    bool DPS_ProcessorKeyPress(struct ProcessorConData *FData,
+ *              const uint8_t *KeyChar,int KeyCharLen,e_UIKeys ExtendedKey,
+ *              uint8_t Mod);
  *
  * PARAMETERS:
+ *    FData [I] -- The connection processor data for this connection.
  *    KeyChar [I] -- A string with the key in it (UTF8).  If the key can be
  *                   converted to a char this will have it.
  *    KeyCharLen [I] -- The number of bytes in 'KeyChar'
@@ -942,17 +997,12 @@ DB_StopTimer(e_DBT_AddChar2Display);
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool DPS_ProcessorKeyPress(const uint8_t *KeyChar,int KeyCharLen,
-        e_UIKeys ExtendedKey,uint8_t Mod)
+bool DPS_ProcessorKeyPress(struct ProcessorConData *FData,
+        const uint8_t *KeyChar,int KeyCharLen,e_UIKeys ExtendedKey,uint8_t Mod)
 {
     i_DPSDataProcessorsType CurProcessor;
-    struct ProcessorConData *FData;
     unsigned int Index;
     bool Consumed;
-
-    FData=Con_GetCurrentProcessorData();
-    if(FData==NULL)
-        return false;
 
     Consumed=false;
 
@@ -984,9 +1034,11 @@ bool DPS_ProcessorKeyPress(const uint8_t *KeyChar,int KeyCharLen,
  *    DPS_ProcessorOutGoingBytes
  *
  * SYNOPSIS:
- *    void DPS_ProcessorOutGoingBytes(const uint8_t *outbuff,int bytes);
+ *    void DPS_ProcessorOutGoingBytes(struct ProcessorConData *FData,
+ *              const uint8_t *outbuff,int bytes);
  *
  * PARAMETERS:
+ *    FData [I] -- The connection processor data for this connection.
  *    outbuff [I] -- The buffer with outgoing bytes in it
  *    bytes [I] -- The number of bytes being sent
  *
@@ -1001,15 +1053,11 @@ bool DPS_ProcessorKeyPress(const uint8_t *KeyChar,int KeyCharLen,
  * SEE ALSO:
  *    
  ******************************************************************************/
-void DPS_ProcessorOutGoingBytes(const uint8_t *outbuff,int bytes)
+void DPS_ProcessorOutGoingBytes(struct ProcessorConData *FData,
+        const uint8_t *outbuff,int bytes)
 {
     i_DPSDataProcessorsType CurProcessor;
-    struct ProcessorConData *FData;
     unsigned int Index;
-
-    FData=Con_GetCurrentProcessorData();
-    if(FData==NULL)
-        return;
 
     /* Send it to all the term emulations */
     if(FData->Settings->DataProcessorType==e_DataProcessorType_Text)
@@ -2638,7 +2686,8 @@ void DPS_SetMark2CursorPos(t_DataProMark *Mark)
  *    Attrib [I] -- The new attrib(s) to set
  *    Offset [I] -- The number of chars from the mark to skip before starting
  *                  to apply the attribs.
- *    Len [I] -- The number of chars to apply these new attributes to.
+ *    Len [I] -- The number of chars to apply these new attributes to.  Pass
+ *               0 to apply until the cursor.
  *
  * FUNCTION:
  *    This function takes and sets a attrib (or more than one) between the
@@ -2669,7 +2718,8 @@ void DPS_ApplyAttrib2Mark(t_DataProMark *Mark,uint32_t Attrib,uint32_t Offset,
  *    Attrib [I] -- The new attrib(s) to clear
  *    Offset [I] -- The number of chars from the mark to skip before starting
  *                  to remove the attribs.
- *    Len [I] -- The number of chars to remove these new attributes from.
+ *    Len [I] -- The number of chars to remove these attributes from.  Pass
+ *               0 to apply until the cursor.
  *
  * FUNCTION:
  *    This function takes and clears a attrib (or more than one) between the
@@ -2700,7 +2750,8 @@ void DPS_RemoveAttribFromMark(t_DataProMark *Mark,uint32_t Attrib,
  *    FGColor [I] -- The colors to apply
  *    Offset [I] -- The number of chars from the mark to skip before starting
  *                  to apply the color.
- *    Len [I] -- The number of chars to apply this color to
+ *    Len [I] -- The number of chars to apply this color to.  Pass
+ *               0 to apply until the cursor.
  *
  * FUNCTION:
  *    This function takes and colors between the mark and the cursor.
@@ -2730,7 +2781,8 @@ void DPS_ApplyFGColor2Mark(t_DataProMark *Mark,uint32_t FGColor,
  *    FGColor [I] -- The colors to apply
  *    Offset [I] -- The number of chars from the mark to skip before starting
  *                  to apply the color.
- *    Len [I] -- The number of chars to apply this color to
+ *    Len [I] -- The number of chars to apply this color to.  Pass
+ *               0 to apply until the cursor.
  *
  * FUNCTION:
  *    This function takes and colors between the mark and the cursor.
@@ -2818,8 +2870,12 @@ void DPS_MoveMark(t_DataProMark *Mark,int Amount)
  *    do string operations on it.  The binary system will also add this zero
  *    past the end but you shouldn't use it.
  *
+ *    Also note that if the stream is gets frozen then this will not include
+ *    any of the frozen data until the stream is unfrozen (and will not include
+ *    any of the frozen data if it is cleared).
+ *
  * SEE ALSO:
- *    
+ *    DPS_GetFrozenString()
  ******************************************************************************/
 static const uint8_t *DPS_GetMarkString(t_DataProMark *Mark,uint32_t *Size,
         uint32_t Offset,uint32_t Len)
@@ -2925,4 +2981,36 @@ void DPS_ReleaseFrozenStream(void)
 void DPS_ClearFrozenStream(void)
 {
     Con_ClearFrozenStream();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_GetFrozenString
+ *
+ * SYNOPSIS:
+ *    const uint8_t *DPS_GetFrozenString(uint32_t *Size);
+ *
+ * PARAMETERS:
+ *    Size [O] -- The number of bytes in the buffer returned.  This does not
+ *                include the convenience \0.
+ *
+ * FUNCTION:
+ *    This function gets all bytes that have been collected since the stream
+ *    was frozen.
+ *
+ * RETURNS:
+ *    A buffer with all the chars in it that have been frozen.  This includes
+ *    a \0 at the end for your convenience.  This will be a UTF-8 string
+ *    not the raw bytes.
+ *
+ *    If the stream is not frozen then this function will return NULL.  You
+ *    must always check for NULL as a reset of the connection can unfreeze
+ *    the connection.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+const uint8_t *DPS_GetFrozenString(uint32_t *Size)
+{
+    return Con_GetFrozenString(Size);
 }

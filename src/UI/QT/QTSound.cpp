@@ -23,7 +23,7 @@
 #include "UI/UISound.h"
 #include "QTSound.h"
 #include <QApplication>
-#include <QSound>
+#include <QSoundEffect>
 
 /*** DEFINES                  ***/
 
@@ -42,11 +42,22 @@ void UI_Beep(void)
 
 void UIPlayWav(const char *Filename)
 {
-    QSound::play(Filename);
+    QSoundEffect effect;
+    effect.setSource(QUrl::fromLocalFile(Filename));
+//    effect.setLoopCount(QSoundEffect::Infinite);
+//    effect.setVolume(0.25f);
+    effect.play();
+    
+    //    QSoundEffect::play(Filename);
 }
 
 void UIPlayBuiltInBeep(void)
 {
-    QSound::play(":/S/Sounds/Computer_Error_Alert_Short.wav");
+    QSoundEffect effect;
+    effect.setSource(QUrl(":/S/Sounds/Computer_Error_Alert_Short.wav"));
+    //    effect.setLoopCount(QSoundEffect::Infinite);
+    //    effect.setVolume(0.25f);
+    effect.play();
+//    QSoundEffect::play(":/S/Sounds/Computer_Error_Alert_Short.wav");
 }
 

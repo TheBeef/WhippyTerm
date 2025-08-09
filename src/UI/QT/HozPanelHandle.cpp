@@ -80,8 +80,8 @@ void HozPanelHandle::ClearHighlight(void)
 
 void HozPanelHandle::mouseReleaseEvent(QMouseEvent *event)
 {
-    if(event->y()>=0 && event->y()<=this->height() &&
-            event->x()>=0 && event->x()<=this->width())
+    if(event->position().y()>=0 && event->position().y()<=this->height() &&
+            event->position().x()>=0 && event->position().x()<=this->width())
     {
         if(MainWindow!=NULL)
             MainWindow->PanelClicked(e_Panel_Bottom);

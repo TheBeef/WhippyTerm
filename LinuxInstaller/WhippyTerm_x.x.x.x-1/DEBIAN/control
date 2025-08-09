@@ -3,7 +3,7 @@ Version: x.x.x.x-1
 Section: comm
 Priority: optional
 Architecture: amd64
-Depends: libqt5core5t64 (>= 5.15.1), libqt5gui5t64 (>= 5.14.1), libqt5widgets5t64 (>= 5.15.1), libqt5multimedia5 (>= 5.15.1), libc6 (>= 2.39), libgcc1, libstdc++6 (>= 5)
+Depends: libqt6core6 (>= 6.2.0), libqt6gui6 (>= 6.2.0), libqt6widgets6 (>= 6.2.0), libqt6multimedia6 (>= 6.2.0), libc6 (>= 2.35), libgcc1, libstdc++6 (>= 5)
 Maintainer: Paul Hutchinson <hutchinson.paul@gmail.com>
 Description: Modern term program.
  Terminal program with Modern GUI, hex dumps, plugins, and binary protocols.

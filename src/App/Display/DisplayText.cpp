@@ -7266,20 +7266,16 @@ const uint8_t *DisplayText::GetMarkString(t_DataProMark *Mark,uint32_t *Size,
 void DisplayText::GetMarkMinMaxPoints(struct TextPointMarker *Marker,
         int &PX,int &PY,int &StopX,int &StopY,uint32_t Offset,uint32_t Len)
 {
-    int CursorGlobalY;
     int MaxCursorGlobalY;
     int ScreenFirstLineY;
-    int BottomOfScreenY;
 
     if(LinesCount<ScreenHeightChars)
     {
-        CursorGlobalY=CursorY;
         MaxCursorGlobalY=MaxCursorY;
         ScreenFirstLineY=0;
     }
     else
     {
-        CursorGlobalY=LinesCount-ScreenHeightChars+CursorY;
         MaxCursorGlobalY=LinesCount-ScreenHeightChars+MaxCursorY;
         ScreenFirstLineY=LinesCount-ScreenHeightChars;
     }

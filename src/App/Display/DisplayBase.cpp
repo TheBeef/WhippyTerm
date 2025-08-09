@@ -2085,4 +2085,5 @@ void DisplayBase::MoveMark(t_DataProMark *Mark,int Amount)
 const uint8_t *DisplayBase::GetMarkString(t_DataProMark *Mark,uint32_t *Size,
         uint32_t Offset,uint32_t Len)
 {
+    return NULL;
 }

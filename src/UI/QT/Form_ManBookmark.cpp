@@ -16,7 +16,7 @@ void MB_DragItems_QTreeWidget::dropEvent(QDropEvent *event)
     if(draggedItem==NULL)
         return;
 
-    droppedIndex=indexAt(event->pos());
+    droppedIndex=indexAt(event->position().toPoint());
     DroppedOnItem=itemFromIndex(droppedIndex);
 
     switch(dropIndicatorPosition())

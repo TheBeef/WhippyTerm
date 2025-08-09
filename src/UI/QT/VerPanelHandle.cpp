@@ -87,9 +87,9 @@ void VerPanelHandle::LeftMode(void)
 void VerPanelHandle::mouseReleaseEvent(QMouseEvent *event)
 {
     e_PanelType PanelType;
-
-    if(event->y()>=0 && event->y()<=this->height() &&
-            event->x()>=0 && event->x()<=this->width())
+    
+    if(event->position().y()>=0 && event->position().y()<=this->height() &&
+            event->position().x()>=0 && event->position().x()<=this->width())
     {
         PanelType=e_Panel_Right;
         if(LeftPanel)

@@ -32,7 +32,7 @@ MyCloseBttn::MyCloseBttn(QWidget *parent) : QWidget(parent)
     MouseClicked=false;
 }
 
-void MyCloseBttn::enterEvent(QEvent *event)
+void MyCloseBttn::enterEvent(QEnterEvent *event)
 {
     MouseIn=true;
     QWidget::enterEvent(event);
@@ -48,8 +48,8 @@ void MyCloseBttn::leaveEvent(QEvent *event)
 
 void MyCloseBttn::mouseMoveEvent(QMouseEvent * event)
 {
-    if(event->y()>=0 && event->y()<=this->height() &&
-            event->x()>=0 && event->x()<=this->width())
+    if(event->position().y()>=0 && event->position().y()<=this->height() &&
+            event->position().x()>=0 && event->position().x()<=this->width())
     {
         if(!MouseIn)
         {
@@ -71,8 +71,8 @@ void MyCloseBttn::mouseReleaseEvent(QMouseEvent *event)
 {
     MouseClicked=false;
     update();
-    if(event->y()>=0 && event->y()<=this->height() &&
-            event->x()>=0 && event->x()<=this->width())
+    if(event->position().y()>=0 && event->position().y()<=this->height() &&
+            event->position().x()>=0 && event->position().x()<=this->width())
     {
         emit Clicked();
     }
@@ -81,8 +81,8 @@ void MyCloseBttn::mouseReleaseEvent(QMouseEvent *event)
 
 void MyCloseBttn::mousePressEvent(QMouseEvent *event)
 {
-    if(event->y()>=0 && event->y()<=this->height() &&
-            event->x()>=0 && event->x()<=this->width())
+    if(event->position().y()>=0 && event->position().y()<=this->height() &&
+            event->position().x()>=0 && event->position().x()<=this->width())
     {
         MouseClicked=true;
         update();

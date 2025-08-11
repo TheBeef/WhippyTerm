@@ -48,7 +48,7 @@
 using namespace std;
 
 /*** DEFINES                  ***/
-#define UDPSERVER_URI_PREFIX                    "UDPS"
+#define UDPSERVER_URI_PREFIX                    "SRV_UDP"
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      UDPServer // The name to append on the RegisterPlugin() function for built in version
 #define NEEDED_MIN_API_VERSION                  0x01000000
 
@@ -123,10 +123,9 @@ extern const struct IODriverAPI g_UDPServerPluginAPI;
 struct IODriverInfo m_UDPServerInfo=
 {
     0,
-    "<URI>UDPS://[host]:[port]</URI>"
-    "<ARG>host -- The TCP/IP interface to listen on</ARG>"
+    "<URI>" UDPSERVER_URI_PREFIX ":[port]</URI>"
     "<ARG>port -- The port to listen on</ARG>"
-    "<Example>UDPS://localhost:80</Example>"
+    "<Example>" UDPSERVER_URI_PREFIX ":80</Example>"
 };
 
 const struct IOS_API *g_UDPS_IOSystem;
@@ -670,7 +669,7 @@ void UDPServer_ConnectionOptionsWidgets_UpdateUI(
  *    a buffer.
  *
  *    This is in the format of:
- *      "UDPS://localhost:80"
+ *      "SRV_UDP:80"
  *
  * RETURNS:
  *    true -- all ok

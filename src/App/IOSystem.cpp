@@ -340,7 +340,7 @@ t_ActiveHandlesListType m_ActiveHandlesList;    // A list of active handles
  *    DriverName [I] -- A Unique Name for this driver.  This just be only
  *                      A-Z a-z and 0-9.  This may also be shown to the user.
  *    BaseURI [I] -- The base URL string for this driver.  Only letters
- *                   are valid for this string (A-Z a-z).
+ *                   are valid for this string (A-Z a-z and '_').
  *    DriverAPI [I] -- The API to this driver.  This is a list of function
  *                     pointers.  See below for a list of each member (under
  *                     CALLBACKS).
@@ -1021,7 +1021,7 @@ PG_BOOL IOS_RegisterDriver(const char *DriverName,const char *BaseURI,
         for(pos=BaseURI;*pos!=0;pos++)
         {
             if((*pos<'a' || *pos>'z') &&
-                    (*pos<'A' || *pos>'Z'))
+                    (*pos<'A' || *pos>'Z') && *pos!='_')
             {
                 throw(0);
             }
@@ -2897,7 +2897,7 @@ t_IOSystemHandle *IOS_AllocIOSystemHandleFromURI(const char *URI,uintptr_t ID)
     {
         /* Break the URI down into it's parts */
         p=URI;
-        while((*p>='a' && *p<='z') || (*p>='A' && *p<='Z'))
+        while((*p>='a' && *p<='z') || (*p>='A' && *p<='Z') || *p=='_')
             p++;
         BaseURI.assign(URI,p-URI);
         transform(BaseURI.begin(),BaseURI.end(),BaseURI.begin(),::toupper);
@@ -2977,7 +2977,7 @@ bool IOS_GetUniqueIDFromURI(const char *URI,std::string &UniqueID)
     {
         /* Break the URI down into it's parts */
         p=URI;
-        while((*p>='a' && *p<='z') || (*p>='A' && *p<='Z'))
+        while((*p>='a' && *p<='z') || (*p>='A' && *p<='Z') || *p=='_')
             p++;
         BaseURI.assign(URI,p-URI);
         transform(BaseURI.begin(),BaseURI.end(),BaseURI.begin(),::toupper);
@@ -3110,7 +3110,7 @@ bool IOS_UpdateOptionsFromURI(const char *URI,t_KVList &Options)
     {
         /* Break the URI down into it's parts */
         p=URI;
-        while((*p>='a' && *p<='z') || (*p>='A' && *p<='Z'))
+        while((*p>='a' && *p<='z') || (*p>='A' && *p<='Z') || *p=='_')
             p++;
         BaseURI.assign(URI,p-URI);
         transform(BaseURI.begin(),BaseURI.end(),BaseURI.begin(),::toupper);
@@ -5044,7 +5044,7 @@ bool IOS_DoesURIMatchBaseURI(const char *URI,const char *BaseURI)
     {
         /* Break the URI down into it's parts */
         p=URI;
-        while((*p>='a' && *p<='z') || (*p>='A' && *p<='Z'))
+        while((*p>='a' && *p<='z') || (*p>='A' && *p<='Z') || *p=='_')
             p++;
         ExtractedBaseURI.assign(URI,p-URI);
         transform(ExtractedBaseURI.begin(),ExtractedBaseURI.end(),

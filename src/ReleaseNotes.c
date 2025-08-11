@@ -31,6 +31,14 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Server style IO plugins now start with \"SRV_\"",
+            "Server style IO plugins now should start their URI prefix with"
+            " \"SRV_\" to show that they are a server.  A server is a plugin"
+            " that ways for a client to connect to it.  This has been"
+            " done to make things more consistant, so for example a TCP/IP"
+            " server would now be SRV_TCP://localhost and the client would"
+            " be TCP://localhost"},
+    {
         NOTETYPE_ENHANCEMENT,"Added an option to add a carriage return when a line feed is received",
             "An option was added in settings so that the system will"
             " automatically add a carriage return (\\r) when a new line (\\n)"

@@ -48,7 +48,7 @@
 using namespace std;
 
 /*** DEFINES                  ***/
-#define TCPSERVER_URI_PREFIX              "TCPS"
+#define TCPSERVER_URI_PREFIX                    "SRV_TCP"
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      TCPServer // The name to append on the RegisterPlugin() function for built in version
 #define NEEDED_MIN_API_VERSION                  0x01000000
 
@@ -115,10 +115,9 @@ extern const struct IODriverAPI g_TCPServerPluginAPI;
 struct IODriverInfo m_TCPServerInfo=
 {
     0,
-    "<URI>TCPS://[host]:[port]</URI>"
-    "<ARG>host -- The TCP/IP interface to listen on</ARG>"
+    "<URI>" TCPSERVER_URI_PREFIX ":[port]</URI>"
     "<ARG>port -- The port to listen on.</ARG>"
-    "<Example>TCPS://localhost:80</Example>"
+    "<Example>" TCPSERVER_URI_PREFIX ":80</Example>"
 };
 
 const struct IOS_API *g_TCPS_IOSystem;
@@ -601,7 +600,7 @@ void TCPServer_ConnectionOptionsWidgets_UpdateUI(
  *    a buffer.
  *
  *    This is in the format of:
- *      "TCPS://localhost:80"
+ *      "SRV_TCP:80"
  *
  * RETURNS:
  *    true -- all ok
@@ -668,7 +667,7 @@ PG_BOOL TCPServer_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,
     unsigned long Port;
     char buff[100];
 
-    /* Make sure it starts with TCPS:// */
+    /* Make sure it starts with SRV_TCP:// */
     if(strncasecmp(URI,TCPSERVER_URI_PREFIX ":",
             (sizeof(TCPSERVER_URI_PREFIX)-1)+1)!=0)   // +1 for ':'
     {

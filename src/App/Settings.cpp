@@ -1138,6 +1138,8 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
     /***** Connections *****/
     cfg.Register("AutoReopen",AutoReopen);
     cfg.Register("AutoReopenWaitTime",AutoReopenWaitTime);
+    cfg.Register("DelayBetweenBytes",DelayBetweenBytes);
+    cfg.Register("DelayAfterNewLineSent",DelayAfterNewLineSent);
 
     Settings_RegisterSysColorType(cfg,"ColorsNormal",&SysColors[e_SysColShade_Normal]);
     Settings_RegisterSysColorType(cfg,"ColorsBright",&SysColors[e_SysColShade_Bright]);
@@ -1153,6 +1155,8 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
     cfg.Register("Height",TermSizeHeight);
     cfg.Register("ScrollBufferLines",ScrollBufferLines);
     cfg.Register("CenterTextInWindow",CenterTextInWindow);
+    cfg.Register("LocalEcho",LocalEcho);
+    cfg.Register("AutoCROnLF",AutoCROnLF);
 
     cfg.StartBlock("DataProcessors");
     Settings_RegisterDataProcessorType(cfg,"DataProcessorType",DataProcessorType);
@@ -1215,6 +1219,10 @@ bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
         return false;
     if(Con1.AutoReopenWaitTime!=Con2.AutoReopenWaitTime)
         return false;
+    if(Con1.DelayBetweenBytes!=Con2.DelayBetweenBytes)
+        return false;
+    if(Con1.DelayAfterNewLineSent!=Con2.DelayAfterNewLineSent)
+        return false;
 
     if(memcmp(Con1.SysColors,Con2.SysColors,sizeof(Con1.SysColors))!=0)
         return false;
@@ -1240,6 +1248,10 @@ bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
     if(Con1.ScrollBufferLines!=Con2.ScrollBufferLines)
         return false;
     if(Con1.CenterTextInWindow!=Con2.CenterTextInWindow)
+        return false;
+    if(Con1.LocalEcho!=Con2.LocalEcho)
+        return false;
+    if(Con1.AutoCROnLF!=Con2.AutoCROnLF)
         return false;
     if(Con1.DataProcessorType!=Con2.DataProcessorType)
         return false;
@@ -1362,6 +1374,8 @@ void ConSettings::DefaultSettings(void)
 
     AutoReopen=false;
     AutoReopenWaitTime=100; // 100ms
+    DelayBetweenBytes=0;
+    DelayAfterNewLineSent=0;
 
     TermSizeFixedWidth=false;
     TermSizeFixedHeight=false;
@@ -1369,6 +1383,8 @@ void ConSettings::DefaultSettings(void)
     TermSizeHeight=25;
     ScrollBufferLines=10000;
     CenterTextInWindow=true;
+    LocalEcho=false;
+    AutoCROnLF=true;
 
     BackspaceKeyMode=e_BackspaceKey_BS;
     EnterKeyMode=e_EnterKey_LF;

@@ -925,14 +925,14 @@ void Con_MoveMark(t_DataProMark *Mark,int Amount)
  *    NONE
  *
  * FUNCTION:
- *    This function does the DSP_FreezeStream() function to the active
+ *    This function does the DPS_FreezeStream() function to the active
  *    connection.
  *
  * RETURNS:
  *    NONE
  *
  * SEE ALSO:
- *    DSP_FreezeStream()
+ *    DPS_FreezeStream()
  ******************************************************************************/
 void Con_FreezeStream(void)
 {
@@ -953,14 +953,14 @@ void Con_FreezeStream(void)
  *    NONE
  *
  * FUNCTION:
- *    This function does the DSP_ReleaseFrozenStream() function to the active
+ *    This function does the DPS_ReleaseFrozenStream() function to the active
  *    connection.
  *
  * RETURNS:
  *    NONE
  *
  * SEE ALSO:
- *    DSP_ReleaseFrozenStream()
+ *    DPS_ReleaseFrozenStream()
  ******************************************************************************/
 void Con_ReleaseFrozenStream(void)
 {
@@ -981,14 +981,14 @@ void Con_ReleaseFrozenStream(void)
  *    NONE
  *
  * FUNCTION:
- *    This function does the DSP_ClearFrozenStream() function to the active
+ *    This function does the DPS_ClearFrozenStream() function to the active
  *    connection.
  *
  * RETURNS:
  *    NONE
  *
  * SEE ALSO:
- *    DSP_ClearFrozenStream()
+ *    DPS_ClearFrozenStream()
  ******************************************************************************/
 void Con_ClearFrozenStream(void)
 {

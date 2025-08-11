@@ -718,6 +718,11 @@ static void DS_SetSettingGUI(void)
     NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_AutoReopenWaitTime);
     UISetNumberInputCtrlValue(NumberInputHandle,m_SettingConSettings->AutoReopenWaitTime);
 
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_DelayBetweenBytes);
+    UISetNumberInputCtrlValue(NumberInputHandle,m_SettingConSettings->DelayBetweenBytes);
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_DelayAfterNewLineSent);
+    UISetNumberInputCtrlValue(NumberInputHandle,m_SettingConSettings->DelayAfterNewLineSent);
+
     /********************/
     /* Display          */
     /********************/
@@ -795,6 +800,12 @@ static void DS_SetSettingGUI(void)
         default:
         break;
     }
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoCROnLF);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->AutoCROnLF);
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_LocalEcho);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->LocalEcho);
 
     /* Keyboard */
     DS_SetKeyboardRadioBttns();
@@ -1144,6 +1155,11 @@ static void DS_GetSettingsFromGUI(void)
     NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_AutoReopenWaitTime);
     m_SettingConSettings->AutoReopenWaitTime=UIGetNumberInputCtrlValue(NumberInputHandle);
 
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_DelayBetweenBytes);
+    m_SettingConSettings->DelayBetweenBytes=UIGetNumberInputCtrlValue(NumberInputHandle);
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_DelayAfterNewLineSent);
+    m_SettingConSettings->DelayAfterNewLineSent=UIGetNumberInputCtrlValue(NumberInputHandle);
+
     /********************/
     /* Display          */
     /********************/
@@ -1182,6 +1198,11 @@ static void DS_GetSettingsFromGUI(void)
     m_SettingConSettings->ScrollBufferLines=UIGetNumberInputCtrlValue(NumberInputHandle);
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CenterTextInWindow);
     m_SettingConSettings->CenterTextInWindow=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoCROnLF);
+    m_SettingConSettings->AutoCROnLF=UIGetCheckboxCheckStatus(CheckboxHandle);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_LocalEcho);
+    m_SettingConSettings->LocalEcho=UIGetCheckboxCheckStatus(CheckboxHandle);
 
     /* Keyboard */
     DS_GetSettingsFromGUI_KeyboardRadioBttns();
@@ -2617,6 +2638,8 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Checkbox_AlwaysShowTabs:
                 case e_UIS_Checkbox_CloseButtonOnTabs:
                 case e_UIS_Checkbox_CenterTextInWindow:
+                case e_UIS_Checkbox_AutoCROnLF:
+                case e_UIS_Checkbox_LocalEcho:
                 case e_UIS_Checkbox_CursorBlink:
                 case e_UIS_Checkbox_BookmarksOpenNewTab:
                 case e_UIS_Checkbox_StopWatchAutoLap:
@@ -2773,6 +2796,8 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_NumberInput_ScrollBufferLines:
                 case e_UIS_NumberInput_HexDisplay_BufferSize:
                 case e_UIS_NumberInput_AutoReopenWaitTime:
+                case e_UIS_NumberInput_DelayBetweenBytes:
+                case e_UIS_NumberInput_DelayAfterNewLineSent:
                 case e_UIS_NumberInputMAX:
                 default:
                 break;

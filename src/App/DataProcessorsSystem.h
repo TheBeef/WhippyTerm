@@ -98,7 +98,7 @@ void DPS_GetListOfBinaryProcessors(e_BinaryDataProcessorClassType BinClass,
         t_DPS_ProInfoType &RetData);
 bool DPS_ProcessorKeyPress(struct ProcessorConData *FData,const uint8_t *KeyChar,int KeyCharLen,e_UIKeys ExtendedKey,uint8_t Mod);
 void DPS_ProcessorIncomingBytes(struct ProcessorConData *FData,
-        const uint8_t *inbuff,int bytes);
+        const uint8_t *inbuff,int bytes,bool DoAutoLF);
 void DPS_ProcessorOutGoingBytes(struct ProcessorConData *FData,const uint8_t *outbuff,int bytes);
 const struct DataProcessor *DPS_GetProcessorsInfo(const char *IDStr);
 

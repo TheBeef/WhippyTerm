@@ -31,6 +31,27 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added an option to add a carriage return when a line feed is received",
+            "An option was added in settings so that the system will"
+            " automatically add a carriage return (\\r) when a new line (\\n)"
+            " is seen"},
+    {
+        NOTETYPE_ENHANCEMENT,"Added option to do local echo",
+            "A new settings option has been added to do a local echo when"
+            " sending data for half duplex connections."},
+    {
+        NOTETYPE_ENHANCEMENT,"Added the transmit delay to settings",
+            "You could set the send delay for a connection but it"
+            " wasn't stored anywhere.  A new setting has been"
+            " added that lets you customize this for the system and"
+            " have bookmarks store the setting.\n"
+            "You can also just temperately for the current connection"
+            " as well without changing the settings."},
+    {
+        NOTETYPE_ENHANCEMENT,"Moved the QT6 for GUI",
+            "Updated to QT6 for the GUI.  This should add better support"
+            " for display scaling (DPI)."},
+    {
         NOTETYPE_POLISH,"Reworked custom connection settings menu work",
             "Telling when a connection was using custom settings was not"
             " clear.  The menu has been reworked to make it clearer."},

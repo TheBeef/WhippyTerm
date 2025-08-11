@@ -119,6 +119,8 @@ class ConSettings
         /***** Connections *****/
         bool AutoReopen;
         uint32_t AutoReopenWaitTime;
+        uint32_t DelayBetweenBytes;
+        uint32_t DelayAfterNewLineSent;
 
         /* Keyboard */
         e_BackspaceKeyType BackspaceKeyMode;
@@ -138,6 +140,8 @@ class ConSettings
         int TermSizeHeight;
         unsigned int ScrollBufferLines;
         bool CenterTextInWindow;
+        bool LocalEcho;
+        bool AutoCROnLF;
 
         /* Input */
         e_DataProcessorTypeType DataProcessorType;

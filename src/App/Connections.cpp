@@ -467,6 +467,8 @@ Connection::Connection(const char *URI)
 
     TransmitDelayByte=0;
     TransmitDelayLine=0;
+    LastSettingsTransmitDelayByte=0;
+    LastSettingsTransmitDelayLine=0;
     TransmitDelayBuffer=NULL;
     TransmitDelayBufferSize=0;
     TransmitDelayBufferWritePos=0;
@@ -750,6 +752,12 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
                 Display->SetBlockDeviceMode(BlockSendDevice);
         }
 
+        TransmitDelayByte=CustomSettings.DelayBetweenBytes;
+        TransmitDelayLine=CustomSettings.DelayAfterNewLineSent;
+        LastSettingsTransmitDelayByte=CustomSettings.DelayBetweenBytes;
+        LastSettingsTransmitDelayLine=CustomSettings.DelayAfterNewLineSent;
+        ApplyTransmitDelayChange();
+
         ResetZoom();
     }
     catch(...)
@@ -895,7 +903,7 @@ bool Connection::SetConnectionBasedOnURI(const char *URI)
  *    false -- There was an error applying the settings.
  *
  * SEE ALSO:
- *    
+ *    ApplyCustomSettings()
  ******************************************************************************/
 bool Connection::ApplySettings(void)
 {
@@ -1087,6 +1095,16 @@ void Connection::ApplyCustomSettings(void)
 
     DoAutoReopen=CustomSettings.AutoReopen;
     DoAutoReopenIfNeeded();
+
+    if(LastSettingsTransmitDelayByte!=CustomSettings.DelayBetweenBytes ||
+            LastSettingsTransmitDelayLine!=CustomSettings.DelayAfterNewLineSent)
+    {
+        TransmitDelayByte=CustomSettings.DelayBetweenBytes;
+        TransmitDelayLine=CustomSettings.DelayAfterNewLineSent;
+        LastSettingsTransmitDelayByte=CustomSettings.DelayBetweenBytes;
+        LastSettingsTransmitDelayLine=CustomSettings.DelayAfterNewLineSent;
+        ApplyTransmitDelayChange();
+    }
 }
 
 /*******************************************************************************
@@ -1665,6 +1683,17 @@ e_ConWriteType Connection::InternalWriteBytes(const uint8_t *Data,int Bytes)
         break;
     }
 
+    /* Do local echo (only on success) */
+    if(RetValue==e_ConWrite_Success && CustomSettings.LocalEcho)
+    {
+        Con_SetActiveConnection(this);
+        DoingIncomingByteProcessing=true;
+        DPS_ProcessorIncomingBytes(&ProcessorData,Data,Bytes,
+                CustomSettings.AutoCROnLF);
+        DoingIncomingByteProcessing=false;
+        Con_SetActiveConnection(NULL);
+    }
+
     return RetValue;
 }
 
@@ -1815,6 +1844,7 @@ bool Connection::InformOfDataAvaiable(void)
     uint8_t inbuff[100];
     bool ProcessBlock;
     bool RetValue;
+    uint_fast32_t r;
 
     Con_SetActiveConnection(this);
 
@@ -1867,7 +1897,8 @@ bool Connection::InformOfDataAvaiable(void)
                 if(ProcessBlock)
                 {
                     DoingIncomingByteProcessing=true;
-                    DPS_ProcessorIncomingBytes(&ProcessorData,inbuff,bytes);
+                    DPS_ProcessorIncomingBytes(&ProcessorData,inbuff,bytes,
+                            CustomSettings.AutoCROnLF);
                     DoingIncomingByteProcessing=false;
                 }
             }
@@ -5650,10 +5681,7 @@ void Connection::InformOfDelayTransmitTimeout(void)
     }
 
     if(TransmitDelayLine==0 && TransmitDelayByte==0)
-    {
-        
         Delay=0;
-    }
 
     if(Delay>0)
     {
@@ -7328,13 +7356,13 @@ const uint8_t *Connection::GetMarkString(t_DataProMark *Mark,uint32_t *Size,
  *    NONE
  *
  * FUNCTION:
- *    This function does the DSP_FreezeStream() function to the connection.
+ *    This function does the DPS_FreezeStream() function to the connection.
  *
  * RETURNS:
  *    NONE
  *
  * SEE ALSO:
- *    DSP_FreezeStream()
+ *    DPS_FreezeStream()
  ******************************************************************************/
 void Connection::FreezeStream(void)
 {
@@ -7354,14 +7382,14 @@ void Connection::FreezeStream(void)
  *    NONE
  *
  * FUNCTION:
- *    This function does the DSP_ReleaseFrozenStream() function to the
+ *    This function does the DPS_ReleaseFrozenStream() function to the
  *    connection.
  *
  * RETURNS:
  *    NONE
  *
  * SEE ALSO:
- *    DSP_ReleaseFrozenStream
+ *    DPS_ReleaseFrozenStream
  ******************************************************************************/
 void Connection::ReleaseFrozenStream(void)
 {
@@ -7381,14 +7409,14 @@ void Connection::ReleaseFrozenStream(void)
  *    NONE
  *
  * FUNCTION:
- *    This function does the DSP_ClearFrozenStream() function to the active
+ *    This function does the DPS_ClearFrozenStream() function to the active
  *    connection.
  *
  * RETURNS:
  *    NONE
  *
  * SEE ALSO:
- *    DSP_ClearFrozenStream()
+ *    DPS_ClearFrozenStream()
  ******************************************************************************/
 void Connection::ClearFrozenStream(void)
 {

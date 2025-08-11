@@ -525,13 +525,6 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         e_LeftPanelTabType LeftPanelInfo;
         e_RightPanelTabType RightPanelInfo;
         e_BottomPanelTabType BottomPanelInfo;
-        unsigned int TransmitDelayByte;
-        unsigned int TransmitDelayLine;
-        uint8_t *TransmitDelayBuffer;
-        unsigned int TransmitDelayBufferSize;
-        unsigned int TransmitDelayBufferWritePos;
-        unsigned int TransmitDelayBufferReadPos;
-        struct UITimer *TransmitDelayTimer;
         struct UITimer *SmartClipTimer;
         struct UITimer *AutoReopenTimer;
         bool BlockSendDevice;
@@ -547,6 +540,17 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         bool BinaryConnection;
         uint64_t LastBellPlayed;
         bool DoAutoReopen;
+
+        /* Send delays */
+        unsigned int TransmitDelayByte;
+        unsigned int TransmitDelayLine;
+        unsigned int LastSettingsTransmitDelayByte;
+        unsigned int LastSettingsTransmitDelayLine;
+        uint8_t *TransmitDelayBuffer;
+        unsigned int TransmitDelayBufferSize;
+        unsigned int TransmitDelayBufferWritePos;
+        unsigned int TransmitDelayBufferReadPos;
+        struct UITimer *TransmitDelayTimer;
 
         /* Frozen */
         bool InputFrozen;

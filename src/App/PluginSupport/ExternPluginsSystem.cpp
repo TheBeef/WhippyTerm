@@ -811,6 +811,10 @@ bool InstallNewExternPlugin(const char *Filename)
 
     ImformOfNewPluginInstalled(&Info);
 
+    /* Enable this plugin in settings (we assume that if they installed the
+       plugin they want to use it) */
+    
+
     return true;
 }
 

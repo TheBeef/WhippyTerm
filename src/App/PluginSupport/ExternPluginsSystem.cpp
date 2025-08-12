@@ -30,12 +30,14 @@
  ******************************************************************************/
 
 /*** HEADER FILES TO INCLUDE  ***/
+#include "App/DataProcessorsSystem.h"
+#include "App/MainApp.h"
+#include "App/MainWindow.h"
+#include "App/IOSystem.h"
+#include "App/Settings.h"
 #include "App/Dialogs/Dialog_InstallPlugin.h"
 #include "App/PluginSupport/ExternPluginsSystem.h"
 #include "App/PluginSupport/SystemSupport.h"
-#include "App/MainApp.h"
-#include "App/IOSystem.h"
-#include "App/MainWindow.h"
 #include "BuildOptions/BuildOptions.h"
 #include "OS/Directorys.h"
 #include "OS/FilePaths.h"
@@ -47,6 +49,7 @@
 #include "Version.h"
 #include <string.h>
 #include <stdio.h>
+#include <algorithm>
 #include <list>
 
 using namespace std;
@@ -734,6 +737,13 @@ bool InstallNewExternPlugin(const char *Filename)
     uint8_t Min;
     uint8_t Rev;
     uint8_t Patch;
+    uint_fast32_t TotalDPPluginsBeforeInstall;
+    uint_fast32_t TotalDPPluginsAfterInstall;
+    uint_fast32_t NewDPPluginsCount;
+    uint_fast32_t r;
+    t_DPS_ProInfoType DPPlugins;
+    struct DPS_ProInfo *QuickPro;
+    t_StringListType *AddTo;
 
     if(!LoadInfoAboutExternPlugin(Filename,Info,false))
         return false;
@@ -802,6 +812,8 @@ bool InstallNewExternPlugin(const char *Filename)
         return false;
     }
 
+    TotalDPPluginsBeforeInstall=DPS_GetDataProcessorPluginCount();
+
     Info.DLLFound=LoadPlugin(LoadFilename,Info.PluginName.c_str());
 
     /* Add this to the list of plugins */
@@ -809,11 +821,49 @@ bool InstallNewExternPlugin(const char *Filename)
 
     SavePluginList();
 
-    ImformOfNewPluginInstalled(&Info);
+    /* If the plugin is a data processing plugin then we need to enable this
+       plugin in settings */
+    TotalDPPluginsAfterInstall=DPS_GetDataProcessorPluginCount();
+    if(TotalDPPluginsAfterInstall!=TotalDPPluginsBeforeInstall)
+    {
+        /* New plugins where installed */
+        NewDPPluginsCount=
+                TotalDPPluginsAfterInstall-TotalDPPluginsBeforeInstall;
+        DPS_GetDataProcessorPluginList(DPPlugins);
 
-    /* Enable this plugin in settings (we assume that if they installed the
-       plugin they want to use it) */
-    
+        /* Ok, take the an enable the new plugins */
+        for(r=0;r<NewDPPluginsCount;r++)
+        {
+            QuickPro=&DPPlugins[TotalDPPluginsBeforeInstall+r];
+            AddTo=NULL;
+            switch(QuickPro->ProcessorData->Info.ProType)
+            {
+                case e_DataProcessorType_Text:
+                    AddTo=&g_Settings.DefaultConSettings.
+                            EnabledTextDataProcessors;
+                break;
+                case e_DataProcessorType_Binary:
+                    AddTo=&g_Settings.DefaultConSettings.
+                            EnabledBinaryDataProcessors;
+                break;
+                default:
+                case e_DataProcessorTypeMAX:
+                break;
+            }
+            if(AddTo!=NULL)
+            {
+                if(std::find(AddTo->begin(),AddTo->end(),QuickPro->IDStr)==
+                        AddTo->end())
+                {
+                    /* Wasn't there so add it */
+                    AddTo->push_back(QuickPro->IDStr);
+                }
+            }
+        }
+        ApplySettings();    // Apply the change
+    }
+
+    ImformOfNewPluginInstalled(&Info);
 
     return true;
 }

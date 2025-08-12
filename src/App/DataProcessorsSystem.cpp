@@ -1159,7 +1159,8 @@ void DPS_ProcessorOutGoingBytes(struct ProcessorConData *FData,
  *    index.
  *
  * SEE ALSO:
- *    DPS_GetListOfBinaryProcessors()
+ *    DPS_GetListOfBinaryProcessors(), DPS_GetDataProcessorPluginCount(),
+ *    DPS_GetDataProcessorPluginList()
  ******************************************************************************/
 void DPS_GetListOfTextProcessors(e_TextDataProcessorClassType TxtClass,
         t_DPS_ProInfoType &RetData)
@@ -1179,6 +1180,7 @@ void DPS_GetListOfTextProcessors(e_TextDataProcessorClassType TxtClass,
             NewEntry.DisplayName=CurProcessor->Info.DisplayName;
             NewEntry.Tip=CurProcessor->Info.Tip;
             NewEntry.Help=CurProcessor->Info.Help;
+            NewEntry.ProcessorData=&*CurProcessor;
 
             RetData.push_back(NewEntry);
         }
@@ -1237,9 +1239,92 @@ void DPS_GetListOfBinaryProcessors(e_BinaryDataProcessorClassType BinClass,
             NewEntry.DisplayName=CurProcessor->Info.DisplayName;
             NewEntry.Tip=CurProcessor->Info.Tip;
             NewEntry.Help=CurProcessor->Info.Help;
+            NewEntry.ProcessorData=&*CurProcessor;
 
             RetData.push_back(NewEntry);
         }
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_GetDataProcessorPluginCount
+ *
+ * SYNOPSIS:
+ *    uint_fast32_t DPS_GetDataProcessorPluginCount(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This funciton gets the total number of plugins that have registered
+ *    the data processors system.
+ *
+ * RETURNS:
+ *    The number of plugins currently registered.
+ *
+ * NOTES:
+ *    This count can go down if a plugin is unregister and removed.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+uint_fast32_t DPS_GetDataProcessorPluginCount(void)
+{
+    return m_DataProcessors.size();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_GetDataProcessorPluginList
+ *
+ * SYNOPSIS:
+ *    void DPS_GetDataProcessorPluginList(t_DPS_ProInfoType &RetData);
+ *
+ * PARAMETERS:
+ *    RetData [O] -- This is filled with info about the input processors.
+ *                   The data return will be a vector of a structure with
+ *                   the following fields:
+ *                      IDStr -- The identifier string for this input
+ *                               processor.
+ *                      DisplayName -- The name to display to the user
+ *                      Tip -- A tool tip for this input processor
+ *                      Help -- Help for this input processor.  This is
+ *                              written in a text markup.
+ *
+ * FUNCTION:
+ *    This function gets a list of all registered data processors.  The list
+ *    will be ordered by when they where registered.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    The order of the returned data will change from time to time so you
+ *    must use the 'IDStr' to identify the text data processor not the
+ *    index.
+ *
+ * SEE ALSO:
+ *    DPS_GetListOfTextProcessors()
+ ******************************************************************************/
+void DPS_GetDataProcessorPluginList(t_DPS_ProInfoType &RetData)
+{
+    i_DPSDataProcessorsType CurProcessor;
+    struct DPS_ProInfo NewEntry;
+
+    RetData.clear();
+    RetData.reserve(m_DataProcessors.size());
+
+    for(CurProcessor=m_DataProcessors.begin();
+            CurProcessor!=m_DataProcessors.end();CurProcessor++)
+    {
+        NewEntry.IDStr=CurProcessor->ProID.c_str();
+        NewEntry.DisplayName=CurProcessor->Info.DisplayName;
+        NewEntry.Tip=CurProcessor->Info.Tip;
+        NewEntry.Help=CurProcessor->Info.Help;
+        NewEntry.ProcessorData=&*CurProcessor;
+
+        RetData.push_back(NewEntry);
     }
 }
 

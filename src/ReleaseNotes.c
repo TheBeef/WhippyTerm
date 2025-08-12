@@ -31,6 +31,10 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Installing a data processor plugin will now enable it",
+            "When you install a new data processor plugin it will enable it"
+            " in settings."},
+    {
         NOTETYPE_ENHANCEMENT,"Server style IO plugins now start with \"SRV_\"",
             "Server style IO plugins now should start their URI prefix with"
             " \"SRV_\" to show that they are a server.  A server is a plugin"

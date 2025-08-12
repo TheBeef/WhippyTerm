@@ -50,6 +50,7 @@ struct DPS_ProInfo
     const char *DisplayName;
     const char *Tip;
     const char *Help;
+    const struct DataProcessor *ProcessorData;
 };
 typedef std::vector<struct DPS_ProInfo> t_DPS_ProInfoType;
 
@@ -96,6 +97,8 @@ void DPS_GetListOfTextProcessors(e_TextDataProcessorClassType TxtClass,
         t_DPS_ProInfoType &RetData);
 void DPS_GetListOfBinaryProcessors(e_BinaryDataProcessorClassType BinClass,
         t_DPS_ProInfoType &RetData);
+void DPS_GetDataProcessorPluginList(t_DPS_ProInfoType &RetData);
+uint_fast32_t DPS_GetDataProcessorPluginCount(void);
 bool DPS_ProcessorKeyPress(struct ProcessorConData *FData,const uint8_t *KeyChar,int KeyCharLen,e_UIKeys ExtendedKey,uint8_t Mod);
 void DPS_ProcessorIncomingBytes(struct ProcessorConData *FData,
         const uint8_t *inbuff,int bytes,bool DoAutoLF);

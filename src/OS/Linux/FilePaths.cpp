@@ -34,6 +34,9 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <limits.h>
 
 /*** DEFINES                  ***/
 
@@ -47,16 +50,16 @@
 
 /*******************************************************************************
  * NAME:
- *    GetAppDataPath
+ *    GetOSAppDataPath
  *
  * SYNOPSIS:
- *    bool GetAppDataPath(std::string &AppPath);
+ *    bool GetOSAppDataPath(std::string &AppPath);
  *
  * PARAMETERS:
  *    AppPath [O] -- The path (with trailing /) for the path to store app data.
  *
  * FUNCTION:
- *    This function gets a path of the system where the program should store
+ *    This function gets a path of the OS where the program should store
  *    it's data.  This is data like the settings files.
  *
  * RETURNS:
@@ -70,7 +73,7 @@
  *    Paul Hutchinson (27 Sep 2018)
  *       Created
  ******************************************************************************/
-bool GetAppDataPath(std::string &AppPath)
+bool GetOSAppDataPath(std::string &AppPath)
 {
     struct passwd *pw;
     const char *homedir;
@@ -98,3 +101,49 @@ bool GetAppDataPath(std::string &AppPath)
     return true;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    GetOSAppExePath
+ *
+ * SYNOPSIS:
+ *    bool GetOSAppExePath(std::string &AppPath);
+ *
+ * PARAMETERS:
+ *    AppPath [O] -- The path (with trailing /) for the path to exe.
+ *
+ * FUNCTION:
+ *    This function gets a path of the system where the program exe is.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    GetOSAppDataPath()
+ ******************************************************************************/
+bool GetOSAppExePath(std::string &AppPath)
+{
+    char dest[PATH_MAX+1];
+    char *p;
+
+    memset(dest,0,sizeof(dest)); // readlink does not null terminate!
+
+    if(readlink("/proc/self/exe",dest,PATH_MAX)==-1)
+        return false;
+
+    /* Remove the exe name */
+    p=&dest[strlen(dest)];
+    while(p>dest)
+    {
+        if(*p=='/')
+        {
+            *(p+1)=0;
+            break;
+        }
+        p--;
+    }
+
+    AppPath=dest;
+
+    return true;
+}

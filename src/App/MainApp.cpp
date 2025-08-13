@@ -16,12 +16,13 @@
 #include "MainApp.h"
 #include "App/Bookmarks.h"
 #include "App/Commands.h"
+#include "App/DataProcessorsSystem.h"
+#include "App/FileTransferProtocolSystem.h"
 #include "App/MainWindow.h"
+#include "App/Portable.h"
 #include "App/Session.h"
 #include "App/Settings.h"
 #include "App/IOSystem.h"
-#include "App/DataProcessorsSystem.h"
-#include "App/FileTransferProtocolSystem.h"
 #include "App/StdPlugins/RegisterStdPlugins.h"
 #include "App/SendBuffer.h"
 #include "App/Util/CRCSystem.h"
@@ -83,6 +84,8 @@ bool AppMain(int argc,char *argv[])
             "Look at build date in ABOUT to differentiate between builds.\n\n"
             "Goto WhippyTerm.com for an official version.");
 #endif
+
+    InitPortableSystem();
 
     /* Startup code */
     InitSessionSystem();

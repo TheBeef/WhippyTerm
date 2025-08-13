@@ -48,16 +48,16 @@
 
 /*******************************************************************************
  * NAME:
- *    GetAppDataPath
+ *    GetOSAppDataPath
  *
  * SYNOPSIS:
- *    bool GetAppDataPath(std::string &AppPath);
+ *    bool GetOSAppDataPath(std::string &AppPath);
  *
  * PARAMETERS:
  *    AppPath [O] -- The path (with trailing \) for the path to store app data.
  *
  * FUNCTION:
- *    This function gets a path of the system where the program should store
+ *    This function gets a path of the OS where the program should store
  *    it's data.  This is data like the settings files.
  *
  * RETURNS:
@@ -71,7 +71,7 @@
  *    Paul Hutchinson (27 Sep 2018)
  *       Created
  ******************************************************************************/
-bool GetAppDataPath(std::string &AppPath)
+bool GetOSAppDataPath(std::string &AppPath)
 {
     char szPath[MAX_PATH];
     if(SHGetFolderPath(NULL,CSIDL_APPDATA,NULL,0,szPath)!=S_OK)
@@ -82,6 +82,51 @@ bool GetAppDataPath(std::string &AppPath)
     if(AppPath[AppPath.length()-1]!='\\')
         AppPath+="\\";
     AppPath+="WhippyTerm\\";
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    GetOSAppExePath
+ *
+ * SYNOPSIS:
+ *    bool GetOSAppExePath(std::string &AppPath);
+ *
+ * PARAMETERS:
+ *    AppPath [O] -- The path (with trailing /) for the path to exe.
+ *
+ * FUNCTION:
+ *    This function gets a path of the system where the program exe is.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    GetOSAppDataPath()
+ ******************************************************************************/
+bool GetOSAppExePath(std::string &AppPath)
+{
+    TCHAR szFileName[MAX_PATH];
+
+    if(GetModuleFileName(NULL,szFileName,MAX_PATH)==0)
+        return false;
+
+/* DEBUG PAUL: Remove filename? */
+//    /* Remove the exe name */
+//    p=&dest[strlen(dest)];
+//    while(p>dest)
+//    {
+//        if(*p=='\\')
+//        {
+//            *(p+1)=0;
+//            break;
+//        }
+//        p--;
+//    }
+
+    AppPath=szFileName;
 
     return true;
 }

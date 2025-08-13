@@ -47,6 +47,7 @@ RC_ICONS = ..\WindowsInstaller\WhippyTerm.ico
 SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/Dialogs/Dialog_CRCFinder.cpp \
     ../src/App/Dialogs/Dialog_DataProPluginSettings.cpp \
+    ../src/App/Portable.cpp \
     ../src/BuildOptions/BuildOptions.cpp \
     ../src/App/Dialogs/Dialog_NewConnectionFromURI.cpp \
     ../src/App/Dialogs/Dialog_SendBufferSelect.cpp \

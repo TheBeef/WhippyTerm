@@ -43,10 +43,10 @@
 
 /*******************************************************************************
  * NAME:
- *    GetAppDataPath
+ *    GetOSAppDataPath
  *
  * SYNOPSIS:
- *    bool GetAppDataPath(std::string &AppPath);
+ *    bool GetOSAppDataPath(std::string &AppPath);
  *
  * PARAMETERS:
  *    AppPath [O] -- The path (with trailing /) for the path to store app data.
@@ -62,7 +62,7 @@
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool GetAppDataPath(std::string &AppPath)
+bool GetOSAppDataPath(std::string &AppPath)
 {
     return false;
 }

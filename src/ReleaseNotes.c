@@ -31,6 +31,12 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added an option to make portable version",
+            "Added an option to pull the settings and other files from"
+            " the same directory as the exe.  This will enable making"
+            " a portable version that does not need to be installed (or"
+            " needs admin rights)."},
+    {
         NOTETYPE_ENHANCEMENT,"Installing a data processor plugin will now enable it",
             "When you install a new data processor plugin it will enable it"
             " in settings."},

@@ -46,6 +46,7 @@
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
-bool GetAppDataPath(std::string &AppPath);
+bool GetOSAppDataPath(std::string &AppPath);
+bool GetOSAppExePath(std::string &AppPath);
 
 #endif   /* end of "#ifndef __FILEPATHS_H_" */

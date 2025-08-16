@@ -170,6 +170,7 @@ class DisplayText : public DisplayBase
         void ToggleAttribs2Selection(uint32_t Attribs);
         void ApplyBGColor2Selection(uint32_t RGB);
         bool IsAttribSetInSelection(uint32_t Attribs);
+        uint8_t *GetSelectionRAW(unsigned int *Bytes);
 
         t_DataProMark *AllocateMark(void);
         void FreeMark(t_DataProMark *Mark);

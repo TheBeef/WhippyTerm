@@ -1754,7 +1754,6 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         /* Things that are effected by binary vs text */
         IsBinaryCon=Con->IsConnectionBinary();
         UIEnableMenu(InsertHorizontalRule,!IsBinaryCon);
-        UISetContextMenuVisible(ContextMenu_FindCRCAlgorithm,IsBinaryCon);
 
         /* Styling checked or not */
         Checked=Con->IsThisAttribInSelection(TXT_ATTRIB_BOLD);

@@ -7299,3 +7299,44 @@ void DisplayText::GetMarkMinMaxPoints(struct TextPointMarker *Marker,
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::GetSelectionRAW
+ *
+ * SYNOPSIS:
+ *    uint8_t *DisplayText::GetSelectionRAW(unsigned int *Bytes);
+ *
+ * PARAMETERS:
+ *    Bytes [O] -- The number of bytes in the selection.
+ *
+ * FUNCTION:
+ *    This function gets a copy of the selection as RAW bytes.
+ *
+ * RETURNS:
+ *    A buffer with the selection copied into it or NULL if there was an error.
+ *    You must free this buffer with free() (it will be allocated with
+ *    malloc()).
+ *
+ * SEE ALSO:
+ *    IsThereASelection(), SelectAll(), ClearSelection()
+ ******************************************************************************/
+uint8_t *DisplayText::GetSelectionRAW(unsigned int *Bytes)
+{
+    std::string Clip;
+    uint8_t *RetBuff;
+
+    *Bytes=0;
+
+    if(!GetSelectionString(Clip))
+        return NULL;
+
+    *Bytes=Clip.length();
+
+    RetBuff=(uint8_t *)malloc(*Bytes+1);
+    if(RetBuff==NULL)
+        return NULL;
+
+    memcpy(RetBuff,Clip.c_str(),*Bytes+1);
+
+    return RetBuff;
+}

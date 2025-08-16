@@ -1807,6 +1807,27 @@ bool DisplayBase::IsAttribSetInSelection(uint32_t Attribs)
     return false;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetSelectionRAW
+ *
+ * SYNOPSIS:
+ *    uint8_t *DisplayBase::GetSelectionRAW(unsigned int *Bytes);
+ *
+ * PARAMETERS:
+ *    Bytes [O] -- The number of bytes in the selection.
+ *
+ * FUNCTION:
+ *    This function gets a copy of the selection as RAW bytes.
+ *
+ * RETURNS:
+ *    A buffer with the selection copied into it or NULL if there was an error.
+ *    You must free this buffer with free() (it will be allocated with
+ *    malloc()).
+ *
+ * SEE ALSO:
+ *    IsThereASelection(), SelectAll(), ClearSelection()
+ ******************************************************************************/
 uint8_t *DisplayBase::GetSelectionRAW(unsigned int *Bytes)
 {
     return NULL;

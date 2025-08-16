@@ -20,6 +20,9 @@ Frame_MainTextArea::Frame_MainTextArea(QWidget *parent) :
     ContextMenu->addAction(ui->actionCopy);
     ContextMenu->addAction(ui->actionPaste);
     ContextMenu->addSeparator();
+    ContextMenu->addAction(ui->actionEndian_Swap);
+    ContextMenu->addAction(ui->actionClear_Screen);
+    ContextMenu->addSeparator();
     ContextMenu->addAction(ui->actionStyleBold);
     ContextMenu->addAction(ui->actionStyleItalics);
     ContextMenu->addAction(ui->actionStyleUnderline);
@@ -41,9 +44,6 @@ Frame_MainTextArea::Frame_MainTextArea(QWidget *parent) :
     ColorBGSubmenu->addAction(ui->actionStyleBGColor_LightMagenta);
     ColorBGSubmenu->addAction(ui->actionStyleBGColor_Yellow);
     ColorBGSubmenu->addAction(ui->actionStyleBGColor_BrightWhite);
-    ContextMenu->addSeparator();
-    ContextMenu->addAction(ui->actionEndian_Swap);
-    ContextMenu->addAction(ui->actionClear_Screen);
     ContextMenu->addSeparator();
     ContextMenu->addAction(ui->actionZoom_In);
     ContextMenu->addAction(ui->actionZoom_Out);

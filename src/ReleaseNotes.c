@@ -31,6 +31,12 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added an select color button to the color settings",
+            "In Settings->Display->Colors you can input colors by Web # and"
+            " sliders. A new button was added that you can press to use"
+            " the color picker the same as with Cursor"
+            " color."},
+    {
         NOTETYPE_ENHANCEMENT,"Added an option to make portable version",
             "Added an option to pull the settings and other files from"
             " the same directory as the exe.  This will enable making"

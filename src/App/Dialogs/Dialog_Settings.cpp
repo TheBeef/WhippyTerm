@@ -2601,6 +2601,15 @@ bool DS_Event(const struct DSEvent *Event)
                     }
                 break;
 
+                case e_UIS_Button_ColorEditSelectColor:
+                    SelColor=UIGetColor(DS_GetCurrentColor());
+                    if(SelColor!=0xFFFFFFFF)
+                    {
+                        DS_SetCurrentColor(SelColor);
+                        DS_UpdateColorPreview(true);
+                    }
+                break;
+
                 case e_UIS_ButtonMAX:
                 default:
                 break;

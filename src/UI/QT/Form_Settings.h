@@ -165,6 +165,8 @@ private slots:
     
     void on_Binary_OtherSettings_pushButton_clicked();
     
+    void on_SelectColor_pushButton_clicked();
+    
 private:
     bool DoingEvent;
 

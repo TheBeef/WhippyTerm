@@ -795,3 +795,12 @@ void Form_Settings::on_Binary_OtherSettings_pushButton_clicked()
     SendEvent(e_DSEvent_BttnTriggered,&EventData);
 }
 
+
+void Form_Settings::on_SelectColor_pushButton_clicked()
+{
+    union DSEventData EventData;
+    
+    EventData.Bttn.InputID=e_UIS_Button_ColorEditSelectColor;
+    SendEvent(e_DSEvent_BttnTriggered,&EventData);
+}
+

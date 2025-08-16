@@ -191,6 +191,8 @@ t_UIButtonCtrl *UIS_GetButtonHandle(e_UIS_Button UIObj)
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->HexDisplay_SelectSelBGColor_pushButton;
         case e_UIS_Button_CustomSound_SelectFilename:
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->CustomSound_SelectFilename_pushButton;
+        case e_UIS_Button_ColorEditSelectColor:
+            return (t_UIButtonCtrl *)g_SettingsDialog->ui->SelectColor_pushButton;
 
         case e_UIS_ButtonMAX:
         default:

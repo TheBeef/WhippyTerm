@@ -1,0 +1,308 @@
+T = TeraTerm
+S = Screen
+W = WhippyTerm
+
+https://xtermjs.org/docs/api/vtfeatures/#dcs
+https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+
+== C0 ==
+  * NUL     00/00           0x00    NULL
+  * SOH     00/01           0x01    START OF HEADING
+  * STX     00/02           0x02    START OF TEXT
+  * ETX     00/03           0x03    END OF TEXT
+  * EOT     00/04           0x04    END OF TRANSMISSION
+T * ENQ     00/05           0x05    ENQUIRY
+  * ACK     00/06           0x06    ACKNOWLEDGE
+T W BEL     00/07           0x07    BELL
+T W BS      00/08           0x08    BACKSPACE
+T W HT      00/09           0x09    CHARACTER TABULATION
+T W LF      00/10           0x0A    LINE FEED
+T * VT      00/11           0x0B    LINE TABULATION
+T W FF      00/12           0x0C    FORM FEED
+T W CR      00/13           0x0D    CARRIAGE RETURN
+TS* SO/LS1  00/14           0x0E    SHIFT-OUT / LOCKING-SHIFT ONE
+TS* SI/LS0  00/15           0x0F    SHIFT-IN / LOCKING-SHIFT ZERO
+T * DLE     01/00           0x10    DATA LINK ESCAPE
+  * DC1     01/01           0x11    DEVICE CONTROL ONE
+  * DC2     01/02           0x12    DEVICE CONTROL TWO
+  * DC3     01/03           0x13    DEVICE CONTROL THREE
+  * DC4     01/04           0x14    DEVICE CONTROL FOUR
+  * NAK     01/05           0x15    NEGATIVE ACKNOWLEDGE
+  * SYN     01/06           0x16    SYNCHRONOUS IDLE
+  * ETB     01/07           0x17    END OF TRANSMISSION BLOCK
+T * CAN     01/08           0x18    CANCEL
+  * EM      01/09           0x19    END OF MEDIUM
+T * SUB     01/10           0x1A    SUBSTITUTE
+T W ESC     01/11           0x1B    ESCAPE
+T * IS4     01/12           0x1C    INFORMATION SEPARATOR FOUR (FS - FILE SEPARATOR)
+T * IS3     01/13           0x1D    INFORMATION SEPARATOR THREE (GS - GROUP SEPARATOR)
+T * IS2     01/14           0x1E    INFORMATION SEPARATOR TWO (RS - RECORD SEPARATOR)
+T * IS1     01/15           0x1F    INFORMATION SEPARATOR ONE (US - UNIT SEPARATOR)
+
+== C1 ==
+    BPH     ESC 04/02       0x1B 0x42   B   BREAK PERMITTED HERE
+    NBH     ESC 04/03       0x1B 0x43   C   NO BREAK HERE
+TSW NEL     ESC 04/05       0x1B 0x45   E   NEXT LINE
+    SSA     ESC 04/06       0x1B 0x46   F   START OF SELECTED AREA
+    ESA     ESC 04/07       0x1B 0x47   G   END OF SELECTED AREA
+TS  HTS     ESC 04/08       0x1B 0x48   H   CHARACTER TABULATION SET
+    HTJ     ESC 04/09       0x1B 0x49   I   CHARACTER TABULATION WITH JUSTIFICATION
+    VTS     ESC 04/10       0x1B 0x4A   J   LINE TABULATION SET
+    PLD     ESC 04/11       0x1B 0x4B   K   PARTIAL LINE FORWARD
+    PLU     ESC 04/12       0x1B 0x4C   L   PARTIAL LINE BACKWARD
+TSW RI      ESC 04/13       0x1B 0x4D   M   REVERSE LINE FEED
+T   SS2     ESC 04/14       0x1B 0x4E   N   SINGLE-SHIFT TWO
+T   SS3     ESC 04/15       0x1B 0x4F   O   SINGLE-SHIFT THREE
+
+TS* DCS     ESC 05/00       0x1B 0x50   P   DEVICE CONTROL STRING
+    PU1     ESC 05/01       0x1B 0x51   Q   PRIVATE USE ONE
+    PU2     ESC 05/02       0x1B 0x52   R   PRIVATE USE TWO
+    STS     ESC 05/03       0x1B 0x53   S   SET TRANSMIT STATE
+    CCH     ESC 05/04       0x1B 0x54   T   CANCEL CHARACTER
+    MW      ESC 05/05       0x1B 0x55   U   MESSAGE WAITING
+    SPA     ESC 05/06       0x1B 0x56   V   START OF GUARDED AREA
+    EPA     ESC 05/07       0x1B 0x57   W   END OF GUARDED AREA
+T * SOS     ESC 05/08       0x1B 0x58   X   START OF STRING
+TS  SCI     ESC 05/10       0x1B 0x5A   Z   SINGLE CHARACTER INTRODUCER
+TSW CSI     ESC 05/11       0x1B 0x5B   [   CONTROL SEQUENCE INTRODUCER
+TSW ST      ESC 05/12       0x1B 0x5C   \   STRING TERMINATOR
+TS* OSC     ESC 05/13       0x1B 0x5D   ]   OPERATING SYSTEM COMMAND
+TS* PM      ESC 05/14       0x1B 0x5E   ^   PRIVACY MESSAGE
+TS* APC     ESC 05/15       0x1B 0x5F   _   APPLICATION PROGRAM COMMAND
+
+== NP ==
+
+== Ps ==
+TSW ICH     CSI 04/00       0x1B 0x5B 0x40  @   INSERT CHARACTER
+TSW CUU     CSI 04/01       0x1B 0x5B 0x41  A   CURSOR UP
+TSW CUD     CSI 04/02       0x1B 0x5B 0x42  B   CURSOR DOWN
+TSW CUF     CSI 04/03       0x1B 0x5B 0x43  C   CURSOR RIGHT
+TSW CUB     CSI 04/04       0x1B 0x5B 0x44  D   CURSOR LEFT
+TSW CNL     CSI 04/05       0x1B 0x5B 0x45  E   CURSOR NEXT LINE
+TSW CPL     CSI 04/06       0x1B 0x5B 0x46  F   CURSOR PRECEDING LINE
+TSW CHA     CSI 04/07       0x1B 0x5B 0x47  G   CURSOR CHARACTER ABSOLUTE
+TSW CUP     CSI 04/08       0x1B 0x5B 0x48  H   CURSOR POSITION
+TSW CHT     CSI 04/09       0x1B 0x5B 0x49  I   CURSOR FORWARD TABULATION
+TSW ED      CSI 04/10       0x1B 0x5B 0x4A  J   ERASE IN PAGE
+TSW EL      CSI 04/11       0x1B 0x5B 0x4B  K   ERASE IN LINE
+TSW IL      CSI 04/12       0x1B 0x5B 0x4C  L   INSERT LINE
+TSW DL      CSI 04/13       0x1B 0x5B 0x4D  M   DELETE LINE
+    EF      CSI 04/14       0x1B 0x5B 0x4E  N   ERASE IN FIELD
+    EA      CSI 04/15       0x1B 0x5B 0x4F  O   ERASE IN AREA
+
+TS  DCH     CSI 05/00       0x1B 0x5B 0x50  P   DELETE CHARACTER
+    SEE     CSI 05/01       0x1B 0x5B 0x51  Q   SELECT EDITING EXTENT (miss labled SSE)
+    CPR     CSI 05/02       0x1B 0x5B 0x52  R   ACTIVE POSITION REPORT
+TSW SU      CSI 05/03       0x1B 0x5B 0x53  S   SCROLL UP
+TSW SD      CSI 05/04       0x1B 0x5B 0x54  T   SCROLL DOWN
+    NP      CSI 05/05       0x1B 0x5B 0x55  U   NEXT PAGE
+    PP      CSI 05/06       0x1B 0x5B 0x56  V   PRECEDING PAGE
+    CTC     CSI 05/07       0x1B 0x5B 0x57  W   CURSOR TABULATION CONTROL
+TSW ECH     CSI 05/08       0x1B 0x5B 0x58  X   ERASE CHARACTER
+    CVT     CSI 05/09       0x1B 0x5B 0x59  Y   CURSOR LINE TABULATION
+TSW CBT     CSI 05/10       0x1B 0x5B 0x5A  Z   CURSOR BACKWARD TABULATION
+    SRS     CSI 05/11       0x1B 0x5B 0x5B  [   START REVERSED STRING
+    PTX     CSI 05/12       0x1B 0x5B 0x5C  \   PARALLEL TEXTS
+    SDS     CSI 05/13       0x1B 0x5B 0x5D  ]   START DIRECTED STRING
+    SIMD    CSI 05/14       0x1B 0x5B 0x5E  ^   SELECT IMPLICIT MOVEMENT DIRECTION
+    ---     CSI 05/15       0x1B 0x5B 0x5F  _   
+
+T W HPA     CSI 06/00       0x1B 0x5B 0x60  `   CHARACTER POSITION ABSOLUTE
+T W HPR     CSI 06/01       0x1B 0x5B 0x61  a   CHARACTER POSITION FORWARD
+T W REP     CSI 06/02       0x1B 0x5B 0x62  b   REPEAT
+TS  DA      CSI 06/03       0x1B 0x5B 0x63  c   DEVICE ATTRIBUTES
+TSW VPA     CSI 06/04       0x1B 0x5B 0x64  d   LINE POSITION ABSOLUTE
+T W VPR     CSI 06/05       0x1B 0x5B 0x65  e   LINE POSITION FORWARD
+T W HVP     CSI 06/06       0x1B 0x5B 0x66  f   CHARACTER AND LINE POSITION
+TS  TBC     CSI 06/07       0x1B 0x5B 0x67  g   TABULATION CLEAR
+TS  SM      CSI 06/08       0x1B 0x5B 0x68  h   SET MODE
+TS  MC      CSI 06/09       0x1B 0x5B 0x69  i   MEDIA COPY
+T W HPB     CSI 06/10       0x1B 0x5B 0x6A  j   CHARACTER POSITION BACKWARD
+T W VPB     CSI 06/11       0x1B 0x5B 0x6B  k   LINE POSITION BACKWARD
+TSW RM      CSI 06/12       0x1B 0x5B 0x6C  l   RESET MODE
+TSW SGR     CSI 06/13       0x1B 0x5B 0x6D  m   SELECT GRAPHIC RENDITION
+T W DSR     CSI 06/14       0x1B 0x5B 0x6E  n   DEVICE STATUS REPORT
+    DAQ     CSI 06/15       0x1B 0x5B 0x6F  o   DEFINE AREA QUALIFICATION
+
+== Pn ==
+    SL      CSI 04/00       0x1B 0x5B 0x20 @    SCROLL LEFT
+    SR      CSI 04/01       0x1B 0x5B 0x20 A    SCROLL RIGHT
+    GSM     CSI 04/02       0x1B 0x5B 0x20 B    GRAPHIC SIZE MODIFICATION
+    GSS     CSI 04/03       0x1B 0x5B 0x20 C    GRAPHIC SIZE SELECTION
+    FNT     CSI 04/04       0x1B 0x5B 0x20 D    FONT SELECTION
+    TSS     CSI 04/05       0x1B 0x5B 0x20 E    THIN SPACE SPECIFICATION
+    JFY     CSI 04/06       0x1B 0x5B 0x20 F    JUSTIFY
+    SPI     CSI 04/07       0x1B 0x5B 0x20 G    SPACING INCREMENT
+    QUAD    CSI 04/08       0x1B 0x5B 0x20 H    QUAD
+    SSU     CSI 04/09       0x1B 0x5B 0x20 I    SELECT SIZE UNIT
+    PFS     CSI 04/10       0x1B 0x5B 0x20 J    PAGE FORMAT SELECTION
+    SHS     CSI 04/11       0x1B 0x5B 0x20 K    SELECT CHARACTER SPACING
+    SVS     CSI 04/12       0x1B 0x5B 0x20 L    SELECT LINE SPACING
+    IGS     CSI 04/13       0x1B 0x5B 0x20 M    IDENTIFY GRAPHIC SUBREPERTOIRE
+    --      CSI 04/14       0x1B 0x5B 0x20 N    
+    IDCS    CSI 04/15       0x1B 0x5B 0x20 O    IDENTIFY DEVICE CONTROL STRING
+
+    PPA     CSI 05/00       0x1B 0x5B 0x20 P    PAGE POSITION ABSOLUTE
+    PPR     CSI 05/01       0x1B 0x5B 0x20 Q    PAGE POSITION FORWARD
+    PPB     CSI 05/02       0x1B 0x5B 0x20 R    PAGE POSITION BACKWARD
+    SPD     CSI 05/03       0x1B 0x5B 0x20 S    SELECT PRESENTATION DIRECTIONS
+    DTA     CSI 05/04       0x1B 0x5B 0x20 T    DIMENSION TEXT AREA
+    SHL/SLH CSI 05/05       0x1B 0x5B 0x20 U    SET LINE HOME
+    SLL     CSI 05/06       0x1B 0x5B 0x20 V    SET LINE LIMIT
+    FNK     CSI 05/07       0x1B 0x5B 0x20 W    FUNCTION KEY
+    SPQR    CSI 05/08       0x1B 0x5B 0x20 X    SELECT PRINT QUALITY AND RAPIDITY
+    SEF     CSI 05/09       0x1B 0x5B 0x20 Y    SHEET EJECT AND FEED
+    PEC     CSI 05/10       0x1B 0x5B 0x20 Z    PRESENTATION EXPAND OR CONTRACT
+    SSW     CSI 05/11       0x1B 0x5B 0x20 [    SET SPACE WIDTH
+    SACS    CSI 05/12       0x1B 0x5B 0x20 \    SET ADDITIONAL CHARACTER SEPARATION
+    SAPV    CSI 05/13       0x1B 0x5B 0x20 ]    SELECT ALTERNATIVE PRESENTATION VARIANTS
+    STAB    CSI 05/14       0x1B 0x5B 0x20 ^    SELECTIVE TABULATION
+    GCC     CSI 05/15       0x1B 0x5B 0x20 _    GRAPHIC CHARACTER COMBINATION
+
+    TATE    CSI 06/00       0x1B 0x5B 0x20 `    TABULATION ALIGNED TRAILING EDGE
+    TALE    CSI 06/01       0x1B 0x5B 0x20 a    TABULATION ALIGNED LEADING EDGE
+    TAC     CSI 06/02       0x1B 0x5B 0x20 b    TABULATION ALIGNED CENTRED
+    TCC     CSI 06/03       0x1B 0x5B 0x20 c    TABULATION CENTRED ON CHARACTER
+    TSR     CSI 06/04       0x1B 0x5B 0x20 d    TABULATION STOP REMOVE
+    SCO     CSI 06/05       0x1B 0x5B 0x20 e    SELECT CHARACTER ORIENTATION
+    SRCS    CSI 06/06       0x1B 0x5B 0x20 f    SET REDUCED CHARACTER SEPARATION
+    SCS     CSI 06/07       0x1B 0x5B 0x20 g    SET CHARACTER SPACING
+    SLS     CSI 06/08       0x1B 0x5B 0x20 h    SET LINE SPACING
+    --      CSI 06/09       0x1B 0x5B 0x20 i    
+    --      CSI 06/10       0x1B 0x5B 0x20 j    
+    SCP     CSI 06/11       0x1B 0x5B 0x20 k    SELECT CHARACTER PATH
+    --      CSI 06/12       0x1B 0x5B 0x20 l    
+    --      CSI 06/13       0x1B 0x5B 0x20 m    
+    --      CSI 06/14       0x1B 0x5B 0x20 n    
+    --      CSI 06/15       0x1B 0x5B 0x20 o    
+
+
+== Fs ==
+    DMI     ESC 06/00       0x1B 0x60   `   DISABLE MANUAL INPUT
+    INT     ESC 06/01       0x1B 0x61   a   INTERRUPT
+    EMI     ESC 06/02       0x1B 0x62   b   ENABLE MANUAL INPUT
+TSW RIS     ESC 06/03       0x1B 0x63   c   RESET TO INITIAL STATE
+    CMD     ESC 06/04       0x1B 0x64   d   CODING METHOD DELIMITER
+    --      ESC 06/05       0x1B 0x65   e   
+    --      ESC 06/06       0x1B 0x66   f   
+TSW --      ESC 06/07       0x1B 0x67   g   Visual Bell
+    --      ESC 06/08       0x1B 0x68   h   
+    --      ESC 06/09       0x1B 0x69   i   
+    --      ESC 06/10       0x1B 0x6A   j   
+ S  --      ESC 06/11       0x1B 0x6B   k   Title Definition String
+    --      ESC 06/12       0x1B 0x6C   l   
+    --      ESC 06/13       0x1B 0x6D   m   
+TS  LS2     ESC 06/14       0x1B 0x6E   n   LOCKING-SHIFT TWO
+TS  LS3     ESC 06/15       0x1B 0x6F   o   LOCKING-SHIFT THREE
+
+
+----> 8.3.44
+
+Non standard:
+    DECBI   ESC 03/06       0x1B 0x36   6   Back Index  (VT100)
+ S          ESC 03/07       0x1B 0x37   7   SaveCursor()
+ S          ESC 03/08       0x1B 0x38   8   RestoreCursor()
+    DECFI   ESC 03/09       0x1B 0x39   9   Forward Index (VT100)
+ S  DECNKM  ESC 03/13       0x1B 0x3D   =   Numeric Keypad Mode (VT100?)
+ S  DECNKM  ESC 03/14       0x1B 0x3E   >   Numeric Keypad Mode (VT100?)
+ SW IND     ESC 04/04       0x1B 0x44   D   Index (Move down)
+    LS3R    ESC 07/12       0x1B 0x7C   |   
+    LS2R    ESC 07/13       0x1B 0x7D   }
+    LS1R    ESC 07/14       0x1B 0x7E   ~
+ S  DECSTBM CSI 07/02       0x1B 0x5B 0x72  r   Set Top and Bottom Margins
+ S  DECSLRM/SCP CSI 07/03   0x1B 0x5B 0x73  s   Set Left and Right Margins / SaveCursor()
+    DECSLPP CSI 07/04       0x1B 0x5B 0x74  t   Set Lines Per Page
+ S  RCP     CSI 07/05       0x1B 0x5B 0x75  u   Restore cursor
+
+== l mode ==
+T   DECCKM  CSI ?1l         0x1B 0x5B 0x3F 0x31 0x6C                        Cursor Keys Mode
+T   DECCOLM CSI ?3l         0x1B 0x5B 0x3F 0x33 0x6C                        Select 80 or 132 Columns per Page
+T   DECSCNM CSI ?5l         0x1B 0x5B 0x3F 0x35 0x6C                        Screen Mode: Light or Dark Screen
+T   DECOM   CSI ?6l         0x1B 0x5B 0x3F 0x36 0x6C                        Origin Mode
+T   DECAWM  CSI ?7l         0x1B 0x5B 0x3F 0x37 0x6C                        Autowrap Mode
+T   DECARM  CSI ?8l         0x1B 0x5B 0x3F 0x38 0x6C                        Autorepeat Mode
+T           CSI ?9l         0x1B 0x5B 0x3F 0x39 0x6C                        X10 Mouse Tracking
+T           CSI ?12l        0x1B 0x5B 0x3F 0x31 0x32 0x6C                   att610 cursor blinking
+T   DECPEX  CSI ?19l        0x1B 0x5B 0x3F 0x31 0x39 0x6C                   
+T   DECTCEM CSI ?25l        0x1B 0x5B 0x3F 0x32 0x35 0x6C                   
+T           CSI ?47l        0x1B 0x5B 0x3F 0x34 0x37 0x6C                   Alternate Screen Buffer
+T           CSI ?59l        0x1B 0x5B 0x3F 0x35 0x39 0x6C                   
+T   DECNKM  CSI ?66l        0x1B 0x5B 0x3F 0x36 0x36 0x6C                   
+T   DECBKM  CSI ?67l        0x1B 0x5B 0x3F 0x36 0x37 0x6C                   
+T   DECLRMM CSI ?69l        0x1B 0x5B 0x3F 0x36 0x39 0x6C                   
+T           CSI ?1000l      0x1B 0x5B 0x3F 0x31 0x30 0x30 0x30 0x6C         Mouse Tracking
+T           CSI ?1001l      0x1B 0x5B 0x3F 0x31 0x30 0x30 0x31 0x6C         Hilite Mouse Tracking
+T           CSI ?1002l      0x1B 0x5B 0x3F 0x31 0x30 0x30 0x32 0x6C         Button-Event Mouse Tracking
+T           CSI ?1003l      0x1B 0x5B 0x3F 0x31 0x30 0x30 0x33 0x6C         Any-Event Mouse Tracking
+T           CSI ?1004l      0x1B 0x5B 0x3F 0x31 0x30 0x30 0x34 0x6C         Focus Report
+T           CSI ?1005l      0x1B 0x5B 0x3F 0x31 0x30 0x30 0x35 0x6C         Extended Mouse Tracking (UTF-8)
+T   SGR     CSI ?1006l      0x1B 0x5B 0x3F 0x31 0x30 0x30 0x36 0x6C         Extended Mouse Tracking
+T           CSI ?1015l      0x1B 0x5B 0x3F 0x31 0x30 0x31 0x35 0x6C         Extended Mouse Tracking (rxvt-unicode)
+T           CSI ?1047l      0x1B 0x5B 0x3F 0x31 0x30 0x34 0x37 0x6C         Alternate Screen Buffer
+T           CSI ?1048l      0x1B 0x5B 0x3F 0x31 0x30 0x34 0x38 0x6C         Save Cursor Position (Alternate Screen Buffer)
+T           CSI ?1049l      0x1B 0x5B 0x3F 0x31 0x30 0x34 0x39 0x6C         Alternate Screen Buffer
+T           CSI ?2004l      0x1B 0x5B 0x3F 0x32 0x30 0x30 0x34 0x6C         Bracketed Paste Mode
+T           CSI ?7727l      0x1B 0x5B 0x3F 0x37 0x37 0x32 0x37 0x6C         mintty Application Escape Mode
+T           CSI ?7786l      0x1B 0x5B 0x3F 0x37 0x37 0x38 0x36 0x6C         Wheel to Cursor translation
+T           CSI ?8200l      0x1B 0x5B 0x3F 0x38 0x32 0x30 0x30 0x6C         ClearThenHome
+T           CSI ?14001l     0x1B 0x5B 0x3F 0x31 0x34 0x30 0x30 0x31 0x6C    ClearThenHome
+T           CSI ?14002l     0x1B 0x5B 0x3F 0x31 0x34 0x30 0x30 0x32 0x6C    test Application Escape Mode 2
+T           CSI ?14003l     0x1B 0x5B 0x3F 0x31 0x34 0x30 0x30 0x33 0x6C    test Application Escape Mode 3
+T           CSI ?14004l     0x1B 0x5B 0x3F 0x31 0x34 0x30 0x30 0x34 0x6C    test Application Escape Mode 4
+
+== h mode ==
+T   DECCKM  CSI ?1h         0x1B 0x5B 0x3F 0x31 0x68                        Cursor Keys Mode
+T   DECCOLM CSI ?3h         0x1B 0x5B 0x3F 0x33 0x68                        Select 80 or 132 Columns per Page
+T   DECSCNM CSI ?5h         0x1B 0x5B 0x3F 0x35 0x68                        Screen Mode: Light or Dark Screen
+T   DECOM   CSI ?6h         0x1B 0x5B 0x3F 0x36 0x68                        Origin Mode
+T   DECAWM  CSI ?7h         0x1B 0x5B 0x3F 0x37 0x68                        Autowrap Mode
+T   DECARM  CSI ?8h         0x1B 0x5B 0x3F 0x38 0x68                        Autorepeat Mode
+T           CSI ?9h         0x1B 0x5B 0x3F 0x39 0x68                        X10 Mouse Tracking
+T           CSI ?12h        0x1B 0x5B 0x3F 0x31 0x32 0x68                   att610 cursor blinking
+T   DECPEX  CSI ?19h        0x1B 0x5B 0x3F 0x31 0x39 0x68                   
+T   DECTCEM CSI ?25h        0x1B 0x5B 0x3F 0x32 0x35 0x68                   
+T   DECTEK  CSI ?38h        0x1B 0x5B 0x3F 0x33 0x38 0x68                   Enter TEK Mode
+T           CSI ?47h        0x1B 0x5B 0x3F 0x34 0x37 0x68                   Alternate Screen Buffer
+T           CSI ?59h        0x1B 0x5B 0x3F 0x35 0x39 0x68                   
+T   DECNKM  CSI ?66h        0x1B 0x5B 0x3F 0x36 0x36 0x68                   
+T   DECBKM  CSI ?67h        0x1B 0x5B 0x3F 0x36 0x37 0x68                   
+T   DECVSSM CSI ?69h        0x1B 0x5B 0x3F 0x36 0x39 0x68                   
+T           CSI ?1000h      0x1B 0x5B 0x3F 0x31 0x30 0x30 0x30 0x68         Mouse Tracking
+T           CSI ?1001h      0x1B 0x5B 0x3F 0x31 0x30 0x30 0x31 0x68         Hilite Mouse Tracking
+T           CSI ?1002h      0x1B 0x5B 0x3F 0x31 0x30 0x30 0x32 0x68         Button-Event Mouse Tracking
+T           CSI ?1003h      0x1B 0x5B 0x3F 0x31 0x30 0x30 0x33 0x68         Any-Event Mouse Tracking
+T           CSI ?1004h      0x1B 0x5B 0x3F 0x31 0x30 0x30 0x34 0x68         Focus Report
+T           CSI ?1005h      0x1B 0x5B 0x3F 0x31 0x30 0x30 0x35 0x68         Extended Mouse Tracking (UTF-8)
+T   SGR     CSI ?1006h      0x1B 0x5B 0x3F 0x31 0x30 0x30 0x36 0x68         Extended Mouse Tracking
+T           CSI ?1015h      0x1B 0x5B 0x3F 0x31 0x30 0x31 0x35 0x68         Extended Mouse Tracking (rxvt-unicode)
+T           CSI ?1047h      0x1B 0x5B 0x3F 0x31 0x30 0x34 0x37 0x68         Alternate Screen Buffer
+T           CSI ?1048h      0x1B 0x5B 0x3F 0x31 0x30 0x34 0x38 0x68         Save Cursor Position (Alternate Screen Buffer)
+T           CSI ?1049h      0x1B 0x5B 0x3F 0x31 0x30 0x34 0x39 0x68         Alternate Screen Buffer
+T           CSI ?2004h      0x1B 0x5B 0x3F 0x32 0x30 0x30 0x34 0x68         Bracketed Paste Mode
+T           CSI ?7727h      0x1B 0x5B 0x3F 0x37 0x37 0x32 0x37 0x68         mintty Application Escape Mode
+T           CSI ?7786h      0x1B 0x5B 0x3F 0x37 0x37 0x38 0x36 0x68         Wheel to Cursor translation
+T           CSI ?8200h      0x1B 0x5B 0x3F 0x38 0x32 0x30 0x30 0x68         ClearThenHome
+T           CSI ?14001h     0x1B 0x5B 0x3F 0x31 0x34 0x30 0x30 0x31 0x68    ClearThenHome
+T           CSI ?14002h     0x1B 0x5B 0x3F 0x31 0x34 0x30 0x30 0x32 0x68    test Application Escape Mode 2
+T           CSI ?14003h     0x1B 0x5B 0x3F 0x31 0x34 0x30 0x30 0x33 0x68    test Application Escape Mode 3
+T           CSI ?14004h     0x1B 0x5B 0x3F 0x31 0x34 0x30 0x30 0x34 0x68    test Application Escape Mode 4
+
+== Screen extras ==
+ S          ESC 6p          0x1B 0x36 0x70              ESC 6 p             Cursor Visibility Invisible
+ S          ESC 7p          0x1B 0x37 0x70              ESC 7 p             Cursor Visibility Visible
+ S          ESC 04/14       0x1B 0x4E                   ESC [ N             Single Shift G2
+ S          ESC 04/15       0x1B 0x4F                   ESC [ O             Single Shift G3
+ S  CUP     CSI 06/06       0x1B 0x5B 0x66              ESC [ f             CURSOR POSITION (same as ESC[H)
+ S  CHA     CSI 06/00       0x1B 0x5B 0x60              ESC [ `             CURSOR CHARACTER ABSOLUTE (same as ESC[G)
+ S  SD      CSI 05/14       0x1B 0x5B 0x5E              ESC [ ^             SCROLL DOWN (same as ESC[T)
+ S          CSI 07/04       0x1B 0x5B 0x38 ... 0x74     ESC [ 8 ; Ph ; Pw t Resize the window to ‘Ph’ lines and ‘Pw’ columns (SunView special)
+ S          CSI 07/08       0x1B 0x5B 0x78              ESC [ x             Send Secondary Device Attributes String
+ S          CSI 06/03       0x1B 0x5B 0x3E 0x63         ESC [ >c            Send Secondary Device Attributes String
+ S          CSI 06/14       0x1B 0x5B 0x36 0x6E         ESC [ 6n            Send Cursor Position Report
+
+------
+getty -L 9600 ttyUSB0 vt100       <--- Start a term on a serial port
+
+
+

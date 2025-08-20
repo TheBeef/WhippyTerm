@@ -102,6 +102,8 @@ private slots:
     
     void on_actionFind_CRC_Algorithm_triggered();
     
+    void on_actionCalculate_CRC_triggered();
+    
 private:
     void SendContextMenuEvent(e_UITD_ContextMenuType EventMenu);
 };

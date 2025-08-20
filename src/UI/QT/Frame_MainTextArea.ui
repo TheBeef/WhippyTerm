@@ -646,6 +646,11 @@
     <string>Find CRC Algorithm...</string>
    </property>
   </action>
+  <action name="actionCalculate_CRC">
+   <property name="text">
+    <string>Calculate CRC...</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

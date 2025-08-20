@@ -645,6 +645,7 @@ bool MWHexDisplay::HexDisplayBufferEvent(const struct HDEvent *Event)
         break;
         case e_HDEvent_CursorMove:
         case e_HDEvent_BufferResize:
+        case e_HDEvent_BufferChange:
         case e_HDEventMAX:
         default:
         break;

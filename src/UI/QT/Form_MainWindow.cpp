@@ -1940,3 +1940,9 @@ void Form_MainWindow::on_actionUse_Global_Settings_triggered()
     DoMenuTriggered(e_UIMWMenu_ConnectionUseGlobalSettings);
 }
 
+
+void Form_MainWindow::on_actionCalculate_CRC_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_CalcCRC);
+}
+

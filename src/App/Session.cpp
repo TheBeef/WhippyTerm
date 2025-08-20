@@ -538,6 +538,10 @@ static void Session_RegisterAllMembers(struct Session &session,
     cfg.StartBlock("Buffers");
     RegisterCRCType(cfg,"LastSelectedCRCType",session.LastSelectedCRCType);
     cfg.EndBlock();
+
+    cfg.StartBlock("CalcCRC");
+    RegisterCRCType(cfg,"LastSelectedCalcCRCType",session.LastSelectedCalcCRCType);
+    cfg.EndBlock();
 }
 
 static void Session_DefaultSession(struct Session &session)
@@ -564,6 +568,9 @@ static void Session_DefaultSession(struct Session &session)
 
     /* Edit Buffer */
     session.LastSelectedCRCType=e_CRC_CRC32;
+
+    /* Calc Buffer */
+    session.LastSelectedCalcCRCType=e_CRC_CRC32;
 }
 
 ///////////////////

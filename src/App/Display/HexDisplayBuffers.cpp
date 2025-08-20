@@ -1916,6 +1916,7 @@ bool HexDisplayBuffer::KeyPress(uint8_t Mods,e_UIKeys Key,
                             StartOfData[Cursor_Pos]=TextPtr[r];
                             Cursor_Pos++;
                             ClipCursorPos(false);
+                            SendBufferChangeEvent();
                         }
                     }
                     else
@@ -2282,6 +2283,7 @@ void HexDisplayBuffer::EditHandleNibbleInput(int Nib)
             StartOfData[Cursor_Pos]=EditByteValue;
             Cursor_Pos++;
             ClipCursorPos(false);
+            SendBufferChangeEvent();
         break;
         case e_HDB_EditStateMAX:
         default:
@@ -2451,6 +2453,7 @@ void HexDisplayBuffer::AcceptCycleInput(void)
             StartOfData[Cursor_Pos]=EditByteValue;
             Cursor_Pos++;
             DoingCycleInputChar=false;
+            SendBufferChangeEvent();
         }
     }
 }
@@ -3712,6 +3715,38 @@ void HexDisplayBuffer::SendSelectionEvent(void)
 
 /*******************************************************************************
  * NAME:
+ *    HexDisplayBuffer::SendBufferChangeEvent
+ *
+ * SYNOPSIS:
+ *    void HexDisplayBuffer::SendBufferChangeEvent(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    Sends a buffer changed event.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void HexDisplayBuffer::SendBufferChangeEvent(void)
+{
+    struct HDEvent Event;
+
+    if(HDEventHandler!=NULL)
+    {
+        Event.EventType=e_HDEvent_BufferChange;
+        Event.ID=HDID;
+
+        HDEventHandler(&Event);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
  *    HexDisplayBuffer::SetLossOfFocusBehavior
  *
  * SYNOPSIS:
@@ -3962,6 +3997,7 @@ void HexDisplayBuffer::SetNewBufferSize(int NewSize)
 
         HDEventHandler(&HDEvent);
     }
+    SendBufferChangeEvent();
 }
 
 /*******************************************************************************
@@ -3998,6 +4034,7 @@ void HexDisplayBuffer::FillSelectionWithValue(uint8_t Value)
         memset((void *)SelStartPtr,Value,SelEndPtr-SelStartPtr);
 
         RebuildDisplay();
+        SendBufferChangeEvent();
     }
 }
 
@@ -4070,6 +4107,8 @@ void HexDisplayBuffer::FillWithValue(int InsertOffset,const uint8_t *Data,
     ClearSelection();
     RebuildDisplay();
     RethinkCursorPos();
+
+    SendBufferChangeEvent();
 }
 
 /*******************************************************************************
@@ -4198,6 +4237,8 @@ void HexDisplayBuffer::DoInsertFromClipboard(e_HDBCFormatType ClipFormat)
     FillWithValue(InsertPos,Buffer,Len,DoReplace);
 
     free(Buffer);
+
+    SendBufferChangeEvent();
 }
 
 /*******************************************************************************

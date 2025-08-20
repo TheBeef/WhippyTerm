@@ -298,6 +298,8 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionCTRL_C_Handling;
         case e_UIMWMenu_CRCFinder:
             return (e_UIMenuCtrl *)realwin->ui->actionCRC_Algorithm_Finder;
+        case e_UIMWMenu_CalcCRC:
+            return (e_UIMenuCtrl *)realwin->ui->actionCalculate_CRC;
         case e_UIMWMenuMAX:
         default:
         break;

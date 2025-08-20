@@ -56,6 +56,7 @@ typedef struct UITextDisplay t_UITextDisplayCtrl;
 typedef enum
 {
     e_UITD_ContextMenu_SendBuffers,
+    e_UITD_ContextMenu_CalcCRC,
     e_UITD_ContextMenu_FindCRCAlgorithm,
     e_UITD_ContextMenu_Copy,
     e_UITD_ContextMenu_Paste,

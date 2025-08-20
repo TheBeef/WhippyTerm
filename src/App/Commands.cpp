@@ -187,6 +187,8 @@ const char *m_CmdNames[]=
     "SettingsQuickJumpCtrlCHandling",       // e_Cmd_SettingsQuickJump_CtrlCHandling
     "CRCFinder",                            // e_Cmd_CRCFinder
     "CRCFinderFromSelection",               // e_Cmd_CRCFinderFromSelection
+    "CalcCRCFromSelection",                 // e_Cmd_CalcCRCFromSelection
+    "CalcCRC",                              // e_Cmd_CalcCRC
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -297,6 +299,7 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_StyleSelectionStrikeThrough,      // e_UIMWMenu_StyleStrikeThrough
     e_Cmd_SettingsQuickJump_CtrlCHandling,  // e_UIMWMenu_SettingsQuickJump_CtrlCHandling
     e_Cmd_CRCFinder,                        // e_UIMWMenu_CRCFinder
+    e_Cmd_CalcCRC,                          // e_UIMWMenu_CalcCRC
 };
 
 e_CmdType m_Cmd2SendBufferContextMenuMapping[]=
@@ -796,6 +799,8 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     // e_Cmd_SettingsQuickJump_CtrlCHandling
     // e_Cmd_CRCFinder
     // e_Cmd_CRCFinderFromSelection
+    // e_Cmd_CalcCRCFromSelection
+    // e_Cmd_CalcCRC
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A

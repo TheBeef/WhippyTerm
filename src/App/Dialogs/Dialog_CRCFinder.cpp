@@ -163,6 +163,7 @@ static bool DCF_HexDisplayBufferEvent(const struct HDEvent *Event)
         case e_HDEvent_MouseMove:
         case e_HDEvent_CursorMove:
         case e_HDEvent_BufferResize:
+        case e_HDEvent_BufferChange:
         break;
         case e_HDEvent_ContextMenu:
             switch(Event->Info.Context.Menu)

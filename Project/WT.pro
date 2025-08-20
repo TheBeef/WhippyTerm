@@ -46,6 +46,7 @@ RC_ICONS = ..\WindowsInstaller\WhippyTerm.ico
 
 SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/Dialogs/Dialog_CRCFinder.cpp \
+    ../src/App/Dialogs/Dialog_CalcCrc.cpp \
     ../src/App/Dialogs/Dialog_DataProPluginSettings.cpp \
     ../src/App/Portable.cpp \
     ../src/BuildOptions/BuildOptions.cpp \
@@ -60,6 +61,8 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/UI/QT/ContextMenuHelper.cpp \
     ../src/UI/QT/Form_CRCFinder.cpp \
     ../src/UI/QT/Form_CRCFinderAccess.cpp \
+    ../src/UI/QT/Form_CalcCrc.cpp \
+    ../src/UI/QT/Form_CalcCrcAccess.cpp \
     ../src/UI/QT/Form_DataProPluginSettings.cpp \
     ../src/UI/QT/Form_DataProPluginSettingsAccess.cpp \
     ../src/UI/QT/Form_DebugPrintLog.cpp \
@@ -258,6 +261,7 @@ macx {
 
 HEADERS  += ../src/UI/QT/Form_MainWindow.h \
     ../src/UI/QT/Form_CRCFinder.h \
+    ../src/UI/QT/Form_CalcCrc.h \
     ../src/UI/QT/Form_DataProPluginSettings.h \
     ../src/UI/QT/Form_DebugPrintLog.h \
     ../src/UI/QT/Form_NewConnectionFromURI.h \
@@ -300,6 +304,7 @@ HEADERS  += ../src/UI/QT/Form_MainWindow.h \
 
 FORMS    += ../src/UI/QT/Form_MainWindow.ui \
     ../src/UI/QT/Form_CRCFinder.ui \
+    ../src/UI/QT/Form_CalcCrc.ui \
     ../src/UI/QT/Form_DataProPluginSettings.ui \
     ../src/UI/QT/Form_DebugPrintLog.ui \
     ../src/UI/QT/Form_FontDialog.ui \

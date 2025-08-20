@@ -454,6 +454,8 @@ static bool DESB_HexDisplayBufferEvent(const struct HDEvent *Event)
             sprintf(buff,"%d",Event->Info.Buffer.Size);
             UISetTextCtrlText(BufferSize,buff);
         break;
+        case e_HDEvent_BufferChange:
+        break;
         case e_HDEvent_ContextMenu:
             switch(Event->Info.Context.Menu)
             {

@@ -1060,7 +1060,7 @@ bool CRC_BuildSource4CRC(e_CRCType CRCType,std::string &OutStr)
             CRC_Append2String(OutStr,"}\n");
         }
 
-        CRC_Append2String(OutStr,"/* This code is public domain do what you want with it just don't blame me if it mess up.\n\n");
+        CRC_Append2String(OutStr,"/* This code is public domain do what you want with it just don't blame me if it messes up.\n\n");
         CRC_Append2String(OutStr,"   THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */\n");
 
 //        CRC_Append2String(OutStr,"/* Copyright %s Paul Hutchinson\n","2021");
@@ -1116,6 +1116,29 @@ static void CRC_Append2String(std::string &Str,const char *fmt,...)
     va_end(args);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    CRC_FindCRC
+ *
+ * SYNOPSIS:
+ *    t_CRCListType CRC_FindCRC(const uint8_t *Data,int DataSize,
+ *              const char *CRCstr);
+ *
+ * PARAMETERS:
+ *    Data [I] -- The data to build CRC's from
+ *    DataSize [I] -- The number of bytes in 'Data'
+ *    CRCstr [I] -- The CRC to try to match in string format (and hex).
+ *
+ * FUNCTION:
+ *    This function searches for a CRC alg that will calc the Data and
+ *    CRC provided.
+ *
+ * RETURNS:
+ *    A list of CRC alg's found or a blank list if no matches found.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 t_CRCListType CRC_FindCRC(const uint8_t *Data,int DataSize,const char *CRCstr)
 {
     t_CRCListType FoundCRCs;

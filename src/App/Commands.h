@@ -178,6 +178,8 @@ typedef enum
     e_Cmd_SettingsQuickJump_CtrlCHandling,
     e_Cmd_CRCFinder,
     e_Cmd_CRCFinderFromSelection,
+    e_Cmd_CalcCRCFromSelection,
+    e_Cmd_CalcCRC,
     e_CmdMAX
 } e_CmdType;
 

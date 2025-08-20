@@ -84,6 +84,9 @@ struct Session
 
     /* Edit Buffer */
     e_CRCType LastSelectedCRCType;
+
+    /* Calc CRC */
+    e_CRCType LastSelectedCalcCRCType;
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

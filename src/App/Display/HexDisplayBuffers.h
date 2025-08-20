@@ -60,6 +60,7 @@ typedef enum
     e_HDEvent_CursorMove,
     e_HDEvent_BufferResize,
     e_HDEvent_ContextMenu,
+    e_HDEvent_BufferChange,
     e_HDEventMAX
 } e_HDEventType;
 
@@ -238,6 +239,7 @@ class HexDisplayBuffer
         void AbortDotInput(void);
         void SetNewBufferSize(int NewSize);
         void RebuildDisplay_ClearStyleHelper(struct CharStyling *style);
+        void SendBufferChangeEvent(void);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

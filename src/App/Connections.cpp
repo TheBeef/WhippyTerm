@@ -34,6 +34,7 @@
 
 /*** HEADER FILES TO INCLUDE  ***/
 #include "App/Dialogs/Dialog_CRCFinder.h"
+#include "App/Dialogs/Dialog_CalcCrc.h"
 #include "App/Connections.h"
 #include "App/ConnectionsGlobal.h"
 #include "App/MainWindow.h"
@@ -1844,7 +1845,6 @@ bool Connection::InformOfDataAvaiable(void)
     uint8_t inbuff[100];
     bool ProcessBlock;
     bool RetValue;
-    uint_fast32_t r;
 
     Con_SetActiveConnection(this);
 
@@ -2916,6 +2916,9 @@ bool Connection::ProcessDisplayEvent(const struct DBEvent *Event)
                 break;
                 case e_UITD_ContextMenu_FindCRCAlgorithm:
                     MW->ExeCmd(e_Cmd_CRCFinderFromSelection);
+                break;
+                case e_UITD_ContextMenu_CalcCRC:
+                    MW->ExeCmd(e_Cmd_CalcCRCFromSelection);
                 break;
                 case e_UITD_ContextMenu_Copy:
                     MW->ExeCmd(e_Cmd_Copy);
@@ -7050,6 +7053,42 @@ void Connection::FindCRCFromSelection(void)
     if(Buffer!=NULL)
     {
         RunCRCFinderDialog(Buffer,Bytes);
+        free(Buffer);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::CalcCRCFromSelection
+ *
+ * SYNOPSIS:
+ *    void Connection::CalcCRCFromSelection(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function starts the calc crc dialog from the selection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::CalcCRCFromSelection(void)
+{
+    string SelectContents;
+    uint8_t *Buffer;
+    unsigned int Bytes;
+
+    if(Display==NULL)
+        return;
+
+    Buffer=Display->GetSelectionRAW(&Bytes);
+    if(Buffer!=NULL)
+    {
+        RunCalcCrcDialog(Buffer,Bytes);
         free(Buffer);
     }
 }

@@ -432,6 +432,8 @@ private slots:
     
     void on_actionUse_Global_Settings_triggered();
     
+    void on_actionCalculate_CRC_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

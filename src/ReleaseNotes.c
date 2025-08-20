@@ -31,6 +31,14 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added a calculate CRC dialog",
+            "A new calculate CRC dialog has been added.  This will let the"
+            " user input some hex data and calculate the CRC (for a selection)"
+            " for that data.  You can also select text in the main window"
+            " and have it copied into the calculate CRC dialog.  As with all"
+            " CRC there is a button to generate source code to calculate"
+            " the selection CRC type."},
+    {
         NOTETYPE_ENHANCEMENT,"Added an select color button to the color settings",
             "In Settings->Display->Colors you can input colors by Web # and"
             " sliders. A new button was added that you can press to use"

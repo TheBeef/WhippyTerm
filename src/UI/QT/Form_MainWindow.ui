@@ -2261,6 +2261,8 @@
      <string>Tools</string>
     </property>
     <addaction name="actionCom_Test"/>
+    <addaction name="separator"/>
+    <addaction name="actionCalculate_CRC"/>
     <addaction name="actionCRC_Algorithm_Finder"/>
    </widget>
    <widget class="QMenu" name="menuBuffers">
@@ -3704,6 +3706,11 @@
    </property>
    <property name="toolTip">
     <string>Does this connection use global settings or custom settings</string>
+   </property>
+  </action>
+  <action name="actionCalculate_CRC">
+   <property name="text">
+    <string>Calculate CRC...</string>
    </property>
   </action>
  </widget>

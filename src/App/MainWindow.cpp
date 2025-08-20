@@ -42,6 +42,7 @@
 #include "App/Dialogs/Dialog_TransmitDelay.h"
 #include "App/Dialogs/Dialog_SendBufferSelect.h"
 #include "App/Dialogs/Dialog_CRCFinder.h"
+#include "App/Dialogs/Dialog_CalcCrc.h"
 #include "App/Bookmarks.h"
 #include "App/Connections.h"
 #include "App/MainApp.h"
@@ -1388,6 +1389,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *StyleStrikeThrough;
     t_UIContextMenuCtrl *ContextMenu_SendBuffer;
     t_UIContextMenuCtrl *ContextMenu_FindCRCAlgorithm;
+    t_UIContextMenuCtrl *ContextMenu_CalcCRC;
     t_UIContextMenuCtrl *ContextMenu_Copy;
     t_UIContextMenuCtrl *ContextMenu_Paste;
 //    t_UIContextMenuCtrl *ContextMenu_ClearScreen;
@@ -1627,6 +1629,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
 
         ContextMenu_SendBuffer=Con->GetContextMenuHandle(e_UITD_ContextMenu_SendBuffers);
         ContextMenu_FindCRCAlgorithm=Con->GetContextMenuHandle(e_UITD_ContextMenu_FindCRCAlgorithm);
+        ContextMenu_CalcCRC=Con->GetContextMenuHandle(e_UITD_ContextMenu_CalcCRC);
         ContextMenu_Copy=Con->GetContextMenuHandle(e_UITD_ContextMenu_Copy);
         ContextMenu_Paste=Con->GetContextMenuHandle(e_UITD_ContextMenu_Paste);
         ContextMenu_Edit=Con->GetContextMenuHandle(e_UITD_ContextMenu_Edit);
@@ -1730,6 +1733,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(StyleUnderline,EnableSelectionBased);
         UIEnableMenu(StyleStrikeThrough,EnableSelectionBased);
         UIEnableContextMenu(ContextMenu_FindCRCAlgorithm,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_CalcCRC,EnableSelectionBased);
         UIEnableContextMenu(ContextMenu_Bold,EnableSelectionBased);
         UIEnableContextMenu(ContextMenu_Italics,EnableSelectionBased);
         UIEnableContextMenu(ContextMenu_Underline,EnableSelectionBased);
@@ -4370,6 +4374,36 @@ void TheMainWindow::DoFindCRCFromSelection(void)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::DoCalcCRCFromSelection
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::DoCalcCRCFromSelection(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function tells the connection to do it's calc crc from selection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void TheMainWindow::DoCalcCRCFromSelection(void)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+        TabCon->CalcCRCFromSelection();
+}
+
+/*******************************************************************************
+ * NAME:
  *    MW_Event
  *
  * SYNOPSIS:
@@ -4698,6 +4732,8 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_ApplyStyleBGColor_BrightWhite -- Apply this color to the background of the selection
  *                  e_Cmd_CRCFinder -- Show the crc finder dialog
  *                  e_Cmd_CRCFinderFromSelection -- Show the CRC finder dialog but copy in the currently selected bytes
+ *                  e_Cmd_CalcCRCFromSelection -- Show the calc CRC dialog coping the currently selected bytes in
+ *                  e_Cmd_CalcCRC -- Show the calc CRC dialog
  *
  * FUNCTION:
  *    This function executes a command.
@@ -5211,6 +5247,12 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_CRCFinderFromSelection:
             DoFindCRCFromSelection();
+        break;
+        case e_Cmd_CalcCRCFromSelection:
+            DoCalcCRCFromSelection();
+        break;
+        case e_Cmd_CalcCRC:
+            RunCalcCrcDialog(NULL,0);
         break;
         case e_CmdMAX:
         default:

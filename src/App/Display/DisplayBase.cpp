@@ -1191,6 +1191,7 @@ bool DisplayBase::DoHexInputEvent(const struct HDEvent *Event)
         case e_HDEvent_SelectionEvent:
         case e_HDEvent_MouseMove:
         case e_HDEvent_BufferResize:
+        case e_HDEvent_BufferChange:
         break;
         case e_HDEvent_CursorMove:
             Offset=GetSendPanel_HexPosInput();

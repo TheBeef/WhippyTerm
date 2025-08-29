@@ -178,6 +178,7 @@ struct DPS_ProInfo DS_DPSNoneEntry=
     "",             // ID
     "NONE",
     NULL,
+    NULL,
     NULL
 };
 

@@ -120,9 +120,6 @@ t_UILabelCtrl *UIMP_GetLabelInputHandle(e_UIMP_LabelInput UIObj)
 {
     switch(UIObj)
     {
-        case e_UIMP_LabelInput_MustRestart:
-            return (t_UILabelCtrl *)g_ManagePluginsDialog->ui->MustRestart_label;
-
         case e_UIMP_LabelInputMAX:
         default:
         break;

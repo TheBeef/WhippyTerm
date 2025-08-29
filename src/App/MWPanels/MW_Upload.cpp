@@ -42,6 +42,7 @@
 #include <inttypes.h>
 #include <string.h>
 #include <string>
+#include <algorithm>
 
 using namespace std;
 
@@ -76,6 +77,33 @@ MWUpload::~MWUpload()
 
 /*******************************************************************************
  * NAME:
+ *    SortFTPsList
+ *
+ * SYNOPSIS:
+ *    static bool SortFTPsList(const struct FTPS_ProtocolInfo &A,const struct FTPS_ProtocolInfo &B);
+ *
+ * PARAMETERS:
+ *    A [I] -- The first thing to cmp
+ *    B [I] -- The second thing to cmp
+ *
+ * FUNCTION:
+ *    This is a helper function for the sort() of protocols.
+ *
+ * RETURNS:
+ *    true -- first argument is less than the second
+ *    false -- first argument is greater or equ to the second
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static bool SortFTPsList(const struct FTPS_ProtocolInfo &A,
+        const struct FTPS_ProtocolInfo &B)
+{
+    return strcmp(A.DisplayName,B.DisplayName)<0;
+}
+
+/*******************************************************************************
+ * NAME:
  *    MWUpload::Setup
  *
  * SYNOPSIS:
@@ -97,23 +125,71 @@ MWUpload::~MWUpload()
  ******************************************************************************/
 void MWUpload::Setup(class TheMainWindow *Parent,t_UIMainWindow *Win)
 {
-    t_UIComboBoxCtrl *ProtocolCB;
-    unsigned int Index;
-    e_UIMenuCtrl *NewMenuItem;
     t_UILabelCtrl *BytesTxLabel;
-    char buff[100];
 
     MW=Parent;
     UIWin=Win;
 
-    ProtocolCB=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Upload_Protocol);
     BytesTxLabel=UIMW_GetLabelHandle(UIWin,e_UIMWLabel_Upload_BytesTx);
 
-    /* Fill in the available upload protocols */
+    RescanAvailableProtocols();
+
+    UISetLabelText(BytesTxLabel,"");
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWUpload::RescanAvailableProtocols()
+ *
+ * SYNOPSIS:
+ *    void MWUpload::RescanAvailableProtocols(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function clears the current protocols and reloads the list from
+ *    the FTPS and rebuilds the list.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWUpload::RescanAvailableProtocols(void)
+{
+    t_UIComboBoxCtrl *ProtocolCB;
+    string SelProtoIDStr;
+    int SelectedIndex;
+    char buff[100];
+    unsigned int Index;
+    e_UIMenuCtrl *NewMenuItem;
+
+    ProtocolCB=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Upload_Protocol);
+
+    /* Find out what protocol is currently selected */
+    SelProtoIDStr="";
+    SelectedIndex=UIGetComboBoxSelectedIndex(ProtocolCB);
+    if(SelectedIndex>=0 && SelectedIndex<(int)FTPsAvail.size())
+        SelProtoIDStr=FTPsAvail[SelectedIndex].IDStr;
+
+    /* Fill in the available download protocols */
     FTPS_GetListOfFTProtocols(e_FileTransferProtocolMode_Upload,FTPsAvail);
 
+    /* Sort them */
+    sort(FTPsAvail.begin(),FTPsAvail.end(),SortFTPsList);
+
+    /* Build the combox and the menu */
+    UIMW_AddFTPUploadClearAllMenus(UIWin);
+    MenuItems.clear();
+    UIClearComboBox(ProtocolCB);
+    SelectedIndex=-1;
     for(Index=0;Index<FTPsAvail.size();Index++)
     {
+        if(SelProtoIDStr==FTPsAvail[Index].IDStr)
+            SelectedIndex=Index;
+
         UIAddItem2ComboBox(ProtocolCB,FTPsAvail[Index].DisplayName,Index);
 
         strncpy(buff,FTPsAvail[Index].DisplayName,sizeof(buff)-4);
@@ -124,7 +200,62 @@ void MWUpload::Setup(class TheMainWindow *Parent,t_UIMainWindow *Win)
         MenuItems.push_back(NewMenuItem);
     }
 
-    UISetLabelText(BytesTxLabel,"");
+    if(SelectedIndex>=0)
+        UISetComboBoxSelectedEntry(ProtocolCB,SelectedIndex);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWUpload::FreePluginResourcesIfNeeded
+ *
+ * SYNOPSIS:
+ *    void MWUpload::FreePluginResourcesIfNeeded(const char *PluginIDStr);
+ *
+ * PARAMETERS:
+ *    PluginIDStr [I] -- The plugin ID string for the plugin to free the
+ *                       resources of
+ *
+ * FUNCTION:
+ *    This function is called to tell us to release any resources used by
+ *    a plugin.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWUpload::FreePluginResourcesIfNeeded(const char *PluginIDStr)
+{
+    t_UIComboBoxCtrl *ProtocolCB;
+    string FileName;
+    unsigned int ProtocolIndex;
+    t_KVList *Options;
+
+    ProtocolCB=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Upload_Protocol);
+    ProtocolIndex=UIGetComboBoxSelectedEntry(ProtocolCB);
+
+    /* Check if this is the active protocol */
+    if(ProtocolIndex>=FTPsAvail.size())
+        return;
+
+    /* See if this is the selected protocol */
+    if(strcmp(FTPsAvail[ProtocolIndex].IDStr,PluginIDStr)!=0)
+        return;
+
+    /* We are using this plugin free the resources */
+
+    /* Save any changes */
+    if(MW->ActiveCon!=NULL && OptionWidgets!=NULL)
+    {
+        MW->ActiveCon->SetUploadProtocol(FTPsAvail[ProtocolIndex].IDStr);
+        Options=MW->ActiveCon->GetUploadOptionsPtr();
+        FTPS_StoreOptions(OptionWidgets,*Options);
+    }
+
+    if(OptionWidgets!=NULL)
+        FTPS_FreeProtocolOptions(OptionWidgets);
+    OptionWidgets=NULL;
 }
 
 /*******************************************************************************
@@ -706,6 +837,9 @@ void MWUpload::NoteFilenameChanged(void)
 {
     t_UITextInputCtrl *FilenameInput;
     string Filename;
+
+    if(MW->ActiveCon==NULL)
+        return;
 
     FilenameInput=UIMW_GetTxtInputHandle(UIWin,e_UIMWTxtInput_Upload_Filename);
 

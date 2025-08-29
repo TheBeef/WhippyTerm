@@ -892,11 +892,7 @@ static PG_BOOL XModemUpload_RxData(t_FTPSystemData *SysHandle,
                 if(Data->Waiting4DoneAck)
                 {
                     m_FTPS->ULFinish(SysHandle,false);
-                    if(Data->FileHandle!=NULL)
-                    {
-                        fclose(Data->FileHandle);
-                        Data->FileHandle=NULL;
-                    }
+                    return true;    // 'Data' is no longer valid, so we are done
                 }
                 else if(Data->Done)
                 {
@@ -939,14 +935,7 @@ static PG_BOOL XModemUpload_RxData(t_FTPSystemData *SysHandle,
                         if(m_FTPS->ULSendData(SysHandle,Block,sizeof(Block))!=e_FTPS_SendDataRet_Success)
                             Data->DelayedError=e_XModemDelayedError_Cancel;
                         m_FTPS->ULFinish(SysHandle,true);
-
-                        Data->Done=true;
-                        if(Data->FileHandle!=NULL)
-                        {
-                            fclose(Data->FileHandle);
-                            Data->FileHandle=NULL;
-                        }
-                        SendBlockNum=-1;    // Aborted don't send
+                        return true;    // 'Data' is no longer valid, so we are done
                     }
                 }
             }
@@ -1005,11 +994,7 @@ static PG_BOOL XModemUpload_RxData(t_FTPSystemData *SysHandle,
                 default:
                     Data->Done=true;
                     m_FTPS->ULFinish(SysHandle,true);
-                    if(Data->FileHandle!=NULL)
-                    {
-                        fclose(Data->FileHandle);
-                        Data->FileHandle=NULL;
-                    }
+                    return true;    // 'Data' is no longer valid, so we are done
                 break;
                 case e_FTPS_SendDataRet_Busy:
                     /* Wait for the rx to timeout and nak */
@@ -1068,11 +1053,7 @@ static void XModemUpload_Timeout(t_FTPSystemData *SysHandle,
         if(Data->StartTimeout>MAX_START_WAIT_TIME)
         {
             m_FTPS->ULFinish(SysHandle,true);
-            if(Data->FileHandle!=NULL)
-            {
-                fclose(Data->FileHandle);
-                Data->FileHandle=NULL;
-            }
+            return;    // 'Data' is no longer valid, so we are done
         }
     }
     else
@@ -1118,11 +1099,7 @@ static void XModemUpload_Timeout(t_FTPSystemData *SysHandle,
         if(Data->LastPacketTimeout>MAX_PACKET_WAIT_TIME)
         {
             m_FTPS->ULFinish(SysHandle,true);
-            if(Data->FileHandle!=NULL)
-            {
-                fclose(Data->FileHandle);
-                Data->FileHandle=NULL;
-            }
+            return;    // 'Data' is no longer valid, so we are done
         }
     }
 }
@@ -1446,12 +1423,7 @@ static PG_BOOL XModemDownload_RxData(t_FTPSystemData *SysHandle,
                     m_FTPS->DLSendData(SysHandle,&c,1);
 
                     m_FTPS->DLFinish(SysHandle,false);
-                    if(Data->FileHandle!=NULL)
-                    {
-                        fclose(Data->FileHandle);
-                        Data->FileHandle=NULL;
-                    }
-                    Data->Done=true;
+                    return true;    // Data has been free'ed we are done
                 }
                 Data->DownloadState++;
             break;
@@ -1654,11 +1626,7 @@ static void XModemDownload_Timeout(t_FTPSystemData *SysHandle,
         if(Data->StartTimeout>MAX_START_WAIT_TIME)
         {
             m_FTPS->DLFinish(SysHandle,true);
-            if(Data->FileHandle!=NULL)
-            {
-                fclose(Data->FileHandle);
-                Data->FileHandle=NULL;
-            }
+            return;    // Data has been free'ed we are done
         }
     }
     else
@@ -1687,11 +1655,7 @@ static void XModemDownload_Timeout(t_FTPSystemData *SysHandle,
         if(Data->LastPacketTimeout>=MAX_PACKET_WAIT_TIME)
         {
             m_FTPS->DLFinish(SysHandle,true);
-            if(Data->FileHandle!=NULL)
-            {
-                fclose(Data->FileHandle);
-                Data->FileHandle=NULL;
-            }
+            return;    // Data has been free'ed we are done
         }
     }
 }

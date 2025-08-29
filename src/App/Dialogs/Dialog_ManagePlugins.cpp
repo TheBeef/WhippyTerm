@@ -32,6 +32,7 @@
 /*** HEADER FILES TO INCLUDE  ***/
 #include "App/Dialogs/Dialog_ManagePlugins.h"
 #include "App/PluginSupport/ExternPluginsSystem.h"
+#include "App/PluginSupport/PluginSystem.h"
 #include "UI/UIManagePlugins.h"
 #include "UI/UIAsk.h"
 #include <string.h>
@@ -51,10 +52,8 @@ static void DMP_ToggleEnable(void);
 static void DMP_RethinkEnableButton(bool BttnEnabled);
 static void DMP_UninstallPlugin(void);
 static void DMP_BuildPluginList(void);
-static void DMP_ShowRestartWarning(bool Visible);
 
 /*** VARIABLE DEFINITIONS     ***/
-bool m_DMP_ChangeWasMade;
 
 /*******************************************************************************
  * NAME:
@@ -85,8 +84,6 @@ void RunManagePluginsDialog(void)
         return;
     }
 
-    m_DMP_ChangeWasMade=false;
-    DMP_ShowRestartWarning(false);
     DMP_BuildPluginList();
     DMP_RethinkEnableButton(false);
 
@@ -154,11 +151,6 @@ bool DMP_Event(const struct DMPEvent *Event)
             }
         break;
         case e_DMPEvent_DialogOk:
-            if(m_DMP_ChangeWasMade)
-            {
-                UIAsk("Restart","You need to restart for your changes to"
-                        " take effect",e_AskBox_Info,e_AskBttns_Ok);
-            }
         break;
         case e_DMPEventMAX:
         default:
@@ -416,8 +408,6 @@ static void DMP_ToggleEnable(void)
             UIStyleListViewItem(PluginList,Index,UISTYLE_STRIKETHROUGH);
 
         DMP_RethinkEnableButton(PluginInfo.Enabled);
-        DMP_ShowRestartWarning(true);
-        m_DMP_ChangeWasMade=true;
     }
 }
 
@@ -447,12 +437,23 @@ static void DMP_UninstallPlugin(void)
     struct ExternPluginInfo PluginInfo;
     int Index;
     string Msg;
+    const char *PluginIDStr;
 
     PluginList=UIMP_GetListViewHandle(e_UIMP_ListView_PluginList);
 
     Index=UIGetListViewSelectedEntry(PluginList);
     if(GetExternPluginInfo(Index,PluginInfo))
     {
+        /* See if it's currently in use */
+        if(IsPluginInUse(&PluginInfo))
+        {
+            UIAsk("Uninstall plugin","This plugin is currently in use and "
+                    "can not be uninstalled.\n\nClose any connections that "
+                    "are using this plugin and try again.",
+                    e_AskBox_Error,e_AskBttns_Ok);
+            return;
+        }
+
         Msg="Are you sure you want to uninstall:\n";
         Msg+=PluginInfo.PluginName;
 
@@ -462,35 +463,6 @@ static void DMP_UninstallPlugin(void)
             UninstallExternPlugin(Index);
             UIClearListView(PluginList);
             DMP_BuildPluginList();
-            DMP_ShowRestartWarning(true);
-            m_DMP_ChangeWasMade=true;
         }
     }
-}
-
-/*******************************************************************************
- * NAME:
- *    DMP_ShowRestartWarning
- *
- * SYNOPSIS:
- *    static void DMP_ShowRestartWarning(bool Visible);
- *
- * PARAMETERS:
- *    Visible [I] -- Show or hide the label.
- *
- * FUNCTION:
- *    This function shows or hides the restart warning label.
- *
- * RETURNS:
- *    NONE
- *
- * SEE ALSO:
- *    
- ******************************************************************************/
-static void DMP_ShowRestartWarning(bool Visible)
-{
-    t_UILabelCtrl *MustRestart;
-
-    MustRestart=UIMP_GetLabelInputHandle(e_UIMP_LabelInput_MustRestart);
-    UIMakeLabelVisible(MustRestart,Visible);
 }

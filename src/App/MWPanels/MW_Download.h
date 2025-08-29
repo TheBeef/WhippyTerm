@@ -53,6 +53,8 @@ class MWDownload
         ~MWDownload();
 
         void Setup(class TheMainWindow *Parent,t_UIMainWindow *Win);
+        void RescanAvailableProtocols(void);
+        void FreePluginResourcesIfNeeded(const char *PluginIDStr);
         void ActivateCtrls(bool Active);
         void ConnectionChanged(void);
         void ConnectionAbout2Changed(void);

@@ -41,6 +41,7 @@
 #include "App/PluginSupport/KeyValueSupport.h"
 #include "App/Settings.h"
 #include "App/PluginSupport/PluginUISupport.h"
+#include "App/PluginSupport/PluginSystem.h"
 #include "UI/UIAsk.h"
 #include "UI/UIFileReq.h"
 #include "OS/Directorys.h"
@@ -69,6 +70,7 @@ struct RealFTPData
     t_FTPHandlerDataType *HandlerData;
     const struct FileTransferHandlerAPI *HandlerAPI;
     class Connection *Con;
+    i_FTPHandlersType FTPHandlerInfo;
 };
 
 /*** FUNCTION PROTOTYPES      ***/
@@ -396,6 +398,9 @@ PG_BOOL FTPSPIA_RegisterFileTransferProtocol(const struct FTPHandlerInfo *Info)
         }
 
         m_FTPHandlersList.push_back(Info);
+
+        /* Register this plugin with system */
+        RegisterPluginWithSystem(Info->IDStr);
     }
     catch(const char *Msg)
     {
@@ -600,7 +605,9 @@ static int FTPSPIA_ULSendData(t_FTPSystemData *SysHandle,void *Data,
  *
  * FUNCTION:
  *    This function is used to tell the system that the driver has finished
- *    the transfer.
+ *    the transfer.  This function will free the resources of this transfer
+ *    so you can not longer access your t_FTPHandlerDataType data after calling
+ *    this function.
  *
  * RETURNS:
  *    NONE
@@ -616,6 +623,9 @@ static void FTPSPIA_ULFinishUpload(t_FTPSystemData *SysHandle,PG_BOOL Aborted)
         return;
 
     RealFData->Con->FinishedUpload(Aborted);
+
+    /* We are done free the resourses */
+    FTPS_FreeCurrentHander(RealFData);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -724,7 +734,9 @@ static int FTPSPIA_DLSendData(t_FTPSystemData *SysHandle,void *Data,
  *
  * FUNCTION:
  *    This function is used to tell the system that the driver has finished
- *    the transfer.
+ *    the transfer.  This function will free the resources of this transfer
+ *    so you can not longer access your t_FTPHandlerDataType data after calling
+ *    this function.
  *
  * RETURNS:
  *    NONE
@@ -740,6 +752,9 @@ static void FTPSPIA_DLFinishDownload(t_FTPSystemData *SysHandle,PG_BOOL Aborted)
         return;
 
     RealFData->Con->FinishedDownload(Aborted);
+
+    /* We are done free the resourses */
+    FTPS_FreeCurrentHander(RealFData);
 }
 
 /*******************************************************************************
@@ -911,6 +926,8 @@ t_FTPData *FTPS_AllocFTPData(void)
 
         NewData->HandlerData=NULL;
         NewData->HandlerAPI=NULL;
+        NewData->Con=NULL;
+        NewData->FTPHandlerInfo=m_FTPHandlersList.end();
     }
     catch(...)
     {
@@ -974,6 +991,7 @@ static bool FTPS_SetupCurrentHandler(struct RealFTPData *RealFData,
         i_FTPHandlersType Handler)
 {
     RealFData->HandlerAPI=(*Handler)->API;
+    RealFData->FTPHandlerInfo=Handler;
 
     RealFData->HandlerData=NULL;
     if(RealFData->HandlerAPI->AllocateData!=NULL)
@@ -982,6 +1000,9 @@ static bool FTPS_SetupCurrentHandler(struct RealFTPData *RealFData,
         if(RealFData->HandlerData==NULL)
             return false;
     }
+
+    /* Tell the system we are using this plugin */
+    NotePluginInUse((*RealFData->FTPHandlerInfo)->IDStr);
 
     return true;
 }
@@ -1013,8 +1034,13 @@ static void FTPS_FreeCurrentHander(struct RealFTPData *RealFData)
     if(RealFData->HandlerAPI->FreeData!=NULL && RealFData->HandlerData!=NULL)
         RealFData->HandlerAPI->FreeData(RealFData->HandlerData);
 
+    /* Tell the system we are no longer using this plugin */
+    UnNotePluginInUse((*RealFData->FTPHandlerInfo)->IDStr);
+
     RealFData->HandlerAPI=NULL;
     RealFData->HandlerData=NULL;
+    RealFData->Con=NULL;
+    RealFData->FTPHandlerInfo=m_FTPHandlersList.end();
 }
 
 /*******************************************************************************
@@ -1430,3 +1456,69 @@ bool FTPS_ProcessIncomingBytes(t_FTPData *FData,uint8_t *Data,int Bytes)
     return false;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    FTPS_InformOfNewPluginInstalled
+ *
+ * SYNOPSIS:
+ *    void FTPS_InformOfNewPluginInstalled(const char *PluginIDStr);
+ *
+ * PARAMETERS:
+ *    PluginIDStr [I] -- The ID string for the plugin that was installed
+ *
+ * FUNCTION:
+ *    This function is called any time a new plugin is installed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    This is not called at started when plugin are loaded, just when a new
+ *    plugin is installed.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void FTPS_InformOfNewPluginInstalled(const char *PluginIDStr)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    FTPS_InformOfPluginUninstalled
+ *
+ * SYNOPSIS:
+ *    void FTPS_InformOfPluginUninstalled(const char *PluginIDStr);
+ *
+ * PARAMETERS:
+ *    PluginIDStr [I] -- The ID string for the plugin that was removed
+ *
+ * FUNCTION:
+ *    This function is called when a plugin is removed from the system.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void FTPS_InformOfPluginUninstalled(const char *PluginIDStr)
+{
+    i_FTPHandlersType CurFTP;
+
+    /* Remove from the list of available FTP handlers */
+    for(CurFTP=m_FTPHandlersList.begin();CurFTP!=m_FTPHandlersList.end();
+            CurFTP++)
+    {
+        if(strcmp((*CurFTP)->IDStr,PluginIDStr)==0)
+        {
+            break;
+        }
+    }
+    if(CurFTP!=m_FTPHandlersList.end())
+    {
+        m_FTPHandlersList.erase(CurFTP);
+
+        UnRegisterPluginWithSystem(PluginIDStr);
+    }
+}

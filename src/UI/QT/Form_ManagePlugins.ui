@@ -316,25 +316,6 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QLabel" name="MustRestart_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">color:red</string>
-        </property>
-        <property name="text">
-         <string>You must restart for any changes to take effect</string>
-        </property>
-        <property name="wordWrap">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QDialogButtonBox" name="buttonBox">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">

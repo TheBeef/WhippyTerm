@@ -23,17 +23,13 @@
 #include "App/Session.h"
 #include "App/Settings.h"
 #include "App/IOSystem.h"
-#include "App/StdPlugins/RegisterStdPlugins.h"
 #include "App/SendBuffer.h"
 #include "App/Util/CRCSystem.h"
 #include "App/Dialogs/Dialog_EditSendBuffer.h"
 #include "OS/System.h"
 #include "UI/UIAsk.h"
-#include "PluginSupport/ExternPluginsSystem.h"
+#include "App/PluginSupport/PluginSystem.h"
 #include "Version.h"
-
-/* Temp external plugins */
-//#include "App/PluginSupport/SystemSupport.h"
 
 /*** DEFINES                  ***/
 
@@ -101,13 +97,7 @@ bool AppMain(int argc,char *argv[])
     DPS_Init();
     FTPS_Init();
 
-//    RegisterBuildInInputProcessors();
-//    RegisterBuildInKeyPressProcessors();
-
-    RegisterStdPlugins();
-    RegisterExternPlugins();
-
-    IOS_InitPlugins();
+    InitPluginSystem();
 
     MW_AllocNewMainWindow();
 

@@ -4198,7 +4198,7 @@ void Connection::FinishedUpload(bool Aborted)
  *    NewProtocol [I] -- The new protocol to use for uploads
  *
  * FUNCTION:
- *    This function sets the protocol that will be used for uploads.
+ *    This function sets the protocol that will be used for downloads.
  *
  * RETURNS:
  *    NONE

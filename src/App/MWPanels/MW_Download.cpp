@@ -44,6 +44,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <string>
+#include <algorithm>
 
 using namespace std;
 
@@ -54,6 +55,7 @@ using namespace std;
 /*** TYPE DEFINITIONS         ***/
 
 /*** FUNCTION PROTOTYPES      ***/
+static bool SortFTPsList(const struct FTPS_ProtocolInfo &A,const struct FTPS_ProtocolInfo &B);
 
 /*** VARIABLE DEFINITIONS     ***/
 
@@ -74,6 +76,33 @@ MWDownload::~MWDownload()
         FTPS_FreeProtocolOptions(OptionWidgets);
         OptionWidgets=NULL;
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    SortFTPsList
+ *
+ * SYNOPSIS:
+ *    static bool SortFTPsList(const struct FTPS_ProtocolInfo &A,const struct FTPS_ProtocolInfo &B);
+ *
+ * PARAMETERS:
+ *    A [I] -- The first thing to cmp
+ *    B [I] -- The second thing to cmp
+ *
+ * FUNCTION:
+ *    This is a helper function for the sort() of protocols.
+ *
+ * RETURNS:
+ *    true -- first argument is less than the second
+ *    false -- first argument is greater or equ to the second
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static bool SortFTPsList(const struct FTPS_ProtocolInfo &A,
+        const struct FTPS_ProtocolInfo &B)
+{
+    return strcmp(A.DisplayName,B.DisplayName)<0;
 }
 
 /*******************************************************************************
@@ -99,25 +128,74 @@ MWDownload::~MWDownload()
  ******************************************************************************/
 void MWDownload::Setup(class TheMainWindow *Parent,t_UIMainWindow *Win)
 {
-    t_UIComboBoxCtrl *ProtocolCB;
-    unsigned int Index;
-    e_UIMenuCtrl *NewMenuItem;
     t_UILabelCtrl *FilenameLabel;
     t_UILabelCtrl *BytesRxLabel;
-    char buff[100];
 
     MW=Parent;
     UIWin=Win;
 
-    ProtocolCB=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Download_Protocol);
     FilenameLabel=UIMW_GetLabelHandle(UIWin,e_UIMWLabel_Download_Filename);
     BytesRxLabel=UIMW_GetLabelHandle(UIWin,e_UIMWLabel_Download_BytesRx);
+
+    RescanAvailableProtocols();
+
+    UISetLabelText(BytesRxLabel,"");
+    UISetLabelText(FilenameLabel,"");
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWDownload::RescanAvailableProtocols()
+ *
+ * SYNOPSIS:
+ *    void MWDownload::RescanAvailableProtocols(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function clears the current protocols and reloads the list from
+ *    the FTPS and rebuilds the list.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWDownload::RescanAvailableProtocols(void)
+{
+    t_UIComboBoxCtrl *ProtocolCB;
+    string SelProtoIDStr;
+    int SelectedIndex;
+    char buff[100];
+    unsigned int Index;
+    e_UIMenuCtrl *NewMenuItem;
+
+    ProtocolCB=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Download_Protocol);
+
+    /* Find out what protocol is currently selected */
+    SelProtoIDStr="";
+    SelectedIndex=UIGetComboBoxSelectedIndex(ProtocolCB);
+    if(SelectedIndex>=0 && SelectedIndex<(int)FTPsAvail.size())
+        SelProtoIDStr=FTPsAvail[SelectedIndex].IDStr;
 
     /* Fill in the available download protocols */
     FTPS_GetListOfFTProtocols(e_FileTransferProtocolMode_Download,FTPsAvail);
 
+    /* Sort them */
+    sort(FTPsAvail.begin(),FTPsAvail.end(),SortFTPsList);
+
+    /* Build the combox and the menu */
+    UIMW_AddFTPDownloadClearAllMenus(UIWin);
+    MenuItems.clear();
+    UIClearComboBox(ProtocolCB);
+    SelectedIndex=-1;
     for(Index=0;Index<FTPsAvail.size();Index++)
     {
+        if(SelProtoIDStr==FTPsAvail[Index].IDStr)
+            SelectedIndex=Index;
+
         UIAddItem2ComboBox(ProtocolCB,FTPsAvail[Index].DisplayName,Index);
 
         strncpy(buff,FTPsAvail[Index].DisplayName,sizeof(buff)-4);
@@ -128,8 +206,62 @@ void MWDownload::Setup(class TheMainWindow *Parent,t_UIMainWindow *Win)
         MenuItems.push_back(NewMenuItem);
     }
 
-    UISetLabelText(BytesRxLabel,"");
-    UISetLabelText(FilenameLabel,"");
+    if(SelectedIndex>=0)
+        UISetComboBoxSelectedEntry(ProtocolCB,SelectedIndex);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWDownload::FreePluginResourcesIfNeeded
+ *
+ * SYNOPSIS:
+ *    void MWDownload::FreePluginResourcesIfNeeded(const char *PluginIDStr);
+ *
+ * PARAMETERS:
+ *    PluginIDStr [I] -- The plugin ID string for the plugin to free the
+ *                       resources of
+ *
+ * FUNCTION:
+ *    This function is called to tell us to release any resources used by
+ *    a plugin.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWDownload::FreePluginResourcesIfNeeded(const char *PluginIDStr)
+{
+    t_UIComboBoxCtrl *ProtocolCB;
+    string FileName;
+    unsigned int ProtocolIndex;
+    t_KVList *Options;
+
+    ProtocolCB=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Download_Protocol);
+    ProtocolIndex=UIGetComboBoxSelectedEntry(ProtocolCB);
+
+    /* Check if this is the active protocol */
+    if(ProtocolIndex>=FTPsAvail.size())
+        return;
+
+    /* See if this is the selected protocol */
+    if(strcmp(FTPsAvail[ProtocolIndex].IDStr,PluginIDStr)!=0)
+        return;
+
+    /* We are using this plugin free the resources */
+
+    /* Save any changes */
+    if(MW->ActiveCon!=NULL && OptionWidgets!=NULL)
+    {
+        MW->ActiveCon->SetDownloadProtocol(FTPsAvail[ProtocolIndex].IDStr);
+        Options=MW->ActiveCon->GetDownloadOptionsPtr();
+        FTPS_StoreOptions(OptionWidgets,*Options);
+    }
+
+    if(OptionWidgets!=NULL)
+        FTPS_FreeProtocolOptions(OptionWidgets);
+    OptionWidgets=NULL;
 }
 
 /*******************************************************************************
@@ -772,4 +904,3 @@ void MWDownload::DownloadMenuTriggered(uint64_t ID)
 
     Start();
 }
-

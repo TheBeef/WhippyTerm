@@ -37,6 +37,7 @@
 #include "App/Portable.h"
 #include "App/Settings.h"
 #include "App/Dialogs/Dialog_InstallPlugin.h"
+#include "App/PluginSupport/PluginSystem.h"
 #include "App/PluginSupport/ExternPluginsSystem.h"
 #include "App/PluginSupport/SystemSupport.h"
 #include "BuildOptions/BuildOptions.h"
@@ -77,7 +78,7 @@ class ExternPluginInfoList : public TinyCFGBaseData
 };
 
 /*** FUNCTION PROTOTYPES      ***/
-bool LoadPlugin(const char *File,const char *Name);
+static struct DLLHandle *LoadPlugin(const char *File,const char *Name);
 static bool RegisterExternPluginInfoList(class TinyCFG &cfg,const char *XmlName,
         list<struct ExternPluginInfo> &Data);
 static void LoadPluginList(void);
@@ -88,11 +89,11 @@ static void ExternPluginInstallDLL(class RIFF &PluginFile,
         const char *DescFilename,uint32_t ChunkLen);
 static bool LoadInfoAboutExternPlugin(const char *Filename,
         struct ExternPluginInfo &Info,bool InstallDLL);
-static void ImformOfNewPluginInstalled(struct ExternPluginInfo *Info);
 
 /*** VARIABLE DEFINITIONS     ***/
 t_DLLLoadedListType m_DLLLoaded;
 t_ExternPluginInfoType m_ExternPlugins;
+struct DLLHandle *m_ExternPluginHandle;
 
 /*******************************************************************************
  * NAME:
@@ -120,6 +121,7 @@ void RegisterExternPlugins(void)
     string PluginFilename;
     const char *LoadFilename;
     char buff[200];
+    struct DLLHandle *DLLHandle;
 
     LoadPluginList();
     if(m_ExternPlugins.size()==0)
@@ -164,7 +166,17 @@ void RegisterExternPlugins(void)
             continue;
         }
 
-        Plugin->DLLFound=LoadPlugin(LoadFilename,Plugin->PluginName.c_str());
+        DLLHandle=LoadPlugin(LoadFilename,Plugin->PluginName.c_str());
+        if(DLLHandle!=NULL)
+        {
+            Plugin->DLLFound=true;
+            Plugin->EPHandle=DLLHandle;
+        }
+        else
+        {
+            Plugin->DLLFound=false;
+            Plugin->EPHandle=NULL;
+        }
     }
 }
 
@@ -328,7 +340,7 @@ void FreeLoadedExternPlugins(void)
  *    LoadPlugin
  *
  * SYNOPSIS:
- *    bool LoadPlugin(const char *File,const char *Name);
+ *    struct DLLHandle *LoadPlugin(const char *File,const char *Name);
  *
  * PARAMETERS:
  *    File [I] -- The filename (with path) of the plugin to load.
@@ -338,13 +350,13 @@ void FreeLoadedExternPlugins(void)
  *    This function loads and registers a plugin from disk.
  *
  * RETURNS:
- *    true -- DLL was loaded
- *    false -- There was a problem loading the DLL
+ *    The DLL handle for this plugin or NULL if there was a problem loading
+ *    the DLL
  *
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool LoadPlugin(const char *File,const char *Name)
+static struct DLLHandle *LoadPlugin(const char *File,const char *Name)
 {
     struct DLLHandle *Plugin;
     char buff[200];
@@ -366,7 +378,7 @@ bool LoadPlugin(const char *File,const char *Name)
         snprintf(buff,sizeof(buff)-1,"Failed to load plugin.  "
                 "\"%s\" failed to load:\n%s",Name,Error);
         UIAsk("Error",buff,e_AskBox_Error);
-        return false;
+        return NULL;
     }
 
     /* Find the register function in the plugin */
@@ -378,11 +390,13 @@ bool LoadPlugin(const char *File,const char *Name)
         snprintf(buff,sizeof(buff)-1,"Failed to load plugin.  "
                 "\"%s\" is not a WhipyTerm plugin.",Name);
         UIAsk("Error",buff,e_AskBox_Error);
-        return false;
+        return NULL;
     }
 
     /* Ok, call the register function */
+    m_ExternPluginHandle=Plugin;
     ReqVer=RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+    m_ExternPluginHandle=NULL;
     if(ReqVer!=0)
     {
         /* Tell user what version of WhippyTerm is needed */
@@ -405,12 +419,59 @@ bool LoadPlugin(const char *File,const char *Name)
         }
         snprintf(buff,sizeof(buff),Msg,Name,Maj,Min,Rev,Patch+'A'-1);
         UIAsk("Error",buff,e_AskBox_Error);
-        return false;
+        return NULL;
     }
 
     m_DLLLoaded.push_back(Plugin);
 
-    return true;
+    return Plugin;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UnLoadPlugin
+ *
+ * SYNOPSIS:
+ *    static void UnLoadPlugin(struct DLLHandle *DLLHandle);
+ *
+ * PARAMETERS:
+ *    DLLHandle [I] -- The handle to the plugin we are unloading
+ *
+ * FUNCTION:
+ *    This function unloads a plugin.  The plugin must have a use count of
+ *    0 before this function will work.  This does remove the DLL from the
+ *    list of DLL's (m_DLLLoaded) but it does not remove it from the list of
+ *    extern plugins (m_ExternPlugins).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void UnLoadPlugin(struct DLLHandle *DLLHandle)
+{
+    i_DLLLoadedListType dll;
+    i_ExternPluginInfoType ExternPlugin;
+
+    /* Find this plugin */
+    for(ExternPlugin=m_ExternPlugins.begin();
+            ExternPlugin!=m_ExternPlugins.end();ExternPlugin++)
+    {
+        if(ExternPlugin->EPHandle==DLLHandle)
+            break;
+    }
+    if(ExternPlugin==m_ExternPlugins.end())
+        return;
+
+    if(ExternPlugin!=m_ExternPlugins.end())
+        InformOfPluginUninstalled(&*ExternPlugin);
+
+    dll=find(m_DLLLoaded.begin(),m_DLLLoaded.end(),DLLHandle);
+    if(dll!=m_DLLLoaded.end())
+        m_DLLLoaded.erase(dll);
+
+    CloseDLL(DLLHandle);
 }
 
 /*******************************************************************************
@@ -661,14 +722,18 @@ void UninstallExternPlugin(int Index)
 
     Count=0;
     for(Plugin=m_ExternPlugins.begin();Plugin!=m_ExternPlugins.end() &&
-            Count<Index;Plugin++,Count++)
+            Count<Index;Plugin++)
     {
+        Count++;
     }
     if(Plugin==m_ExternPlugins.end())
         return;
 
+    /* Unload this plugin */
+    if(Plugin->EPHandle!=NULL)
+        UnLoadPlugin((struct DLLHandle *)Plugin->EPHandle);
+
     /* Erase the dll */
-    /* Ok, load each of the plugins that are enabled */
     if(!GetAppDataPath(PluginDir))
     {
         UIAsk("Error","Failed to uninstall plugin.  App data path unknown.",
@@ -806,7 +871,7 @@ bool InstallNewExternPlugin(const char *Filename)
     if(LoadFilename==NULL)
     {
         snprintf(buff,sizeof(buff)-1,"Failed to install plugin.\n\n"
-                "\"%s\" failed to filename + path to long.",
+                "\"%s\" failed filename + path to long.",
                 Info.Filename.c_str());
         UIAsk("Error",buff,e_AskBox_Error);
         return false;
@@ -814,7 +879,12 @@ bool InstallNewExternPlugin(const char *Filename)
 
     TotalDPPluginsBeforeInstall=DPS_GetDataProcessorPluginCount();
 
-    Info.DLLFound=LoadPlugin(LoadFilename,Info.PluginName.c_str());
+    Info.EPHandle=LoadPlugin(LoadFilename,
+            Info.PluginName.c_str());
+    if(Info.EPHandle!=NULL)
+        Info.DLLFound=true;
+    else
+        Info.DLLFound=false;
 
     /* Add this to the list of plugins */
     m_ExternPlugins.push_back(Info);
@@ -831,7 +901,7 @@ bool InstallNewExternPlugin(const char *Filename)
                 TotalDPPluginsAfterInstall-TotalDPPluginsBeforeInstall;
         DPS_GetDataProcessorPluginList(DPPlugins);
 
-        /* Ok, take the an enable the new plugins */
+        /* Ok, take and enable the new plugins */
         for(r=0;r<NewDPPluginsCount;r++)
         {
             QuickPro=&DPPlugins[TotalDPPluginsBeforeInstall+r];
@@ -863,7 +933,8 @@ bool InstallNewExternPlugin(const char *Filename)
         ApplySettings();    // Apply the change
     }
 
-    ImformOfNewPluginInstalled(&Info);
+/* DEBUG PAUL: Wrong, shouldn't be passing Info */
+    InformOfNewPluginInstalled(&Info);
 
     return true;
 }
@@ -1259,32 +1330,32 @@ void PromptAndInstallPlugin(void)
     }
 }
 
+
 /*******************************************************************************
  * NAME:
- *    ImformOfNewPluginInstalled
+ *    GetCurrentExternPluginHandle
  *
  * SYNOPSIS:
- *    void ImformOfNewPluginInstalled(struct ExternPluginInfo *Info);
+ *    struct DLLHandle *GetCurrentExternPluginHandle(void);
  *
  * PARAMETERS:
- *    Info [I] -- The info about this plugin
+ *    NONE
  *
  * FUNCTION:
- *    This function is called when a new plugin is installed in the system.
- *    This is not when a plugin is loaded, but instead when a plug is first
- *    installed.
+ *    This function gets the handle to the current extern plugin that is being
+ *    registered.  This handle will be set, then the RegisterPlugin() function
+ *    will be called in the plugin.  When that function returns this will
+ *    be set to NULL.
  *
  * RETURNS:
- *    NONE
+ *    The handle to the external plugin or NULL if there isn't one being
+ *    added to the system.
  *
  * SEE ALSO:
  *    
  ******************************************************************************/
-void ImformOfNewPluginInstalled(struct ExternPluginInfo *Info)
+struct DLLHandle *GetCurrentExternPluginHandle(void)
 {
-    if(Info->PluginClass==e_ExtPluginClass_IODriver)
-        IOS_InitNewlyInstalledPlugin(Info);
-
-    MW_InformOfNewPluginInstalled(Info);
+    return m_ExternPluginHandle;
 }
 

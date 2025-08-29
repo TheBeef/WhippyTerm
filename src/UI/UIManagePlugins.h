@@ -73,7 +73,6 @@ enum e_UIMP_MultiLineTextInput
 
 enum e_UIMP_LabelInput
 {
-    e_UIMP_LabelInput_MustRestart,
     e_UIMP_LabelInputMAX
 };
 

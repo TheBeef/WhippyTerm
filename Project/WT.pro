@@ -48,6 +48,7 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/Dialogs/Dialog_CRCFinder.cpp \
     ../src/App/Dialogs/Dialog_CalcCrc.cpp \
     ../src/App/Dialogs/Dialog_DataProPluginSettings.cpp \
+    ../src/App/PluginSupport/PluginSystem.cpp \
     ../src/App/Portable.cpp \
     ../src/BuildOptions/BuildOptions.cpp \
     ../src/App/Dialogs/Dialog_NewConnectionFromURI.cpp \

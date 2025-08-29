@@ -82,5 +82,7 @@ bool FTPS_DownloadFile(t_FTPData *FData,class Connection *ParentCon,
 void FTPS_AbortTransfer(t_FTPData *FData);
 void FTPS_TimeoutTransfer(t_FTPData *FData);
 bool FTPS_ProcessIncomingBytes(t_FTPData *FData,uint8_t *Data,int Bytes);
+void FTPS_InformOfNewPluginInstalled(const char *PluginIDStr);
+void FTPS_InformOfPluginUninstalled(const char *PluginIDStr);
 
 #endif

@@ -28,8 +28,8 @@
  *       Created
  *
  *******************************************************************************/
-#ifndef __PLUGINSYSTEM_H_
-#define __PLUGINSYSTEM_H_
+#ifndef __SDK_PLUGINSYSTEM_H_
+#define __SDK_PLUGINSYSTEM_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
 

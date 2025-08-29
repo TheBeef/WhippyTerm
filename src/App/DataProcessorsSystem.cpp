@@ -67,6 +67,7 @@ Example plugins:
 #include "App/Settings.h"
 #include "App/PluginSupport/PluginUISupport.h"
 #include "App/PluginSupport/KeyValueSupport.h"
+#include "App/PluginSupport/PluginSystem.h"
 #include "PluginSDK/Plugin.h"
 #include "UI/UIAsk.h"
 #include "UI/UIDebug.h"
@@ -597,6 +598,9 @@ PG_BOOL DPS_RegisterDataProcessor(const char *ProID,
         memcpy(&NewPro.API,ProAPI,Size2Copy);
 
         m_DataProcessors.push_back(NewPro);
+
+        /* Register this plugin with system */
+        RegisterPluginWithSystem(ProID);
     }
     catch(...)
     {
@@ -731,6 +735,9 @@ bool DPS_AllocProcessorConData(struct ProcessorConData *FData,
             }
         }
         FData->ProcessorsData.push_back(NewProcessorData);
+
+        /* Tell the system we are using this plugin */
+        NotePluginInUse(CurProcessor->ProID.c_str());
     }
 
     return true;
@@ -769,6 +776,8 @@ void DPS_FreeProcessorConData(struct ProcessorConData *FData)
             if(CurProcessor->API.FreeData!=NULL)
                 CurProcessor->API.FreeData(FData->ProcessorsData[Index]);
         }
+
+        UnNotePluginInUse(CurProcessor->ProID.c_str());
     }
 
     FData->DataProcessorsList.clear();
@@ -1722,6 +1731,72 @@ void DPS_PluginSettings_Load(class ConSettings *Settings,const char *IDStr)
 //    {
 //    }
 }
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_InformOfNewPluginInstalled
+ *
+ * SYNOPSIS:
+ *    void DPS_InformOfNewPluginInstalled(const char *PluginIDStr);
+ *
+ * PARAMETERS:
+ *    PluginIDStr [I] -- The ID string for the plugin that was installed
+ *
+ * FUNCTION:
+ *    This function is called any time a new plugin is installed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    This is not called at started when plugin are loaded, just when a new
+ *    plugin is installed.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DPS_InformOfNewPluginInstalled(const char *PluginIDStr)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DPS_InformOfPluginUninstalled
+ *
+ * SYNOPSIS:
+ *    void DPS_InformOfPluginUninstalled(const char *PluginIDStr);
+ *
+ * PARAMETERS:
+ *    PluginIDStr [I] -- The ID string for the plugin that was removed
+ *
+ * FUNCTION:
+ *    This function is called when a plugin is removed from the system.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DPS_InformOfPluginUninstalled(const char *PluginIDStr)
+{
+    i_DPSDataProcessorsType pro;
+
+    /* Remove from the list of available data processors */
+    for(pro=m_DataProcessors.begin();pro!=m_DataProcessors.end();pro++)
+        if(pro->ProID==PluginIDStr)
+            break;
+    if(pro!=m_DataProcessors.end())
+    {
+        m_DataProcessors.erase(pro);
+        UnRegisterPluginWithSystem(PluginIDStr);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
  * NAME:

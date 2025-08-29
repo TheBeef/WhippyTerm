@@ -78,6 +78,7 @@ struct ExternPluginInfo
     int PluginClass;
     int PluginSubClass;
     bool DLLFound;          // Not stored to disk
+    struct DLLHandle *EPHandle;    // Not stored to disk
 
     public:
         void Register(class TinyCFG *cfg)
@@ -116,5 +117,5 @@ void UninstallExternPlugin(int Index);
 void PromptAndInstallPlugin(void);
 bool InstallNewExternPlugin(const char *Filename);
 bool GetNewExternPluginInfo(const char *Filename,struct ExternPluginInfo &Info);
-
+struct DLLHandle *GetCurrentExternPluginHandle(void);
 #endif

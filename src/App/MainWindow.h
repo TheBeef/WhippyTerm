@@ -105,7 +105,9 @@ void Debug6(void);
                 class Connection **Con2);
         void DoSendByte(uint8_t Byte);
         void ApplyTerminalEmulationMenuTriggered(uint64_t ID);
-        void InformOfNewPluginInstalled(const struct ExternPluginInfo *Info);
+        void InformOfNewPluginInstalled(const char *PluginIDStr);
+        void InformOfPluginAboutToUninstall(const char *PluginIDStr);
+        void InformOfPluginRemoved(const char *PluginIDStr);
         void HandleGoURIToolBttnEnabled(void);
         void InformOfSendBufferChange(int BufferIndex);
         void ToolbarMenuSelected(e_UIMWToolbarMenuType InputID);
@@ -185,7 +187,9 @@ void Debug6(void);
 bool MW_AllocNewMainWindow(void);
 void MW_ApplySettings(void);
 void MW_RebuildAllBookmarkMenus(void);
-void MW_InformOfNewPluginInstalled(const struct ExternPluginInfo *Info);
+void MW_InformOfNewPluginInstalled(const char *PluginIDStr);
+void MW_InformOfPluginAboutToUninstall(const char *PluginIDStr);
+void MW_InformOfPluginUninstalled(const char *PluginIDStr);
 void MW_InformOfSendBufferChange(int BufferIndex);
 
 #endif

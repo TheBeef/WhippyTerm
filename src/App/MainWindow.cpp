@@ -225,10 +225,10 @@ void MW_ApplySettings(void)
  *    MW_InformOfNewPluginInstalled
  *
  * SYNOPSIS:
- *    void MW_InformOfNewPluginInstalled(const struct ExternPluginInfo *Info);
+ *    void MW_InformOfNewPluginInstalled(const char *PluginIDStr);
  *
  * PARAMETERS:
- *    Info [I] -- The info about this plugin
+ *    PluginIDStr [I] -- The ID string for the plugin that was installed
  *
  * FUNCTION:
  *    This function is called when a new plugin is installed.  It tells all
@@ -240,14 +240,72 @@ void MW_ApplySettings(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MW_InformOfNewPluginInstalled(const struct ExternPluginInfo *Info)
+void MW_InformOfNewPluginInstalled(const char *PluginIDStr)
 {
     i_MainWindowsListType MW;
 
     for(MW=m_MainWindowsList.begin();MW!=m_MainWindowsList.end();MW++)
-        (*MW)->InformOfNewPluginInstalled(Info);
+        (*MW)->InformOfNewPluginInstalled(PluginIDStr);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    MW_InformOfPluginUninstalled
+ *
+ * SYNOPSIS:
+ *    void MW_InformOfPluginUninstalled(const char *PluginIDStr);
+ *
+ * PARAMETERS:
+ *    PluginIDStr [I] -- The ID string for the plugin that was removed
+ *
+ * FUNCTION:
+ *    This function is called when a plugin is uninstalled (or just unloaded).
+ *    It tells all the mains windows that the plugin has been removed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MW_InformOfPluginUninstalled(const char *PluginIDStr)
+{
+    i_MainWindowsListType MW;
+
+    for(MW=m_MainWindowsList.begin();MW!=m_MainWindowsList.end();MW++)
+        (*MW)->InformOfPluginRemoved(PluginIDStr);
+}
+
+
+/*******************************************************************************
+ * NAME:
+ *    MW_InformOfPluginAboutToUninstall
+ *
+ * SYNOPSIS:
+ *    void MW_InformOfPluginAboutToUninstall(const char *PluginIDStr);
+ *
+ * PARAMETERS:
+ *    PluginIDStr [I] -- The ID string for the plugin that is about to removed
+ *
+ * FUNCTION:
+ *    This function is called when a plugin is about to be uninstalled
+ *    (or just unloaded) from the system.
+ *
+ *    It tells all the mains windows that the plugin has been removed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MW_InformOfPluginAboutToUninstall(const char *PluginIDStr)
+{
+    i_MainWindowsListType MW;
+
+    for(MW=m_MainWindowsList.begin();MW!=m_MainWindowsList.end();MW++)
+        (*MW)->InformOfPluginAboutToUninstall(PluginIDStr);
+}
 /*******************************************************************************
  * NAME:
  *    MW_RebuildAllBookmarkMenus
@@ -3998,10 +4056,10 @@ void TheMainWindow::ApplyTerminalEmulationMenuTriggered(uint64_t ID)
  *    TheMainWindow::InformOfNewPluginInstalled
  *
  * SYNOPSIS:
- *    void TheMainWindow::InformOfNewPluginInstalled(const struct ExternPluginInfo *Info)
+ *    void TheMainWindow::InformOfNewPluginInstalled(const char *PluginIDStr)
  *
  * PARAMETERS:
- *    Info [I] -- The info about this plugin
+ *    PluginIDStr [I] -- The ID string for the plugin that was installed
  *
  * FUNCTION:
  *    This function rebuilds the apply terminal emulation menu after a new
@@ -4013,9 +4071,64 @@ void TheMainWindow::ApplyTerminalEmulationMenuTriggered(uint64_t ID)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void TheMainWindow::InformOfNewPluginInstalled(const struct ExternPluginInfo *Info)
+void TheMainWindow::InformOfNewPluginInstalled(const char *PluginIDStr)
 {
     RebuildTerminalEmulationMenu();
+    UploadPanel.RescanAvailableProtocols();
+    DownloadPanel.RescanAvailableProtocols();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::InformOfPluginAboutToUninstall
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::InformOfPluginAboutToUninstall(const char *PluginIDStr)
+ *
+ * PARAMETERS:
+ *    PluginIDStr [I] -- The ID string for the plugin that was installed
+ *
+ * FUNCTION:
+ *    This function tells anything that uses plugin resources to release them
+ *    if it's for the plugin that's about to removed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::InformOfPluginAboutToUninstall(const char *PluginIDStr)
+{
+    UploadPanel.FreePluginResourcesIfNeeded(PluginIDStr);
+    DownloadPanel.FreePluginResourcesIfNeeded(PluginIDStr);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::InformOfPluginRemoved
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::InformOfPluginRemoved(const char *PluginIDStr)
+ *
+ * PARAMETERS:
+ *    PluginIDStr [I] -- The ID string for the plugin that was installed
+ *
+ * FUNCTION:
+ *    This function rebuilds the apply terminal emulation menu after a
+ *    plugin is removed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::InformOfPluginRemoved(const char *PluginIDStr)
+{
+    RebuildTerminalEmulationMenu();
+    UploadPanel.RescanAvailableProtocols();
+    DownloadPanel.RescanAvailableProtocols();
 }
 
 /*******************************************************************************

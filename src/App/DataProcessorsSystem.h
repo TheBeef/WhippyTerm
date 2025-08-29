@@ -112,5 +112,7 @@ void DPS_PluginSettings_FreeWidgets(const char *IDStr,t_DataProSettingsWidgetsTy
 void DPS_PluginSettings_SetSettingsFromWidgets(class ConSettings *Settings,const char *IDStr,t_DataProSettingsWidgetsType *PrivData);
 void DPS_PrunePluginSettings(class ConSettings *Settings);
 void DPS_PluginSettings_Load(class ConSettings *Settings,const char *IDStr);
+void DPS_InformOfNewPluginInstalled(const char *PluginIDStr);
+void DPS_InformOfPluginUninstalled(const char *PluginIDStr);
 
 #endif

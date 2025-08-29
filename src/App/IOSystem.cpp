@@ -36,6 +36,7 @@
 #include "App/PluginSupport/PluginUISupport.h"
 #include "App/PluginSupport/SystemSupport.h"
 #include "App/PluginSupport/KeyValueSupport.h"
+#include "App/PluginSupport/PluginSystem.h"
 #include "App/ConnectionsGlobal.h"
 #include "PluginSDK/Plugin.h"
 #include "PluginSupport/PluginUISupport.h"
@@ -1066,6 +1067,9 @@ PG_BOOL IOS_RegisterDriver(const char *DriverName,const char *BaseURI,
                 NewDriver.BaseURI.begin(),::toupper);
 
         m_IODriverList.push_back(NewDriver);
+
+        /* Register this plugin with system */
+        RegisterPluginWithSystem(DriverName);
     }
     catch(...)
     {
@@ -1200,17 +1204,47 @@ void IOS_InitPlugins(void)
 
 /*******************************************************************************
  * NAME:
- *    IOS_InitNewlyInstalledPlugin
+ *    IOS_InformOfNewPluginInstalled
  *
  * SYNOPSIS:
- *    void IOS_InitNewlyInstalledPlugin(struct ExternPluginInfo *Info);
+ *    void IOS_InformOfNewPluginInstalled(const char *PluginIDStr);
  *
  * PARAMETERS:
- *    Info [I] -- Info about this plugin.
+ *    PluginIDStr [I] -- The ID string for the plugin that was installed
  *
  * FUNCTION:
- *    This function is called when a new IODriver plugin is installed.
- *    It call's it's init() function and rescans for new connections.
+ *    This function is called any time a new plugin is installed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    This is not called at started when plugin are loaded, just when a new
+ *    plugin is installed.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void IOS_InformOfNewPluginInstalled(const char *PluginIDStr)
+{
+    /* Ok the new plugin will have it's 'InitBeenCalled' set to false so
+       we can call IOS_InitPlugins() again to just call the new plugins
+       init() */
+    IOS_InitPlugins();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_InformOfPluginUninstalled
+ *
+ * SYNOPSIS:
+ *    void IOS_InformOfPluginUninstalled(const char *PluginIDStr);
+ *
+ * PARAMETERS:
+ *    PluginIDStr [I] -- The ID string for the plugin that was removed
+ *
+ * FUNCTION:
+ *    This function is called when a plugin is removed from the system.
  *
  * RETURNS:
  *    NONE
@@ -1218,12 +1252,19 @@ void IOS_InitPlugins(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void IOS_InitNewlyInstalledPlugin(struct ExternPluginInfo *Info)
+void IOS_InformOfPluginUninstalled(const char *PluginIDStr)
 {
-    /* Ok the new plugin will have it's 'InitBeenCalled' set to false so
-       we can call IOS_InitPlugins() again to just call the new plugins
-       init() */
-    IOS_InitPlugins();
+    i_IODriverListType drv;
+
+    /* Find what driver we are talking about */
+    for(drv=m_IODriverList.begin();drv!=m_IODriverList.end();drv++)
+        if(drv->DriverName==PluginIDStr)
+            break;
+    if(drv!=m_IODriverList.end())
+    {
+        UnRegisterPluginWithSystem(PluginIDStr);
+        m_IODriverList.erase(drv);
+    }
 }
 
 /*******************************************************************************
@@ -2222,6 +2263,9 @@ t_IOSystemHandle *IOS_AllocIOSystemHandle(const char *UniqueID,uintptr_t ID)
 
         DrvHandle->DrvOpen=false;
         DrvHandle->DataAvailable=false;
+
+        /* Tell the system we are using this plugin */
+        NotePluginInUse(drv->DriverName.c_str());
     }
     catch(...)
     {
@@ -2267,6 +2311,9 @@ void IOS_FreeIOSystemHandle(t_IOSystemHandle *Handle)
 
     if(DrvHandle->DrvOpen)
         IOS_Close(Handle);
+
+    /* Tell the system we are no longer using this plugin */
+    UnNotePluginInUse(DrvHandle->IOdrv->DriverName.c_str());
 
     /* Remove this handle from the list of available handles */
     m_ActiveHandlesList.remove(Handle);

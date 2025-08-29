@@ -89,6 +89,9 @@ static void ExternPluginInstallDLL(class RIFF &PluginFile,
         const char *DescFilename,uint32_t ChunkLen);
 static bool LoadInfoAboutExternPlugin(const char *Filename,
         struct ExternPluginInfo &Info,bool InstallDLL);
+static bool CallRegisterExternPluginFn(struct DLLHandle *Plugin,
+        const char *Name);
+static bool LoadExternPluginDLL(struct ExternPluginInfo *Info);
 
 /*** VARIABLE DEFINITIONS     ***/
 t_DLLLoadedListType m_DLLLoaded;
@@ -150,6 +153,9 @@ void RegisterExternPlugins(void)
 
     for(Plugin=m_ExternPlugins.begin();Plugin!=m_ExternPlugins.end();Plugin++)
     {
+        Plugin->DLLFound=false;
+        Plugin->DLLHandle=NULL;
+
         if(!Plugin->Enabled)
             continue;
 
@@ -170,12 +176,12 @@ void RegisterExternPlugins(void)
         if(DLLHandle!=NULL)
         {
             Plugin->DLLFound=true;
-            Plugin->EPHandle=DLLHandle;
+            Plugin->DLLHandle=DLLHandle;
         }
         else
         {
             Plugin->DLLFound=false;
-            Plugin->EPHandle=NULL;
+            Plugin->DLLHandle=NULL;
         }
     }
 }
@@ -207,6 +213,7 @@ static void LoadPluginList(void)
     class TinyCFG cfg("PluginData");
     string Path;
     string PluginListFilename;
+    i_ExternPluginInfoType ExternPlugin;
 
     try
     {
@@ -234,6 +241,14 @@ static void LoadPluginList(void)
 
         RegisterExternPluginInfoList(cfg,"Plugins",m_ExternPlugins);
         cfg.LoadCFGFile(PluginListFilename.c_str());
+
+        /* Clear the things we don't load */
+        for(ExternPlugin=m_ExternPlugins.begin();
+                ExternPlugin!=m_ExternPlugins.end();ExternPlugin++)
+        {
+            ExternPlugin->DLLFound=false;
+            ExternPlugin->DLLHandle=NULL;
+        }
     }
     catch(...)
     {
@@ -361,13 +376,6 @@ static struct DLLHandle *LoadPlugin(const char *File,const char *Name)
     struct DLLHandle *Plugin;
     char buff[200];
     const char *Error;
-    RegisterPluginFnType RegisterPlugin;
-    unsigned int ReqVer;
-    uint8_t Maj;
-    uint8_t Min;
-    uint8_t Rev;
-    uint8_t Patch;
-    const char *Msg;
 
     Plugin=LoadDLL(File);
     if(Plugin==NULL)
@@ -381,44 +389,9 @@ static struct DLLHandle *LoadPlugin(const char *File,const char *Name)
         return NULL;
     }
 
-    /* Find the register function in the plugin */
-    RegisterPlugin=(RegisterPluginFnType)DLL2Function(Plugin,"RegisterPlugin");
-    if(RegisterPlugin==NULL)
+    if(!CallRegisterExternPluginFn(Plugin,Name))
     {
-        /* Not a WhippyTerm plugin as the plugin must have a register plugin
-           function */
-        snprintf(buff,sizeof(buff)-1,"Failed to load plugin.  "
-                "\"%s\" is not a WhipyTerm plugin.",Name);
-        UIAsk("Error",buff,e_AskBox_Error);
-        return NULL;
-    }
-
-    /* Ok, call the register function */
-    m_ExternPluginHandle=Plugin;
-    ReqVer=RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
-    m_ExternPluginHandle=NULL;
-    if(ReqVer!=0)
-    {
-        /* Tell user what version of WhippyTerm is needed */
-        if(ReqVer==0xFFFFFFFF)
-        {
-            Msg="The plugin %s used the experimental plugin API and is not supported by this version of " WHIPPYTERM_NAME;
-        }
-        else
-        {
-            Maj=(ReqVer>>24)&0xFF;
-            Min=(ReqVer>>16)&0xFF;
-            Rev=(ReqVer>>8)&0xFF;
-            Patch=ReqVer&0xFF;
-            if(Rev==0 && Patch==0)
-                Msg="The plugin %s requires version %d.%d of " WHIPPYTERM_NAME;
-            else if(Patch==0)
-                Msg="The plugin %s requires version %d.%d.%d of " WHIPPYTERM_NAME;
-            else
-                Msg="The plugin %s requires version %d.%d.%d%c of " WHIPPYTERM_NAME;
-        }
-        snprintf(buff,sizeof(buff),Msg,Name,Maj,Min,Rev,Patch+'A'-1);
-        UIAsk("Error",buff,e_AskBox_Error);
+        CloseDLL(Plugin);
         return NULL;
     }
 
@@ -458,7 +431,7 @@ static void UnLoadPlugin(struct DLLHandle *DLLHandle)
     for(ExternPlugin=m_ExternPlugins.begin();
             ExternPlugin!=m_ExternPlugins.end();ExternPlugin++)
     {
-        if(ExternPlugin->EPHandle==DLLHandle)
+        if(ExternPlugin->DLLHandle==DLLHandle)
             break;
     }
     if(ExternPlugin==m_ExternPlugins.end())
@@ -472,6 +445,95 @@ static void UnLoadPlugin(struct DLLHandle *DLLHandle)
         m_DLLLoaded.erase(dll);
 
     CloseDLL(DLLHandle);
+
+    ExternPlugin->DLLHandle=NULL;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    CallRegisterExternPluginFn
+ *
+ * SYNOPSIS:
+ *    static bool CallRegisterExternPluginFn(struct DLLHandle *Plugin,
+ *              const char *Name)
+ *
+ * PARAMETERS:
+ *    Plugin [I] -- The DLL handle for this plugin
+ *    Name [I] -- The display name of this plugin (for errors)
+ *
+ * FUNCTION:
+ *    This function calls the register function of a plugin (so it will
+ *    register with the system).
+ *
+ * RETURNS:
+ *    true -- All good
+ *    false -- There was an error, and the user has been told.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static bool CallRegisterExternPluginFn(struct DLLHandle *Plugin,
+        const char *Name)
+{
+    RegisterPluginFnType RegisterPlugin;
+    const char *Msg;
+    char buff[200];
+    unsigned int ReqVer;
+    uint8_t Maj;
+    uint8_t Min;
+    uint8_t Rev;
+    uint8_t Patch;
+
+    /* Find the register function in the plugin */
+    RegisterPlugin=(RegisterPluginFnType)DLL2Function(Plugin,"RegisterPlugin");
+    if(RegisterPlugin==NULL)
+    {
+        /* Not a WhippyTerm plugin as the plugin must have a register plugin
+           function */
+        snprintf(buff,sizeof(buff)-1,"Failed to load plugin.  "
+                "\"%s\" is not a WhipyTerm plugin.",Name);
+        UIAsk("Error",buff,e_AskBox_Error);
+        return false;
+    }
+
+    /* Ok, call the register function */
+    m_ExternPluginHandle=Plugin;
+    ReqVer=RegisterPlugin(&g_PISystemAPI,WHIPPYTERM_VERSION);
+    m_ExternPluginHandle=NULL;
+    if(ReqVer!=0)
+    {
+        /* Tell user what version of WhippyTerm is needed */
+        if(ReqVer==0xFFFFFFFF)
+        {
+            Msg="The plugin %s used the experimental plugin API and is not "
+                    "supported by this version of " WHIPPYTERM_NAME;
+        }
+        else
+        {
+            Maj=(ReqVer>>24)&0xFF;
+            Min=(ReqVer>>16)&0xFF;
+            Rev=(ReqVer>>8)&0xFF;
+            Patch=ReqVer&0xFF;
+            if(Rev==0 && Patch==0)
+            {
+                Msg="The plugin %s requires version %d.%d of " WHIPPYTERM_NAME;
+            }
+            else if(Patch==0)
+            {
+                Msg="The plugin %s requires version %d.%d.%d of "
+                        WHIPPYTERM_NAME;
+            }
+            else
+            {
+                Msg="The plugin %s requires version %d.%d.%d%c of "
+                        WHIPPYTERM_NAME;
+            }
+        }
+        snprintf(buff,sizeof(buff),Msg,Name,Maj,Min,Rev,Patch+'A'-1);
+        UIAsk("Error",buff,e_AskBox_Error);
+        return false;
+    }
+    return true;
 }
 
 /*******************************************************************************
@@ -683,6 +745,19 @@ void SetExternPluginEnabled(int Index,bool Enabled)
     Plugin->Enabled=Enabled;
 
     SavePluginList();
+
+    /* Now add / remove as needed */
+    if(Enabled)
+    {
+        if(!LoadExternPluginDLL(&*Plugin))
+            return;
+        InformOfNewPluginInstalled(&*Plugin);
+    }
+    else
+    {
+        UnLoadPlugin(Plugin->DLLHandle);
+        InformOfPluginUninstalled(&*Plugin);
+    }
 }
 
 /*******************************************************************************
@@ -730,8 +805,8 @@ void UninstallExternPlugin(int Index)
         return;
 
     /* Unload this plugin */
-    if(Plugin->EPHandle!=NULL)
-        UnLoadPlugin((struct DLLHandle *)Plugin->EPHandle);
+    if(Plugin->DLLHandle!=NULL)
+        UnLoadPlugin((struct DLLHandle *)Plugin->DLLHandle);
 
     /* Erase the dll */
     if(!GetAppDataPath(PluginDir))
@@ -847,6 +922,11 @@ bool InstallNewExternPlugin(const char *Filename)
 
     Info.Enabled=true;
 
+    TotalDPPluginsBeforeInstall=DPS_GetDataProcessorPluginCount();
+
+    if(!LoadExternPluginDLL(&Info))
+        return false;
+#if 0
     /* Register this plugin */
     if(!GetAppDataPath(PluginDir))
     {
@@ -877,14 +957,14 @@ bool InstallNewExternPlugin(const char *Filename)
         return false;
     }
 
-    TotalDPPluginsBeforeInstall=DPS_GetDataProcessorPluginCount();
-
-    Info.EPHandle=LoadPlugin(LoadFilename,
+    Info.DLLHandle=LoadPlugin(LoadFilename,
             Info.PluginName.c_str());
-    if(Info.EPHandle!=NULL)
+    if(Info.DLLHandle!=NULL)
         Info.DLLFound=true;
     else
         Info.DLLFound=false;
+
+#endif
 
     /* Add this to the list of plugins */
     m_ExternPlugins.push_back(Info);
@@ -933,8 +1013,76 @@ bool InstallNewExternPlugin(const char *Filename)
         ApplySettings();    // Apply the change
     }
 
-/* DEBUG PAUL: Wrong, shouldn't be passing Info */
     InformOfNewPluginInstalled(&Info);
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    LoadExternPluginDLL
+ *
+ * SYNOPSIS:
+ *    bool LoadExternPluginDLL(struct ExternPluginInfo *Info);
+ *
+ * PARAMETERS:
+ *    Info [I/O] -- The info for this plugin.  We will use this to get the
+ *                  filename, and other needed parts, it will then be updated
+ *                  with the DLL handle and other parts when it is loaded.
+ *
+ * FUNCTION:
+ *    This function loads a plugin from the ExternPluginInfo entry for the
+ *    already installed plugin.
+ *
+ * RETURNS:
+ *    true -- All good
+ *    false -- There was an error.  User has already been informed.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool LoadExternPluginDLL(struct ExternPluginInfo *Info)
+{
+    string PluginDir;
+    string PluginFilename;
+    const char *LoadFilename;
+    char buff[200];
+
+    /* Register this plugin */
+    if(!GetAppDataPath(PluginDir))
+    {
+        UIAsk("Error","Failed to install plugin.\n\n"
+                "App data path unknown.",e_AskBox_Error);
+        return false;
+    }
+
+    PluginDir+=BuildOption_GetPluginPath();
+
+    if(!PathExists(PluginDir.c_str()))
+    {
+        snprintf(buff,sizeof(buff),"Failed to install plugin.\n\n"
+                "\"%s\" missing.",PluginDir.c_str());
+        UIAsk("Error",buff,e_AskBox_Error);
+        return false;
+    }
+    PluginFilename=PluginDir;
+    PluginFilename+="/";
+    PluginFilename+=Info->Filename;
+    LoadFilename=ConvertPath2Native(PluginFilename.c_str());
+    if(LoadFilename==NULL)
+    {
+        snprintf(buff,sizeof(buff)-1,"Failed to install plugin.\n\n"
+                "\"%s\" failed filename + path to long.",
+                Info->Filename.c_str());
+        UIAsk("Error",buff,e_AskBox_Error);
+        return false;
+    }
+
+    Info->DLLHandle=LoadPlugin(LoadFilename,Info->PluginName.c_str());
+    if(Info->DLLHandle!=NULL)
+        Info->DLLFound=true;
+    else
+        Info->DLLFound=false;
 
     return true;
 }

@@ -398,6 +398,16 @@ static void DMP_ToggleEnable(void)
     Index=UIGetListViewSelectedEntry(PluginList);
     if(GetExternPluginInfo(Index,PluginInfo))
     {
+        /* See if it's currently in use */
+        if(PluginInfo.Enabled && IsPluginInUse(&PluginInfo))
+        {
+            UIAsk("Disable plugin","This plugin is currently in use and "
+                    "can not be disabled.\n\nClose any connections that "
+                    "are using this plugin and try again.",
+                    e_AskBox_Error,e_AskBttns_Ok);
+            return;
+        }
+
         PluginInfo.Enabled=!PluginInfo.Enabled;
 
         SetExternPluginEnabled(Index,PluginInfo.Enabled);

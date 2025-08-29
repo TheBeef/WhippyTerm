@@ -240,7 +240,7 @@ bool IsPluginInUse(struct ExternPluginInfo *ExPlugin)
 
     for(Plugin=m_PluginList.begin();Plugin!=m_PluginList.end();Plugin++)
     {
-        if(Plugin->second.ExternPluginHandle==ExPlugin->EPHandle)
+        if(Plugin->second.ExternPluginHandle==ExPlugin->DLLHandle)
         {
             if(Plugin->second.InUseCount>0)
                 return true;
@@ -276,7 +276,7 @@ void InformOfNewPluginInstalled(struct ExternPluginInfo *Info)
 
     for(Plugin=m_PluginList.begin();Plugin!=m_PluginList.end();Plugin++)
     {
-        if(Plugin->second.ExternPluginHandle==Info->EPHandle)
+        if(Plugin->second.ExternPluginHandle==Info->DLLHandle)
         {
             /* Tell all the areas that this plugin has been installed */
             FTPS_InformOfNewPluginInstalled(Plugin->first.c_str());
@@ -311,10 +311,13 @@ void InformOfPluginUninstalled(struct ExternPluginInfo *Info)
 {
     i_PluginList Plugin;
 
+    if(Info->DLLHandle==NULL)
+        return;
+
     Plugin=m_PluginList.begin();
     while(Plugin!=m_PluginList.end())
     {
-        if(Plugin->second.ExternPluginHandle==Info->EPHandle)
+        if(Plugin->second.ExternPluginHandle==Info->DLLHandle)
         {
             /* Because the main window may need to release the resources
                used by the plugin we tell it we are about to uninstall this

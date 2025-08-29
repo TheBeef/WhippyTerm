@@ -59,6 +59,5 @@ void UnNotePluginInUse(const char *IDStr);
 bool IsPluginInUse(struct ExternPluginInfo *ExPlugin);
 void InformOfNewPluginInstalled(struct ExternPluginInfo *Info);
 void InformOfPluginUninstalled(struct ExternPluginInfo *Info);
-//const char *GetPluginIDStrByExternPluginHandle(struct ExternPluginHandle *EPHandle);
 
 #endif   /* end of "#ifndef __PLUGINSYSTEM_H_" */

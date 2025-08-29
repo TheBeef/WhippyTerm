@@ -1757,6 +1757,10 @@ void DPS_PluginSettings_Load(class ConSettings *Settings,const char *IDStr)
  ******************************************************************************/
 void DPS_InformOfNewPluginInstalled(const char *PluginIDStr)
 {
+    /* We apply the settings so that if there are any open connections that
+       had a plugin in listed but it wasn't installed / enabled it will
+       reeval it and enable it */
+    ApplySettings();
 }
 
 /*******************************************************************************

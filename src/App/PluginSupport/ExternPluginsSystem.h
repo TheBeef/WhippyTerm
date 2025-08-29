@@ -78,7 +78,7 @@ struct ExternPluginInfo
     int PluginClass;
     int PluginSubClass;
     bool DLLFound;          // Not stored to disk
-    struct DLLHandle *EPHandle;    // Not stored to disk
+    struct DLLHandle *DLLHandle;    // Not stored to disk
 
     public:
         void Register(class TinyCFG *cfg)

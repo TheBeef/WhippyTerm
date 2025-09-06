@@ -871,13 +871,6 @@ bool InstallNewExternPlugin(const char *Filename)
     struct ExternPluginInfo Info;
     string PluginDir;
     string PluginFilename;
-    const char *LoadFilename;
-    char buff[200];
-    char Verbuff[100];
-    uint8_t Maj;
-    uint8_t Min;
-    uint8_t Rev;
-    uint8_t Patch;
     uint_fast32_t TotalDPPluginsBeforeInstall;
     uint_fast32_t TotalDPPluginsAfterInstall;
     uint_fast32_t NewDPPluginsCount;
@@ -888,29 +881,6 @@ bool InstallNewExternPlugin(const char *Filename)
 
     if(!CheckExternPluginForInstall(Filename))
         return false;
-
-//    if(!LoadInfoAboutExternPlugin(Filename,Info,false))
-//        return false;
-//
-//    if(Info.APIVersion>WHIPPYTERM_VERSION)
-//    {
-//        Maj=(Info.APIVersion>>24)&0xFF;
-//        Min=(Info.APIVersion>>16)&0xFF;
-//        Rev=(Info.APIVersion>>8)&0xFF;
-//        Patch=(Info.APIVersion>>0)&0xFF;
-//        if(Rev==0 && Patch==0)
-//            sprintf(Verbuff,"%d.%d",Maj,Min);
-//        else if(Patch==0)
-//            sprintf(Verbuff,"%d.%d.%d",Maj,Min,Rev);
-//        else
-//            sprintf(Verbuff,",%d.%d.%d%c",Maj,Min,Rev,Patch+'A'-1);
-//
-//        snprintf(buff,sizeof(buff),"Failed to install plugin.\n\n"
-//                "This plugin requires a newer version of WhippyTerm.\n\n"
-//                "Required version: %s",Verbuff);
-//        UIAsk("Error",buff,e_AskBox_Error);
-//        return false;
-//    }
 
     /* Ok do it again, but this time install the files */
     if(!LoadInfoAboutExternPlugin(Filename,Info,true))

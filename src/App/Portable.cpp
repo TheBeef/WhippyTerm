@@ -133,7 +133,6 @@ bool GetAppDataPath(std::string &AppPath)
             return false;
         AppPath+=PORTABLE_SETTINGS_FILESNAME;
         AppPath+=GetOSPathSeparator();
-        return true;
     }
     else
     {
@@ -145,5 +144,6 @@ bool GetAppDataPath(std::string &AppPath)
         return GetOSAppDataPath(AppPath);
 #endif
     }
+    return true;
 }
 

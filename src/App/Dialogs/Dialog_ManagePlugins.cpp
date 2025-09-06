@@ -455,7 +455,6 @@ static void DMP_UninstallPlugin(void)
     struct ExternPluginInfo PluginInfo;
     int Index;
     string Msg;
-    const char *PluginIDStr;
 
     PluginList=UIMP_GetListViewHandle(e_UIMP_ListView_PluginList);
 

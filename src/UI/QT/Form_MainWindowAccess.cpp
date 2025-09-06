@@ -101,8 +101,8 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionImport_Settings;
         case e_UIMWMenu_ExportSettings:
             return (e_UIMenuCtrl *)realwin->ui->actionExport_Settings;
-////        case e_UIMWMenu_NewConnection:
-////            return (e_UIMenuCtrl *)realwin->ui->actionNew_Connection;
+        case e_UIMWMenu_NewConnection:
+            return (e_UIMenuCtrl *)realwin->ui->actionNew_Connection;
         case e_UIMWMenu_Connect:
             return (e_UIMenuCtrl *)realwin->ui->actionConnect_Menu;
         case e_UIMWMenu_Disconnect:

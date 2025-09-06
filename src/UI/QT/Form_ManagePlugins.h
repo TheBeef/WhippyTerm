@@ -30,7 +30,9 @@ private slots:
     void on_buttonBox_accepted();
     
     void on_PluginList_listWidget_currentRowChanged(int currentRow);
-
+    
+    void on_Upgrade_pushButton_clicked();
+    
 private:
     bool DoingEvent;
     bool SendEvent(e_DMPEventType EventType,union DMPEventData *Info,uintptr_t ID);

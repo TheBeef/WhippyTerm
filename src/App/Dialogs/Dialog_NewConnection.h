@@ -45,6 +45,6 @@
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
-void RunNewConnectionDialog(class TheMainWindow *MW);
+void RunNewConnectionDialog(class TheMainWindow *MW,bool NewTab);
 
 #endif   /* end of "#ifndef __DIALOG_COMPORTNEWCONNECTION_H_" */

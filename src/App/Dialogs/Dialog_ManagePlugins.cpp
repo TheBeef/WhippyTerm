@@ -52,6 +52,7 @@ static void DMP_ToggleEnable(void);
 static void DMP_RethinkEnableButton(bool BttnEnabled);
 static void DMP_UninstallPlugin(void);
 static void DMP_BuildPluginList(void);
+static void DMP_UpgradePlugin(void);
 
 /*** VARIABLE DEFINITIONS     ***/
 
@@ -133,6 +134,9 @@ bool DMP_Event(const struct DMPEvent *Event)
                 break;
                 case e_UIMP_Button_Uninstall:
                     DMP_UninstallPlugin();
+                break;
+                case e_UIMP_Button_Upgrade:
+                    DMP_UpgradePlugin();
                 break;
                 case e_UIMP_ButtonMAX:
                 default:
@@ -230,6 +234,7 @@ static void DMP_SelectPlugin(int PluginIndex)
     t_UIMuliLineTextInputCtrl *Description;
     t_UIButtonCtrl *Enable;
     t_UIButtonCtrl *Uninstall;
+    t_UIButtonCtrl *Upgrade;
     char buff[100];
     const char *PluginTypeStr;
     uint8_t VMaj;
@@ -247,6 +252,7 @@ static void DMP_SelectPlugin(int PluginIndex)
 
     Enable=UIMP_GetButtonHandle(e_UIMP_Button_Enable);
     Uninstall=UIMP_GetButtonHandle(e_UIMP_Button_Uninstall);
+    Upgrade=UIMP_GetButtonHandle(e_UIMP_Button_Upgrade);
 
     if(!GetExternPluginInfo(PluginIndex,PluginInfo))
     {
@@ -260,11 +266,13 @@ static void DMP_SelectPlugin(int PluginIndex)
         PluginInfo.Version=0;
         UIEnableButton(Enable,false);
         UIEnableButton(Uninstall,false);
+        UIEnableButton(Upgrade,false);
     }
     else
     {
         UIEnableButton(Enable,true);
         UIEnableButton(Uninstall,true);
+        UIEnableButton(Upgrade,true);
     }
 
     DMP_RethinkEnableButton(PluginInfo.Enabled);
@@ -475,4 +483,41 @@ static void DMP_UninstallPlugin(void)
             DMP_BuildPluginList();
         }
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DMP_UpgradePlugin
+ *
+ * SYNOPSIS:
+ *    static void DMP_UpgradePlugin(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function lets the user select a plugin to upgrade.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void DMP_UpgradePlugin(void)
+{
+    t_UIListViewCtrl *PluginList;
+    int Index;
+
+    PluginList=UIMP_GetListViewHandle(e_UIMP_ListView_PluginList);
+
+    Index=UIGetListViewSelectedEntry(PluginList);
+
+    PromptAndUpgradePlugin(Index);
+
+    /* Rebuild the plugin list (so it refreshs the version numbers) */
+    UIClearListView(PluginList);
+    DMP_BuildPluginList();
+    DMP_SelectPlugin(Index);    // Assume it will have the same index
+    UISetListViewSelectedEntry(PluginList,Index);
 }

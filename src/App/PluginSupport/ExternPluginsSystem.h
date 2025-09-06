@@ -77,8 +77,10 @@ struct ExternPluginInfo
     uint32_t APIVersion;
     int PluginClass;
     int PluginSubClass;
-    bool DLLFound;          // Not stored to disk
-    struct DLLHandle *DLLHandle;    // Not stored to disk
+
+    /* Things that are not stored to disk */
+    bool DLLFound;
+    struct DLLHandle *DLLHandle;
 
     public:
         void Register(class TinyCFG *cfg)
@@ -118,4 +120,6 @@ void PromptAndInstallPlugin(void);
 bool InstallNewExternPlugin(const char *Filename);
 bool GetNewExternPluginInfo(const char *Filename,struct ExternPluginInfo &Info);
 struct DLLHandle *GetCurrentExternPluginHandle(void);
+void PromptAndUpgradePlugin(int Index);
+
 #endif

@@ -72,17 +72,21 @@ static struct ConnectionInfoList *m_DNC_LastOptions;
 static bool m_IgnoreConnectionListChange;
 static t_DNCConOptions m_DNC_ConOptions;
 static bool m_NameChanged;
+static bool m_OpenNewTab;
 
 /*******************************************************************************
  * NAME:
  *    RunNewConnectionDialog
  *
  * SYNOPSIS:
- *    void RunNewConnectionDialog(class TheMainWindow *MW);
+ *    void RunNewConnectionDialog(class TheMainWindow *MW,bool NewTab);
  *
  * PARAMETERS:
  *    MW [I] -- The main window to take info about (the main window that
  *              was active when the command was run)
+ *    NewTab [I] -- If this is true then we always open a new tab, else take
+ *                  over the active tab in this main window (or open a new
+ *                  tab if there is no active tab).
  *
  * FUNCTION:
  *    This function shows the new connection dialog and fill in all the
@@ -98,7 +102,7 @@ static bool m_NameChanged;
  *    Paul Hutchinson (27 Sep 2018)
  *       Created
  ******************************************************************************/
-void RunNewConnectionDialog(class TheMainWindow *MW)
+void RunNewConnectionDialog(class TheMainWindow *MW,bool NewTab)
 {
     bool AllocatedUI;
 
@@ -108,6 +112,7 @@ void RunNewConnectionDialog(class TheMainWindow *MW)
     m_DNC_CurrentOptions=NULL;
     m_DNC_LastOptions=NULL;
     m_NameChanged=false;
+    m_OpenNewTab=NewTab;
     try
     {
         m_DNC_ConOptions.clear();
@@ -636,10 +641,25 @@ static void DNC_OpenConnection(class TheMainWindow *MW)
         if(!IOS_MakeURIFromDetectedCon(Selected,*SelectedConOptions,URI))
             throw("Failed to make a URI for this connection");
 
-        NewConnection=MW->AllocNewTab(ConnectionName.c_str(),NULL,URI.c_str(),
-                SelectedConOptions);
-        if(NewConnection==nullptr)
-            throw(nullptr);    // We have already prompted
+        if(m_OpenNewTab)
+        {
+            NewConnection=MW->AllocNewTab(ConnectionName.c_str(),NULL,
+                    URI.c_str(),SelectedConOptions);
+            if(NewConnection==nullptr)
+                throw(nullptr);    // We have already prompted
+        }
+        else
+        {
+            /* Reuse the current tab */
+            NewConnection=MW->ReloadTabFromURI(ConnectionName.c_str(),NULL,
+                    URI.c_str());
+            if(NewConnection==NULL)
+            {
+                UIAsk("Error","Failed to open new connection",
+                        e_AskBox_Error,e_AskBttns_Ok);
+                throw(nullptr);
+            }
+        }
 
         if(DNCOptions!=m_DNC_ConOptions.end())
         {
@@ -650,12 +670,6 @@ static void DNC_OpenConnection(class TheMainWindow *MW)
             }
             NewConnection->SetDisplayName(DNCOptions->second.Name);
         }
-
-//        NewConnection->TextCanvasResize(MW->GetTextCanvasWidth(),
-//                MW->GetTextCanvasHeight());
-//
-//        /* Make this new connection the active one */
-//        MW->SetActiveTab(NewConnection);
     }
     catch(const char *Error)
     {

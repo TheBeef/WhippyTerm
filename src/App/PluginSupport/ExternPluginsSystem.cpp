@@ -92,6 +92,7 @@ static bool LoadInfoAboutExternPlugin(const char *Filename,
 static bool CallRegisterExternPluginFn(struct DLLHandle *Plugin,
         const char *Name);
 static bool LoadExternPluginDLL(struct ExternPluginInfo *Info);
+static bool CheckExternPluginForInstall(const char *Filename);
 
 /*** VARIABLE DEFINITIONS     ***/
 t_DLLLoadedListType m_DLLLoaded;
@@ -784,7 +785,7 @@ void SetExternPluginEnabled(int Index,bool Enabled)
  *    You need to restart for the uninstall to take effect.
  *
  * SEE ALSO:
- *    
+ *    PromptAndUpgradePlugin(), PromptAndInstallPlugin()
  ******************************************************************************/
 void UninstallExternPlugin(int Index)
 {
@@ -885,28 +886,31 @@ bool InstallNewExternPlugin(const char *Filename)
     struct DPS_ProInfo *QuickPro;
     t_StringListType *AddTo;
 
-    if(!LoadInfoAboutExternPlugin(Filename,Info,false))
+    if(!CheckExternPluginForInstall(Filename))
         return false;
 
-    if(Info.APIVersion>WHIPPYTERM_VERSION)
-    {
-        Maj=(Info.APIVersion>>24)&0xFF;
-        Min=(Info.APIVersion>>16)&0xFF;
-        Rev=(Info.APIVersion>>8)&0xFF;
-        Patch=(Info.APIVersion>>0)&0xFF;
-        if(Rev==0 && Patch==0)
-            sprintf(Verbuff,"%d.%d",Maj,Min);
-        else if(Patch==0)
-            sprintf(Verbuff,"%d.%d.%d",Maj,Min,Rev);
-        else
-            sprintf(Verbuff,",%d.%d.%d%c",Maj,Min,Rev,Patch+'A'-1);
-
-        snprintf(buff,sizeof(buff),"Failed to install plugin.\n\n"
-                "This plugin requires a newer version of WhippyTerm.\n\n"
-                "Required version: %s",Verbuff);
-        UIAsk("Error",buff,e_AskBox_Error);
-        return false;
-    }
+//    if(!LoadInfoAboutExternPlugin(Filename,Info,false))
+//        return false;
+//
+//    if(Info.APIVersion>WHIPPYTERM_VERSION)
+//    {
+//        Maj=(Info.APIVersion>>24)&0xFF;
+//        Min=(Info.APIVersion>>16)&0xFF;
+//        Rev=(Info.APIVersion>>8)&0xFF;
+//        Patch=(Info.APIVersion>>0)&0xFF;
+//        if(Rev==0 && Patch==0)
+//            sprintf(Verbuff,"%d.%d",Maj,Min);
+//        else if(Patch==0)
+//            sprintf(Verbuff,"%d.%d.%d",Maj,Min,Rev);
+//        else
+//            sprintf(Verbuff,",%d.%d.%d%c",Maj,Min,Rev,Patch+'A'-1);
+//
+//        snprintf(buff,sizeof(buff),"Failed to install plugin.\n\n"
+//                "This plugin requires a newer version of WhippyTerm.\n\n"
+//                "Required version: %s",Verbuff);
+//        UIAsk("Error",buff,e_AskBox_Error);
+//        return false;
+//    }
 
     /* Ok do it again, but this time install the files */
     if(!LoadInfoAboutExternPlugin(Filename,Info,true))
@@ -1014,6 +1018,63 @@ bool InstallNewExternPlugin(const char *Filename)
     }
 
     InformOfNewPluginInstalled(&Info);
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    CheckExternPluginForInstall
+ *
+ * SYNOPSIS:
+ *    bool CheckExternPluginForInstall(const char *Filename);
+ *
+ * PARAMETERS:
+ *    Filename [I] -- The filename of the .wtp file
+ *
+ * FUNCTION:
+ *    This function runs the checks on a plugin file to make sure it's going
+ *    to work with this version of WhippyTerm (well it checks the meta data).
+ *
+ * RETURNS:
+ *    true -- This file looks like it's going to work
+ *    false -- This file isn't going to work with this version of WhippyTerm
+ *
+ * SEE ALSO:
+ *    InstallNewExternPlugin()
+ ******************************************************************************/
+bool CheckExternPluginForInstall(const char *Filename)
+{
+    struct ExternPluginInfo Info;
+    char buff[200];
+    char Verbuff[100];
+    uint8_t Maj;
+    uint8_t Min;
+    uint8_t Rev;
+    uint8_t Patch;
+
+    if(!LoadInfoAboutExternPlugin(Filename,Info,false))
+        return false;
+
+    if(Info.APIVersion>WHIPPYTERM_VERSION)
+    {
+        Maj=(Info.APIVersion>>24)&0xFF;
+        Min=(Info.APIVersion>>16)&0xFF;
+        Rev=(Info.APIVersion>>8)&0xFF;
+        Patch=(Info.APIVersion>>0)&0xFF;
+        if(Rev==0 && Patch==0)
+            sprintf(Verbuff,"%d.%d",Maj,Min);
+        else if(Patch==0)
+            sprintf(Verbuff,"%d.%d.%d",Maj,Min,Rev);
+        else
+            sprintf(Verbuff,",%d.%d.%d%c",Maj,Min,Rev,Patch+'A'-1);
+
+        snprintf(buff,sizeof(buff),"Failed to install plugin.\n\n"
+                "This plugin requires a newer version of WhippyTerm.\n\n"
+                "Required version: %s",Verbuff);
+        UIAsk("Error",buff,e_AskBox_Error);
+        return false;
+    }
 
     return true;
 }
@@ -1207,65 +1268,77 @@ static bool LoadInfoAboutExternPlugin(const char *Filename,
                 PluginFile.Read(&Tmp32,sizeof(Tmp32));
                 Info.PluginSubClass=Tmp32;
             }
-            else if(strcmp(ChunkID,"LIN6")==0 && RunningOS()==e_OS_Linux &&
-                    InstallDLL)
+            else if(strcmp(ChunkID,"LIN6")==0 && RunningOS()==e_OS_Linux)
             {
                 /* Linux 64 bit */
                 if(InstallFilename=="")
                     throw("Error in plugin file (chunk order)");
                 InstallFilename+=".so";
                 Info.Filename=InstallFilename;
-                ExternPluginInstallDLL(PluginFile,InstallFilename.c_str(),
-                        ChunkLen);
-                Info.DLLFound=true;
+                if(InstallDLL)
+                {
+                    ExternPluginInstallDLL(PluginFile,InstallFilename.c_str(),
+                            ChunkLen);
+                    Info.DLLFound=true;
+                }
             }
-            else if(strcmp(ChunkID,"WIN6")==0 && RunningOS()==e_OS_Windows &&
-                    InstallDLL)
+            else if(strcmp(ChunkID,"WIN6")==0 && RunningOS()==e_OS_Windows)
             {
                 /* Windows 64 bit */
                 if(InstallFilename=="")
                     throw("Error in plugin file (chunk order)");
                 InstallFilename+=".dll";
                 Info.Filename=InstallFilename;
-                ExternPluginInstallDLL(PluginFile,InstallFilename.c_str(),
-                        ChunkLen);
-                Info.DLLFound=true;
+                if(InstallDLL)
+                {
+                    ExternPluginInstallDLL(PluginFile,InstallFilename.c_str(),
+                            ChunkLen);
+                    Info.DLLFound=true;
+                }
             }
-            else if(strcmp(ChunkID,"MACS")==0 && RunningOS()==e_OS_MacOSX &&
-                    InstallDLL)
+            else if(strcmp(ChunkID,"MACS")==0 && RunningOS()==e_OS_MacOSX)
             {
                 /* Mac OS */
                 if(InstallFilename=="")
                     throw("Error in plugin file (chunk order)");
                 InstallFilename+=".so";
                 Info.Filename=InstallFilename;
-                ExternPluginInstallDLL(PluginFile,InstallFilename.c_str(),
-                        ChunkLen);
-                Info.DLLFound=true;
+                if(InstallDLL)
+                {
+                    ExternPluginInstallDLL(PluginFile,InstallFilename.c_str(),
+                            ChunkLen);
+                    Info.DLLFound=true;
+                }
             }
             else if(strcmp(ChunkID,"RPI3")==0 && RunningOS()==e_OS_RaspberryPI
-                    && RunningExeBits()==32 && InstallDLL)
+                    && RunningExeBits()==32)
             {
                 /* Raspberry PI 32 bit */
                 if(InstallFilename=="")
                     throw("Error in plugin file (chunk order)");
                 InstallFilename+=".so";
                 Info.Filename=InstallFilename;
-                ExternPluginInstallDLL(PluginFile,InstallFilename.c_str(),
-                        ChunkLen);
-                Info.DLLFound=true;
+                if(InstallDLL)
+                {
+                    ExternPluginInstallDLL(PluginFile,InstallFilename.c_str(),
+                            ChunkLen);
+                    Info.DLLFound=true;
+                }
             }
             else if(strcmp(ChunkID,"RPI6")==0 && RunningOS()==e_OS_RaspberryPI
-                    && RunningExeBits()==64 && InstallDLL)
+                    && RunningExeBits()==64)
             {
                 /* Raspberry PI 64 bit */
                 if(InstallFilename=="")
                     throw("Error in plugin file (chunk order)");
                 InstallFilename+=".so";
                 Info.Filename=InstallFilename;
-                ExternPluginInstallDLL(PluginFile,InstallFilename.c_str(),
-                        ChunkLen);
-                Info.DLLFound=true;
+                if(InstallDLL)
+                {
+                    ExternPluginInstallDLL(PluginFile,InstallFilename.c_str(),
+                            ChunkLen);
+                    Info.DLLFound=true;
+                }
             }
         }
         PluginFile.Close();
@@ -1461,7 +1534,7 @@ static void ExternPluginInstallDLL(class RIFF &PluginFile,
  *    NONE
  *
  * SEE ALSO:
- *    RunInstallPluginDialog()
+ *    RunInstallPluginDialog(), UninstallExternPlugin()
  ******************************************************************************/
 void PromptAndInstallPlugin(void)
 {
@@ -1477,7 +1550,6 @@ void PromptAndInstallPlugin(void)
         RunInstallPluginDialog(PathFilename.c_str());
     }
 }
-
 
 /*******************************************************************************
  * NAME:
@@ -1507,3 +1579,71 @@ struct DLLHandle *GetCurrentExternPluginHandle(void)
     return m_ExternPluginHandle;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PromptAndUpgradePlugin
+ *
+ * SYNOPSIS:
+ *    void PromptAndUpgradePlugin(int Index);
+ *
+ * PARAMETERS:
+ *    Index [I] -- The index of the plugin to upgrade.
+ *
+ * FUNCTION:
+ *    This function prompts the user to select a plugin upgrade file (the
+ *    normal install file) and then starts the upgrade.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    UninstallExternPlugin()
+ ******************************************************************************/
+void PromptAndUpgradePlugin(int Index)
+{
+    std::string Path;
+    std::string Filename;
+    std::string PathFilename;
+    struct ExternPluginInfo CurrentPluginInfo;
+    struct ExternPluginInfo NewPluginInfo;
+
+    if(!GetExternPluginInfo(Index,CurrentPluginInfo))
+        return; // Shouldn't happen
+
+    if(UI_LoadFileReq("Upgrade Plugin",Path,Filename,
+            "WhippyTerm Plugins|*.wtp\n"
+            "All Files|*",0))
+    {
+        PathFilename=UI_ConcatFile2Path(Path,Filename);
+        if(!GetNewExternPluginInfo(PathFilename.c_str(),NewPluginInfo))
+        {
+            UIAsk("Error","Failed to get info about this upgrade plugin file",
+                    e_AskBox_Error,e_AskBttns_Ok);
+            return;
+        }
+        /* Check that the filename's are the same (it's the only way we have
+           to know if they have selected the same plugin type) */
+        if(NewPluginInfo.Filename!=CurrentPluginInfo.Filename)
+        {
+            UIAsk("Error","Plugin file does not match the installed plugin "
+                    "type.\n\nIf you wish to force the upgrade, uninstall the "
+                    " current plugin and then reinstall using this plugin file.",
+                    e_AskBox_Error,e_AskBttns_Ok);
+            return;
+        }
+
+        /* Ok, run the install checks for a new plugin */
+        if(!CheckExternPluginForInstall(PathFilename.c_str()))
+            return; // Already been prompted
+
+        /* Ok, uninstall the plugin then reinstall it */
+        UninstallExternPlugin(Index);
+        if(!InstallNewExternPlugin(PathFilename.c_str()))
+        {
+            UIAsk("Error","There was an error upgrading the plugin.  It has "
+                    "been remove and will need to be reinstalled manually",
+                    e_AskBox_Error,e_AskBttns_Ok);
+            return;
+        }
+    }
+}

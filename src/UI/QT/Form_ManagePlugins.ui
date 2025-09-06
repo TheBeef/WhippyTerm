@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>659</width>
-    <height>396</height>
+    <width>654</width>
+    <height>495</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -72,6 +72,13 @@
           <widget class="QPushButton" name="Install_pushButton">
            <property name="text">
             <string>Install...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="Upgrade_pushButton">
+           <property name="text">
+            <string>Upgrade...</string>
            </property>
           </widget>
          </item>
@@ -179,7 +186,11 @@
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QLineEdit" name="Version_lineEdit"/>
+             <widget class="QLineEdit" name="Version_lineEdit">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>

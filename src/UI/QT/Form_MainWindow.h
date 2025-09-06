@@ -434,6 +434,8 @@ private slots:
     
     void on_actionCalculate_CRC_triggered();
     
+    void on_actionNew_Connection_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

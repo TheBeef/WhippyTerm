@@ -70,6 +70,8 @@ t_UIButtonCtrl *UIMP_GetButtonHandle(e_UIMP_Button UIObj)
             return (t_UIButtonCtrl *)g_ManagePluginsDialog->ui->Install_pushButton;
         case e_UIMP_Button_Uninstall:
             return (t_UIButtonCtrl *)g_ManagePluginsDialog->ui->Uninstall_pushButton;
+        case e_UIMP_Button_Upgrade:
+            return (t_UIButtonCtrl *)g_ManagePluginsDialog->ui->Upgrade_pushButton;
 
         case e_UIMP_ButtonMAX:
         default:

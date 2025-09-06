@@ -44,6 +44,7 @@ typedef enum
     e_Cmd_NOP,
     e_Cmd_NewTab,
     e_Cmd_NewTabFromURI,
+    e_Cmd_NewConnection,
     e_Cmd_ResetTerm,
     e_Cmd_InsertHorizontalRule,
     e_Cmd_ClearScreen,

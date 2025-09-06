@@ -99,6 +99,9 @@
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
+            <property name="toolTip">
+             <string>New Tab</string>
+            </property>
             <property name="text">
              <string>New Tab</string>
             </property>
@@ -121,6 +124,9 @@
            <widget class="QToolButton" name="ConnectToggle_toolButton">
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="toolTip">
+             <string>Connect / Disconnect</string>
             </property>
             <property name="text">
              <string>Connect / Disconnect</string>
@@ -162,6 +168,9 @@
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
+            <property name="toolTip">
+             <string>Copy to clipboard</string>
+            </property>
             <property name="text">
              <string>Copy</string>
             </property>
@@ -184,6 +193,9 @@
            <widget class="QToolButton" name="Paste_toolButton">
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="toolTip">
+             <string>Paste from clipboard</string>
             </property>
             <property name="text">
              <string>Paste</string>
@@ -221,6 +233,9 @@
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
+            <property name="toolTip">
+             <string>Apply bold styling</string>
+            </property>
             <property name="text">
              <string>Bold</string>
             </property>
@@ -246,6 +261,9 @@
            <widget class="QToolButton" name="StyleItalics_toolButton">
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="toolTip">
+             <string>Apply italic styling</string>
             </property>
             <property name="text">
              <string>Italics</string>
@@ -273,6 +291,9 @@
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
+            <property name="toolTip">
+             <string>Apply underline styling</string>
+            </property>
             <property name="text">
              <string>Underline</string>
             </property>
@@ -299,6 +320,9 @@
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
+            <property name="toolTip">
+             <string>Apply strikethrough styling</string>
+            </property>
             <property name="text">
              <string>Strike Through</string>
             </property>
@@ -324,6 +348,9 @@
            <widget class="QToolButton" name="StyleColor_toolButton">
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="toolTip">
+             <string>Apply text coloring</string>
             </property>
             <property name="text">
              <string>Highlight</string>
@@ -363,6 +390,9 @@
            <widget class="QToolButton" name="Clear_Screen_toolButton">
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="toolTip">
+             <string>Clear screen</string>
             </property>
             <property name="text">
              <string>Clear Screen</string>
@@ -2184,6 +2214,8 @@
     <property name="title">
      <string>C&amp;onnection</string>
     </property>
+    <addaction name="actionNew_Connection"/>
+    <addaction name="separator"/>
     <addaction name="actionConnect_Menu"/>
     <addaction name="actionDisconnect_Menu"/>
     <addaction name="actionAuto_Reconnect"/>
@@ -2723,7 +2755,7 @@
      <normaloff>:/G/Graphics/tab_add.png</normaloff>:/G/Graphics/tab_add.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;New Connection Tab...</string>
+    <string>&amp;New Tab...</string>
    </property>
    <property name="toolTip">
     <string>New Tab</string>
@@ -3207,7 +3239,7 @@
   </action>
   <action name="actionNew_Tab_From_URI">
    <property name="text">
-    <string>New Connection Tab From URI...</string>
+    <string>New Tab From URI...</string>
    </property>
   </action>
   <action name="actionDefault_Settings">
@@ -3711,6 +3743,11 @@
   <action name="actionCalculate_CRC">
    <property name="text">
     <string>Calculate CRC...</string>
+   </property>
+  </action>
+  <action name="actionNew_Connection">
+   <property name="text">
+    <string>New Connection...</string>
    </property>
   </action>
  </widget>

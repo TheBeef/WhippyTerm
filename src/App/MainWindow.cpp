@@ -837,10 +837,12 @@ void TheMainWindow::GetSizeAndPos(int &x,int &y,int &Width,int &Height)
  *    TheMainWindow::NewConnection
  *
  * SYNOPSIS:
- *    void TheMainWindow::NewConnection(void);
+ *    void TheMainWindow::NewConnection(bool MakeNewTab);
  *
  * PARAMETERS:
- *    NONE
+ *    MakeNewTab [I] -- If this is true then we open a new tab, if it's false
+ *                      then we reuse the active tab (or open a new tab if
+ *                      there isn't one).
  *
  * FUNCTION:
  *    This function opens a new tab (connection)
@@ -851,9 +853,9 @@ void TheMainWindow::GetSizeAndPos(int &x,int &y,int &Width,int &Height)
  * SEE ALSO:
  *
  ******************************************************************************/
-void TheMainWindow::NewConnection(void)
+void TheMainWindow::NewConnection(bool MakeNewTab)
 {
-    RunNewConnectionDialog(this);
+    RunNewConnectionDialog(this,MakeNewTab);
 }
 
 /*******************************************************************************
@@ -4771,6 +4773,9 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_NewTab -- Open a new connection.
  *                  e_Cmd_NewTabFromURI -- Request a URI and then open a new
  *                                         connection.
+ *                  e_Cmd_NewConnection -- Take over the current connection with
+ *                                         a new connector (or open a new
+ *                                         tab if there are no open tabs)
  *                  e_Cmd_ResetTerm -- Resets the term
  *                  e_Cmd_InsertHorizontalRule -- A horizontal rule replaces
  *                          the current line.  Cursor is moved to the next line.
@@ -4872,10 +4877,13 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
             /* Does nothing */
         break;
         case e_Cmd_NewTab:
-            NewConnection();
+            NewConnection(true);
         break;
         case e_Cmd_NewTabFromURI:
             RunNewConnectionFromURIDialog(this,NULL);
+        break;
+        case e_Cmd_NewConnection:
+            NewConnection(false);
         break;
         case e_Cmd_ResetTerm:
             ResetTerm();

@@ -51,6 +51,7 @@ enum e_UIMP_Button
     e_UIMP_Button_Enable,
     e_UIMP_Button_Install,
     e_UIMP_Button_Uninstall,
+    e_UIMP_Button_Upgrade,
     e_UIMP_ButtonMAX
 };
 

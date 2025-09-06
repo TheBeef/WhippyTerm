@@ -1946,3 +1946,9 @@ void Form_MainWindow::on_actionCalculate_CRC_triggered()
     DoMenuTriggered(e_UIMWMenu_CalcCRC);
 }
 
+
+void Form_MainWindow::on_actionNew_Connection_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_NewConnection);
+}
+

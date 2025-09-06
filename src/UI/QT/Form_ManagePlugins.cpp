@@ -117,3 +117,12 @@ void Form_ManagePlugins::on_PluginList_listWidget_currentRowChanged(int currentR
     SendEvent(e_DMPEvent_ListViewChange,&EventData,ID);
 }
 
+
+void Form_ManagePlugins::on_Upgrade_pushButton_clicked()
+{
+    union DMPEventData EventData;
+
+    EventData.Bttn.InputID=e_UIMP_Button_Upgrade;
+    SendEvent(e_DMPEvent_BttnTriggered,&EventData);
+}
+

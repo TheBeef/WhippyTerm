@@ -167,6 +167,8 @@ void MWConnectionOptions::ApplyConnectionOptions(class Connection *ApplyCon)
         UIAsk("Error","There was an error applying connection options",
                 e_AskBox_Error,e_AskBttns_Ok);
     }
+
+    MW->HandlePanelAutoCloseLeft();
 }
 
 /*******************************************************************************

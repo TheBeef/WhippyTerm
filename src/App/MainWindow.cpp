@@ -4519,6 +4519,128 @@ void TheMainWindow::DoCalcCRCFromSelection(void)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::HandlePanelAutoClose
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::HandlePanelAutoClose(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function handles the auto closing of the panels.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::HandlePanelAutoClose(void)
+{
+    HandlePanelAutoCloseLeft();
+    HandlePanelAutoCloseRight();
+    HandlePanelAutoCloseBottom();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::HandlePanelAutoCloseLeft
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::HandlePanelAutoCloseLeft(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function handles the auto closing of the right panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::HandlePanelAutoCloseLeft(void)
+{
+    if(g_Settings.LeftPanelAutoHide)
+    {
+        UIMW_SetLeftPanel(UIWin,g_Session.LeftPanelSize,false);
+        g_Session.LeftPanelOpen=false;
+
+        /* Give the connection focus */
+        if(ActiveCon!=NULL)
+            ActiveCon->GiveFocus();
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::HandlePanelAutoCloseRight
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::HandlePanelAutoCloseRight(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function handles the auto closing of the right panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::HandlePanelAutoCloseRight(void)
+{
+    if(g_Settings.RightPanelAutoHide)
+    {
+        UIMW_SetRightPanel(UIWin,g_Session.RightPanelSize,false);
+        g_Session.RightPanelOpen=false;
+
+        /* Give the connection focus */
+        if(ActiveCon!=NULL)
+            ActiveCon->GiveFocus();
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::HandlePanelAutoCloseBottom
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::HandlePanelAutoCloseBottom(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function handles the auto closing of the bottom panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::HandlePanelAutoCloseBottom(void)
+{
+    if(g_Settings.BottomPanelAutoHide)
+    {
+        UIMW_SetBottomPanel(UIWin,g_Session.BottomPanelSize,false);
+        g_Session.BottomPanelOpen=false;
+
+        /* Give the connection focus */
+        if(ActiveCon!=NULL)
+            ActiveCon->GiveFocus();
+    }
+}
+
+/*******************************************************************************
+ * NAME:
  *    MW_Event
  *
  * SYNOPSIS:
@@ -5072,42 +5194,55 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_SendBuffer_Send1:
             SendBuffersPanel.SendBuffer(0);
+            HandlePanelAutoCloseBottom();
         break;
         case e_Cmd_SendBuffer_Send2:
             SendBuffersPanel.SendBuffer(1);
+            HandlePanelAutoCloseBottom();
         break;
         case e_Cmd_SendBuffer_Send3:
             SendBuffersPanel.SendBuffer(2);
+            HandlePanelAutoCloseBottom();
         break;
         case e_Cmd_SendBuffer_Send4:
             SendBuffersPanel.SendBuffer(3);
+            HandlePanelAutoCloseBottom();
         break;
         case e_Cmd_SendBuffer_Send5:
             SendBuffersPanel.SendBuffer(4);
+            HandlePanelAutoCloseBottom();
         break;
         case e_Cmd_SendBuffer_Send6:
             SendBuffersPanel.SendBuffer(5);
+            HandlePanelAutoCloseBottom();
         break;
         case e_Cmd_SendBuffer_Send7:
             SendBuffersPanel.SendBuffer(6);
+            HandlePanelAutoCloseBottom();
         break;
         case e_Cmd_SendBuffer_Send8:
             SendBuffersPanel.SendBuffer(7);
+            HandlePanelAutoCloseBottom();
         break;
         case e_Cmd_SendBuffer_Send9:
             SendBuffersPanel.SendBuffer(8);
+            HandlePanelAutoCloseBottom();
         break;
         case e_Cmd_SendBuffer_Send10:
             SendBuffersPanel.SendBuffer(9);
+            HandlePanelAutoCloseBottom();
         break;
         case e_Cmd_SendBuffer_Send11:
             SendBuffersPanel.SendBuffer(10);
+            HandlePanelAutoCloseBottom();
         break;
         case e_Cmd_SendBuffer_Send12:
             SendBuffersPanel.SendBuffer(11);
+            HandlePanelAutoCloseBottom();
         break;
         case e_Cmd_SendBuffer_SendSelectedBuffer:
             SendBuffersPanel.SendCurrentBuffer();
+            HandlePanelAutoCloseBottom();
         break;
         case e_Cmd_SendBuffer_ClearAllBuffers:
             if(UIAsk("Clear all send buffers",

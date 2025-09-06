@@ -568,6 +568,10 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
             RethinkCursor();
         break;
         case e_TextDisplayEvent_MouseDown:
+            Info.Mouse.x=Event->Info.Mouse.x;
+            Info.Mouse.y=Event->Info.Mouse.y;
+            SendEvent(e_DBEvent_LeftMousePress,&Info);
+
             HandleLeftMousePress(true,Event->Info.Mouse.x,
                     Event->Info.Mouse.y);
         break;

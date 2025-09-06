@@ -245,6 +245,10 @@ void MWCapture::Start(void)
         ErrorStr+="\"";
         UIAsk("Error",ErrorStr.c_str(),e_AskBox_Error);
     }
+    else
+    {
+        MW->HandlePanelAutoCloseLeft();
+    }
     RethinkUI();
 }
 

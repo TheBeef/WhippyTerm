@@ -112,6 +112,10 @@ void Debug6(void);
         void HandleGoURIToolBttnEnabled(void);
         void InformOfSendBufferChange(int BufferIndex);
         void ToolbarMenuSelected(e_UIMWToolbarMenuType InputID);
+        void HandlePanelAutoClose(void);
+        void HandlePanelAutoCloseLeft(void);
+        void HandlePanelAutoCloseRight(void);
+        void HandlePanelAutoCloseBottom(void);
 
         /* Panel handlers */
         class MWConnectionOptions ConnectionOptionsPanel;

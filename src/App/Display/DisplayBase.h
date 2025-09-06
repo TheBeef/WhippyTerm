@@ -48,6 +48,7 @@
 typedef enum
 {
     e_DBEvent_MouseMiddlePress,
+    e_DBEvent_LeftMousePress,
     e_DBEvent_KeyEvent,
     e_DBEvent_SelectionChanged,
     e_DBEvent_SendBlockData,

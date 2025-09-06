@@ -271,6 +271,8 @@ void MWStopWatch::StartTimer(void)
 
     UpdateUIForStartStop(true);
 
+    MW->HandlePanelAutoCloseRight();
+
     if(g_Settings.StopWatchShowPanel)
         MW->ShowPanel(e_MWPanels_StopWatch);
 }
@@ -333,6 +335,9 @@ void MWStopWatch::ResetTimer(void)
     MW->ActiveCon->StopWatchReset();
 
     UpdateDisplayedTime();
+
+    if(MW->ActiveCon->GetStopWatchRunning())
+        MW->HandlePanelAutoCloseRight();
 
     if(g_Settings.StopWatchShowPanel)
         MW->ShowPanel(e_MWPanels_StopWatch);

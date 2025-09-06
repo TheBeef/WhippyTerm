@@ -2871,6 +2871,9 @@ bool Connection::ProcessDisplayEvent(const struct DBEvent *Event)
         case e_DBEvent_MouseMiddlePress:
             HandleMiddleMousePress(Event->Info->Mouse.x,Event->Info->Mouse.y);
         break;
+        case e_DBEvent_LeftMousePress:
+            MW->HandlePanelAutoClose();
+        break;
         case e_DBEvent_MouseMouseWheel:
             if(Event->Info->MouseWheel.Mods&KEYMOD_CONTROL)
                 HandleMouseWheelZoom(Event->Info->MouseWheel.Steps);

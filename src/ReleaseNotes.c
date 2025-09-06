@@ -31,6 +31,22 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_BUG_FIX,"Auto hide of panels made to work",
+            "The auto hide of panels was not implemented.  You could turn on"
+            " the option but it didn't do anything.  Now when enabled clicking"
+            " on the max text area or pressing select buttons in the panels"
+            " will auto hide the panel and give focus to the text area."},
+    {
+        NOTETYPE_ENHANCEMENT,"A restart is no longer needed to uninstall a plugin",
+            "The plugin system was made more dynamic so you can"
+            " install / uninstall plugins without restarting WhippyTerm."
+            " This also effects enable/disable plugin."},
+    {
+        NOTETYPE_ENHANCEMENT,"Added upgrade plugin",
+            "The only way to upgrade a plugin was to uninstall it and"
+            " then reinstall it.  A new button was added to the manage plugins"
+            " dialog so the user can upgrade an installed plugin."},
+    {
         NOTETYPE_ENHANCEMENT,"Added a calculate CRC dialog",
             "A new calculate CRC dialog has been added.  This will let the"
             " user input some hex data and calculate the CRC (for a selection)"

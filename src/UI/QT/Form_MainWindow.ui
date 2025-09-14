@@ -2105,6 +2105,8 @@
      <string>&amp;Help</string>
     </property>
     <addaction name="actionAbout_Whippy_Term"/>
+    <addaction name="separator"/>
+    <addaction name="actionCommand_Line_Options"/>
    </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="title">
@@ -2356,7 +2358,7 @@
      <normaloff>:/G/Graphics/help.png</normaloff>:/G/Graphics/help.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;About WhippyTerm</string>
+    <string>&amp;About WhippyTerm...</string>
    </property>
    <property name="iconText">
     <string>About WhippyTerm</string>
@@ -3748,6 +3750,11 @@
   <action name="actionNew_Connection">
    <property name="text">
     <string>New Connection...</string>
+   </property>
+  </action>
+  <action name="actionCommand_Line_Options">
+   <property name="text">
+    <string>Command Line Options...</string>
    </property>
   </action>
  </widget>

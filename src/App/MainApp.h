@@ -17,6 +17,8 @@
 
 /***  HEADER FILES TO INCLUDE          ***/
 #include "Version.h"
+#include <list>
+#include <string>
 
 /***  DEFINES                          ***/
 #define WHIPPYTERM_NAME                 "WhippyTerm"
@@ -30,10 +32,16 @@
 /***  MACROS                           ***/
 
 /***  TYPE DEFINITIONS                 ***/
+typedef std::list<std::string> t_CLIArgList;
+typedef t_CLIArgList::iterator i_CLIArgList;
 
 /***  CLASS DEFINITIONS                ***/
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
+extern bool g_CLI_URIOpened;
+extern bool g_CLI_BookmarksOpened;
+extern t_CLIArgList g_CLI_URIList;
+extern t_CLIArgList g_CLI_BookmarkList;
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
 bool AppMain(int argc,char *argv[]);

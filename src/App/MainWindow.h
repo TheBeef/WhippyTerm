@@ -92,7 +92,7 @@ void Debug6(void);
         void ShowConnectionOptions(void);
         void ShowTransmitDelayDialog(void);
         void BookmarkCurrentTab(void);
-        void GotoBookmark(uintptr_t ID);
+        void GotoBookmark(uintptr_t ID,bool ForceNewTab=false);
         bool IsThisYourUIWindow(t_UIMainWindow *GUIWin);
         void RebuildBookmarkMenu(void);
         void ShowPanel(e_MWPanelsType PanelID);

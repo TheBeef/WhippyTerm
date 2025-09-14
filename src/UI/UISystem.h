@@ -56,5 +56,4 @@ void UnLockMutex(t_UIMutex *Mut);
 uint64_t GetMSCounter(void);
 void UI_GotoWebPage(const char *WebSite);
 int caseinsensitivestrcmp(const char *a,const char *b);
-
 #endif

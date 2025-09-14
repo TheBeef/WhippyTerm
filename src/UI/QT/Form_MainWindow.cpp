@@ -1952,3 +1952,9 @@ void Form_MainWindow::on_actionNew_Connection_triggered()
     DoMenuTriggered(e_UIMWMenu_NewConnection);
 }
 
+
+void Form_MainWindow::on_actionCommand_Line_Options_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_HelpCommandLineOptions);
+}
+

@@ -436,6 +436,8 @@ private slots:
     
     void on_actionNew_Connection_triggered();
     
+    void on_actionCommand_Line_Options_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

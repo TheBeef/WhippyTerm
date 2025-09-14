@@ -182,6 +182,7 @@ typedef enum
     e_UIMWMenu_SettingsQuickJump_CtrlCHandling,
     e_UIMWMenu_CRCFinder,
     e_UIMWMenu_CalcCRC,
+    e_UIMWMenu_HelpCommandLineOptions,
     e_UIMWMenuMAX
 } e_UIMWMenuType;
 

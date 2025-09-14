@@ -45,7 +45,7 @@
 struct Bookmark
 {
     int BookmarkUID;        // The unique bookmark ID (RAM only)
-    std::string MenuName;   // All menus with the same name make a sub menu ("" is root)
+    std::string MenuName;   // Submenu name.  All menus with the same name make a sub menu (a MenuName of "" is in the root)
     std::string Name;
     std::string URI;
     t_KVList Options;

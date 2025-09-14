@@ -34,6 +34,7 @@
 #include "App/Dialogs/Dialog_ChangeConnectionName.h"
 #include "App/Dialogs/Dialog_ConnectionOptions.h"
 #include "App/Dialogs/Dialog_ComTest.h"
+#include "App/Dialogs/Dialog_HelpCommandLineOptions.h"
 #include "App/Dialogs/Dialog_ManagePlugins.h"
 #include "App/Dialogs/Dialog_NewConnection.h"
 #include "App/Dialogs/Dialog_NewConnectionFromURI.h"
@@ -499,6 +500,9 @@ void TheMainWindow::Init(void)
 {
     int r;
     t_UITabCtrl *PanelCtrl;
+    i_CLIArgList arg;
+    i_BookmarkList bm;
+    unsigned int Index;
 
     /* Restore the session data */
     RestoreFromSession();
@@ -567,6 +571,36 @@ void TheMainWindow::Init(void)
         InformOfSendBufferChange(r);
 
     ChangeStyleBGColorSelectedColor(e_SysCol_Blue,e_SysColShade_Normal);
+
+    /* Ok, if we are the first main window to open then we handle command line
+       tabs to open. */
+    if(!g_CLI_URIOpened)
+    {
+        g_CLI_URIOpened=true;   // Note that we already did this
+        for(arg=g_CLI_URIList.begin();arg!=g_CLI_URIList.end();arg++)
+        {
+            /* Ok, open a new tab */
+            AllocNewTab(arg->c_str(),NULL,arg->c_str(),NULL);
+        }
+    }
+    /* And bookmarks as well */
+    if(!g_CLI_BookmarksOpened)
+    {
+        g_CLI_BookmarksOpened=true;   // Note that we already did this
+        for(arg=g_CLI_BookmarkList.begin();arg!=g_CLI_BookmarkList.end();arg++)
+        {
+            for(Index=0,bm=g_BookmarkList.begin();bm!=g_BookmarkList.end();
+                    bm++,Index++)
+            {
+                if(caseinsensitivestrcmp(bm->Name.c_str(),arg->c_str())==0)
+                {
+                    /* Open this bookmark */
+                    GotoBookmark(Index,true);
+                    break;
+                }
+            }
+        }
+    }
 }
 
 /*******************************************************************************
@@ -2975,11 +3009,14 @@ void TheMainWindow::RebuildBookmarkMenu(void)
  *    TheMainWindow::GotoBookmark
  *
  * SYNOPSIS:
- *    void TheMainWindow::GotoBookmark(uintptr_t ID);
+ *    void TheMainWindow::GotoBookmark(uintptr_t ID,bool ForceNewTab=false);
  *
  * PARAMETERS:
  *    ID [I] -- The id of the bookmark to goto.  This is it index into
  *              the bookmarks list.
+ *    ForceNewTab [I] -- If this is true then we override the
+ *                       'g_Settings.BookmarksOpenNewTabs' setting and force
+ *                       opening of a new tab.
  *
  * FUNCTION:
  *    This function changes the current tab to a bookmark from the bookmark
@@ -2991,7 +3028,7 @@ void TheMainWindow::RebuildBookmarkMenu(void)
  * SEE ALSO:
  *
  ******************************************************************************/
-void TheMainWindow::GotoBookmark(uintptr_t ID)
+void TheMainWindow::GotoBookmark(uintptr_t ID,bool ForceNewTab)
 {
     i_BookmarkList bm;
     unsigned int Index;
@@ -3015,7 +3052,7 @@ void TheMainWindow::GotoBookmark(uintptr_t ID)
     else
         UseSettings=NULL;
 
-    if(g_Settings.BookmarksOpenNewTabs)
+    if(g_Settings.BookmarksOpenNewTabs || ForceNewTab)
     {
         /* Ok, open a new tab */
         NewCon=AllocNewTab(bm->Name.c_str(),UseSettings,bm->URI.c_str(),
@@ -4974,6 +5011,7 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_CRCFinderFromSelection -- Show the CRC finder dialog but copy in the currently selected bytes
  *                  e_Cmd_CalcCRCFromSelection -- Show the calc CRC dialog coping the currently selected bytes in
  *                  e_Cmd_CalcCRC -- Show the calc CRC dialog
+ *                  e_Cmd_HelpCommandLineOptions -- Show the command line help dialog
  *
  * FUNCTION:
  *    This function executes a command.
@@ -5509,6 +5547,9 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_CalcCRC:
             RunCalcCrcDialog(NULL,0);
+        break;
+        case e_Cmd_HelpCommandLineOptions:
+            RunHCLO_HelpCommandLineOptionsDialog();
         break;
         case e_CmdMAX:
         default:

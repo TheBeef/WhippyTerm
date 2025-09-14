@@ -28,8 +28,14 @@
 #include "App/Dialogs/Dialog_EditSendBuffer.h"
 #include "OS/System.h"
 #include "UI/UIAsk.h"
+#include "UI/UISystem.h"
 #include "App/PluginSupport/PluginSystem.h"
 #include "Version.h"
+#include <stdint.h>
+#include <string>
+#include <list>
+
+using namespace std;
 
 /*** DEFINES                  ***/
 
@@ -40,6 +46,10 @@
 /*** FUNCTION PROTOTYPES      ***/
 
 /*** VARIABLE DEFINITIONS     ***/
+bool g_CLI_URIOpened=false;
+bool g_CLI_BookmarksOpened=false;
+t_CLIArgList g_CLI_URIList;
+t_CLIArgList g_CLI_BookmarkList;
 
 /*******************************************************************************
  * NAME:
@@ -70,8 +80,39 @@
  ******************************************************************************/
 bool AppMain(int argc,char *argv[])
 {
+    int_fast32_t r;
+
     /* Debug checks */
     CmdCheck();
+
+    /* Handle command line args */
+    if(argc>1)
+    {
+        /* Handle options first */
+        for(r=1;r<argc;r++)
+        {
+            if(argv[r][0]=='-')
+            {
+                /* It's an option */
+                if(caseinsensitivestrcmp(argv[r],"--bookmark")==0)
+                {
+                    /* Next arg is a bookmark name */
+                    r++;
+                    if(r==argc)
+                    {
+                        UIAsk("Error missing arg after bookmark option");
+                        return false;
+                    }
+                    g_CLI_BookmarkList.push_back(argv[r]);
+                }
+            }
+            else
+            {
+                /* Must be a URI then */
+                g_CLI_URIList.push_back(argv[r]);
+            }
+        }
+    }
 
     InitOS();
 
@@ -103,6 +144,11 @@ bool AppMain(int argc,char *argv[])
 
     ApplySettings();
 
+//    /* Open any URI's that where requested */
+//    for(a=URIList.begin();a!=URIList.begin();a++)
+//    {
+//        
+//    }
     return true;
 }
 

@@ -181,6 +181,7 @@ typedef enum
     e_Cmd_CRCFinderFromSelection,
     e_Cmd_CalcCRCFromSelection,
     e_Cmd_CalcCRC,
+    e_Cmd_HelpCommandLineOptions,
     e_CmdMAX
 } e_CmdType;
 

@@ -31,6 +31,12 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_BUG_FIX,"Added command line options",
+            "Added command line options when WhippyTerm is started from a"
+            " CLI.  You can now provide a list of URI's to open, or using"
+            " the --bookmark option open a bookmark from available bookmarks.\n"
+            "A new help menu was added to explain the command line options."},
+    {
         NOTETYPE_BUG_FIX,"Auto hide of panels made to work",
             "The auto hide of panels was not implemented.  You could turn on"
             " the option but it didn't do anything.  Now when enabled clicking"

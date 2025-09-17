@@ -55,6 +55,10 @@ private slots:
     
     void on_GlobalSettings_checkBox_clicked();
     
+    void on_Import_pushButton_clicked();
+    
+    void on_Export_pushButton_clicked();
+    
 private:
     bool DoingEvent;
     bool SendEvent(e_DMBEventType EventType,union DMBEventData *Info,uintptr_t ID);

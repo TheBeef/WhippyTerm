@@ -178,10 +178,11 @@ bool RegisterBookmarksList_TinyCFG(class TinyCFG &cfg,const char *XmlName,
 
 bool LoadBookmarks(void)
 {
-    class TinyCFG cfg("BookMarkData");
     string Path;
     string BookmarksFilename;
+    bool RetValue;
 
+    RetValue=false;
     try
     {
          if(GetAppDataPath(Path)==false)
@@ -198,9 +199,47 @@ bool LoadBookmarks(void)
         BookmarksFilename=Path;
         BookmarksFilename+=BOOKMARKS_FILE;
 
-        RegisterBookmarksList_TinyCFG(cfg,"Bookmarks",g_BookmarkList);
+        RetValue=LoadBookmarksFromFile(g_BookmarkList,
+                BookmarksFilename.c_str());
+    }
+    catch(...)
+    {
+        return false;
+    }
+    return RetValue;
+}
 
-        cfg.LoadCFGFile(BookmarksFilename.c_str());
+/*******************************************************************************
+ * NAME:
+ *    LoadBookmarksFromFile
+ *
+ * SYNOPSIS:
+ *    bool LoadBookmarksFromFile(t_BookmarkList &Bookmarks,
+ *              const char *Filename);
+ *
+ * PARAMETERS:
+ *    Bookmarks [O] -- The bookmarks memory to load the file into
+ *    Filename [I] -- The filename to load
+ *
+ * FUNCTION:
+ *    This function loads bookmarks in from a file.
+ *
+ * RETURNS:
+ *    true -- The bookmark file was loaded
+ *    false -- There an error.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool LoadBookmarksFromFile(t_BookmarkList &Bookmarks,const char *Filename)
+{
+    class TinyCFG cfg("BookMarkData");
+
+    try
+    {
+        RegisterBookmarksList_TinyCFG(cfg,"Bookmarks",Bookmarks);
+
+        cfg.LoadCFGFile(Filename);
     }
     catch(...)
     {
@@ -211,13 +250,14 @@ bool LoadBookmarks(void)
 
 bool SaveBookmarks(void)
 {
-    class TinyCFG cfg("BookMarkData");
     string Path;
     string BookmarksFilename;
+    bool RetValue;
 
+    RetValue=false;
     try
     {
-         if(GetAppDataPath(Path)==false)
+        if(GetAppDataPath(Path)==false)
             return false;
 
         /* See if this path exists */
@@ -231,9 +271,45 @@ bool SaveBookmarks(void)
         BookmarksFilename=Path;
         BookmarksFilename+=BOOKMARKS_FILE;
 
-        RegisterBookmarksList_TinyCFG(cfg,"Bookmarks",g_BookmarkList);
+        RetValue=SaveBookmarks2File(g_BookmarkList,BookmarksFilename.c_str());
+    }
+    catch(...)
+    {
+        return false;
+    }
+    return RetValue;
+}
 
-        cfg.SaveCFGFile(BookmarksFilename.c_str());
+/*******************************************************************************
+ * NAME:
+ *    SaveBookmarks2File
+ *
+ * SYNOPSIS:
+ *    bool SaveBookmarks2File(t_BookmarkList &Bookmarks,const char *filename);
+ *
+ * PARAMETERS:
+ *    Bookmarks [I] -- The bookmarks to save out
+ *    filename [I] -- The filename to save to
+ *
+ * FUNCTION:
+ *    This function saves the bookmarks 
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool SaveBookmarks2File(t_BookmarkList &Bookmarks,const char *filename)
+{
+    class TinyCFG cfg("BookMarkData");
+
+    try
+    {
+        RegisterBookmarksList_TinyCFG(cfg,"Bookmarks",Bookmarks);
+
+        cfg.SaveCFGFile(filename);
     }
     catch(...)
     {

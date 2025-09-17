@@ -31,6 +31,10 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_BUG_FIX,"Added bookmark import/export",
+            "You can now export your bookmarks to a file and you can replace"
+            " your bookmarks with the bookmarks from a saved file."},
+    {
         NOTETYPE_BUG_FIX,"Added command line options",
             "Added command line options when WhippyTerm is started from a"
             " CLI.  You can now provide a list of URI's to open, or using"

@@ -46,6 +46,8 @@ enum e_UIDMB_Button
     e_UIDMB_Button_Delete,
     e_UIDMB_Button_Options,
     e_UIDMB_Button_Settings,
+    e_UIDMB_Button_Export,
+    e_UIDMB_Button_Import,
     e_UIDMB_ButtonMAX
 };
 

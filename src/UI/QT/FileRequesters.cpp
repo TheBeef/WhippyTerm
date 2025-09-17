@@ -108,10 +108,11 @@ bool UI_LoadFileReq(const char *Title,std::string &Path,
  *
  * PARAMETERS:
  *    Path [I/O] -- This has the default path in it and returns the path of
- *                  the file the user selected.
+ *                  the file the user selected.  This is not guaranteed to end
+ *                  in a with a / or \
  *    Filename [I/O] -- This has the default filename in it and returns the
  *                      filename the user selected.  If this is "" then the
- *                      path will be used for the filename and path.
+ *                      path will be used for the filename and path.  
  *    Filters [I] -- This is a list of filters split by \n chars.  The format
  *                   of the filters is: DisplayName|Filter\n.  For example:
  *                      All Files|*\n

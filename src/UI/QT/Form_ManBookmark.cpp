@@ -200,3 +200,21 @@ void Form_ManBookmark::on_GlobalSettings_checkBox_clicked()
     SendEvent(e_DMBEvent_CheckboxChange,&Info);
 }
 
+
+void Form_ManBookmark::on_Import_pushButton_clicked()
+{
+    union DMBEventData EventData;
+
+    EventData.Bttn.BttnID=e_UIDMB_Button_Import;
+    SendEvent(e_DMBEvent_BttnTriggered,&EventData);
+}
+
+
+void Form_ManBookmark::on_Export_pushButton_clicked()
+{
+    union DMBEventData EventData;
+
+    EventData.Bttn.BttnID=e_UIDMB_Button_Export;
+    SendEvent(e_DMBEvent_BttnTriggered,&EventData);
+}
+

@@ -36,6 +36,8 @@
 #include "UI/UIDebug.h"
 #include "UI/UIAsk.h"
 #include "UI/UITextInputBox.h"
+#include "UI/UIFileReq.h"
+#include "OS/Directorys.h"
 #include <string>
 #include <map>
 
@@ -777,6 +779,9 @@ void DMB_ChangeSelectedItemsURIText(const char *Text)
 bool DMB_Event(const struct DMBEvent *Event)
 {
     bool AcceptEvent;
+    string Path;
+    string File;
+    string Error;
 
     AcceptEvent=true;
     switch(Event->EventType)
@@ -795,6 +800,41 @@ bool DMB_Event(const struct DMBEvent *Event)
                 break;
                 case e_UIDMB_Button_Settings:
                     DMB_RunSettings();
+                break;
+                case e_UIDMB_Button_Export:
+                    Path="";
+                    File="Bookmarks.wtb";
+                    UI_SaveFileReq("Export bookmarks",Path,File,
+                            "WhippyTerm bookmarks|*.wtb\nAll Files|*",0);
+
+                    if(Path.back()!='/' || Path.back()=='\\')
+                        Path+=GetOSPathSeparator();
+                    Path+=File;
+                    if(!SaveBookmarks2File(*m_DMB_EditList,Path.c_str()))
+                    {
+                        Error="Unable to save bookmarks to:\n";
+                        Error+=Path;
+                        UIAsk("Error",Error.c_str(),e_AskBox_Error,
+                                e_AskBttns_Ok);
+                    }
+                break;
+                case e_UIDMB_Button_Import:
+                    if(UI_LoadFileReq("Import bookmarks",Path,File,
+                            "WhippyTerm bookmarks|*.wtb\nAll Files|*",0))
+                    {
+                        if(Path.back()!='/' || Path.back()=='\\')
+                            Path+=GetOSPathSeparator();
+                        Path+=File;
+
+                        if(!LoadBookmarksFromFile(*m_DMB_EditList,
+                                Path.c_str()))
+                        {
+                            UIAsk("Error","Failed to import the bookmarks",
+                                    e_AskBox_Error,e_AskBttns_Ok);
+                        }
+                        m_SelectedEntry=m_DMB_ItemLookup.end();
+                        DMB_RebuildFolderTree();
+                    }
                 break;
                 case e_UIDMB_ButtonMAX:
                 default:

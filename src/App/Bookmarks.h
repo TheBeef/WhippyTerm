@@ -56,9 +56,6 @@ struct Bookmark
 typedef std::list<struct Bookmark> t_BookmarkList;
 typedef t_BookmarkList::iterator i_BookmarkList;
 
-//typedef std::list<std::string> t_BookmarkMenuList;
-//typedef t_BookmarkMenuList::iterator i_BookmarkMenuList;
-
 /***  CLASS DEFINITIONS                ***/
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
@@ -71,6 +68,8 @@ bool BookmarkConnection(class Connection *Con);
 void ManageBookmarks(void);
 bool LoadBookmarks(void);
 bool SaveBookmarks(void);
+bool LoadBookmarksFromFile(t_BookmarkList &Bookmarks,const char *Filename);
+bool SaveBookmarks2File(t_BookmarkList &Bookmarks,const char *filename);
 i_BookmarkList FindBookmarkByUID(int UID);
 
 #endif

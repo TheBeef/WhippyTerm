@@ -147,6 +147,10 @@ t_UIButtonCtrl *UIDMB_GetButton(e_UIDMB_Button bttn)
             return (t_UIButtonCtrl *)g_ManBookmarkDialog->ui->Options_pushButton;
         case e_UIDMB_Button_Settings:
             return (t_UIButtonCtrl *)g_ManBookmarkDialog->ui->Settings_pushButton;
+        case e_UIDMB_Button_Export:
+            return (t_UIButtonCtrl *)g_ManBookmarkDialog->ui->Export_pushButton;
+        case e_UIDMB_Button_Import:
+            return (t_UIButtonCtrl *)g_ManBookmarkDialog->ui->Import_pushButton;
         case e_UIDMB_ButtonMAX:
         default:
             return NULL;

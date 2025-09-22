@@ -31,6 +31,12 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_BUG_FIX,"Fixed bug with selections in binary mode",
+            "When in binary mode the selection was showing up and"
+            " disappearing randomly.  There is there is selection"
+            " was not be check so it was drawing random data as the "
+            " selection.  It has been fixed."},
+    {
         NOTETYPE_BUG_FIX,"Added bookmark import/export",
             "You can now export your bookmarks to a file and you can replace"
             " your bookmarks with the bookmarks from a saved file."},

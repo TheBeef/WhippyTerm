@@ -1095,73 +1095,77 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
     LineBuff[END_OF_ASCII_CHAR]=0;
 
     /* Handle selection */
-    for(s=0;s<2;s++)
+    if(SelectionActive)
     {
-        if(Line>=SelBlocks[s].Start.Line && Line<=SelBlocks[s].End.Line)
+        for(s=0;s<2;s++)
         {
-            if(SelectionInAscII)
+            if(Line>=SelBlocks[s].Start.Line && Line<=SelBlocks[s].End.Line)
             {
-                Offset=START_OF_ASCII_CHAR;
-                HighLightStart=SelBlocks[s].Start.Offset;
-                HighLightEnd=SelBlocks[s].End.Offset+1;
-                HighLightMaxSize=HEX_BYTES_PER_LINE;
-                HighLightLineSize=SelBlocks[s].End.Offset-
-                        SelBlocks[s].Start.Offset+1;
-            }
-            else
-            {
-                /* Times 3 because we use 3 chars per hex value, and -1 because
-                   we don't highlight the last char */
-                Offset=0;
-                HighLightStart=SelBlocks[s].Start.Offset*3;
-                HighLightEnd=(SelBlocks[s].End.Offset+1)*3-1;
-                HighLightMaxSize=HEX_BYTES_PER_LINE*3-1;
-                HighLightLineSize=(SelBlocks[s].End.Offset-
-                        SelBlocks[s].Start.Offset+1)*3-1;
-            }
+                if(SelectionInAscII)
+                {
+                    Offset=START_OF_ASCII_CHAR;
+                    HighLightStart=SelBlocks[s].Start.Offset;
+                    HighLightEnd=SelBlocks[s].End.Offset+1;
+                    HighLightMaxSize=HEX_BYTES_PER_LINE;
+                    HighLightLineSize=SelBlocks[s].End.Offset-
+                            SelBlocks[s].Start.Offset+1;
+                }
+                else
+                {
+                    /* Times 3 because we use 3 chars per hex value, and -1
+                       because we don't highlight the last char */
+                    Offset=0;
+                    HighLightStart=SelBlocks[s].Start.Offset*3;
+                    HighLightEnd=(SelBlocks[s].End.Offset+1)*3-1;
+                    HighLightMaxSize=HEX_BYTES_PER_LINE*3-1;
+                    HighLightLineSize=(SelBlocks[s].End.Offset-
+                            SelBlocks[s].Start.Offset+1)*3-1;
+                }
 
-            if(Line==SelBlocks[s].Start.Line && Line==SelBlocks[s].End.Line)
-            {
-                for(r=0;r<HighLightLineSize;r++)
+                if(Line==SelBlocks[s].Start.Line && Line==SelBlocks[s].End.Line)
                 {
-                    ColorBuff[Offset+HighLightStart+r].FGColor=
-                            Settings->SelectionColors[e_Color_FG];
-                    ColorBuff[Offset+HighLightStart+r].BGColor=
-                            Settings->SelectionColors[e_Color_BG];
-                    ColorBuff[Offset+HighLightStart+r].Attribs=TXT_ATTRIB_FORCE;
+                    for(r=0;r<HighLightLineSize;r++)
+                    {
+                        ColorBuff[Offset+HighLightStart+r].FGColor=
+                                Settings->SelectionColors[e_Color_FG];
+                        ColorBuff[Offset+HighLightStart+r].BGColor=
+                                Settings->SelectionColors[e_Color_BG];
+                        ColorBuff[Offset+HighLightStart+r].Attribs=
+                                TXT_ATTRIB_FORCE;
+                    }
                 }
-            }
-            else if(Line==SelBlocks[s].Start.Line)
-            {
-                for(r=HighLightStart;r<HighLightMaxSize;r++)
+                else if(Line==SelBlocks[s].Start.Line)
                 {
-                    ColorBuff[Offset+r].FGColor=Settings->
-                            SelectionColors[e_Color_FG];
-                    ColorBuff[Offset+r].BGColor=Settings->
-                            SelectionColors[e_Color_BG];
-                    ColorBuff[Offset+r].Attribs=TXT_ATTRIB_FORCE;
+                    for(r=HighLightStart;r<HighLightMaxSize;r++)
+                    {
+                        ColorBuff[Offset+r].FGColor=Settings->
+                                SelectionColors[e_Color_FG];
+                        ColorBuff[Offset+r].BGColor=Settings->
+                                SelectionColors[e_Color_BG];
+                        ColorBuff[Offset+r].Attribs=TXT_ATTRIB_FORCE;
+                    }
                 }
-            }
-            else if(Line==SelBlocks[s].End.Line)
-            {
-                for(r=0;r<HighLightEnd;r++)
+                else if(Line==SelBlocks[s].End.Line)
                 {
-                    ColorBuff[Offset+r].FGColor=Settings->
-                            SelectionColors[e_Color_FG];
-                    ColorBuff[Offset+r].BGColor=Settings->
-                            SelectionColors[e_Color_BG];
-                    ColorBuff[Offset+r].Attribs=TXT_ATTRIB_FORCE;
+                    for(r=0;r<HighLightEnd;r++)
+                    {
+                        ColorBuff[Offset+r].FGColor=Settings->
+                                SelectionColors[e_Color_FG];
+                        ColorBuff[Offset+r].BGColor=Settings->
+                                SelectionColors[e_Color_BG];
+                        ColorBuff[Offset+r].Attribs=TXT_ATTRIB_FORCE;
+                    }
                 }
-            }
-            else
-            {
-                for(r=0;r<HighLightMaxSize;r++)
+                else
                 {
-                    ColorBuff[Offset+r].FGColor=Settings->
-                            SelectionColors[e_Color_FG];
-                    ColorBuff[Offset+r].BGColor=Settings->
-                            SelectionColors[e_Color_BG];
-                    ColorBuff[Offset+r].Attribs=TXT_ATTRIB_FORCE;
+                    for(r=0;r<HighLightMaxSize;r++)
+                    {
+                        ColorBuff[Offset+r].FGColor=Settings->
+                                SelectionColors[e_Color_FG];
+                        ColorBuff[Offset+r].BGColor=Settings->
+                                SelectionColors[e_Color_BG];
+                        ColorBuff[Offset+r].Attribs=TXT_ATTRIB_FORCE;
+                    }
                 }
             }
         }

@@ -15,6 +15,7 @@ Frame_CustomTextWidget::Frame_CustomTextWidget(QWidget *parent)
     ContextMenu = new QMenu;
     ContextMenu->addAction(ui->actionEdit);
     ContextMenu->addAction(ui->actionFind_CRC_Algorithm);
+    ContextMenu->addAction(ui->actionCopy_To_Send_Buffer);
     ContextMenu->addSeparator();
     ContextMenu->addAction(ui->actionCopy);
     ContextMenu->addAction(ui->actionPaste);
@@ -174,6 +175,21 @@ void Frame_CustomTextWidget::on_actionFind_CRC_Algorithm_triggered()
     NewEvent.EventType=e_UICTWEvent_ContextMenu;
     NewEvent.ID=ID;
     NewEvent.Info.Context.Menu=e_UICTW_ContextMenu_FindCRCAlgorithm;
+
+    EventHandler(&NewEvent);
+}
+
+
+void Frame_CustomTextWidget::on_actionCopy_To_Send_Buffer_triggered()
+{
+    struct UICTWEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_UICTWEvent_ContextMenu;
+    NewEvent.ID=ID;
+    NewEvent.Info.Context.Menu=e_UICTW_ContextMenu_CopyToSendBuffer;
 
     EventHandler(&NewEvent);
 }

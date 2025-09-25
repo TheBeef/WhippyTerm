@@ -472,6 +472,7 @@ static bool DESB_HexDisplayBufferEvent(const struct HDEvent *Event)
                     DESB_DoEndianSwap();
                 break;
                 case e_UICTW_ContextMenu_FindCRCAlgorithm:
+                case e_UICTW_ContextMenu_CopyToSendBuffer:
                 case e_UICTW_ContextMenu_ClearScreen:
                 case e_UICTW_ContextMenu_Edit:
                 case e_UICTW_ContextMenu_ZoomIn:

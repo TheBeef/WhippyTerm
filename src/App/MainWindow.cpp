@@ -5324,10 +5324,10 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
             }
         break;
         case e_Cmd_SendBufferSendGeneric:
-            RunSendBufferSelectDialog(this,e_SBSD_Send);
+            RunSendBufferSelectDialog(this,e_SBSD_Send,NULL,0);
         break;
         case e_Cmd_SendBuffer_EditPrompted:
-            RunSendBufferSelectDialog(this,e_SBSD_Edit);
+            RunSendBufferSelectDialog(this,e_SBSD_Edit,NULL,0);
         break;
         case e_Cmd_Tools_ComTest:
             RunComTestDialog();
@@ -5560,7 +5560,7 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_Selection2SendBuffer:
             if(ActiveCon!=NULL)
-                RunSendBufferSelectDialog(this,e_SBSD_Copy2Buffer);
+                RunSendBufferSelectDialog(this,e_SBSD_Copy2Buffer,NULL,0);
         break;
         case e_CmdMAX:
         default:

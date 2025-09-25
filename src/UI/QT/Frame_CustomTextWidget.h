@@ -48,6 +48,8 @@ private slots:
     
     void on_actionFind_CRC_Algorithm_triggered();
     
+    void on_actionCopy_To_Send_Buffer_triggered();
+    
 private:
 };
 

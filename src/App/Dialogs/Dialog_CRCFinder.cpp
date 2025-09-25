@@ -178,6 +178,7 @@ static bool DCF_HexDisplayBufferEvent(const struct HDEvent *Event)
                             DoInsertFromClipboard(e_HDBCFormat_Default);
                 break;
                 case e_UICTW_ContextMenu_FindCRCAlgorithm:
+                case e_UICTW_ContextMenu_CopyToSendBuffer:
                 case e_UICTW_ContextMenu_EndianSwap:
                 case e_UICTW_ContextMenu_ClearScreen:
                 case e_UICTW_ContextMenu_Edit:

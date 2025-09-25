@@ -35,6 +35,7 @@
 #include "UI/UISendBufferSelect.h"
 #include "UI/UIAsk.h"
 #include "UI/UIControl.h"
+#include <string.h>
 
 /*** DEFINES                  ***/
 
@@ -44,11 +45,14 @@
 
 /*** FUNCTION PROTOTYPES      ***/
 static void SBSD_FillInBufferList(void);
+static void SBSD_HandleCopyToSendBuffer(int BufferIndex);
 
 /*** VARIABLE DEFINITIONS     ***/
 static e_SBSDType m_SBSD_DialogType;
 static class TheMainWindow *m_SBSD_MW;
 static int m_SBSD_LastSelectedBufferIndex=-1;
+static uint8_t *m_SBSD_Buffer;
+static int m_SBSD_BufferSize;
 
 /*******************************************************************************
  * NAME:
@@ -56,7 +60,7 @@ static int m_SBSD_LastSelectedBufferIndex=-1;
  *
  * SYNOPSIS:
  *    void RunSendBufferSelectDialog(class TheMainWindow *MW,
- *          e_SBSDType DialogType);
+ *          e_SBSDType DialogType,uint8_t *Buffer,int BufferSize);
  *
  * PARAMETERS:
  *    MW [I] -- The main window that this dialog is going to work with (where
@@ -69,6 +73,12 @@ static int m_SBSD_LastSelectedBufferIndex=-1;
  *                          e_SBSD_Copy2Buffer -- User and press "copy" to
  *                                                open the edit buffer of
  *                                                the selected entry.
+ *    Buffer [I] -- If 'DialogType' is 'e_SBSD_Copy2Buffer' then this is an
+ *                  optional buffer to get the new send buffer data from.
+ *                  If this is NULL then the 'MW' will be used to get the
+ *                  selection from there.  This will be copied to an internal
+ *                  buffer.
+ *    BufferSize [I] -- The size of 'Buffer'
  *
  * FUNCTION:
  *    This function shows the select a send buffer dialog.
@@ -79,7 +89,8 @@ static int m_SBSD_LastSelectedBufferIndex=-1;
  * SEE ALSO:
  *    
  ******************************************************************************/
-void RunSendBufferSelectDialog(class TheMainWindow *MW,e_SBSDType DialogType)
+void RunSendBufferSelectDialog(class TheMainWindow *MW,e_SBSDType DialogType,
+        uint8_t *Buffer,int BufferSize)
 {
     bool AllocatedUI;
     t_UIButtonCtrl *GoBttn;
@@ -89,6 +100,8 @@ void RunSendBufferSelectDialog(class TheMainWindow *MW,e_SBSDType DialogType)
     {
         m_SBSD_DialogType=DialogType;
         m_SBSD_MW=MW;
+        m_SBSD_Buffer=Buffer;
+        m_SBSD_BufferSize=BufferSize;
 
         if(!UIAlloc_SendBufferSelect())
             throw("Failed to open window");
@@ -166,8 +179,6 @@ bool SBS_Event(const struct SBSEvent *Event)
     t_UIButtonCtrl *GoBttn;
     t_UIColumnView *BufferList;
     int BufferIndex;
-    uint8_t *Buffer;
-    int BufferSize;
 
     BufferList=UISBS_GetColumnViewHandle(e_SBSColumnView_Buffers_List);
     GoBttn=UISBS_GetButton(e_SBS_Button_GoButton);
@@ -206,33 +217,7 @@ bool SBS_Event(const struct SBSEvent *Event)
                             }
                         break;
                         case e_SBSD_Copy2Buffer:
-                            if(m_SBSD_MW->ActiveCon!=NULL)
-                            {
-                                Buffer=m_SBSD_MW->ActiveCon->GetRawSelection(
-                                        (unsigned int *)&BufferSize);
-                                if(Buffer==NULL)
-                                {
-                                    UIAsk("Error","Error getting the selection",
-                                            e_AskBox_Error,e_AskBttns_Ok);
-                                    return false;
-                                }
-
-                                if(RunEditSendBufferDialog(BufferIndex,
-                                        &Buffer,&BufferSize))
-                                {
-                                    /* Ok, copy this over the selected send
-                                       buffer */
-                                    g_SendBuffers.SetBuffer(BufferIndex,
-                                            Buffer,BufferSize);
-                                    free(Buffer);
-
-                                    /* Update the UI with any changes */
-                                    m_SBSD_MW->RethinkActiveConnectionUI();
-
-                                    m_SBSD_LastSelectedBufferIndex=BufferIndex;
-                                }
-                                UISBS_CloseDialog();
-                            }
+                            SBSD_HandleCopyToSendBuffer(BufferIndex);
                         break;
                         case e_SBSDMAX:
                         default:
@@ -309,3 +294,69 @@ void SBSD_FillInBufferList(void)
         UIColumnViewSelectRow(BufferList,m_SBSD_LastSelectedBufferIndex);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    SBSD_HandleCopyToSendBuffer
+ *
+ * SYNOPSIS:
+ *    void SBSD_HandleCopyToSendBuffer(int BufferIndex);
+ *
+ * PARAMETERS:
+ *    BufferIndex [I] -- The index of the buffer we are going to be copying into
+ *
+ * FUNCTION:
+ *    This function handles when the user clicks on "copy" button and we need to
+ *    open the edit send buffer (and copy to the send buffer).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void SBSD_HandleCopyToSendBuffer(int BufferIndex)
+{
+    uint8_t *Buffer;
+    int BufferSize;
+
+    if(m_SBSD_Buffer==NULL)
+    {
+        if(m_SBSD_MW->ActiveCon==NULL)
+            return;
+
+        Buffer=m_SBSD_MW->ActiveCon->GetRawSelection((unsigned int *)
+                &BufferSize);
+        if(Buffer==NULL)
+        {
+            UIAsk("Error","Error getting the selection",e_AskBox_Error,
+                    e_AskBttns_Ok);
+            return;
+        }
+    }
+    else
+    {
+        /* We need to copy 'm_SBSD_Buffer' because we might be editing it */
+        Buffer=(uint8_t *)malloc(m_SBSD_BufferSize);
+        if(Buffer==NULL)
+        {
+            UIAsk("Error","Out of memory",e_AskBox_Error,e_AskBttns_Ok);
+            return;
+        }
+        memcpy(Buffer,m_SBSD_Buffer,m_SBSD_BufferSize);
+        BufferSize=m_SBSD_BufferSize;
+    }
+
+    if(RunEditSendBufferDialog(BufferIndex,&Buffer,&BufferSize))
+    {
+        /* Ok, copy this over the selected send
+           buffer */
+        g_SendBuffers.SetBuffer(BufferIndex,Buffer,BufferSize);
+        free(Buffer);
+
+        /* Update the UI with any changes */
+        m_SBSD_MW->RethinkActiveConnectionUI();
+
+        m_SBSD_LastSelectedBufferIndex=BufferIndex;
+    }
+    UISBS_CloseDialog();
+}

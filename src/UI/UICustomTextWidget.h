@@ -57,6 +57,7 @@ typedef enum
     e_UICTW_ContextMenu_Edit,
     e_UICTW_ContextMenu_EndianSwap,
     e_UICTW_ContextMenu_FindCRCAlgorithm,
+    e_UICTW_ContextMenu_CopyToSendBuffer,
     e_UICTW_ContextMenuMAX
 } e_UICTW_ContextMenuType;
 

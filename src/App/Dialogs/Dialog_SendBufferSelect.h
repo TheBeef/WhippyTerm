@@ -52,6 +52,7 @@ typedef enum
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
-void RunSendBufferSelectDialog(class TheMainWindow *MW,e_SBSDType DialogType);
+void RunSendBufferSelectDialog(class TheMainWindow *MW,e_SBSDType DialogType,
+        uint8_t *Buffer,int BufferSize);
 
 #endif   /* end of "#ifndef __DIALOG_SENDBUFFERSELECT_H_" */

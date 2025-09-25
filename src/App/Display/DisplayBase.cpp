@@ -1218,6 +1218,7 @@ bool DisplayBase::DoHexInputEvent(const struct HDEvent *Event)
                     DoBlock_EditHex();
                 break;
                 case e_UICTW_ContextMenu_FindCRCAlgorithm:
+                case e_UICTW_ContextMenu_CopyToSendBuffer:
                 case e_UICTW_ContextMenu_EndianSwap:
                 case e_UICTW_ContextMenu_ZoomIn:
                 case e_UICTW_ContextMenu_ZoomOut:

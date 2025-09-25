@@ -31,6 +31,7 @@
 /*** HEADER FILES TO INCLUDE  ***/
 #include "App/Dialogs/Dialog_HexDisplayCopyAs.h"
 #include "App/Dialogs/Dialog_CRCFinder.h"
+#include "App/Dialogs/Dialog_SendBufferSelect.h"
 #include "App/MWPanels/MW_HexDisplay.h"
 #include "App/MWPanels/MWPanels.h"
 #include "App/MainWindow.h"
@@ -339,6 +340,7 @@ void MWHexDisplay::RethinkUI(void)
     t_UIContextMenuCtrl *ContextMenu_Copy;
     t_UIContextMenuCtrl *ContextMenu_Paste;
     t_UIContextMenuCtrl *ContextMenu_FindCRCAlgorithm;
+    t_UIContextMenuCtrl *ContextMenu_CopyToSendBuffer;
 
     ClearBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_HexDisplay_Clear);
     CopyBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_HexDisplay_Copy);
@@ -348,6 +350,7 @@ void MWHexDisplay::RethinkUI(void)
     ContextMenu_Copy=IncomingHistoryHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_Copy);
     ContextMenu_Paste=IncomingHistoryHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_Paste);
     ContextMenu_FindCRCAlgorithm=IncomingHistoryHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_FindCRCAlgorithm);
+    ContextMenu_CopyToSendBuffer=IncomingHistoryHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_CopyToSendBuffer);
 
     ControlsEnabled=PanelActive;
     PauseCheckEnabled=PanelActive;
@@ -377,9 +380,11 @@ void MWHexDisplay::RethinkUI(void)
 
     UIEnableContextMenu(ContextMenu_Copy,ClipboardBttnEnabled);
     UIEnableContextMenu(ContextMenu_FindCRCAlgorithm,ClipboardBttnEnabled);
+    UIEnableContextMenu(ContextMenu_CopyToSendBuffer,ClipboardBttnEnabled);
 
     UISetContextMenuVisible(ContextMenu_Paste,false);
     UISetContextMenuVisible(ContextMenu_FindCRCAlgorithm,true);
+    UISetContextMenuVisible(ContextMenu_CopyToSendBuffer,true);
 }
 
 /*******************************************************************************
@@ -633,6 +638,9 @@ bool MWHexDisplay::HexDisplayBufferEvent(const struct HDEvent *Event)
                 case e_UICTW_ContextMenu_FindCRCAlgorithm:
                     OpenFindCRCAlgDialog();
                 break;
+                case e_UICTW_ContextMenu_CopyToSendBuffer:
+                    OpenSendBufferDialog();
+                break;
                 case e_UICTW_ContextMenu_Edit:
                 case e_UICTW_ContextMenu_EndianSwap:
                 case e_UICTW_ContextMenu_Paste:
@@ -696,3 +704,44 @@ void MWHexDisplay::OpenFindCRCAlgDialog(void)
     free(HexBuff);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    MWHexDisplay::OpenSendBufferDialog
+ *
+ * SYNOPSIS:
+ *    void MWHexDisplay::OpenSendBufferDialog(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function opens the select send buffer dialog with the select in it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWHexDisplay::OpenSendBufferDialog(void)
+{
+    int Bytes;
+    uint8_t *HexBuff;
+
+    Bytes=IncomingHistoryHexDisplay->GetSizeOfSelection(e_HDBCFormat_RAW);
+    if(Bytes==0)
+        return;
+
+    HexBuff=(uint8_t *)malloc(Bytes);
+    if(HexBuff==NULL)
+    {
+        UIAsk("Error","Out of memory",e_AskBox_Error,e_AskBttns_Ok);
+        return;
+    }
+
+    IncomingHistoryHexDisplay->CopySelection2Buffer(HexBuff,e_HDBCFormat_RAW);
+
+    RunSendBufferSelectDialog(MW,e_SBSD_Copy2Buffer,HexBuff,Bytes);
+
+    free(HexBuff);
+}

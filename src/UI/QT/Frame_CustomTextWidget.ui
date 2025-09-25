@@ -182,6 +182,14 @@
     <bool>false</bool>
    </property>
   </action>
+  <action name="actionCopy_To_Send_Buffer">
+   <property name="text">
+    <string>Copy To Send Buffer...</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

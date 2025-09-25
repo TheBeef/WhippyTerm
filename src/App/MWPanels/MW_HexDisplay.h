@@ -74,6 +74,7 @@ class MWHexDisplay
         void OpenFindCRCAlgDialog(void);
 
         void RethinkUI(void);
+        void OpenSendBufferDialog(void);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

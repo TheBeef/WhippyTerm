@@ -1481,9 +1481,11 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *StyleItalics;
     e_UIMenuCtrl *StyleUnderline;
     e_UIMenuCtrl *StyleStrikeThrough;
+    e_UIMenuCtrl *CopySelectionToSendBuffer;
     t_UIContextMenuCtrl *ContextMenu_SendBuffer;
     t_UIContextMenuCtrl *ContextMenu_FindCRCAlgorithm;
     t_UIContextMenuCtrl *ContextMenu_CalcCRC;
+    t_UIContextMenuCtrl *ContextMenu_SendToSendBuffer;
     t_UIContextMenuCtrl *ContextMenu_Copy;
     t_UIContextMenuCtrl *ContextMenu_Paste;
 //    t_UIContextMenuCtrl *ContextMenu_ClearScreen;
@@ -1591,6 +1593,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     SendBuffer11=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer11);
     SendBuffer12=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer12);
     SendBufferSendGeneric=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBufferSendGeneric);
+    CopySelectionToSendBuffer=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_CopySelectionToSendBuffer);
 
     if(UITabCtrlGetTabCount(MainTabs)==0)
     {
@@ -1671,6 +1674,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableToolbar(StyleUnderlineTool,false);
         UIEnableToolbar(StyleBGColorTool,false);
         UIEnableToolbar(StyleStrikeThroughTool,false);
+        UIEnableMenu(CopySelectionToSendBuffer,false);
 
         UIMW_EnableApplyTerminalEmulationMenu(UIWin,false);
 
@@ -1694,7 +1698,6 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(ClearScrollBackBuffer,true);
         UIEnableMenu(GotoColumn,true);
         UIEnableMenu(GotoRow,true);
-        UIEnableMenu(Copy,true);
         UIEnableMenu(SelectAll,true);
         UIEnableMenu(ZoomIn,true);
         UIEnableMenu(ZoomOut,true);
@@ -1724,6 +1727,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         ContextMenu_SendBuffer=Con->GetContextMenuHandle(e_UITD_ContextMenu_SendBuffers);
         ContextMenu_FindCRCAlgorithm=Con->GetContextMenuHandle(e_UITD_ContextMenu_FindCRCAlgorithm);
         ContextMenu_CalcCRC=Con->GetContextMenuHandle(e_UITD_ContextMenu_CalcCRC);
+        ContextMenu_SendToSendBuffer=Con->GetContextMenuHandle(e_UITD_ContextMenu_SendToSendBuffer);
         ContextMenu_Copy=Con->GetContextMenuHandle(e_UITD_ContextMenu_Copy);
         ContextMenu_Paste=Con->GetContextMenuHandle(e_UITD_ContextMenu_Paste);
         ContextMenu_Edit=Con->GetContextMenuHandle(e_UITD_ContextMenu_Edit);
@@ -1799,6 +1803,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         /* Things that are effected by selection */
         EnableSelectionBased=Con->IsThereASelection();
         UIEnableMenu(Copy,EnableSelectionBased);
+        UIEnableMenu(CopySelectionToSendBuffer,EnableSelectionBased);
         UIEnableToolbar(CopyTool,EnableSelectionBased);
         UIEnableContextMenu(ContextMenu_Copy,EnableSelectionBased);
         UIEnableToolbar(StyleBoldTool,EnableSelectionBased);
@@ -1828,6 +1833,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(StyleStrikeThrough,EnableSelectionBased);
         UIEnableContextMenu(ContextMenu_FindCRCAlgorithm,EnableSelectionBased);
         UIEnableContextMenu(ContextMenu_CalcCRC,EnableSelectionBased);
+        UIEnableContextMenu(ContextMenu_SendToSendBuffer,EnableSelectionBased);
         UIEnableContextMenu(ContextMenu_Bold,EnableSelectionBased);
         UIEnableContextMenu(ContextMenu_Italics,EnableSelectionBased);
         UIEnableContextMenu(ContextMenu_Underline,EnableSelectionBased);
@@ -5012,6 +5018,7 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_CalcCRCFromSelection -- Show the calc CRC dialog coping the currently selected bytes in
  *                  e_Cmd_CalcCRC -- Show the calc CRC dialog
  *                  e_Cmd_HelpCommandLineOptions -- Show the command line help dialog
+ *                  e_Cmd_Selection2SendBuffer -- Take the selected text and copies it into a send buffer
  *
  * FUNCTION:
  *    This function executes a command.
@@ -5550,6 +5557,10 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_HelpCommandLineOptions:
             RunHCLO_HelpCommandLineOptionsDialog();
+        break;
+        case e_Cmd_Selection2SendBuffer:
+            if(ActiveCon!=NULL)
+                RunSendBufferSelectDialog(this,e_SBSD_Copy2Buffer);
         break;
         case e_CmdMAX:
         default:

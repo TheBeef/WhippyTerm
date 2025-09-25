@@ -31,6 +31,10 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added a menu item to copy the current selection to a send buffer",
+            "The user can now select some text and copy that text to a"
+            " send buffer."},
+    {
         NOTETYPE_BUG_FIX,"Fixed bug with selections in binary mode",
             "When in binary mode the selection was showing up and"
             " disappearing randomly.  There is there is selection"

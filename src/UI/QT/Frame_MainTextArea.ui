@@ -651,6 +651,11 @@
     <string>Calculate CRC...</string>
    </property>
   </action>
+  <action name="actionCopy_To_Send_Buffer">
+   <property name="text">
+    <string>Copy To Send Buffer...</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

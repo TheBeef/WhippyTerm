@@ -17,6 +17,7 @@ Frame_MainTextArea::Frame_MainTextArea(QWidget *parent) :
     ContextMenu->addAction(ui->actionEdit);
     ContextMenu->addAction(ui->actionCalculate_CRC);
     ContextMenu->addAction(ui->actionFind_CRC_Algorithm);
+    ContextMenu->addAction(ui->actionCopy_To_Send_Buffer);
     ContextMenu->addSeparator();
     ContextMenu->addAction(ui->actionCopy);
     ContextMenu->addAction(ui->actionPaste);
@@ -333,9 +334,13 @@ void Frame_MainTextArea::on_actionFind_CRC_Algorithm_triggered()
     SendContextMenuEvent(e_UITD_ContextMenu_FindCRCAlgorithm);
 }
 
-
 void Frame_MainTextArea::on_actionCalculate_CRC_triggered()
 {
     SendContextMenuEvent(e_UITD_ContextMenu_CalcCRC);
+}
+
+void Frame_MainTextArea::on_actionCopy_To_Send_Buffer_triggered()
+{
+    SendContextMenuEvent(e_UITD_ContextMenu_SendToSendBuffer);
 }
 

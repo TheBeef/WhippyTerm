@@ -1958,3 +1958,9 @@ void Form_MainWindow::on_actionCommand_Line_Options_triggered()
     DoMenuTriggered(e_UIMWMenu_HelpCommandLineOptions);
 }
 
+
+void Form_MainWindow::on_actionCopy_Selection_To_Send_Buffer_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_CopySelectionToSendBuffer);
+}
+

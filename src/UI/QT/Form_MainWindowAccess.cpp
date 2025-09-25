@@ -302,6 +302,8 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionCalculate_CRC;
         case e_UIMWMenu_HelpCommandLineOptions:
             return (e_UIMenuCtrl *)realwin->ui->actionCommand_Line_Options;
+        case e_UIMWMenu_CopySelectionToSendBuffer:
+            return (e_UIMenuCtrl *)realwin->ui->actionCopy_Selection_To_Send_Buffer;
         case e_UIMWMenuMAX:
         default:
         break;

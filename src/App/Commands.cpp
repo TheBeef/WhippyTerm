@@ -191,6 +191,7 @@ const char *m_CmdNames[]=
     "CalcCRCFromSelection",                 // e_Cmd_CalcCRCFromSelection
     "CalcCRC",                              // e_Cmd_CalcCRC
     "HelpCommandLineOptions",               // e_Cmd_HelpCommandLineOptions
+    "Selection2SendBuffer",                 // e_Cmd_Selection2SendBuffer
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -304,6 +305,7 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_CRCFinder,                        // e_UIMWMenu_CRCFinder
     e_Cmd_CalcCRC,                          // e_UIMWMenu_CalcCRC
     e_Cmd_HelpCommandLineOptions,           // e_UIMWMenu_HelpCommandLineOptions
+    e_Cmd_Selection2SendBuffer,             // e_UIMWMenu_CopySelectionToSendBuffer
 };
 
 e_CmdType m_Cmd2SendBufferContextMenuMapping[]=
@@ -806,6 +808,7 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     // e_Cmd_CalcCRCFromSelection
     // e_Cmd_CalcCRC
     // e_Cmd_HelpCommandLineOptions
+    // e_Cmd_Selection2SendBuffer
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A

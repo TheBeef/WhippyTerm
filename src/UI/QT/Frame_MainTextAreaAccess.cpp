@@ -179,6 +179,8 @@ t_UIContextMenuCtrl *UITC_GetContextMenuHandle(t_UITextDisplayCtrl *ctrl,e_UITD_
             return (t_UIContextMenuCtrl *)TextDisplay->ui->actionCalculate_CRC;
         case e_UITD_ContextMenu_FindCRCAlgorithm:
             return (t_UIContextMenuCtrl *)TextDisplay->ui->actionFind_CRC_Algorithm;
+        case e_UITD_ContextMenu_SendToSendBuffer:
+            return (t_UIContextMenuCtrl *)TextDisplay->ui->actionCopy_To_Send_Buffer;
         case e_UITD_ContextMenu_Copy:
             return (t_UIContextMenuCtrl *)TextDisplay->ui->actionCopy;
         case e_UITD_ContextMenu_Paste:

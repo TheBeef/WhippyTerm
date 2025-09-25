@@ -2201,6 +2201,8 @@
     <addaction name="actionFind_Next"/>
     <addaction name="actionFind_First"/>
     <addaction name="separator"/>
+    <addaction name="actionCopy_Selection_To_Send_Buffer"/>
+    <addaction name="separator"/>
     <addaction name="actionBold"/>
     <addaction name="actionItalics"/>
     <addaction name="actionUnderline"/>
@@ -3755,6 +3757,11 @@
   <action name="actionCommand_Line_Options">
    <property name="text">
     <string>Command Line Options...</string>
+   </property>
+  </action>
+  <action name="actionCopy_Selection_To_Send_Buffer">
+   <property name="text">
+    <string>Copy Selection To Send Buffer...</string>
    </property>
   </action>
  </widget>

@@ -104,6 +104,8 @@ private slots:
     
     void on_actionCalculate_CRC_triggered();
     
+    void on_actionCopy_To_Send_Buffer_triggered();
+    
 private:
     void SendContextMenuEvent(e_UITD_ContextMenuType EventMenu);
 };

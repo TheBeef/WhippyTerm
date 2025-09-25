@@ -629,7 +629,7 @@ void SendBuffer::LoadBufferFromWTSBFile(class RIFF *Load,
  *    BSize [I] -- The number of bytes in 'Memory'
  *
  * FUNCTION:
- *    This function free the current contents of a buffer and replaces it with
+ *    This function frees the current contents of a buffer and replaces it with
  *    new data.  The data will be copied.
  *
  * RETURNS:

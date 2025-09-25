@@ -437,6 +437,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
 
         void GiveFocus(void);
         void CopySelectionToClipboard(void);
+        uint8_t *GetRawSelection(unsigned int *Bytes);
         void PasteFromClipboard(void);
         void FindCRCFromSelection(void);
         void CalcCRCFromSelection(void);

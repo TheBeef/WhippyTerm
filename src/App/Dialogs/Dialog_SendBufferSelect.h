@@ -43,6 +43,7 @@ typedef enum
 {
     e_SBSD_Send,
     e_SBSD_Edit,
+    e_SBSD_Copy2Buffer,
     e_SBSDMAX
 } e_SBSDType;
 

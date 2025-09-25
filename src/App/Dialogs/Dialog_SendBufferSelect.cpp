@@ -66,9 +66,12 @@ static int m_SBSD_LastSelectedBufferIndex=-1;
  *                                         selected buffer.
  *                          e_SBSD_Edit -- User and press "edit" to open the
  *                                         edit buffer of the selected entry.
+ *                          e_SBSD_Copy2Buffer -- User and press "copy" to
+ *                                                open the edit buffer of
+ *                                                the selected entry.
  *
  * FUNCTION:
- *    This function shows the com test dialog.
+ *    This function shows the select a send buffer dialog.
  *
  * RETURNS:
  *    NONE
@@ -105,6 +108,10 @@ void RunSendBufferSelectDialog(class TheMainWindow *MW,e_SBSDType DialogType)
             case e_SBSD_Edit:
                 UISBS_SetDialogTitle("Edit Send Buffer");
                 UISetButtonLabel(GoBttn,"Edit");
+            break;
+            case e_SBSD_Copy2Buffer:
+                UISBS_SetDialogTitle("Copy To Send Buffer");
+                UISetButtonLabel(GoBttn,"Copy");
             break;
             case e_SBSDMAX:
             default:
@@ -159,6 +166,8 @@ bool SBS_Event(const struct SBSEvent *Event)
     t_UIButtonCtrl *GoBttn;
     t_UIColumnView *BufferList;
     int BufferIndex;
+    uint8_t *Buffer;
+    int BufferSize;
 
     BufferList=UISBS_GetColumnViewHandle(e_SBSColumnView_Buffers_List);
     GoBttn=UISBS_GetButton(e_SBS_Button_GoButton);
@@ -193,6 +202,35 @@ bool SBS_Event(const struct SBSEvent *Event)
                                 m_SBSD_MW->RethinkActiveConnectionUI();
 
                                 m_SBSD_LastSelectedBufferIndex=BufferIndex;
+                                UISBS_CloseDialog();
+                            }
+                        break;
+                        case e_SBSD_Copy2Buffer:
+                            if(m_SBSD_MW->ActiveCon!=NULL)
+                            {
+                                Buffer=m_SBSD_MW->ActiveCon->GetRawSelection(
+                                        (unsigned int *)&BufferSize);
+                                if(Buffer==NULL)
+                                {
+                                    UIAsk("Error","Error getting the selection",
+                                            e_AskBox_Error,e_AskBttns_Ok);
+                                    return false;
+                                }
+
+                                if(RunEditSendBufferDialog(BufferIndex,
+                                        &Buffer,&BufferSize))
+                                {
+                                    /* Ok, copy this over the selected send
+                                       buffer */
+                                    g_SendBuffers.SetBuffer(BufferIndex,
+                                            Buffer,BufferSize);
+                                    free(Buffer);
+
+                                    /* Update the UI with any changes */
+                                    m_SBSD_MW->RethinkActiveConnectionUI();
+
+                                    m_SBSD_LastSelectedBufferIndex=BufferIndex;
+                                }
                                 UISBS_CloseDialog();
                             }
                         break;

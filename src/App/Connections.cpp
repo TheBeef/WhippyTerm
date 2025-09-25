@@ -2923,6 +2923,9 @@ bool Connection::ProcessDisplayEvent(const struct DBEvent *Event)
                 case e_UITD_ContextMenu_CalcCRC:
                     MW->ExeCmd(e_Cmd_CalcCRCFromSelection);
                 break;
+                case e_UITD_ContextMenu_SendToSendBuffer:
+                    MW->ExeCmd(e_Cmd_Selection2SendBuffer);
+                break;
                 case e_UITD_ContextMenu_Copy:
                     MW->ExeCmd(e_Cmd_Copy);
                 break;
@@ -7045,7 +7048,6 @@ void Connection::ApplyBGColor2Selection(uint32_t Color)
  ******************************************************************************/
 void Connection::FindCRCFromSelection(void)
 {
-    string SelectContents;
     uint8_t *Buffer;
     unsigned int Bytes;
 
@@ -7081,7 +7083,6 @@ void Connection::FindCRCFromSelection(void)
  ******************************************************************************/
 void Connection::CalcCRCFromSelection(void)
 {
-    string SelectContents;
     uint8_t *Buffer;
     unsigned int Bytes;
 
@@ -8086,4 +8087,34 @@ void Connection::PlayBackFrozenQueue(void)
         }
     }
     InputFrozen=true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::GetRawSelection
+ *
+ * SYNOPSIS:
+ *    uint8_t *Connection::GetRawSelection(unsigned int *Bytes);
+ *
+ * PARAMETERS:
+ *    Bytes [O] -- The number of bytes in the returned buffer.  This is not
+ *                 valid if this function returns NULL.
+ *
+ * FUNCTION:
+ *    This function gets a copy of the selection as RAW bytes.
+ *
+ * RETURNS:
+ *    A buffer with the selection copied into it or NULL if there was an error.
+ *    You must free this buffer with free() (it will be allocated with
+ *    malloc()).
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+uint8_t *Connection::GetRawSelection(unsigned int *Bytes)
+{
+    if(Display==NULL)
+        return NULL;
+
+    return Display->GetSelectionRAW(Bytes);
 }

@@ -438,6 +438,8 @@ private slots:
     
     void on_actionCommand_Line_Options_triggered();
     
+    void on_actionCopy_Selection_To_Send_Buffer_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

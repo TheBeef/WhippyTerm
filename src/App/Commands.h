@@ -182,6 +182,7 @@ typedef enum
     e_Cmd_CalcCRCFromSelection,
     e_Cmd_CalcCRC,
     e_Cmd_HelpCommandLineOptions,
+    e_Cmd_Selection2SendBuffer,
     e_CmdMAX
 } e_CmdType;
 

@@ -3455,12 +3455,15 @@ void TheMainWindow::ConnectionEvent(const struct ConMWEvent *Event)
         break;
         case ConMWEvent_UploadStatUpdate:
             UploadPanel.UploadStatChanged();
+            DownloadPanel.UpdateGUI();
         break;
         case ConMWEvent_UploadAborted:
             UploadPanel.InformOfUploadAborted();
+            DownloadPanel.UpdateGUI();
         break;
         case ConMWEvent_UploadDone:
             UploadPanel.InformOfUploadDone();
+            DownloadPanel.UpdateGUI();
         break;
         case ConMWEvent_NewConnection:
             UploadPanel.NewConnectionAllocated(Event->Con);
@@ -3469,12 +3472,15 @@ void TheMainWindow::ConnectionEvent(const struct ConMWEvent *Event)
         break;
         case ConMWEvent_DownloadStatUpdate:
             DownloadPanel.DownloadStatChanged();
+            UploadPanel.UpdateGUI();
         break;
         case ConMWEvent_DownloadAborted:
             DownloadPanel.InformOfDownloadAborted();
+            UploadPanel.UpdateGUI();
         break;
         case ConMWEvent_DownloadDone:
             DownloadPanel.InformOfDownloadDone();
+            UploadPanel.UpdateGUI();
         break;
         case ConMWEvent_HexDisplayUpdate:
             HexDisplayPanel.InformOfUpdate(Event->Con,&Event->Info->HexDis);

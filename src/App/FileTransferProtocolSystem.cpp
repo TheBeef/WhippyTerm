@@ -1271,6 +1271,9 @@ bool FTPS_UploadFile(t_FTPData *FData,class Connection *ParentCon,
         {
             throw(0);
         }
+
+        /* Tell the connection that we have 0 progress */
+        RealFData->Con->UploadSetNumberOfBytesSent(0);
     }
     catch(...)
     {
@@ -1342,6 +1345,9 @@ bool FTPS_DownloadFile(t_FTPData *FData,class Connection *ParentCon,
         {
             throw(0);
         }
+
+        /* Update the system so it knowns we have 0 bytes tx'ed */
+        RealFData->Con->DownloadSetNumberOfBytesRecv(0);
     }
     catch(...)
     {

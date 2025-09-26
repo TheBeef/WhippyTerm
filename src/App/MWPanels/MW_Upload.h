@@ -67,6 +67,7 @@ class MWUpload
         void InformOfUploadAborted(void);
         void InformOfUploadDone(void);
         void UploadMenuTriggered(uint64_t ID);
+        void UpdateGUI(void);
 
     private:
         t_UIMainWindow *UIWin;

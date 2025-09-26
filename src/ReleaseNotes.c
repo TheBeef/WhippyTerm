@@ -31,6 +31,11 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_POLISH,"Fixed download/upload so you can't try to start a upload/download while the other is active.",
+            "If you started a download you could still goto the upload panel"
+            " and start an upload (which wouldn't work out very well). "
+            " This has been changed to lockout the others controls."},
+    {
         NOTETYPE_ENHANCEMENT,"Added a menu item to copy the current selection to a send buffer",
             "The user can now select some text and copy that text to a"
             " send buffer."},

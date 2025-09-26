@@ -498,6 +498,7 @@ void MWDownload::RethinkUI(void)
     t_UIProgressBarCtrl *ProgressBar;
     t_UIContainerCtrl *OptionsFrame;
     i_FTPDownloadMenuList MenuItem;
+    const struct UploadStats *UStat;
     const struct DownloadStats *DLStat;
     bool StartEnabled;
     bool OptionsEnabled;
@@ -522,22 +523,35 @@ void MWDownload::RethinkUI(void)
         if(MW->ActiveCon==NULL)
             return;
 
+        UStat=MW->ActiveCon->UploadGetStats();
         DLStat=MW->ActiveCon->DownloadGetStats();
 
-        if(DLStat->InProgress)
+        if(UStat->InProgress)
         {
             StartEnabled=false;
             OptionsEnabled=false;
             ProtocolEnabled=false;
-
-            /* Only enable if we know the file size */
-            if(DLStat->TotalFileSize>0)
-                ProgressEnabled=true;
+            ProgressEnabled=false;
+            AbortEnabled=false;
+            ProgressEnabled=false;
         }
         else
         {
-            AbortEnabled=false;
-            ProgressEnabled=false;
+            if(DLStat->InProgress)
+            {
+                StartEnabled=false;
+                OptionsEnabled=false;
+                ProtocolEnabled=false;
+
+                /* Only enable if we know the file size */
+                if(DLStat->TotalFileSize>0)
+                    ProgressEnabled=true;
+            }
+            else
+            {
+                AbortEnabled=false;
+                ProgressEnabled=false;
+            }
         }
     }
 
@@ -903,4 +917,28 @@ void MWDownload::DownloadMenuTriggered(uint64_t ID)
     }
 
     Start();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWDownload::UpdateGUI
+ *
+ * SYNOPSIS:
+ *    void MWDownload::UpdateGUI(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function tells the panel to rethink it's UI.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWDownload::UpdateGUI(void)
+{
+    RethinkUI();
 }

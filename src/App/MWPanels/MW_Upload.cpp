@@ -503,6 +503,7 @@ void MWUpload::RethinkUI(void)
     t_UIContainerCtrl *OptionsFrame;
     i_FTPUploadMenuList MenuItem;
     const struct UploadStats *UStat;
+    const struct DownloadStats *DLStat;
     bool StartEnabled;
     bool OptionsEnabled;
     bool FileEnabled;
@@ -537,19 +538,33 @@ void MWUpload::RethinkUI(void)
             StartEnabled=false;
 
         UStat=MW->ActiveCon->UploadGetStats();
+        DLStat=MW->ActiveCon->DownloadGetStats();
 
-        if(UStat->InProgress)
+        if(DLStat->InProgress)
         {
             StartEnabled=false;
             OptionsEnabled=false;
             FileEnabled=false;
             ProtocolEnabled=false;
             ProgressEnabled=true;
+            AbortEnabled=false;
+            ProgressEnabled=false;
         }
         else
         {
-            AbortEnabled=false;
-            ProgressEnabled=false;
+            if(UStat->InProgress)
+            {
+                StartEnabled=false;
+                OptionsEnabled=false;
+                FileEnabled=false;
+                ProtocolEnabled=false;
+                ProgressEnabled=true;
+            }
+            else
+            {
+                AbortEnabled=false;
+                ProgressEnabled=false;
+            }
         }
     }
 
@@ -989,3 +1004,26 @@ void MWUpload::UploadMenuTriggered(uint64_t ID)
     Start();
 }
 
+/*******************************************************************************
+ * NAME:
+ *    MWUpload::UpdateGUI
+ *
+ * SYNOPSIS:
+ *    void MWUpload::UpdateGUI(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function tells the panel to rethink it's UI.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWUpload::UpdateGUI(void)
+{
+    RethinkUI();
+}

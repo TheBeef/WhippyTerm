@@ -41,15 +41,15 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "InstallFiles\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\libstdc++-6.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\Qt6Core.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\Qt6Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\Qt6Multimedia.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\Qt6Network.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\Qt6Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\platforms\*"; DestDir: "{app}\platforms"; Flags: ignoreversion
-Source: "InstallFiles\styles\*"; DestDir: "{app}\styles"; Flags: ignoreversion
+Source: "InstallFiles6\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InstallFiles6\libstdc++-6.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InstallFiles6\Qt6Core.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InstallFiles6\Qt6Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InstallFiles6\Qt6Multimedia.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InstallFiles6\Qt6Network.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InstallFiles6\Qt6Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InstallFiles6\platforms\*"; DestDir: "{app}\platforms"; Flags: ignoreversion
+Source: "InstallFiles6\styles\*"; DestDir: "{app}\styles"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

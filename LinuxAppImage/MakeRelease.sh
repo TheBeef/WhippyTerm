@@ -21,8 +21,8 @@ mkdir -p WhippyTerm/usr/bin
 mkdir -p WhippyTerm/usr/share/applications
 mkdir -p WhippyTerm/usr/share/icons/hicolor/256x256/apps
 objcopy --strip-debug --strip-unneeded $2/WhippyTerm WhippyTerm/usr/bin/whippyterm
-cp ../LinuxInstaller/WhippyTerm_x.x.x.x-1/usr/share/applications/* WhippyTerm/usr/share/applications
-cp ../LinuxInstaller/WhippyTerm_x.x.x.x-1/usr/share/icons/* WhippyTerm/usr/share/icons/hicolor/256x256/apps
+cp ../LinuxInstaller/Debian24.template/usr/share/applications/* WhippyTerm/usr/share/applications
+cp ../LinuxInstaller/Debian24.template/usr/share/icons/* WhippyTerm/usr/share/icons/hicolor/256x256/apps
 export VERSION=$1
 linuxdeployqt-continuous-x86_64.AppImage WhippyTerm/usr/share/applications/WhippyTerm.desktop -qmake=/usr/lib/qt6/bin/qmake -appimage
 

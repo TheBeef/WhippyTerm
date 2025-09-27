@@ -113,18 +113,17 @@ bool GetOSAppExePath(std::string &AppPath)
     if(GetModuleFileName(NULL,szFileName,MAX_PATH)==0)
         return false;
 
-/* DEBUG PAUL: Remove filename? */
-//    /* Remove the exe name */
-//    p=&dest[strlen(dest)];
-//    while(p>dest)
-//    {
-//        if(*p=='\\')
-//        {
-//            *(p+1)=0;
-//            break;
-//        }
-//        p--;
-//    }
+    /* Remove the exe name */
+    p=&dest[strlen(dest)];
+    while(p>dest)
+    {
+        if(*p=='\\')
+        {
+            *(p+1)=0;
+            break;
+        }
+        p--;
+    }
 
     AppPath=szFileName;
 

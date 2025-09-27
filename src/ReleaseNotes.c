@@ -28,6 +28,12 @@ struct ReleaseInfo
 //            "Descrition"},
 //};
 
+static struct ReleaseNote m_Notes_NEXT[]=
+{
+    {   "Title",
+            "Descrition"},
+};
+
 static struct ReleaseNote m_Notes_Rel2_0_0_0[]=
 {
     {
@@ -313,6 +319,7 @@ static struct ReleaseNote m_Notes_Rel1_0_0_0[]=
 #define RELEASE_NOTE(x,y,z,a) x,y,z,a,sizeof(a)/sizeof(struct ReleaseNote)
 const struct ReleaseInfo m_ReleaseNotes[]=
 {
+    {RELEASE_NOTE("x.x.x.x","-- -- ----",NULL,m_Notes_NEXT)},
     {RELEASE_NOTE("2.0.0.0","26 Sep 2025","Updates to the plugin system",m_Notes_Rel2_0_0_0)},
     {RELEASE_NOTE("1.1.0.0","29 Jun 2025","Added most requested features",m_Notes_Rel1_1_0_0)},
     {RELEASE_NOTE("1.0.4.0","31 May 2025",NULL,m_Notes_Rel1_0_4_0)},

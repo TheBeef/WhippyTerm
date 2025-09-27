@@ -109,13 +109,14 @@ bool GetOSAppDataPath(std::string &AppPath)
 bool GetOSAppExePath(std::string &AppPath)
 {
     TCHAR szFileName[MAX_PATH];
+    TCHAR *p;
 
     if(GetModuleFileName(NULL,szFileName,MAX_PATH)==0)
         return false;
 
     /* Remove the exe name */
-    p=&dest[strlen(dest)];
-    while(p>dest)
+    p=&szFileName[strlen(szFileName)];
+    while(p>szFileName)
     {
         if(*p=='\\')
         {

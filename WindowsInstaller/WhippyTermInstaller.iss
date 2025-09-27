@@ -2,8 +2,8 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Whippy Term"
-#define MyAppVersion "0.17"
-#define MyAppURL "http://WhippyTerm.com"
+#define MyAppVersion "2.0"
+#define MyAppURL "https://WhippyTerm.com"
 #define MyAppExeName "WhippyTerm.exe"
 
 [Setup]
@@ -42,24 +42,14 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "InstallFiles\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\D3Dcompiler_47.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\libEGL.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\libgcc_s_seh-1.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\libGLESV2.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InstallFiles\libstdc++-6.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\libwinpthread-1.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\opengl32sw.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\Qt5Core.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\Qt5Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\Qt5Svg.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\Qt5Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\Qt5Multimedia.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\Qt5Network.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InstallFiles\iconengines\*"; DestDir: "{app}\iconengines"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "InstallFiles\imageformats\*"; DestDir: "{app}\imageformats"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "InstallFiles\platforms\*"; DestDir: "{app}\platforms"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "InstallFiles\styles\*"; DestDir: "{app}\styles"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "InstallFiles\translations\*"; DestDir: "{app}\translations"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "InstallFiles\Qt6Core.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InstallFiles\Qt6Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InstallFiles\Qt6Multimedia.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InstallFiles\Qt6Network.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InstallFiles\Qt6Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InstallFiles\platforms\*"; DestDir: "{app}\platforms"; Flags: ignoreversion
+Source: "InstallFiles\styles\*"; DestDir: "{app}\styles"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

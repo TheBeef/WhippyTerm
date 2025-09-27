@@ -1,3 +1,81 @@
+whippyterm (2.0.0.0-1) unstable; urgency=low
+
+  * Updates to the plugin system
+    - Fixed download/upload so you can't try to start a upload/download while the other is active.
+    - Added a menu item to copy the current selection to a send buffer
+    - Fixed bug with selections in binary mode
+    - Added bookmark import/export
+    - Added command line options
+    - Auto hide of panels made to work
+    - A restart is no longer needed to uninstall a plugin
+    - Added upgrade plugin
+    - Added a calculate CRC dialog
+    - Added an select color button to the color settings
+    - Added an option to make portable version
+    - Installing a data processor plugin will now enable it
+    - Server style IO plugins now start with "SRV_"
+    - Added an option to add a carriage return when a line feed is received
+    - Added option to do local echo
+    - Added the transmit delay to settings
+    - Moved the QT6 for GUI
+    - Reworked custom connection settings menu work
+    - Reworked how manage bookmarks dialog handles custom connection settings
+    - Added a plugin API to be able to freeze the display
+    - Added marks to data processors plugin API
+    - Fixed bug where selection would move if back buffer filled
+    - Fixed bug where selection was being cleared when clipboard mode wasn't smart
+    - Added new misc type of binary plugins
+    - Added a text box to the plugin UI API
+    - Added a color picker to the plugin UI API
+    - Added a groupbox to the plugin UI API
+    - Made settings button work for plugins
+    - Added selection colors to settings
+    - Added a new find CRC dialog
+    - Changed copyright message for generated code
+    - Added support for a file requester to the UI API
+    - Added quick jump for CTRL-C handling
+    - Added user styling/color of the selection
+    - Updated send block panel to support hex
+    - Fixed bug where binary display doesn't stop the cursor from blinking
+    - Added a help button to URI input
+    - Changed menu buffers to use send buffers name instead of static text
+    - Added a set setting to defaults menu option
+
+ -- Paul Hutchinson <paul@whippyterm.com>  Fri, 26 Sep 2025 00:00:00 +0000
+whippyterm (1.1.0.0-1) unstable; urgency=low
+
+  * Added most requested features
+    - Fixed a bug with screen DPI settings on Windows
+    - Fixed a bug with binary displays not ignore attribs that are turned off
+    - Added Lock window scroll when not on bottom line
+    - Improved open errors dialog with OS messages
+    - Added option to auto reconnect when a connection is closed
+    - Extended plugin API so data processor plugin's can see bytes sent
+
+ -- Paul Hutchinson <paul@whippyterm.com>  Sun, 29 Jun 2025 00:00:00 +0000
+whippyterm (1.0.4.0-1) unstable; urgency=low
+
+  * First Release - bug fix #4
+    - Fixed a bug where the plugin IODriver Init() wasn't being called on install
+    - Changed how URI help works.
+    - Fixed bug that the URI didn't always set all options
+    - Fixed a crash in the edit send buffer dialog
+
+ -- Paul Hutchinson <paul@whippyterm.com>  Sat, 31 May 2025 00:00:00 +0000
+whippyterm (1.0.3.0-1) unstable; urgency=low
+
+  * First Release - bug fix #3
+    - Fixed problem where file download didn't know that xmodem was selected by default
+
+ -- Paul Hutchinson <paul@whippyterm.com>  Sun, 27 Apr 2025 00:00:00 +0000
+whippyterm (1.0.2.0-1) unstable; urgency=low
+
+  * First Release - bug fix #2
+    - Fixed problem with Linux installer
+    - Fixed bug with open new connection from URI dialog
+    - Fixed bug with importing settings does not apply the settings
+
+ -- Paul Hutchinson <paul@whippyterm.com>  Wed, 23 Apr 2025 00:00:00 +0000
 whippyterm (1.0.1.0-1) unstable; urgency=low
 
   * First Release - bug fix #1

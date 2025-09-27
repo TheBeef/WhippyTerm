@@ -212,7 +212,7 @@ static struct ReleaseNote m_Notes_Rel2_0_0_0[]=
             "Added a hex input to the send block panel on binary and block connections."
             " A hex input with edit button (that goes the send buffer dialog)"
             " was added to the panel as well as input for what to send at the "
-            "end of a text block.  The uesr can select from:\n"
+            "end of a text block.  The user can select from:\n"
             " * CR+LF\n"
             " * CR\n"
             " * LF\n"

@@ -67,6 +67,7 @@ int main(void)
     int Minor;
     int Rev;
     int Patch;
+    const char *NoteTypeStr;
 
     outmd=fopen("ReleaseNotes.md","w");
     if(outmd==NULL)
@@ -93,7 +94,30 @@ int main(void)
 
         for(note=0;note<m_ReleaseNotes[rel].NotesCount;note++)
         {
-            fprintf(outmd," * %s\n",m_ReleaseNotes[rel].Notes[note].Summary);
+            switch(m_ReleaseNotes[rel].Notes[note].Type)
+            {
+                case NOTETYPE_BUG_FIX:
+                    NoteTypeStr="[Bug fix] ";
+                break;
+                case NOTETYPE_ENHANCEMENT:
+                    NoteTypeStr="[Enhancement] ";
+                break;
+                case NOTETYPE_FUNCTIONALLY_FIX:
+                    NoteTypeStr="[Functionally fix] ";
+                break;
+                case NOTETYPE_POLISH:
+                    NoteTypeStr="[Polish] ";
+                break;
+                case NOTETYPE_NEW_FEATURE:
+                    NoteTypeStr="[New Feature] ";
+                break;
+                default:
+                    NoteTypeStr="";
+                break;
+            }
+
+            fprintf(outmd," * %s%s\n",NoteTypeStr,
+                    m_ReleaseNotes[rel].Notes[note].Summary);
             fprintf(outmd,"   - %s\n",m_ReleaseNotes[rel].Notes[note].Details);
         }
 

@@ -33,6 +33,7 @@
 #include "OS/Directorys.h"
 #include "OS/FilePaths.h"
 #include "Portable.h"
+#include "Version.h"
 #include <string>
 #include <stdio.h>
 

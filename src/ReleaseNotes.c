@@ -30,8 +30,9 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
-    {   "Title",
-            "Descrition"},
+    {   "Fixed bug with selecting cursor color of #FFFFFF",
+            "You could not select full white for colors.  White worked out to"
+            " the abort code.  Fixed it so it no longer does."},
 };
 
 static struct ReleaseNote m_Notes_Rel2_0_0_0[]=

@@ -70,6 +70,6 @@ uint32_t UIGetColor(uint32_t StartingColor)
     SelColor=QColorDialog::getColor(QColor(StartingColor),
             g_MainApp->activeWindow());
     if(SelColor.isValid())
-        return SelColor.rgba();
+        return SelColor.rgba()&0xFFFFFF;
     return 0xFFFFFFFF;
 }

@@ -466,8 +466,13 @@ PG_BOOL Comport_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
         return false;
     }
 
-    Comport_UpdateRTS(DriverIO,Comport_ReadAuxRTSCheckbox(ComInfo->AuxWidgets));
-    Comport_UpdateDTR(DriverIO,Comport_ReadAuxDTRCheckbox(ComInfo->AuxWidgets));
+    if(ComInfo->AuxWidgets!=NULL)
+    {
+        Comport_UpdateRTS(DriverIO,Comport_ReadAuxRTSCheckbox(ComInfo->
+                AuxWidgets));
+        Comport_UpdateDTR(DriverIO,Comport_ReadAuxDTRCheckbox(ComInfo->
+                AuxWidgets));
+    }
 
 //    if(ioctl(ComInfo->fd,TIOCEXCL))
 //    {
@@ -651,9 +656,12 @@ int Comport_Read(t_DriverIOHandleType *DriverIO,uint8_t *Data,int Bytes)
         /* See https://man7.org/linux/man-pages/man2/TIOCMSET.2const.html 
            for bits */
         TmpModemBits=ComInfo->ModemBits;
-        Comport_NotifyOfModemBitsChange(ComInfo->AuxWidgets,
-                TmpModemBits&TIOCM_CD,TmpModemBits&TIOCM_RI,
-                TmpModemBits&TIOCM_DSR,TmpModemBits&TIOCM_CTS);
+        if(ComInfo->AuxWidgets!=NULL)
+        {
+            Comport_NotifyOfModemBitsChange(ComInfo->AuxWidgets,
+                    TmpModemBits&TIOCM_CD,TmpModemBits&TIOCM_RI,
+                    TmpModemBits&TIOCM_DSR,TmpModemBits&TIOCM_CTS);
+        }
         ComInfo->LastModemBits=ComInfo->ModemBits;
     }
 
@@ -728,15 +736,19 @@ int Comport_Read(t_DriverIOHandleType *DriverIO,uint8_t *Data,int Bytes)
                     }
                 break;
                 case 2: // Byte 2 of esc
-                    if(*Src==0)
+                    if(ComInfo->AuxWidgets!=NULL)
                     {
-                        /* It was a break */
-                        Comport_AddLogMsg(ComInfo->AuxWidgets,"BREAK");
-                    }
-                    else
-                    {
-                        /* Framing / parity errors */
-                        Comport_AddLogMsg(ComInfo->AuxWidgets,"Framing / parity error");
+                        if(*Src==0)
+                        {
+                            /* It was a break */
+                            Comport_AddLogMsg(ComInfo->AuxWidgets,"BREAK");
+                        }
+                        else
+                        {
+                            /* Framing / parity errors */
+                            Comport_AddLogMsg(ComInfo->AuxWidgets,
+                                    "Framing / parity error");
+                        }
                     }
                     ComInfo->ReadEsc=0;
                     RetBytes--;

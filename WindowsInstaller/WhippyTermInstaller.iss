@@ -43,6 +43,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "InstallFiles6\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InstallFiles6\libstdc++-6.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InstallFiles6\libwinpthread-1.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InstallFiles6\libgcc_s_seh-1.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InstallFiles6\Qt6Core.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InstallFiles6\Qt6Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InstallFiles6\Qt6Multimedia.dll"; DestDir: "{app}"; Flags: ignoreversion

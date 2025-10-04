@@ -1,5 +1,8 @@
 # Release Notes
 
+## Version 2.0.1.0 -- 30 Sep 2025
+ * [Bug fix] Fixed bug with selecting cursor color of #FFFFFF
+   - You could not select full white for colors.  White worked out to the abort code.  Fixed it so it no longer does.
 ## Version 2.0.0.0 -- 26 Sep 2025
 ### Updates to the plugin system
  * [Polish] Fixed download/upload so you can't try to start a upload/download while the other is active.
@@ -73,7 +76,7 @@ You can also just temperately for the current connection as well without changin
  * [New Feature] Added user styling/color of the selection
    - The user can now style or change the background color of the selected text.  This allows the user to highlight text of interest.  This is most useful in binary mode as they can select different messages or parts of a packet and highlight them.  Bold, italics, underline, strike through, and the background color can be changed.
  * [Enhancement] Updated send block panel to support hex
-   - Added a hex input to the send block panel on binary and block connections. A hex input with edit button (that goes the send buffer dialog) was added to the panel as well as input for what to send at the end of a text block.  The uesr can select from:
+   - Added a hex input to the send block panel on binary and block connections. A hex input with edit button (that goes the send buffer dialog) was added to the panel as well as input for what to send at the end of a text block.  The user can select from:
  * CR+LF
  * CR
  * LF

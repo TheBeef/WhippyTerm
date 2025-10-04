@@ -575,9 +575,12 @@ int Comport_Read(t_DriverIOHandleType *DriverIO,uint8_t *Data,int Bytes)
         {
             /* Update the indicators */
             TmpModemBits=ComInfo->ModemBits;
-            Comport_NotifyOfModemBitsChange(ComInfo->AuxWidgets,
-                    TmpModemBits&MS_RLSD_ON,TmpModemBits&MS_RING_ON,
-                    TmpModemBits&MS_DSR_ON,TmpModemBits&MS_CTS_ON);
+            if(ComInfo->AuxWidgets!=NULL)
+            {
+                Comport_NotifyOfModemBitsChange(ComInfo->AuxWidgets,
+                        TmpModemBits&MS_RLSD_ON,TmpModemBits&MS_RING_ON,
+                        TmpModemBits&MS_DSR_ON,TmpModemBits&MS_CTS_ON);
+            }
             ComInfo->LastModemBits=ComInfo->ModemBits;
         }
 
@@ -585,30 +588,33 @@ int Comport_Read(t_DriverIOHandleType *DriverIO,uint8_t *Data,int Bytes)
         {
             /* Update the any errors we support */
             TmpErrorBits=ComInfo->CommErrors;
-            if(ComInfo->CommErrors&CE_BREAK &&
-                    !(ComInfo->LastCommErrors&CE_BREAK))
+            if(ComInfo->AuxWidgets!=NULL)
             {
-                Comport_AddLogMsg(ComInfo->AuxWidgets,"BREAK");
-            }
-            if(ComInfo->CommErrors&CE_FRAME &&
-                    !(ComInfo->LastCommErrors&CE_FRAME))
-            {
-                Comport_AddLogMsg(ComInfo->AuxWidgets,"Framing error");
-            }
-            if(ComInfo->CommErrors&CE_RXPARITY &&
-                    !(ComInfo->LastCommErrors&CE_RXPARITY))
-            {
-                Comport_AddLogMsg(ComInfo->AuxWidgets,"Parity error");
-            }
-            if(ComInfo->CommErrors&CE_RXOVER &&
-                    !(ComInfo->LastCommErrors&CE_RXOVER))
-            {
-                Comport_AddLogMsg(ComInfo->AuxWidgets,"Overrun error");
-            }
-            if(ComInfo->CommErrors&CE_OVERRUN &&
-                    !(ComInfo->LastCommErrors&CE_OVERRUN))
-            {
-                Comport_AddLogMsg(ComInfo->AuxWidgets,"Overrun error");
+                if(ComInfo->CommErrors&CE_BREAK &&
+                        !(ComInfo->LastCommErrors&CE_BREAK))
+                {
+                    Comport_AddLogMsg(ComInfo->AuxWidgets,"BREAK");
+                }
+                if(ComInfo->CommErrors&CE_FRAME &&
+                        !(ComInfo->LastCommErrors&CE_FRAME))
+                {
+                    Comport_AddLogMsg(ComInfo->AuxWidgets,"Framing error");
+                }
+                if(ComInfo->CommErrors&CE_RXPARITY &&
+                        !(ComInfo->LastCommErrors&CE_RXPARITY))
+                {
+                    Comport_AddLogMsg(ComInfo->AuxWidgets,"Parity error");
+                }
+                if(ComInfo->CommErrors&CE_RXOVER &&
+                        !(ComInfo->LastCommErrors&CE_RXOVER))
+                {
+                    Comport_AddLogMsg(ComInfo->AuxWidgets,"Overrun error");
+                }
+                if(ComInfo->CommErrors&CE_OVERRUN &&
+                        !(ComInfo->LastCommErrors&CE_OVERRUN))
+                {
+                    Comport_AddLogMsg(ComInfo->AuxWidgets,"Overrun error");
+                }
             }
             ComInfo->LastCommErrors=ComInfo->CommErrors;
         }

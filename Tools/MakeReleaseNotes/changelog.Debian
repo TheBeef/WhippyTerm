@@ -1,3 +1,11 @@
+whippyterm (2.0.1.0-1) unstable; urgency=low
+
+  * Updates to the plugin system - bug fix #1
+  * Added most requested features - bug fix #1
+  * First Release - bug fix #1
+    - Fixed bug with selecting cursor color of #FFFFFF
+
+ -- Paul Hutchinson <paul@whippyterm.com>  Tue, 30 Sep 2025 00:00:00 +0000
 whippyterm (2.0.0.0-1) unstable; urgency=low
 
   * Updates to the plugin system

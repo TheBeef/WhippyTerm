@@ -28,9 +28,18 @@ struct ReleaseInfo
 //            "Descrition"},
 //};
 
+static struct ReleaseNote m_Notes_NEXT[]=
+{
+    {   "Fixed bug with the com test crashing when used with serial ports",
+            "The serial port driver was setting aux controls even if they"
+            " didn't exist.  New rules for drivers, do not assume that aux"
+            " controls will exist (check if the handle is NULL before"
+            " setting an aux control)."},
+};
+
 static struct ReleaseNote m_Notes_Rel2_0_1_0[]=
 {
-    {   "Fixed bug with selecting cursor color of #FFFFFF",
+    {   NOTETYPE_BUG_FIX,"Fixed bug with selecting cursor color of #FFFFFF",
             "You could not select full white for colors.  White worked out to"
             " the abort code.  Fixed it so it no longer does."},
 };

@@ -30,7 +30,7 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_Rel2_0_2_0[]=
 {
-    {   "Fixed bug with the com test crashing when used with serial ports",
+    {   NOTETYPE_BUG_FIX,"Fixed bug with the com test crashing when used with serial ports",
             "The serial port driver was setting aux controls even if they"
             " didn't exist.  New rules for drivers, do not assume that aux"
             " controls will exist (check if the handle is NULL before"

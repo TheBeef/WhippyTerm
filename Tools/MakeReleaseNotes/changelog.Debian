@@ -1,3 +1,11 @@
+whippyterm (2.0.2.0-1) unstable; urgency=low
+
+  * Updates to the plugin system - bug fix #2
+  * Added most requested features - bug fix #2
+  * First Release - bug fix #2
+    - Fixed bug with the com test crashing when used with serial ports
+
+ -- Paul Hutchinson <paul@whippyterm.com>  Fri, 03 Oct 2025 00:00:00 +0000
 whippyterm (2.0.1.0-1) unstable; urgency=low
 
   * Updates to the plugin system - bug fix #1

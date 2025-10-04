@@ -1,5 +1,8 @@
 # Release Notes
 
+## Version 2.0.2.0 -- 03 Oct 2025
+ * [Bug fix] Fixed bug with the com test crashing when used with serial ports
+   - The serial port driver was setting aux controls even if they didn't exist.  New rules for drivers, do not assume that aux controls will exist (check if the handle is NULL before setting an aux control).
 ## Version 2.0.1.0 -- 30 Sep 2025
  * [Bug fix] Fixed bug with selecting cursor color of #FFFFFF
    - You could not select full white for colors.  White worked out to the abort code.  Fixed it so it no longer does.

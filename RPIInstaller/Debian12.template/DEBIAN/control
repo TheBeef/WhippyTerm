@@ -2,7 +2,7 @@ Package: whippyterm
 Version: x.x.x.x-1
 Section: comm
 Priority: optional
-Architecture: amd64
+Architecture: armhf
 Depends: libqt6core6 (>= 6.2.0), libqt6gui6 (>= 6.2.0), libqt6widgets6 (>= 6.2.0), libqt6multimedia6 (>= 6.2.0), libc6 (>= 2.35), libgcc1, libstdc++6 (>= 5)
 Maintainer: Paul Hutchinson <paul@whippyterm.com>
 Description: Modern term program.

@@ -1862,6 +1862,32 @@ bool DisplayText::RethinkInsertFrag(void)
  ******************************************************************************/
 void DisplayText::WriteChar(uint8_t *Chr)
 {
+    WriteCharWithOptions(Chr,true);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::WriteCharWithOptions
+ *
+ * SYNOPSIS:
+ *    void DisplayText::WriteCharWithOptions(uint8_t *Chr,bool AdvCursor);
+ *
+ * PARAMETERS:
+ *    Chr [I] -- The char to add.  This is a UTF8 char that is 0 term'ed.
+ *    AdvCursor [I] -- If this is true then we move the cursor when we are done.
+ *
+ * FUNCTION:
+ *    This is the real WriteChar().  It has more options than WriteChar()
+ *    supports.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    WriteChar()
+ ******************************************************************************/
+void DisplayText::WriteCharWithOptions(uint8_t *Chr,bool AdvCursor)
+{
     try
     {
         if(ActiveLine==NULL)
@@ -1923,7 +1949,8 @@ void DisplayText::WriteChar(uint8_t *Chr)
             }
         }
 
-        AdjustCursorAfterWriteChar(Chr);
+        if(AdvCursor)
+            AdjustCursorAfterWriteChar(Chr);
         RedrawActiveLine();
     }
     catch(...)
@@ -2936,22 +2963,30 @@ void DisplayText::DoBackspace(void)
     uint_fast32_t CursorOffset;
     uint_fast32_t MarkOffset;
 
-    /* Move the cursor to the next tab pos */
+    /* Move the cursor to the prev pos */
     NewCursorY=CursorY;
     NewPos=CursorX-1;
     if(NewPos<0)
     {
         /* Ok, we need to wrap to the prev line */
-        NewPos=ScreenWidthChars-1;
         NewCursorY--;
         if(NewCursorY<0)
         {
             NewCursorY=0;
             NewPos=0;
         }
+        else
+        {
+            NewPos=ScreenWidthChars-1;
+
+            if(Settings->DestructiveBackspace)
+                ClearArea(NewPos,NewCursorY,~0,NewCursorY+1);
+        }
     }
 
     MoveCursor(NewPos,NewCursorY,false);
+    if(Settings->DestructiveBackspace)
+        WriteCharWithOptions((uint8_t *)" ",false);
 
     /* We invalid the marks if we be less than the mark */
     CursorOffset=NewCursorY*ScreenWidthChars+NewPos;

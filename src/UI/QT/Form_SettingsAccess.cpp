@@ -116,6 +116,8 @@ t_UICheckboxCtrl *UIS_GetCheckboxHandle(e_UIS_Checkbox UIObj)
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->AutoCR_checkBox;
         case e_UIS_Checkbox_LocalEcho:
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->LocalEcho_checkBox;
+        case e_UIS_Checkbox_DestructiveBackspace:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->DestructiveBackspace_checkBox;
         case e_UIS_CheckboxMAX:
         default:
         break;

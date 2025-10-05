@@ -24,9 +24,19 @@ struct ReleaseInfo
 
 //static struct ReleaseNote m_Notes_NEXT[]=
 //{
-//    {   "Title",
+//    {   NOTETYPE_ENHANCEMENT,"Title",
 //            "Descrition"},
 //};
+
+static struct ReleaseNote m_Notes_NEXT[]=
+{
+    {   NOTETYPE_ENHANCEMENT,"Added new option for a destructive backspace",
+            "There is a new setting to change how the backspace works.  If"
+            " checked then instead of just moving the cursor, a space is"
+            " placed over the cursor position.  This is helpful if you have"
+            " a prompt that supports editing but doesn't output a space"
+            " to erase the char when doing a backspace."},
+};
 
 static struct ReleaseNote m_Notes_Rel2_0_2_0[]=
 {

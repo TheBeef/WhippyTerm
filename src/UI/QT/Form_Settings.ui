@@ -36,7 +36,7 @@
       <item>
        <widget class="QStackedWidget" name="Editing_stackedWidget">
         <property name="currentIndex">
-         <number>3</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="page_Panel">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -793,7 +793,7 @@
           <item>
            <widget class="QTabWidget" name="Display_tabWidget">
             <property name="currentIndex">
-             <number>1</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="Display_tab">
              <attribute name="title">
@@ -12747,7 +12747,7 @@
           <item>
            <widget class="QTabWidget" name="Terminal_tabWidget">
             <property name="currentIndex">
-             <number>0</number>
+             <number>2</number>
             </property>
             <widget class="QWidget" name="Terminal_tab">
              <attribute name="title">
@@ -13337,6 +13337,16 @@ p, li { white-space: pre-wrap; }
                        </size>
                       </property>
                      </spacer>
+                    </item>
+                    <item>
+                     <widget class="QCheckBox" name="DestructiveBackspace_checkBox">
+                      <property name="toolTip">
+                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Erase the charactor under the cursor when a backspace is procressed&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="text">
+                       <string>Destructive backspace</string>
+                      </property>
+                     </widget>
                     </item>
                    </layout>
                   </widget>

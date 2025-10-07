@@ -2675,7 +2675,6 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Checkbox_ColorEnable:
                 case e_UIS_Checkbox_UseCustomSounds:
                 case e_UIS_Checkbox_MouseCursorUseIBeam:
-                case e_UIS_Checkbox_DestructiveBackspace:
                 case e_UIS_CheckboxMAX:
                 default:
                 break;

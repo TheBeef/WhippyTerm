@@ -1275,6 +1275,18 @@ void Form_MainWindow::on_pushButton_Bridge_Release_clicked()
     DoBttnTriggered(e_UIMWBttn_Bridge_Release);
 }
 
+void Form_MainWindow::on_comboBox_Bridge_Con1_activated(int index)
+{
+    uintptr_t ID;   // The ID for this item
+    union MWEventData EventData;
+
+    ID=ui->comboBox_Bridge_Con1->itemData(index).toULongLong();
+
+    EventData.ComboBox.InputID=e_UIMWComboBox_Bridge_Connection1;
+    EventData.ComboBox.Index=index;
+    SendEvent(e_MWEvent_ComboBoxChanged,&EventData,ID);
+}
+
 void Form_MainWindow::on_comboBox_Bridge_Con2_activated(int index)
 {
     uintptr_t ID;   // The ID for this item

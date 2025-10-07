@@ -53,10 +53,12 @@ class MWBridge
         void ConnectionAbout2Changed(void);
         void BridgeConnections(void);
         void ReleaseConnections(void);
-        void ConnectionsChanged(void);
+        void ConnectionAddedRemoved(void);
         void SelectedConnectionChanged(void);
         void LockConnectionChange(int Connection);
         void ConnectionAttribChanged(void);
+        void ConnectionBridgedChanged(class Connection *Con1,
+                class Connection *Con2);
 
     private:
         t_UIMainWindow *UIWin;

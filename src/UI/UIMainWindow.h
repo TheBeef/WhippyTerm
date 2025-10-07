@@ -301,7 +301,6 @@ typedef enum
     e_UIMWLabel_Download_Filename,
     e_UIMWLabel_Download_BytesRx,
     e_UIMWLabel_Upload_BytesTx,
-    e_UIMWLabel_Bridge_Connection1,
     e_UIMWLabelMAX
 } e_UIMWLabelType;
 
@@ -309,6 +308,7 @@ typedef enum
 {
     e_UIMWComboBox_Upload_Protocol,
     e_UIMWComboBox_Download_Protocol,
+    e_UIMWComboBox_Bridge_Connection1,
     e_UIMWComboBox_Bridge_Connection2,
     e_UIMWComboBoxMAX
 } e_UIMWComboBoxType;

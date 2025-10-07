@@ -81,13 +81,8 @@ MWBridge::~MWBridge()
  ******************************************************************************/
 void MWBridge::Setup(class TheMainWindow *Parent,t_UIMainWindow *Win)
 {
-    t_UILabelCtrl *Con1Label;
-
     MW=Parent;
     UIWin=Win;
-
-    Con1Label=UIMW_GetLabelHandle(UIWin,e_UIMWLabel_Bridge_Connection1);
-    UISetLabelText(Con1Label,"");
 }
 
 /*******************************************************************************
@@ -113,7 +108,6 @@ void MWBridge::Setup(class TheMainWindow *Parent,t_UIMainWindow *Win)
 void MWBridge::ActivateCtrls(bool Active)
 {
     PanelActive=Active;
-
     RethinkControls();
     RethinkLockNames();
 }
@@ -142,6 +136,7 @@ void MWBridge::RethinkControls(void)
 {
     t_UIButtonCtrl *BridgeBttn;
     t_UIButtonCtrl *ReleaseBttn;
+    t_UIComboBoxCtrl *Con1Combox;
     t_UIComboBoxCtrl *Con2Combox;
     t_UICheckboxCtrl *Lock1Checkbox;
     t_UICheckboxCtrl *Lock2Checkbox;
@@ -160,6 +155,7 @@ void MWBridge::RethinkControls(void)
 
     BridgeBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_Bridge_Bridge);
     ReleaseBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_Bridge_Release);
+    Con1Combox=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Bridge_Connection1);
     Con2Combox=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Bridge_Connection2);
     Lock1Checkbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_Bridge_Lock1);
     Lock2Checkbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_Bridge_Lock2);
@@ -173,14 +169,18 @@ void MWBridge::RethinkControls(void)
 
     if(PanelActive)
     {
-        if(MW->ActiveCon->GetBridgedConnection()!=NULL)
-            AlreadyBridged=true;
-        else
-            AlreadyBridged=false;
+        AlreadyBridged=MW->GetBridgedStateInfo(&BridgedCon1,NULL);
 
         CanBridge=true;
-        if(AlreadyBridged || UIGetComboBoxSelectedIndex(Con2Combox)<0)
+        if(AlreadyBridged)
             CanBridge=false;
+
+        /* We can't bridge the same connection to it's self */
+        if(UIGetComboBoxSelectedEntry(Con1Combox)==
+                UIGetComboBoxSelectedEntry(Con2Combox))
+        {
+            CanBridge=false;
+        }
 
         if(CanBridge)
             BridgeEnabled=true;
@@ -200,6 +200,7 @@ void MWBridge::RethinkControls(void)
 
     UIEnableButton(BridgeBttn,BridgeEnabled);
     UIEnableButton(ReleaseBttn,ReleaseEnabled);
+    UIEnableComboBox(Con1Combox,Con1Enabled);
     UIEnableComboBox(Con2Combox,Con2Enabled);
     UIEnableCheckbox(Lock1Checkbox,Lock1Enabled);
     UIEnableCheckbox(Lock2Checkbox,Lock2Enabled);
@@ -226,31 +227,23 @@ void MWBridge::RethinkControls(void)
  ******************************************************************************/
 void MWBridge::BridgeConnections(void)
 {
+    t_UIComboBoxCtrl *Con1Combox;
     t_UIComboBoxCtrl *Con2Combox;
     class Connection *Con1;
     class Connection *Con2;
     t_UICheckboxCtrl *Lock1Checkbox;
     t_UICheckboxCtrl *Lock2Checkbox;
 
-    if(!PanelActive || MW->ActiveCon==NULL)
+    if(!PanelActive)
         return;
 
+    Con1Combox=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Bridge_Connection1);
     Con2Combox=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Bridge_Connection2);
     Lock1Checkbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_Bridge_Lock1);
     Lock2Checkbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_Bridge_Lock2);
 
-    if(UIGetComboBoxSelectedIndex(Con2Combox)<0)
-        return;
-
-    Con1=MW->ActiveCon;
+    Con1=(class Connection *)UIGetComboBoxSelectedEntry(Con1Combox);
     Con2=(class Connection *)UIGetComboBoxSelectedEntry(Con2Combox);
-
-    /* Make sure we can bridge these connections */
-    if(MW->ActiveCon->GetBridgedConnection()!=NULL ||
-            Con2->GetBridgedConnection()!=NULL)
-    {
-        return;
-    }
 
     Con1->SetLockOutConnectionWhenBridged(
             UIGetCheckboxCheckStatus(Lock1Checkbox));
@@ -284,20 +277,28 @@ void MWBridge::BridgeConnections(void)
  ******************************************************************************/
 void MWBridge::ReleaseConnections(void)
 {
-    t_UIComboBoxCtrl *Con2Combox;
+//    t_UIComboBoxCtrl *Con1Combox;
+//    t_UIComboBoxCtrl *Con2Combox;
     class Connection *Con1;
     class Connection *Con2;
 
-    if(MW==NULL || MW->ActiveCon==NULL)
+    if(MW==NULL)
         return;
 
-    Con2Combox=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Bridge_Connection2);
+//    Con1Combox=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Bridge_Connection1);
+//    Con2Combox=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Bridge_Connection2);
+//
+//    Con1=(class Connection *)UIGetComboBoxSelectedEntry(Con1Combox);
+//    Con2=(class Connection *)UIGetComboBoxSelectedEntry(Con2Combox);
+//
+//    Con1->BridgeConnection(NULL);
+//    Con2->BridgeConnection(NULL);
 
-    Con1=MW->ActiveCon;
-    Con2=(class Connection *)UIGetComboBoxSelectedEntry(Con2Combox);
-
-    Con1->BridgeConnection(NULL);
-    Con2->BridgeConnection(NULL);
+    if(MW->GetBridgedStateInfo(&Con1,&Con2))
+    {
+        Con1->BridgeConnection(NULL);
+        Con2->BridgeConnection(NULL);
+    }
 
     RethinkControls();
 }
@@ -350,39 +351,21 @@ void MWBridge::ConnectionAbout2Changed(void)
  ******************************************************************************/
 void MWBridge::ConnectionChanged(void)
 {
-    t_UILabelCtrl *Con1Label;
-    std::string ConName;
-
-    Con1Label=UIMW_GetLabelHandle(UIWin,e_UIMWLabel_Bridge_Connection1);
-
-    if(MW==NULL || MW->ActiveCon==NULL)
-    {
-        UISetLabelText(Con1Label,"");
-        return;
-    }
-
-    MW->ActiveCon->GetDisplayName(ConName);
-    UISetLabelText(Con1Label,ConName.c_str());
-
-    /* We need to rebuild the list of connections (because we need to remove
-       invalid connections */
-    ConnectionsChanged();
 }
 
 /*******************************************************************************
  * NAME:
- *    MWBridge::ConnectionsChanged
+ *    MWBridge::ConnectionAddedRemoved
  *
  * SYNOPSIS:
- *    void MWBridge::ConnectionsChanged(void);
+ *    void MWBridge::ConnectionAddedRemoved(void);
  *
  * PARAMETERS:
  *    NONE
  *
  * FUNCTION:
  *    This function is called to tell the bridge panel that a connection has
- *    been allocated or freed or changed in some way (like the bridge status
- *    being changed).
+ *    been allocated or freed.
  *
  *    It takes an updates the list of connections available for bridging.
  *
@@ -392,58 +375,44 @@ void MWBridge::ConnectionChanged(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWBridge::ConnectionsChanged(void)
+void MWBridge::ConnectionAddedRemoved(void)
 {
-    t_ConnectionList ConList;
-    i_ConnectionList CurrentCon;
+    t_MainWindowConnectionList ConList;
+    i_MainWindowConnectionList CurrentCon;
     class Connection *Con;
+    t_UIComboBoxCtrl *Con1Combox;
     t_UIComboBoxCtrl *Con2Combox;
     uintptr_t SelectCon1;
     uintptr_t SelectCon2;
     std::string ConName;
-    t_UICheckboxCtrl *Lock1Checkbox;
-    t_UICheckboxCtrl *Lock2Checkbox;
-    class Connection *Con1;
-    class Connection *Con2;
 
-    if(MW==NULL || MW->ActiveCon==NULL)
+    if(MW==NULL)
         return;
 
+    Con1Combox=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Bridge_Connection1);
     Con2Combox=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Bridge_Connection2);
-    Lock1Checkbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_Bridge_Lock1);
-    Lock2Checkbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_Bridge_Lock2);
 
-    Con1=MW->ActiveCon;
-    Con2=MW->ActiveCon->GetBridgedConnection();
-
+    SelectCon1=UIGetComboBoxSelectedEntry(Con1Combox);
     SelectCon2=UIGetComboBoxSelectedEntry(Con2Combox);
 
+    UIClearComboBox(Con1Combox);
     UIClearComboBox(Con2Combox);
 
-    Con_GetListOfConnections(ConList);
+    MW->GetListOfConnections(ConList);
     for(CurrentCon=ConList.begin();CurrentCon!=ConList.end();CurrentCon++)
     {
         Con=*CurrentCon;
 
-        /* We only add connections that are not already bridged (and are
-           not the active connection) */
-        if(Con!=MW->ActiveCon && (Con->GetBridgedConnection()==NULL ||
-                Con->GetBridgedConnection()==MW->ActiveCon))
-        {
-            Con->GetDisplayName(ConName);
-            UIAddItem2ComboBox(Con2Combox,ConName.c_str(),(uintptr_t)Con);
-            if(Con->GetBridgedConnection()==MW->ActiveCon)
-                SelectCon2=(uintptr_t)Con;
-        }
+        Con->GetDisplayName(ConName);
+        UIAddItem2ComboBox(Con1Combox,ConName.c_str(),(uintptr_t)Con);
+        UIAddItem2ComboBox(Con2Combox,ConName.c_str(),(uintptr_t)Con);
     }
 
+    UISetComboBoxSelectedEntry(Con1Combox,SelectCon1);
     UISetComboBoxSelectedEntry(Con2Combox,SelectCon2);
-    UISortComboBox(Con2Combox);
 
-    if(Con1!=NULL)
-        UICheckCheckbox(Lock1Checkbox,Con1->GetLockOutConnectionWhenBridged());
-    if(Con2!=NULL)
-        UICheckCheckbox(Lock2Checkbox,Con2->GetLockOutConnectionWhenBridged());
+    UISortComboBox(Con1Combox);
+    UISortComboBox(Con2Combox);
 
     RethinkLockNames();
     RethinkControls();
@@ -501,22 +470,20 @@ void MWBridge::LockConnectionChange(int Connection)
     class Connection *Con;
     t_UICheckboxCtrl *LockCheckbox;
 
-    if(MW->ActiveCon==NULL)
-        return;
-
     if(Connection==0)
     {
+        ConCombox=UIMW_GetComboBoxHandle(UIWin,
+                e_UIMWComboBox_Bridge_Connection1);
         LockCheckbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_Bridge_Lock1);
-        Con=MW->ActiveCon;
     }
     else
     {
         ConCombox=UIMW_GetComboBoxHandle(UIWin,
                 e_UIMWComboBox_Bridge_Connection2);
         LockCheckbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_Bridge_Lock2);
-        Con=(class Connection *)UIGetComboBoxSelectedEntry(ConCombox);
     }
 
+    Con=(class Connection *)UIGetComboBoxSelectedEntry(ConCombox);
     Con->SetLockOutConnectionWhenBridged(
             UIGetCheckboxCheckStatus(LockCheckbox));
 }
@@ -543,7 +510,7 @@ void MWBridge::LockConnectionChange(int Connection)
  ******************************************************************************/
 void MWBridge::ConnectionAttribChanged(void)
 {
-    ConnectionsChanged();
+    ConnectionAddedRemoved();
 }
 
 /*******************************************************************************
@@ -570,6 +537,7 @@ void MWBridge::RethinkLockNames(void)
 {
     t_MainWindowConnectionList ConList;
     i_MainWindowConnectionList CurrentCon;
+    t_UIComboBoxCtrl *Con1Combox;
     t_UIComboBoxCtrl *Con2Combox;
     t_UICheckboxCtrl *Lock1Checkbox;
     t_UICheckboxCtrl *Lock2Checkbox;
@@ -581,11 +549,12 @@ void MWBridge::RethinkLockNames(void)
     if(MW==NULL)
         return;
 
+    Con1Combox=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Bridge_Connection1);
     Con2Combox=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Bridge_Connection2);
     Lock1Checkbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_Bridge_Lock1);
     Lock2Checkbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_Bridge_Lock2);
 
-    SelectCon1=MW->ActiveCon;
+    SelectCon1=(class Connection *)UIGetComboBoxSelectedEntry(Con1Combox);
     SelectCon2=(class Connection *)UIGetComboBoxSelectedEntry(Con2Combox);
 
     if(SelectCon1!=NULL)
@@ -603,4 +572,54 @@ void MWBridge::RethinkLockNames(void)
     NewLabel="Lock ";
     NewLabel+=ConName;
     UISetCheckboxLabel(Lock2Checkbox,NewLabel.c_str());
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWBridge::ConnectionBridgedChanged
+ *
+ * SYNOPSIS:
+ *    void MWBridge::ConnectionBridgedChanged(class Connection *Con1,
+ *              class Connection *Con2);
+ *
+ * PARAMETERS:
+ *    Con1 [I] -- The first connection that has been bridged (maybe be NULL).
+ *    Con2 [I] -- The second connection that has been bridged (maybe be NULL).
+ *
+ * FUNCTION:
+ *    This function is called to tell the panel that we got a connection
+ *    bridged event.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWBridge::ConnectionBridgedChanged(class Connection *Con1,
+        class Connection *Con2)
+{
+    t_UIComboBoxCtrl *Con1Combox;
+    t_UIComboBoxCtrl *Con2Combox;
+    t_UICheckboxCtrl *Lock1Checkbox;
+    t_UICheckboxCtrl *Lock2Checkbox;
+
+    Con1Combox=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Bridge_Connection1);
+    Con2Combox=UIMW_GetComboBoxHandle(UIWin,e_UIMWComboBox_Bridge_Connection2);
+    Lock1Checkbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_Bridge_Lock1);
+    Lock2Checkbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_Bridge_Lock2);
+
+    if(Con1!=NULL && Con2!=NULL)
+    {
+        /* Update the UI so the connection that in the bridge are shown */
+        UISetComboBoxSelectedEntry(Con1Combox,(uintptr_t)Con1);
+        UISetComboBoxSelectedEntry(Con2Combox,(uintptr_t)Con2);
+
+        UICheckCheckbox(Lock1Checkbox,Con1->GetLockOutConnectionWhenBridged());
+        UICheckCheckbox(Lock2Checkbox,Con2->GetLockOutConnectionWhenBridged());
+
+        RethinkLockNames();
+    }
+
+    RethinkControls();
 }

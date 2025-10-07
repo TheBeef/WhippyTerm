@@ -394,6 +394,9 @@ TheMainWindow::TheMainWindow()
     TextCanvasWidth=0;
     TextCanvasHeight=0;
     ActiveCon=NULL;
+    BridgeActive=false;
+    BridgedCon1=NULL;
+    BridgedCon2=NULL;
     CurrentBGStyleColor=e_SysCol_Black;
     CurrentBGStyleShade=e_SysColShade_Normal;
 
@@ -1120,7 +1123,7 @@ class Connection *TheMainWindow::ReloadTabFromURI(const char *TabLabel,
                 /* We also need to free the tab because it's now an orphan */
                 UITabCtrlRemoveTab(MainTabs,(uintptr_t)TabCon);
                 RethinkTabCountAfterFree();
-                BridgePanel.ConnectionsChanged();
+                BridgePanel.ConnectionAddedRemoved();
                 RethinkBridgeMenu();
 
                 throw("Failed to setup the new connection");
@@ -1995,7 +1998,7 @@ void TheMainWindow::CloseActiveConnection(void)
 void TheMainWindow::CloseConnection(class Connection *TabCon)
 {
     FreeTab(TabCon);
-    BridgePanel.ConnectionsChanged();
+    BridgePanel.ConnectionAddedRemoved();
     RethinkBridgeMenu();
 }
 
@@ -3465,7 +3468,7 @@ void TheMainWindow::ConnectionEvent(const struct ConMWEvent *Event)
         case ConMWEvent_NewConnection:
             UploadPanel.NewConnectionAllocated(Event->Con);
             DownloadPanel.NewConnectionAllocated(Event->Con);
-            BridgePanel.ConnectionsChanged();
+            BridgePanel.ConnectionAddedRemoved();
         break;
         case ConMWEvent_DownloadStatUpdate:
             DownloadPanel.DownloadStatChanged();
@@ -3487,7 +3490,21 @@ void TheMainWindow::ConnectionEvent(const struct ConMWEvent *Event)
                     &Event->Info->HexDis);
         break;
         case ConMWEvent_BridgeStateChange:
-            BridgePanel.ConnectionsChanged();
+            if(Event->Info->Bridged.BridgedTo==NULL)
+            {
+                BridgeActive=false;
+                BridgedCon1=NULL;
+                BridgedCon2=NULL;
+            }
+            else
+            {
+                BridgeActive=true;
+                BridgedCon1=Event->Con;
+                BridgedCon2=Event->Info->Bridged.BridgedTo;
+            }
+
+            BridgePanel.ConnectionBridgedChanged(BridgedCon1,BridgedCon2);
+
             RethinkBridgeMenu();
         break;
         case ConMWEvent_SelectionChanged:
@@ -3526,7 +3543,7 @@ void TheMainWindow::CloseTab(class Connection *Con)
     if(Con!=NULL)
     {
         FreeTab(Con);
-        BridgePanel.ConnectionsChanged();
+        BridgePanel.ConnectionAddedRemoved();
         RethinkBridgeMenu();
 
         /* Rethink the whole UI as we have just deleted a tab */
@@ -3607,10 +3624,6 @@ void TheMainWindow::RethinkBridgeMenu(void)
     e_UIMenuCtrl *ReleaseBridgeMenu;
     bool EnableBridge;
     bool EnableRelease;
-    t_ConnectionList ConList;
-    i_ConnectionList CurrentCon;
-    class Connection *Con;
-    bool BridgeAvail;
 
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
     BridgeMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_BridgeConnections);
@@ -3618,27 +3631,9 @@ void TheMainWindow::RethinkBridgeMenu(void)
 
     EnableBridge=false;
     EnableRelease=false;
-
-    BridgeAvail=false;
-    Con_GetListOfConnections(ConList);
-    for(CurrentCon=ConList.begin();CurrentCon!=ConList.end();CurrentCon++)
+    if(UITabCtrlGetTabCount(MainTabs)>=2)
     {
-        Con=*CurrentCon;
-
-        /* We only add connections that are not already bridged (and are
-           not the active connection) */
-        if(Con!=ActiveCon && (Con->GetBridgedConnection()==NULL ||
-                Con->GetBridgedConnection()==ActiveCon))
-        {
-            /* We have at least 1 connection to we bridge with */
-            BridgeAvail=true;
-            break;
-        }
-    }
-
-    if(BridgeAvail)
-    {
-        if(ActiveCon->GetBridgedConnection()!=NULL)
+        if(BridgeActive)
             EnableRelease=true;
         else
             EnableBridge=true;
@@ -3646,6 +3641,41 @@ void TheMainWindow::RethinkBridgeMenu(void)
 
     UIEnableMenu(BridgeMenu,EnableBridge);
     UIEnableMenu(ReleaseBridgeMenu,EnableRelease);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::GetBridgedStateInfo
+ *
+ * SYNOPSIS:
+ *    bool TheMainWindow::GetBridgedStateInfo(class Connection **Con1,
+ *          class Connection **Con2);
+ *
+ * PARAMETERS:
+ *    Con1 [I] -- A pointer to fill in with the first connection that is
+ *                bridged in this main window.  Pass NULL to ignore.
+ *    Con2 [I] -- A pointer to fill in with the second connection that is
+ *                bridged in this main window.  Pass NULL to ignore.
+ *
+ * FUNCTION:
+ *    This function gets info about any connection bridging that is in place.
+ *
+ * RETURNS:
+ *    true -- There is a bridge in place
+ *    false -- Connection in the main window are not bridged.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool TheMainWindow::GetBridgedStateInfo(class Connection **Con1,
+        class Connection **Con2)
+{
+    if(Con1!=NULL)
+        *Con1=BridgedCon1;
+    if(Con2!=NULL)
+        *Con2=BridgedCon2;
+
+    return BridgeActive;
 }
 
 /*******************************************************************************
@@ -4762,6 +4792,7 @@ bool MW_Event(const struct MWEvent *Event)
                 case e_UIMWComboBox_Download_Protocol:
                     Event->MW->DownloadPanel.DownloadProtocolChange(Event->ID);
                 break;
+                case e_UIMWComboBox_Bridge_Connection1:
                 case e_UIMWComboBox_Bridge_Connection2:
                     Event->MW->BridgePanel.SelectedConnectionChanged();
                 break;
@@ -5337,7 +5368,24 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
             RunBridgeConDialog(this);
         break;
         case e_Cmd_ReleaseBridgedConnections:
-            BridgePanel.ReleaseConnections();
+            if(BridgedCon1!=NULL && BridgedCon2!=NULL)
+            {
+                if(UIAsk("Bridged connections",
+                        "Undo the bridging of the two connections?",
+                        e_AskBox_Question,e_AskBttns_YesNo)==e_AskRet_Yes)
+                {
+                    class Connection *Saved1;
+                    class Connection *Saved2;
+
+                    /* We need to save them because we can get an event that
+                       will clear 'BridgedCon1' and 'BridgedCon2' */
+                    Saved1=BridgedCon1;
+                    Saved2=BridgedCon2;
+
+                    Saved1->BridgeConnection(NULL);
+                    Saved2->BridgeConnection(NULL);
+                }
+            }
         break;
         case e_Cmd_ToggleConnectionUseGlobalSettings:
             ToggleConnectionUseGlobalSettings();

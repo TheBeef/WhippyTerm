@@ -139,9 +139,9 @@ void Debug6(void);
 //        void SetupTabDisplay(void);
         int TextCanvasWidth;
         int TextCanvasHeight;
-//        bool BridgeActive;
-//        class Connection *BridgedCon1;
-//        class Connection *BridgedCon2;
+        bool BridgeActive;
+        class Connection *BridgedCon1;
+        class Connection *BridgedCon2;
         e_SysColType CurrentBGStyleColor;
         e_SysColShadeType CurrentBGStyleShade;
 

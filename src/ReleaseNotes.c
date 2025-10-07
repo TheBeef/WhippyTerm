@@ -30,10 +30,6 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
-    {   NOTETYPE_FUNCTIONALLY_FIX,"Changed bridging so you can bridge more than 2 connections",
-            "The bridging code has been updated to let the user bridge"
-            " more than 2 connections.  You make as many pairs as you"
-            " would like."},
     {   NOTETYPE_ENHANCEMENT,"Added new option for a destructive backspace",
             "There is a new setting to change how the backspace works.  If"
             " checked then instead of just moving the cursor, a space is"

@@ -137,6 +137,7 @@ class DisplayText : public DisplayBase
         bool Init(void *ParentWidget,class ConSettings *SettingsPtr,bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData);
         void Reparent(void *NewParentWidget);
         void WriteChar(uint8_t *Chr);
+        void WriteCharWithOptions(uint8_t *Chr,bool AdvCursor);
         void NoteNonPrintable(const char *NoteStr);
         void SetShowNonPrintable(bool Show);
         void SetShowEndOfLines(bool Show);

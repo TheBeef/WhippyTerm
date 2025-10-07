@@ -67,6 +67,7 @@ enum e_UIS_Checkbox
     e_UIS_Checkbox_AutoReopen,
     e_UIS_Checkbox_AutoCROnLF,
     e_UIS_Checkbox_LocalEcho,
+    e_UIS_Checkbox_DestructiveBackspace,
     e_UIS_CheckboxMAX
 };
 

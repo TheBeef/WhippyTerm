@@ -126,6 +126,7 @@ class ConSettings
         e_BackspaceKeyType BackspaceKeyMode;
         e_EnterKeyType EnterKeyMode;
         e_ClipboardModeType ClipboardMode;
+        bool DestructiveBackspace;
 
         /* Colors */
         uint32_t SysColors[e_SysColShadeMAX][e_SysColMAX];

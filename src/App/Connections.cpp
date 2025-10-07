@@ -392,6 +392,39 @@ void Con_ApplySettings2AllConnections(void)
 
 /*******************************************************************************
  * NAME:
+ *    Con_GetListOfConnections
+ *
+ * SYNOPSIS:
+ *    void Con_GetListOfConnections(t_ConnectionList &List);
+ *
+ * PARAMETERS:
+ *    List [O] -- A list of pointers to all the connections in the system.
+ *
+ * FUNCTION:
+ *    This function gets a list of all the connections on the system.  This
+ *    list will be valid until the next time a connection is added / removed
+ *    from the systme.
+ *
+ * RETURNS:
+ *    A list of connection pointers for all the connections in the system.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Con_GetListOfConnections(t_ConnectionList &List)
+{
+    i_ConnectionListType Con;
+    class Connection *ConPtr;
+
+    for(Con=m_Connections.begin();Con!=m_Connections.end();Con++)
+    {
+        ConPtr=*Con;
+        List.push_back(ConPtr);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
  *    Connection::Connection
  *
  * SYNOPSIS:

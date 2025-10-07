@@ -810,6 +810,8 @@ static void DS_SetSettingGUI(void)
 
     /* Keyboard */
     DS_SetKeyboardRadioBttns();
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_DestructiveBackspace);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->DestructiveBackspace);
     DS_RethinkTerminalDisplay();
 
     /* Sounds */
@@ -1207,6 +1209,8 @@ static void DS_GetSettingsFromGUI(void)
 
     /* Keyboard */
     DS_GetSettingsFromGUI_KeyboardRadioBttns();
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_DestructiveBackspace);
+    m_SettingConSettings->DestructiveBackspace=UIGetCheckboxCheckStatus(CheckboxHandle);
 
     /* Sounds */
     RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_SysBell_None);
@@ -2671,6 +2675,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Checkbox_ColorEnable:
                 case e_UIS_Checkbox_UseCustomSounds:
                 case e_UIS_Checkbox_MouseCursorUseIBeam:
+                case e_UIS_Checkbox_DestructiveBackspace:
                 case e_UIS_CheckboxMAX:
                 default:
                 break;

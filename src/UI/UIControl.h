@@ -209,13 +209,11 @@ void UIAddItem2ComboBox(t_UIComboBoxCtrl *ComboBox,const struct ComboBoxItem *It
 void UIAddItem2ComboBox(t_UIComboBoxCtrl *ComboBox,const char *Label,uintptr_t ID);
 void UIAddItem2ComboBox(t_UIComboBoxCtrl *ComboBox,const std::string &Label,uintptr_t ID);
 void UIAddList2ComboBox(t_UIComboBoxCtrl *ComboBox,const t_ComboBoxItemListType &List);
-void UIStyleComboBoxItem(t_UIComboBoxCtrl *ComboBox,uintptr_t ID,
-        uint32_t Styles);
+void UIStyleComboBoxItem(t_UIComboBoxCtrl *ComboBox,uintptr_t ID,uint32_t Styles);
 void UISetComboBoxSelectedEntry(t_UIComboBoxCtrl *ComboBox,uintptr_t ID);
 uintptr_t UIGetComboBoxSelectedEntry(t_UIComboBoxCtrl *ComboBox);
 int UIGetComboBoxSelectedIndex(t_UIComboBoxCtrl *ComboBox);
-void UISetComboBoxItemToolTip(t_UIComboBoxCtrl *ComboBox,uintptr_t ID,
-        const char *Tip);
+void UISetComboBoxItemToolTip(t_UIComboBoxCtrl *ComboBox,uintptr_t ID,const char *Tip);
 void UIGetComboBoxText(t_UIComboBoxCtrl *ComboBox,std::string &Text);
 void UISetComboBoxText(t_UIComboBoxCtrl *ComboBox,const char *Text);
 void UISortComboBox(t_UIComboBoxCtrl *ComboBox);

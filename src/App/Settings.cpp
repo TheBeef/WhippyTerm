@@ -1174,6 +1174,7 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
         RegisterBackspaceKey(cfg,"BackspaceKey",BackspaceKeyMode);
         RegisterEnterKey(cfg,"EnterKey",EnterKeyMode);
         RegisterClipboardMode(cfg,"ClipboardMode",ClipboardMode);
+        cfg.Register("DestructiveBackspace",DestructiveBackspace);
     cfg.EndBlock();
 
     cfg.StartBlock("AttribEnable");
@@ -1256,6 +1257,8 @@ bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
     if(Con1.DataProcessorType!=Con2.DataProcessorType)
         return false;
     if(Con1.BackspaceKeyMode!=Con2.BackspaceKeyMode)
+        return false;
+    if(Con1.DestructiveBackspace!=Con2.DestructiveBackspace)
         return false;
     if(Con1.EnterKeyMode!=Con2.EnterKeyMode)
         return false;
@@ -1387,6 +1390,7 @@ void ConSettings::DefaultSettings(void)
     AutoCROnLF=true;
 
     BackspaceKeyMode=e_BackspaceKey_BS;
+    DestructiveBackspace=true;
     EnterKeyMode=e_EnterKey_LF;
     ClipboardMode=e_ClipboardMode_Smart;
 

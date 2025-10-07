@@ -653,7 +653,7 @@
                   <item>
                    <widget class="QTabWidget" name="LeftPanel_tabWidget">
                     <property name="currentIndex">
-                     <number>2</number>
+                     <number>5</number>
                     </property>
                     <widget class="QWidget" name="Capture_Tab">
                      <attribute name="title">
@@ -1285,7 +1285,11 @@
                           </widget>
                          </item>
                          <item>
-                          <widget class="QComboBox" name="comboBox_Bridge_Con1"/>
+                          <widget class="QLabel" name="Bridge_Connection1_label">
+                           <property name="text">
+                            <string>TextLabel</string>
+                           </property>
+                          </widget>
                          </item>
                         </layout>
                        </widget>

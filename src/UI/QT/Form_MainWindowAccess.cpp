@@ -546,6 +546,8 @@ t_UILabelCtrl *UIMW_GetLabelHandle(t_UIMainWindow *win,e_UIMWLabelType UIObj)
             return (t_UILabelCtrl *)realwin->ui->label_DownloadBytesTrans;
         case e_UIMWLabel_Upload_BytesTx:
             return (t_UILabelCtrl *)realwin->ui->label_UploadBytesTrans;
+        case e_UIMWLabel_Bridge_Connection1:
+            return (t_UILabelCtrl *)realwin->ui->Bridge_Connection1_label;
 
         case e_UIMWLabelMAX:
         default:
@@ -565,8 +567,6 @@ t_UIComboBoxCtrl *UIMW_GetComboBoxHandle(t_UIMainWindow *win,
             return (t_UIComboBoxCtrl *)realwin->ui->comboBox_UploadProtocol;
         case e_UIMWComboBox_Download_Protocol:
             return (t_UIComboBoxCtrl *)realwin->ui->comboBox_DownloadProtocol;
-        case e_UIMWComboBox_Bridge_Connection1:
-            return (t_UIComboBoxCtrl *)realwin->ui->comboBox_Bridge_Con1;
         case e_UIMWComboBox_Bridge_Connection2:
             return (t_UIComboBoxCtrl *)realwin->ui->comboBox_Bridge_Con2;
         case e_UIMWComboBoxMAX:

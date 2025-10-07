@@ -209,6 +209,9 @@ struct ComTestType
     struct ComTestStats Stats;
 };
 
+typedef std::list<class Connection *> t_ConnectionList;
+typedef t_ConnectionList::iterator i_ConnectionList;
+
 typedef enum
 {
     ConMWEvent_ConOptionsChange,
@@ -612,5 +615,6 @@ void Con_FreeConnection(class Connection *Con);
 bool Con_TextCavnasEvent(const struct TCEvent *Event);
 void Con_FileTransTick(void);
 void Con_ApplySettings2AllConnections(void);
+void Con_GetListOfConnections(t_ConnectionList &List);
 
 #endif

@@ -202,8 +202,6 @@ private slots:
     
     void on_pushButton_Bridge_Release_clicked();
     
-    void on_comboBox_Bridge_Con1_activated(int index);
-    
     void on_comboBox_Bridge_Con2_activated(int index);
     
     void on_checkBox_Bridge_Lockout1_clicked(bool checked);

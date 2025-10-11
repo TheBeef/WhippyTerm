@@ -4994,6 +4994,16 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_CalcCRC -- Show the calc CRC dialog
  *                  e_Cmd_HelpCommandLineOptions -- Show the command line help dialog
  *                  e_Cmd_Selection2SendBuffer -- Take the selected text and copies it into a send buffer
+ *                  e_Cmd_Movement_Top -- Move the current view to the top of the buffer
+ *                  e_Cmd_Movement_Bottom -- Move the current view the bottom of the buffer
+ *                  e_Cmd_Movement_StartLine -- Move to the left side of the view
+ *                  e_Cmd_Movement_EndLine -- Move to the right side of the view
+ *                  e_Cmd_Movement_Right -- Move 1 char to the right
+ *                  e_Cmd_Movement_Left -- Move 1 char to the left
+ *                  e_Cmd_Movement_Up -- Move 1 char up
+ *                  e_Cmd_Movement_Down -- Move 1 char down
+ *                  e_Cmd_Movement_PgUp -- Move 1 page up
+ *                  e_Cmd_Movement_PgDown -- Move 1 page down
  *
  * FUNCTION:
  *    This function executes a command.
@@ -5520,9 +5530,48 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
             if(ActiveCon!=NULL)
                 RunSendBufferSelectDialog(this,e_SBSD_Copy2Buffer,NULL,0);
         break;
+        case e_Cmd_Movement_Top:
+            if(ActiveCon!=NULL)
+                ActiveCon->ChangeView(e_ConViewChange_Top);
+        break;
+        case e_Cmd_Movement_Bottom:
+            if(ActiveCon!=NULL)
+                ActiveCon->ChangeView(e_ConViewChange_Bottom);
+        break;
+        case e_Cmd_Movement_StartLine:
+            if(ActiveCon!=NULL)
+                ActiveCon->ChangeView(e_ConViewChange_StartLine);
+        break;
+        case e_Cmd_Movement_EndLine:
+            if(ActiveCon!=NULL)
+                ActiveCon->ChangeView(e_ConViewChange_EndLine);
+        break;
+        case e_Cmd_Movement_Right:
+            if(ActiveCon!=NULL)
+                ActiveCon->ChangeView(e_ConViewChange_Right);
+        break;
+        case e_Cmd_Movement_Left:
+            if(ActiveCon!=NULL)
+                ActiveCon->ChangeView(e_ConViewChange_Left);
+        break;
+        case e_Cmd_Movement_Up:
+            if(ActiveCon!=NULL)
+                ActiveCon->ChangeView(e_ConViewChange_Up);
+        break;
+        case e_Cmd_Movement_Down:
+            if(ActiveCon!=NULL)
+                ActiveCon->ChangeView(e_ConViewChange_Down);
+        break;
+        case e_Cmd_Movement_PgUp:
+            if(ActiveCon!=NULL)
+                ActiveCon->ChangeView(e_ConViewChange_PgUp);
+        break;
+        case e_Cmd_Movement_PgDown:
+            if(ActiveCon!=NULL)
+                ActiveCon->ChangeView(e_ConViewChange_PgDown);
+        break;
         case e_CmdMAX:
         default:
         break;
     }
 }
-

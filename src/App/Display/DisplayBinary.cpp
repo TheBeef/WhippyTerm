@@ -3054,10 +3054,10 @@ void DisplayBinary::InvalidateMarksOnScroll(void)
 
 /*******************************************************************************
  * NAME:
- *    DisplayText::AdvancePoint
+ *    DisplayBinary::AdvancePoint
  *
  * SYNOPSIS:
- *    void DisplayText::AdvancePoint(struct DisBin_PointPair *Point,int Amount);
+ *    void DisplayBinary::AdvancePoint(struct DisBin_PointPair *Point,int Amount);
  *
  * PARAMETERS:
  *    Point [I/O] -- The point to move
@@ -3719,4 +3719,217 @@ const uint8_t *DisplayBinary::GetMarkString(t_DataProMark *Mark,uint32_t *Size,
 
     *Size=TotalNeededSize-1;
     return MarkerGetStrBuffer;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::MoveViewTop
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::MoveViewTop(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function move the display to the top of the scroll back buffer.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::MoveViewTop(void)
+{
+    t_UIScrollBarCtrl *VertScroll;
+
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    VertScroll=UITC_GetVertSlider(TextDisplayCtrl);
+
+    /* Vert */
+    UISetScrollBarPos(VertScroll,0);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::MoveViewBottom
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::MoveViewBottom(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function move the display to the bottom of the screen.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::MoveViewBottom(void)
+{
+    t_UIScrollBarCtrl *VertScroll;
+    int TotalLines;
+    int MaxPos;
+
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    VertScroll=UITC_GetVertSlider(TextDisplayCtrl);
+
+    /* Vert */
+    TotalLines=UIGetScrollBarTotalSize(VertScroll);
+    MaxPos=TotalLines-DisplayLines;
+
+    UISetScrollBarPos(VertScroll,MaxPos);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::MoveViewUpDown
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::MoveViewUpDown(int Delta);
+ *
+ * PARAMETERS:
+ *    Delta [I] -- How mucht to move up (neg) or down (positive)
+ *
+ * FUNCTION:
+ *    This function moves the display to up or down (scrolls)
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::MoveViewUpDown(int Delta)
+{
+    ScrollScreen(0,Delta);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::MoveViewLeftRight
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::MoveViewLeftRight(int Delta);
+ *
+ * PARAMETERS:
+ *    Delta [I] -- How much to move left (neg) or right (positive)
+ *
+ * FUNCTION:
+ *    This function moves the display to left or right (scrolls)
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::MoveViewLeftRight(int Delta)
+{
+    ScrollScreen(Delta*CharWidthPx,0);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::MoveViewHome
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::MoveViewHome(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves the display to the start of the left side.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::MoveViewHome(void)
+{
+    ScrollScreen(-WindowXOffsetPx,0);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::MoveViewEnd
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::MoveViewEnd(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves the display to the end of the right side.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::MoveViewEnd(void)
+{
+    ScrollScreen(ScreenHeightPx-WindowXOffsetPx,0);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::MovePageUp
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::MovePageUp(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves the display 1 page up
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::MovePageUp(void)
+{
+    ScrollScreen(0,-ScreenHeightPx/CharHeightPx);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::MovePageDown
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::MovePageDown(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves the display 1 page down
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::MovePageDown(void)
+{
+    ScrollScreen(0,ScreenHeightPx/CharHeightPx);
 }

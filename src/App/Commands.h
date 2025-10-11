@@ -183,8 +183,33 @@ typedef enum
     e_Cmd_CalcCRC,
     e_Cmd_HelpCommandLineOptions,
     e_Cmd_Selection2SendBuffer,
+    e_Cmd_Movement_Top,
+    e_Cmd_Movement_Bottom,
+    e_Cmd_Movement_StartLine,
+    e_Cmd_Movement_EndLine,
+    e_Cmd_Movement_Right,
+    e_Cmd_Movement_Left,
+    e_Cmd_Movement_Up,
+    e_Cmd_Movement_Down,
+    e_Cmd_Movement_PgUp,
+    e_Cmd_Movement_PgDown,
     e_CmdMAX
 } e_CmdType;
+
+/*
+    e_Cmd_Movement_Sel_Top,
+    e_Cmd_Movement_Sel_Bottom,
+    e_Cmd_Movement_Sel_StartLine
+    e_Cmd_Movement_Sel_EndLine,
+    e_Cmd_Movement_Sel_Right,
+    e_Cmd_Movement_Sel_Left,
+    e_Cmd_Movement_Sel_Up,
+    e_Cmd_Movement_Sel_Down,
+    e_Cmd_Movement_Sel_PgUp,
+    e_Cmd_Movement_Sel_PgDown,
+
+    e_Cmd_Toggle_KeyMode,???
+*/
 
 /***  CLASS DEFINITIONS                ***/
 

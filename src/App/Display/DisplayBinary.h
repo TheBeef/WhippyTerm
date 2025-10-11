@@ -114,6 +114,15 @@ class DisplayBinary : public DisplayBase
         void MoveMark(t_DataProMark *Mark,int Amount);
         const uint8_t *GetMarkString(t_DataProMark *Mark,uint32_t *Size,uint32_t Offset,uint32_t Len);
 
+        void MoveViewTop(void);
+        void MoveViewBottom(void);
+        void MoveViewUpDown(int Delta);
+        void MoveViewLeftRight(int Delta);
+        void MoveViewHome(void);
+        void MoveViewEnd(void);
+        void MovePageUp(void);
+        void MovePageDown(void);
+
     private:
         bool InitCalled;
         e_TextCursorStyleType CursorStyle;

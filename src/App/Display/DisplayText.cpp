@@ -381,7 +381,7 @@ bool DisplayText::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
                 RethinkCursorHidden();
                 RedrawFullScreen();
             }
-        break;
+break;
         case e_TextDisplayEvent_MouseDown:
             Info.Mouse.x=Event->Info.Mouse.x;
             Info.Mouse.y=Event->Info.Mouse.y;
@@ -7378,4 +7378,248 @@ uint8_t *DisplayText::GetSelectionRAW(unsigned int *Bytes)
     memcpy(RetBuff,Clip.c_str(),*Bytes+1);
 
     return RetBuff;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::MoveViewTop
+ *
+ * SYNOPSIS:
+ *    void DisplayText::MoveViewTop(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function move the display to the top of the scroll back buffer.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::MoveViewTop(void)
+{
+    t_UIScrollBarCtrl *HorzScroll;
+
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    HorzScroll=UITC_GetHorzSlider(TextDisplayCtrl);
+
+    WindowXOffsetPx=0;
+    TopLine=Lines.begin();
+    TopLineY=0;
+
+    UITC_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
+    UISetScrollBarPos(HorzScroll,WindowXOffsetPx);
+    UITC_SetCursorPos(TextDisplayCtrl,CursorX,CalcCorrectedCursorPos());
+    RethinkCursorHidden();
+    RedrawFullScreen();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::MoveViewBottom
+ *
+ * SYNOPSIS:
+ *    void DisplayText::MoveViewBottom(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function move the display to the bottom of the screen.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::MoveViewBottom(void)
+{
+    t_UIScrollBarCtrl *HorzScroll;
+
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    HorzScroll=UITC_GetHorzSlider(TextDisplayCtrl);
+
+    /* Scroll the window to be at the bottom */
+    WindowXOffsetPx=0;
+    TopLine=ScreenFirstLine;
+    if(LinesCount>=ScreenHeightChars)
+        TopLineY=LinesCount-ScreenHeightChars;
+    else
+        TopLineY=0;
+
+    UITC_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
+    UISetScrollBarPos(HorzScroll,WindowXOffsetPx);
+    UITC_SetCursorPos(TextDisplayCtrl,CursorX,CalcCorrectedCursorPos());
+    RethinkCursorHidden();
+    RedrawFullScreen();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::MoveViewUpDown
+ *
+ * SYNOPSIS:
+ *    void DisplayText::MoveViewUpDown(int Delta);
+ *
+ * PARAMETERS:
+ *    Delta [I] -- How mucht to move up (neg) or down (positive)
+ *
+ * FUNCTION:
+ *    This function moves the display to up or down (scrolls)
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::MoveViewUpDown(int Delta)
+{
+    ScrollScreen(0,Delta);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::MoveViewLeftRight
+ *
+ * SYNOPSIS:
+ *    void DisplayText::MoveViewLeftRight(int Delta);
+ *
+ * PARAMETERS:
+ *    Delta [I] -- How much to move left (neg) or right (positive)
+ *
+ * FUNCTION:
+ *    This function moves the display to left or right (scrolls)
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::MoveViewLeftRight(int Delta)
+{
+    ScrollScreen(Delta*CharWidthPx,0);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::MoveViewHome
+ *
+ * SYNOPSIS:
+ *    void DisplayText::MoveViewHome(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves the display to the start of the left side.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::MoveViewHome(void)
+{
+    ScrollScreen(-WindowXOffsetPx,0);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::MoveViewEnd
+ *
+ * SYNOPSIS:
+ *    void DisplayText::MoveViewEnd(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves the display to the end of the right side.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::MoveViewEnd(void)
+{
+    int MaxLength;
+    int ScreenWidth;
+    int ScreenWidthPx;
+
+    MaxLength=LongestLinePx;
+    if(MaxLength<ScreenWidthChars*CharWidthPx)
+        MaxLength=ScreenWidthChars*CharWidthPx;
+
+    ScreenWidthPx=ScreenWidthChars*CharWidthPx;
+
+    ScreenWidth=TextAreaWidthPx;
+    if(Settings->TermSizeFixedWidth && TextAreaWidthPx>ScreenWidthPx)
+        ScreenWidth=ScreenWidthPx;
+
+    MaxLength=LongestLinePx;
+    if(MaxLength<ScreenWidthChars*CharWidthPx)
+        MaxLength=ScreenWidthChars*CharWidthPx;
+
+    ScrollScreen(MaxLength-ScreenWidth,0);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::MovePageUp
+ *
+ * SYNOPSIS:
+ *    void DisplayText::MovePageUp(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves the display 1 page up
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::MovePageUp(void)
+{
+    ScrollScreen(0,-WindowHeightChars);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::MovePageDown
+ *
+ * SYNOPSIS:
+ *    void DisplayText::MovePageDown(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves the display 1 page down
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::MovePageDown(void)
+{
+    ScrollScreen(0,WindowHeightChars);
 }

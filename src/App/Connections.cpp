@@ -8151,3 +8151,67 @@ uint8_t *Connection::GetRawSelection(unsigned int *Bytes)
 
     return Display->GetSelectionRAW(Bytes);
 }
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::ChangeView
+ *
+ * SYNOPSIS:
+ *    void Connection::ChangeView(e_ConViewChangeType Move);
+ *
+ * PARAMETERS:
+ *    Move [I] -- How are we moving the view
+ *
+ * FUNCTION:
+ *    This function moves the view.  It scrolls the view around like moving
+ *    the scroll bars (plus some)
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::ChangeView(e_ConViewChangeType Move)
+{
+    if(Display==NULL)
+        return;
+
+    switch(Move)
+    {
+        case e_ConViewChange_Top:
+            Display->MoveViewTop();
+        break;
+        case e_ConViewChange_Bottom:
+            Display->MoveViewBottom();
+        break;
+        case e_ConViewChange_StartLine:
+            Display->MoveViewHome();
+        break;
+        case e_ConViewChange_EndLine:
+            Display->MoveViewEnd();
+        break;
+        case e_ConViewChange_Right:
+            Display->MoveViewLeftRight(1);
+        break;
+        case e_ConViewChange_Left:
+            Display->MoveViewLeftRight(-1);
+        break;
+        case e_ConViewChange_Up:
+            Display->MoveViewUpDown(-1);
+        break;
+        case e_ConViewChange_Down:
+            Display->MoveViewUpDown(1);
+        break;
+        case e_ConViewChange_PgUp:
+            Display->MovePageUp();
+        break;
+        case e_ConViewChange_PgDown:
+            Display->MovePageDown();
+        break;
+        case e_ConViewChangeMAX:
+        default:
+        return;
+    }
+}
+

@@ -92,6 +92,21 @@ typedef enum
     e_ConWriteSourceMAX
 } e_ConWriteSourceType;
 
+typedef enum
+{
+    e_ConViewChange_Top,
+    e_ConViewChange_Bottom,
+    e_ConViewChange_StartLine,
+    e_ConViewChange_EndLine,
+    e_ConViewChange_Right,
+    e_ConViewChange_Left,
+    e_ConViewChange_Up,
+    e_ConViewChange_Down,
+    e_ConViewChange_PgUp,
+    e_ConViewChange_PgDown,
+    e_ConViewChangeMAX
+} e_ConViewChangeType;
+
 struct CaptureToFileOptions
 {
     bool Timestamp;
@@ -467,6 +482,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void ClearScrollBackBuffer(void);
         void InsertHorizontalRule(void);
         void ResetTerm(void);
+        void ChangeView(e_ConViewChangeType Move);
 
         t_DataProMark *AllocateMark(void);
         void FreeMark(t_DataProMark *Mark);

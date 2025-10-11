@@ -2110,3 +2110,187 @@ const uint8_t *DisplayBase::GetMarkString(t_DataProMark *Mark,uint32_t *Size,
 {
     return NULL;
 }
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::MoveViewTop
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::MoveViewTop(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function move the display to the top of the scroll back buffer.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::MoveViewTop(void)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::MoveViewBottom
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::MoveViewBottom(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function move the display to the bottom of the screen.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::MoveViewBottom(void)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::MoveViewUpDown
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::MoveViewUpDown(int Delta);
+ *
+ * PARAMETERS:
+ *    Delta [I] -- How much to move up (neg) or down (positive)
+ *
+ * FUNCTION:
+ *    This function moves the display to up or down (scrolls)
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::MoveViewUpDown(int Delta)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::MoveViewLeftRight
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::MoveViewLeftRight(int Delta);
+ *
+ * PARAMETERS:
+ *    Delta [I] -- How much to move left (neg) or right (positive)
+ *
+ * FUNCTION:
+ *    This function moves the display to left or right (scrolls)
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::MoveViewLeftRight(int Delta)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::MoveViewHome
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::MoveViewHome(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves the display to the start of the left side.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::MoveViewHome(void)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::MoveViewEnd
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::MoveViewEnd(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves the display to the end of the right side.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::MoveViewEnd(void)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::MovePageUp
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::MovePageUp(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves the display 1 page up
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::MovePageUp(void)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::MovePageDown
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::MovePageDown(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves the display 1 page down
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::MovePageDown(void)
+{
+}

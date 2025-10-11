@@ -192,6 +192,16 @@ const char *m_CmdNames[]=
     "CalcCRC",                              // e_Cmd_CalcCRC
     "HelpCommandLineOptions",               // e_Cmd_HelpCommandLineOptions
     "Selection2SendBuffer",                 // e_Cmd_Selection2SendBuffer
+    "MovementTop",                          // e_Cmd_Movement_Top
+    "MovementBottom",                       // e_Cmd_Movement_Bottom
+    "MovementStartLine",                    // e_Cmd_Movement_StartLine
+    "MovementEndLine",                      // e_Cmd_Movement_EndLine
+    "MovementRight",                        // e_Cmd_Movement_Right
+    "MovementLeft",                         // e_Cmd_Movement_Left
+    "MovementUp",                           // e_Cmd_Movement_Up
+    "MovementDown",                         // e_Cmd_Movement_Down
+    "MovementPgUp",                         // e_Cmd_Movement_PgUp
+    "MovementPgDown",                       // e_Cmd_Movement_PgDown
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -809,6 +819,16 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     // e_Cmd_CalcCRC
     // e_Cmd_HelpCommandLineOptions
     // e_Cmd_Selection2SendBuffer
+    // e_Cmd_Movement_Top
+    // e_Cmd_Movement_Bottom
+    // e_Cmd_Movement_StartLine,
+    // e_Cmd_Movement_EndLine,
+    // e_Cmd_Movement_Right,
+    // e_Cmd_Movement_Left,
+    // e_Cmd_Movement_Up,
+    // e_Cmd_Movement_Down,
+    // e_Cmd_Movement_PgUp,
+    // e_Cmd_Movement_PgDown,
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A

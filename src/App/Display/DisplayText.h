@@ -186,6 +186,15 @@ class DisplayText : public DisplayBase
 
         void SetBlockDeviceMode(bool On);
 
+        void MoveViewTop(void);
+        void MoveViewBottom(void);
+        void MoveViewUpDown(int Delta);
+        void MoveViewLeftRight(int Delta);
+        void MoveViewHome(void);
+        void MoveViewEnd(void);
+        void MovePageUp(void);
+        void MovePageDown(void);
+
     private:
         t_UITextDisplayCtrl *TextDisplayCtrl;
 

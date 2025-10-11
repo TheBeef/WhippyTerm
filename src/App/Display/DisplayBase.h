@@ -190,6 +190,15 @@ class DisplayBase
         virtual void MoveMark(t_DataProMark *Mark,int Amount);
         virtual const uint8_t *GetMarkString(t_DataProMark *Mark,uint32_t *Size,uint32_t Offset,uint32_t Len);
 
+        virtual void MoveViewTop(void);
+        virtual void MoveViewBottom(void);
+        virtual void MoveViewUpDown(int Delta);
+        virtual void MoveViewLeftRight(int Delta);
+        virtual void MoveViewHome(void);
+        virtual void MoveViewEnd(void);
+        virtual void MovePageUp(void);
+        virtual void MovePageDown(void);
+
         void SetCustomSettings(class ConSettings *NewSettingsPtr);
         class ConSettings *GetCustomSettings(void);
         void GetFont(std::string &CurFontName,int &CurFontSize,bool &CurFontBold,bool &CurFontItalic);

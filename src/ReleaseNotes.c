@@ -30,6 +30,11 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_ENHANCEMENT,"Added new commands to move the view around",
+            "New commands where added that lets the user bind keys to"
+            " functions to move the current view window around.  The"
+            " user can now move the view up/down/left/right, goto the"
+            " top/bottom of the buffer, and page up and down."},
     {   NOTETYPE_FUNCTIONALLY_FIX,"Changed bridging so you can bridge more than 2 connections",
             "The bridging code has been updated to let the user bridge"
             " more than 2 connections.  You make as many pairs as you"

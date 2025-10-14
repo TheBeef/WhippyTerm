@@ -30,6 +30,9 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_FUNCTIONALLY_FIX,"Updated ANSI decoder to support Page Up/Down",
+            "The ANSI decoder was not sending page up, page down, home, end,"
+            " and insert.  It has been updated to send these."},
     {   NOTETYPE_ENHANCEMENT,"Added cursor key modes",
             "A need mode was added called cursor key mode.  It sets how the"
             " cursor and other movement keys (like the page up and down)"

@@ -48,6 +48,8 @@
 #if defined(Q_OS_WIN)
 #include <windows.h>
 
+bool m_SendScrollLockHint=false;
+
 void QTInitScrollLockHandler(void)
 {
 }
@@ -63,17 +65,20 @@ bool IsScrollLockOn(void)
 
 void QTInformOfScrollLockPressed(void)
 {
-    struct MWEvent Event;
-
-    Event.EventType=e_MWEvent_ScrollLockHint;
-    Event.MW=NULL;  // All
-    MW_Event(&Event);
+    m_SendScrollLockHint=true;
 }
 
 void QTScrollLockHelperTick(void)
 {
-    /* Does nothing because Windows (of all things) works correctly for scroll
-       lock */
+    struct MWEvent Event;
+
+    if(m_SendScrollLockHint)
+    {
+        m_SendScrollLockHint=false;
+        Event.EventType=e_MWEvent_ScrollLockHint;
+        Event.MW=NULL;  // All
+        MW_Event(&Event);
+    }
 }
 
 #elif defined(Q_OS_MACOS)

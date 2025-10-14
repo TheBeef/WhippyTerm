@@ -30,6 +30,15 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_ENHANCEMENT,"Added cursor key modes",
+            "A need mode was added called cursor key mode.  It sets how the"
+            " cursor and other movement keys (like the page up and down)"
+            " work.  When cursor key mode is \"send\" then pressing the cursor"
+            " keys sends out control codes on the connection (what control"
+            " codes depends on active data processor).  When switched to"
+            " \"local\" mode then cursor moves the window around and doesn't"
+            " send anything out the connection.  This is by default connected"
+            " to the state of the Scroll Lock key."},
     {   NOTETYPE_ENHANCEMENT,"Added new commands to move the view around",
             "New commands where added that lets the user bind keys to"
             " functions to move the current view window around.  The"

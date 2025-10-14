@@ -94,6 +94,15 @@ typedef enum
     e_ClipboardModeMAX
 } e_ClipboardModeType;
 
+typedef enum
+{
+    e_CursorKeyToggleMode_None,
+    e_CursorKeyToggleMode_ScrollLock,
+    e_CursorKeyToggleMode_Esc,
+    e_CursorKeyToggleMode_Insert,
+    e_CursorKeyToggleModeMAX
+} e_CursorKeyToggleModeType;
+
 /***  CLASS DEFINITIONS                ***/
 struct PluginSettings
 {
@@ -233,6 +242,7 @@ class Settings
         bool AutoConnectOnNewConnection;
 
         /* Keyboard */
+        e_CursorKeyToggleModeType CursorKeyToggleMode;
 
         /* Key bindings */
         struct CommandKeySeq KeyMapping[e_CmdMAX];
@@ -264,6 +274,8 @@ class Settings
                 e_ScreenClearType &Data);
         bool RegisterKeyCommandType(class TinyCFG &cfg,const char *XmlName,
                 struct CommandKeySeq (*Data)[e_CmdMAX]);
+        bool RegisterCursorKeyToggleMode(class TinyCFG &cfg,const char *XmlName,
+                e_CursorKeyToggleModeType &Data);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

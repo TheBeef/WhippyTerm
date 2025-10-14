@@ -34,9 +34,11 @@
 #include "App/Settings.h"
 #include "App/Commands.h"
 #include "App/Connections.h"
+#include "App/CursorKeyMode.h"
 #include "App/Portable.h"
 #include "OS/Directorys.h"
 #include "UI/UIFontReq.h"
+#include "UI/UIKeyboard.h"
 #include <string>
 #include <algorithm>
 #include <string.h>
@@ -824,6 +826,73 @@ bool ConSettings::RegisterClipboardMode(class TinyCFG &cfg,const char *XmlName,
     return cfg.RegisterGeneric(NewDataClass);
 }
 ////////////////////
+class CursorKeyToggleModeCFG : public TinyCFGBaseData
+{
+   public:
+      e_CursorKeyToggleModeType *Ptr;
+      bool LoadData(string &LoadedString);
+      bool SaveData(string &StoreString);
+};
+bool CursorKeyToggleModeCFG::LoadData(string &LoadedString)
+{
+    *Ptr=e_CursorKeyToggleMode_ScrollLock;  /* Defaults to smart */
+
+    if(strcmp(LoadedString.c_str(),"None")==0)
+        *Ptr=e_CursorKeyToggleMode_None;
+    if(strcmp(LoadedString.c_str(),"ScrollLock")==0)
+        *Ptr=e_CursorKeyToggleMode_ScrollLock;
+    if(strcmp(LoadedString.c_str(),"Escape")==0)
+        *Ptr=e_CursorKeyToggleMode_Esc;
+    if(strcmp(LoadedString.c_str(),"Insert")==0)
+        *Ptr=e_CursorKeyToggleMode_Insert;
+
+    return true;
+}
+
+bool CursorKeyToggleModeCFG::SaveData(string &StoreString)
+{
+    switch(*Ptr)
+    {
+        default:
+        case e_CursorKeyToggleModeMAX:
+        case e_CursorKeyToggleMode_ScrollLock:
+            StoreString="ScrollLock";
+        break;
+        case e_CursorKeyToggleMode_Esc:
+            StoreString="Escape";
+        break;
+        case e_CursorKeyToggleMode_Insert:
+            StoreString="Insert";
+        break;
+        case e_CursorKeyToggleMode_None:
+            StoreString="None";
+        break;
+    }
+    return true;
+}
+
+bool Settings::RegisterCursorKeyToggleMode(class TinyCFG &cfg,const char *XmlName,
+      e_CursorKeyToggleModeType &Data)
+{
+    class CursorKeyToggleModeCFG *NewDataClass;
+
+    /* Make a new class to handle this new piece of data */
+    try
+    {
+        NewDataClass=new CursorKeyToggleModeCFG;
+    }
+    catch(std::bad_alloc const &)
+    {
+        return false;
+    }
+
+    /* Setup the data */
+    NewDataClass->Ptr=&Data;
+    NewDataClass->XmlName=XmlName;
+
+    return cfg.RegisterGeneric(NewDataClass);
+}
+////////////////////
 class BeepCFG : public TinyCFGBaseData
 {
    public:
@@ -1045,6 +1114,8 @@ void ApplySettings(void)
 
     /* Apply to all connections */
     Con_ApplySettings2AllConnections();
+
+    CursorKeyMode_ApplySettings();
 }
 
 void Settings::RegisterAllMembers(class TinyCFG &cfg)
@@ -1112,6 +1183,10 @@ void Settings::RegisterAllMembers(class TinyCFG &cfg)
 
     cfg.StartBlock("Behaviour");
         cfg.Register("BookmarksOpenNewTabs",BookmarksOpenNewTabs);
+    cfg.EndBlock();
+
+    cfg.StartBlock("Keyboard");
+    RegisterCursorKeyToggleMode(cfg,"CursorKeyToggleMode",CursorKeyToggleMode);
     cfg.EndBlock();
 
     RegisterKeyCommandType(cfg,"KeyBindings",&KeyMapping);
@@ -1355,6 +1430,9 @@ void Settings::DefaultSettings(void)
     HexDisplaysFontItalic=false;
 
     DefaultConSettings.DefaultSettings();
+
+    /* Keyboard */
+    CursorKeyToggleMode=e_CursorKeyToggleMode_ScrollLock;
 
     /* Default all the plugins */
     DefaultConSettings.PluginsSettings.clear();

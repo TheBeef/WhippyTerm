@@ -432,6 +432,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void InformOfConnected(void);
         void InformOfDisconnected(void);
         bool InformOfDataAvaiable(void);
+        void InformOfCursorKeyModeChange(void);
 //        struct ProcessorConData *GetCurrentProcessorData(void);
         bool GetConnectedStatus(void);
         void SetFGColor(uint32_t FGColor);

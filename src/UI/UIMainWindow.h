@@ -362,6 +362,7 @@ typedef enum
     e_MWEvent_ColumnViewChange,
     e_MWEvent_ApplyTerminalEmulationMenuTriggered,
     e_MWEvent_ContextMenuTriggered,
+    e_MWEvent_ScrollLockHint,
     e_MWEventMAX
 } e_MWEventType;
 

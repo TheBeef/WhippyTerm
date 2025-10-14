@@ -150,6 +150,7 @@ enum e_UIS_GroupBox
     e_UIS_GroupBox_Display_Tabs,
     e_UIS_GroupBox_Display_ClearScreen,
     e_UIS_GroupBox_Display_MouseCursor,
+    e_UIS_GroupBox_Keyboard_CursorKeyToggle,
     e_UIS_GroupBoxMAX
 };
 
@@ -189,6 +190,10 @@ enum e_UIS_RadioBttns
     e_UIS_RadioBttn_SysBell_VisualOnly,
     e_UIS_RadioBttn_SelectionColorPrev_Forground,
     e_UIS_RadioBttn_SelectionColorPrev_Background,
+    e_UIS_RadioBttn_Keyboard_CursorKeyToggle_None,
+    e_UIS_RadioBttn_Keyboard_CursorKeyToggle_ScrollLock,
+    e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Esc,
+    e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Insert,
     e_UIS_RadioBttnMAX
 };
 

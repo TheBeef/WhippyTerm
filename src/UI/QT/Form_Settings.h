@@ -167,6 +167,14 @@ private slots:
     
     void on_SelectColor_pushButton_clicked();
     
+    void on_CursorKeyToggle_None_radioButton_toggled(bool checked);
+    
+    void on_CursorKeyToggle_ScrollLock_radioButton_toggled(bool checked);
+    
+    void on_CursorKeyToggle_EscKey_radioButton_toggled(bool checked);
+    
+    void on_CursorKeyToggle_InsertKey_radioButton_toggled(bool checked);
+    
 private:
     bool DoingEvent;
 

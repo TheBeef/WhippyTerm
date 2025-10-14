@@ -137,7 +137,9 @@ static void UIS_HandleAreaChanged(uintptr_t ID);
 static void UIS_HandleKeyBindingsCmdListChange(uintptr_t ID);
 static void UIS_HandleKeyBindingsCmdShortCutChange(void);
 static void DS_SetKeyboardRadioBttns(void);
+static void DS_SetGlobalKeyboardRadioBttns(void);
 static void DS_GetSettingsFromGUI_KeyboardRadioBttns(void);
+static void DS_GetSettingsFromGUI_GlobalKeyboardRadioBttns(void);
 static void DS_UnselectColorRadioButtons(uint32_t Bttns);
 static void UIS_HandleSysColSelectionColorClick(void);
 static e_DS_EditingColorType DS_FindCurrentEditingColor(int *Color);
@@ -246,6 +248,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     t_UIGroupBox *Display_Tabs;
     t_UIGroupBox *Display_ClearScreen;
     t_UIGroupBox *Display_MouseCursor;
+    t_UIGroupBox *Keyboard_CursorKeyToggle;
     e_DS_SettingsArea FirstSelectedArea;
     e_UIS_TabCtrl_Terminal_Page SelectTerminalPage;
     e_UIS_TabCtrl_Display_Page SelectDisplayPage;
@@ -478,18 +481,20 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         Display_Tabs=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_Tabs);
         Display_ClearScreen=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_ClearScreen);
         Display_MouseCursor=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_MouseCursor);
+        Keyboard_CursorKeyToggle=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Keyboard_CursorKeyToggle);
 
         UITabCtrlSetTabVisibleByIndex(TerminalTabCtrl,
                 e_UIS_TabCtrl_Terminal_Page_KeyBinding,false);
         UITabCtrlSetTabVisibleByIndex(DisplayTabCtrl,
                 e_UIS_TabCtrl_Display_Page_HexDumps,false);
 
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoConnectOnNewConnection);
+        UICheckboxVisible(CheckboxHandle,false);
+
         UIGroupBoxVisible(Display_Tabs,false);
         UIGroupBoxVisible(Display_ClearScreen,false);
         UIGroupBoxVisible(Display_MouseCursor,false);
-
-        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoConnectOnNewConnection);
-        UICheckboxVisible(CheckboxHandle,false);
+        UIGroupBoxVisible(Keyboard_CursorKeyToggle,false);
     }
 
     /* Load settings into UI */
@@ -810,6 +815,7 @@ static void DS_SetSettingGUI(void)
 
     /* Keyboard */
     DS_SetKeyboardRadioBttns();
+    DS_SetGlobalKeyboardRadioBttns();
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_DestructiveBackspace);
     UICheckCheckbox(CheckboxHandle,m_SettingConSettings->DestructiveBackspace);
     DS_RethinkTerminalDisplay();
@@ -1141,6 +1147,8 @@ static void DS_GetSettingsFromGUI(void)
         RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollWithHR);
         if(UIIsRadioBttnSelected(RadioHandle))
             g_Settings.ScreenClear=e_ScreenClear_ScrollWithHR;
+
+        DS_GetSettingsFromGUI_GlobalKeyboardRadioBttns();
 
         /* KeyBindings */
         memcpy(&g_Settings.KeyMapping,&m_CopyOfKeyMapping,
@@ -2722,6 +2730,10 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_RadioBttn_Keyboard_Clipboard_ShiftCtrl:
                 case e_UIS_RadioBttn_Keyboard_Clipboard_Alt:
                 case e_UIS_RadioBttn_Keyboard_Clipboard_Smart:
+                case e_UIS_RadioBttn_Keyboard_CursorKeyToggle_None:
+                case e_UIS_RadioBttn_Keyboard_CursorKeyToggle_ScrollLock:
+                case e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Esc:
+                case e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Insert:
                 break;
                 case e_UIS_RadioBttn_SysBell_None:
                 case e_UIS_RadioBttn_SysBell_System:
@@ -3048,6 +3060,57 @@ static void DS_SetKeyboardRadioBttns(void)
 
 /*******************************************************************************
  * NAME:
+ *    DS_SetGlobalKeyboardRadioBttns
+ *
+ * SYNOPSIS:
+ *    void DS_SetGlobalKeyboardRadioBttns(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function sets the GUI to global settings for the keyboard radio
+ *    buttons.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DS_SetKeyboardRadioBttns()
+ ******************************************************************************/
+static void DS_SetGlobalKeyboardRadioBttns(void)
+{
+    t_UIRadioBttnCtrl *Keyboard_CursorKeyToggle_None;
+    t_UIRadioBttnCtrl *Keyboard_CursorKeyToggle_ScrollLock;
+    t_UIRadioBttnCtrl *Keyboard_CursorKeyToggle_Esc;
+    t_UIRadioBttnCtrl *Keyboard_CursorKeyToggle_Insert;
+
+    Keyboard_CursorKeyToggle_None=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_CursorKeyToggle_None);
+    Keyboard_CursorKeyToggle_ScrollLock=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_CursorKeyToggle_ScrollLock);
+    Keyboard_CursorKeyToggle_Esc=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Esc);
+    Keyboard_CursorKeyToggle_Insert=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Insert);
+
+    switch(g_Settings.CursorKeyToggleMode)
+    {
+        default:
+        case e_CursorKeyToggleModeMAX:
+        case e_CursorKeyToggleMode_ScrollLock:
+            UISelectRadioBttn(Keyboard_CursorKeyToggle_ScrollLock);
+        break;
+        case e_CursorKeyToggleMode_None:
+            UISelectRadioBttn(Keyboard_CursorKeyToggle_None);
+        break;
+        case e_CursorKeyToggleMode_Esc:
+            UISelectRadioBttn(Keyboard_CursorKeyToggle_Esc);
+        break;
+        case e_CursorKeyToggleMode_Insert:
+            UISelectRadioBttn(Keyboard_CursorKeyToggle_Insert);
+        break;
+    }
+}
+
+/*******************************************************************************
+ * NAME:
  *    DS_GetSettingsFromGUI_KeyboardRadioBttns
  *
  * SYNOPSIS:
@@ -3123,6 +3186,48 @@ static void DS_GetSettingsFromGUI_KeyboardRadioBttns(void)
         m_SettingConSettings->ClipboardMode=e_ClipboardMode_Alt;
     if(UIIsRadioBttnSelected(Keyboard_Clipboard_Smart))
         m_SettingConSettings->ClipboardMode=e_ClipboardMode_Smart;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DS_GetSettingsFromGUI_GlobalKeyboardRadioBttns
+ *
+ * SYNOPSIS:
+ *    static void DS_GetSettingsFromGUI_GlobalKeyboardRadioBttns(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function reads the values from the GUI and sets the anything that's
+ *    in the global settings for the keyboard radio buttons.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DS_SetKeyboardRadioBttns(), DS_GetSettingsFromGUI_KeyboardRadioBttns()
+ ******************************************************************************/
+static void DS_GetSettingsFromGUI_GlobalKeyboardRadioBttns(void)
+{
+    t_UIRadioBttnCtrl *Keyboard_CursorKeyToggle_None;
+    t_UIRadioBttnCtrl *Keyboard_CursorKeyToggle_ScrollLock;
+    t_UIRadioBttnCtrl *Keyboard_CursorKeyToggle_Esc;
+    t_UIRadioBttnCtrl *Keyboard_CursorKeyToggle_Insert;
+
+    Keyboard_CursorKeyToggle_None=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_CursorKeyToggle_None);
+    Keyboard_CursorKeyToggle_ScrollLock=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_CursorKeyToggle_ScrollLock);
+    Keyboard_CursorKeyToggle_Esc=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Esc);
+    Keyboard_CursorKeyToggle_Insert=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Insert);
+
+    if(UIIsRadioBttnSelected(Keyboard_CursorKeyToggle_None))
+        g_Settings.CursorKeyToggleMode=e_CursorKeyToggleMode_None;
+    if(UIIsRadioBttnSelected(Keyboard_CursorKeyToggle_ScrollLock))
+        g_Settings.CursorKeyToggleMode=e_CursorKeyToggleMode_ScrollLock;
+    if(UIIsRadioBttnSelected(Keyboard_CursorKeyToggle_Esc))
+        g_Settings.CursorKeyToggleMode=e_CursorKeyToggleMode_Esc;
+    if(UIIsRadioBttnSelected(Keyboard_CursorKeyToggle_Insert))
+        g_Settings.CursorKeyToggleMode=e_CursorKeyToggleMode_Insert;
 }
 
 /*******************************************************************************

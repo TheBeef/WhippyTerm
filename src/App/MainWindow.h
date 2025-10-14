@@ -116,6 +116,7 @@ void Debug6(void);
         void HandlePanelAutoCloseLeft(void);
         void HandlePanelAutoCloseRight(void);
         void HandlePanelAutoCloseBottom(void);
+        void InformOfCursorKeyModeChange(void);
 
         /* Panel handlers */
         class MWConnectionOptions ConnectionOptionsPanel;
@@ -195,5 +196,6 @@ void MW_InformOfNewPluginInstalled(const char *PluginIDStr);
 void MW_InformOfPluginAboutToUninstall(const char *PluginIDStr);
 void MW_InformOfPluginUninstalled(const char *PluginIDStr);
 void MW_InformOfSendBufferChange(int BufferIndex);
+void MW_InformOfCursorKeyModeChange(void);
 
 #endif

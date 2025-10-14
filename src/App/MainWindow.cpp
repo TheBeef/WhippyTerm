@@ -29,6 +29,7 @@
  ******************************************************************************/
 
 /*** HEADER FILES TO INCLUDE  ***/
+#include "App/CursorKeyMode.h"
 #include "App/Dialogs/Dialog_About.h"
 #include "App/Dialogs/Dialog_Bridge.h"
 #include "App/Dialogs/Dialog_ChangeConnectionName.h"
@@ -362,6 +363,35 @@ void MW_InformOfSendBufferChange(int BufferIndex)
     /* Update all the main windows */
     for(MW=m_MainWindowsList.begin();MW!=m_MainWindowsList.end();MW++)
         (*MW)->InformOfSendBufferChange(BufferIndex);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MW_InformOfCursorKeyModeChange
+ *
+ * SYNOPSIS:
+ *    void MW_InformOfCursorKeyModeChange(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when the status of the cursor key mode changes.
+ *    It sends this info to all the main windows.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MW_InformOfCursorKeyModeChange(void)
+{
+    i_MainWindowsListType MW;
+
+    /* Update all the main windows */
+    for(MW=m_MainWindowsList.begin();MW!=m_MainWindowsList.end();MW++)
+        (*MW)->InformOfCursorKeyModeChange();
 }
 
 /*******************************************************************************
@@ -3602,7 +3632,6 @@ void TheMainWindow::GetListOfConnections(t_MainWindowConnectionList &List)
  ******************************************************************************/
 void TheMainWindow::RethinkBridgeMenu(void)
 {
-    t_UITabCtrl *MainTabs;
     e_UIMenuCtrl *BridgeMenu;
     e_UIMenuCtrl *ReleaseBridgeMenu;
     bool EnableBridge;
@@ -3612,7 +3641,6 @@ void TheMainWindow::RethinkBridgeMenu(void)
     class Connection *Con;
     bool BridgeAvail;
 
-    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
     BridgeMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_BridgeConnections);
     ReleaseBridgeMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ReleaseBridgedConnections);
 
@@ -4660,6 +4688,36 @@ void TheMainWindow::HandlePanelAutoCloseBottom(void)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::InformOfCursorKeyModeChange
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::InformOfCursorKeyModeChange(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when the status of the cursor key mode changes.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::InformOfCursorKeyModeChange(void)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+        TabCon->InformOfCursorKeyModeChange();
+}
+
+/*******************************************************************************
+ * NAME:
  *    MW_Event
  *
  * SYNOPSIS:
@@ -4894,6 +4952,16 @@ bool MW_Event(const struct MWEvent *Event)
         case e_MWEvent_ApplyTerminalEmulationMenuTriggered:
             Event->MW->ApplyTerminalEmulationMenuTriggered(Event->ID);
         break;
+        case e_MWEvent_ScrollLockHint:
+            /* This is special, because Linux don't always give us the scroll
+               lock key press, the OS part scans for changes in the LED state
+               (which Linux also can't always detect) and sends this event
+               as a helper to note there was a change.  It does not include
+               a main window (MW) and is not guaranteed to come in at all.
+
+               DO NOT RELY ON THIS MESSAGE COMING IN SCROLL LOCK CHANGES! */
+            MW_InformOfCursorKeyModeChange();
+        break;
         case e_MWEventMAX:
         default:
         break;
@@ -5004,6 +5072,7 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_Movement_Down -- Move 1 char down
  *                  e_Cmd_Movement_PgUp -- Move 1 page up
  *                  e_Cmd_Movement_PgDown -- Move 1 page down
+ *                  e_Cmd_Toggle_CursorKeyMode -- Toggle the cursor key mode
  *
  * FUNCTION:
  *    This function executes a command.
@@ -5569,6 +5638,9 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         case e_Cmd_Movement_PgDown:
             if(ActiveCon!=NULL)
                 ActiveCon->ChangeView(e_ConViewChange_PgDown);
+        break;
+        case e_Cmd_Toggle_CursorKeyMode:
+            SetCursorKeyModeLocal(!GetCurrentCursorKeyModeIsLocal());
         break;
         case e_CmdMAX:
         default:

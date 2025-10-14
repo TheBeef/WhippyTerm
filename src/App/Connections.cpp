@@ -37,6 +37,7 @@
 #include "App/Dialogs/Dialog_CalcCrc.h"
 #include "App/Connections.h"
 #include "App/ConnectionsGlobal.h"
+#include "App/CursorKeyMode.h"
 #include "App/MainWindow.h"
 #include "App/DataProcessorsSystem.h"
 #include "App/FileTransferProtocolSystem.h"
@@ -1428,15 +1429,16 @@ bool Connection::KeyPress(uint8_t Mods,e_UIKeys Key,const uint8_t *TextPtr,
     if(IOHandle==NULL || Display==NULL || MW==NULL)
         return false;
 
+    /* This handles the commands with KeySeq2CmdID() */
     if(MW->KeyPress(Mods,Key,TextPtr,TextLen))
         return true;
 
     Con_SetActiveConnection(this);
 
-    /* Handle Cut/Copy/Paste */
     DoCmd=e_CmdMAX;
     if(Key==e_UIKeysMAX)
     {
+        /* Handle Cut/Copy/Paste */
         switch(CustomSettings.ClipboardMode)
         {
             case e_ClipboardMode_None:
@@ -1485,6 +1487,72 @@ bool Connection::KeyPress(uint8_t Mods,e_UIKeys Key,const uint8_t *TextPtr,
                     DoCmd=HandleSmartClipboard(TextPtr[0]);
                 }
             break;
+        }
+    }
+
+    /* Handle cursor key mode */
+    switch(g_Settings.CursorKeyToggleMode)
+    {
+        case e_CursorKeyToggleMode_ScrollLock:
+            if(Key==e_UIKeys_ScrollLock)
+                DoCmd=e_Cmd_Toggle_CursorKeyMode;
+        break;
+        case e_CursorKeyToggleMode_Esc:
+            if(Key==e_UIKeys_Escape)
+                DoCmd=e_Cmd_Toggle_CursorKeyMode;
+        break;
+        case e_CursorKeyToggleMode_Insert:
+            if(Key==e_UIKeys_Insert)
+                DoCmd=e_Cmd_Toggle_CursorKeyMode;
+        break;
+        case e_CursorKeyToggleMode_None:
+        case e_CursorKeyToggleModeMAX:
+        default:
+        break;
+    }
+
+    if(GetCurrentCursorKeyModeIsLocal())
+    {
+        /* Ok, we need to handle the cursor keys locally */
+        if(Key==e_UIKeys_Home && Mods&KEYMOD_CONTROL)
+        {
+            DoCmd=e_Cmd_Movement_Top;
+        }
+        else if(Key==e_UIKeys_End && Mods&KEYMOD_CONTROL)
+        {
+            DoCmd=e_Cmd_Movement_Bottom;
+        }
+        else if(Key==e_UIKeys_Home)
+        {
+            DoCmd=e_Cmd_Movement_StartLine;
+        }
+        else if(Key==e_UIKeys_End)
+        {
+            DoCmd=e_Cmd_Movement_EndLine;
+        }
+        else if(Key==e_UIKeys_Left)
+        {
+            DoCmd=e_Cmd_Movement_Left;
+        }
+        else if(Key==e_UIKeys_Up)
+        {
+            DoCmd=e_Cmd_Movement_Up;
+        }
+        else if(Key==e_UIKeys_Right)
+        {
+            DoCmd=e_Cmd_Movement_Right;
+        }
+        else if(Key==e_UIKeys_Down)
+        {
+            DoCmd=e_Cmd_Movement_Down;
+        }
+        else if(Key==e_UIKeys_PageUp)
+        {
+            DoCmd=e_Cmd_Movement_PgUp;
+        }
+        else if(Key==e_UIKeys_PageDown)
+        {
+            DoCmd=e_Cmd_Movement_PgDown;
         }
     }
 
@@ -1957,6 +2025,30 @@ bool Connection::InformOfDataAvaiable(void)
     Con_SetActiveConnection(NULL);
 
     return RetValue;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::InformOfCursorKeyModeChange
+ *
+ * SYNOPSIS:
+ *    void Connection::InformOfCursorKeyModeChange(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when the status of the cursor key mode changes.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::InformOfCursorKeyModeChange(void)
+{
+    RethinkCursor();
 }
 
 /*******************************************************************************
@@ -6312,7 +6404,10 @@ void Connection::RethinkCursor(void)
             if(IsConnected)
             {
                 CursorBlinking=CustomSettings.CursorBlink;
-                CursorStyle=e_TextCursorStyle_Block;
+                if(GetCurrentCursorKeyModeIsLocal())
+                    CursorStyle=e_TextCursorStyle_UnderLine;
+                else
+                    CursorStyle=e_TextCursorStyle_Block;
             }
             else
             {
@@ -8214,4 +8309,3 @@ void Connection::ChangeView(e_ConViewChangeType Move)
         return;
     }
 }
-

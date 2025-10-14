@@ -147,13 +147,11 @@ void MWBridge::RethinkControls(void)
     t_UICheckboxCtrl *Lock2Checkbox;
     bool BridgeEnabled;
     bool ReleaseEnabled;
-    bool Con1Enabled;
     bool Con2Enabled;
     bool Lock1Enabled;
     bool Lock2Enabled;
     bool CanBridge;
     bool AlreadyBridged;
-    class Connection *BridgedCon1;
 
     if(UIWin==NULL || MW==NULL)
         return;
@@ -166,7 +164,6 @@ void MWBridge::RethinkControls(void)
 
     BridgeEnabled=PanelActive;
     ReleaseEnabled=PanelActive;
-    Con1Enabled=PanelActive;
     Con2Enabled=PanelActive;
     Lock1Enabled=PanelActive;
     Lock2Enabled=PanelActive;
@@ -191,7 +188,6 @@ void MWBridge::RethinkControls(void)
         if(AlreadyBridged)
             ReleaseEnabled=true;
 
-        Con1Enabled=!AlreadyBridged;
         Con2Enabled=!AlreadyBridged;
 
         Lock1Enabled=AlreadyBridged;
@@ -398,7 +394,6 @@ void MWBridge::ConnectionsChanged(void)
     i_ConnectionList CurrentCon;
     class Connection *Con;
     t_UIComboBoxCtrl *Con2Combox;
-    uintptr_t SelectCon1;
     uintptr_t SelectCon2;
     std::string ConName;
     t_UICheckboxCtrl *Lock1Checkbox;

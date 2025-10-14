@@ -13398,83 +13398,161 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item>
-               <widget class="QGroupBox" name="groupBox_22">
-                <property name="title">
-                 <string>Clipboard Keys</string>
-                </property>
-                <layout class="QVBoxLayout" name="verticalLayout_37">
+               <widget class="QWidget" name="widget_18" native="true">
+                <layout class="QHBoxLayout" name="horizontalLayout_36">
                  <item>
-                  <widget class="QLabel" name="label_11">
-                   <property name="text">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This controls how the clipboard keys (CTRL-C, CTRL-V, CTRL-X) behave.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <widget class="QGroupBox" name="groupBox_22">
+                   <property name="title">
+                    <string>Clipboard Keys</string>
                    </property>
-                   <property name="wordWrap">
-                    <bool>true</bool>
-                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_37">
+                    <item>
+                     <widget class="QLabel" name="label_11">
+                      <property name="text">
+                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This controls how the clipboard keys (CTRL-C, CTRL-V, CTRL-X) behave.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="wordWrap">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="ClipboardKeys_None_radioButton">
+                      <property name="toolTip">
+                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;No clipboard handling.&lt;/p&gt;&lt;p&gt;Mouse and menus are the only way to copy and paste.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="text">
+                       <string>None</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="ClipboardKeys_Normal_radioButton">
+                      <property name="toolTip">
+                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The clipboard keys as the same in other programs.&lt;/p&gt;&lt;p&gt;CTRL+X to cut.&lt;/p&gt;&lt;p&gt;CTRL+C to copy.&lt;/p&gt;&lt;p&gt;CTRL+V to paste.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="text">
+                       <string>Normal</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="ClipboardKeys_ShiftCtrlClip_radioButton">
+                      <property name="toolTip">
+                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clipboard keys work the same as normal however SHIFT must also be held.&lt;/p&gt;&lt;p&gt;SHIFT+CTRL+X to cut.&lt;/p&gt;&lt;p&gt;SHIFT+CTRL+C to copy.&lt;/p&gt;&lt;p&gt;SHIFT+CTRL+V to paste.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="text">
+                       <string>Shift+Ctrl for clipboard</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="ClipboardKeys_AltClip_radioButton">
+                      <property name="toolTip">
+                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clipboard keys work the same as normal however ALT is used instead of CTRL.&lt;/p&gt;&lt;p&gt;ALT+X to cut.&lt;/p&gt;&lt;p&gt;ALT+C to copy.&lt;/p&gt;&lt;p&gt;ALT+V to paste.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="text">
+                       <string>Alt for clipboard</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="ClipboardKeys_SmartClip_radioButton">
+                      <property name="toolTip">
+                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use smart clipboard.&lt;/p&gt;&lt;p&gt;With smart clipboard, if you have a selection then CTRL-C will copy the selection. If there is no selection then a ^C (0x03) will be sent.&lt;/p&gt;&lt;p&gt;Pressing CTRL-X will work the same as CTRL-C&lt;/p&gt;&lt;p&gt;Pressing CTRL-V will send the clipboard, however if you press it 2 time fast it will send a ^V (0x16) instead of pasting from the clipboard.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="text">
+                       <string>Smart clipboard</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_18">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QRadioButton" name="ClipboardKeys_None_radioButton">
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;No clipboard handling.&lt;/p&gt;&lt;p&gt;Mouse and menus are the only way to copy and paste.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <widget class="QGroupBox" name="CursorKeyToggle_groupBox">
+                   <property name="title">
+                    <string>Cursor Keys</string>
                    </property>
-                   <property name="text">
-                    <string>None</string>
-                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_49">
+                    <item>
+                     <widget class="QLabel" name="label_17">
+                      <property name="text">
+                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This controls what is used to toggle the cursor keys between send / local mode. In send mode when the keys are pressed then codes are transmitted (what is sent depends on the data processor active). In local mode then they keys are used to move the local display around (like a normal text input).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="wordWrap">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="CursorKeyToggle_None_radioButton">
+                      <property name="toolTip">
+                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;No key will toggle the cursor key mode.  System will be locked to send mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="text">
+                       <string>None</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="CursorKeyToggle_ScrollLock_radioButton">
+                      <property name="toolTip">
+                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When Scroll Lock is on then use local mode&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="text">
+                       <string>Scroll Lock State</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="CursorKeyToggle_EscKey_radioButton">
+                      <property name="toolTip">
+                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pressing the ESC key will toggle send / local mode&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="text">
+                       <string>Escape Key</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QRadioButton" name="CursorKeyToggle_InsertKey_radioButton">
+                      <property name="toolTip">
+                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pressing the Insert key will toggle send / local mode&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      </property>
+                      <property name="text">
+                       <string>Insert Key</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_21">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
                   </widget>
-                 </item>
-                 <item>
-                  <widget class="QRadioButton" name="ClipboardKeys_Normal_radioButton">
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The clipboard keys as the same in other programs.&lt;/p&gt;&lt;p&gt;CTRL+X to cut.&lt;/p&gt;&lt;p&gt;CTRL+C to copy.&lt;/p&gt;&lt;p&gt;CTRL+V to paste.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="text">
-                    <string>Normal</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QRadioButton" name="ClipboardKeys_ShiftCtrlClip_radioButton">
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clipboard keys work the same as normal however SHIFT must also be held.&lt;/p&gt;&lt;p&gt;SHIFT+CTRL+X to cut.&lt;/p&gt;&lt;p&gt;SHIFT+CTRL+C to copy.&lt;/p&gt;&lt;p&gt;SHIFT+CTRL+V to paste.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="text">
-                    <string>Shift+Ctrl for clipboard</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QRadioButton" name="ClipboardKeys_AltClip_radioButton">
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clipboard keys work the same as normal however ALT is used instead of CTRL.&lt;/p&gt;&lt;p&gt;ALT+X to cut.&lt;/p&gt;&lt;p&gt;ALT+C to copy.&lt;/p&gt;&lt;p&gt;ALT+V to paste.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="text">
-                    <string>Alt for clipboard</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QRadioButton" name="ClipboardKeys_SmartClip_radioButton">
-                   <property name="toolTip">
-                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use smart clipboard.&lt;/p&gt;&lt;p&gt;With smart clipboard, if you have a selection then CTRL-C will copy the selection. If there is no selection then a ^C (0x03) will be sent.&lt;/p&gt;&lt;p&gt;Pressing CTRL-X will work the same as CTRL-C&lt;/p&gt;&lt;p&gt;Pressing CTRL-V will send the clipboard, however if you press it 2 time fast it will send a ^V (0x16) instead of pasting from the clipboard.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                   </property>
-                   <property name="text">
-                    <string>Smart clipboard</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <spacer name="verticalSpacer_18">
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>20</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                  </spacer>
                  </item>
                 </layout>
                </widget>

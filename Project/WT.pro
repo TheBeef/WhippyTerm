@@ -45,6 +45,7 @@ RC_ICONS = ..\WindowsInstaller\WhippyTerm.ico
 }
 
 SOURCES += ../src/UI/QT/main.cpp\
+    ../src/App/CursorKeyMode.cpp \
     ../src/App/Dialogs/Dialog_CRCFinder.cpp \
     ../src/App/Dialogs/Dialog_CalcCrc.cpp \
     ../src/App/Dialogs/Dialog_DataProPluginSettings.cpp \
@@ -82,6 +83,7 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/UI/QT/Frame_CustomTextWidget.cpp \
     ../src/UI/QT/Frame_CustomTextWidgetAccess.cpp \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.cpp \
+    ../src/UI/QT/QTKeyHandleScrollLock.cpp \
     ../src/UI/QT/QTSound.cpp \
     ../src/UI/QT/VerPanelHandle.cpp \
     ../src/UI/QT/HozPanelHandle.cpp \
@@ -234,7 +236,7 @@ win32 {
 
 unix:!macx {
 # Linux
-    LIBS+=-ldl
+    LIBS+=-ldl -lX11
 
      SOURCES += \
     ../src/OS/Linux/FilePaths.cpp \

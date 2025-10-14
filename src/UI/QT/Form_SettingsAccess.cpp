@@ -292,6 +292,8 @@ t_UIGroupBox *UIS_GetGroupBoxHandle(e_UIS_GroupBox UIObj)
             return (t_UIGroupBox *)g_SettingsDialog->ui->groupBox_DisplayClearScreen;
         case e_UIS_GroupBox_Display_MouseCursor:
             return (t_UIGroupBox *)g_SettingsDialog->ui->MouseCursor_groupBox;
+        case e_UIS_GroupBox_Keyboard_CursorKeyToggle:
+            return (t_UIGroupBox *)g_SettingsDialog->ui->CursorKeyToggle_groupBox;
 
         case e_UIS_GroupBoxMAX:
         default:
@@ -372,6 +374,14 @@ t_UIRadioBttnCtrl *UIS_GetRadioBttnHandle(e_UIS_RadioBttns UIObj)
             return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->SysColPrev_SelectionFG_radioButton;
         case e_UIS_RadioBttn_SelectionColorPrev_Background:
             return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->SysColPrev_SelectionBG_radioButton;
+        case e_UIS_RadioBttn_Keyboard_CursorKeyToggle_None:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->CursorKeyToggle_None_radioButton;
+        case e_UIS_RadioBttn_Keyboard_CursorKeyToggle_ScrollLock:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->CursorKeyToggle_ScrollLock_radioButton;
+        case e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Esc:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->CursorKeyToggle_EscKey_radioButton;
+        case e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Insert:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->CursorKeyToggle_InsertKey_radioButton;
         case e_UIS_RadioBttnMAX:
         default:
         break;

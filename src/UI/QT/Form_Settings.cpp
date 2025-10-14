@@ -795,7 +795,6 @@ void Form_Settings::on_Binary_OtherSettings_pushButton_clicked()
     SendEvent(e_DSEvent_BttnTriggered,&EventData);
 }
 
-
 void Form_Settings::on_SelectColor_pushButton_clicked()
 {
     union DSEventData EventData;
@@ -804,3 +803,46 @@ void Form_Settings::on_SelectColor_pushButton_clicked()
     SendEvent(e_DSEvent_BttnTriggered,&EventData);
 }
 
+void Form_Settings::on_CursorKeyToggle_None_radioButton_toggled(bool checked)
+{
+    union DSEventData EventData;
+
+    if(checked)
+    {
+        EventData.RadioBttn.InputID=e_UIS_RadioBttn_Keyboard_CursorKeyToggle_None;
+        SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+    }
+}
+
+void Form_Settings::on_CursorKeyToggle_ScrollLock_radioButton_toggled(bool checked)
+{
+    union DSEventData EventData;
+
+    if(checked)
+    {
+        EventData.RadioBttn.InputID=e_UIS_RadioBttn_Keyboard_CursorKeyToggle_ScrollLock;
+        SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+    }
+}
+
+void Form_Settings::on_CursorKeyToggle_EscKey_radioButton_toggled(bool checked)
+{
+    union DSEventData EventData;
+
+    if(checked)
+    {
+        EventData.RadioBttn.InputID=e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Esc;
+        SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+    }
+}
+
+void Form_Settings::on_CursorKeyToggle_InsertKey_radioButton_toggled(bool checked)
+{
+    union DSEventData EventData;
+
+    if(checked)
+    {
+        EventData.RadioBttn.InputID=e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Insert;
+        SendEvent(e_DSEvent_RadioBttnClick,&EventData);
+    }
+}

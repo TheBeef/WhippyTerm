@@ -12,6 +12,7 @@
 #include <QDateTime>
 #include <QDesktopServices>
 #include <QUrl>
+#include "QTKeyHandleScrollLock.h"
 #include "Form_MainWindow.h"
 #include "main.h"
 #include <stdint.h>
@@ -55,11 +56,21 @@ void MainApp::AppUploadDownloadTimer_triggered()
 void MainApp::App1SecTimerTick()
 {
     App1SecTick();
-}
 
+    QTScrollLockHelperTick();
+}
 
 bool MainApp::notify(QObject * receiver, QEvent * event)
 {
+    /* Handle Scroll Lock on Linux */
+    if(event->type()==QEvent::KeyPress)
+    {
+        QKeyEvent *Key;
+        Key=(QKeyEvent *)event;
+        if(Key->key()==Qt::Key_ScrollLock)
+            QTInformOfScrollLockPressed();
+    }
+
     /* We do all of this so we can by pass the QAction shortcuts */
     /* I'm not sure this is working anyway.... */
     if(receiver==g_FocusedMainWindow)
@@ -99,6 +110,8 @@ int main(int argc, char *argv[])
 //            STARTING_DATAEVENT_QUEUE_SIZE));
 
     qRegisterMetaType<t_IOSystemHandle *>("t_IOSystemHandle *");
+
+    QTInitScrollLockHandler();
 
     if(!AppMain(argc,argv))
     {

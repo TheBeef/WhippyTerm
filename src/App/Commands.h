@@ -193,23 +193,9 @@ typedef enum
     e_Cmd_Movement_Down,
     e_Cmd_Movement_PgUp,
     e_Cmd_Movement_PgDown,
+    e_Cmd_Toggle_CursorKeyMode,
     e_CmdMAX
 } e_CmdType;
-
-/*
-    e_Cmd_Movement_Sel_Top,
-    e_Cmd_Movement_Sel_Bottom,
-    e_Cmd_Movement_Sel_StartLine
-    e_Cmd_Movement_Sel_EndLine,
-    e_Cmd_Movement_Sel_Right,
-    e_Cmd_Movement_Sel_Left,
-    e_Cmd_Movement_Sel_Up,
-    e_Cmd_Movement_Sel_Down,
-    e_Cmd_Movement_Sel_PgUp,
-    e_Cmd_Movement_Sel_PgDown,
-
-    e_Cmd_Toggle_KeyMode,???
-*/
 
 /***  CLASS DEFINITIONS                ***/
 

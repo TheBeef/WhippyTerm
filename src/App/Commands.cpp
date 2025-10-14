@@ -202,6 +202,7 @@ const char *m_CmdNames[]=
     "MovementDown",                         // e_Cmd_Movement_Down
     "MovementPgUp",                         // e_Cmd_Movement_PgUp
     "MovementPgDown",                       // e_Cmd_Movement_PgDown
+    "ToggleCursorKeyMode",                  // e_Cmd_Toggle_CursorKeyMode
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -829,6 +830,7 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     // e_Cmd_Movement_Down,
     // e_Cmd_Movement_PgUp,
     // e_Cmd_Movement_PgDown,
+    // e_Cmd_Toggle_CursorKeyMode,
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A

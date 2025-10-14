@@ -48,6 +48,10 @@
 #if defined(Q_OS_WIN)
 #include <windows.h>
 
+void QTInitScrollLockHandler(void)
+{
+}
+
 void EnableHandlingOfScrollLock(bool Enabled)
 {
 }

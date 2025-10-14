@@ -57,6 +57,10 @@ bool IsScrollLockOn(void)
     return GetKeyState(VK_SCROLL) == 1;
 }
 
+void QTInformOfScrollLockPressed(void)
+{
+}
+
 void QTScrollLockHelperTick(void)
 {
     /* Does nothing because Windows (of all things) works correctly for scroll

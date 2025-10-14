@@ -63,6 +63,11 @@ bool IsScrollLockOn(void)
 
 void QTInformOfScrollLockPressed(void)
 {
+    struct MWEvent Event;
+
+    Event.EventType=e_MWEvent_ScrollLockHint;
+    Event.MW=NULL;  // All
+    MW_Event(&Event);
 }
 
 void QTScrollLockHelperTick(void)

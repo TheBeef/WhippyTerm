@@ -37,27 +37,27 @@ MainApp::MainApp(int & argc, char ** argv) : QApplication(argc,argv)
     connect(App1SecTimer, SIGNAL(timeout()), this, SLOT(App1SecTimerTick()));
     App1SecTimer->start(1000);
 
-    AppUploadDownloadTimer=new QTimer(this);
-    connect(AppUploadDownloadTimer, SIGNAL(timeout()), this, SLOT(AppUploadDownloadTimer_triggered()));
+    App100msTimer=new QTimer(this);
+    connect(App100msTimer, SIGNAL(timeout()), this, SLOT(App100msTimer_triggered()));
 
-/* DEBUG PAUL: May want to provide an API to speed this up when a plugin requests a timeout below 100ms */
-    AppUploadDownloadTimer->start(100);              // We only provide .1 sec timeouts
+    App100msTimer->start(100);              // We only provide .1 sec timeouts
 }
 
 MainApp::~MainApp()
 {
 }
 
-void MainApp::AppUploadDownloadTimer_triggered()
+void MainApp::App100msTimer_triggered()
 {
+    QTScrollLockHelperTick();
+
+    /* DEBUG PAUL: May want to provide an API to speed this up when a plugin requests a timeout below 100ms */
     AppInformOf_FileTransTimerTick();
 }
 
 void MainApp::App1SecTimerTick()
 {
     App1SecTick();
-
-    QTScrollLockHelperTick();
 }
 
 bool MainApp::notify(QObject * receiver, QEvent * event)

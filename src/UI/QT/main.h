@@ -57,11 +57,11 @@ class MainApp : public QApplication
 
 public slots:
         void App1SecTimerTick();
-        void AppUploadDownloadTimer_triggered();
+        void App100msTimer_triggered();
 
     private:
         QTimer *App1SecTimer;
-        QTimer *AppUploadDownloadTimer;
+        QTimer *App100msTimer;
 };
 
 class MainMethodCB : public QObject

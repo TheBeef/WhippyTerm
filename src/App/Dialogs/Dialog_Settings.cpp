@@ -624,6 +624,9 @@ static void DS_SetSettingGUI(void)
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_BookmarksOpenNewTab);
     UICheckCheckbox(CheckboxHandle,g_Settings.BookmarksOpenNewTabs);
 
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ConfirmQuit);
+    UICheckCheckbox(CheckboxHandle,g_Settings.ConfirmQuit);
+
     /********************/
     /* Panels           */
     /********************/
@@ -711,6 +714,9 @@ static void DS_SetSettingGUI(void)
 
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_StartMax);
     UICheckCheckbox(CheckboxHandle,g_Settings.AppMaximized);
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ReopenConnectionsOnStartup);
+    UICheckCheckbox(CheckboxHandle,g_Settings.ReopenOnConnectionsOnStartup);
 
     /********************/
     /* Connections      */
@@ -1037,6 +1043,9 @@ static void DS_GetSettingsFromGUI(void)
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_BookmarksOpenNewTab);
         g_Settings.BookmarksOpenNewTabs=UIGetCheckboxCheckStatus(CheckboxHandle);
 
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ConfirmQuit);
+        g_Settings.ConfirmQuit=UIGetCheckboxCheckStatus(CheckboxHandle);
+
         /********************/
         /* Panels           */
         /********************/
@@ -1116,6 +1125,9 @@ static void DS_GetSettingsFromGUI(void)
 
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_StartMax);
         g_Settings.AppMaximized=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ReopenConnectionsOnStartup);
+        g_Settings.ReopenOnConnectionsOnStartup=UIGetCheckboxCheckStatus(CheckboxHandle);
 
         /********************/
         /* Connections      */
@@ -2684,6 +2696,8 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Checkbox_UseCustomSounds:
                 case e_UIS_Checkbox_MouseCursorUseIBeam:
                 case e_UIS_Checkbox_DestructiveBackspace:
+                case e_UIS_Checkbox_ReopenConnectionsOnStartup:
+                case e_UIS_Checkbox_ConfirmQuit:
                 case e_UIS_CheckboxMAX:
                 default:
                 break;

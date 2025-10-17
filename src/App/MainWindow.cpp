@@ -601,19 +601,22 @@ void TheMainWindow::Init(void)
 
     /* Ok, if we are the first main window to open then we handle command line
        tabs to open. */
-    if(!g_CLI_URIOpened)
+    if(!g_CLI_FirstWindowOpen)
     {
-        g_CLI_URIOpened=true;   // Note that we already did this
+        g_CLI_FirstWindowOpen=true;
+
+        /* Restore sessions */
+        if(g_Settings.ReopenOnConnectionsOnStartup)
+            RestoreSessionConnections();
+
+        /* Command line URI */
         for(arg=g_CLI_URIList.begin();arg!=g_CLI_URIList.end();arg++)
         {
             /* Ok, open a new tab */
-            AllocNewTab(arg->c_str(),NULL,arg->c_str(),NULL);
+            AllocNewTab(arg->c_str(),NULL,arg->c_str(),NULL,false);
         }
-    }
-    /* And bookmarks as well */
-    if(!g_CLI_BookmarksOpened)
-    {
-        g_CLI_BookmarksOpened=true;   // Note that we already did this
+
+        /* Command line Bookmarks */
         for(arg=g_CLI_BookmarkList.begin();arg!=g_CLI_BookmarkList.end();arg++)
         {
             for(Index=0,bm=g_BookmarkList.begin();bm!=g_BookmarkList.end();
@@ -926,7 +929,7 @@ void TheMainWindow::NewConnection(bool MakeNewTab)
  * SYNOPSIS:
  *    class Connection *TheMainWindow::AllocNewTab(const char *TabLabel,
  *              class ConSettings *UseSettings,const char *URI,
- *              t_KVList *Options);
+ *              t_KVList *Options,bool IgnoreAutoConnect);
  *
  * PARAMETERS:
  *    TabLabel [I] -- The display label for this new tab.
@@ -935,6 +938,8 @@ void TheMainWindow::NewConnection(bool MakeNewTab)
  *    URI [I] -- The URI to open the connection with
  *    Options [I] -- The options to apply to this new connection or NULL to
  *                   just use the options from the URI.
+ *    IgnoreAutoConnect [I] -- If this is true then we ignore the
+ *                             'g_Settings.AutoConnectOnNewConnection'
  *
  * FUNCTION:
  *    This function allocates a new tab and adds it to the main window.
@@ -947,7 +952,8 @@ void TheMainWindow::NewConnection(bool MakeNewTab)
  *    TheMainWindow::ReloadTabFromURI()
  ******************************************************************************/
 class Connection *TheMainWindow::AllocNewTab(const char *TabLabel,
-        class ConSettings *UseSettings,const char *URI,t_KVList *Options)
+        class ConSettings *UseSettings,const char *URI,t_KVList *Options,
+        bool IgnoreAutoConnect)
 {
     t_UITabCtrl *MainTabs;
     t_UITab *NewTab;
@@ -1033,7 +1039,7 @@ class Connection *TheMainWindow::AllocNewTab(const char *TabLabel,
 
         AuxControlsPanel.NewConnection(NewConnection);
 
-        NewConnection->FinalizeNewConnection();
+        NewConnection->FinalizeNewConnection(IgnoreAutoConnect);
     }
     catch(const char *Msg)
     {
@@ -1059,7 +1065,8 @@ class Connection *TheMainWindow::AllocNewTab(const char *TabLabel,
  *
  * SYNOPSIS:
  *    class Connection *TheMainWindow::ReloadTabFromURI(const char *TabLabel,
- *              class ConSettings *UseSettings,const char *URI);
+ *              class ConSettings *UseSettings,const char *URI,
+ *              bool IgnoreAutoConnect);
  *
  * PARAMETERS:
  *    TabLabel [I] -- The display label for this new tab.  If NULL then the
@@ -1067,6 +1074,8 @@ class Connection *TheMainWindow::AllocNewTab(const char *TabLabel,
  *    UseSettings [I] -- The settings to apply to this connection (or NULL
  *                       for global settings).
  *    URI [I] -- The URI to open the connection with
+ *    IgnoreAutoConnect [I] -- If this is true then we ignore the
+ *                             'g_Settings.AutoConnectOnNewConnection'
  *
  * FUNCTION:
  *    This function is called when you want to reload a tab from a URI
@@ -1080,7 +1089,7 @@ class Connection *TheMainWindow::AllocNewTab(const char *TabLabel,
  *
  ******************************************************************************/
 class Connection *TheMainWindow::ReloadTabFromURI(const char *TabLabel,
-        class ConSettings *UseSettings,const char *URI)
+        class ConSettings *UseSettings,const char *URI,bool IgnoreAutoConnect)
 {
     t_UITabCtrl *MainTabs;
     class Connection *TabCon;
@@ -1162,12 +1171,13 @@ class Connection *TheMainWindow::ReloadTabFromURI(const char *TabLabel,
 
             AuxControlsPanel.NewConnection(NewConnection);
 
-            NewConnection->FinalizeNewConnection();
+            NewConnection->FinalizeNewConnection(IgnoreAutoConnect);
         }
         else
         {
             /* Allocate a new tab and connection */
-            NewConnection=AllocNewTab(TabLabel,UseSettings,URI,NULL);
+            NewConnection=AllocNewTab(TabLabel,UseSettings,URI,NULL,
+                    IgnoreAutoConnect);
         }
     }
     catch(const char *Msg)
@@ -3089,13 +3099,14 @@ void TheMainWindow::GotoBookmark(uintptr_t ID,bool ForceNewTab)
     {
         /* Ok, open a new tab */
         NewCon=AllocNewTab(bm->Name.c_str(),UseSettings,bm->URI.c_str(),
-                &bm->Options);
+                &bm->Options,false);
         if(NewCon==nullptr)
             return;    // We have already prompted
     }
     else
     {
-        NewCon=ReloadTabFromURI(bm->Name.c_str(),UseSettings,bm->URI.c_str());
+        NewCon=ReloadTabFromURI(bm->Name.c_str(),UseSettings,bm->URI.c_str(),
+                false);
         if(NewCon==NULL)
         {
             UIAsk("Error","Failed to load tab from the URI string",
@@ -3123,6 +3134,63 @@ void TheMainWindow::GotoBookmark(uintptr_t ID,bool ForceNewTab)
     /* Make this new connection the active one */
     SetActiveTab(NewCon);
 }
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::RestoreSessionConnections
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::RestoreSessionConnections(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This restores any open connections from the session system.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *
+ ******************************************************************************/
+void TheMainWindow::RestoreSessionConnections(void)
+{
+    i_SessionOpenConnectionList sc;
+    class Connection *NewCon;
+    class ConSettings *UseSettings;
+
+    for(sc=g_Session.OpenConnections.begin();
+            sc!=g_Session.OpenConnections.end();sc++)
+    {
+        /* Figure out if we are using global settings or the bookmarks */
+        if(sc->UseCustomSettings)
+            UseSettings=&sc->CustomSettings;
+        else
+            UseSettings=NULL;
+
+        /* Open a new tab */
+        NewCon=AllocNewTab(sc->Name.c_str(),UseSettings,sc->URI.c_str(),
+                &sc->Options,true);
+        if(NewCon==nullptr)
+            continue;    // We have already prompted
+
+        /* Apply options */
+        if(!NewCon->SetConnectionOptions(sc->Options))
+        {
+            UIAsk("Error","There was an error applying connection options",
+                    e_AskBox_Error,e_AskBttns_Ok);
+        }
+
+        /* Change the tab name to the same as the bookmark */
+        NewCon->SetDisplayName(sc->Name.c_str());
+
+        /* Open this connection if it was open before */
+        if(sc->WasOpen)
+            NewCon->SetConnectedState(true);
+    }
+}
+
 
 /*******************************************************************************
  * NAME:
@@ -3582,7 +3650,7 @@ void TheMainWindow::CloseTab(class Connection *Con)
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    GetConnectionsCount()
  ******************************************************************************/
 void TheMainWindow::GetListOfConnections(t_MainWindowConnectionList &List)
 {
@@ -3609,6 +3677,35 @@ void TheMainWindow::GetListOfConnections(t_MainWindowConnectionList &List)
             }
         }
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::GetConnectionsCount
+ *
+ * SYNOPSIS:
+ *    int TheMainWindow::GetConnectionsCount(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets the number of open connections in this window.
+ *
+ * RETURNS:
+ *    The number of connections (tabs).
+ *
+ * SEE ALSO:
+ *    GetListOfConnections()
+ ******************************************************************************/
+int TheMainWindow::GetConnectionsCount(void)
+{
+    t_UITabCtrl *MainTabs;
+    int Tabs;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    Tabs=UITabCtrlGetTabCount(MainTabs);
+    return Tabs;
 }
 
 /*******************************************************************************
@@ -3822,7 +3919,8 @@ void TheMainWindow::ToggleConnectionUseGlobalSettings(void)
  *    This function is called when the main window closes.
  *
  * RETURNS:
- *    NONE
+ *    true -- Eat the event
+ *    false -- Do the event
  *
  * SEE ALSO:
  *
@@ -3840,6 +3938,23 @@ static bool MW_DoMainWindowClose(class TheMainWindow *win)
     }
     if(Search!=m_MainWindowsList.end())
     {
+        if(g_Settings.ConfirmQuit && m_MainWindowsList.size()>=1 &&
+                win->GetConnectionsCount()>0)
+        {
+            if(UIAsk("Exit program","Are you sure you want to exit?",
+                    e_AskBox_Warning,e_AskBttns_YesNo)==e_AskRet_No)
+            {
+                return false;
+            }
+        }
+
+        /* If this is going to be the last window closing then we want to mark
+           the system has shutting down (before we erase the window) */
+        if(m_MainWindowsList.size()==1)
+        {
+            StartAppShutDown();
+        }
+
         /* Remove this entry */
         m_MainWindowsList.erase(Search);
     }
@@ -3852,7 +3967,7 @@ static bool MW_DoMainWindowClose(class TheMainWindow *win)
     if(m_MainWindowsList.empty())
     {
         /* Ok, we are quiting */
-        AppShutdown();
+        FinishAppShutdown();
     }
 
     return true;
@@ -5125,7 +5240,8 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
             CloseAllConnections();
         break;
         case e_Cmd_Quit:
-            if(m_MainWindowsList.size()>1)
+            if(g_Settings.ConfirmQuit && m_MainWindowsList.size()>=1 &&
+                    GetConnectionsCount()>0)
             {
                 if(UIAsk("Exit program","Are you sure you want to exit?",
                         e_AskBox_Warning,e_AskBttns_YesNo)==e_AskRet_No)
@@ -5134,7 +5250,9 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
                 }
             }
 
-            AppShutdown();
+            StartAppShutDown();
+            FinishAppShutdown();
+
             UIExit(0);
         break;
         case e_Cmd_About:
@@ -5201,7 +5319,7 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         case e_Cmd_URIGo:
             URIInput=UIMW_GetTxtInputHandle(UIWin,e_UIMWTxtInput_URI);
             UIGetTextCtrlText(URIInput,URIBuffer,MAX_URI_LENGTH);
-            ReloadTabFromURI(NULL,NULL,URIBuffer);
+            ReloadTabFromURI(NULL,NULL,URIBuffer,false);
         break;
         case e_Cmd_AddBookmark:
             BookmarkCurrentTab();

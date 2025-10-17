@@ -1,4 +1,3 @@
-void DebugMsg(const char *fmt,...);
 /*******************************************************************************
  * FILENAME: Session.cpp
  *
@@ -30,9 +29,12 @@ void DebugMsg(const char *fmt,...);
  ******************************************************************************/
 
 /*** HEADER FILES TO INCLUDE  ***/
+#include "App/Connections.h"
+#include "App/MainApp.h"
+#include "App/Portable.h"
 #include "App/Session.h"
 #include "App/Util/StorageHelpers.h"
-#include "App/Portable.h"
+#include "ThirdParty/TinyCFG/TinyCFG.h"
 #include "OS/Directorys.h"
 #include <string>
 #include <string.h>
@@ -46,6 +48,13 @@ using namespace std;
 /*** MACROS                   ***/
 
 /*** TYPE DEFINITIONS         ***/
+class SessionOpenConnections_TinyCFG : public TinyCFGBaseData
+{
+    public:
+        t_SessionOpenConnectionList *Ptr;
+        bool LoadElement(class TinyCFG *CFG);
+        bool SaveElement(class TinyCFG *CFG);
+};
 
 /*** FUNCTION PROTOTYPES      ***/
 static void Session_RegisterAllMembers(struct Session &session,
@@ -199,6 +208,8 @@ bool SaveSession(const char *Filename)
 
         Session_RegisterAllMembers(g_Session,cfg);
 
+        ScanOpenConnections2Session();
+
 /* DEBUG PAUL: We need to ask each plugin to store it's session data here */
 
         cfg.SaveCFGFile(UseFilename);
@@ -298,8 +309,170 @@ void SaveSessionIfNeeded(void)
  ******************************************************************************/
 void NoteSessionChanged(void)
 {
+    /* If we are shutting down then we ignore session changes (because we have
+       already saved the session, and we don't want to keep anything that
+       might change the session) */
+    if(g_AppShuttingDown)
+        return;
+
     m_SessionChanged=true;
 }
+
+/*******************************************************************************
+ * NAME:
+ *    ScanOpenConnections2Session
+ *
+ * SYNOPSIS:
+ *    void ScanOpenConnections2Session(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function scans all open connections takes a copy of needed info
+ *    into the session system.
+ *
+ *    It also removes closed connections from the session.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void ScanOpenConnections2Session(void)
+{
+    struct SessionOpenConnection NewOpenConInfo;
+    t_ConnectionList ConList;
+    i_ConnectionList CurrentCon;
+    class Connection *Con;
+
+    g_Session.OpenConnections.clear();
+
+    /* If we aren't restoring connections on startup then we just store blank
+       data in session */
+    if(!g_Settings.ReopenOnConnectionsOnStartup)
+        return;
+
+    try
+    {
+        Con_GetListOfConnections(ConList);
+
+        for(CurrentCon=ConList.begin();CurrentCon!=ConList.end();CurrentCon++)
+        {
+            Con=*CurrentCon;
+
+            Con->GetDisplayName(NewOpenConInfo.Name);
+            NewOpenConInfo.WasOpen=Con->GetConnectedStatus();
+
+            if(!Con->GetConnectionOptions(NewOpenConInfo.Options))
+                throw(0);
+
+            if(!Con->GetURI(NewOpenConInfo.URI))
+                throw(0);
+
+            NewOpenConInfo.UseCustomSettings=Con->UsingCustomSettings;
+            NewOpenConInfo.CustomSettings=Con->CustomSettings;
+
+            /* Add this connection to the list of open connections */
+            g_Session.OpenConnections.push_back(NewOpenConInfo);
+        }
+    }
+    catch(...)
+    {
+    }
+}
+
+/////////////////////
+bool SessionOpenConnections_TinyCFG::LoadElement(class TinyCFG *CFG)
+{
+    struct SessionOpenConnection NewData;
+    class TinyCFG SubCFG("Connection");
+
+    Ptr->clear();
+
+    SubCFG.Register("Name",NewData.Name);
+    SubCFG.Register("URI",NewData.URI);
+    RegisterKVList_TinyCFG(SubCFG,"Option",NewData.Options);
+    SubCFG.Register("UseCustomSettings",NewData.UseCustomSettings);
+    SubCFG.StartBlock("CustomSettings");
+    NewData.CustomSettings.RegisterAllMembers(SubCFG);
+    SubCFG.EndBlock();
+    SubCFG.Register("WasOpen",NewData.WasOpen);
+
+    NewData.Name="";
+    NewData.URI="";
+    NewData.UseCustomSettings=false;
+    NewData.CustomSettings.DefaultSettings();
+    NewData.WasOpen=false;
+
+    SubCFG.ConnectToParentCFGForReading(CFG);
+
+    while(SubCFG.ReadNextCFG())
+    {
+        Ptr->push_back(NewData);
+    }
+
+    return true;
+}
+
+bool SessionOpenConnections_TinyCFG::SaveElement(class TinyCFG *CFG)
+{
+    i_SessionOpenConnectionList i;
+    string MenuName;
+    string Name;
+    string URI;
+    bool WasOpen;
+    t_KVList Options;
+    class TinyCFG SubCFG("Connection");
+    class ConSettings CustomSettings;
+    bool UseCustomSettings;
+
+    SubCFG.Register("Name",Name);
+    SubCFG.Register("URI",URI);
+    RegisterKVList_TinyCFG(SubCFG,"Option",Options);
+    SubCFG.Register("UseCustomSettings",UseCustomSettings);
+    SubCFG.StartBlock("CustomSettings");
+    CustomSettings.RegisterAllMembers(SubCFG);
+    SubCFG.EndBlock();
+    SubCFG.Register("WasOpen",WasOpen);
+
+    for(i=Ptr->begin();i!=Ptr->end();i++)
+    {
+        Name=i->Name;
+        URI=i->URI;
+        Options=i->Options;
+        UseCustomSettings=i->UseCustomSettings;
+        CustomSettings=i->CustomSettings;
+        WasOpen=i->WasOpen;
+
+        SubCFG.WriteCFGUsingParentCFG(CFG);
+    }
+    return true;
+}
+
+bool RegisterSessionOpenConnectionsList_TinyCFG(class TinyCFG &cfg,
+        const char *XmlName,t_SessionOpenConnectionList &Data)
+{
+    class SessionOpenConnections_TinyCFG *NewDataClass;
+
+    /* Make a new class to handle this new piece of data */
+    try
+    {
+        NewDataClass=new SessionOpenConnections_TinyCFG;
+    }
+    catch(std::bad_alloc const &)
+    {
+        return false;
+    }
+
+    /* Setup the data */
+    NewDataClass->Ptr=&Data;
+    NewDataClass->XmlName=XmlName;
+
+    return cfg.RegisterGeneric(NewDataClass);
+}
+/////////////////////
 
 /* DEBUG PAUL: Removed this because it should be done on a connection by connection basis instead 1 global */
 /////////////////////
@@ -528,6 +701,9 @@ static void Session_RegisterAllMembers(struct Session &session,
     cfg.StartBlock("Connections");
     cfg.Register("LastConnectionOpened",session.LastConnectionOpened);
     RegisterConnectionOptions_TinyCFG(cfg,"Options",session.ConnectionsOptions);
+
+    RegisterSessionOpenConnectionsList_TinyCFG(cfg,"OpenConnections",session.OpenConnections);
+
     cfg.EndBlock();
 
     cfg.StartBlock("Transfers");
@@ -565,6 +741,7 @@ static void Session_DefaultSession(struct Session &session)
     session.ConnectionsOptions.clear();
     session.LastUsedUploadOptions.clear();
     session.LastUsedDownloadOptions.clear();
+    session.OpenConnections.clear();
 
     /* Edit Buffer */
     session.LastSelectedCRCType=e_CRC_CRC32;

@@ -30,6 +30,16 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_ENHANCEMENT,"Added a \"are you sure\" popup on quit",
+            "When you close WhippyTerm it will now prompt to make sure you"
+            " are sure if there is one or more open connection tabs.\n"
+            "This function can be turn on/off in the settings."},
+    {   NOTETYPE_ENHANCEMENT,"Added a restore connection on startup option",
+            "A new setting has been added that will reopen the connection tabs"
+            " that where open then WhippyTerm quits.  It will store this"
+            " info in the session data, and includes any custom settings"
+            " applied to the connection, if the connection was open or closed,"
+            " any connection options."},
     {   NOTETYPE_FUNCTIONALLY_FIX,"Updated ANSI decoder to support Page Up/Down",
             "The ANSI decoder was not sending page up, page down, home, end,"
             " and insert.  It has been updated to send these."},

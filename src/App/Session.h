@@ -32,24 +32,38 @@
 #define __SESSION_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
+#include "App/Settings.h"
 #include "App/Util/StorageHelpers.h"
 #include "ThirdParty/TinyCFG/TinyCFG.h"
 #include "UI/UIMainWindow.h"
 #include "App/Util/CRCSystem.h"
+#include "App/Util/KeyValue.h"
 #include <string>
+#include <list>
 
 /***  DEFINES                          ***/
 
 /***  MACROS                           ***/
 
 /***  TYPE DEFINITIONS                 ***/
+struct SessionOpenConnection
+{
+    std::string Name;
+    std::string URI;
+    t_KVList Options;
+    bool UseCustomSettings;
+    class ConSettings CustomSettings;
+    bool WasOpen;
+};
+
+typedef std::list<struct SessionOpenConnection> t_SessionOpenConnectionList;
+typedef t_SessionOpenConnectionList::iterator i_SessionOpenConnectionList;
 
 /***  CLASS DEFINITIONS                ***/
 /* Adding to session:
     * Add to 'struct Session'
     * Add to Session_RegisterAllMembers()
     * Add to Session_DefaultSession()
-    * Add to Session_Changed()
 */
 struct Session
 {
@@ -75,6 +89,7 @@ struct Session
     int WindowWidth;
     int WindowHeight;
     std::string SendBufferPath; // The path that we load/save buffers
+    t_SessionOpenConnectionList OpenConnections;
 
     /* Connections */
     std::string LastConnectionOpened;
@@ -99,5 +114,6 @@ bool LoadSession(const char *Filename=NULL);
 void AutoSaveSessionTick(void);
 void SaveSessionIfNeeded(void);
 void NoteSessionChanged(void);
+void ScanOpenConnections2Session(void);
 
 #endif   /* end of "#ifndef __SESSION_H_" */

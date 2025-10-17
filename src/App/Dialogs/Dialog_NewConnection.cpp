@@ -644,7 +644,7 @@ static void DNC_OpenConnection(class TheMainWindow *MW)
         if(m_OpenNewTab)
         {
             NewConnection=MW->AllocNewTab(ConnectionName.c_str(),NULL,
-                    URI.c_str(),SelectedConOptions);
+                    URI.c_str(),SelectedConOptions,false);
             if(NewConnection==nullptr)
                 throw(nullptr);    // We have already prompted
         }
@@ -652,7 +652,7 @@ static void DNC_OpenConnection(class TheMainWindow *MW)
         {
             /* Reuse the current tab */
             NewConnection=MW->ReloadTabFromURI(ConnectionName.c_str(),NULL,
-                    URI.c_str());
+                    URI.c_str(),false);
             if(NewConnection==NULL)
             {
                 UIAsk("Error","Failed to open new connection",

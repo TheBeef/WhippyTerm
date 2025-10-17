@@ -46,8 +46,10 @@ using namespace std;
 /*** FUNCTION PROTOTYPES      ***/
 
 /*** VARIABLE DEFINITIONS     ***/
-bool g_CLI_URIOpened=false;
-bool g_CLI_BookmarksOpened=false;
+bool g_CLI_FirstWindowOpen=false;
+//bool g_CLI_URIOpened=false;
+//bool g_CLI_BookmarksOpened=false;
+bool g_AppShuttingDown=false;
 t_CLIArgList g_CLI_URIList;
 t_CLIArgList g_CLI_BookmarkList;
 
@@ -82,7 +84,9 @@ bool AppMain(int argc,char *argv[])
 {
     int_fast32_t r;
 
-    /* Debug checks */
+    g_AppShuttingDown=false;
+
+    /* Code checks (make sure enum's are correct) */
     CmdCheck();
 
     /* Handle command line args */
@@ -154,10 +158,37 @@ bool AppMain(int argc,char *argv[])
 
 /*******************************************************************************
  * NAME:
- *    AppShutdown
+ *    StartAppShutDown
  *
  * SYNOPSIS:
- *    void AppShutdown(void);
+ *    void StartAppShutDown(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called to start the shut down of the app.  It mostly
+ *    just sets a flag that the system uses to know that shutdown is pending.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void StartAppShutDown(void)
+{
+    SaveSession();  // Always save the session data
+
+    g_AppShuttingDown=true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    FinishAppShutdown
+ *
+ * SYNOPSIS:
+ *    void FinishAppShutdown(void);
  *
  * PARAMETERS:
  *    NONE
@@ -175,10 +206,8 @@ bool AppMain(int argc,char *argv[])
  *    Paul Hutchinson (27 Sep 2018)
  *       Created
  ******************************************************************************/
-void AppShutdown(void)
+void FinishAppShutdown(void)
 {
-    SaveSessionIfNeeded();
-
     CRC_ShutDown();
     IOS_Shutdown();
 

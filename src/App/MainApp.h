@@ -38,14 +38,17 @@ typedef t_CLIArgList::iterator i_CLIArgList;
 /***  CLASS DEFINITIONS                ***/
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
-extern bool g_CLI_URIOpened;
-extern bool g_CLI_BookmarksOpened;
+extern bool g_CLI_FirstWindowOpen;
+//extern bool g_CLI_URIOpened;
+//extern bool g_CLI_BookmarksOpened;
 extern t_CLIArgList g_CLI_URIList;
 extern t_CLIArgList g_CLI_BookmarkList;
+extern bool g_AppShuttingDown;
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
 bool AppMain(int argc,char *argv[]);
-void AppShutdown(void);
+void StartAppShutDown(void);
+void FinishAppShutdown(void);
 void App1SecTick(void);
 void AppInformOf_FileTransTimerTick(void);
 

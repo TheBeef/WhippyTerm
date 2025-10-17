@@ -250,6 +250,7 @@ class Settings
 
         /***** Behaviour *****/
         bool BookmarksOpenNewTabs;
+        bool ConfirmQuit;
 
         /***** Startup *****/
         e_WindowStartupPosType RestoreWindowPos;
@@ -258,6 +259,7 @@ class Settings
         int WindowPosY;
         int WindowWidth;
         int WindowHeight;
+        bool ReopenOnConnectionsOnStartup;
 
         /* Connection settings defaults */
         class ConSettings DefaultConSettings;

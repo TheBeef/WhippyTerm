@@ -44,6 +44,7 @@
 #include "App/Display/DisplayText.h"
 #include "App/Display/DisplayBinary.h"
 #include "App/Settings.h"
+#include "App/Session.h"
 #include "App/SendBuffer.h"
 #include "OS/OSTime.h"
 #include "UI/UIAsk.h"
@@ -141,6 +142,10 @@ class Connection *Con_AllocateConnection(const char *URI)
     {
         NewCon=new Connection(URI);
         m_Connections.push_back(NewCon);
+
+        /* Adding a connection needs to update the session open conneciton
+           list */
+        NoteSessionChanged();
     }
     catch(const char *Msg)
     {
@@ -178,6 +183,10 @@ void Con_FreeConnection(class Connection *Con)
 {
     m_Connections.remove(Con);
     delete Con;
+
+    /* Closing a connection needs to update the session open conneciton
+       list */
+    NoteSessionChanged();
 }
 
 /*******************************************************************************
@@ -811,10 +820,11 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
  *    Connection::FinalizeNewConnection
  *
  * SYNOPSIS:
- *    void Connection::FinalizeNewConnection(void);
+ *    void Connection::FinalizeNewConnection(bool IgnoreAutoConnect);
  *
  * PARAMETERS:
- *    NONE
+ *    IgnoreAutoConnect [I] -- If this is true then we ignore the
+ *                             'g_Settings.AutoConnectOnNewConnection'
  *
  * FUNCTION:
  *    This function is called after a new connection is allocated.  It does
@@ -833,10 +843,10 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
  * SEE ALSO:
  *    
  ******************************************************************************/
-void Connection::FinalizeNewConnection(void)
+void Connection::FinalizeNewConnection(bool IgnoreAutoConnect)
 {
     /* We auto open this when we open the tab */
-    if(g_Settings.AutoConnectOnNewConnection)
+    if(!IgnoreAutoConnect && g_Settings.AutoConnectOnNewConnection)
     {
         if(UITimerRunning(AutoReopenTimer))
         {
@@ -917,6 +927,10 @@ bool Connection::SetConnectionBasedOnURI(const char *URI)
     IOHandle=IOS_AllocIOSystemHandleFromURI(URI,(uintptr_t)this);
     if(IOHandle==NULL)
         return false;
+
+    /* We also need to update the session open conneciton list */
+    NoteSessionChanged();
+
     return true;
 }
 
@@ -1140,6 +1154,9 @@ void Connection::ApplyCustomSettings(void)
         LastSettingsTransmitDelayLine=CustomSettings.DelayAfterNewLineSent;
         ApplyTransmitDelayChange();
     }
+
+    /* We also need to update the session open conneciton list */
+    NoteSessionChanged();
 }
 
 /*******************************************************************************
@@ -1169,6 +1186,9 @@ bool Connection::SetConnectionOptions(const t_KVList &Options)
 
     RetValue=IOS_SetConnectionOptions(IOHandle,Options);
     SendMWEvent(ConMWEvent_ConOptionsChange);
+
+    /* We also need to update the session open conneciton list */
+    NoteSessionChanged();
 
     return RetValue;
 }
@@ -1339,6 +1359,9 @@ void Connection::SetDisplayName(const char *Name)
             Info.NameChange.NewName=DisplayName;
             SendMWEvent(ConMWEvent_NameChange,&Info);
         }
+
+        /* We also need to update the session open conneciton list */
+        NoteSessionChanged();
     }
     catch(...)
     {
@@ -1857,6 +1880,9 @@ void Connection::InformOfConnected(void)
     IsConnected=true;
     SendMWEvent(ConMWEvent_StatusChange);
     RethinkCursor();
+
+    /* We also need to update the session open conneciton list */
+    NoteSessionChanged();
 }
 
 /*******************************************************************************
@@ -1889,6 +1915,9 @@ void Connection::InformOfDisconnected(void)
     RethinkCursor();
 
     DoAutoReopenIfNeeded();
+
+    /* We also need to update the session open conneciton list */
+    NoteSessionChanged();
 }
 
 /*******************************************************************************

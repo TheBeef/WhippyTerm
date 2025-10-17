@@ -356,7 +356,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         ~Connection();
         bool Init(class TheMainWindow *MainWindow,void *ParentWidget,
                 class ConSettings *SourceSettings);
-        void FinalizeNewConnection(void);
+        void FinalizeNewConnection(bool IgnoreAutoConnect);
         void ReParentWidget(void *NewParentWidget);
         bool ApplySettings(void);
         bool SetConnection(const std::string &UniqueID);

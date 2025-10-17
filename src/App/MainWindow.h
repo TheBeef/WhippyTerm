@@ -77,8 +77,8 @@ void Debug6(void);
         void ShowWindow(void);
         void GetSizeAndPos(int &x,int &y,int &Width,int &Height);
         void NewConnection(bool MakeNewTab);
-        class Connection *AllocNewTab(const char *TabLabel,class ConSettings *UseSettings,const char *URI,t_KVList *Options);
-        class Connection *ReloadTabFromURI(const char *TabLabel,class ConSettings *UseSettings,const char *URI);
+        class Connection *AllocNewTab(const char *TabLabel,class ConSettings *UseSettings,const char *URI,t_KVList *Options,bool IgnoreAutoConnect);
+        class Connection *ReloadTabFromURI(const char *TabLabel,class ConSettings *UseSettings,const char *URI,bool IgnoreAutoConnect);
         void FreeTab(class Connection *Con);
         void RethinkActiveConnectionUI(void);
         void CloseActiveConnection(void);
@@ -102,6 +102,7 @@ void Debug6(void);
         void ConnectionEvent(const struct ConMWEvent *Event);
         void CloseTab(class Connection *Con);
         void GetListOfConnections(t_MainWindowConnectionList &List);
+        int GetConnectionsCount(void);
         bool GetBridgedStateInfo(class Connection **Con1,
                 class Connection **Con2);
         void DoSendByte(uint8_t Byte);
@@ -184,6 +185,7 @@ void Debug6(void);
         void DoFindCRCFromSelection(void);
         void DoCalcCRCFromSelection(void);
         void ToggleConnectionUseGlobalSettings(void);
+        void RestoreSessionConnections(void);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

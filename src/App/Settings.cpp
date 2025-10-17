@@ -1135,6 +1135,7 @@ void Settings::RegisterAllMembers(class TinyCFG &cfg)
         cfg.Register("RightPanelOpenOnStartup",RightPanelOpenOnStartup);
         cfg.Register("BottomPanelOpenOnStartup",BottomPanelOpenOnStartup);
         cfg.Register("AppMaximized",AppMaximized);
+        cfg.Register("ReopenOnConnectionsOnStartup",ReopenOnConnectionsOnStartup);
         cfg.Register("WindowPosX",WindowPosX);
         cfg.Register("WindowPosY",WindowPosY);
         cfg.Register("WindowWidth",WindowWidth);
@@ -1183,6 +1184,7 @@ void Settings::RegisterAllMembers(class TinyCFG &cfg)
 
     cfg.StartBlock("Behaviour");
         cfg.Register("BookmarksOpenNewTabs",BookmarksOpenNewTabs);
+        cfg.Register("ConfirmQuit",ConfirmQuit);
     cfg.EndBlock();
 
     cfg.StartBlock("Keyboard");
@@ -1386,6 +1388,7 @@ void Settings::DefaultSettings(void)
     RightPanelOpenOnStartup=false;
     BottomPanelOpenOnStartup=false;
     AppMaximized=true;
+    ReopenOnConnectionsOnStartup=false;
     WindowPosX=-1;
     WindowPosY=-1;
     WindowWidth=640;
@@ -1393,7 +1396,6 @@ void Settings::DefaultSettings(void)
     CloseButtonOnTabs=false;
     MouseCursorIBeam=true;
 
-//            ScrollBackLines=20;
     AlwaysShowTabs=true;
     AutoConnectOnNewConnection=true;
 
@@ -1402,6 +1404,7 @@ void Settings::DefaultSettings(void)
 
     /**** Behaviour ****/
     BookmarksOpenNewTabs=true;
+    ConfirmQuit=true;
 
     /**** Panels ****/
     /* Stop watch */

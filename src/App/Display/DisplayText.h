@@ -296,6 +296,7 @@ class DisplayText : public DisplayBase
         void MoveToNextLine(int &NewCursorY);
         void HandleLeftMousePress(bool Down,int x,int y);
         void HandleLeftMouseDoublePress(int x,int y);
+        void HandleLeftMouseTriplePress(int x,int y);
         void HandleMouseMove(int x,int y);
         int CharUnderCursorWidthPx(void);
         void ScrollVertAreaDown(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dy);

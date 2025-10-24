@@ -26,6 +26,7 @@ typedef enum
     e_WTCEvent_MouseWheel,
     e_WTCEvent_MouseMove,
     e_WTCEvent_MouseDoubleClick,
+    e_WTCEvent_MouseTripleClick,
     e_WTCEvent_Resize,
     e_WTCEvent_LostFocus,
     e_WTCEvent_GotFocus,
@@ -183,6 +184,8 @@ private:
     bool CursorSet2BeBlinking;
     bool CursorHiddenByBlink;
     QTimer *CursorTimer;
+    QTimer *TripleClickTimer;
+    int TripleClickCount;
     QLabel *BellLabel;
     Frame_TextCavnasOverrideBox *OverrideWidget;
     bool OverrideActive;

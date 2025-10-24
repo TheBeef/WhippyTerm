@@ -1,6 +1,7 @@
 #include "UI/UIDebug.h"
 
 #include "UI/UITextMainArea.h"
+#include "UI/UIDebug.h"
 #include "Widget_TextCanvas.h"
 #include "main.h"
 #include "UI/UIDebug.h"
@@ -10,6 +11,7 @@
 #include <QtGui>
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
+#include <QApplication>
 
 #define FOCUS_BOX_SIZE          1
 
@@ -47,6 +49,12 @@ Widget_TextCanvas::Widget_TextCanvas(QWidget *parent) : QWidget(parent)
     CursorTimer=new QTimer(this);
     connect(CursorTimer, SIGNAL(timeout()), this, SLOT(CursorTimerTick()));
     CursorTimer->start(500);
+
+    TripleClickTimer=new QTimer(this);
+    TripleClickTimer->setSingleShot(true);
+    TripleClickCount=0;
+//    connect(TripleClickTimer, SIGNAL(timeout()), this, SLOT(CursorTimerTick()));
+//    CursorTimer->start(500);
 
     RethinkCursor();
 
@@ -220,6 +228,22 @@ void Widget_TextCanvas::mousePressEvent(QMouseEvent * event)
         return;
 
     SendEvent(EventType,&EventData);
+
+    /* Handle triple clicks */
+    if(event->button()==Qt::LeftButton)
+    {
+        /* Ok, this might have been a triple click */
+        if(TripleClickTimer->remainingTime()>0)
+        {
+            /* Timer is still running, so this mean's the user clicked fast
+               enough to count towards a triple click */
+
+            /* Event time */
+            EventType=e_WTCEvent_MouseTripleClick;
+            SendEvent(EventType,&EventData);
+            TripleClickTimer->stop();
+        }
+    }
 }
 
 void Widget_TextCanvas::mouseReleaseEvent(QMouseEvent * event)
@@ -268,6 +292,13 @@ void Widget_TextCanvas::mouseDoubleClickEvent(QMouseEvent *event)
         return;
 
     SendEvent(EventType,&EventData);
+
+    /* Ok, we use the double click as our starting point for the triple */
+    if(event->button()==Qt::LeftButton)
+    {
+        TripleClickTimer->setInterval(QApplication::doubleClickInterval());
+        TripleClickTimer->start();
+    }
 }
 
 void Widget_TextCanvas::mouseMoveEvent(QMouseEvent *event)

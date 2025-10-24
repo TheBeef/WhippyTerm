@@ -30,6 +30,9 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_POLISH,"Added double-click a word in term window selects it, triple-click selects line",
+            "The selection system was updated to support double click and"
+            " triple click.  This does not apply to binary display."},
     {   NOTETYPE_ENHANCEMENT,"Added a \"are you sure\" popup on quit",
             "When you close WhippyTerm it will now prompt to make sure you"
             " are sure if there is one or more open connection tabs.\n"

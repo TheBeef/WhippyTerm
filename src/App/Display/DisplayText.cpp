@@ -409,6 +409,9 @@ break;
         case e_TextDisplayEvent_MouseDoubleClick:
             HandleLeftMouseDoublePress(Event->Info.Mouse.x,Event->Info.Mouse.y);
         break;
+        case e_TextDisplayEvent_MouseTripleClick:
+            HandleLeftMouseTriplePress(Event->Info.Mouse.x,Event->Info.Mouse.y);
+        break;
         case e_TextDisplayEvent_MouseWheel:
             if(TextDisplayCtrl==NULL)
                 return false;
@@ -663,6 +666,53 @@ void DisplayText::HandleLeftMouseDoublePress(int x,int y)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayText::HandleLeftMouseTriplePress
+ *
+ * SYNOPSIS:
+ *    void DisplayText::HandleLeftMouseTriplePress(int x,int y);
+ *
+ * PARAMETERS:
+ *    x [I] -- The x pos of the mouse
+ *    y [I] -- The y pos of the mouse
+ *
+ * FUNCTION:
+ *    This function is called when the left mouse button is triple clicked.
+ *
+ *    It used to handle the selection of lines.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::HandleLeftMouseTriplePress(int x,int y)
+{
+    int XChars;
+    int YChars;
+
+    LeftMouseDown=true;
+
+    SelectMode=e_DTSelectMode_Line;
+
+    ConvertScreenXY2Chars(x,y,&XChars,&YChars);
+
+    Selection_StartX1=XChars;
+    Selection_StartY1=YChars;
+
+    Selection_X=0;
+    Selection_AnchorX=0;
+    Selection_Y=YChars;
+    Selection_AnchorY=YChars+1;
+
+    SelectionActive=true;
+
+    RedrawFullScreen();
+    SendEvent(e_DBEvent_SelectionChanged,NULL);
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayText::HandleMouseMove
  *
  * SYNOPSIS:
@@ -764,6 +814,30 @@ void DisplayText::HandleMouseMove(int x,int y)
                 }
             break;
             case e_DTSelectMode_Line:
+                /* See if we are before or after the starting word */
+                WordCmp=CmpXYPositions(XChars,YChars,Selection_StartX1,
+                        Selection_StartY1);
+
+                if(WordCmp<=0)
+                {
+                    /* Ok, we are selecting before the starting line */
+                    Selection_X=0;
+                    Selection_Y=YChars;
+                    Selection_AnchorX=0;
+                    Selection_AnchorY=Selection_StartY1+1;
+
+                    FindWordStartEndPoints(Selection_X,Selection_Y,
+                            JunkX,JunkY);
+                }
+                else
+                {
+                    /* We are selecting after the starting line */
+                    Selection_X=0;
+                    Selection_Y=Selection_StartY1;
+
+                    Selection_AnchorX=0;
+                    Selection_AnchorY=YChars+1;
+                }
             break;
             case e_DTSelectModeMAX:
             break;

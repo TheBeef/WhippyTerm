@@ -150,6 +150,7 @@ typedef enum
     e_TextDisplayEvent_ComboxChange,
     e_TextDisplayEvent_RadioButtonPress,
     e_TextDisplayEvent_MouseDoubleClick,
+    e_TextDisplayEvent_MouseTripleClick,
     e_TextDisplayEventMAX
 } e_TextDisplayEventType;
 

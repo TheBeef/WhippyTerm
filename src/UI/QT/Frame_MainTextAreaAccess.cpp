@@ -407,6 +407,11 @@ static bool UITC_EventHandler(const struct WTCEvent *Event)
             NewEvent.Info.Mouse.x=Event->Info->Mouse.x;
             NewEvent.Info.Mouse.y=Event->Info->Mouse.y;
         break;
+        case e_WTCEvent_MouseTripleClick:
+            NewEvent.EventType=e_TextDisplayEvent_MouseTripleClick;
+            NewEvent.Info.Mouse.x=Event->Info->Mouse.x;
+            NewEvent.Info.Mouse.y=Event->Info->Mouse.y;
+        break;
         case e_WTCEvent_MouseWheel:
             NewEvent.EventType=e_TextDisplayEvent_MouseWheel;
             NewEvent.Info.MouseWheel.Steps=Event->Info->MouseWheel.Steps;

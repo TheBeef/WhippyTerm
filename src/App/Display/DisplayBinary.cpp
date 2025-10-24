@@ -32,6 +32,7 @@
 /*** HEADER FILES TO INCLUDE  ***/
 #include "App/Settings.h"
 #include "DisplayBinary.h"
+#include "UI/UIDebug.h"
 #include <stdint.h>
 #include <string.h>
 #include <string>
@@ -567,6 +568,8 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
             RedrawScreen();
             RethinkCursor();
         break;
+        case e_TextDisplayEvent_MouseTripleClick:
+        case e_TextDisplayEvent_MouseDoubleClick:
         case e_TextDisplayEvent_MouseDown:
             Info.Mouse.x=Event->Info.Mouse.x;
             Info.Mouse.y=Event->Info.Mouse.y;

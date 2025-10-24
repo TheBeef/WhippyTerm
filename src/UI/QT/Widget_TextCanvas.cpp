@@ -248,6 +248,28 @@ void Widget_TextCanvas::mouseReleaseEvent(QMouseEvent * event)
     SendEvent(EventType,&EventData);
 }
 
+void Widget_TextCanvas::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    union WTCEventData EventData;
+    QPoint Pos;
+    e_WTCEventType EventType;
+
+    if(OverrideActive)
+        return;
+
+    Pos=event->pos();
+
+    EventData.Mouse.x=Pos.x();
+    EventData.Mouse.y=Pos.y();
+
+    if(event->button()==Qt::LeftButton)
+        EventType=e_WTCEvent_MouseDoubleClick;
+    else
+        return;
+
+    SendEvent(EventType,&EventData);
+}
+
 void Widget_TextCanvas::mouseMoveEvent(QMouseEvent *event)
 {
     union WTCEventData EventData;

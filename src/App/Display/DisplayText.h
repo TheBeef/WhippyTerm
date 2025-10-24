@@ -97,6 +97,14 @@ struct DTPoint
     int_fast32_t StrPos;            // The offset into 'Frag' string
 };
 
+typedef enum
+{
+    e_DTSelectMode_Letter,
+    e_DTSelectMode_Word,
+    e_DTSelectMode_Line,
+    e_DTSelectModeMAX
+} e_DTSelectModeType;
+
 /***  CLASS DEFINITIONS                ***/
 
 /*
@@ -248,11 +256,16 @@ class DisplayText : public DisplayBase
         int InsertPos;                  // The offset into the current string frag's 'Text' (also used as a flag see DisplayText::RethinkInsertFrag())
 
         /* Selection */
-        bool SelectionActive;       // Is there an active selection (may not be valid, but we are selecting something)
-        int Selection_X;            // The selection left pos (in chars)
-        int Selection_Y;            // The selection top pos (in lines)
-        int Selection_AnchorX;      // The selection end left pos (in chars)
-        int Selection_AnchorY;      // The selection end top pos (in lines)
+        bool SelectionActive;           // Is there an active selection (may not be valid, but we are selecting something)
+        int Selection_X;                // The selection left pos (in chars)
+        int Selection_Y;                // The selection top pos (in lines)
+        int Selection_AnchorX;          // The selection end left pos (in chars)
+        int Selection_AnchorY;          // The selection end top pos (in lines)
+        e_DTSelectModeType SelectMode;  // What are we selecting
+        int Selection_StartX1;          // Only used when selection word/line
+        int Selection_StartY1;
+        int Selection_StartX2;
+        int Selection_StartY2;
 
         /* Markers */
         struct TextPointMarker *MarkerList;
@@ -282,12 +295,14 @@ class DisplayText : public DisplayBase
         int CalcCorrectedCursorPos(void);
         void MoveToNextLine(int &NewCursorY);
         void HandleLeftMousePress(bool Down,int x,int y);
+        void HandleLeftMouseDoublePress(int x,int y);
         void HandleMouseMove(int x,int y);
         int CharUnderCursorWidthPx(void);
         void ScrollVertAreaDown(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dy);
         void ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dy);
         void DEBUG_ForceRedrawOfScreen(void);
         int CalcCursorXPx(void);
+        bool CheckWordBreak(std::string &Letter);
 
         /* NOTE PAUL: These comment headings where added long after so they might
            be missing functions from the grouping */
@@ -310,6 +325,8 @@ class DisplayText : public DisplayBase
         bool FindPoint(int PX,int PY,struct DTPoint &Pos,i_TextLines HintLine,int HintStartY);
         void FindPointHelper_FindDelta(int PY,i_TextLines StartLine,int StartingY,unsigned int *LastMinDelta,i_TextLines *RetStartLine,int *RetStartingY);
         void AdvancePoint(int &PX,int &PY,int Amount,int MinX,int MinY,int MaxX,int MaxY);
+        void FindWordStartEndPoints(int &PX,int &PY,int &PX2,int &PY2);
+        int CmpXYPositions(int X1,int Y1,int X2,int Y2);
 
         /* Line handling */
         bool IsLineBlank(i_TextLines Line);

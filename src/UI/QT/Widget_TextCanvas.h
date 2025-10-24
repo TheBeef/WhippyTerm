@@ -25,6 +25,7 @@ typedef enum
     e_WTCEvent_MouseMiddleUp,
     e_WTCEvent_MouseWheel,
     e_WTCEvent_MouseMove,
+    e_WTCEvent_MouseDoubleClick,
     e_WTCEvent_Resize,
     e_WTCEvent_LostFocus,
     e_WTCEvent_GotFocus,
@@ -152,6 +153,7 @@ protected:
     void paintEvent(QPaintEvent *);
     void mousePressEvent(QMouseEvent * event);
     void mouseReleaseEvent(QMouseEvent * event);
+    void mouseDoubleClickEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void focusInEvent(QFocusEvent * event);
     void focusOutEvent(QFocusEvent * event);

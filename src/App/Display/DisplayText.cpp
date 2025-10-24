@@ -153,6 +153,7 @@ DisplayText::DisplayText()
     Selection_Y=0;
     Selection_AnchorX=0;
     Selection_AnchorY=0;
+    SelectMode=e_DTSelectModeMAX;
 
     ScrollTimer=NULL;
 }
@@ -405,6 +406,9 @@ break;
         break;
         case e_TextDisplayEvent_MouseMiddleUp:
         break;
+        case e_TextDisplayEvent_MouseDoubleClick:
+            HandleLeftMouseDoublePress(Event->Info.Mouse.x,Event->Info.Mouse.y);
+        break;
         case e_TextDisplayEvent_MouseWheel:
             if(TextDisplayCtrl==NULL)
                 return false;
@@ -543,6 +547,8 @@ void DisplayText::HandleLeftMousePress(bool Down,int x,int y)
     {
         /* Clear the selection, but note where the user clicked */
         NeedRedraw=SelectionActive;
+        SelectMode=e_DTSelectMode_Letter;
+//SelectMode=e_DTSelectMode_Word;
 
         SelectionActive=false;
 
@@ -563,6 +569,17 @@ void DisplayText::HandleLeftMousePress(bool Down,int x,int y)
         Selection_Y=YChars;
         Selection_AnchorY=YChars;
 
+///* DEBUG PAUL: This is for word select (double click) */
+//SelectionActive=true;
+//Selection_StartX1=Selection_X;
+//Selection_StartY1=Selection_Y;
+//FindWordStartEndPoints(Selection_StartX1,Selection_StartY1,Selection_StartX2,Selection_StartY2);
+//Selection_X=Selection_StartX1;
+//Selection_AnchorX=Selection_StartX2;
+//Selection_Y=Selection_StartY1;
+//Selection_AnchorY=Selection_StartY2;
+//NeedRedraw=true;
+
         if(NeedRedraw)
         {
             RedrawFullScreen();
@@ -575,6 +592,73 @@ void DisplayText::HandleLeftMousePress(bool Down,int x,int y)
         if(UITimerRunning(ScrollTimer))
             UITimerStop(ScrollTimer);
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::HandleLeftMouseDoublePress
+ *
+ * SYNOPSIS:
+ *    void DisplayText::HandleLeftMouseDoublePress(int x,int y);
+ *
+ * PARAMETERS:
+ *    x [I] -- The x pos of the mouse
+ *    y [I] -- The y pos of the mouse
+ *
+ * FUNCTION:
+ *    This function is called when the left mouse button is double clicked.
+ *
+ *    It used to handle the selection of words.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::HandleLeftMouseDoublePress(int x,int y)
+{
+    int XChars;
+    int YChars;
+
+    LeftMouseDown=true;
+
+    SelectMode=e_DTSelectMode_Word;
+
+    if(x<CharWidthPx)
+    {
+        /* We select from the edge instead of the middle when we are on
+           the left side */
+        ConvertScreenXY2Chars(x,y,&XChars,&YChars);
+    }
+    else
+    {
+        /* We add 1/2 a char so we select the whole char when we are half way
+           though instead of having to be all the way through */
+        ConvertScreenXY2Chars(x+CharWidthPx/2,y,&XChars,&YChars);
+    }
+    Selection_X=XChars;
+    Selection_AnchorX=XChars;
+    Selection_Y=YChars;
+    Selection_AnchorY=YChars;
+
+    Selection_StartX1=Selection_X;
+    Selection_StartY1=Selection_Y;
+    FindWordStartEndPoints(Selection_StartX1,Selection_StartY1,
+            Selection_StartX2,Selection_StartY2);
+
+    Selection_X=Selection_StartX1;
+    Selection_AnchorX=Selection_StartX2;
+    Selection_Y=Selection_StartY1;
+    Selection_AnchorY=Selection_StartY2;
+
+    if(Selection_X==Selection_AnchorX && Selection_Y==Selection_AnchorY)
+        SelectionActive=false;
+    else
+        SelectionActive=true;
+
+    RedrawFullScreen();
+    SendEvent(e_DBEvent_SelectionChanged,NULL);
 }
 
 /*******************************************************************************
@@ -602,6 +686,9 @@ void DisplayText::HandleMouseMove(int x,int y)
 {
     int XChars;
     int YChars;
+    int JunkX;
+    int JunkY;
+    int WordCmp;
 
     if(LeftMouseDown)
     {
@@ -640,8 +727,48 @@ void DisplayText::HandleMouseMove(int x,int y)
            though instead of having to be all the way through */
         ConvertScreenXY2Chars(x+CharWidthPx/2,y,&XChars,&YChars);
 
-        Selection_X=XChars;
-        Selection_Y=YChars;
+        switch(SelectMode)
+        {
+            case e_DTSelectMode_Letter:
+                Selection_X=XChars;
+                Selection_Y=YChars;
+            break;
+            case e_DTSelectMode_Word:
+                /* Move to the start of the word */
+
+                /* See if we are before or after the starting word */
+                WordCmp=CmpXYPositions(XChars,YChars,Selection_StartX1,
+                        Selection_StartY1);
+
+                if(WordCmp<=0)
+                {
+                    /* Ok, we are selecting before the starting word start */
+                    Selection_X=XChars;
+                    Selection_AnchorX=Selection_StartX2;
+                    Selection_Y=YChars;
+                    Selection_AnchorY=Selection_StartY2;
+
+                    FindWordStartEndPoints(Selection_X,Selection_Y,
+                            JunkX,JunkY);
+                }
+                else
+                {
+                    /* We are selecting after the starting word */
+                    Selection_X=Selection_StartX1;
+                    Selection_Y=Selection_StartY1;
+
+                    JunkX=XChars;
+                    JunkY=YChars;
+                    FindWordStartEndPoints(JunkX,JunkY,Selection_AnchorX,
+                            Selection_AnchorY);
+                }
+            break;
+            case e_DTSelectMode_Line:
+            break;
+            case e_DTSelectModeMAX:
+            break;
+        }
+
 
         RedrawFullScreen();
         SendEvent(e_DBEvent_SelectionChanged,NULL);
@@ -6441,6 +6568,44 @@ bool DisplayText::FindPointsOfSelection(struct DTPoint &Start,
 
 /*******************************************************************************
  * NAME:
+ *    DisplayText::CmpXYPositions
+ *
+ * SYNOPSIS:
+ *    int DisplayText::CmpXYPositions(int X1,int Y1,int X2,int Y2);
+ *
+ * PARAMETERS:
+ *    X1 [I] -- The first X pos to compare
+ *    Y1 [I] -- The first Y pos to compare
+ *    X2 [I] -- The second X pos to compare
+ *    Y2 [I] -- The second Y pos to compare
+ *
+ * FUNCTION:
+ *    This function compairs two x,y points to figure out which one is before
+ *    the other in.
+ *
+ * RETURNS:
+ *    - = 1 < 2
+ *    0  = 1 = 2
+ *    + = 1 > 2
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+int DisplayText::CmpXYPositions(int X1,int Y1,int X2,int Y2)
+{
+    if(Y1==Y2)
+    {
+        if(X1==X2)
+            return 0;
+
+        return X1-X2;
+    }
+
+    return Y1-Y2;
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayText::FindPoint
  *
  * SYNOPSIS:
@@ -6496,6 +6661,12 @@ bool DisplayText::FindPoint(int PX,int PY,struct DTPoint &Pos,
 
     /* Mark everything we don't support to .end() */
     Pos.Line=Lines.end();
+
+    if(PY>=LinesCount)
+    {
+        /* We don't have this line */
+        return false;
+    }
 
     /* Find the quickest way to the line we are looking for */
     MinDelta=~0;
@@ -6758,6 +6929,149 @@ void DisplayText::AdvancePoint(int &PX,int &PY,int Amount,int MinX,
             }
         }
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::FindWordStartEndPoints
+ *
+ * SYNOPSIS:
+ *    void DisplayText::FindWordStartEndPoints(int &PX,int &PY,int &PX2,
+ *              int &PY2);
+ *
+ * PARAMETERS:
+ *    PX [I/O] -- The X point to move.  This will be changed to the start of
+ *                the word.
+ *    PY [I/O] -- The Y point.  If X goes before the start of the line or
+ *                past the end this will be changed.  This will be changed to
+ *                the start of the word.
+ *    PX2 [O] -- The end of the word.
+ *    PY2 [O] -- The end of the word.
+ *
+ * FUNCTION:
+ *    This function finds the start and end of the word under a point.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    If there is no valid word (PX,PY on a space) then the returned values
+ *    will be PX=PX2 PY=PY2.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::FindWordStartEndPoints(int &PX,int &PY,int &PX2,int &PY2)
+{
+    string Letter;
+    struct DTPoint Point;
+    int TmpY;
+
+    PX2=PX;
+    PY2=PY;
+
+    /* Find the start of the word */
+    for(;;)
+    {
+        if(!GetStringBetweenPoints(PX,PY,PX+1,PY,Letter))
+            break;
+        if(CheckWordBreak(Letter))
+        {
+            PX++;   // We want to be just after the word break
+            break;
+        }
+
+        if(PX==0)
+        {
+            /* We are done at the start of the line */
+            /* We need to check to see if this was a wrapped line */
+            TmpY=PY-1;
+            if(TmpY<0)
+                break;
+
+            if(!FindPoint(PX,TmpY,Point,Lines.end(),0))
+                break;
+
+            /* Check if the line is a wrapped line */
+            if(Point.Line->EOL!=e_DTEOL_Soft)
+                break;
+
+            /* Ok, it was a soft line break, move to the end of the prev line
+               and keep looking */
+            PY--;
+            if(PY<0)
+            {
+                PY=0;
+                break;
+            }
+            PX=TextLine_FindLineLen(Point.Line);
+        }
+        else
+        {
+            /* Back up by 1 */
+            AdvancePoint(PX,PY,-1,0,0,ScreenWidthChars,LinesCount);
+        }
+    }
+
+    /* Find the end of the word */
+    for(;;)
+    {
+        if(!GetStringBetweenPoints(PX2,PY2,PX2+1,PY2,Letter))
+            break;
+        if(CheckWordBreak(Letter))
+            break;
+
+        /* Get info about this line */
+        if(!FindPoint(PX2,PY2,Point,Lines.end(),0))
+            break;
+
+        /* Go forward by 1 spot */
+        TmpY=PY2;
+        AdvancePoint(PX2,PY2,+1,0,0,ScreenWidthChars,LinesCount);
+        if(TmpY!=PY2)
+        {
+            /* We changed lines, check to see if the last line was a
+               wrapped line */
+            if(Point.Line->EOL!=e_DTEOL_Soft)
+                break;
+        }
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::CheckWordBreak
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::CheckWordBreak(string &Letter);
+ *
+ * PARAMETERS:
+ *    Letter [I] -- The letter to check
+ *
+ * FUNCTION:
+ *    This function checks if a letter is a word break char or not
+ *
+ * RETURNS:
+ *    true -- It's a word break char
+ *    false -- It is not a word break char
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayText::CheckWordBreak(string &Letter)
+{
+    if(Letter==" " || Letter==":" || Letter==";" || Letter=="\"" ||
+            Letter=="\'" || Letter=="," || Letter=="." || Letter=="?" ||
+            Letter=="\\" || Letter=="/" || Letter=="`" || Letter=="~" ||
+            Letter=="|" || Letter=="(" || Letter==")" || Letter=="[" ||
+            Letter=="]" || Letter=="!" || Letter=="@" || Letter=="#" ||
+            Letter=="$" || Letter=="%" || Letter=="^" || Letter=="&" ||
+            Letter=="*" || Letter=="-" || Letter=="+" || Letter=="=" ||
+            Letter=="<" || Letter==">")
+    {
+        return true;
+    }
+    return false;
 }
 
 /*******************************************************************************

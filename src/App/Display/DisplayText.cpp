@@ -156,6 +156,9 @@ DisplayText::DisplayText()
     SelectMode=e_DTSelectModeMAX;
 
     ScrollTimer=NULL;
+
+    LastSeenLF=false;
+    LastSeenCR=false;
 }
 
 DisplayText::~DisplayText()
@@ -1256,32 +1259,105 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
 
     /* Only draw the end of line markers if they are shown and we are not
        drawing the last line (we don't draw the marker on the last line) */
-    if(ShowEndOfLines && Line!=&Lines.back())
+    if(ShowEndOfLines)
     {
-        DisplayFrag.FragType=e_TextCanvasFragMAX;
-        DisplayFrag.Text="";
-        DisplayFrag.Styling=CurrentStyle;
-        DisplayFrag.Value=0;
-        DisplayFrag.Data=NULL;
-
-        switch(Line->EOL)
+        if(Line!=&Lines.back())
         {
-            case e_DTEOL_Soft:
-                DisplayFrag.FragType=e_TextCanvasFrag_SoftRet;
-            break;
-            case e_DTEOL_Hard:
-                DisplayFrag.FragType=e_TextCanvasFrag_HardRet;
-            break;
-            case e_DTEOLMAX:
-            default:
-            break;
+            DisplayFrag.FragType=e_TextCanvasFragMAX;
+            DisplayFrag.Text="";
+            DisplayFrag.Styling=CurrentStyle;
+            DisplayFrag.Value=0;
+            DisplayFrag.Data=NULL;
+
+            switch(Line->EOL)
+            {
+                case e_DTEOL_Soft:
+                    DisplayFrag.FragType=e_TextCanvasFrag_SoftRet;
+                break;
+                case e_DTEOL_Hard:
+                    DisplayFrag.FragType=e_TextCanvasFrag_HardRet;
+                break;
+                case e_DTEOLMAX:
+                default:
+                break;
+            }
+            if(DisplayFrag.FragType!=e_TextCanvasFragMAX)
+            {
+                UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
+                LineLenPx+=UITC_GetFragWidth(TextDisplayCtrl,&DisplayFrag);
+            }
         }
 
-        if(DisplayFrag.FragType!=e_TextCanvasFragMAX)
+        if(Line->EOL==e_DTEOL_Hard)
         {
-            UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
-            LineLenPx+=UITC_GetFragWidth(TextDisplayCtrl,&DisplayFrag);
+            DisplayFrag.FragType=e_TextCanvasFragMAX;
+            DisplayFrag.Text="";
+            DisplayFrag.Styling=CurrentStyle;
+            DisplayFrag.Value=0;
+            DisplayFrag.Data=NULL;
+
+            DisplayFrag.Styling.Attribs&=~(TXT_ATTRIB_UNDERLINE|
+                    TXT_ATTRIB_UNDERLINE_DOUBLE|
+                    TXT_ATTRIB_UNDERLINE_DOTTED|
+                    TXT_ATTRIB_UNDERLINE_DASHED|
+                    TXT_ATTRIB_UNDERLINE_WAVY|
+                    TXT_ATTRIB_OVERLINE|
+                    TXT_ATTRIB_LINETHROUGHT|
+                    TXT_ATTRIB_OUTLINE|
+                    TXT_ATTRIB_BOX);
+
+            DisplayFrag.Styling.Attribs|=TXT_ATTRIB_ROUNDBOX;
+
+            switch(Line->EOLGuess)
+            {
+                case e_DTEOLGuess_Unknown:
+                break;
+                case e_DTEOLGuess_LF:
+                case e_DTEOLGuess_LFCR:
+                    DisplayFrag.FragType=e_TextCanvasFrag_NonPrintableChar;
+                    DisplayFrag.Text="LF";
+                break;
+                case e_DTEOLGuess_CR:
+                case e_DTEOLGuess_CRLF:
+                    DisplayFrag.FragType=e_TextCanvasFrag_NonPrintableChar;
+                    DisplayFrag.Text="CR";
+                break;
+                case e_DTEOLGuessMAX:
+                break;
+            }
+
+            if(DisplayFrag.FragType!=e_TextCanvasFragMAX)
+            {
+                UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
+                LineLenPx+=UITC_GetFragWidth(TextDisplayCtrl,&DisplayFrag);
+            }
+
+            DisplayFrag.FragType=e_TextCanvasFragMAX;
+
+            switch(Line->EOLGuess)
+            {
+                case e_DTEOLGuess_LFCR:
+                    DisplayFrag.FragType=e_TextCanvasFrag_NonPrintableChar;
+                    DisplayFrag.Text="CR";
+                break;
+                case e_DTEOLGuess_CRLF:
+                    DisplayFrag.FragType=e_TextCanvasFrag_NonPrintableChar;
+                    DisplayFrag.Text="LF";
+                break;
+                case e_DTEOLGuess_Unknown:
+                case e_DTEOLGuess_LF:
+                case e_DTEOLGuess_CR:
+                case e_DTEOLGuessMAX:
+                break;
+            }
+
+            if(DisplayFrag.FragType!=e_TextCanvasFragMAX)
+            {
+                UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
+                LineLenPx+=UITC_GetFragWidth(TextDisplayCtrl,&DisplayFrag);
+            }
         }
+
     }
 
     UITC_End(TextDisplayCtrl);
@@ -1951,6 +2027,7 @@ bool DisplayText::RethinkInsertFrag(void)
                     Settings->DefaultColors[e_DefaultColors_BG];
             BlankLine.LineWidthPx=0;
             BlankLine.EOL=e_DTEOL_Hard;
+            BlankLine.EOLGuess=e_DTEOLGuess_Unknown;
 
             while(y<=CursorY)
             {
@@ -2063,6 +2140,9 @@ bool DisplayText::RethinkInsertFrag(void)
  ******************************************************************************/
 void DisplayText::WriteChar(uint8_t *Chr)
 {
+    LastSeenLF=false;
+    LastSeenCR=false;
+
     WriteCharWithOptions(Chr,true);
 }
 
@@ -3225,8 +3305,48 @@ void DisplayText::DoBackspace(void)
  ******************************************************************************/
 void DisplayText::DoReturn(void)
 {
+    int y;
+    i_TextLines PrevLine;
+    int GlobalY;
+    int BottomLineY;
+
+    LastSeenCR=true;
     if(ActiveLine!=NULL)
+    {
         ActiveLine->EOL=e_DTEOL_Hard;
+        if(LastSeenLF)
+        {
+            /* This effects the line above (because we moved down 1 line) */
+            PrevLine=ScreenFirstLine;
+            for(y=0;y<ActiveLineY-1 && PrevLine!=Lines.end();y++)
+                PrevLine++;
+
+            if(PrevLine!=Lines.end())
+            {
+                PrevLine->EOLGuess=e_DTEOLGuess_LFCR;
+                LastSeenCR=false;   // We just consumed the CR
+            }
+
+            if(LinesCount<ScreenHeightChars)
+                GlobalY=y;
+            else
+                GlobalY=LinesCount-ScreenHeightChars+y;
+            BottomLineY=TopLineY+WindowHeightChars;
+
+            if(GlobalY>=TopLineY && GlobalY<BottomLineY &&
+                    PrevLine!=Lines.end())
+            {
+                /* We need to redraw this line */
+                DrawLine(GlobalY,y,&*PrevLine);
+            }
+        }
+        else
+        {
+            ActiveLine->EOLGuess=e_DTEOLGuess_CR;
+        }
+    }
+
+    LastSeenLF=false;
 
     /* Redraw any changes to the current line before we move on */
     RedrawActiveLine();
@@ -3257,8 +3377,21 @@ void DisplayText::DoLineFeed(void)
 {
     int NewCursorY;
 
+    LastSeenLF=true;
     if(ActiveLine!=NULL)
+    {
         ActiveLine->EOL=e_DTEOL_Hard;
+        if(LastSeenCR)
+        {
+            ActiveLine->EOLGuess=e_DTEOLGuess_CRLF;
+            LastSeenLF=false;   // We just consumed the LF
+        }
+        else
+        {
+            ActiveLine->EOLGuess=e_DTEOLGuess_LF;
+        }
+    }
+    LastSeenCR=false;
 
     /* Redraw any changes to the current line before we move on */
     RedrawActiveLine();
@@ -3348,6 +3481,7 @@ void DisplayText::ScrollScreenByXLines(int Lines2Scroll)
         BlankLine.LineBackgroundColor=CurrentStyle.BGColor;
         BlankLine.LineWidthPx=0;
         BlankLine.EOL=e_DTEOL_Hard;
+        BlankLine.EOLGuess=e_DTEOLGuess_Unknown;
 
         for(LinesScrolled=0;LinesScrolled<Lines2Scroll;LinesScrolled++)
         {
@@ -4501,6 +4635,7 @@ void DisplayText::ClearScreen(e_ScreenClearType Type)
                     CurLine->LineWidthPx=0;
                     CurLine->EOL=e_DTEOL_Hard;
                     CurLine->Frags.clear();
+                    CurLine->EOLGuess=e_DTEOLGuess_Unknown;
                 }
             break;
             case e_ScreenClear_Scroll:
@@ -4559,6 +4694,7 @@ void DisplayText::ClearScreen(e_ScreenClearType Type)
                             ActiveLine->EOL=e_DTEOL_Hard;
                             ActiveLine->LineBackgroundColor=
                                     CurrentStyle.BGColor;
+                            ActiveLine->EOLGuess=e_DTEOLGuess_Unknown;
                             RethinkFragWidth(ActiveLine->Frags.begin());
 
                             InsertFrag=ActiveLine->Frags.end();
@@ -4693,6 +4829,7 @@ void DisplayText::InsertHorizontalRule(void)
         ActiveLine->Frags.push_back(NewHRFrag);
         ActiveLine->EOL=e_DTEOL_Hard;
         ActiveLine->LineBackgroundColor=CurrentStyle.BGColor;
+        ActiveLine->EOLGuess=e_DTEOLGuess_Unknown;
         RethinkFragWidth(ActiveLine->Frags.begin());
 
         InsertFrag=ActiveLine->Frags.end();
@@ -4790,6 +4927,7 @@ void DisplayText::PadOutScreenWithBlankLines(void)
                 DefaultColors[e_DefaultColors_BG];
         BlankLine.LineWidthPx=0;
         BlankLine.EOL=e_DTEOL_Hard;
+        BlankLine.EOLGuess=e_DTEOLGuess_Unknown;
 
         while(LinesCount<ScreenHeightChars)
         {

@@ -69,12 +69,23 @@ struct TextLineFrag
 typedef std::list<struct TextLineFrag> t_TextLineFrags;
 typedef t_TextLineFrags::iterator i_TextLineFrags;
 
+typedef enum
+{
+    e_DTEOLGuess_Unknown,
+    e_DTEOLGuess_LF,
+    e_DTEOLGuess_CR,
+    e_DTEOLGuess_LFCR,
+    e_DTEOLGuess_CRLF,
+    e_DTEOLGuessMAX
+} e_DTEOLGuessType;
+
 struct TextLine
 {
     t_TextLineFrags Frags;
     int LineWidthPx;
     uint32_t LineBackgroundColor;
     e_DTEOLType EOL;
+    e_DTEOLGuessType EOLGuess;
 };
 
 typedef std::list<struct TextLine> t_TextLines;
@@ -210,6 +221,8 @@ class DisplayText : public DisplayBase
         std::string TmpStr; // A temp string (so we don't have keep allocating it)
         std::string TmpStr2; // A temp string (so we don't have keep allocating it)
         struct UITimer *ScrollTimer;
+        bool LastSeenLF;
+        bool LastSeenCR;
 
         bool ShowNonPrintables;
         bool ShowEndOfLines;

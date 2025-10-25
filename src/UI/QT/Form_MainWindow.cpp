@@ -136,11 +136,6 @@ Form_MainWindow::~Form_MainWindow()
     delete ui;
 }
 
-void Form_MainWindow::on_actionNew_Tab_Toolbar_triggered()
-{
-    DoToolbarTriggered(e_UIMWToolbar_NewTab);
-}
-
 void Form_MainWindow::Setup(class TheMainWindow *MW)
 {
     MainWindowClassPtr=MW;
@@ -843,11 +838,6 @@ void Form_MainWindow::on_actionDisconnect_Menu_triggered()
     DoMenuTriggered(e_UIMWMenu_Disconnect);
 }
 
-void Form_MainWindow::on_actionConnectToggle_triggered(bool checked)
-{
-    DoToolbarTriggered(e_UIMWToolbar_ConnectToggle);
-}
-
 void Form_MainWindow::on_Main_tabWidget_currentChanged(int index)
 {
     union MWEventData EventData;
@@ -930,11 +920,6 @@ void Form_MainWindow::on_actionPaste_triggered()
 void Form_MainWindow::on_pushButton_CO_Apply_clicked()
 {
     DoBttnTriggered(e_UIMWBttn_ConnectionOptionApply);
-}
-
-void Form_MainWindow::on_actionactionURIGo_triggered()
-{
-    DoToolbarTriggered(e_UIMWToolbar_URIGo);
 }
 
 void Form_MainWindow::on_actionBookmark_this_connection_triggered()
@@ -1411,17 +1396,6 @@ void Form_MainWindow::on_actionSend_Delete_triggered()
     DoMenuTriggered(e_UIMWMenu_Send_Delete);
 }
 
-
-void Form_MainWindow::on_actionCopy_toolbar_triggered()
-{
-    DoToolbarTriggered(e_UIMWToolbar_Copy);
-}
-
-void Form_MainWindow::on_actionPaste_toolbar_triggered()
-{
-    DoToolbarTriggered(e_UIMWToolbar_Paste);
-}
-
 void Form_MainWindow::on_actionTerminal_Size_triggered()
 {
     DoMenuTriggered(e_UIMWMenu_SettingsQuickJump_TermSize);
@@ -1617,13 +1591,6 @@ void Form_MainWindow::on_actionNew_Tab_From_URI_triggered()
 {
     DoMenuTriggered(e_UIMWMenu_NewTabFromURI);
 }
-
-
-void Form_MainWindow::on_actionURIHelp_triggered()
-{
-    DoToolbarTriggered(e_UIMWToolbar_URIHelp);
-}
-
 
 void Form_MainWindow::on_actionDefault_Settings_triggered()
 {

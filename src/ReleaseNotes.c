@@ -30,6 +30,18 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_FUNCTIONALLY_FIX,"Show line ends now show CR/LF",
+            "Show end of lines now shows the marks + a CR,LF,CRLF,or LFCR"
+            " at the end of the line.  This does not show the control chars"
+            " that came in but instead shows a \"guess\" of what WhippyTerm"
+            " things was the line ending.  This is because the cursor moves"
+            " between the first control char coming in and the second control"
+            " char, making it a mess if you put the chars where they came in.\n"
+            "For this reason WhippyTerm now just tracks if CR/LF come in and"
+            " adjusts a guess at what ended the line.  If the user moves the"
+            " cursor up to an already existing line it will adjust the"
+            " existing line ending on that line even if the cursor was in the"
+            " middle of the line."},
     {   NOTETYPE_POLISH,"Added double-click a word in term window selects it, triple-click selects line",
             "The selection system was updated to support double click and"
             " triple click.  This does not apply to binary display."},

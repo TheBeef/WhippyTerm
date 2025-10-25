@@ -86,10 +86,8 @@ private slots:
     void on_actionConnect_Menu_triggered();
     void on_actionDisconnect_Menu_triggered();
     void on_Main_tabWidget_currentChanged(int index);
-    void on_actionNew_Tab_Toolbar_triggered();
     void on_actionInsert_Horizontal_Rule_triggered();
     void on_actionClear_Screen_triggered();
-    void on_actionConnectToggle_triggered(bool checked);
     void on_actionMenu_Change_Name_triggered();
     void on_pushButton_SW_Start_clicked();
     void on_pushButton_SW_Reset_clicked();
@@ -100,7 +98,6 @@ private slots:
     void on_actionCopy_triggered();
     void on_actionPaste_triggered();
     void on_pushButton_CO_Apply_clicked();
-    void on_actionactionURIGo_triggered();
     void on_actionBookmark_this_connection_triggered();
     void actionBookmarkMenuItem_triggered();
     void actionFTPUploadMenuItem_triggered();
@@ -254,10 +251,6 @@ private slots:
     
     void on_actionSend_Delete_triggered();
     
-    void on_actionCopy_toolbar_triggered();
-    
-    void on_actionPaste_toolbar_triggered();
-    
     void on_actionTerminal_Size_triggered();
     
     void on_actionTerminal_Emulation_triggered();
@@ -317,8 +310,6 @@ private slots:
     void on_Menu_treeWidget_Buffer_BufferList_x8_SaveBuffer_triggered();
     
     void on_actionNew_Tab_From_URI_triggered();
-    
-    void on_actionURIHelp_triggered();
     
     void on_actionDefault_Settings_triggered();
     

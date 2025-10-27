@@ -1,0 +1,61 @@
+name: Ubuntu 22.04
+
+on:
+  release:
+    types: [created]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    permissions:
+      contents: write 
+    name: Build Ubuntu
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: bhowell2/github-substring-action@1.0.2
+      id: RelVer
+      with:
+        value: ${{ github.event.release.tag_name }}
+        index_of_str: "Rel_"
+
+    - uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get install qt6-base-dev qmake6 qt6-tools-dev qt6-base-dev-tools qt6-multimedia-dev fakeroot gzip dpkg libgl-dev wget libfuse2
+
+    - name: Build
+      working-directory: ./wt/Project
+      run: |
+        /usr/lib/qt6/bin/qmake WT.pro && make -s
+
+    - name: deb
+      working-directory: ./wt/LinuxInstaller
+      run: |
+        ./MakeRelease.sh ${GITHUB_REF_NAME:4} ../Project 22
+        mv WhippyTerm${GITHUB_REF_NAME:4}-1.deb WhippyTerm_${GITHUB_REF_NAME:4}-1_Ubuntu22_04.deb
+
+    - name: AppImage
+      working-directory: ./wt/LinuxAppImage
+      run: |
+        wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
+        chmod +x linuxdeployqt-continuous-x86_64.AppImage
+        ./MakeRelease.sh ${GITHUB_REF_NAME:4} ../Project
+        mv Whippy_Term-${GITHUB_REF_NAME:4}-x86_64.AppImage WhippyTerm_${GITHUB_REF_NAME:4}-x86_64.AppImage
+
+#    - name: Setup tmate session
+#      uses: mxschmitt/action-tmate@v3
+
+    - name: Upload Release files
+      uses: softprops/action-gh-release@v1
+      if: github.ref_type == 'tag'
+      with:
+        files: |
+          wt/LinuxInstaller/WhippyTerm_${{steps.RelVer.outputs.substring}}-1_Ubuntu22_04.deb
+          wt/LinuxAppImage/WhippyTerm_${{steps.RelVer.outputs.substring}}-x86_64.AppImage
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

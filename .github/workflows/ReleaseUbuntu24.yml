@@ -1,8 +1,8 @@
 name: Ubuntu 24.04
 
-on:
-  release:
-    types: [created]
+#on:
+#  release:
+#    types: [created]
 
 on:
   push:

@@ -1,8 +1,8 @@
 name: Windows
 
-on:
-  release:
-    types: [created]
+#on:
+#  release:
+#    types: [created]
 
 on:
   push:

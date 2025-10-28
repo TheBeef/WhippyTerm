@@ -4,6 +4,11 @@ on:
   release:
     types: [created]
 
+on:
+  push:
+    branches:
+      - mainx
+
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
@@ -29,12 +34,12 @@ jobs:
         sudo apt-get install qt6-base-dev qmake6 qt6-tools-dev qt6-base-dev-tools qt6-multimedia-dev fakeroot gzip dpkg
 
     - name: Build
-      working-directory: ./wt/Project
+      working-directory: ./Project
       run: |
         /usr/lib/qt6/bin/qmake WT.pro && make -s
 
     - name: deb
-      working-directory: ./wt/LinuxInstaller
+      working-directory: ./LinuxInstaller
       run: |
         ./MakeRelease.sh ${GITHUB_REF_NAME:4} ../Project 24
         mv WhippyTerm${GITHUB_REF_NAME:4}-1.deb WhippyTerm_${GITHUB_REF_NAME:4}-1_Ubuntu24_04.deb
@@ -47,7 +52,7 @@ jobs:
       if: github.ref_type == 'tag'
       with:
         files: |
-          wt/LinuxInstaller/WhippyTerm_${{steps.RelVer.outputs.substring}}-1_Ubuntu24_04.deb
+          LinuxInstaller/WhippyTerm_${{steps.RelVer.outputs.substring}}-1_Ubuntu24_04.deb
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -4,6 +4,11 @@ on:
   release:
     types: [created]
 
+on:
+  push:
+    branches:
+      - mainx
+
 env:
   BUILD_TYPE: Release
 
@@ -28,18 +33,18 @@ jobs:
         sudo apt-get install qt6-base-dev qmake6 qt6-tools-dev qt6-base-dev-tools qt6-multimedia-dev fakeroot gzip dpkg libgl-dev wget libfuse2
 
     - name: Build
-      working-directory: ./wt/Project
+      working-directory: ./Project
       run: |
         /usr/lib/qt6/bin/qmake WT.pro && make -s
 
     - name: deb
-      working-directory: ./wt/LinuxInstaller
+      working-directory: ./LinuxInstaller
       run: |
         ./MakeRelease.sh ${GITHUB_REF_NAME:4} ../Project 22
         mv WhippyTerm${GITHUB_REF_NAME:4}-1.deb WhippyTerm_${GITHUB_REF_NAME:4}-1_Ubuntu22_04.deb
 
     - name: AppImage
-      working-directory: ./wt/LinuxAppImage
+      working-directory: ./LinuxAppImage
       run: |
         wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
         chmod +x linuxdeployqt-continuous-x86_64.AppImage
@@ -54,8 +59,8 @@ jobs:
       if: github.ref_type == 'tag'
       with:
         files: |
-          wt/LinuxInstaller/WhippyTerm_${{steps.RelVer.outputs.substring}}-1_Ubuntu22_04.deb
-          wt/LinuxAppImage/WhippyTerm_${{steps.RelVer.outputs.substring}}-x86_64.AppImage
+          LinuxInstaller/WhippyTerm_${{steps.RelVer.outputs.substring}}-1_Ubuntu22_04.deb
+          LinuxAppImage/WhippyTerm_${{steps.RelVer.outputs.substring}}-x86_64.AppImage
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

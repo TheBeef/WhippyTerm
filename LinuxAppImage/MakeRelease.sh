@@ -24,7 +24,7 @@ objcopy --strip-debug --strip-unneeded $2/WhippyTerm WhippyTerm/usr/bin/whippyte
 cp ../LinuxInstaller/Debian24.template/usr/share/applications/* WhippyTerm/usr/share/applications
 cp ../LinuxInstaller/Debian24.template/usr/share/icons/* WhippyTerm/usr/share/icons/hicolor/256x256/apps
 export VERSION=$1
-linuxdeployqt-continuous-x86_64.AppImage WhippyTerm/usr/share/applications/WhippyTerm.desktop -qmake=/usr/lib/qt6/bin/qmake -appimage
+./linuxdeployqt-continuous-x86_64.AppImage WhippyTerm/usr/share/applications/WhippyTerm.desktop -qmake=/usr/lib/qt6/bin/qmake -appimage
 
 
 #rm WhippyTerm_$1-x86_64.AppImage

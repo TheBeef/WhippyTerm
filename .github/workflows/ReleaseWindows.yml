@@ -38,9 +38,9 @@ jobs:
 
     - name: Fix qt install (gcc)
       run: |
-        Rename-Item -Path "D:\a\GitHubTestRep\Qt\6.4.2\mingw_64\bin\libgcc_s_seh-1.dll" -NewName "D:\a\GitHubTestRep\Qt\6.4.2\mingw_64\bin\libgcc_s_seh-1.xxx"
-        Rename-Item -Path "D:\a\GitHubTestRep\Qt\6.4.2\mingw_64\bin\libstdc++-6.dll" -NewName "D:\a\GitHubTestRep\Qt\6.4.2\mingw_64\bin\libstdc++-6.xxx"
-        Rename-Item -Path "D:\a\GitHubTestRep\Qt\6.4.2\mingw_64\bin\libwinpthread-1.dll" -NewName "D:\a\GitHubTestRep\Qt\6.4.2\mingw_64\bin\libwinpthread-1.xxx"
+        Rename-Item -Path "D:\a\WhippyTerm\Qt\6.4.2\mingw_64\bin\libgcc_s_seh-1.dll" -NewName "D:\a\WhippyTerm\Qt\6.4.2\mingw_64\bin\libgcc_s_seh-1.xxx"
+        Rename-Item -Path "D:\a\WhippyTerm\Qt\6.4.2\mingw_64\bin\libstdc++-6.dll" -NewName "D:\a\WhippyTerm\Qt\6.4.2\mingw_64\bin\libstdc++-6.xxx"
+        Rename-Item -Path "D:\a\WhippyTerm\Qt\6.4.2\mingw_64\bin\libwinpthread-1.dll" -NewName "D:\a\WhippyTerm\Qt\6.4.2\mingw_64\bin\libwinpthread-1.xxx"
 
     - name: Build
       working-directory: ./Project
@@ -74,7 +74,7 @@ jobs:
     - name: Rename installer
       working-directory: ./WindowsInstaller
       run: |
-        Rename-Item -Path "D:\a\GitHubTestRep\GitHubTestRep\WindowsInstaller\Installer\WhippyTermSetup.exe" -NewName "D:\a\GitHubTestRep\GitHubTestRep\WindowsInstaller\Installer\WhippyTermSetup_${{steps.RelVer.outputs.substring}}.exe"
+        Rename-Item -Path "D:\a\WhippyTerm\WhippyTerm\WindowsInstaller\Installer\WhippyTermSetup.exe" -NewName "D:\a\WhippyTerm\WhippyTerm\WindowsInstaller\Installer\WhippyTermSetup_${{steps.RelVer.outputs.substring}}.exe"
 
     - name: Portable Version
       working-directory: ./WindowsInstaller

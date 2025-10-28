@@ -1,13 +1,8 @@
 name: Ubuntu 22.04
 
-#on:
-#  release:
-#    types: [created]
-
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [created]
 
 env:
   BUILD_TYPE: Release

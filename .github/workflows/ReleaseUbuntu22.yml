@@ -7,7 +7,7 @@ name: Ubuntu 22.04
 on:
   push:
     branches:
-      - mainx
+      - main
 
 env:
   BUILD_TYPE: Release

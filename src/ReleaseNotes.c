@@ -386,7 +386,7 @@ static struct ReleaseNote m_Notes_Rel1_0_0_0[]=
 const struct ReleaseInfo m_ReleaseNotes[]=
 {
 //    {RELEASE_NOTE("x.x.x.x","-- -- ----",NULL,m_Notes_NEXT)},
-    {RELEASE_NOTE("2.2.0.0","29 Oct 2025","Scroll Lock cursor key mode",m_Notes_Rel2_1_0_0)},
+    {RELEASE_NOTE("2.1.0.0","29 Oct 2025","Scroll Lock cursor key mode",m_Notes_Rel2_1_0_0)},
     {RELEASE_NOTE("2.0.2.0","03 Oct 2025",NULL,m_Notes_Rel2_0_2_0)},
     {RELEASE_NOTE("2.0.1.0","30 Sep 2025",NULL,m_Notes_Rel2_0_1_0)},
     {RELEASE_NOTE("2.0.0.0","26 Sep 2025","Updates to the plugin system",m_Notes_Rel2_0_0_0)},

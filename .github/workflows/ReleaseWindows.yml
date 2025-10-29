@@ -71,13 +71,13 @@ jobs:
       env:
         RELEASE_VER: ${{ steps.RelVer.outputs.substring }}
 
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
+#    - name: Setup tmate session
+#      uses: mxschmitt/action-tmate@v3
 
     - name: Rename installer
       working-directory: ./WindowsInstaller
       run: |
-        Rename-Item -Path "D:\a\WhippyTerm\WindowsInstaller\Installer\WhippyTermSetup.exe" -NewName "D:\a\WhippyTerm\WindowsInstaller\Installer\WhippyTermSetup_${{steps.RelVer.outputs.substring}}.exe"
+        Rename-Item -Path "D:\a\WhippyTerm\WhippyTerm\WindowsInstaller\Installer\WhippyTermSetup.exe" -NewName "D:\a\WhippyTerm\WhippyTerm\WindowsInstaller\Installer\WhippyTermSetup_${{steps.RelVer.outputs.substring}}.exe"
 
     - name: Portable Version
       working-directory: ./WindowsInstaller

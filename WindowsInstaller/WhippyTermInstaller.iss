@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Whippy Term"
-#define MyAppVersion "2.0"
+#define MyAppVersion GetEnv('RELEASE_VER')
 #define MyAppURL "https://WhippyTerm.com"
 #define MyAppExeName "WhippyTerm.exe"
 
@@ -28,7 +28,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
-OutputDir=R:\
+OutputDir=Installer
 OutputBaseFilename=WhippyTermSetup
 Compression=lzma
 SolidCompression=yes

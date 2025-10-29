@@ -51,13 +51,13 @@ jobs:
     - name: Collect files
       working-directory: ./WindowsInstaller
       run: |
-        copy ../Qt/6.4.2/mingw_64/bin/Qt6Core.dll InstallFiles6
-        copy ../Qt/6.4.2/mingw_64/bin/Qt6Gui.dll InstallFiles6
-        copy ../Qt/6.4.2/mingw_64/bin/Qt6Multimedia.dll InstallFiles6
-        copy ../Qt/6.4.2/mingw_64/bin/Qt6Network.dll InstallFiles6
-        copy ../Qt/6.4.2/mingw_64/bin/Qt6Widgets.dll InstallFiles6
-        copy ../Qt/6.4.2/mingw_64/plugins/platforms/qwindows.dll InstallFiles6/platforms
-        copy ../Qt/6.4.2/mingw_64/plugins/styles/qwindowsvistastyle.dll InstallFiles6/styles
+        copy ../../Qt/6.4.2/mingw_64/bin/Qt6Core.dll InstallFiles6
+        copy ../../Qt/6.4.2/mingw_64/bin/Qt6Gui.dll InstallFiles6
+        copy ../../Qt/6.4.2/mingw_64/bin/Qt6Multimedia.dll InstallFiles6
+        copy ../../Qt/6.4.2/mingw_64/bin/Qt6Network.dll InstallFiles6
+        copy ../../Qt/6.4.2/mingw_64/bin/Qt6Widgets.dll InstallFiles6
+        copy ../../Qt/6.4.2/mingw_64/plugins/platforms/qwindows.dll InstallFiles6/platforms
+        copy ../../Qt/6.4.2/mingw_64/plugins/styles/qwindowsvistastyle.dll InstallFiles6/styles
         copy C:/mingw64/bin/"libstdc++-6.dll" InstallFiles6
         copy C:/mingw64/bin/"libgcc_s_seh-1.dll" InstallFiles6
         copy C:/mingw64/bin/"libwinpthread-1.dll" InstallFiles6

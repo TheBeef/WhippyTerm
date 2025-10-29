@@ -71,6 +71,9 @@ jobs:
       env:
         RELEASE_VER: ${{ steps.RelVer.outputs.substring }}
 
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+
     - name: Rename installer
       working-directory: ./WindowsInstaller
       run: |

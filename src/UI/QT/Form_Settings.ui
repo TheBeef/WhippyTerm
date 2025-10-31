@@ -36,7 +36,7 @@
       <item>
        <widget class="QStackedWidget" name="Editing_stackedWidget">
         <property name="currentIndex">
-         <number>5</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="page_Panel">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -12766,7 +12766,7 @@
           <item>
            <widget class="QTabWidget" name="Terminal_tabWidget">
             <property name="currentIndex">
-             <number>2</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="Terminal_tab">
              <attribute name="title">
@@ -13016,6 +13016,13 @@ p, li { white-space: pre-wrap; }
                    </property>
                    <property name="text">
                     <string>Automatically add a carriage return (\r) when a new line (\n) is seen</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="AutoLF_checkBox">
+                   <property name="text">
+                    <string>Automatically add a new line (\n) when a carriage return (\r) is seen</string>
                    </property>
                   </widget>
                  </item>

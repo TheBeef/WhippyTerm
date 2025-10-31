@@ -1234,6 +1234,7 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
     cfg.Register("CenterTextInWindow",CenterTextInWindow);
     cfg.Register("LocalEcho",LocalEcho);
     cfg.Register("AutoCROnLF",AutoCROnLF);
+    cfg.Register("AutoLFOnCR",AutoLFOnCR);
 
     cfg.StartBlock("DataProcessors");
     Settings_RegisterDataProcessorType(cfg,"DataProcessorType",DataProcessorType);
@@ -1330,6 +1331,8 @@ bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
     if(Con1.LocalEcho!=Con2.LocalEcho)
         return false;
     if(Con1.AutoCROnLF!=Con2.AutoCROnLF)
+        return false;
+    if(Con1.AutoLFOnCR!=Con2.AutoLFOnCR)
         return false;
     if(Con1.DataProcessorType!=Con2.DataProcessorType)
         return false;
@@ -1469,6 +1472,7 @@ void ConSettings::DefaultSettings(void)
     CenterTextInWindow=true;
     LocalEcho=false;
     AutoCROnLF=true;
+    AutoLFOnCR=false;
 
     BackspaceKeyMode=e_BackspaceKey_BS;
     DestructiveBackspace=true;

@@ -816,6 +816,9 @@ static void DS_SetSettingGUI(void)
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoCROnLF);
     UICheckCheckbox(CheckboxHandle,m_SettingConSettings->AutoCROnLF);
 
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoLFOnCR);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->AutoLFOnCR);
+
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_LocalEcho);
     UICheckCheckbox(CheckboxHandle,m_SettingConSettings->LocalEcho);
 
@@ -1224,6 +1227,8 @@ static void DS_GetSettingsFromGUI(void)
 
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoCROnLF);
     m_SettingConSettings->AutoCROnLF=UIGetCheckboxCheckStatus(CheckboxHandle);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoLFOnCR);
+    m_SettingConSettings->AutoLFOnCR=UIGetCheckboxCheckStatus(CheckboxHandle);
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_LocalEcho);
     m_SettingConSettings->LocalEcho=UIGetCheckboxCheckStatus(CheckboxHandle);
 
@@ -2673,6 +2678,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Checkbox_CloseButtonOnTabs:
                 case e_UIS_Checkbox_CenterTextInWindow:
                 case e_UIS_Checkbox_AutoCROnLF:
+                case e_UIS_Checkbox_AutoLFOnCR:
                 case e_UIS_Checkbox_LocalEcho:
                 case e_UIS_Checkbox_CursorBlink:
                 case e_UIS_Checkbox_BookmarksOpenNewTab:

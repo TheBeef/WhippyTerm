@@ -152,6 +152,7 @@ class ConSettings
         bool CenterTextInWindow;
         bool LocalEcho;
         bool AutoCROnLF;
+        bool AutoLFOnCR;
 
         /* Input */
         e_DataProcessorTypeType DataProcessorType;

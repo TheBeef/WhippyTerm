@@ -28,6 +28,15 @@ struct ReleaseInfo
 //            "Descrition"},
 //};
 
+static struct ReleaseNote m_Notes_NEXT[]=
+{
+    {
+        NOTETYPE_ENHANCEMENT,"Added an option to add a line feed when a carriage return is received",
+            "An option was added in settings so that the system will"
+            " automatically add a new line (\\n) when a carriage return (\\r)"
+            " is seen"},
+};
+
 static struct ReleaseNote m_Notes_Rel2_1_0_0[]=
 {
     {   NOTETYPE_FUNCTIONALLY_FIX,"Show line ends now show CR/LF",

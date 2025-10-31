@@ -1814,7 +1814,7 @@ e_ConWriteType Connection::InternalWriteBytes(const uint8_t *Data,int Bytes)
         Con_SetActiveConnection(this);
         DoingIncomingByteProcessing=true;
         DPS_ProcessorIncomingBytes(&ProcessorData,Data,Bytes,
-                CustomSettings.AutoCROnLF);
+                CustomSettings.AutoCROnLF,CustomSettings.AutoLFOnCR);
         DoingIncomingByteProcessing=false;
         Con_SetActiveConnection(NULL);
     }
@@ -2028,7 +2028,8 @@ bool Connection::InformOfDataAvaiable(void)
                 {
                     DoingIncomingByteProcessing=true;
                     DPS_ProcessorIncomingBytes(&ProcessorData,inbuff,bytes,
-                            CustomSettings.AutoCROnLF);
+                            CustomSettings.AutoCROnLF,
+                            CustomSettings.AutoLFOnCR);
                     DoingIncomingByteProcessing=false;
                 }
             }

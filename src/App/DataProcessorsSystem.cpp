@@ -823,13 +823,16 @@ bool DPS_ReapplyProcessor2Connection(struct ProcessorConData *FData,
  *
  * SYNOPSIS:
  *    void DPS_ProcessorIncomingBytes(struct ProcessorConData *FData,
- *          const uint8_t *inbuff,int bytes,bool DoAutoLF);
+ *          const uint8_t *inbuff,int bytes,bool DoAutoLF,bool DoAutoCR);
  *
  * PARAMETERS:
  *    FData [I] -- The connection processor data for this connection.
  *    inbuff [I] -- The buffer with the data that was read.  This is raw data
  *    bytes [I] -- The number of bytes that was read.
  *    DoAutoLF [I] -- If this is true then if a \n is found then DoReturn()
+ *                    is called on the active connection (only for text
+ *                    connections).
+ *    DoAutoCR [I] -- If this is true then if a \r is found then DoNewLine()
  *                    is called on the active connection (only for text
  *                    connections).
  *
@@ -844,7 +847,7 @@ bool DPS_ReapplyProcessor2Connection(struct ProcessorConData *FData,
  *    
  ******************************************************************************/
 void DPS_ProcessorIncomingBytes(struct ProcessorConData *FData,
-        const uint8_t *inbuff,int bytes,bool DoAutoLF)
+        const uint8_t *inbuff,int bytes,bool DoAutoLF,bool DoAutoCR)
 {
     uint8_t ProcessedChar[MAX_BYTES_PER_CHAR+1];  // Buffer for the char we will eventually output.  UTF8 seems to be limited to 4 maybe 6 bytes so 10 should be good (it's up the plugin not to go over 6)
     PG_BOOL Consumed;
@@ -892,6 +895,12 @@ DB_StopTimer(e_DBT_AddChar2Display);
             {
                 if(inbuff[byte]=='\n')
                     DPS_DoReturn();
+            }
+
+            if(DoAutoCR)
+            {
+                if(inbuff[byte]=='\r')
+                    DPS_DoNewLine();
             }
         }
     }

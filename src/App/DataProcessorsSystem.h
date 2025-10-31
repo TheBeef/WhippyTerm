@@ -101,7 +101,7 @@ void DPS_GetDataProcessorPluginList(t_DPS_ProInfoType &RetData);
 uint_fast32_t DPS_GetDataProcessorPluginCount(void);
 bool DPS_ProcessorKeyPress(struct ProcessorConData *FData,const uint8_t *KeyChar,int KeyCharLen,e_UIKeys ExtendedKey,uint8_t Mod);
 void DPS_ProcessorIncomingBytes(struct ProcessorConData *FData,
-        const uint8_t *inbuff,int bytes,bool DoAutoLF);
+        const uint8_t *inbuff,int bytes,bool DoAutoLF,bool DoAutoCR);
 void DPS_ProcessorOutGoingBytes(struct ProcessorConData *FData,const uint8_t *outbuff,int bytes);
 const struct DataProcessor *DPS_GetProcessorsInfo(const char *IDStr);
 

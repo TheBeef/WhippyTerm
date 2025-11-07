@@ -213,8 +213,8 @@ SOURCES += ../src/UI/QT/main.cpp\
 
 win32 {
 # Windows
+    message("Building Windows")
     LIBS+=-lSetupApi
-#DEBUG PAUL: Temp.  Needed for a plugin
     LIBS+=-lws2_32
 
     SOURCES += \
@@ -234,9 +234,10 @@ win32 {
     }
 }
 
-unix:!macx {
+linux {
 # Linux
-    contains(QMAKE_HOST.arch, arm.*):{
+    contains(QMAKESPEC, .*aarch64.*):{
+        message("Building RPI")
         LIBS+=-ldl -lX11
 
          SOURCES += \
@@ -244,12 +245,9 @@ unix:!macx {
         ../src/OS/RPI/Directorys.cpp \
         ../src/OS/RPI/OSTime.cpp \
         ../src/OS/RPI/System.cpp \
-        ../src/App/StdPlugins/IODrivers/Comport/OS/Linux/Comport_OS_Serial.cpp \
-        ../src/App/StdPlugins/IODrivers/TCPClient/src/OS/Linux/TCPClient_OS_Socket.cpp \
-        ../src/App/StdPlugins/IODrivers/TCPServer/src/OS/Linux/TCPServer_OS_Socket.cpp \
-        ../src/App/StdPlugins/IODrivers/UDPClient/src/OS/Linux/UDPClient_OS_Socket.cpp \
-        ../src/App/StdPlugins/IODrivers/UDPServer/src/OS/Linux/UDPServer_OS_Socket.cpp \
+
     }else{
+        message("Building Linux")
         LIBS+=-ldl -lX11
 
          SOURCES += \
@@ -257,21 +255,27 @@ unix:!macx {
         ../src/OS/Linux/Directorys.cpp \
         ../src/OS/Linux/OSTime.cpp \
         ../src/OS/Linux/System.cpp \
+
+    }
+
+    SOURCES += \
         ../src/App/StdPlugins/IODrivers/Comport/OS/Linux/Comport_OS_Serial.cpp \
         ../src/App/StdPlugins/IODrivers/TCPClient/src/OS/Linux/TCPClient_OS_Socket.cpp \
         ../src/App/StdPlugins/IODrivers/TCPServer/src/OS/Linux/TCPServer_OS_Socket.cpp \
         ../src/App/StdPlugins/IODrivers/UDPClient/src/OS/Linux/UDPClient_OS_Socket.cpp \
         ../src/App/StdPlugins/IODrivers/UDPServer/src/OS/Linux/UDPServer_OS_Socket.cpp \
-    }
 
     CONFIG(debug, debug|release){
         SOURCES += \
             ../ExternPlugins/IODrivers/TestLoopback/src/LB2_Main.cpp \
+
     }
 }
 
 macx {
 # Mac OS X
+    message("Building Mac")
+
      SOURCES += \
     ../src/OS/Mac/FilePaths.cpp \
     ../src/OS/Mac/Directorys.cpp \

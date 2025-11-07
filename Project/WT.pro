@@ -236,18 +236,33 @@ win32 {
 
 unix:!macx {
 # Linux
-    LIBS+=-ldl -lX11
+    contains(QMAKE_HOST.arch, arm.*):{
+        LIBS+=-ldl -lX11
 
-     SOURCES += \
-    ../src/OS/Linux/FilePaths.cpp \
-    ../src/OS/Linux/Directorys.cpp \
-    ../src/OS/Linux/OSTime.cpp \
-    ../src/OS/Linux/System.cpp \
-    ../src/App/StdPlugins/IODrivers/Comport/OS/Linux/Comport_OS_Serial.cpp \
-    ../src/App/StdPlugins/IODrivers/TCPClient/src/OS/Linux/TCPClient_OS_Socket.cpp \
-    ../src/App/StdPlugins/IODrivers/TCPServer/src/OS/Linux/TCPServer_OS_Socket.cpp \
-    ../src/App/StdPlugins/IODrivers/UDPClient/src/OS/Linux/UDPClient_OS_Socket.cpp \
-    ../src/App/StdPlugins/IODrivers/UDPServer/src/OS/Linux/UDPServer_OS_Socket.cpp \
+         SOURCES += \
+        ../src/OS/RPI/FilePaths.cpp \
+        ../src/OS/RPI/Directorys.cpp \
+        ../src/OS/RPI/OSTime.cpp \
+        ../src/OS/RPI/System.cpp \
+        ../src/App/StdPlugins/IODrivers/Comport/OS/Linux/Comport_OS_Serial.cpp \
+        ../src/App/StdPlugins/IODrivers/TCPClient/src/OS/Linux/TCPClient_OS_Socket.cpp \
+        ../src/App/StdPlugins/IODrivers/TCPServer/src/OS/Linux/TCPServer_OS_Socket.cpp \
+        ../src/App/StdPlugins/IODrivers/UDPClient/src/OS/Linux/UDPClient_OS_Socket.cpp \
+        ../src/App/StdPlugins/IODrivers/UDPServer/src/OS/Linux/UDPServer_OS_Socket.cpp \
+    }else{
+        LIBS+=-ldl -lX11
+
+         SOURCES += \
+        ../src/OS/Linux/FilePaths.cpp \
+        ../src/OS/Linux/Directorys.cpp \
+        ../src/OS/Linux/OSTime.cpp \
+        ../src/OS/Linux/System.cpp \
+        ../src/App/StdPlugins/IODrivers/Comport/OS/Linux/Comport_OS_Serial.cpp \
+        ../src/App/StdPlugins/IODrivers/TCPClient/src/OS/Linux/TCPClient_OS_Socket.cpp \
+        ../src/App/StdPlugins/IODrivers/TCPServer/src/OS/Linux/TCPServer_OS_Socket.cpp \
+        ../src/App/StdPlugins/IODrivers/UDPClient/src/OS/Linux/UDPClient_OS_Socket.cpp \
+        ../src/App/StdPlugins/IODrivers/UDPServer/src/OS/Linux/UDPServer_OS_Socket.cpp \
+    }
 
     CONFIG(debug, debug|release){
         SOURCES += \

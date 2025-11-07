@@ -107,7 +107,7 @@
     * The version number does not have any meaning and some other mechanism
       (like the build date and time) is used to know what is in this build.
 */
-#define OFFICIAL_RELEASE    1               // 1=official, 0=developer build (don't forget to update ExperimentalID.h on release)
+#define OFFICIAL_RELEASE    0               // 1=official, 0=developer build (don't forget to update ExperimentalID.h on release)
 
 #define WHIPPYTERM_VERSION_MAJOR       2
 #define WHIPPYTERM_VERSION_MINOR       1

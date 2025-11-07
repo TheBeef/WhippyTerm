@@ -1860,7 +1860,8 @@ static void DPS_SetCurrentSettingsTabName(const char *Name)
  *    This function adds a new tab to the plugin settings dialog.
  *
  * RETURNS:
- *    A new handle for adding widgets or NULL if there was an error.
+ *    A new handle for adding widgets or NULL if there was an error.  This is
+ *    no need to free this handle.
  *
  * NOTES:
  *    You must use the handle returned from this function with any widgets

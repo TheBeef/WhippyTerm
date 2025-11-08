@@ -90,9 +90,11 @@ struct DataProcessorAPI m_CodePage437DecodeCBs=
     NULL, // ProcessIncomingBinaryByte
     /* V2 */
     NULL,       // ProcessOutGoingData
+    /* V3 */
     NULL,       // AllocSettingsWidgets
     NULL,       // FreeSettingsWidgets
-    NULL,       // StoreSettings
+    NULL,       // SetSettingsFromWidgets
+    NULL,       // ApplySettings
 };
 
 struct DataProcessorInfo m_CodePage437Decode_Info=

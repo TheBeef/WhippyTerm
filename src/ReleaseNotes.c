@@ -31,6 +31,13 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added setting for tab size",
+            "You can now set the tab size to something other than 8 spaces."},
+    {
+        NOTETYPE_ENHANCEMENT,"Added new settings to the ANSI decoder",
+            "Added settings to turn on/off bold,italic,underline, intensity,"
+            " double underline, and overline"},
+    {
         NOTETYPE_ENHANCEMENT,"Added an option to add a line feed when a carriage return is received",
             "An option was added in settings so that the system will"
             " automatically add a new line (\\n) when a carriage return (\\r)"

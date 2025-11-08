@@ -279,6 +279,8 @@ t_UINumberInput *UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput UIObj)
             return (t_UINumberInput *)g_SettingsDialog->ui->TxByteDelay_spinBox;
         case e_UIS_NumberInput_DelayAfterNewLineSent:
             return (t_UINumberInput *)g_SettingsDialog->ui->TxLineDelay_spinBox;
+        case e_UIS_NumberInput_TabSize:
+            return (t_UINumberInput *)g_SettingsDialog->ui->TabSize_spinBox;
         case e_UIS_NumberInputMAX:
         default:
         break;

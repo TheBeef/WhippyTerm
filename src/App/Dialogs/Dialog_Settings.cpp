@@ -767,6 +767,10 @@ static void DS_SetSettingGUI(void)
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ColorEnable);
     UICheckCheckbox(CheckboxHandle,m_SettingConSettings->ColorsEnabled);
 
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_TabSize);
+    UISetNumberInputCtrlValue(NumberInputHandle,m_SettingConSettings->TabSize);
+
+
     memcpy(m_DS_SysColors,m_SettingConSettings->SysColors,sizeof(m_DS_SysColors));
     memcpy(m_DS_DefaultColors,m_SettingConSettings->DefaultColors,sizeof(m_DS_DefaultColors));
     memcpy(m_DS_SelectionColors,m_SettingConSettings->SelectionColors,sizeof(m_DS_SelectionColors));
@@ -1208,6 +1212,9 @@ static void DS_GetSettingsFromGUI(void)
     m_SettingConSettings->LineThroughEnabled=UIGetCheckboxCheckStatus(CheckboxHandle);
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ColorEnable);
     m_SettingConSettings->ColorsEnabled=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_TabSize);
+    m_SettingConSettings->TabSize=UIGetNumberInputCtrlValue(NumberInputHandle);
 
     /********************/
     /* Terminal         */
@@ -2845,6 +2852,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_NumberInput_AutoReopenWaitTime:
                 case e_UIS_NumberInput_DelayBetweenBytes:
                 case e_UIS_NumberInput_DelayAfterNewLineSent:
+                case e_UIS_NumberInput_TabSize:
                 case e_UIS_NumberInputMAX:
                 default:
                 break;

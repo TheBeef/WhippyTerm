@@ -67,9 +67,11 @@ struct DataProcessorAPI m_BasicHexDecoderAPI=
     BasicHexDecoder_ProcessIncomingBinaryByte,
     /* V2 */
     NULL,       // ProcessOutGoingData
+    /* V3 */
     NULL,       // AllocSettingsWidgets
     NULL,       // FreeSettingsWidgets
-    NULL,       // StoreSettings
+    NULL,       // SetSettingsFromWidgets
+    NULL,       // ApplySettings
 };
 
 struct DataProcessorInfo m_BasicHexDecoder_Info=

@@ -47,7 +47,6 @@ using namespace std;
 /*** DEFINES                  ***/
 //#define DEBUG_SHOW_BUFFER_POS               1       // Show the pointers to parts of the screen (only some)
 
-#define CHARS_IN_A_TAB                          8
 #define SELECTION_SCROLL_SPEED_TIMER            50 // ms
 
 /*** MACROS                   ***/
@@ -2795,8 +2794,11 @@ void DisplayText::AddTab(void)
 {
     int NewPos;
 
+    if(Settings->TabSize==0)
+        return;
+
     /* Move the cursor to the next tab pos */
-    NewPos=CursorX+(CHARS_IN_A_TAB-CursorX%CHARS_IN_A_TAB);
+    NewPos=CursorX+((Settings->TabSize)-CursorX%(Settings->TabSize));
 
     MoveCursor(NewPos,CursorY,false);
 }
@@ -2825,10 +2827,13 @@ void DisplayText::AddReverseTab(void)
     int NewPos;
     int Amount;
 
+    if(Settings->TabSize==0)
+        return;
+
     /* Move the cursor to the prev tab pos */
-    Amount=CursorX%CHARS_IN_A_TAB;
+    Amount=CursorX%(Settings->TabSize);
     if(Amount==0)
-        Amount=CHARS_IN_A_TAB;
+        Amount=Settings->TabSize;
     NewPos=CursorX-Amount;
 
     MoveCursor(NewPos,CursorY,false);

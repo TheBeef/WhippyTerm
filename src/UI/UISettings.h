@@ -144,6 +144,7 @@ enum e_UIS_NumberInput
     e_UIS_NumberInput_AutoReopenWaitTime,
     e_UIS_NumberInput_DelayBetweenBytes,
     e_UIS_NumberInput_DelayAfterNewLineSent,
+    e_UIS_NumberInput_TabSize,
     e_UIS_NumberInputMAX
 };
 

@@ -232,6 +232,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <string>
+
+using namespace std;
 
 /*** DEFINES                  ***/
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      ANSIX3_64 // The name to append on the RegisterPlugin() function for built in version
@@ -282,6 +285,26 @@ struct ANSIX364DecoderData
     int LastProcessedCharLen;
     int LastProcessedCharBuffSize;
     struct ANSIX364DecoderSavedCursorAttribs SavedCursorAttribs;
+
+    bool BoldEnabled;
+    bool ItalicEnabled;
+    bool UnderlineEnabled;
+    bool IntensityEnabled;
+    bool DoubleUnderlineEnabled;
+    bool OverlineEnabled;
+};
+
+struct ANSIX364Decoder_SettingsWidgets
+{
+    t_WidgetSysHandle *OptionsTabHandle;
+
+    /* Options widgets */
+    struct PI_Checkbox *EnableBoldInput;
+    struct PI_Checkbox *EnableItalicInput;
+    struct PI_Checkbox *EnableUnderlineInput;
+    struct PI_Checkbox *EnableIntensityInput;
+    struct PI_Checkbox *EnableDoubleUnderlineInput;
+    struct PI_Checkbox *EnableOverlineInput;
 };
 
 /*** FUNCTION PROTOTYPES      ***/
@@ -315,6 +338,10 @@ void ANSIX364Decoder_DoCSIQuestCommand(struct ANSIX364DecoderData *Data,
         const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
         PG_BOOL *Consumed);
 static void ANSIX364Decoder_DefaultData(struct ANSIX364DecoderData *Data);
+static t_DataProSettingsWidgetsType *ANSIX364Decoder_AllocSettingsWidgets(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings);
+static void ANSIX364Decoder_FreeSettingsWidgets(t_DataProSettingsWidgetsType *PrivData);
+static void ANSIX364Decoder_SetSettingsFromWidgets(t_DataProSettingsWidgetsType *PrivData,t_PIKVList *Settings);
+static void ANSIX364Decoder_ApplySettings(t_DataProcessorHandleType *DataHandle,t_PIKVList *Settings);
 
 /*** VARIABLE DEFINITIONS     ***/
 static const struct PI_UIAPI *m_UIAPI;
@@ -331,9 +358,11 @@ struct DataProcessorAPI m_ANSIX364DecoderAPI=
     NULL, // ProcessIncomingBinaryByte
     /* V2 */
     NULL,       // ProcessOutGoingData
-    NULL,       // AllocSettingsWidgets
-    NULL,       // FreeSettingsWidgets
-    NULL,       // StoreSettings
+    /* V3 */
+    ANSIX364Decoder_AllocSettingsWidgets,
+    ANSIX364Decoder_FreeSettingsWidgets,
+    ANSIX364Decoder_SetSettingsFromWidgets,
+    ANSIX364Decoder_ApplySettings,
 };
 struct DataProcessorInfo m_ANSIX364Decoder_Info=
 {
@@ -1566,18 +1595,24 @@ void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data)
                 ULineColor=FGColor;
             break;
             case 1: // bold or increased intensity
-                Attribs|=TXT_ATTRIB_BOLD;
-                Data->DoingBright=true;
+                if(Data->BoldEnabled)
+                    Attribs|=TXT_ATTRIB_BOLD;
+                if(Data->IntensityEnabled)
+                    Data->DoingBright=true;
             break;
             case 2: // faint, decreased intensity or second colour
                 Data->DoingDim=true;
             break;
             case 3: // italicized
-                Attribs|=TXT_ATTRIB_ITALIC;
+                if(Data->ItalicEnabled)
+                    Attribs|=TXT_ATTRIB_ITALIC;
             break;
             case 4: // singly underlined
-                Attribs|=TXT_ATTRIB_UNDERLINE;
-                ULineColor=FGColor;
+                if(Data->UnderlineEnabled)
+                {
+                    Attribs|=TXT_ATTRIB_UNDERLINE;
+                    ULineColor=FGColor;
+                }
             break;
             case 5: // slowly blinking (less then 150 per minute)
             break;
@@ -1604,8 +1639,11 @@ void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data)
             case 20: // Fraktur (Gothic)
             break;
             case 21: // doubly underlined
-                Attribs|=TXT_ATTRIB_UNDERLINE_DOUBLE;
-                ULineColor=FGColor;
+                if(Data->DoubleUnderlineEnabled)
+                {
+                    Attribs|=TXT_ATTRIB_UNDERLINE_DOUBLE;
+                    ULineColor=FGColor;
+                }
             break;
             case 22: // normal colour or normal intensity (neither bold nor faint)
                 Attribs&=~TXT_ATTRIB_BOLD;
@@ -1672,8 +1710,11 @@ void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data)
             case 52: // encircled
             break;
             case 53: // overlined
-                Attribs|=TXT_ATTRIB_OVERLINE;
-                ULineColor=FGColor;
+                if(Data->OverlineEnabled)
+                {
+                    Attribs|=TXT_ATTRIB_OVERLINE;
+                    ULineColor=FGColor;
+                }
             break;
             case 54: // not framed, not encircled
             break;
@@ -2031,4 +2072,293 @@ void ANSIX364Decoder_DoCSIQuestCommand(struct ANSIX364DecoderData *Data,
 #endif
         break;
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    AllocSettingsWidgets
+ *
+ * SYNOPSIS:
+ *    t_DataProSettingsWidgetsType *AllocSettingsWidgets(
+ *              t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to add new widgets to
+ *    Settings [I] -- The current settings.  This is a standard key/value
+ *                    list.
+ *
+ * FUNCTION:
+ *    This function is called when the user presses the "Settings" button
+ *    to change any settings for this plugin (in the settings dialog).  If
+ *    this is NULL then the user can not press the settings button.
+ *
+ *    When the plugin settings dialog is open it will have a tab control in
+ *    it with a "Generic" tab opened.  Your widgets will be added to this
+ *    tab.  If you want to add a new tab use can call the DPS_API
+ *    function AddNewSettingsTab().  If you want to change the name of the
+ *    first tab call SetCurrentSettingsTabName() before you add a new tab.
+ *
+ * RETURNS:
+ *    The private settings data that you want to use.  This is a private
+ *    structure that you allocate and then cast to
+ *    (t_DataProSettingsWidgetsType *) when you return.  It's up to you what
+ *    you want to do with this data (if you do not want to use it return
+ *    a fixed int set to 1, and ignore it in FreeSettingsWidgets.  If you
+ *    return NULL it is considered an error.
+ *
+ * SEE ALSO:
+ *    FreeSettingsWidgets(), SetCurrentSettingsTabName(), AddNewSettingsTab()
+ ******************************************************************************/
+t_DataProSettingsWidgetsType *ANSIX364Decoder_AllocSettingsWidgets(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings)
+{
+    struct ANSIX364Decoder_SettingsWidgets *WData;
+    const char *Str;
+
+    try
+    {
+        WData=new ANSIX364Decoder_SettingsWidgets;
+
+        /* Zero everything */
+        WData->EnableBoldInput=NULL;
+        WData->EnableItalicInput=NULL;
+        WData->EnableUnderlineInput=NULL;
+        WData->EnableIntensityInput=NULL;
+        WData->EnableDoubleUnderlineInput=NULL;
+        WData->EnableOverlineInput=NULL;
+
+        /* Timestamp tab */
+        WData->OptionsTabHandle=WidgetHandle;
+        m_DPS->SetCurrentSettingsTabName("Options");
+
+        /* Add options widgets */
+        WData->EnableBoldInput=m_UIAPI->AddCheckbox(WData->OptionsTabHandle,
+                "Enable Bold (ESC[1m)",NULL,NULL);
+        if(WData->EnableBoldInput==NULL)
+            throw(0);
+        Str=m_System->KVGetItem(Settings,"EnableBold");
+        if(Str==NULL)
+            Str="1";
+        m_UIAPI->SetCheckboxChecked(WData->OptionsTabHandle,
+                WData->EnableBoldInput->Ctrl,atoi(Str));
+
+        WData->EnableItalicInput=m_UIAPI->AddCheckbox(WData->OptionsTabHandle,
+                "Enable Italic (ESC[3m)",NULL,NULL);
+        if(WData->EnableItalicInput==NULL)
+            throw(0);
+        Str=m_System->KVGetItem(Settings,"EnableItalic");
+        if(Str==NULL)
+            Str="1";
+        m_UIAPI->SetCheckboxChecked(WData->OptionsTabHandle,
+                WData->EnableItalicInput->Ctrl,atoi(Str));
+
+        WData->EnableUnderlineInput=m_UIAPI->AddCheckbox(WData->OptionsTabHandle,
+                "Enable Underline (ESC[4m)",NULL,NULL);
+        if(WData->EnableUnderlineInput==NULL)
+            throw(0);
+        Str=m_System->KVGetItem(Settings,"EnableUnderline");
+        if(Str==NULL)
+            Str="1";
+        m_UIAPI->SetCheckboxChecked(WData->OptionsTabHandle,
+                WData->EnableUnderlineInput->Ctrl,atoi(Str));
+
+        WData->EnableIntensityInput=m_UIAPI->AddCheckbox(WData->OptionsTabHandle,
+                "Enable Intensity (ESC[1m)",NULL,NULL);
+        if(WData->EnableIntensityInput==NULL)
+            throw(0);
+        Str=m_System->KVGetItem(Settings,"EnableIntensity");
+        if(Str==NULL)
+            Str="1";
+        m_UIAPI->SetCheckboxChecked(WData->OptionsTabHandle,
+                WData->EnableIntensityInput->Ctrl,atoi(Str));
+
+        WData->EnableDoubleUnderlineInput=m_UIAPI->AddCheckbox(WData->OptionsTabHandle,
+                "Enable Double Underline (ESC[21m)",NULL,NULL);
+        if(WData->EnableDoubleUnderlineInput==NULL)
+            throw(0);
+        Str=m_System->KVGetItem(Settings,"EnableDoubleUnderline");
+        if(Str==NULL)
+            Str="1";
+        m_UIAPI->SetCheckboxChecked(WData->OptionsTabHandle,
+                WData->EnableDoubleUnderlineInput->Ctrl,atoi(Str));
+
+        WData->EnableOverlineInput=m_UIAPI->AddCheckbox(WData->OptionsTabHandle,
+                "Enable Overline (ESC[53m)",NULL,NULL);
+        if(WData->EnableOverlineInput==NULL)
+            throw(0);
+        Str=m_System->KVGetItem(Settings,"EnableOverline");
+        if(Str==NULL)
+            Str="1";
+        m_UIAPI->SetCheckboxChecked(WData->OptionsTabHandle,
+                WData->EnableOverlineInput->Ctrl,atoi(Str));
+    }
+    catch(...)
+    {
+        if(WData!=NULL)
+        {
+            ANSIX364Decoder_FreeSettingsWidgets(
+                    (t_DataProSettingsWidgetsType *)WData);
+        }
+        return NULL;
+    }
+
+    return (t_DataProSettingsWidgetsType *)WData;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    FreeSettingsWidgets
+ *
+ * SYNOPSIS:
+ *    void FreeSettingsWidgets(t_DataProSettingsWidgetsType *PrivData);
+ *
+ * PARAMETERS:
+ *    PrivData [I] -- The private data to free
+ *
+ * FUNCTION:
+ *      This function is called when the system frees the settings widets.
+ *      It should free any private data you allocated in AllocSettingsWidgets().
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    AllocSettingsWidgets()
+ ******************************************************************************/
+void ANSIX364Decoder_FreeSettingsWidgets(t_DataProSettingsWidgetsType *PrivData)
+{
+    struct ANSIX364Decoder_SettingsWidgets *WData=(struct ANSIX364Decoder_SettingsWidgets *)PrivData;
+
+    /* Free everything in reverse order */
+    if(WData->EnableBoldInput!=NULL)
+        m_UIAPI->FreeCheckbox(WData->OptionsTabHandle,WData->EnableBoldInput);
+
+    if(WData->EnableItalicInput!=NULL)
+        m_UIAPI->FreeCheckbox(WData->OptionsTabHandle,WData->EnableItalicInput);
+
+    if(WData->EnableUnderlineInput!=NULL)
+        m_UIAPI->FreeCheckbox(WData->OptionsTabHandle,WData->EnableUnderlineInput);
+
+    if(WData->EnableIntensityInput!=NULL)
+        m_UIAPI->FreeCheckbox(WData->OptionsTabHandle,WData->EnableIntensityInput);
+
+    if(WData->EnableDoubleUnderlineInput!=NULL)
+        m_UIAPI->FreeCheckbox(WData->OptionsTabHandle,WData->EnableDoubleUnderlineInput);
+
+    if(WData->EnableOverlineInput!=NULL)
+        m_UIAPI->FreeCheckbox(WData->OptionsTabHandle,WData->EnableOverlineInput);
+
+    delete WData;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    SetSettingsFromWidgets
+ *
+ * SYNOPSIS:
+ *    void SetSettingsFromWidgets(t_DataProSettingsWidgetsType *PrivData,
+ *              t_PIKVList *Settings);
+ *
+ * PARAMETERS:
+ *    PrivData [I] -- Your private data allocated in AllocSettingsWidgets()
+ *    Settings [O] -- This is where you store the settings.
+ *
+ * FUNCTION:
+ *    This function takes the widgets added with AllocSettingsWidgets() and
+ *    stores them is a key/value pair list in 'Settings'.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    AllocSettingsWidgets()
+ ******************************************************************************/
+void ANSIX364Decoder_SetSettingsFromWidgets(t_DataProSettingsWidgetsType *PrivData,t_PIKVList *Settings)
+{
+    struct ANSIX364Decoder_SettingsWidgets *WData=(struct ANSIX364Decoder_SettingsWidgets *)PrivData;
+    string Str;
+
+    Str=m_UIAPI->IsCheckboxChecked(WData->OptionsTabHandle,
+            WData->EnableBoldInput->Ctrl)?"1":"0";
+    m_System->KVAddItem(Settings,"EnableBold",Str.c_str());
+
+    Str=m_UIAPI->IsCheckboxChecked(WData->OptionsTabHandle,
+            WData->EnableItalicInput->Ctrl)?"1":"0";
+    m_System->KVAddItem(Settings,"EnableItalic",Str.c_str());
+
+    Str=m_UIAPI->IsCheckboxChecked(WData->OptionsTabHandle,
+            WData->EnableUnderlineInput->Ctrl)?"1":"0";
+    m_System->KVAddItem(Settings,"EnableUnderline",Str.c_str());
+
+    Str=m_UIAPI->IsCheckboxChecked(WData->OptionsTabHandle,
+            WData->EnableIntensityInput->Ctrl)?"1":"0";
+    m_System->KVAddItem(Settings,"EnableIntensity",Str.c_str());
+
+    Str=m_UIAPI->IsCheckboxChecked(WData->OptionsTabHandle,
+            WData->EnableDoubleUnderlineInput->Ctrl)?"1":"0";
+    m_System->KVAddItem(Settings,"EnableDoubleUnderline",Str.c_str());
+
+    Str=m_UIAPI->IsCheckboxChecked(WData->OptionsTabHandle,
+            WData->EnableOverlineInput->Ctrl)?"1":"0";
+    m_System->KVAddItem(Settings,"EnableOverline",Str.c_str());
+}
+
+/*******************************************************************************
+ * NAME:
+ *    ApplySettings
+ *
+ * SYNOPSIS:
+ *    void ApplySettings(t_DataProcessorHandleType *DataHandle,
+ *              t_PIKVList *Settings);
+ *
+ * PARAMETERS:
+ *    DataHandle [I] -- The data handle to work on.  This is your internal
+ *                      data.
+ *    Settings [I] -- This is where you get your settings from.
+ *
+ * FUNCTION:
+ *    This function takes the settings from 'Settings' and setups the
+ *    plugin to use them when new bytes come in or out.  It will normally
+ *    copy the settings from key/value pairs to internal data structures.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void ANSIX364Decoder_ApplySettings(t_DataProcessorHandleType *DataHandle,
+        t_PIKVList *Settings)
+{
+    struct ANSIX364DecoderData *Data=(struct ANSIX364DecoderData *)DataHandle;
+    const char *Str;
+
+    Str=m_System->KVGetItem(Settings,"EnableBold");
+    if(Str==NULL)
+        Str="1";
+    Data->BoldEnabled=atoi(Str);
+
+    Str=m_System->KVGetItem(Settings,"EnableItalic");
+    if(Str==NULL)
+        Str="1";
+    Data->ItalicEnabled=atoi(Str);
+
+    Str=m_System->KVGetItem(Settings,"EnableUnderline");
+    if(Str==NULL)
+        Str="1";
+    Data->UnderlineEnabled=atoi(Str);
+
+    Str=m_System->KVGetItem(Settings,"EnableIntensity");
+    if(Str==NULL)
+        Str="1";
+    Data->IntensityEnabled=atoi(Str);
+
+    Str=m_System->KVGetItem(Settings,"EnableDoubleUnderline");
+    if(Str==NULL)
+        Str="1";
+    Data->DoubleUnderlineEnabled=atoi(Str);
+
+    Str=m_System->KVGetItem(Settings,"EnableOverline");
+    if(Str==NULL)
+        Str="1";
+    Data->OverlineEnabled=atoi(Str);
 }

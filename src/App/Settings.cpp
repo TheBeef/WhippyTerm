@@ -1263,6 +1263,7 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
     cfg.Register("ReverseEnabled",ReverseEnabled);
     cfg.Register("LineThroughEnabled",LineThroughEnabled);
     cfg.Register("ColorsEnabled",ColorsEnabled);
+    cfg.Register("TabSize",TabSize);
     cfg.EndBlock();
 
     cfg.StartBlock("Sound");
@@ -1367,6 +1368,8 @@ bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
     if(Con1.LineThroughEnabled!=Con2.LineThroughEnabled)
         return false;
     if(Con1.ColorsEnabled!=Con2.ColorsEnabled)
+        return false;
+    if(Con1.TabSize!=Con2.TabSize)
         return false;
 
     return true;
@@ -1497,6 +1500,7 @@ void ConSettings::DefaultSettings(void)
     ReverseEnabled=true;
     LineThroughEnabled=true;
     ColorsEnabled=true;
+    TabSize=8;
 
     BeepMode=e_Beep_System;
     UseCustomSound=false;

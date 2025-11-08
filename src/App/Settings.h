@@ -161,7 +161,7 @@ class ConSettings
         t_StringListType EnabledTermEmuDataProcessors;
         t_StringListType EnabledBinaryDataProcessors;
 
-        /* Attribs on/off */
+        /* Attribs */
         bool BoldEnabled;
         bool ItalicEnabled;
         bool UnderlineEnabled;
@@ -169,6 +169,7 @@ class ConSettings
         bool ReverseEnabled;
         bool LineThroughEnabled;
         bool ColorsEnabled;
+        uint32_t TabSize;
 
         /* Sounds */
         e_BeepType BeepMode;

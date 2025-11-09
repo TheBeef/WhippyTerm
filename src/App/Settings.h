@@ -161,6 +161,13 @@ class ConSettings
         t_StringListType EnabledTermEmuDataProcessors;
         t_StringListType EnabledBinaryDataProcessors;
 
+        /* Sounds */
+        e_BeepType BeepMode;
+        bool UseCustomSound;
+        std::string BeepFilename;
+
+        /***** Display *****/
+
         /* Attribs */
         bool BoldEnabled;
         bool ItalicEnabled;
@@ -171,10 +178,9 @@ class ConSettings
         bool ColorsEnabled;
         uint32_t TabSize;
 
-        /* Sounds */
-        e_BeepType BeepMode;
-        bool UseCustomSound;
-        std::string BeepFilename;
+        /* Elements */
+        bool OverrideHR;
+        uint32_t HorizontalRuleColor;
 
         /* Plugins */
         t_PluginSettings PluginsSettings;

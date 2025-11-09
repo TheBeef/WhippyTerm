@@ -351,6 +351,7 @@ class DisplayText : public DisplayBase
         void TextLine_Fill(i_TextLines Line,int_fast32_t Offset,uint_fast32_t Count,const struct CharStyling *Style,const char *Chr);
         void TextLine_Clear(i_TextLines Line);
         int TextLine_FindLineLen(i_TextLines Line);
+        i_TextLines GetActiveLineIterator(void);
 
         /* Frag handling */
         void TxtFrag_SplitFrag(i_TextLines Line,i_TextLineFrags Frag,int_fast32_t StrPos,bool SplitEvenIfResultEmpty,i_TextLineFrags *Frag1,i_TextLineFrags *Frag2);

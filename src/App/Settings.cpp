@@ -1266,6 +1266,11 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
     cfg.Register("TabSize",TabSize);
     cfg.EndBlock();
 
+    cfg.StartBlock("Elements");
+    cfg.Register("OverrideHR",OverrideHR);
+    cfg.Register("HorizontalRuleColor",HorizontalRuleColor,true);
+    cfg.EndBlock();
+
     cfg.StartBlock("Sound");
         RegisterBeep(cfg,"Beep",BeepMode);
         cfg.Register("UseCustomSound",UseCustomSound);
@@ -1501,6 +1506,9 @@ void ConSettings::DefaultSettings(void)
     LineThroughEnabled=true;
     ColorsEnabled=true;
     TabSize=8;
+
+    OverrideHR=false;
+    HorizontalRuleColor=SysColors[e_SysColShade_Normal][e_SysCol_White];
 
     BeepMode=e_Beep_System;
     UseCustomSound=false;

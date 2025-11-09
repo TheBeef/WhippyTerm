@@ -71,6 +71,7 @@ enum e_UIS_Checkbox
     e_UIS_Checkbox_DestructiveBackspace,
     e_UIS_Checkbox_ReopenConnectionsOnStartup,
     e_UIS_Checkbox_ConfirmQuit,
+    e_UIS_Checkbox_OverrideHR,
     e_UIS_CheckboxMAX
 };
 
@@ -119,6 +120,7 @@ enum e_UIS_Button
     e_UIS_Button_SelectHexDisplaySelBGColor,
     e_UIS_Button_CustomSound_SelectFilename,
     e_UIS_Button_ColorEditSelectColor,
+    e_UIS_Button_HRColorSelect,
     e_UIS_ButtonMAX
 };
 
@@ -224,6 +226,7 @@ enum e_UIS_ColorPreview
     e_UIS_ColorPreview_HexDisplay_FGDisplay,
     e_UIS_ColorPreview_HexDisplay_BGDisplay,
     e_UIS_ColorPreview_HexDisplay_SelBGDisplay,
+    e_UIS_ColorPreview_HROverrideColor,
     e_UIS_ColorPreviewMAX
 };
 

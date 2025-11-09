@@ -4812,6 +4812,7 @@ void DisplayText::ClearScrollBackBuffer(void)
  ******************************************************************************/
 void DisplayText::InsertHorizontalRule(void)
 {
+    i_TextLines CurLine;
     struct TextLineFrag NewHRFrag;
     int NewCursorY;
 
@@ -4819,7 +4820,6 @@ void DisplayText::InsertHorizontalRule(void)
     {
         /* We replace the current line with a HR and then move the cursor to the
            next line */
-
         NewHRFrag.FragType=e_TextCanvasFrag_HR;
         NewHRFrag.Text="";
         NewHRFrag.Styling.FGColor=CurrentStyle.FGColor;
@@ -4829,6 +4829,19 @@ void DisplayText::InsertHorizontalRule(void)
         NewHRFrag.WidthPx=0;
         NewHRFrag.Value=0;
         NewHRFrag.Data=NULL;
+
+        if(Settings->OverrideHR)
+            NewHRFrag.Styling.FGColor=Settings->HorizontalRuleColor;
+
+        CurLine=GetActiveLineIterator();
+        if(CurLine!=Lines.end() && !IsLineBlank(CurLine))
+        {
+            /* We are not on a blank line, move to the next line */
+            /* Move to the start of the next line */
+            NewCursorY=CursorY;
+            MoveToNextLine(NewCursorY);
+            MoveCursor(0,NewCursorY,false);
+        }
 
         ActiveLine->Frags.clear();
         ActiveLine->Frags.push_back(NewHRFrag);
@@ -4852,6 +4865,39 @@ void DisplayText::InsertHorizontalRule(void)
     {
         
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::GetActiveLineIterator
+ *
+ * SYNOPSIS:
+ *    i_TextLines DisplayText::GetActiveLineIterator(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets a line iterator that is the same as 'ActiveLine'
+ *
+ * RETURNS:
+ *    An iterator to ActiveLine or Lines.end() if it is not valid.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+i_TextLines DisplayText::GetActiveLineIterator(void)
+{
+    i_TextLines CurLine;
+    int y;
+    if(ActiveLine==NULL)
+        return Lines.end();
+
+    for(y=0,CurLine=ScreenFirstLine;CurLine!=Lines.end() && y<ActiveLineY;
+            CurLine++,y++)
+    {
+    }
+    return CurLine;
 }
 
 /*******************************************************************************

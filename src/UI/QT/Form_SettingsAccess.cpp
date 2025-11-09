@@ -124,6 +124,8 @@ t_UICheckboxCtrl *UIS_GetCheckboxHandle(e_UIS_Checkbox UIObj)
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->RestoreConnectionsOnStart_checkBox;
         case e_UIS_Checkbox_ConfirmQuit:
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->ConfirmQuit_checkBox;
+        case e_UIS_Checkbox_OverrideHR:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->HR_OverrideColor_checkBox;
         case e_UIS_CheckboxMAX:
         default:
         break;
@@ -447,6 +449,8 @@ t_UIColorPreviewCtrl *UIS_GetColorPreviewHandle(e_UIS_ColorPreview UIObj)
             return (t_UIColorPreviewCtrl *)g_SettingsDialog->ui->HexDisplay_BGDisplay_frame;
         case e_UIS_ColorPreview_HexDisplay_SelBGDisplay:
             return (t_UIColorPreviewCtrl *)g_SettingsDialog->ui->HexDisplay_SelBGDisplay_frame;
+        case e_UIS_ColorPreview_HROverrideColor:
+            return (t_UIColorPreviewCtrl *)g_SettingsDialog->ui->HR_ColorDisplay_frame;
 
         case e_UIS_ColorPreviewMAX:
         default:

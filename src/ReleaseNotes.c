@@ -31,6 +31,11 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_FUNCTIONALLY_FIX,"Changed how insert horizontal rule works",
+            "Horizontal Rule cleared the current line and then changed it to"
+            " a horizontal rule.  Now it checks if the line is blank and if"
+            " not moves to the next line and then inserts a horizontal rule."},
+    {
         NOTETYPE_ENHANCEMENT,"Added setting for tab size",
             "You can now set the tab size to something other than 8 spaces."},
     {

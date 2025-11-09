@@ -166,6 +166,7 @@ uint32_t m_HexDisplaysSelBGColor;
 struct CommandKeySeq m_CopyOfKeyMapping[e_CmdMAX];
 class ConSettings *m_SettingConSettings;
 bool m_SettingConSettingsOnly;
+uint32_t m_HROverrideColor;
 
 struct ProInfoSortCB
 {
@@ -770,6 +771,13 @@ static void DS_SetSettingGUI(void)
     NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_TabSize);
     UISetNumberInputCtrlValue(NumberInputHandle,m_SettingConSettings->TabSize);
 
+    /* Elements */
+    m_HROverrideColor=m_SettingConSettings->HorizontalRuleColor;
+    ColorPreviewHandle=UIS_GetColorPreviewHandle(e_UIS_ColorPreview_HROverrideColor);
+    UISetColorPreviewColor(ColorPreviewHandle,m_HROverrideColor);
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_OverrideHR);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->OverrideHR);
 
     memcpy(m_DS_SysColors,m_SettingConSettings->SysColors,sizeof(m_DS_SysColors));
     memcpy(m_DS_DefaultColors,m_SettingConSettings->DefaultColors,sizeof(m_DS_DefaultColors));
@@ -1215,6 +1223,12 @@ static void DS_GetSettingsFromGUI(void)
 
     NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_TabSize);
     m_SettingConSettings->TabSize=UIGetNumberInputCtrlValue(NumberInputHandle);
+
+    /* Elements */
+    m_SettingConSettings->HorizontalRuleColor=m_HROverrideColor;
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_OverrideHR);
+    m_SettingConSettings->OverrideHR=UIGetCheckboxCheckStatus(CheckboxHandle);
 
     /********************/
     /* Terminal         */
@@ -2644,6 +2658,18 @@ bool DS_Event(const struct DSEvent *Event)
                     {
                         DS_SetCurrentColor(SelColor);
                         DS_UpdateColorPreview(true);
+                    }
+                break;
+
+                case e_UIS_Button_HRColorSelect:
+                    SelColor=UIGetColor(m_HROverrideColor);
+                    if(SelColor!=0xFFFFFFFF)
+                    {
+                        m_HROverrideColor=SelColor;
+                        ColorPreviewHandle=UIS_GetColorPreviewHandle(
+                                e_UIS_ColorPreview_HROverrideColor);
+                        UISetColorPreviewColor(ColorPreviewHandle,
+                                m_HROverrideColor);
                     }
                 break;
 

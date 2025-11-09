@@ -846,3 +846,12 @@ void Form_Settings::on_CursorKeyToggle_InsertKey_radioButton_toggled(bool checke
         SendEvent(e_DSEvent_RadioBttnClick,&EventData);
     }
 }
+
+void Form_Settings::on_HR_SelectColor_pushButton_clicked()
+{
+    union DSEventData EventData;
+
+    EventData.Bttn.InputID=e_UIS_Button_HRColorSelect;
+    SendEvent(e_DSEvent_BttnTriggered,&EventData);
+}
+

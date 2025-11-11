@@ -36,7 +36,7 @@
       <item>
        <widget class="QStackedWidget" name="Editing_stackedWidget">
         <property name="currentIndex">
-         <number>3</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="page_Panel">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -13330,7 +13330,7 @@
           <item>
            <widget class="QTabWidget" name="Terminal_tabWidget">
             <property name="currentIndex">
-             <number>0</number>
+             <number>3</number>
             </property>
             <widget class="QWidget" name="Terminal_tab">
              <attribute name="title">
@@ -14174,7 +14174,11 @@ p, li { white-space: pre-wrap; }
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_26">
                  <item>
-                  <widget class="QListWidget" name="KeyBinding_CommandList_listWidget"/>
+                  <widget class="QListWidget" name="KeyBinding_CommandList_listWidget">
+                   <property name="sortingEnabled">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -14187,6 +14191,16 @@ p, li { white-space: pre-wrap; }
                 <layout class="QHBoxLayout" name="horizontalLayout_29">
                  <item>
                   <widget class="QLineEdit" name="KeyBinding_Assigned2_lineEdit"/>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="Record_pushButton">
+                   <property name="text">
+                    <string>Record</string>
+                   </property>
+                   <property name="checkable">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item>
                   <widget class="QPushButton" name="KeyBinding_CommandList_Set_pushButton">

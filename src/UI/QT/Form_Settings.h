@@ -177,6 +177,8 @@ private slots:
     
     void on_HR_SelectColor_pushButton_clicked();
     
+    void on_Record_pushButton_clicked();
+    
 private:
     bool DoingEvent;
 

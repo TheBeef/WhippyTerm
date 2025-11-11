@@ -855,3 +855,12 @@ void Form_Settings::on_HR_SelectColor_pushButton_clicked()
     SendEvent(e_DSEvent_BttnTriggered,&EventData);
 }
 
+
+void Form_Settings::on_Record_pushButton_clicked()
+{
+    union DSEventData EventData;
+
+    EventData.Bttn.InputID=e_UIS_Button_KeyRecord;
+    SendEvent(e_DSEvent_BttnTriggered,&EventData);
+}
+

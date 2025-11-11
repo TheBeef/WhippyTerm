@@ -1,3 +1,4 @@
+#include <stdio.h>
 /* DEBUG PAUL:
 I think the settings need to be copied, and restored on cancel button.  This
 is because I see some stuff that changes the data in the global structure
@@ -53,6 +54,7 @@ instead of in the GUI (window pos for example, and plugin settings)
 #include "UI/UIFileReq.h"
 #include "UI/UIFontReq.h"
 #include "UI/UIColorReq.h"
+#include "UI/UISystem.h"
 #include "OS/Directorys.h"
 #include "Version.h"
 #include <time.h>
@@ -104,6 +106,7 @@ enum e_DS_EditingColorType
 };
 
 /*** FUNCTION PROTOTYPES      ***/
+static void UIS_RecordKeyPressCallback(uint8_t Mods,e_UIKeys UIKey,std::string &Text);
 static void DS_SetSettingGUI(void);
 static void DS_GetSettingsFromGUI(void);
 static void DS_RethinkGUI(void);
@@ -167,6 +170,7 @@ struct CommandKeySeq m_CopyOfKeyMapping[e_CmdMAX];
 class ConSettings *m_SettingConSettings;
 bool m_SettingConSettingsOnly;
 uint32_t m_HROverrideColor;
+struct CommandKeySeq m_LastRecordingKeyPressed;
 
 struct ProInfoSortCB
 {
@@ -1578,9 +1582,6 @@ void UIS_HandleKeyBindingsCmdListChange(uintptr_t ID)
     ShortcutInput=UIS_GetTextInputHandle(e_UIS_TextInput_KeyBinding_Assigned2);
     UISetTextCtrlText(ShortcutInput,
             ConvertKeySeq2String(&m_CopyOfKeyMapping[Cmd]));
-
-//const char *ConvertKeySeq2String(struct CommandKeySeq *KeySeq);
-//void ConvertString2KeySeq(struct CommandKeySeq *KeySeq,const char *Str);
 }
 
 /*******************************************************************************
@@ -2481,6 +2482,9 @@ bool DS_Event(const struct DSEvent *Event)
     const char *FilePart;
     const char *TmpCStr;
     unsigned int Selected;
+    t_UIButtonCtrl *Bttn;
+    string SeqStr;
+    t_UITextInputCtrl *ShortcutInput;
 
     AcceptEvent=true;
     switch(Event->EventType)
@@ -2673,6 +2677,60 @@ bool DS_Event(const struct DSEvent *Event)
                     }
                 break;
 
+                case e_UIS_Button_KeyRecord:
+                    Bttn=UIS_GetButtonHandle(e_UIS_Button_KeyRecord);
+                    ShortcutInput=UIS_GetTextInputHandle(
+                            e_UIS_TextInput_KeyBinding_Assigned2);
+                    if(!UIGetButtonChecked(Bttn))
+                    {
+                        /* Done */
+                        UI_CollectAllKeyPresses(NULL);
+
+                        if(m_LastRecordingKeyPressed.Key==e_UIKeysMAX &&
+                                m_LastRecordingKeyPressed.Letter==0)
+                        {
+                            /* User didn't press anything */
+                            SeqStr="None";
+                        }
+                        else if(m_LastRecordingKeyPressed.Key==e_UIKeys_Shift ||
+                                m_LastRecordingKeyPressed.Key==e_UIKeys_Control ||
+                                m_LastRecordingKeyPressed.Key==e_UIKeys_Meta ||
+                                m_LastRecordingKeyPressed.Key==e_UIKeys_Alt ||
+                                m_LastRecordingKeyPressed.Key==e_UIKeys_AltGr ||
+                                m_LastRecordingKeyPressed.Key==e_UIKeys_Super_L ||
+                                m_LastRecordingKeyPressed.Key==e_UIKeys_Super_R)
+                        {
+                            /* We ignore if all they pressed was a modifier key */
+                            /* Reject this key press */
+                            UIAsk("Error","This key seq is not supported",
+                                    e_AskBox_Error,e_AskBttns_Ok);
+                            SeqStr="None";
+                        }
+                        else
+                        {
+                            SeqStr=ConvertKeySeq2String(&m_LastRecordingKeyPressed);
+                            printf("%s\n",ConvertKeySeq2String(&m_LastRecordingKeyPressed));
+                            fflush(stdout);
+                        }
+                        UISetTextCtrlText(ShortcutInput,SeqStr.c_str());
+                    }
+                    else
+                    {
+                        /* Start recording key presses */
+                        UIAsk("Info","Close this window and then press the key"
+                                " sequence you are interesed in.\n\n"
+                                "When finished press record again to stop"
+                                " recording.\n\n"
+                                "Remember to press set to assign the key"
+                                " sequence.",
+                                e_AskBox_Info,e_AskBttns_Ok);
+
+                        UI_CollectAllKeyPresses(UIS_RecordKeyPressCallback);
+                        m_LastRecordingKeyPressed.Key=e_UIKeysMAX;
+                        m_LastRecordingKeyPressed.Letter=0;
+                    }
+                break;
+
                 case e_UIS_ButtonMAX:
                 default:
                 break;
@@ -2737,6 +2795,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Checkbox_DestructiveBackspace:
                 case e_UIS_Checkbox_ReopenConnectionsOnStartup:
                 case e_UIS_Checkbox_ConfirmQuit:
+                case e_UIS_Checkbox_OverrideHR:
                 case e_UIS_CheckboxMAX:
                 default:
                 break;
@@ -3506,4 +3565,36 @@ e_DS_EditingColorType DS_FindCurrentEditingColor(int *Color)
     }
 
     return RetValue;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIS_RecordKeyPressCallback
+ *
+ * SYNOPSIS:
+ *    void UIS_RecordKeyPressCallback(uint8_t Mods,e_UIKeys UIKey,
+ *              std::string &Text);
+ *
+ * PARAMETERS:
+ *    Mods [I] -- The mods for 
+ *    UIKey [I] -- The key that was pressed
+ *    Text [I] -- The text of the key that was pressed
+ *
+ * FUNCTION:
+ *    This function is called when we are recording key presses for key binding
+ *    it remembers the last key pressed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_RecordKeyPressCallback(uint8_t Mods,e_UIKeys UIKey,std::string &Text)
+{
+    m_LastRecordingKeyPressed.Mod=Mods;
+    m_LastRecordingKeyPressed.Key=UIKey;
+    m_LastRecordingKeyPressed.Letter=0;
+    if(Text.length()==1)
+        m_LastRecordingKeyPressed.Letter=Text[0];
 }

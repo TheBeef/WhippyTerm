@@ -31,6 +31,12 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_FUNCTIONALLY_FIX,"Added record button to bind keys",
+            "Added a record button to the bind keys that will now record"
+            " key presses and fill in the key seq.  Also fixed an error"
+            " message if the key seq is not understood.  The list of commands"
+            " is now sorted."},
+    {
         NOTETYPE_FUNCTIONALLY_FIX,"Changed how insert horizontal rule works",
             "Horizontal Rule cleared the current line and then changed it to"
             " a horizontal rule.  Now it checks if the line is blank and if"

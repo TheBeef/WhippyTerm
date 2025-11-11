@@ -121,6 +121,7 @@ enum e_UIS_Button
     e_UIS_Button_CustomSound_SelectFilename,
     e_UIS_Button_ColorEditSelectColor,
     e_UIS_Button_HRColorSelect,
+    e_UIS_Button_KeyRecord,
     e_UIS_ButtonMAX
 };
 

@@ -465,6 +465,12 @@ bool ConvertString2KeySeq(struct CommandKeySeq *KeySeq,const char *Str)
     KeySeq->Key=ConvertKeyName2ENum(LastPoint);
     if(KeySeq->Key==e_UIKeysMAX)
     {
+        if(LastPoint[0]==0 || LastPoint[1]!=0)
+        {
+            /* Can only be 1 letter so fail */
+            return false;
+        }
+
         /* Use the letter */
         KeySeq->Letter=*LastPoint;
         if(*LastPoint==0 || *LastPoint==' ')

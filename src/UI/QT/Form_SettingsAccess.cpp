@@ -203,7 +203,11 @@ t_UIButtonCtrl *UIS_GetButtonHandle(e_UIS_Button UIObj)
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->CustomSound_SelectFilename_pushButton;
         case e_UIS_Button_ColorEditSelectColor:
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->SelectColor_pushButton;
-
+        case e_UIS_Button_HRColorSelect:
+            return (t_UIButtonCtrl *)g_SettingsDialog->ui->HR_SelectColor_pushButton;
+        case e_UIS_Button_KeyRecord:
+            return (t_UIButtonCtrl *)g_SettingsDialog->ui->Record_pushButton;
+            
         case e_UIS_ButtonMAX:
         default:
         break;

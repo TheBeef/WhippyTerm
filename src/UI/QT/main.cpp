@@ -14,6 +14,7 @@
 #include <QUrl>
 #include "QTKeyHandleScrollLock.h"
 #include "Form_MainWindow.h"
+#include "QTKeyMappings.h"
 #include "main.h"
 #include <stdint.h>
 #include <strings.h>
@@ -29,7 +30,10 @@ QMutex m_DataAvail_mutex;
 //t_ConID m_DataAvail_ArraySize;
 //uint8_t *m_DataAvail_AlreadyBeingProcessed;
 
+static void HandleGlobalKeyPressEvent(QKeyEvent * event);
+
 Form_MainWindow *g_FocusedMainWindow=NULL;
+static void (*m_KeyCallback)(uint8_t Mods,e_UIKeys UIKey,std::string &Text);
 
 MainApp::MainApp(int & argc, char ** argv) : QApplication(argc,argv)
 {
@@ -71,19 +75,30 @@ bool MainApp::notify(QObject * receiver, QEvent * event)
             QTInformOfScrollLockPressed();
     }
 
-    /* We do all of this so we can by pass the QAction shortcuts */
-    /* I'm not sure this is working anyway.... */
-    if(receiver==g_FocusedMainWindow)
+    if(m_KeyCallback!=NULL)
     {
         if(event->type()==QEvent::KeyPress)
         {
-            g_FocusedMainWindow->keyPressEvent((QKeyEvent *)event);
-
-            /* Kill it */
+            HandleGlobalKeyPressEvent((QKeyEvent *)event);
             return true;
         }
-        if(event->type()==QEvent::KeyRelease)
-            return true;
+    }
+    else
+    {
+        /* We do all of this so we can by pass the QAction shortcuts */
+        /* I'm not sure this is working anyway.... */
+        if(receiver==g_FocusedMainWindow)
+        {
+            if(event->type()==QEvent::KeyPress)
+            {
+                g_FocusedMainWindow->keyPressEvent((QKeyEvent *)event);
+
+                /* Kill it */
+                return true;
+            }
+            if(event->type()==QEvent::KeyRelease)
+                return true;
+        }
     }
 
     return QApplication::notify(receiver,event);
@@ -270,4 +285,51 @@ void UI_GotoWebPage(const char *WebSite)
 int caseinsensitivestrcmp(const char *a,const char *b)
 {
     return strcasecmp(a,b);
+}
+
+void UI_CollectAllKeyPresses(void (*Callback)(uint8_t Mods,e_UIKeys UIKey,std::string &Text))
+{
+    m_KeyCallback=Callback;
+}
+
+static void HandleGlobalKeyPressEvent(QKeyEvent *event)
+{
+    uint8_t Mods;
+    e_UIKeys UIKey;
+    std::string Text;
+    char c;
+
+    Mods=0;
+    if(event->modifiers() & Qt::ShiftModifier)
+        Mods|=KEYMOD_SHIFT;
+    if(event->modifiers() & Qt::ControlModifier)
+        Mods|=KEYMOD_CONTROL;
+    if(event->modifiers() & Qt::AltModifier)
+        Mods|=KEYMOD_ALT;
+    if(event->modifiers() & Qt::MetaModifier)
+        Mods|=KEYMOD_LOGO;
+
+    UIKey=ConvertQTKey2UIKey((Qt::Key)event->key());
+    if(UIKey==e_UIKeysMAX)
+    {
+        /* Convert CTRL-? (AscII<32) to their letter and let 'Mods' say
+           it was a letter with the ctrl key held */
+        if(event->text().length()==1 && event->text()[0]<' ')
+        {
+            /* Remove the CTRL part */
+            c=event->text()[0].toLatin1();
+            c+='@'; // Move up to ABC range
+            Text=c;
+        }
+        else
+        {
+            Text=event->text().toStdString();
+        }
+    }
+    else
+    {
+        Text="";
+    }
+
+    m_KeyCallback(Mods,UIKey,Text);
 }

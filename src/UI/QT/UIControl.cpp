@@ -744,6 +744,20 @@ void UISetButtonLabel(t_UIButtonCtrl *Bttn,const char *Text)
     PButton->setText(Text);
 }
 
+void UISetButtonChecked(t_UIButtonCtrl *Bttn,bool Checked)
+{
+    QPushButton *PButton=(QPushButton *)Bttn;
+
+    PButton->setChecked(Checked);
+}
+
+bool UIGetButtonChecked(t_UIButtonCtrl *Bttn)
+{
+    QPushButton *PButton=(QPushButton *)Bttn;
+
+    return PButton->isChecked();
+}
+
 /*************************************/
 /* TabCtrl                           */
 /*************************************/

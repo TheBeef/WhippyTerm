@@ -50,6 +50,7 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/Dialogs/Dialog_CalcCrc.cpp \
     ../src/App/Dialogs/Dialog_DataProPluginSettings.cpp \
     ../src/App/Dialogs/Dialog_HelpCommandLineOptions.cpp \
+    ../src/App/Dialogs/Dialog_IODriverSettings.cpp \
     ../src/App/PluginSupport/PluginSystem.cpp \
     ../src/App/Portable.cpp \
     ../src/BuildOptions/BuildOptions.cpp \
@@ -72,6 +73,8 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/UI/QT/Form_DebugPrintLogAccess.cpp \
     ../src/UI/QT/Form_GenericTextDisplay.cpp \
     ../src/UI/QT/Form_GenericTextDisplayAccess.cpp \
+    ../src/UI/QT/Form_IODriverSettings.cpp \
+    ../src/UI/QT/Form_IODriverSettingsAccess.cpp \
     ../src/UI/QT/Form_MainWindow.cpp \
     ../src/UI/QT/Form_NewConnectionFromURI.cpp \
     ../src/UI/QT/Form_NewConnectionFromURIAccess.cpp \
@@ -290,6 +293,7 @@ HEADERS  += ../src/UI/QT/Form_MainWindow.h \
     ../src/UI/QT/Form_DataProPluginSettings.h \
     ../src/UI/QT/Form_DebugPrintLog.h \
     ../src/UI/QT/Form_GenericTextDisplay.h \
+    ../src/UI/QT/Form_IODriverSettings.h \
     ../src/UI/QT/Form_NewConnectionFromURI.h \
     ../src/UI/QT/Form_SendBufferSelect.h \
     ../src/UI/QT/Form_SendByte.h \
@@ -335,6 +339,7 @@ FORMS    += ../src/UI/QT/Form_MainWindow.ui \
     ../src/UI/QT/Form_DebugPrintLog.ui \
     ../src/UI/QT/Form_FontDialog.ui \
     ../src/UI/QT/Form_GenericTextDisplay.ui \
+    ../src/UI/QT/Form_IODriverSettings.ui \
     ../src/UI/QT/Form_NewConnectionFromURI.ui \
     ../src/UI/QT/Form_SendBufferSelect.ui \
     ../src/UI/QT/Form_SendByte.ui \

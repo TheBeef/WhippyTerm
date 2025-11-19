@@ -1201,6 +1201,10 @@ void Settings::RegisterAllMembers(class TinyCFG &cfg)
     cfg.StartBlock("Terminal");
         RegisterScreenClear(cfg,"ScreenClear",ScreenClear);
     cfg.EndBlock();
+
+    cfg.StartBlock("IODriver");
+    RegisterPluginSettingsList(cfg,"PlugsinSettings",IODriverPluginsSettings);
+    cfg.EndBlock();
 }
 
 void ConSettings::RegisterAllMembers(class TinyCFG &cfg)

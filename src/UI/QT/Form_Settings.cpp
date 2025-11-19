@@ -864,3 +864,24 @@ void Form_Settings::on_Record_pushButton_clicked()
     SendEvent(e_DSEvent_BttnTriggered,&EventData);
 }
 
+
+void Form_Settings::on_IODriver_list_listWidget_itemClicked(QListWidgetItem *item)
+{
+    uintptr_t ID;   // The ID for this item
+    union DSEventData EventData;
+
+    ID=(uintptr_t)(item->data(Qt::UserRole).toULongLong());
+
+    EventData.ListView.InputID=e_UIS_ListView_IODriverList;
+    SendEvent(e_DSEvent_ListViewChange,&EventData,ID);
+}
+
+
+void Form_Settings::on_IODriver_Settings_pushButton_clicked()
+{
+    union DSEventData EventData;
+
+    EventData.Bttn.InputID=e_UIS_Button_IODriverSettings;
+    SendEvent(e_DSEvent_BttnTriggered,&EventData);
+}
+

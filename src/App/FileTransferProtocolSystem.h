@@ -69,7 +69,7 @@ void FTPS_FreeFTPData(t_FTPData *FData);
 void FTPS_GetListOfFTProtocols(e_FileTransferProtocolModeType Mode,
         t_FTPS_ProtocolInfoType &RetData);
 t_ProtocolOptionsDataType *FTPS_AllocProtocolOptions(
-        const char *ProtocolStrID,t_UIContainerCtrl *ContainerWidget,
+        const char *ProtocolStrID,t_UILayoutContainerCtrl *ContainerWidget,
         t_KVList &OptionsKeyValues);
 void FTPS_FreeProtocolOptions(t_ProtocolOptionsDataType *OptionsHandle);
 void FTPS_StoreOptions(t_ProtocolOptionsDataType *OptionsHandle,

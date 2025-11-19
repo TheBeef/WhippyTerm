@@ -370,8 +370,8 @@ struct PI_UIAPI
     void (*FreeColorPick)(t_WidgetSysHandle *WidgetHandle,struct PI_ColorPick *Handle);
     uint32_t (*GetColorPickValue)(t_WidgetSysHandle *WidgetHandle,t_PIUIColorPickCtrl *UICtrl);
     void (*SetColorPickValue)(t_WidgetSysHandle *WidgetHandle,t_PIUIColorPickCtrl *UICtrl,uint32_t RGB);
-
     /********* End of PI_UIAPI_API_VERSION_2 *********/
+
 };
 
 /***  CLASS DEFINITIONS                ***/

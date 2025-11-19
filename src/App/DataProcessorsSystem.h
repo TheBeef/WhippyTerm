@@ -107,7 +107,7 @@ const struct DataProcessor *DPS_GetProcessorsInfo(const char *IDStr);
 
 bool DPS_DoesPluginHaveSettings(const char *IDStr);
 void DPS_PluginSettings_SetActiveCtrls(void *(*GuiCtrl)(e_DataProPlugSettingsFnType Fn,void *Arg1,void *Arg2));
-t_DataProSettingsWidgetsType *DPS_PluginSettings_AddWidgets(class ConSettings *Settings,const char *IDStr,t_UIContainerFrameCtrl *Cont);
+t_DataProSettingsWidgetsType *DPS_PluginSettings_AddWidgets(class ConSettings *Settings,const char *IDStr,t_UILayoutContainerCtrl *Cont);
 void DPS_PluginSettings_FreeWidgets(const char *IDStr,t_DataProSettingsWidgetsType *PrivData);
 void DPS_PluginSettings_SetSettingsFromWidgets(class ConSettings *Settings,const char *IDStr,t_DataProSettingsWidgetsType *PrivData);
 void DPS_PrunePluginSettings(class ConSettings *Settings);

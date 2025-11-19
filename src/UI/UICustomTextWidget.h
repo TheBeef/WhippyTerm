@@ -143,7 +143,8 @@ struct UICTWEvent
 /***  EXTERNAL FUNCTWON PROTOTYPES     ***/
 
 /* Allocate */
-t_UICustomTextWidgetCtrl *UICTW_AllocCustomTextWidget(void *ParentWidget,
+t_UICustomTextWidgetCtrl *UICTW_AllocCustomTextWidget(
+        t_UIFrameContainerCtrl *ParentWidget,
         bool (*EventHandler)(const struct UICTWEvent *Event),uintptr_t ID);
 void UICTW_FreeCustomTextWidget(t_UICustomTextWidgetCtrl *ctrl);
 void UICTW_Reparent(t_UICustomTextWidgetCtrl *ctrl,void *NewParentWidget);

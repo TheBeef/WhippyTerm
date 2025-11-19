@@ -218,7 +218,7 @@ t_UITextInputCtrl *UICT_GetTextInput(e_CT_TextInput UIObj)
  *    UICT_GetOptionsFrameContainer
  *
  * SYNOPSIS:
- *    t_UIContainerCtrl *UICT_GetOptionsFrameContainer(e_CT_Frame UIObj);
+ *    t_UILayoutContainerCtrl *UICT_GetOptionsFrameContainer(e_CT_Frame UIObj);
  *
  * PARAMETERS:
  *    UIObj [I] -- The frame container to get the handle for
@@ -232,14 +232,14 @@ t_UITextInputCtrl *UICT_GetTextInput(e_CT_TextInput UIObj)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIContainerCtrl *UICT_GetOptionsFrameContainer(e_CT_Frame UIObj)
+t_UILayoutContainerCtrl *UICT_GetOptionsFrameContainer(e_CT_Frame UIObj)
 {
     switch(UIObj)
     {
         case e_CT_Frame_Connection1:
-            return (t_UIContainerCtrl *)g_ComTest->ui->Options1_Layout;
+            return (t_UILayoutContainerCtrl*)g_ComTest->ui->Options1_Layout;
         case e_CT_Frame_Connection2:
-            return (t_UIContainerCtrl *)g_ComTest->ui->Options2_Layout;
+            return (t_UILayoutContainerCtrl *)g_ComTest->ui->Options2_Layout;
         case e_CT_Frame_ConnectionMAX:
         default:
             return NULL;

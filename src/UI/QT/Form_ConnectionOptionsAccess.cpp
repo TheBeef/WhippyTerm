@@ -135,7 +135,7 @@ void UIFree_ConnectionOptions(void)
  *    UI_CO_GetOptionsFrameContainer
  *
  * SYNOPSIS:
- *    t_UIContainerCtrl *UI_CO_GetOptionsFrameContainer(void);
+ *    t_UILayoutContainerCtrl *UI_CO_GetOptionsFrameContainer(void);
  *
  * PARAMETERS:
  *    NONE
@@ -150,7 +150,7 @@ void UIFree_ConnectionOptions(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIContainerCtrl *UI_CO_GetOptionsFrameContainer(void)
+t_UILayoutContainerCtrl *UI_CO_GetOptionsFrameContainer(void)
 {
-    return (t_UIContainerCtrl *)g_ConnectionOptions->ui->formLayout_ConOptions;
+    return (t_UILayoutContainerCtrl *)g_ConnectionOptions->ui->formLayout_ConOptions;
 }

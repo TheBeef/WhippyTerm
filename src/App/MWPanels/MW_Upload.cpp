@@ -367,7 +367,7 @@ void MWUpload::ConnectionChanged(void)
 {
     t_UITextInputCtrl *FilenameInput;
     t_UIComboBoxCtrl *ProtocolCB;
-    t_UIContainerCtrl *OptionsFrame;
+    t_UILayoutContainerCtrl *OptionsFrame;
     t_UILabelCtrl *BytesTxLabel;
     string FileName;
     string SelectedProtocolID;
@@ -500,7 +500,7 @@ void MWUpload::RethinkUI(void)
     t_UIButtonCtrl *AbortBttn;
     t_UIButtonCtrl *SelectFilenameBttn;
     t_UIProgressBarCtrl *ProgressBar;
-    t_UIContainerCtrl *OptionsFrame;
+    t_UILayoutContainerCtrl *OptionsFrame;
     i_FTPUploadMenuList MenuItem;
     const struct UploadStats *UStat;
     const struct DownloadStats *DLStat;
@@ -804,7 +804,7 @@ void MWUpload::SelectFilename(void)
  ******************************************************************************/
 void MWUpload::UploadProtocolChange(int Index)
 {
-    t_UIContainerCtrl *OptionsFrame;
+    t_UILayoutContainerCtrl *OptionsFrame;
     t_KVList *Options;
     string OldIDStr;
 

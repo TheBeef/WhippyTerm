@@ -50,6 +50,6 @@ void UIFree_DataProPluginSettings(void);
 bool UIShow_DataProPluginSettings(void);
 t_UITabCtrl *UIDPPS_GetTabControl(void);
 t_UITab *UIDPPS_AddNewTab(const char *Name);
-t_UIContainerFrameCtrl *UIDPPS_GetTabContainerFrame(t_UITab *UITab);
+t_UILayoutContainerCtrl *UIDPPS_GetTabContainerFrame(t_UITab *UITab);
 
 #endif   /* end of "#ifndef __UIDATAPROPLUGINSETTINGS_H_" */

@@ -48,7 +48,8 @@ static bool UICTW_EventHandler(const struct WTCEvent *Event);
  *    UICTW_AllocCustomTextWidget
  *
  * SYNOPSIS:
- *    t_UICustomTextWidgetCtrl *UICTW_AllocCustomTextWidget(void *ParentWidget,
+ *    t_UICustomTextWidgetCtrl *UICTW_AllocCustomTextWidget(
+ *          t_UIFrameContainerCtrl *ParentWidget,
  *          bool (*EventHandler)(const struct UICTWEvent *Event),
  *          uintptr_t ID);
  *
@@ -67,10 +68,11 @@ static bool UICTW_EventHandler(const struct WTCEvent *Event);
  * SEE ALSO:
  *    UICTW_FreeMainTextAreaFrame()
  ******************************************************************************/
-t_UICustomTextWidgetCtrl *UICTW_AllocCustomTextWidget(void *ParentWidget,
+t_UICustomTextWidgetCtrl *UICTW_AllocCustomTextWidget(
+        t_UIFrameContainerCtrl *ParentWidget,
         bool (*EventHandler)(const struct UICTWEvent *Event),uintptr_t ID)
 {
-    QWidget *QParent=(QWidget *)ParentWidget;
+    QFrame *QParent=(QFrame *)ParentWidget;
     Frame_CustomTextWidget *NewTextArea;
 
     NewTextArea=NULL;

@@ -1049,7 +1049,7 @@ static void FTPS_FreeCurrentHander(struct RealFTPData *RealFData)
  *
  * SYNOPSIS:
  *    t_ProtocolOptionsDataType *FTPS_AllocProtocolOptions(
- *          const char *ProtocolStrID,t_UIContainerCtrl *ContainerWidget,
+ *          const char *ProtocolStrID,t_UILayoutContainerCtrl *ContainerWidget,
  *          t_KVList &OptionsKeyValues);
  *
  * PARAMETERS:
@@ -1069,7 +1069,7 @@ static void FTPS_FreeCurrentHander(struct RealFTPData *RealFData)
  *    FTPS_FreeProtocolOptions()
  ******************************************************************************/
 t_ProtocolOptionsDataType *FTPS_AllocProtocolOptions(
-        const char *ProtocolStrID,t_UIContainerCtrl *ContainerWidget,
+        const char *ProtocolStrID,t_UILayoutContainerCtrl *ContainerWidget,
         t_KVList &OptionsKeyValues)
 {
     t_FTPOptionsWidgetsType *FTPOptions;

@@ -39,7 +39,10 @@
 /* Versions of struct IODriverAPI */
 #define IODRIVER_API_VERSION_1          1
 #define IODRIVER_API_VERSION_2          2
+#define IODRIVER_API_VERSION_3          3
 
+#define IOS_API_VERSION_1               1
+#define IOS_API_VERSION_2               2
 
 #define RETERROR_NOBYTES                0
 #define RETERROR_DISCONNECT             -1
@@ -55,6 +58,7 @@
 /***  MACROS                           ***/
 
 /***  TYPE DEFINITIONS                 ***/
+typedef struct IODriverSettingsWidgets {int PrivateDataHere;} t_IODriverSettingsWidgets;      // Fake type holder
 
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! 
    You can not change any of the sizes either */
@@ -129,13 +133,27 @@ struct IODriverAPI
     /********* Start of IODRIVER_API_VERSION_2 *********/
     const char *(*GetLastErrorMessage)(t_DriverIOHandleType *DriverIO);
     /********* End of IODRIVER_API_VERSION_2 *********/
+    /********* Start of IODRIVER_API_VERSION_3 *********/
+    t_ConnectionWidgetsType *(*AllocSettingsWidgets)(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings);
+    void (*FreeSettingsWidgets)(t_ConnectionWidgetsType *PrivData);
+    void (*SetSettingsFromWidgets)(t_ConnectionWidgetsType *PrivData,t_PIKVList *Settings);
+    void (*ApplySettings)(t_ConnectionWidgetsType *DataHandle,t_PIKVList *Settings);
+    /********* End of IODRIVER_API_VERSION_3 *********/
 };
 
+/* !!!! You can only add to this.  Changing it will break the plugins !!!! */
 struct IOS_API
 {
+    /********* Start of IOS_API_VERSION_1 *********/
     PG_BOOL (*RegisterDriver)(const char *DriverName,const char *BaseURI,const struct IODriverAPI *DriverAPI,int SizeOfDriverAPI);
     const struct PI_UIAPI *(*GetAPI_UI)(void);
     void (*DrvDataEvent)(t_IOSystemHandle *IOHandle,int Code); // Really Code is 'e_DataEventCodeType Code'
+    /********* End of IOS_API_VERSION_1 *********/
+
+    /********* Start of IOS_API_VERSION_2 *********/
+    void (*SetCurrentSettingsTabName)(const char *Name);
+    t_WidgetSysHandle *(*AddNewSettingsTab)(const char *Name);
+    /********* End of IOS_API_VERSION_2 *********/
 };
 
 /***  CLASS DEFINITIONS                ***/

@@ -87,6 +87,12 @@ const struct IODriverAPI g_ComportPluginAPI=
 
     /********* Start of IODRIVER_API_VERSION_2 *********/
     Comport_GetLastErrorMessage,
+    
+    /* V3 */
+    NULL,   // AllocSettingsWidgets
+    NULL,   // FreeSettingsWidgets
+    NULL,   // SetSettingsFromWidgets
+    NULL,   // ApplySettings
 };
 
 struct IODriverInfo m_ComportInfo=

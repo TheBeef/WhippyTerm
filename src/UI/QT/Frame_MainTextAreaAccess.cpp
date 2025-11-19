@@ -1310,7 +1310,7 @@ void UITC_SetMouseCursor(t_UITextDisplayCtrl *ctrl,e_UIMouse_CursorType Cursor)
  *    UITC_GetSendHexDisplayContainerFrameCtrlHandle
  *
  * SYNOPSIS:
- *    t_UIContainerFrameCtrl *UITC_GetSendHexDisplayContainerFrameCtrlHandle(t_UITextDisplayCtrl *ctrl);
+ *    t_UIFrameContainerCtrl *UITC_GetSendHexDisplayContainerFrameCtrlHandle(t_UITextDisplayCtrl *ctrl);
  *
  * PARAMETERS:
  *    ctrl [I] -- What control to work on
@@ -1324,11 +1324,11 @@ void UITC_SetMouseCursor(t_UITextDisplayCtrl *ctrl,e_UIMouse_CursorType Cursor)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIContainerFrameCtrl *UITC_GetSendHexDisplayContainerFrameCtrlHandle(t_UITextDisplayCtrl *ctrl)
+t_UIFrameContainerCtrl *UITC_GetSendHexDisplayContainerFrameCtrlHandle(t_UITextDisplayCtrl *ctrl)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    return (t_UIContainerFrameCtrl *)TextDisplay->ui->BlockSendHex_frame;
+    return (t_UIFrameContainerCtrl *)TextDisplay->ui->BlockSendHex_frame;
 }
 
 /*******************************************************************************

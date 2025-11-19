@@ -526,16 +526,15 @@ void UIMW_Maximize(t_UIMainWindow *win);
 void UIMW_SetBottomPanel(t_UIMainWindow *win,int NewSize,bool PanelOpen);
 void UIMW_SetLeftPanel(t_UIMainWindow *win,int NewSize,bool PanelOpen);
 void UIMW_SetRightPanel(t_UIMainWindow *win,int NewSize,bool PanelOpen);
-t_UIContainerFrameCtrl *UIMW_GetContainerFrameCtrlHandle(t_UIMainWindow *win);
-void UIMW_SetContainerFrameVisible(t_UIContainerFrameCtrl *ctrl,bool Show);
+t_UIFrameContainerCtrl *UIMW_GetContainerFrameCtrlHandle(t_UIMainWindow *win);
 void UIMW_SetWindowTitle(t_UIMainWindow *win,const char *Title);
 void UIMW_SwitchTabControlCloseBttnPos(t_UIMainWindow *win,bool OnTab);
 e_UIMenuCtrl *UIMW_AddBookmarkMenuItem(t_UIMainWindow *win,
         e_UISubMenuCtrl *Parent,const char *Title,uintptr_t ID);
 e_UISubMenuCtrl *UIMW_AddBookmarkSubMenu(t_UIMainWindow *win,const char *Title);
 void UIMW_AddBookmarkClearAllMenus(t_UIMainWindow *win);
-t_UIContainerFrameCtrl *UIMW_GetHexDisplayContainerFrameCtrlHandle(t_UIMainWindow *win);
-t_UIContainerFrameCtrl *UIMW_GetSendBuffersContainerFrameCtrlHandle(t_UIMainWindow *win);
+t_UIFrameContainerCtrl *UIMW_GetHexDisplayContainerFrameCtrlHandle(t_UIMainWindow *win);
+t_UIFrameContainerCtrl *UIMW_GetSendBuffersContainerFrameCtrlHandle(t_UIMainWindow *win);
 e_UIMenuCtrl *UIMW_AddFTPUploadMenuItem(t_UIMainWindow *win,const char *Title,
         uintptr_t ID);
 e_UIMenuCtrl *UIMW_AddFTPDownloadMenuItem(t_UIMainWindow *win,const char *Title,
@@ -559,10 +558,10 @@ t_UIComboBoxCtrl *UIMW_GetComboBoxHandle(t_UIMainWindow *win,e_UIMWComboBoxType 
 t_UIProgressBarCtrl *UIMW_GetProgressBarHandle(t_UIMainWindow *win,e_UIMWProgressBarType UIObj);
 t_UIContextMenuCtrl *UIMW_GetContextMenuHandle(t_UIMainWindow *win,e_UIMW_ContextMenuType UIObj);
 
-t_UIContainerCtrl *UIMW_GetOptionsFrameContainer(t_UIMainWindow *win);
-t_UIContainerCtrl *UIMW_GetUploadOptionsFrameContainer(t_UIMainWindow *win);
-t_UIContainerCtrl *UIMW_GetDownloadOptionsFrameContainer(t_UIMainWindow *win);
-t_UIContainerCtrl *UIMW_GetConAuxControlsFrameContainer(t_UIMainWindow *win);
+t_UILayoutContainerCtrl *UIMW_GetOptionsFrameContainer(t_UIMainWindow *win);
+t_UILayoutContainerCtrl *UIMW_GetUploadOptionsFrameContainer(t_UIMainWindow *win);
+t_UILayoutContainerCtrl *UIMW_GetDownloadOptionsFrameContainer(t_UIMainWindow *win);
+t_UILayoutContainerCtrl *UIMW_GetConAuxControlsFrameContainer(t_UIMainWindow *win);
 
 void UIMW_EnableStopWatchTimer(t_UIMainWindow *win,bool Enable);
 

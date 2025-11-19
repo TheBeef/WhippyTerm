@@ -134,9 +134,6 @@ typedef struct UIRadioBttn t_UIRadioBttnCtrl;
 struct UILabelCtrl {int x;};
 typedef struct UILabelCtrl t_UILabelCtrl;
 
-struct UIContainerCtrl {int x;};
-typedef struct UIContainerCtrl t_UIContainerCtrl;
-
 struct UITreeItem {int x;};
 typedef struct UITreeItem t_UITreeItem;
 
@@ -152,8 +149,16 @@ typedef struct UIProgressBarCtrl t_UIProgressBarCtrl;
 struct UIColorPreviewCtrl {int x;};
 typedef struct UIColorPreviewCtrl t_UIColorPreviewCtrl;
 
-struct UIContainerFrame {int x;};
-typedef struct UIContainerFrame t_UIContainerFrameCtrl;
+/* A frame that you can only add 1 thing to */
+struct UIFrameContainer {int x;};
+typedef struct UIFrameContainer t_UIFrameContainerCtrl;
+//t_UIContainerFrameCtrl
+//                struct UIFrameContainerx {int x;};
+//                typedef struct UIFrameContainerx t_UIContainerFrameCtrl;
+
+/* An container that auto positions controls added to it */
+struct UILayoutContainerCtrl {int x;};
+typedef struct UILayoutContainerCtrl t_UILayoutContainerCtrl;
 
 struct UIPanel {int x;};
 typedef struct UIPanel t_UIPanelCtrl;
@@ -347,8 +352,8 @@ void UISetProgressBarSteps(t_UIProgressBarCtrl *Bar,int Steps);
 void UISetProgressBarLevel(t_UIProgressBarCtrl *Bar,int CurrentStep);
 void UIProgressBarVisible(t_UIProgressBarCtrl *Bar,bool Show);
 
-/* UIContainerCtrl */
-void UIEnableContainerCtrl(t_UIContainerCtrl *Container,bool Enable);
+/* UILayoutContainerCtrl */
+void UIEnableContainerCtrl(t_UILayoutContainerCtrl *Container,bool Enable);
 
 /* UIColorPreviewCtrl */
 void UISetColorPreviewColor(t_UIColorPreviewCtrl *CP,uint32_t RGB);
@@ -372,5 +377,8 @@ void UIColumnViewSelectRow(t_UIColumnView *ColumnView,int Row);
 void UIColumnViewClearSelection(t_UIColumnView *ColumnView);
 bool UIColumnViewHasSelectedEntry(t_UIColumnView *ColumnView);
 int UIGetColumnViewSelectedEntry(t_UIColumnView *ColumnView);
+
+/* t_UIFrameContainerCtrl */
+void UISetFrameContainerVisible(t_UIFrameContainerCtrl *ctrl,bool Show);
 
 #endif   /* end of "#ifndef __UICONTROL_H_" */

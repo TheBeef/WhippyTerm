@@ -203,7 +203,7 @@ class DisplayBase
         class ConSettings *GetCustomSettings(void);
         void GetFont(std::string &CurFontName,int &CurFontSize,bool &CurFontBold,bool &CurFontItalic);
         void SetFont(const std::string &NewFontName,int NewFontSize,bool NewFontBold,bool NewFontItalic);
-        void SetupHexInput(t_UIContainerFrameCtrl *ParentWid);
+        void SetupHexInput(t_UIFrameContainerCtrl *ParentWid);
         void FreeHexInput(void);
 
         struct CharStyling CurrentStyle;

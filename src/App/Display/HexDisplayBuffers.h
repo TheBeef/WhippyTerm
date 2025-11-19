@@ -125,7 +125,7 @@ class HexDisplayBuffer
     public:
         HexDisplayBuffer();
         ~HexDisplayBuffer();
-        bool Init(void *ParentWidget,bool (*EventHandler)(const struct HDEvent *Event),uintptr_t ID);
+        bool Init(t_UIFrameContainerCtrl *ParentWidget,bool (*EventHandler)(const struct HDEvent *Event),uintptr_t ID);
         bool SetBuffer(uint8_t *Data,int Size);
         bool SetBuffer(const uint8_t *Data,int Size);
         void SetBufferSize(int Size);

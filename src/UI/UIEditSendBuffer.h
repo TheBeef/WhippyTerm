@@ -119,7 +119,7 @@ bool UIAlloc_EditSendBuffer(void);
 void UIFree_EditSendBuffer(void);
 bool UIShow_EditSendBuffer(void);
 t_UIButtonCtrl *UIESB_GetButton(e_ESB_Button bttn);
-t_UIContainerFrameCtrl *UIESB_GetHexContainerFrame(void);
+t_UIFrameContainerCtrl *UIESB_GetHexContainerFrame(void);
 t_UITextInputCtrl *UIESB_GetTextInput(e_ESB_TextInput UIObj);
 t_UIContextMenuCtrl *UIESB_GetContextMenu(e_ESB_ContextMenu UIObj);
 

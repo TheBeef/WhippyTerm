@@ -147,12 +147,13 @@ struct ConnectionOptionsData
     void (*UIChangedCB)(void *UserData);
     void *UserData;
     struct ConnectionWidgetData *WidgetSysHandles;
+    struct ConnectionOptionsData *Next; // Optional list of options data.  Only used to track what needs to be freed (not everything uses this so it's ok for it to be NULL even if there are more than 1 ConnectionOptionsData's)
 };
 
 struct ConnectionWidgetData
 {
     struct ConnectionOptionsData *COD;
-    t_UIContainerCtrl *ContainerWidget;
+    t_UILayoutContainerCtrl *ContainerWidget;
     struct ConnectionWidgetData *Next;
 };
 
@@ -243,6 +244,10 @@ static struct PI_ColorPick *IOS_AddColorPick(t_WidgetSysHandle *WidgetHandle,
         void *UserData);
 static void IOS_FreeColorPick(t_WidgetSysHandle *WidgetHandle,
         struct PI_ColorPick *Handle);
+static struct PluginSettings *IOS_FindPluginSetting(const char *BaseURI,
+        t_PluginSettings *Settings);
+static void IOS_SetCurrentSettingsTabName(const char *Name);
+static t_WidgetSysHandle *IOS_AddNewSettingsTab(const char *Name);
 
 /*** VARIABLE DEFINITIONS     ***/
 const struct IOS_API g_IOS_API=
@@ -250,7 +255,11 @@ const struct IOS_API g_IOS_API=
     IOS_RegisterDriver,
     IOS_Get_IOSystemUI_API,
     IOS_DrvDataEvent,
+    /* V2 */
+    IOS_SetCurrentSettingsTabName,
+    IOS_AddNewSettingsTab,
 };
+
 
 static struct PI_UIAPI IOS_UIAPI=
 {
@@ -328,6 +337,8 @@ static struct PI_UIAPI IOS_UIAPI=
 bool m_NeverScanned4Connections;
 static t_IODriverListType m_IODriverList;
 t_ActiveHandlesListType m_ActiveHandlesList;    // A list of active handles
+static void *(*IOS_PS_GuiCtrlFn)(e_IODriverSettingsFnType Fn,void *Arg1,void *Arg2);
+static struct ConnectionOptionsData *m_ActiveConSettingsOptionData;
 
 /*******************************************************************************
  * NAME:
@@ -1130,8 +1141,6 @@ void IOS_Init(void)
 {
     m_IODriverList.clear();
     m_NeverScanned4Connections=true;
-
-/* DEBUG PAUL: Reload the list from session */
 }
 
 /*******************************************************************************
@@ -1198,7 +1207,6 @@ void IOS_InitPlugins(void)
         }
     }
 
-/* DEBUG PAUL: Add setting for "force rescan at startup" */
     IOS_ScanForConnections();
 }
 
@@ -1818,7 +1826,7 @@ struct ConnectionInfoList *IOS_FindConnectionFromDetectedID(
  * SYNOPSIS:
  *    t_ConnectionOptionsDataType *IOS_AllocConnectionOptions(
  *          struct ConnectionInfoList *CInfoEntry,
- *          t_UIContainerCtrl *ContainerWidget,t_KVList &OptionsKeyValues,
+ *          t_UILayoutContainerCtrl *ContainerWidget,t_KVList &OptionsKeyValues,
  *          void (*UIChanged)(void *UserData),void *UserData);
  *
  * PARAMETERS:
@@ -1842,7 +1850,7 @@ struct ConnectionInfoList *IOS_FindConnectionFromDetectedID(
  ******************************************************************************/
 t_ConnectionOptionsDataType *IOS_AllocConnectionOptions(
         struct ConnectionInfoList *CInfoEntry,
-        t_UIContainerCtrl *ContainerWidget,t_KVList &OptionsKeyValues,
+        t_UILayoutContainerCtrl *ContainerWidget,t_KVList &OptionsKeyValues,
         void (*UIChanged)(void *UserData),void *UserData)
 {
     struct ConnectionInfoInternal *ConInfo=(struct ConnectionInfoInternal *)CInfoEntry;
@@ -1866,6 +1874,7 @@ t_ConnectionOptionsDataType *IOS_AllocConnectionOptions(
         ConOptionData->DrvHandle=NULL;
         ConOptionData->IOdrv=&(*ConInfo->drv);
         ConOptionData->DeviceUniqueID=DeviceUniqueID;
+        ConOptionData->Next=NULL;
 
         ConWidgetData=new struct ConnectionWidgetData;
         ConWidgetData->COD=ConOptionData;
@@ -1921,7 +1930,7 @@ t_ConnectionOptionsDataType *IOS_AllocConnectionOptions(
  *
  * SYNOPSIS:
  *    t_ConnectionOptionsDataType *IOS_AllocConnectionOptionsFromUniqueID(
- *              const char *UniqueID,t_UIContainerCtrl *ContainerWidget,
+ *              const char *UniqueID,t_UILayoutContainerCtrl *ContainerWidget,
  *              t_KVList &OptionsKeyValues,,void (*UIChanged)(void *UserData),
  *              void *UserData);
  *
@@ -1949,7 +1958,7 @@ t_ConnectionOptionsDataType *IOS_AllocConnectionOptions(
  *    IOS_AllocConnectionOptions() IOS_FreeConnectionOptions()
  ******************************************************************************/
 t_ConnectionOptionsDataType *IOS_AllocConnectionOptionsFromUniqueID(
-        const char *UniqueID,t_UIContainerCtrl *ContainerWidget,
+        const char *UniqueID,t_UILayoutContainerCtrl *ContainerWidget,
         t_KVList &OptionsKeyValues,void (*UIChanged)(void *UserData),
         void *UserData)
 {
@@ -1970,6 +1979,7 @@ t_ConnectionOptionsDataType *IOS_AllocConnectionOptionsFromUniqueID(
         ConOptionData->UIChangedCB=UIChanged;
         ConOptionData->UserData=UserData;
         ConOptionData->DrvHandle=NULL;
+        ConOptionData->Next=NULL;
 
         ConWidgetData=new struct ConnectionWidgetData;
         ConWidgetData->COD=ConOptionData;
@@ -2068,6 +2078,7 @@ void IOS_FreeConnectionOptions(t_ConnectionOptionsDataType *ConWidgetsHandle)
     struct ConnectionOptionsData *ConOptionData=(struct ConnectionOptionsData *)ConWidgetsHandle;
     struct ConnectionWidgetData *CurCWD;
     struct ConnectionWidgetData *TmpCWD;
+    struct ConnectionOptionsData *NextConOptionData;
 
     /* Ok we need to find this connection */
     try
@@ -2080,16 +2091,21 @@ void IOS_FreeConnectionOptions(t_ConnectionOptionsDataType *ConWidgetsHandle)
                     ConOptionData->ConWidgets);
         }
 
-        /* Now free all the Widget Sys handles */
-        CurCWD=ConOptionData->WidgetSysHandles;
-        while(CurCWD!=NULL)
+        while(ConOptionData!=NULL)
         {
-            TmpCWD=CurCWD->Next;
-            delete CurCWD;
-            CurCWD=TmpCWD;
-        }
+            /* Now free all the Widget Sys handles */
+            CurCWD=ConOptionData->WidgetSysHandles;
+            while(CurCWD!=NULL)
+            {
+                TmpCWD=CurCWD->Next;
+                delete CurCWD;
+                CurCWD=TmpCWD;
+            }
 
-        delete ConOptionData;
+            NextConOptionData=ConOptionData->Next;
+            delete ConOptionData;
+            ConOptionData=NextConOptionData;
+        }
     }
     catch(...)
     {
@@ -3293,7 +3309,7 @@ bool IOS_GetConnectionInfo(const char *UniqueID,const t_KVList &Options,
  * SEE ALSO:
  *    
  ******************************************************************************/
-static struct PI_ComboBox *IOS_AddComboBox(t_WidgetSysHandle *WidgetHandle,
+static struct PI_ComboBox *IOS_AddComboBox(t_WidgetSysHandle*WidgetHandle,
         PG_BOOL UserEditable,const char *Label,
         void (*EventCB)(const struct PICBEvent *Event,void *UserData),
         void *UserData)
@@ -4749,7 +4765,7 @@ static void IOS_RadioBttnInputEventHandler(const struct PIRBEvent *Event,
  *
  * SYNOPSIS:
  *    t_ConnectionAuxCtrlsDataType *IOS_AllocConnectionAuxCtrls(
- *              t_IOSystemHandle *Handle,t_UIContainerCtrl *ContainerWidget);
+ *              t_IOSystemHandle *Handle,t_UILayoutContainerCtrl *ContainerWidget);
  *
  * PARAMETERS:
  *    Handle [I] -- The IO handle for the connection to work with
@@ -4767,7 +4783,7 @@ static void IOS_RadioBttnInputEventHandler(const struct PIRBEvent *Event,
  *    IOS_FreeConnectionAuxCtrls()
  ******************************************************************************/
 t_ConnectionAuxCtrlsDataType *IOS_AllocConnectionAuxCtrls(
-        t_IOSystemHandle *Handle,t_UIContainerCtrl *ContainerWidget)
+        t_IOSystemHandle *Handle,t_UILayoutContainerCtrl *ContainerWidget)
 {
     struct IOSystemDrvHandle *DrvHandle=(struct IOSystemDrvHandle *)Handle;
     t_ConnectionWidgetsType *ConAuxCtrlWidgets;
@@ -4789,6 +4805,7 @@ t_ConnectionAuxCtrlsDataType *IOS_AllocConnectionAuxCtrls(
         ConAuxOptionData->IOdrv=DrvHandle->IOdrv;
         ConAuxOptionData->DrvHandle=DrvHandle;
         ConAuxOptionData->DeviceUniqueID=DeviceUniqueID;
+        ConAuxOptionData->Next=NULL;
 
         ConAuxCtrlData=new struct ConnectionWidgetData;
         ConAuxCtrlData->COD=ConAuxOptionData;
@@ -4862,6 +4879,7 @@ void IOS_FreeConnectionAuxCtrls(t_ConnectionAuxCtrlsDataType *ConAuxCtrlsHandle)
     struct ConnectionOptionsData *ConAuxOptionData=(struct ConnectionOptionsData *)ConAuxCtrlsHandle;
     struct ConnectionWidgetData *CurCWD;
     struct ConnectionWidgetData *TmpCWD;
+    struct ConnectionOptionsData *NextConAuxOptionData;
 
     /* Ok we need to find this connection */
     try
@@ -4874,15 +4892,21 @@ void IOS_FreeConnectionAuxCtrls(t_ConnectionAuxCtrlsDataType *ConAuxCtrlsHandle)
                     ConAuxOptionData->ConWidgets);
         }
 
-        /* Now free all the Widget Sys handles */
-        CurCWD=ConAuxOptionData->WidgetSysHandles;
-        while(CurCWD!=NULL)
+        while(ConAuxOptionData!=NULL)
         {
-            TmpCWD=CurCWD->Next;
-            delete CurCWD;
-            CurCWD=TmpCWD;
+            /* Now free all the Widget Sys handles */
+            CurCWD=ConAuxOptionData->WidgetSysHandles;
+            while(CurCWD!=NULL)
+            {
+                TmpCWD=CurCWD->Next;
+                delete CurCWD;
+                CurCWD=TmpCWD;
+            }
+
+            NextConAuxOptionData=ConAuxOptionData->Next;
+            delete ConAuxOptionData;
+            ConAuxOptionData=NextConAuxOptionData;
         }
-        delete ConAuxOptionData;
     }
     catch(...)
     {
@@ -5306,7 +5330,7 @@ struct PI_GroupBox *IOS_AddGroupBox(t_WidgetSysHandle *WidgetHandle,
 
         NewConWidgetData=new struct ConnectionWidgetData;
         NewConWidgetData->COD=ConWidgetData->COD;
-        NewConWidgetData->ContainerWidget=(t_UIContainerCtrl *)NewGroupBox->GroupWidgetHandle;
+        NewConWidgetData->ContainerWidget=(t_UILayoutContainerCtrl *)NewGroupBox->GroupWidgetHandle;
         NewConWidgetData->Next=NULL;
 
         /* Link in this new connection widget data to the end of the list */
@@ -5373,7 +5397,7 @@ void IOS_FreeGroupBox(t_WidgetSysHandle *WidgetHandle,
     PrevCWD=NULL;
     for(CWD=ConWidgetData->COD->WidgetSysHandles;CWD!=NULL;CWD=CWD->Next)
     {
-        if((t_UIContainerCtrl *)CWD==ConWidgetData->ContainerWidget)
+        if((t_UILayoutContainerCtrl *)CWD==ConWidgetData->ContainerWidget)
         {
             /* Found it, unlink it */
             if(PrevCWD==NULL)
@@ -5526,4 +5550,552 @@ void IOS_FreeColorPick(t_WidgetSysHandle *WidgetHandle,
     }
 
     UIPI_FreeColorPickInput(Handle);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_DoesDriverHaveSettings
+ *
+ * SYNOPSIS:
+ *    bool IOS_DoesDriverHaveSettings(const char *BaseURI);
+ *
+ * PARAMETERS:
+ *    BaseURI [I] -- The base URI that tells the system that driver to look up
+ *
+ * FUNCTION:
+ *    This function checks if a IODriver has a settings dialog.
+ *
+ * RETURNS:
+ *    true -- IODrvier has a settings dialog
+ *    false -- IODriver does not have a settings dialog
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool IOS_DoesDriverHaveSettings(const char *BaseURI)
+{
+    i_IODriverListType drv;
+
+    /* Find the driver for this base URI */
+    for(drv=m_IODriverList.begin();drv!=m_IODriverList.end();drv++)
+        if(strcmp(drv->BaseURI.c_str(),BaseURI)==0)
+            break;
+    /* See if it was found */
+    if(drv==m_IODriverList.end())
+        return false;
+
+    if(drv->API.AllocSettingsWidgets!=NULL)
+        return true;
+
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_DriverSettings_SetActiveCtrls
+ *
+ * SYNOPSIS:
+ *    void IOS_DriverSettings_SetActiveCtrls(void *(*GuiCtrl)(e_IODriverSettingsFnType Fn,void *Arg1,void *Arg2))
+ *
+ * PARAMETERS:
+ *    GuiCtrl [I] -- The function to call when the IO Driver makes a GUI request
+ *                   for the settings.  See below.
+ *
+ * FUNCTION:
+ *    This function sets the callback function when the IO driver makes a
+ *    settings GUI request.  When you are done with the settings you should
+ *    call this will NULL (so you don't get unexpected callbacks).
+ *
+ * CALLBACKS:
+ * =============================================================================
+ * NAME:
+ *    GuiCtrl
+ *
+ * SYNOPSIS:
+ *    void *GuiCtrl(e_IODriverSettingsFnType Fn,void *Arg1,void *Arg2);
+ *
+ * PARAMETERS:
+ *    Fn [I] -- What function is the IO driver trying to do.  Supported fns:
+ *                  e_IODriverSettingsFn_SetCurrentTabName -- Changes the
+ *                          name of the current tab that widgets are being
+ *                          added to.
+ *                              Arg1 -- "const char *" with the new name in it.
+ *                              Arg2 -- ignored.
+ *                              Return value: NULL
+ *                  e_IODriverSettingsFn_AddNewTab -- A new tab should
+ *                          be allocated and the t_UILayoutContainerCtrl for
+ *                          this tab should be returned.
+ *                              Arg1 -- "const char *" with the tab name in it.
+ *                              Arg2 -- ignored.
+ *                              Return value: "t_UILayoutContainerCtrl *" with
+ *                                      the handle to the container for the
+ *                                      new tab in it.
+ *
+ * FUNCTION:
+ *    This function is called when a IO driver is in its settings and wants
+ *    to preform an action.  See above for the actions.
+ *
+ * RETURNS:
+ *    Depends on the 'Fn'  See above.
+ *
+ * SEE ALSO:
+ *    
+ * =============================================================================
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void IOS_DriverSettings_SetActiveCtrls(void *(*GuiCtrl)(e_IODriverSettingsFnType Fn,
+        void *Arg1,void *Arg2))
+{
+    IOS_PS_GuiCtrlFn=GuiCtrl;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_FindPluginSetting
+ *
+ * SYNOPSIS:
+ *    static struct PluginSettings *IOS_FindPluginSetting(const char *BaseURI,
+ *              t_PluginSettings *Settings);
+ *
+ * PARAMETERS:
+ *    BaseURI [I] -- The base URI string for this IO driver to lookup
+ *    Settings [I] -- The connection settings to search.
+ *
+ * FUNCTION:
+ *    This function finds a plugins settings in connection settings.
+ *
+ * RETURNS:
+ *    A pointer to the connection settings or NULL if it was not found.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static struct PluginSettings *IOS_FindPluginSetting(const char *BaseURI,
+        t_PluginSettings *Settings)
+{
+    i_PluginSettings plug;
+    for(plug=Settings->begin();plug!=Settings->end();plug++)
+    {
+        if(strcmp(BaseURI,plug->IDStr.c_str())==0)
+        {
+            /* Found */
+            return &*plug;
+        }
+    }
+    return NULL;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_DriverSettings_AddWidgets
+ *
+ * SYNOPSIS:
+ *    t_IODriverSettingsWidgets *IOS_DriverSettings_AddWidgets(t_PluginSettings *Settings,
+ *              const char *BaseURI,t_UILayoutContainerCtrl *ContainerWidget);
+ *
+ * PARAMETERS:
+ *    Settings [I] -- The settings with the IO driver settings in it.
+ *    BaseURI [I] -- The base URI string for this IO driver to lookup
+ *    ContainerWidget [I] -- This is the GUI container that the plugin will
+ *                           add it's widgets to.
+ *
+ * FUNCTION:
+ *    This function tells the IO driver to add it's settings widgets to a
+ *    container and allocate it's private data.
+ *
+ * RETURNS:
+ *    A pointer to the private data the IO driver allocated or NULL if there was
+ *    an error.
+ *
+ * NOTES:
+ *    The plugin can call IOS_AddNewSettingsTab() to add a new tab to the
+ *    current GUI for more settings.  You need to support this (you need
+ *    to have container in a tab input) and you need to support the callbacks
+ *    from the plugin using the IOS_DriverSettings_SetActiveCtrls() function.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_IODriverSettingsWidgets *IOS_DriverSettings_AddWidgets(t_PluginSettings *Settings,
+        const char *BaseURI,t_UILayoutContainerCtrl *ContainerWidget)
+{
+    struct ConnectionWidgetData *ConSettingsCtrlData;
+    struct ConnectionOptionsData *ConSettingsOptionData;
+    i_IODriverListType drv;
+    t_KVList *UseSettings;
+    struct PluginSettings *PlugSettings;
+    t_KVList BlankKVList;
+
+    ConSettingsCtrlData=NULL;
+    ConSettingsOptionData=NULL;
+    m_ActiveConSettingsOptionData=NULL;
+    try
+    {
+        /* Find the driver for this base URI */
+        for(drv=m_IODriverList.begin();drv!=m_IODriverList.end();drv++)
+            if(strcmp(drv->BaseURI.c_str(),BaseURI)==0)
+                break;
+        /* See if it was found */
+        if(drv==m_IODriverList.end() || drv->API.AllocSettingsWidgets==NULL)
+            throw(0);
+
+        /* We need to find the settings for this IO driver */
+        PlugSettings=IOS_FindPluginSetting(BaseURI,Settings);
+        if(PlugSettings==NULL)
+        {
+            /* Ok, we don't have settings for this plugin yet use a blank copy */
+            UseSettings=&BlankKVList;
+        }
+        else
+        {
+            UseSettings=&PlugSettings->Settings;
+        }
+
+        ConSettingsOptionData=new struct ConnectionOptionsData;
+        ConSettingsOptionData->WidgetExtraData=NULL;
+        ConSettingsOptionData->UIChangedCB=NULL;
+        ConSettingsOptionData->UserData=NULL;
+        ConSettingsOptionData->IOdrv=&*drv;
+        ConSettingsOptionData->DrvHandle=NULL;
+        ConSettingsOptionData->DeviceUniqueID="";
+        ConSettingsOptionData->Next=NULL;
+
+        ConSettingsCtrlData=new struct ConnectionWidgetData;
+        ConSettingsCtrlData->COD=ConSettingsOptionData;
+        ConSettingsCtrlData->ContainerWidget=ContainerWidget;
+        ConSettingsCtrlData->Next=NULL;
+
+        ConSettingsOptionData->WidgetSysHandles=ConSettingsCtrlData;
+
+        m_ActiveConSettingsOptionData=ConSettingsOptionData;
+        ConSettingsOptionData->ConWidgets=drv->API.AllocSettingsWidgets(
+                (t_WidgetSysHandle *)ConSettingsOptionData->WidgetSysHandles,
+                PIS_ConvertKVList2PIKVList(*UseSettings));
+        m_ActiveConSettingsOptionData=NULL;
+    }
+    catch(...)
+    {
+        if(drv!=m_IODriverList.end() && ConSettingsOptionData!=NULL &&
+                ConSettingsOptionData->ConWidgets!=NULL &&
+                drv->API.FreeSettingsWidgets!=NULL)
+        {
+            drv->API.FreeSettingsWidgets(ConSettingsOptionData->ConWidgets);
+        }
+
+        if(ConSettingsCtrlData!=NULL)
+            delete ConSettingsCtrlData;
+
+        if(ConSettingsOptionData!=NULL)
+            delete ConSettingsOptionData;
+
+        UIAsk("Error","Failed to add settings to UI.",e_AskBox_Error,
+                e_AskBttns_Ok);
+        return NULL;
+    }
+
+    return (t_IODriverSettingsWidgets *)ConSettingsOptionData;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_DriverSettings_FreeWidgets
+ *
+ * SYNOPSIS:
+ *    void IOS_DriverSettings_FreeWidgets(const char *BaseURI,
+ *              t_IODriverSettingsWidgets *PrivData);
+ *
+ * PARAMETERS:
+ *    BaseURI [I] -- The base URI string for this IO driver to lookup
+ *    PrivData [I] -- The plugins private data that was allocated with
+ *                    IOS_DriverSettings_AddWidgets()
+ *
+ * FUNCTION:
+ *    This function tells the IO driver to free the widgets it allocated with
+ *    IOS_DriverSettings_AddWidgets()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    IOS_DriverSettings_AddWidgets()
+ ******************************************************************************/
+void IOS_DriverSettings_FreeWidgets(const char *BaseURI,t_IODriverSettingsWidgets *PrivData)
+{
+    struct ConnectionOptionsData *ConSettingsOptionData=(struct ConnectionOptionsData *)PrivData;
+    struct ConnectionWidgetData *CurCWD;
+    struct ConnectionWidgetData *TmpCWD;
+    i_IODriverListType drv;
+    struct ConnectionOptionsData *NextConSettingsOptionData;
+
+    /* Ok we need to find this connection */
+    try
+    {
+        if(ConSettingsOptionData->IOdrv->API.FreeSettingsWidgets!=NULL)
+        {
+            ConSettingsOptionData->IOdrv->API.FreeSettingsWidgets(
+                    ConSettingsOptionData->ConWidgets);
+        }
+
+        while(ConSettingsOptionData!=NULL)
+        {
+            /* Now free all the Widget Sys handles */
+            CurCWD=ConSettingsOptionData->WidgetSysHandles;
+            while(CurCWD!=NULL)
+            {
+                TmpCWD=CurCWD->Next;
+                delete CurCWD;
+                CurCWD=TmpCWD;
+            }
+
+            NextConSettingsOptionData=ConSettingsOptionData->Next;
+            delete ConSettingsOptionData;
+            ConSettingsOptionData=NextConSettingsOptionData;
+        }
+    }
+    catch(...)
+    {
+        string ErrorMsg;
+        ErrorMsg="Failed to free options from UI.";
+        UIAsk("Error",ErrorMsg,e_AskBox_Error,e_AskBttns_Ok);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_DriverSettings_SetSettingsFromWidgets
+ *
+ * SYNOPSIS:
+ *    void IOS_DriverSettings_SetSettingsFromWidgets(
+ *          t_PluginSettings *Settings,const char *BaseURI,
+ *          t_IODriverSettingsWidgets *PrivData);
+ *
+ * PARAMETERS:
+ *    Settings [I] -- The settings with the plugin settings in it.
+ *    BaseURI [I] -- The base URI string for this IO driver to lookup
+ *    PrivData [I] -- The IO driver private data that was allocated with
+ *                    IOS_DriverSettings_AddWidgets()
+ *
+ * FUNCTION:
+ *    This function tells the IO driver to grab it's settings from the GUI into
+ *    it's settings.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    IOS_DriverSettings_AddWidgets()
+ ******************************************************************************/
+void IOS_DriverSettings_SetSettingsFromWidgets(t_PluginSettings *Settings,
+        const char *BaseURI,t_IODriverSettingsWidgets *PrivData)
+{
+    struct ConnectionOptionsData *ConSettingsOptionData=(struct ConnectionOptionsData *)PrivData;
+    struct PluginSettings *PlugSettings;
+    struct PluginSettings NewPluginSettings;
+    i_IODriverListType drv;
+
+    try
+    {
+        /* Find the driver for this base URI */
+        for(drv=m_IODriverList.begin();drv!=m_IODriverList.end();drv++)
+            if(strcmp(drv->BaseURI.c_str(),BaseURI)==0)
+                break;
+        /* See if it was found */
+        if(drv==m_IODriverList.end() || drv->API.SetSettingsFromWidgets==NULL)
+            throw(0);
+
+        /* We need to find the settings for this plugin */
+        PlugSettings=IOS_FindPluginSetting(BaseURI,Settings);
+        if(PlugSettings==NULL)
+        {
+            /* Ok, we don't have settings for this plugin yet add one */
+            NewPluginSettings.IDStr=BaseURI;    // DEBUG PAUL: This needs to be converted to the plugin ID instead of baseID
+            Settings->push_back(NewPluginSettings);
+            PlugSettings=&Settings->back();
+        }
+
+        drv->API.SetSettingsFromWidgets(ConSettingsOptionData->ConWidgets,
+                PIS_ConvertKVList2PIKVList(PlugSettings->Settings));
+    }
+    catch(...)
+    {
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_PruneDriverSettings
+ *
+ * SYNOPSIS:
+ *    void IOS_PruneDriverSettings(t_PluginSettings *Settings);
+ *
+ * PARAMETERS:
+ *    Settings [I] -- The settings to prune.
+ *
+ * FUNCTION:
+ *    This function will go though the list of IO driver settings and delete
+ *    any IO driver that are no longer installed.  This is to keep the
+ *    settings from just continuously growing.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void IOS_PruneDriverSettings(t_PluginSettings *Settings)
+{
+    i_PluginSettings plug;
+    i_PluginSettings delme;
+    i_IODriverListType Cur;
+
+    /* Go though all the settings and see if we can find the plugin */
+    for(plug=Settings->begin();plug!=Settings->end();)
+    {
+        for(Cur=m_IODriverList.begin();Cur!=m_IODriverList.end();Cur++)
+            if(Cur->BaseURI==plug->IDStr)
+                break;
+        if(Cur==m_IODriverList.end())
+        {
+            /* This plugin wasn't found, delete it */
+            delme=plug;
+            plug++;
+            Settings->erase(delme);
+            continue;
+        }
+        plug++;
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_SetCurrentSettingsTabName
+ *
+ * SYNOPSIS:
+ *    static void IOS_SetCurrentSettingsTabName(const char *Name);
+ *
+ * PARAMETERS:
+ *    Name [I] -- The new name for the tab.
+ *
+ * FUNCTION:
+ *    This function is used as part of the settings for the IO driver.  It
+ *    changes the settings dialogs current tabs name.  When the settings
+ *    dialog is first allocated the default tab will have a generic name and
+ *    this function lets the IO driver change it's name.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * LIMITATIONS:
+ *    It is only valid to call this when in AllocSettingsWidgets() or a call
+ *    back from one of the widgets that was allocated in AllocSettingsWidgets().
+ *
+ * SEE ALSO:
+ *    IOS_AddNewSettingsTab()
+ ******************************************************************************/
+static void IOS_SetCurrentSettingsTabName(const char *Name)
+{
+    if(IOS_PS_GuiCtrlFn!=NULL)
+    {
+        IOS_PS_GuiCtrlFn(e_IODriverSettingsFn_SetCurrentTabName,(void *)Name,
+                NULL);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_AddNewSettingsTab
+ *
+ * SYNOPSIS:
+ *    static t_WidgetSysHandle *IOS_AddNewSettingsTab(const char *Name);
+ *
+ * PARAMETERS:
+ *    Name [I] -- The name for the new tab.
+ *
+ * FUNCTION:
+ *    This function adds a new tab to the IO driver settings dialog.
+ *
+ * RETURNS:
+ *    A new handle for adding widgets or NULL if there was an error.  This is
+ *    no need to free this handle.
+ *
+ * NOTES:
+ *    You must use the handle returned from this function with any widgets
+ *    added from this point until we add a new tab.  That is to says when you
+ *    call a UI function to access a widget you must pass the t_WidgetSysHandle
+ *    that was active when you added the widget.
+ *
+ *    For example:
+ *      AllocSettingsWidgets(t_WidgetSysHandle *StartingHandle)
+ *      {
+ *          t_WidgetSysHandle *NewHandle;
+ *
+ *          Check1=UI->AddCheckbox(StartingHandle,"One",NULL,NULL);
+ *          NewHandle=API->AddNewSettingsTab("Tab2");
+ *          Check2=UI->AddCheckbox(NewHandle,"Two",NULL,NULL);
+ *
+ *          // You must use 'StartingHandle' when accessing Check1
+ *          UI->SetCheckboxChecked(StartingHandle,Check1,true);
+ *
+ *          // You must use 'NewHandle' when accessing Check2
+ *          UI->SetCheckboxChecked(NewHandle,Check2,true);
+ *      }
+ *
+ * SEE ALSO:
+ *    IOS_SetCurrentSettingsTabName()
+ ******************************************************************************/
+static t_WidgetSysHandle *IOS_AddNewSettingsTab(const char *Name)
+{
+    struct ConnectionWidgetData *ConSettingsCtrlData;
+    struct ConnectionOptionsData *ConSettingsOptionData;
+    t_UILayoutContainerCtrl *NewTabHandle;
+
+    ConSettingsCtrlData=NULL;
+    ConSettingsOptionData=NULL;
+    try
+    {
+        if(IOS_PS_GuiCtrlFn==NULL || m_ActiveConSettingsOptionData==NULL)
+            throw(0);
+
+        ConSettingsOptionData=new struct ConnectionOptionsData;
+        ConSettingsOptionData->WidgetExtraData=NULL;
+        ConSettingsOptionData->UIChangedCB=m_ActiveConSettingsOptionData->UIChangedCB;
+        ConSettingsOptionData->UserData=m_ActiveConSettingsOptionData->UserData;
+        ConSettingsOptionData->IOdrv=m_ActiveConSettingsOptionData->IOdrv;
+        ConSettingsOptionData->DrvHandle=m_ActiveConSettingsOptionData->DrvHandle;
+        ConSettingsOptionData->DeviceUniqueID=m_ActiveConSettingsOptionData->DeviceUniqueID;
+        ConSettingsOptionData->Next=NULL;
+
+        ConSettingsCtrlData=new struct ConnectionWidgetData;
+        ConSettingsCtrlData->COD=ConSettingsOptionData;
+        ConSettingsCtrlData->Next=NULL;
+
+        ConSettingsOptionData->WidgetSysHandles=ConSettingsCtrlData;
+
+        NewTabHandle=(t_UILayoutContainerCtrl *)IOS_PS_GuiCtrlFn(
+                e_IODriverSettingsFn_AddNewTab,(void *)Name,NULL);
+        if(NewTabHandle==NULL)
+            throw(0);
+
+        ConSettingsCtrlData->ContainerWidget=NewTabHandle;
+
+        /* Connect in ConSettingsOptionData (only used to free it) */
+        ConSettingsOptionData->Next=m_ActiveConSettingsOptionData->Next;
+        m_ActiveConSettingsOptionData->Next=ConSettingsOptionData;
+    }
+    catch(...)
+    {
+        if(ConSettingsCtrlData!=NULL)
+            delete ConSettingsCtrlData;
+
+        if(ConSettingsOptionData!=NULL)
+            delete ConSettingsOptionData;
+
+        return NULL;
+    }
+
+    return (t_WidgetSysHandle *)ConSettingsOptionData->WidgetSysHandles;
 }

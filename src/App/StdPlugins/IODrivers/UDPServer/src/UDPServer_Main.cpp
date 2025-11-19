@@ -116,7 +116,11 @@ const struct IODriverAPI g_UDPServerPluginAPI=
     NULL,                                               // ConnectionAuxCtrlWidgets_FreeWidgets
     /* V2 */
     NULL,                                               // GetLastErrorMessage
-#warning Add extra error info
+    /* V3 */
+    NULL,   // AllocSettingsWidgets
+    NULL,   // FreeSettingsWidgets
+    NULL,   // SetSettingsFromWidgets
+    NULL,   // ApplySettings
 };
 extern const struct IODriverAPI g_UDPServerPluginAPI;
 

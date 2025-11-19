@@ -31,6 +31,10 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added settings to IO Drivers",
+            "A new settings area has been added where IO Driver plugins"
+            " can now have settings like the Data Processors can."},
+    {
         NOTETYPE_FUNCTIONALLY_FIX,"Added record button to bind keys",
             "Added a record button to the bind keys that will now record"
             " key presses and fill in the key seq.  Also fixed an error"

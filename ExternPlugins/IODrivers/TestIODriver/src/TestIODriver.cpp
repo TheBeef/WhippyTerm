@@ -118,6 +118,9 @@ t_ConnectionWidgetsType *TestIODriver_ConnectionAuxCtrlWidgets_AllocWidgets(t_Dr
 void TestIODriver_ConnectionAuxCtrlWidgets_FreeWidgets(t_DriverIOHandleType *DriverIO,t_WidgetSysHandle *WidgetHandle,t_ConnectionWidgetsType *ConAuxCtrls);
 void TestColumnView_EventCB(const struct PICVEvent *Event,void *UserData);
 void TestButton_EventCB(const struct PIButtonEvent *Event,void *UserData);
+t_ConnectionWidgetsType *TestIODrv_AllocSettingsWidgets(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings);
+void TestIODrv_FreeSettingsWidgets(t_ConnectionWidgetsType *PrivData);
+void TestIODrv_StoreSettings(t_ConnectionWidgetsType *PrivData,t_PIKVList *Settings);
 
 /*** VARIABLE DEFINITIONS     ***/
 const struct IOS_API *m_TestIODriver_IOSAPI;
@@ -150,6 +153,10 @@ const struct IODriverAPI g_TestIODriverPluginAPI=
     TestIODriver_ConnectionAuxCtrlWidgets_FreeWidgets,
     /* V2 */
     NULL,   // GetLastErrorMessage
+    TestIODrv_AllocSettingsWidgets,
+    TestIODrv_FreeSettingsWidgets,
+    TestIODrv_StoreSettings,
+    NULL, //    void (*TestIODrv_ApplySettings)(t_ConnectionWidgetsType *DataHandle,t_PIKVList *Settings);
 };
 struct IODriverInfo m_TestIODriverInfo=
 {
@@ -878,5 +885,79 @@ void TestButton_EventCB(const struct PIButtonEvent *Event,void *UserData)
         default:
         break;
     }
+}
+
+struct TestIODrvWidgetData
+{
+    t_WidgetSysHandle *FirstTabWidgetHandle;
+    struct PI_Checkbox *TestCheckbox;
+
+    t_WidgetSysHandle *TabWidgetHandle2;
+    struct PI_Checkbox *TestCheckbox2;
+};
+
+void TheEventCB(const struct PICheckboxEvent *Event,void *UserData)
+{
+    struct TestIODrvWidgetData *WData=(struct TestIODrvWidgetData *)UserData;
+
+    m_TestIODriver_UIAPI->SetCheckboxChecked(WData->TabWidgetHandle2,WData->TestCheckbox2->Ctrl,
+            !m_TestIODriver_UIAPI->IsCheckboxChecked(WData->FirstTabWidgetHandle,WData->TestCheckbox->Ctrl));
+}
+
+t_ConnectionWidgetsType *TestIODrv_AllocSettingsWidgets(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings)
+{
+    struct TestIODrvWidgetData *WData;
+    const char *C1;
+    const char *C2;
+
+    m_TestIODriver_IOSAPI->SetCurrentSettingsTabName("THREE!");
+
+    WData=new TestIODrvWidgetData;
+    WData->FirstTabWidgetHandle=WidgetHandle;
+
+    WData->TestCheckbox=m_TestIODriver_UIAPI->AddCheckbox(WidgetHandle,"Test Checkbox 3",TheEventCB,(void *)WData);
+
+    WData->TabWidgetHandle2=m_TestIODriver_IOSAPI->AddNewSettingsTab("FOUR!");
+    WData->TestCheckbox2=m_TestIODriver_UIAPI->AddCheckbox(WData->TabWidgetHandle2,"Test Checkbox 4",NULL,NULL);
+
+    C1=m_TestIODriver_SysAPI->KVGetItem(Settings,"Checkbox3");
+    C2=m_TestIODriver_SysAPI->KVGetItem(Settings,"Checkbox4");
+
+    if(C1==NULL)
+        C1="0";
+    if(C2==NULL)
+        C2="0";
+
+    m_TestIODriver_UIAPI->SetCheckboxChecked(WData->FirstTabWidgetHandle,WData->TestCheckbox->Ctrl,atoi(C1));
+    m_TestIODriver_UIAPI->SetCheckboxChecked(WData->TabWidgetHandle2,WData->TestCheckbox2->Ctrl,atoi(C2));
+
+    return (t_ConnectionWidgetsType *)WData;
+}
+
+void TestIODrv_FreeSettingsWidgets(t_ConnectionWidgetsType *PrivData)
+{
+    struct TestIODrvWidgetData *WData=(struct TestIODrvWidgetData *)PrivData;
+
+    m_TestIODriver_UIAPI->FreeCheckbox(WData->FirstTabWidgetHandle,WData->TestCheckbox);
+    m_TestIODriver_UIAPI->FreeCheckbox(WData->TabWidgetHandle2,WData->TestCheckbox2);
+
+    delete WData;
+}
+
+void TestIODrv_StoreSettings(t_ConnectionWidgetsType *PrivData,t_PIKVList *Settings)
+{
+    struct TestIODrvWidgetData *WData=(struct TestIODrvWidgetData *)PrivData;
+    bool C1;
+    bool C2;
+    char buff[100];
+
+    C1=m_TestIODriver_UIAPI->IsCheckboxChecked(WData->FirstTabWidgetHandle,WData->TestCheckbox->Ctrl);
+    C2=m_TestIODriver_UIAPI->IsCheckboxChecked(WData->TabWidgetHandle2,WData->TestCheckbox2->Ctrl);
+
+    sprintf(buff,"%d",C1);
+    m_TestIODriver_SysAPI->KVAddItem(Settings,"Checkbox3",buff);
+
+    sprintf(buff,"%d",C2);
+    m_TestIODriver_SysAPI->KVAddItem(Settings,"Checkbox4",buff);
 }
 

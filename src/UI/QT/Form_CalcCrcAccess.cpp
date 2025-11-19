@@ -233,7 +233,7 @@ t_UIComboBoxCtrl *UICCRC_GetComboBoxHandle(e_CCRC_ComboxType UIObj)
  *    UICCRC_GetHexContainerFrame
  *
  * SYNOPSIS:
- *    t_UIContainerFrameCtrl *UICCRC_GetHexContainerFrame(void);
+ *    t_UIFrameContainerCtrl *UICCRC_GetHexContainerFrame(void);
  *
  * PARAMETERS:
  *    NONE
@@ -247,8 +247,8 @@ t_UIComboBoxCtrl *UICCRC_GetComboBoxHandle(e_CCRC_ComboxType UIObj)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIContainerFrameCtrl *UICCRC_GetHexContainerFrame(void)
+t_UIFrameContainerCtrl *UICCRC_GetHexContainerFrame(void)
 {
-    return (t_UIContainerFrameCtrl *)g_CalcCrc->ui->Hex_frame;
+    return (t_UIFrameContainerCtrl *)g_CalcCrc->ui->Hex_frame;
 }
 

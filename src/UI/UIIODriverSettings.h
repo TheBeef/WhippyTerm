@@ -1,14 +1,14 @@
 /*******************************************************************************
- * FILENAME: PluginSystem.h
+ * FILENAME: UIIODriverSettings.h
  * 
  * PROJECT:
  *    Whippy Term
  *
  * FILE DESCRIPTION:
- *    
+ *    Has the UI access for the IO Driver settings dialog.
  *
  * COPYRIGHT:
- *    Copyright 21 Aug 2025 Paul Hutchinson.
+ *    Copyright 12 Nov 2025 Paul Hutchinson.
  *
  *    This program is free software: you can redistribute it and/or modify it
  *    under the terms of the GNU General Public License as published by the
@@ -24,55 +24,32 @@
  *    with this program. If not, see https://www.gnu.org/licenses/.
  *
  * HISTORY:
- *    Paul Hutchinson (21 Aug 2025)
+ *    Paul Hutchinson (12 Nov 2025)
  *       Created
  *
  *******************************************************************************/
-#ifndef __PLUGINSYSTEM_H_
-#define __PLUGINSYSTEM_H_
+#ifndef __UIIODRIVERSETTINGS_H_
+#define __UIIODRIVERSETTINGS_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
-#include "App/Util/KeyValue.h"
-#include "ThirdParty/TinyCFG/TinyCFG.h"
-#include <string>
-#include <list>
+#include "UI/UIControl.h"
 
 /***  DEFINES                          ***/
 
 /***  MACROS                           ***/
 
 /***  TYPE DEFINITIONS                 ***/
-typedef enum
-{
-    e_PlugInType_FileTransfer,
-    e_PlugInType_IODriver,
-    e_PlugInType_DataProcessor,
-    e_PlugInTypeMAX
-} e_PlugInTypeType;
-
-struct PluginSettings
-{
-    public:
-        std::string IDStr;
-        t_KVList Settings;
-
-        void RegisterAllMembers(class TinyCFG &cfg);
-};
-typedef std::list<struct PluginSettings> t_PluginSettings;
-typedef t_PluginSettings::iterator i_PluginSettings;
 
 /***  CLASS DEFINITIONS                ***/
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
-void InitPluginSystem(void);
-void RegisterPluginWithSystem(const char *IDStr);
-void UnRegisterPluginWithSystem(const char *IDStr);
-void NotePluginInUse(const char *IDStr);
-void UnNotePluginInUse(const char *IDStr);
-bool IsPluginInUse(struct ExternPluginInfo *ExPlugin);
-void InformOfNewPluginInstalled(struct ExternPluginInfo *Info);
-void InformOfPluginUninstalled(struct ExternPluginInfo *Info);
+bool UIAlloc_IODriverSettings(void);
+void UIFree_IODriverSettings(void);
+bool UIShow_IODriverSettings(void);
+t_UITabCtrl *UIIODS_GetTabControl(void);
+t_UITab *UIIODS_AddNewTab(const char *Name);
+t_UILayoutContainerCtrl *UIIODS_GetTabContainerFrame(t_UITab *UITab);
 
-#endif   /* end of "#ifndef __PLUGINSYSTEM_H_" */
+#endif   /* end of "#ifndef __UIIODRIVERSETTINGS_H_" */

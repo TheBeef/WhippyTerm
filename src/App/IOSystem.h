@@ -32,6 +32,7 @@
 #define __IOSYSTEM_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
+#include "App/PluginSupport/PluginSystem.h"
 #include "PluginSDK/Plugin.h"
 #include "UI/UIControl.h"
 #include "Util/KeyValue.h"
@@ -60,6 +61,13 @@ struct DriverInfoList
     std::string BaseURI;
     struct DriverInfoList *Next;
 };
+
+typedef enum
+{
+    e_IODriverSettingsFn_SetCurrentTabName,
+    e_IODriverSettingsFn_AddNewTab,
+    e_IODriverSettingsFnMAX
+} e_IODriverSettingsFnType;
 
 typedef struct PrivateConnectionOptionsData {int PrivateDataHere;} t_ConnectionOptionsDataType;    // Fake type holder
 typedef struct PrivateConnectionAuxCtrlsDataType {int PrivateDataHere;} t_ConnectionAuxCtrlsDataType;    // Fake type holder
@@ -95,10 +103,10 @@ struct ConnectionInfoList *IOS_FindConnectionFromDetectedID(
 
 t_ConnectionOptionsDataType *IOS_AllocConnectionOptions(
         struct ConnectionInfoList *CInfoEntry,
-        t_UIContainerCtrl *ContainerWidget,t_KVList &OptionsKeyValues,
+        t_UILayoutContainerCtrl *ContainerWidget,t_KVList &OptionsKeyValues,
         void (*UIChanged)(void *UserData),void *UserData);
 t_ConnectionOptionsDataType *IOS_AllocConnectionOptionsFromUniqueID(
-        const char *UniqueID,t_UIContainerCtrl *ContainerWidget,
+        const char *UniqueID,t_UILayoutContainerCtrl *ContainerWidget,
         t_KVList &OptionsKeyValues,void (*UIChanged)(void *UserData),
         void *UserData);
 void IOS_FreeConnectionOptions(t_ConnectionOptionsDataType *ConOptionsHandle);
@@ -107,7 +115,7 @@ void IOS_StoreConnectionOptions(t_ConnectionOptionsDataType *ConOptionsHandle,
 void IOS_SetUI2ConnectionOptions(t_ConnectionOptionsDataType *ConOptionsHandle,
         t_KVList &OptionsKeyValues);
 
-t_ConnectionAuxCtrlsDataType *IOS_AllocConnectionAuxCtrls(t_IOSystemHandle *Handle,t_UIContainerCtrl *ContainerWidget);
+t_ConnectionAuxCtrlsDataType *IOS_AllocConnectionAuxCtrls(t_IOSystemHandle *Handle,t_UILayoutContainerCtrl *ContainerWidget);
 void IOS_FreeConnectionAuxCtrls(t_ConnectionAuxCtrlsDataType *ConAuxCtrlsHandle);
 void IOS_ConnectionAuxCtrlsShow(t_ConnectionAuxCtrlsDataType *ConAuxCtrlsHandle,bool Show);
 
@@ -140,4 +148,10 @@ int IOS_Ask(const char *Message,int Type);
 struct DriverInfoList *IOS_GetListOfDrivers(void);
 void IOS_FreeDriverInfoList(struct DriverInfoList *List);
 
+bool IOS_DoesDriverHaveSettings(const char *BaseURI);
+void IOS_DriverSettings_SetActiveCtrls(void *(*GuiCtrl)(e_IODriverSettingsFnType Fn,void *Arg1,void *Arg2));
+t_IODriverSettingsWidgets *IOS_DriverSettings_AddWidgets(t_PluginSettings *Settings,const char *BaseURI,t_UILayoutContainerCtrl *Cont);
+void IOS_DriverSettings_FreeWidgets(const char *BaseURI,t_IODriverSettingsWidgets *PrivData);
+void IOS_DriverSettings_SetSettingsFromWidgets(t_PluginSettings *Settings,const char *BaseURI,t_IODriverSettingsWidgets *PrivData);
+void IOS_PruneDriverSettings(t_PluginSettings *Settings);
 #endif

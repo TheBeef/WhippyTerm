@@ -267,7 +267,7 @@ t_UIRadioBttnCtrl *UICF_GetRadioBttnInput(e_CF_RadioBttnType UIObj)
  *    UICF_GetHexContainerFrame
  *
  * SYNOPSIS:
- *    t_UIContainerFrameCtrl *UICF_GetHexContainerFrame(void);
+ *    t_UIFrameContainerCtrl *UICF_GetHexContainerFrame(void);
  *
  * PARAMETERS:
  *    NONE
@@ -281,8 +281,8 @@ t_UIRadioBttnCtrl *UICF_GetRadioBttnInput(e_CF_RadioBttnType UIObj)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIContainerFrameCtrl *UICF_GetHexContainerFrame(void)
+t_UIFrameContainerCtrl *UICF_GetHexContainerFrame(void)
 {
-    return (t_UIContainerFrameCtrl *)g_CRCFinder->ui->Hex_frame;
+    return (t_UIFrameContainerCtrl *)g_CRCFinder->ui->Hex_frame;
 }
 

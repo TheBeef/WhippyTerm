@@ -83,6 +83,7 @@ enum e_UIS_ListView
     e_UIS_ListView_KeyBinding_CommandList,
     e_UIS_ListView_BinaryProcessorDecoder,
     e_UIS_ListView_BinaryProcessorOther,
+    e_UIS_ListView_IODriverList,
     e_UIS_ListViewMAX
 };
 
@@ -94,6 +95,7 @@ enum e_UIS_TabCtrl
     e_UIS_TabCtrl_Display,
     e_UIS_TabCtrl_Terminal,
     e_UIS_TabCtrl_Behaviour,
+    e_UIS_TabCtrl_IODriver,
     e_UIS_TabMAX
 };
 
@@ -122,6 +124,7 @@ enum e_UIS_Button
     e_UIS_Button_ColorEditSelectColor,
     e_UIS_Button_HRColorSelect,
     e_UIS_Button_KeyRecord,
+    e_UIS_Button_IODriverSettings,
     e_UIS_ButtonMAX
 };
 

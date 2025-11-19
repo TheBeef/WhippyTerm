@@ -132,7 +132,7 @@ HexDisplayBuffer::~HexDisplayBuffer()
  *    HexDisplayBuffer::Init
  *
  * SYNOPSIS:
- *    bool HexDisplayBuffer::Init(void *ParentWidget);
+ *    bool HexDisplayBuffer::Init(t_UIFrameContainerCtrl *ParentWidget);
  *
  * PARAMETERS:
  *    ParentWidget [I] -- The frame this hex display will live in
@@ -148,7 +148,7 @@ HexDisplayBuffer::~HexDisplayBuffer()
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool HexDisplayBuffer::Init(void *ParentWidget,
+bool HexDisplayBuffer::Init(t_UIFrameContainerCtrl *ParentWidget,
         bool (*EventHandler)(const struct HDEvent *Event),uintptr_t ID)
 {
     try

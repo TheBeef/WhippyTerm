@@ -102,7 +102,7 @@ bool UIAlloc_CalcCrc(void);
 void UIFree_CalcCrc(void);
 bool UIShow_CalcCrc(void);
 t_UIButtonCtrl *UICCRC_GetButton(e_CCRC_Button bttn);
-t_UIContainerFrameCtrl *UICCRC_GetHexContainerFrame(void);
+t_UIFrameContainerCtrl *UICCRC_GetHexContainerFrame(void);
 t_UITextInputCtrl *UICCRC_GetTextInput(e_CCRC_TextInput UIObj);
 t_UIComboBoxCtrl *UICCRC_GetComboBoxHandle(e_CCRC_ComboxType UIObj);
 

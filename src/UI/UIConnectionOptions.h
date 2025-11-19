@@ -51,6 +51,6 @@ bool UIAlloc_ConnectionOptions(void);
 void UIFree_ConnectionOptions(void);
 bool UIShow_ConnectionOptions(void);
 
-t_UIContainerCtrl *UI_CO_GetOptionsFrameContainer(void);
+t_UILayoutContainerCtrl *UI_CO_GetOptionsFrameContainer(void);
 
 #endif

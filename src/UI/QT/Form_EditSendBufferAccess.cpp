@@ -265,7 +265,7 @@ t_UIContextMenuCtrl *UIESB_GetContextMenu(e_ESB_ContextMenu UIObj)
  *    UIESB_GetHexContainerFrame
  *
  * SYNOPSIS:
- *    t_UIContainerFrameCtrl *UIESB_GetHexContainerFrame(void);
+ *    t_UIFrameContainerCtrl *UIESB_GetHexContainerFrame(void);
  *
  * PARAMETERS:
  *    NONE
@@ -279,8 +279,8 @@ t_UIContextMenuCtrl *UIESB_GetContextMenu(e_ESB_ContextMenu UIObj)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIContainerFrameCtrl *UIESB_GetHexContainerFrame(void)
+t_UIFrameContainerCtrl *UIESB_GetHexContainerFrame(void)
 {
-    return (t_UIContainerFrameCtrl *)g_EditSendBuffer->ui->Hex_frame;
+    return (t_UIFrameContainerCtrl *)g_EditSendBuffer->ui->Hex_frame;
 }
 

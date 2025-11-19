@@ -70,7 +70,7 @@ struct GroupBoxData
  *
  * SYNOPSIS:
  *    struct PI_ComboBox *UIPI_AddComboBox(
- *              t_UIContainerCtrl *ContainerWidget,PG_BOOL UserEditable,
+ *              t_UILayoutContainerCtrl *ContainerWidget,PG_BOOL UserEditable,
  *              const char *Label,void (*EventCB)(const struct PICBEvent *Event,
  *              void *UserData),void *UserData);
  *
@@ -90,7 +90,7 @@ struct GroupBoxData
  * SEE ALSO:
  *    
  ******************************************************************************/
-struct PI_ComboBox *UIPI_AddComboBox(t_UIContainerCtrl *ContainerWidget,
+struct PI_ComboBox *UIPI_AddComboBox(t_UILayoutContainerCtrl *ContainerWidget,
         PG_BOOL UserEditable,const char *Label,
         void (*EventCB)(const struct PICBEvent *Event,void *UserData),
         void *UserData)
@@ -190,7 +190,7 @@ void PIQComboBox::ComboBoxTextChanged(const QString &NewText)
  *
  * SYNOPSIS:
  *    static struct PI_RadioBttnGroup *UIPI_AllocRadioBttnGroup(
- *          t_UIContainerCtrl *ContainerWidget,const char *Label);
+ *          t_UILayoutContainerCtrl *ContainerWidget,const char *Label);
  *
  * PARAMETERS:
  *    ContainerWidget [I] -- The parent widget to add this combox box to
@@ -207,7 +207,7 @@ void PIQComboBox::ComboBoxTextChanged(const QString &NewText)
  *    
  ******************************************************************************/
 struct PI_RadioBttnGroup *UIPI_AllocRadioBttnGroup(
-        t_UIContainerCtrl *ContainerWidget,const char *Label)
+        t_UILayoutContainerCtrl *ContainerWidget,const char *Label)
 {
     QFormLayout *Layout=(QFormLayout *)ContainerWidget;
     struct RadioBttnGroup *NewGroup;
@@ -361,7 +361,7 @@ void PIQRadioButton::ButtonClicked(bool checked)
     }
 }
 
-struct PI_Checkbox *UIPI_AddCheckbox(t_UIContainerCtrl *ContainerWidget,
+struct PI_Checkbox *UIPI_AddCheckbox(t_UILayoutContainerCtrl *ContainerWidget,
             const char *Label,void (*EventCB)(const struct PICheckboxEvent *Event,void *UserData),void *UserData)
 {
     QFormLayout *Layout=(QFormLayout *)ContainerWidget;
@@ -449,7 +449,7 @@ void PIQCheckbox::ButtonClicked(bool checked)
  *
  * SYNOPSIS:
  *    struct PI_TextInput *UIPI_AddTextInput(
- *              t_UIContainerCtrl *ContainerWidget,PG_BOOL UserEditable,
+ *              t_UILayoutContainerCtrl *ContainerWidget,PG_BOOL UserEditable,
  *              const char *Label,void (*EventCB)(const struct PICBEvent *Event,
  *              void *UserData),void *UserData);
  *
@@ -469,13 +469,13 @@ void PIQCheckbox::ButtonClicked(bool checked)
  * SEE ALSO:
  *    
  ******************************************************************************/
-struct PI_TextInput *UIPI_AddTextInput(t_UIContainerCtrl *ContainerWidget,
+struct PI_TextInput *UIPI_AddTextInput(t_UILayoutContainerCtrl *ContainerWidget,
         const char *Label,
         void (*EventCB)(const struct PICBEvent *Event,void *UserData),
         void *UserData)
 {
-    struct PI_TextInput *NewPIC;
     QFormLayout *Layout=(QFormLayout *)ContainerWidget;
+    struct PI_TextInput *NewPIC;
     PIQTextInput *NewCtrl;
     QLabel *NewLabel;
 
@@ -556,7 +556,7 @@ void PIQTextInput::TextInputTextChanged(const QString &NewText)
  *
  * SYNOPSIS:
  *    struct PI_NumberInput *UIPI_AddNumberInput(
- *              t_UIContainerCtrl *ContainerWidget,bool UseFloats,
+ *              t_UILayoutContainerCtrl *ContainerWidget,bool UseFloats,
  *              const char *Label,void (*EventCB)(const struct PICBEvent *Event,
  *              void *UserData),void *UserData);
  *
@@ -576,13 +576,13 @@ void PIQTextInput::TextInputTextChanged(const QString &NewText)
  * SEE ALSO:
  *    
  ******************************************************************************/
-struct PI_NumberInput *UIPI_AddNumberInput(t_UIContainerCtrl *ContainerWidget,
+struct PI_NumberInput *UIPI_AddNumberInput(t_UILayoutContainerCtrl *ContainerWidget,
         const char *Label,
         void (*EventCB)(const struct PICBEvent *Event,void *UserData),
         void *UserData)
 {
-    struct PI_NumberInput *NewPIC;
     QFormLayout *Layout=(QFormLayout *)ContainerWidget;
+    struct PI_NumberInput *NewPIC;
     PIQNumberInput *NewCtrl;
     QLabel *NewLabel;
 
@@ -662,7 +662,7 @@ void PIQNumberInput::NumberInputChanged(int NewNumber)
  *
  * SYNOPSIS:
  *    struct PI_DoubleInput *UIPI_AddDoubleInput(
- *              t_UIContainerCtrl *ContainerWidget,bool UseFloats,
+ *              t_UILayoutContainerCtrl *ContainerWidget,bool UseFloats,
  *              const char *Label,void (*EventCB)(const struct PICBEvent *Event,
  *              void *UserData),void *UserData);
  *
@@ -682,13 +682,13 @@ void PIQNumberInput::NumberInputChanged(int NewNumber)
  * SEE ALSO:
  *    
  ******************************************************************************/
-struct PI_DoubleInput *UIPI_AddDoubleInput(t_UIContainerCtrl *ContainerWidget,
+struct PI_DoubleInput *UIPI_AddDoubleInput(t_UILayoutContainerCtrl *ContainerWidget,
         const char *Label,
         void (*EventCB)(const struct PICBEvent *Event,void *UserData),
         void *UserData)
 {
-    struct PI_DoubleInput *NewPIC;
     QFormLayout *Layout=(QFormLayout *)ContainerWidget;
+    struct PI_DoubleInput *NewPIC;
     PIQDoubleInput *NewCtrl;
     QLabel *NewLabel;
 
@@ -768,7 +768,7 @@ void PIQDoubleInput::DoubleInputChanged(double NewDouble)
  *
  * SYNOPSIS:
  *    struct PI_ColumnViewInput *UIPI_AddColumnViewInput(
- *              t_UIContainerCtrl *ContainerWidget,const char *Label,
+ *              t_UILayoutContainerCtrl *ContainerWidget,const char *Label,
  *              int Columns,const char *ColumnNames[],
  *              void (*EventCB)(const struct PICVEvent *Event,void *UserData),
  *              void *UserData);
@@ -791,13 +791,13 @@ void PIQDoubleInput::DoubleInputChanged(double NewDouble)
  * SEE ALSO:
  *    UIPI_FreeColumnViewInput()
  ******************************************************************************/
-struct PI_ColumnViewInput *UIPI_AddColumnViewInput(t_UIContainerCtrl *ContainerWidget,
+struct PI_ColumnViewInput *UIPI_AddColumnViewInput(t_UILayoutContainerCtrl *ContainerWidget,
         const char *Label,int Columns,const char *ColumnNames[],
         void (*EventCB)(const struct PICVEvent *Event,void *UserData),
         void *UserData)
 {
-    struct PI_ColumnViewInput *NewPIC;
     QFormLayout *Layout=(QFormLayout *)ContainerWidget;
+    struct PI_ColumnViewInput *NewPIC;
     PIQColumnViewInput *NewCtrl;
     QLabel *NewLabel;
     int col;
@@ -896,7 +896,7 @@ void PIQColumnViewInput::ColumnViewInputSelectionChanged()
  *
  * SYNOPSIS:
  *    struct PI_ButtonInput *UIPI_AddButtonInput(
- *              t_UIContainerCtrl *ContainerWidget,const char *Label,
+ *              t_UILayoutContainerCtrl *ContainerWidget,const char *Label,
  *              void (*EventCB)(const struct PIButtonEvent *Event,void *UserData),
  *              void *UserData);
  *
@@ -915,13 +915,13 @@ void PIQColumnViewInput::ColumnViewInputSelectionChanged()
  * SEE ALSO:
  *    UIPI_FreeButtonInput()
  ******************************************************************************/
-struct PI_ButtonInput *UIPI_AddButtonInput(t_UIContainerCtrl *ContainerWidget,
+struct PI_ButtonInput *UIPI_AddButtonInput(t_UILayoutContainerCtrl *ContainerWidget,
         const char *Label,
         void (*EventCB)(const struct PIButtonEvent *Event,void *UserData),
         void *UserData)
 {
-    struct PI_ButtonInput *NewPIC;
     QFormLayout *Layout=(QFormLayout *)ContainerWidget;
+    struct PI_ButtonInput *NewPIC;
     PIQPushButtonInput *NewCtrl;
     QLabel *NewLabel;
     QSizePolicy sizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
@@ -1009,7 +1009,7 @@ void PIQPushButtonInput::Buttonclicked(bool checked)
  *
  * SYNOPSIS:
  *    struct PI_Indicator *UIPI_AddIndicator(
- *              t_UIContainerCtrl *ContainerWidget,const char *Label);
+ *              t_UILayoutContainerCtrl *ContainerWidget,const char *Label);
  *
  * PARAMETERS:
  *    ContainerWidget [I] -- The parent widget to add this combox box to
@@ -1024,11 +1024,11 @@ void PIQPushButtonInput::Buttonclicked(bool checked)
  * SEE ALSO:
  *    UIPI_FreeIndicator()
  ******************************************************************************/
-struct PI_Indicator *UIPI_AddIndicator(t_UIContainerCtrl *ContainerWidget,
+struct PI_Indicator *UIPI_AddIndicator(t_UILayoutContainerCtrl *ContainerWidget,
         const char *Label)
 {
-    struct PI_Indicator *NewPIC;
     QFormLayout *Layout=(QFormLayout *)ContainerWidget;
+    struct PI_Indicator *NewPIC;
     PIQIndicator *NewCtrl;
     QLabel *NewLabel;
 
@@ -1199,7 +1199,7 @@ void PIQIndicator::paintEvent(QPaintEvent *event)
  *
  * SYNOPSIS:
  *    struct PI_TextBox *UIPI_AddTextBox(
- *              t_UIContainerCtrl *ContainerWidget,const char *Label,
+ *              t_UILayoutContainerCtrl *ContainerWidget,const char *Label,
  *              const char *Text);
  *
  * PARAMETERS:
@@ -1216,11 +1216,11 @@ void PIQIndicator::paintEvent(QPaintEvent *event)
  * SEE ALSO:
  *    UIPI_FreeTextBox()
  ******************************************************************************/
-struct PI_TextBox *UIPI_AddTextBox(t_UIContainerCtrl *ContainerWidget,
+struct PI_TextBox *UIPI_AddTextBox(t_UILayoutContainerCtrl *ContainerWidget,
         const char *Label,const char *Text)
 {
-    struct PI_TextBox *NewPIC;
     QFormLayout *Layout=(QFormLayout *)ContainerWidget;
+    struct PI_TextBox *NewPIC;
     QLabel *NewCtrl;
     QLabel *NewLabel;
 
@@ -1292,7 +1292,7 @@ void UIPI_SetTextBoxText(t_PIUITextBoxCtrl *UICtrl,const char *NewText)
     Ctrl->setText(NewText);
 }
 
-struct PI_GroupBox *UIPI_AddGroupBox(t_UIContainerCtrl *ContainerWidget,const char *Label)
+struct PI_GroupBox *UIPI_AddGroupBox(t_UILayoutContainerCtrl *ContainerWidget,const char *Label)
 {
     QFormLayout *Layout=(QFormLayout *)ContainerWidget;
     struct PI_GroupBox *NewPIC;
@@ -1372,13 +1372,13 @@ void UIPI_SetGroupBoxLabel(t_PIUIGroupBoxCtrl *UICtrl,const char *NewLabel)
     Group->GroupBoxWidget->setTitle(NewLabel);
 }
 
-struct PI_ColorPick *UIPI_AddColorPickInput(t_UIContainerCtrl *WidgetHandle,
+struct PI_ColorPick *UIPI_AddColorPickInput(t_UILayoutContainerCtrl *WidgetHandle,
         const char *Label,uint32_t RGB,
         void (*EventCB)(const struct PIColorPickEvent *Event,void *UserData),
         void *UserData)
 {
-    struct PI_ColorPick *NewPIC;
     QFormLayout *Layout=(QFormLayout *)WidgetHandle;
+    struct PI_ColorPick *NewPIC;
     Frame_ColorPickerWidget *NewCtrl;
     QLabel *NewLabel;
 

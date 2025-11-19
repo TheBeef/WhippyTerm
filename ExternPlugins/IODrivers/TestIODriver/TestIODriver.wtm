@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no" ?>
 <ExternPluginMaker>
-    <LastBuildFile>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/IODrivers/TestLoopback/TestLoopback.wtp</LastBuildFile>
-    <LinuxFilename>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/IODrivers/TestIODriver/Linux/TestIODriver.so</LinuxFilename>
+    <LastBuildFile>/home/paul/Dropbox/Projects/WhippyTerm/WhippyTerm/ExternPlugins/IODrivers/TestIODriver/TestIODriver.wtp</LastBuildFile>
+    <LinuxFilename>/home/paul/Dropbox/Projects/WhippyTerm/WhippyTerm/ExternPlugins/IODrivers/TestIODriver/Linux/TestIODriver.so</LinuxFilename>
     <WindowsFilename></WindowsFilename>
     <MacFilename></MacFilename>
     <RPI64Filename></RPI64Filename>
@@ -12,8 +12,8 @@
     <Contributors>Paul Hutchinson</Contributors>
     <Copyright>2025</Copyright>
     <ReleaseDate>xx</ReleaseDate>
-    <Version>1.0</Version>
-    <APIVersion>1.1.0.0</APIVersion>
+    <Version>1.1</Version>
+    <APIVersion>2.1.0.0</APIVersion>
     <PluginClass>2</PluginClass>
     <PluginSubClass>0</PluginSubClass>
 </ExternPluginMaker>

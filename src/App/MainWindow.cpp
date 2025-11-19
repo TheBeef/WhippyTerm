@@ -417,7 +417,7 @@ void MW_InformOfCursorKeyModeChange(void)
 TheMainWindow::TheMainWindow()
 {
     t_UITabCtrl *MainTabs;
-    t_UIContainerFrameCtrl *ContainerFrame;
+    t_UIFrameContainerCtrl *ContainerFrame;
 
     UIWin=NULL;
     NoTabsConnection=NULL;
@@ -434,7 +434,7 @@ TheMainWindow::TheMainWindow()
     ContainerFrame=UIMW_GetContainerFrameCtrlHandle(UIWin);
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
 
-    UIMW_SetContainerFrameVisible(ContainerFrame,false);
+    UISetFrameContainerVisible(ContainerFrame,false);
     UIShowHideTabCtrl(MainTabs,false);
 
     UIMW_SetWindowTitle(UIWin,WHIPPYTERM_TITLE);
@@ -538,7 +538,7 @@ void TheMainWindow::Init(void)
 ///* DEBUG PAUL: Move this (currently test code) */
 //{
 //int r;
-//t_UIContainerFrameCtrl *Hex;
+//t_UIFrameContainerCtrl *Hex;
 //t_UIDisplayFrameCtrl *DisplayFrame;
 //struct UITextCanvas *TextCanvas; // The text canvas we are connected to
 //struct ScreenLine AddLine;
@@ -959,7 +959,7 @@ class Connection *TheMainWindow::AllocNewTab(const char *TabLabel,
     t_UITab *NewTab;
     int TabCount;
     bool UseContainer;
-    t_UIContainerFrameCtrl *ContainerFrame;
+    t_UIFrameContainerCtrl *ContainerFrame;
     void *ParentWidget;
     t_UITab *Tab0;
     class Connection *NewConnection;
@@ -1015,13 +1015,13 @@ class Connection *TheMainWindow::AllocNewTab(const char *TabLabel,
         if(UseContainer)
         {
             UIShowHideTabCtrl(MainTabs,false);
-            UIMW_SetContainerFrameVisible(ContainerFrame,true);
+            UISetFrameContainerVisible(ContainerFrame,true);
             NoTabsConnection=NewConnection;
         }
         else
         {
             UIShowHideTabCtrl(MainTabs,true);
-            UIMW_SetContainerFrameVisible(ContainerFrame,false);
+            UISetFrameContainerVisible(ContainerFrame,false);
             NoTabsConnection=NULL;
         }
 
@@ -1100,7 +1100,7 @@ class Connection *TheMainWindow::ReloadTabFromURI(const char *TabLabel,
     void *ParentWidget;
     class Connection *NewConnection;
     t_UITab *ActiveTab;
-    t_UIContainerFrameCtrl *ContainerFrame;
+    t_UIFrameContainerCtrl *ContainerFrame;
 
     try
     {
@@ -1259,7 +1259,7 @@ void TheMainWindow::RethinkTabCountAfterFree(void)
     t_UITabCtrl *MainTabs;
     t_UITab *Tab0;
     int TabCount;
-    t_UIContainerFrameCtrl *ContainerFrame;
+    t_UIFrameContainerCtrl *ContainerFrame;
 
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
     ContainerFrame=UIMW_GetContainerFrameCtrlHandle(UIWin);
@@ -1291,7 +1291,7 @@ void TheMainWindow::RethinkTabCountAfterFree(void)
                 {
                     NoTabsConnection->ReParentWidget(ContainerFrame);
                     UIShowHideTabCtrl(MainTabs,false);
-                    UIMW_SetContainerFrameVisible(ContainerFrame,true);
+                    UISetFrameContainerVisible(ContainerFrame,true);
                 }
             }
         }

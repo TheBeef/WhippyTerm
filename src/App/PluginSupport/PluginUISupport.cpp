@@ -12,7 +12,8 @@
  *    needs to provide every function, it can just use these default functions.
  *
  *    If the sub system doesn't need it's own data then it can just
- *    use these functions using 't_WidgetSysHandle' as a 't_UIContainerCtrl'.
+ *    use these functions using 't_WidgetSysHandle' as a
+ *    't_UILayoutContainerCtrl'.
  *
  * COPYRIGHT:
  *    Copyright 2018 Paul Hutchinson.
@@ -158,8 +159,8 @@ struct PI_UIAPI m_PIUSDefault_UIAPI=
  *
  * NOTES:
  *    If you use this then you must have your 't_WidgetSysHandle'
- *    be the container widget (t_UIContainerCtrl) that will be passed directly
- *    to the UI.
+ *    be the container widget (t_UILayoutContainerCtrl) that will be passed
+ *    directly to the UI.
  *
  * SEE ALSO:
  *    
@@ -174,7 +175,7 @@ struct PI_ComboBox *PIUSDefault_AddComboBox(t_WidgetSysHandle *WidgetHandle,
         void (*EventCB)(const struct PICBEvent *Event,void *UserData),
         void *UserData)
 {
-    return UIPI_AddComboBox((t_UIContainerCtrl *)WidgetHandle,
+    return UIPI_AddComboBox((t_UILayoutContainerCtrl *)WidgetHandle,
             UserEditable,Label,EventCB,UserData);
 }
 
@@ -217,7 +218,8 @@ void PIUSDefault_EnableComboBox(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCt
 
 struct PI_RadioBttnGroup *PIUSDefault_AllocRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,const char *Label)
 {
-    return UIPI_AllocRadioBttnGroup((t_UIContainerCtrl *)WidgetHandle,Label);
+    return UIPI_AllocRadioBttnGroup((t_UILayoutContainerCtrl *)WidgetHandle,
+            Label);
 }
 
 /*******************************************************************************
@@ -291,7 +293,7 @@ void PIUSDefault_SetComboBoxText(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxC
 
 struct PI_Checkbox *PIUSDefault_AddCheckbox(t_WidgetSysHandle *WidgetHandle,const char *Label,void (*EventCB)(const struct PICheckboxEvent *Event,void *UserData),void *UserData)
 {
-    return UIPI_AddCheckbox((t_UIContainerCtrl *)WidgetHandle,Label,EventCB,UserData);
+    return UIPI_AddCheckbox((t_UILayoutContainerCtrl *)WidgetHandle,Label,EventCB,UserData);
 }
 
 void PIUSDefault_FreeCheckbox(t_WidgetSysHandle *WidgetHandle,struct PI_Checkbox *UICtrl)
@@ -325,7 +327,7 @@ struct PI_TextInput *PIUSDefault_AddTextInput(t_WidgetSysHandle *WidgetHandle,
         void (*EventCB)(const struct PICBEvent *Event,void *UserData),
         void *UserData)
 {
-    return UIPI_AddTextInput((t_UIContainerCtrl *)WidgetHandle,
+    return UIPI_AddTextInput((t_UILayoutContainerCtrl *)WidgetHandle,
             Label,EventCB,UserData);
 }
 
@@ -364,7 +366,7 @@ struct PI_NumberInput *PIUSDefault_AddNumberInput(t_WidgetSysHandle *WidgetHandl
         void (*EventCB)(const struct PICBEvent *Event,void *UserData),
         void *UserData)
 {
-    return UIPI_AddNumberInput((t_UIContainerCtrl *)WidgetHandle,Label,
+    return UIPI_AddNumberInput((t_UILayoutContainerCtrl *)WidgetHandle,Label,
             EventCB,UserData);
 }
 
@@ -408,7 +410,7 @@ struct PI_DoubleInput *PIUSDefault_AddDoubleInput(t_WidgetSysHandle *WidgetHandl
         void (*EventCB)(const struct PICBEvent *Event,void *UserData),
         void *UserData)
 {
-    return UIPI_AddDoubleInput((t_UIContainerCtrl *)WidgetHandle,Label,
+    return UIPI_AddDoubleInput((t_UILayoutContainerCtrl *)WidgetHandle,Label,
             EventCB,UserData);
 }
 
@@ -460,7 +462,7 @@ struct PI_ColumnViewInput *PIUSDefault_AddColumnViewInput(t_WidgetSysHandle *Wid
         void (*EventCB)(const struct PICVEvent *Event,void *UserData),
         void *UserData)
 {
-    return UIPI_AddColumnViewInput((t_UIContainerCtrl *)WidgetHandle,Label,
+    return UIPI_AddColumnViewInput((t_UILayoutContainerCtrl *)WidgetHandle,Label,
             Columns,ColumnNames,EventCB,UserData);
 }
 
@@ -517,7 +519,7 @@ struct PI_ButtonInput *PIUSDefault_AddButtonInput(t_WidgetSysHandle *WidgetHandl
         void (*EventCB)(const struct PIButtonEvent *Event,void *UserData),
         void *UserData)
 {
-    return UIPI_AddButtonInput((t_UIContainerCtrl *)WidgetHandle,Label,
+    return UIPI_AddButtonInput((t_UILayoutContainerCtrl *)WidgetHandle,Label,
             EventCB,UserData);
 }
 
@@ -530,7 +532,7 @@ void PIUSDefault_FreeButtonInput(t_WidgetSysHandle *WidgetHandle,
 struct PI_Indicator *PIUSDefault_AddIndicator(t_WidgetSysHandle *WidgetHandle,
         const char *Label)
 {
-    return UIPI_AddIndicator((t_UIContainerCtrl *)WidgetHandle,Label);
+    return UIPI_AddIndicator((t_UILayoutContainerCtrl *)WidgetHandle,Label);
 }
 
 void PIUSDefault_FreeIndicator(t_WidgetSysHandle *WidgetHandle,
@@ -756,7 +758,7 @@ void PIUSDefault_FreeFileReqPathAndFile(char **Path,char **Filename)
 struct PI_TextBox *PIUSDefault_AddTextBox(t_WidgetSysHandle *WidgetHandle,
         const char *Label,const char *Text)
 {
-    return UIPI_AddTextBox((t_UIContainerCtrl *)WidgetHandle,Label,Text);
+    return UIPI_AddTextBox((t_UILayoutContainerCtrl *)WidgetHandle,Label,Text);
 }
 
 /*******************************************************************************
@@ -839,7 +841,7 @@ void PIUSDefault_SetTextBox(t_WidgetSysHandle *WidgetHandle,
  ******************************************************************************/
 struct PI_GroupBox *PIUSDefault_AddGroupBox(t_WidgetSysHandle *WidgetHandle,const char *Label)
 {
-    return UIPI_AddGroupBox((t_UIContainerCtrl *)WidgetHandle,Label);
+    return UIPI_AddGroupBox((t_UILayoutContainerCtrl *)WidgetHandle,Label);
 }
 
 /*******************************************************************************
@@ -932,8 +934,8 @@ struct PI_ColorPick *PIUSDefault_AddColorPick(t_WidgetSysHandle *WidgetHandle,
         void (*EventCB)(const struct PIColorPickEvent *Event,void *UserData),
         void *UserData)
 {
-    return UIPI_AddColorPickInput((t_UIContainerCtrl *)WidgetHandle,Label,RGB,
-            EventCB,UserData);
+    return UIPI_AddColorPickInput((t_UILayoutContainerCtrl *)WidgetHandle,
+            Label,RGB,EventCB,UserData);
 }
 
 /*******************************************************************************

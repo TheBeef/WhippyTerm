@@ -73,7 +73,7 @@ void RunDataProPluginSettingsDialog(class ConSettings *Settings,
 {
     t_UITabCtrl *TabCtrl;
     t_UITab *FirstTab;
-    t_UIContainerFrameCtrl *FirstTabContainer;
+    t_UILayoutContainerCtrl *FirstTabContainer;
 
     if(!UIAlloc_DataProPluginSettings())
         return;
@@ -122,11 +122,11 @@ void RunDataProPluginSettingsDialog(class ConSettings *Settings,
  *                              Arg2 -- ignored.
  *                              Return value: NULL
  *                  e_DataProPlugSettingsFn_AddNewTab -- A new tab should
- *                          be allocated and the t_UIContainerFrameCtrl for
+ *                          be allocated and the t_UILayoutContainerCtrl for
  *                          this tab should be returned.
  *                              Arg1 -- "const char *" with the tab name in it.
  *                              Arg2 -- ignored.
- *                              Return value: "t_UIContainerFrameCtrl *" with
+ *                              Return value: "t_UILayoutContainerCtrl *" with
  *                                      the handle to the container for the
  *                                      new tab in it.
  *
@@ -146,7 +146,7 @@ static void *DDPPS_PluginFnCallback(e_DataProPlugSettingsFnType Fn,void *Arg1,
     t_UITabCtrl *TabCtrl;
     int TabCount;
     t_UITab *ActiveTab;
-    t_UIContainerFrameCtrl *ActiveTabContainer;
+    t_UILayoutContainerCtrl *ActiveTabContainer;
     t_UITab *NewTab;
 
     TabCtrl=UIDPPS_GetTabControl();

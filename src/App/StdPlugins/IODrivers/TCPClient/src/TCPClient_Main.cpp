@@ -96,6 +96,11 @@ const struct IODriverAPI g_TCPClientPluginAPI=
     NULL,                                               // ConnectionAuxCtrlWidgets_FreeWidgets
     /* V2 */
     NULL,   // GetLastErrorMessage
+    /* V3 */
+    NULL,   // AllocSettingsWidgets
+    NULL,   // FreeSettingsWidgets
+    NULL,   // SetSettingsFromWidgets
+    NULL,   // ApplySettings
 };
 
 struct IODriverInfo m_TCPClientInfo=

@@ -112,7 +112,7 @@ bool UIAlloc_CRCFinder(void);
 void UIFree_CRCFinder(void);
 bool UIShow_CRCFinder(void);
 t_UIButtonCtrl *UICF_GetButton(e_CF_Button bttn);
-t_UIContainerFrameCtrl *UICF_GetHexContainerFrame(void);
+t_UIFrameContainerCtrl *UICF_GetHexContainerFrame(void);
 t_UITextInputCtrl *UICF_GetTextInput(e_CF_TextInput UIObj);
 t_UIComboBoxCtrl *UICF_GetComboBoxHandle(e_CF_ComboxType UIObj);
 t_UIRadioBttnCtrl *UICF_GetRadioBttnInput(e_CF_RadioBttnType UIObj);

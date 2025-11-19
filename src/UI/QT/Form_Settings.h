@@ -179,6 +179,10 @@ private slots:
     
     void on_Record_pushButton_clicked();
     
+    void on_IODriver_list_listWidget_itemClicked(QListWidgetItem *item);
+    
+    void on_IODriver_Settings_pushButton_clicked();
+    
 private:
     bool DoingEvent;
 

@@ -181,8 +181,8 @@ void UIFree_NewConnection(void)
     g_NewConnectionDialog=NULL;
 }
 
-t_UIContainerCtrl *UINC_GetOptionsFrameContainer(void)
+t_UILayoutContainerCtrl *UINC_GetOptionsFrameContainer(void)
 {
     /* Always has to be a QFormLayout based widget */
-    return (t_UIContainerCtrl *)g_NewConnectionDialog->ui->Options_Layout;
+    return (t_UILayoutContainerCtrl *)g_NewConnectionDialog->ui->Options_Layout;
 }

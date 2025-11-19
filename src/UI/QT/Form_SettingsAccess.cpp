@@ -149,6 +149,8 @@ t_UIListViewCtrl *UIS_GetListViewHandle(e_UIS_ListView UIObj)
             return (t_UIListViewCtrl *)g_SettingsDialog->ui->Binary_Processor_Decoder_listWidget;
         case e_UIS_ListView_BinaryProcessorOther:
             return (t_UIListViewCtrl *)g_SettingsDialog->ui->Binary_Other_listWidget;
+        case e_UIS_ListView_IODriverList:
+            return (t_UIListViewCtrl *)g_SettingsDialog->ui->IODriver_list_listWidget;
 
         case e_UIS_ListViewMAX:
         default:
@@ -207,7 +209,9 @@ t_UIButtonCtrl *UIS_GetButtonHandle(e_UIS_Button UIObj)
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->HR_SelectColor_pushButton;
         case e_UIS_Button_KeyRecord:
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->Record_pushButton;
-            
+        case e_UIS_Button_IODriverSettings:
+            return (t_UIButtonCtrl *)g_SettingsDialog->ui->IODriver_Settings_pushButton;
+
         case e_UIS_ButtonMAX:
         default:
         break;
@@ -231,6 +235,8 @@ t_UITabCtrl *UIS_GetTabCtrlHandle(e_UIS_TabCtrl UIObj)
             return (t_UITabCtrl *)g_SettingsDialog->ui->Terminal_tabWidget;
         case e_UIS_TabCtrl_Behaviour:
             return (t_UITabCtrl *)g_SettingsDialog->ui->Behaviour_tabWidget;
+        case e_UIS_TabCtrl_IODriver:
+            return (t_UITabCtrl *)g_SettingsDialog->ui->page_IODriver;
 
         case e_UIS_TabMAX:
         default:
@@ -545,6 +551,9 @@ void UIS_MakeTabVisable(e_UIS_TabCtrl Tab)
         break;
         case e_UIS_TabCtrl_Behaviour:
             g_SettingsDialog->ui->Editing_stackedWidget->setCurrentIndex(5);
+        break;
+        case e_UIS_TabCtrl_IODriver:
+            g_SettingsDialog->ui->Editing_stackedWidget->setCurrentIndex(6);
         break;
         case e_UIS_TabMAX:
         default:

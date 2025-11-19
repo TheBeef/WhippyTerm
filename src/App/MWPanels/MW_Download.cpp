@@ -367,7 +367,7 @@ void MWDownload::ConnectionChanged(void)
 {
     const struct DownloadStats *DLStat;
     t_UIComboBoxCtrl *ProtocolCB;
-    t_UIContainerCtrl *OptionsFrame;
+    t_UILayoutContainerCtrl *OptionsFrame;
     string FileName;
     string SelectedProtocolID;
     unsigned int SelProto;
@@ -496,7 +496,7 @@ void MWDownload::RethinkUI(void)
     t_UIButtonCtrl *StartBttn;
     t_UIButtonCtrl *AbortBttn;
     t_UIProgressBarCtrl *ProgressBar;
-    t_UIContainerCtrl *OptionsFrame;
+    t_UILayoutContainerCtrl *OptionsFrame;
     i_FTPDownloadMenuList MenuItem;
     const struct UploadStats *UStat;
     const struct DownloadStats *DLStat;
@@ -738,7 +738,7 @@ void MWDownload::Abort(void)
  ******************************************************************************/
 void MWDownload::DownloadProtocolChange(int Index)
 {
-    t_UIContainerCtrl *OptionsFrame;
+    t_UILayoutContainerCtrl *OptionsFrame;
     t_KVList *Options;
     string OldIDStr;
 

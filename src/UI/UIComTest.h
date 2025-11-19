@@ -148,7 +148,7 @@ bool UIAlloc_ComTest(void);
 void UIFree_ComTest(void);
 bool UIShow_ComTest(void);
 t_UIButtonCtrl *UICT_GetButton(e_CT_Button bttn);
-t_UIContainerCtrl *UICT_GetOptionsFrameContainer(e_CT_Frame frame);
+t_UILayoutContainerCtrl *UICT_GetOptionsFrameContainer(e_CT_Frame frame);
 t_UITextInputCtrl *UICT_GetTextInput(e_CT_TextInput UIObj);
 t_UIComboBoxCtrl *UICT_GetComboBoxHandle(e_CT_ComboxType UIObj);
 t_UICheckboxCtrl *UICT_GetCheckboxHandle(e_CT_CheckboxType UIObj);

@@ -3,10 +3,6 @@
 I think the settings need to be copied, and restored on cancel button.  This
 is because I see some stuff that changes the data in the global structure
 instead of in the GUI (window pos for example, and plugin settings)
-
- * All the settings buttons
- * Add setting button to binary misc
- * 
 */
 
 /*******************************************************************************
@@ -42,6 +38,7 @@ instead of in the GUI (window pos for example, and plugin settings)
 /*** HEADER FILES TO INCLUDE  ***/
 #include "App/Dialogs/Dialog_Settings.h"
 #include "App/Dialogs/Dialog_DataProPluginSettings.h"
+#include "App/Dialogs/Dialog_IODriverSettings.h"
 #include "App/Display/DisplayColors.h"
 #include "App/DataProcessorsSystem.h"
 #include "App/Settings.h"
@@ -92,6 +89,7 @@ enum e_DS_SettingsArea
     e_DS_SettingsArea_Startup,
     e_DS_SettingsArea_Connections,
     e_DS_SettingsArea_Display,
+    e_DS_SettingsArea_IODriver,
     e_DS_SettingsArea_Terminal,
     e_DS_SettingsArea_Behaviour,
     e_DS_SettingsAreaMAX
@@ -135,6 +133,7 @@ static void UIS_HandleInputProcessingHighlighterChange(void);
 static void UIS_HandleInputProcessingOtherChange(void);
 static void UIS_HandleInputProcessingBinaryDecoderChange(void);
 static void UIS_HandleInputProcessingBinaryOtherChange(void);
+static void UIS_HandleIODriveListChange(void);
 static void UIS_HandleSysColPresetChange(uintptr_t ID);
 static void UIS_HandleAreaChanged(uintptr_t ID);
 static void UIS_HandleKeyBindingsCmdListChange(uintptr_t ID);
@@ -171,6 +170,9 @@ class ConSettings *m_SettingConSettings;
 bool m_SettingConSettingsOnly;
 uint32_t m_HROverrideColor;
 struct CommandKeySeq m_LastRecordingKeyPressed;
+static struct DriverInfoList *m_DS_IODriverList;
+t_PluginSettings m_CopyOfIODriverPluginsSettings;
+t_PluginSettings m_CopyOfDataProcessorsPluginSettings;
 
 struct ProInfoSortCB
 {
@@ -231,6 +233,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     t_UIListViewCtrl *InputProTextHighlight;
     t_UIListViewCtrl *InputProTextOther;
     t_UIListViewCtrl *BinaryProcessorsDecoder;
+    t_UIListViewCtrl *IODriverList;
     t_UIComboBoxCtrl *WindowStartupPos;
     t_UINumberInput *TermSize_Width;
     t_UINumberInput *TermSize_Height;
@@ -258,6 +261,8 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     e_UIS_TabCtrl_Terminal_Page SelectTerminalPage;
     e_UIS_TabCtrl_Display_Page SelectDisplayPage;
     t_UICheckboxCtrl *CheckboxHandle;
+    struct DriverInfoList *CurDrv;
+    t_UIButtonCtrl *ButtonHandle;
 
     m_SettingsMW=MW;
     m_DS_ConList=NULL;
@@ -283,6 +288,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
 
     memcpy(&m_CopyOfKeyMapping,&g_Settings.KeyMapping,
             sizeof(m_CopyOfKeyMapping));
+    m_CopyOfIODriverPluginsSettings=g_Settings.IODriverPluginsSettings;
 
     /* Setup the UI */
     AreaList=UIS_GetListViewHandle(e_UIS_ListView_AreaList);
@@ -295,6 +301,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     UIAddItem2ListView(AreaList,"Display",e_DS_SettingsArea_Display);
     if(!m_SettingConSettingsOnly)
     {
+        UIAddItem2ListView(AreaList,"IO Drivers",e_DS_SettingsArea_IODriver);
         UIAddItem2ListView(AreaList,"Panels",e_DS_SettingsArea_Panels);
         UIAddItem2ListView(AreaList,"Startup",e_DS_SettingsArea_Startup);
     }
@@ -502,6 +509,20 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         UIGroupBoxVisible(Keyboard_CursorKeyToggle,false);
     }
 
+    IODriverList=UIS_GetListViewHandle(e_UIS_ListView_IODriverList);
+    UIClearListView(IODriverList);
+    m_DS_IODriverList=IOS_GetListOfDrivers();
+    for(CurDrv=m_DS_IODriverList;CurDrv!=NULL;CurDrv=CurDrv->Next)
+    {
+        UIAddItem2ListView(IODriverList,CurDrv->Name.c_str(),
+                (uintptr_t)CurDrv);
+    }
+    ButtonHandle=UIS_GetButtonHandle(e_UIS_Button_IODriverSettings);
+    UIEnableButton(ButtonHandle,false);
+
+    ButtonHandle=UIS_GetButtonHandle(e_UIS_Button_BinaryProOther_Settings);
+    UIEnableButton(ButtonHandle,false);
+
     /* Load settings into UI */
     DS_SetSettingGUI();
 
@@ -555,7 +576,10 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         RetValue=true;
 
         DS_GetSettingsFromGUI();
+        g_Settings.IODriverPluginsSettings=m_CopyOfIODriverPluginsSettings;
+
         DPS_PrunePluginSettings(m_SettingConSettings);
+        IOS_PruneDriverSettings(&g_Settings.IODriverPluginsSettings);
 
         if(!m_SettingConSettingsOnly)
         {
@@ -577,6 +601,10 @@ bool RunSettingsDialog(class TheMainWindow *MW,
             IOS_FreeConnectionOptions(m_DS_ConOptions);
         IOS_FreeListOfAvailableConnections(m_DS_ConList);
     }
+
+    if(m_DS_IODriverList!=NULL)
+        IOS_FreeDriverInfoList(m_DS_IODriverList);
+    m_DS_IODriverList=NULL;
 
     UIS_Free_Settings();
 
@@ -1539,6 +1567,9 @@ void UIS_HandleAreaChanged(uintptr_t ID)
         case e_DS_SettingsArea_Display:
             UIS_MakeTabVisable(e_UIS_TabCtrl_Display);
         break;
+        case e_DS_SettingsArea_IODriver:
+            UIS_MakeTabVisable(e_UIS_TabCtrl_IODriver);
+        break;
         case e_DS_SettingsArea_Terminal:
             UIS_MakeTabVisable(e_UIS_TabCtrl_Terminal);
         break;
@@ -2075,6 +2106,47 @@ void UIS_HandleInputProcessingBinaryOtherChange(void)
 
 /*******************************************************************************
  * NAME:
+ *    UIS_HandleIODriveListChange
+ *
+ * SYNOPSIS:
+ *    void UIS_HandleIODriveListChange(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function updates the UI when the selected IO Drive changes.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIS_HandleIODriveListChange(void)
+{
+    bool HasSettings;
+    t_UIButtonCtrl *SettingsBttn;
+    t_UIListViewCtrl *ListView;
+    struct DriverInfoList *Selected;
+
+    ListView=UIS_GetListViewHandle(e_UIS_ListView_IODriverList);
+    SettingsBttn=UIS_GetButtonHandle(e_UIS_Button_IODriverSettings);
+
+    Selected=(struct DriverInfoList *)UIGetListViewSelectedEntry(ListView);
+    if(Selected==NULL)
+        return;
+
+    if(IOS_DoesDriverHaveSettings(Selected->BaseURI.c_str()))
+        HasSettings=true;
+    else
+        HasSettings=false;
+
+    UIEnableButton(SettingsBttn,HasSettings);
+}
+
+/*******************************************************************************
+ * NAME:
  *    UIS_HandleSysColPresetChange
  *
  * SYNOPSIS:
@@ -2485,6 +2557,7 @@ bool DS_Event(const struct DSEvent *Event)
     t_UIButtonCtrl *Bttn;
     string SeqStr;
     t_UITextInputCtrl *ShortcutInput;
+    struct DriverInfoList *SelectedIODrv;
 
     AcceptEvent=true;
     switch(Event->EventType)
@@ -2517,6 +2590,8 @@ bool DS_Event(const struct DSEvent *Event)
                     Selected=UIGetComboBoxSelectedEntry(ComboxBox);
                     if(Selected!=0 && Selected<m_CharEncodingInputPros.size())
                     {
+/* DEBUG PAUL: Change this to be more like IO System, so we can handle
+   canceling of the settings dialog */
                         RunDataProPluginSettingsDialog(m_SettingConSettings,
                                 m_CharEncodingInputPros[Selected].IDStr);
                     }
@@ -2709,8 +2784,6 @@ bool DS_Event(const struct DSEvent *Event)
                         else
                         {
                             SeqStr=ConvertKeySeq2String(&m_LastRecordingKeyPressed);
-                            printf("%s\n",ConvertKeySeq2String(&m_LastRecordingKeyPressed));
-                            fflush(stdout);
                         }
                         UISetTextCtrlText(ShortcutInput,SeqStr.c_str());
                     }
@@ -2728,6 +2801,18 @@ bool DS_Event(const struct DSEvent *Event)
                         UI_CollectAllKeyPresses(UIS_RecordKeyPressCallback);
                         m_LastRecordingKeyPressed.Key=e_UIKeysMAX;
                         m_LastRecordingKeyPressed.Letter=0;
+                    }
+                break;
+
+                case e_UIS_Button_IODriverSettings:
+                    ListView=UIS_GetListViewHandle(e_UIS_ListView_IODriverList);
+                    SelectedIODrv=(struct DriverInfoList *)
+                            UIGetListViewSelectedEntry(ListView);
+                    if(SelectedIODrv!=NULL)
+                    {
+                        RunIODriverSettingsDialog(
+                                &m_CopyOfIODriverPluginsSettings,
+                                SelectedIODrv->BaseURI.c_str());
                     }
                 break;
 
@@ -3002,6 +3087,9 @@ bool DS_Event(const struct DSEvent *Event)
                 break;
                 case e_UIS_ListView_BinaryProcessorOther:
                     UIS_HandleInputProcessingBinaryOtherChange();
+                break;
+                case e_UIS_ListView_IODriverList:
+                    UIS_HandleIODriveListChange();
                 break;
                 case e_UIS_ListViewMAX:
                 default:

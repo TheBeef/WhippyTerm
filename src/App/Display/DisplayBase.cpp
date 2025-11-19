@@ -1365,7 +1365,7 @@ t_UIComboBoxCtrl *DisplayBase::GetSendPanel_LineEndInput(void)
  *    DisplayBase::SetupHexInput
  *
  * SYNOPSIS:
- *    void DisplayBase::SetupHexInput(t_UIContainerFrameCtrl *ParentWid);
+ *    void DisplayBase::SetupHexInput(t_UIFrameContainerCtrl *ParentWid);
  *
  * PARAMETERS:
  *    ParentWid [I] -- The widget that this hex input will live
@@ -1382,7 +1382,7 @@ t_UIComboBoxCtrl *DisplayBase::GetSendPanel_LineEndInput(void)
  * SEE ALSO:
  *    DisplayBase::FreeHexInput()
  ******************************************************************************/
-void DisplayBase::SetupHexInput(t_UIContainerFrameCtrl *ParentWid)
+void DisplayBase::SetupHexInput(t_UIFrameContainerCtrl *ParentWid)
 {
     t_UIContextMenuCtrl *ContextMenu_ClearScreen;
     t_UIContextMenuCtrl *ContextMenu_EndianSwap;

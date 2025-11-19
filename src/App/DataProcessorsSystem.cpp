@@ -1449,11 +1449,11 @@ bool DPS_DoesPluginHaveSettings(const char *IDStr)
  *                              Arg2 -- ignored.
  *                              Return value: NULL
  *                  e_DataProPlugSettingsFn_AddNewTab -- A new tab should
- *                          be allocated and the t_UIContainerFrameCtrl for
+ *                          be allocated and the t_UILayoutContainerCtrl for
  *                          this tab should be returned.
  *                              Arg1 -- "const char *" with the tab name in it.
  *                              Arg2 -- ignored.
- *                              Return value: "t_UIContainerFrameCtrl *" with
+ *                              Return value: "t_UILayoutContainerCtrl *" with
  *                                      the handle to the container for the
  *                                      new tab in it.
  *
@@ -1484,7 +1484,7 @@ void DPS_PluginSettings_SetActiveCtrls(void *(*GuiCtrl)(e_DataProPlugSettingsFnT
  *
  * SYNOPSIS:
  *    t_DataProSettingsWidgetsType *DPS_PluginSettings_AddWidgets(class ConSettings *Settings,
- *              const char *IDStr,t_UIContainerFrameCtrl *Cont);
+ *              const char *IDStr,t_UILayoutContainerCtrl *Cont);
  *
  * PARAMETERS:
  *    Settings [I] -- The settings with the plugin settings in it.
@@ -1510,7 +1510,7 @@ void DPS_PluginSettings_SetActiveCtrls(void *(*GuiCtrl)(e_DataProPlugSettingsFnT
  *    
  ******************************************************************************/
 t_DataProSettingsWidgetsType *DPS_PluginSettings_AddWidgets(class ConSettings *Settings,
-        const char *IDStr,t_UIContainerFrameCtrl *Cont)
+        const char *IDStr,t_UILayoutContainerCtrl *Cont)
 {
     const struct DataProcessor *ProData;
     t_DataProSettingsWidgetsType *PrivData;

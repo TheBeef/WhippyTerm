@@ -484,7 +484,7 @@ void DCT_ChangeConnectionListSelectedEntry(struct ConnectionInfoList *Con,
         e_DCTType Connection)
 {
     e_CT_Frame FrameID;
-    t_UIContainerCtrl *Frame;
+    t_UILayoutContainerCtrl *Frame;
 
     if(m_DCT_OptionsWidgets[Connection]!=NULL)
     {
@@ -535,8 +535,8 @@ static void DCT_RethinkUI(void)
     t_UIButtonCtrl *Rescan2;
     t_UIButtonCtrl *Start;
     t_UIButtonCtrl *Stop;
-    t_UIContainerCtrl *Options1;
-    t_UIContainerCtrl *Options2;
+    t_UILayoutContainerCtrl *Options1;
+    t_UILayoutContainerCtrl *Options2;
     t_UIComboBoxCtrl *ConPullDown1;
     t_UIComboBoxCtrl *ConPullDown2;
     t_UIComboBoxCtrl *Pattern;

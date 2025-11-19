@@ -93,7 +93,7 @@ bool UIAlloc_NewConnection(void);
 bool UIShow_NewConnection(void);
 void UIFree_NewConnection(void);
 
-t_UIContainerCtrl *UINC_GetOptionsFrameContainer(void);
+t_UILayoutContainerCtrl *UINC_GetOptionsFrameContainer(void);
 t_UIComboBoxCtrl *UINC_GetComboBoxHandle(e_UINC_ComboBox CBox);
 t_UITextInputCtrl *UINC_GetTxtInputHandle(e_UINC_TxtInput TInput);
 

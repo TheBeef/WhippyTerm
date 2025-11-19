@@ -998,7 +998,7 @@ void UIMW_SetRightPanel(t_UIMainWindow *win,int NewSize,bool PanelOpen)
  *    UIMW_GetContainerFrameCtrlHandle
  *
  * SYNOPSIS:
- *    t_UIContainerFrameCtrl *UIMW_GetContainerFrameCtrlHandle(
+ *    t_UIFrameContainerCtrl *UIMW_GetContainerFrameCtrlHandle(
  *              t_UIMainWindow *win);
  *
  * PARAMETERS:
@@ -1014,39 +1014,11 @@ void UIMW_SetRightPanel(t_UIMainWindow *win,int NewSize,bool PanelOpen)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIContainerFrameCtrl *UIMW_GetContainerFrameCtrlHandle(t_UIMainWindow *win)
+t_UIFrameContainerCtrl *UIMW_GetContainerFrameCtrlHandle(t_UIMainWindow *win)
 {
     Form_MainWindow *realwin=(Form_MainWindow *)win;
 
-    return (t_UIContainerFrameCtrl *)realwin->ui->ContainerFrame;
-}
-
-/*******************************************************************************
- * NAME:
- *    UIMW_SetContainerFrameVisible
- *
- * SYNOPSIS:
- *    void UIMW_SetContainerFrameVisible(t_UIContainerFrameCtrl *ctrl,
- *              bool Show);
- *
- * PARAMETERS:
- *    ctrl [I] -- The control to work on
- *    Show [I] -- true = show it, false = hide it
- *
- * FUNCTION:
- *    This function shows / hides a container frame.
- *
- * RETURNS:
- *    NONE
- *
- * SEE ALSO:
- *    
- ******************************************************************************/
-void UIMW_SetContainerFrameVisible(t_UIContainerFrameCtrl *ctrl,bool Show)
-{
-    QFrame *Frame=(QFrame *)ctrl;
-
-    Frame->setVisible(Show);
+    return (t_UIFrameContainerCtrl *)realwin->ui->ContainerFrame;
 }
 
 /*******************************************************************************
@@ -1054,7 +1026,7 @@ void UIMW_SetContainerFrameVisible(t_UIContainerFrameCtrl *ctrl,bool Show)
  *    UIMW_GetOptionsFrameContainer
  *
  * SYNOPSIS:
- *    t_UIContainerCtrl *UIMW_GetOptionsFrameContainer(t_UIMainWindow *win);
+ *    t_UILayoutContainerCtrl *UIMW_GetOptionsFrameContainer(t_UIMainWindow *win);
  *
  * PARAMETERS:
  *    win [I] -- The main window that has the control in it.
@@ -1069,11 +1041,11 @@ void UIMW_SetContainerFrameVisible(t_UIContainerFrameCtrl *ctrl,bool Show)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIContainerCtrl *UIMW_GetOptionsFrameContainer(t_UIMainWindow *win)
+t_UILayoutContainerCtrl *UIMW_GetOptionsFrameContainer(t_UIMainWindow *win)
 {
     Form_MainWindow *realwin=(Form_MainWindow *)win;
 
-    return (t_UIContainerCtrl *)realwin->ui->formLayout_ConOptions;
+    return (t_UILayoutContainerCtrl *)realwin->ui->formLayout_ConOptions;
 }
 
 /*******************************************************************************
@@ -1081,7 +1053,7 @@ t_UIContainerCtrl *UIMW_GetOptionsFrameContainer(t_UIMainWindow *win)
  *    UIMW_GetUploadOptionsFrameContainer
  *
  * SYNOPSIS:
- *    t_UIContainerCtrl *UIMW_GetUploadOptionsFrameContainer(t_UIMainWindow *win);
+ *    t_UILayoutContainerCtrl *UIMW_GetUploadOptionsFrameContainer(t_UIMainWindow *win);
  *
  * PARAMETERS:
  *    win [I] -- The main window that has the control in it.
@@ -1096,11 +1068,11 @@ t_UIContainerCtrl *UIMW_GetOptionsFrameContainer(t_UIMainWindow *win)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIContainerCtrl *UIMW_GetUploadOptionsFrameContainer(t_UIMainWindow *win)
+t_UILayoutContainerCtrl *UIMW_GetUploadOptionsFrameContainer(t_UIMainWindow *win)
 {
     Form_MainWindow *realwin=(Form_MainWindow *)win;
 
-    return (t_UIContainerCtrl *)realwin->ui->formLayout_UploadOptions;
+    return (t_UILayoutContainerCtrl *)realwin->ui->formLayout_UploadOptions;
 }
 
 /*******************************************************************************
@@ -1108,7 +1080,7 @@ t_UIContainerCtrl *UIMW_GetUploadOptionsFrameContainer(t_UIMainWindow *win)
  *    UIMW_GetDownloadOptionsFrameContainer
  *
  * SYNOPSIS:
- *    t_UIContainerCtrl *UIMW_GetDownloadOptionsFrameContainer(t_UIMainWindow *win);
+ *    t_UILayoutContainerCtrl *UIMW_GetDownloadOptionsFrameContainer(t_UIMainWindow *win);
  *
  * PARAMETERS:
  *    win [I] -- The main window that has the control in it.
@@ -1123,11 +1095,11 @@ t_UIContainerCtrl *UIMW_GetUploadOptionsFrameContainer(t_UIMainWindow *win)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIContainerCtrl *UIMW_GetDownloadOptionsFrameContainer(t_UIMainWindow *win)
+t_UILayoutContainerCtrl *UIMW_GetDownloadOptionsFrameContainer(t_UIMainWindow *win)
 {
     Form_MainWindow *realwin=(Form_MainWindow *)win;
 
-    return (t_UIContainerCtrl *)realwin->ui->formLayout_DownloadOptions;
+    return (t_UILayoutContainerCtrl *)realwin->ui->formLayout_DownloadOptions;
 }
 
 /*******************************************************************************
@@ -1135,7 +1107,7 @@ t_UIContainerCtrl *UIMW_GetDownloadOptionsFrameContainer(t_UIMainWindow *win)
  *    UIMW_GetConAuxControlsFrameContainer
  *
  * SYNOPSIS:
- *    t_UIContainerCtrl *UIMW_GetConAuxControlsFrameContainer(t_UIMainWindow *win);
+ *    t_UILayoutContainerCtrl *UIMW_GetConAuxControlsFrameContainer(t_UIMainWindow *win);
  *
  * PARAMETERS:
  *    win [I] -- The main window that has the control in it.
@@ -1150,11 +1122,11 @@ t_UIContainerCtrl *UIMW_GetDownloadOptionsFrameContainer(t_UIMainWindow *win)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIContainerCtrl *UIMW_GetConAuxControlsFrameContainer(t_UIMainWindow *win)
+t_UILayoutContainerCtrl *UIMW_GetConAuxControlsFrameContainer(t_UIMainWindow *win)
 {
     Form_MainWindow *realwin=(Form_MainWindow *)win;
 
-    return (t_UIContainerCtrl *)realwin->ui->formLayout_ConAux;
+    return (t_UILayoutContainerCtrl *)realwin->ui->formLayout_ConAux;
 }
 
 void UIMW_SetWindowTitle(t_UIMainWindow *win,const char *Title)
@@ -1346,7 +1318,7 @@ void UIMW_AddFTPDownloadClearAllMenus(t_UIMainWindow *win)
  *    UIMW_GetHexDisplayContainerFrameCtrlHandle
  *
  * SYNOPSIS:
- *    t_UIContainerFrameCtrl *UIMW_GetHexDisplayContainerFrameCtrlHandle(
+ *    t_UIFrameContainerCtrl *UIMW_GetHexDisplayContainerFrameCtrlHandle(
  *              t_UIMainWindow *win);
  *
  * PARAMETERS:
@@ -1362,11 +1334,11 @@ void UIMW_AddFTPDownloadClearAllMenus(t_UIMainWindow *win)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIContainerFrameCtrl *UIMW_GetHexDisplayContainerFrameCtrlHandle(t_UIMainWindow *win)
+t_UIFrameContainerCtrl *UIMW_GetHexDisplayContainerFrameCtrlHandle(t_UIMainWindow *win)
 {
     Form_MainWindow *realwin=(Form_MainWindow *)win;
 
-    return (t_UIContainerFrameCtrl *)realwin->ui->frame_HexDisplayContainer;
+    return (t_UIFrameContainerCtrl *)realwin->ui->frame_HexDisplayContainer;
 }
 
 /*******************************************************************************
@@ -1374,7 +1346,7 @@ t_UIContainerFrameCtrl *UIMW_GetHexDisplayContainerFrameCtrlHandle(t_UIMainWindo
  *    UIMW_GetSendBuffersContainerFrameCtrlHandle
  *
  * SYNOPSIS:
- *    t_UIContainerFrameCtrl *UIMW_GetSendBuffersContainerFrameCtrlHandle(
+ *    t_UIFrameContainerCtrl *UIMW_GetSendBuffersContainerFrameCtrlHandle(
  *              t_UIMainWindow *win);
  *
  * PARAMETERS:
@@ -1390,11 +1362,11 @@ t_UIContainerFrameCtrl *UIMW_GetHexDisplayContainerFrameCtrlHandle(t_UIMainWindo
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIContainerFrameCtrl *UIMW_GetSendBuffersContainerFrameCtrlHandle(t_UIMainWindow *win)
+t_UIFrameContainerCtrl *UIMW_GetSendBuffersContainerFrameCtrlHandle(t_UIMainWindow *win)
 {
     Form_MainWindow *realwin=(Form_MainWindow *)win;
 
-    return (t_UIContainerFrameCtrl *)realwin->ui->frame_Buffer_HexDisplayContainer;
+    return (t_UIFrameContainerCtrl *)realwin->ui->frame_Buffer_HexDisplayContainer;
 }
 
 /*******************************************************************************

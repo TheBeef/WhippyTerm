@@ -38,6 +38,7 @@
 #include "App/MainWindow.h"
 #include "App/Util/StorageHelpers.h"
 #include "App/Util/KeyValue.h"
+#include "App/PluginSupport/PluginSystem.h"
 #include "PluginSDK/DataProcessors.h"
 #include "ThirdParty/TinyCFG/TinyCFG.h"
 #include <string>
@@ -104,16 +105,6 @@ typedef enum
 } e_CursorKeyToggleModeType;
 
 /***  CLASS DEFINITIONS                ***/
-struct PluginSettings
-{
-    public:
-        std::string IDStr;
-        t_KVList Settings;
-
-        void RegisterAllMembers(class TinyCFG &cfg);
-};
-typedef std::list<struct PluginSettings> t_PluginSettings;
-typedef t_PluginSettings::iterator i_PluginSettings;
 
 /* These are settings that can be changed per connection */
 class ConSettings
@@ -271,6 +262,9 @@ class Settings
 
         /* Connection settings defaults */
         class ConSettings DefaultConSettings;
+
+        /* Plugins Settings */
+        t_PluginSettings IODriverPluginsSettings;
 
         Settings();
         void RegisterAllMembers(class TinyCFG &cfg);

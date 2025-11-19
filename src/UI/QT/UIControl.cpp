@@ -1604,7 +1604,7 @@ void UIProgressBarVisible(t_UIProgressBarCtrl *Bar,bool Show)
 /*************************************/
 /* UIContainerCtrl                   */
 /*************************************/
-void UIEnableContainerCtrl(t_UIContainerCtrl *Container,bool Enable)
+void UIEnableContainerCtrl(t_UILayoutContainerCtrl *Container,bool Enable)
 {
     QFormLayout *fl=(QFormLayout *)Container;
     QWidget *parent;
@@ -1774,3 +1774,30 @@ bool UIColumnViewHasSelectedEntry(t_UIColumnView *ColumnView)
     return UIGetColumnViewSelectedEntry(ColumnView)>=0;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    UISetFrameContainerVisible
+ *
+ * SYNOPSIS:
+ *    void UISetFrameContainerVisible(t_UIFrameContainerCtrl *ctrl,
+ *              bool Show);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- The control to work on
+ *    Show [I] -- true = show it, false = hide it
+ *
+ * FUNCTION:
+ *    This function shows / hides a container frame.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UISetFrameContainerVisible(t_UIFrameContainerCtrl *ctrl,bool Show)
+{
+    QFrame *Frame=(QFrame *)ctrl;
+
+    Frame->setVisible(Show);
+}

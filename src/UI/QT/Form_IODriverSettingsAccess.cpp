@@ -1,5 +1,5 @@
 /*******************************************************************************
- * FILENAME: Form_DataProPluginSettingsAccess.cpp
+ * FILENAME: Form_IODriverSettingsAccess.cpp
  *
  * PROJECT:
  *    Whippy Term
@@ -29,10 +29,10 @@
  ******************************************************************************/
 
 /*** HEADER FILES TO INCLUDE  ***/
-#include "Form_DataProPluginSettings.h"
+#include "Form_IODriverSettings.h"
 #include "main.h"
-#include "ui_Form_DataProPluginSettings.h"
-#include "UI/UIDataProPluginSettings.h"
+#include "ui_Form_IODriverSettings.h"
+#include "UI/UIIODriverSettings.h"
 
 /*** DEFINES                  ***/
 
@@ -43,14 +43,14 @@
 /*** FUNCTION PROTOTYPES      ***/
 
 /*** VARIABLE DEFINITIONS     ***/
-class Form_DataProPluginSettings *g_DataProPluginSettingsDialog;
+class Form_IODriverSettings *g_IODriverSettingsDialog;
 
 /*******************************************************************************
  * NAME:
- *    UIAlloc_DataProPluginSettings
+ *    UIAlloc_IODriverSettings
  *
  * SYNOPSIS:
- *    bool UIAlloc_DataProPluginSettings(void);
+ *    bool UIAlloc_IODriverSettings(void);
  *
  * PARAMETERS:
  *    NONE
@@ -65,15 +65,15 @@ class Form_DataProPluginSettings *g_DataProPluginSettingsDialog;
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool UIAlloc_DataProPluginSettings(void)
+bool UIAlloc_IODriverSettings(void)
 {
     try
     {
-        g_DataProPluginSettingsDialog=new Form_DataProPluginSettings(g_MainApp->activeWindow());
+        g_IODriverSettingsDialog=new Form_IODriverSettings(g_MainApp->activeWindow());
     }
     catch(...)
     {
-        g_DataProPluginSettingsDialog=NULL;
+        g_IODriverSettingsDialog=NULL;
         return false;
     }
     return true;
@@ -81,10 +81,10 @@ bool UIAlloc_DataProPluginSettings(void)
 
 /*******************************************************************************
  * NAME:
- *    UIFree_DataProPluginSettings
+ *    UIFree_IODriverSettings
  *
  * SYNOPSIS:
- *    void UIFree_DataProPluginSettings(void);
+ *    void UIFree_IODriverSettings(void);
  *
  * PARAMETERS:
  *    NONE
@@ -98,11 +98,11 @@ bool UIAlloc_DataProPluginSettings(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UIFree_DataProPluginSettings(void)
+void UIFree_IODriverSettings(void)
 {
-    delete g_DataProPluginSettingsDialog;
+    delete g_IODriverSettingsDialog;
 
-    g_DataProPluginSettingsDialog=NULL;
+    g_IODriverSettingsDialog=NULL;
 }
 
 /*******************************************************************************
@@ -129,12 +129,12 @@ void UIFree_DataProPluginSettings(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool UIShow_DataProPluginSettings(void)
+bool UIShow_IODriverSettings(void)
 {
-    return g_DataProPluginSettingsDialog->exec();
+    return g_IODriverSettingsDialog->exec();
 }
 
-t_UITab *UIDPPS_AddNewTab(const char *Name)
+t_UITab *UIIODS_AddNewTab(const char *Name)
 {
     QWidget *NewTab;
     QVBoxLayout *verticalLayout;
@@ -147,17 +147,17 @@ t_UITab *UIDPPS_AddNewTab(const char *Name)
 
     verticalLayout->addLayout(NewFormLayout);
 
-    g_DataProPluginSettingsDialog->ui->tabWidget->addTab(NewTab,Name);
+    g_IODriverSettingsDialog->ui->tabWidget->addTab(NewTab,Name);
 
     return (t_UITab *)NewTab;
 }
 
-t_UITabCtrl *UIDPPS_GetTabControl(void)
+t_UITabCtrl *UIIODS_GetTabControl(void)
 {
-    return (t_UITabCtrl *)g_DataProPluginSettingsDialog->ui->tabWidget;
+    return (t_UITabCtrl *)g_IODriverSettingsDialog->ui->tabWidget;
 }
 
-t_UILayoutContainerCtrl *UIDPPS_GetTabContainerFrame(t_UITab *UITab)
+t_UILayoutContainerCtrl *UIIODS_GetTabContainerFrame(t_UITab *UITab)
 {
     QWidget *tab=(QWidget *)UITab;
     QVBoxLayout *verticalLayout;

@@ -1110,6 +1110,7 @@ bool RegisterPluginSettingsList(class TinyCFG &cfg,const char *XmlName,
  ******************************************************************************/
 void ApplySettings(void)
 {
+    IOS_ApplySettings();
     MW_ApplySettings();
 
     /* Apply to all connections */

@@ -31,6 +31,7 @@
 /*** HEADER FILES TO INCLUDE  ***/
 #include "Comport_ConnectionOptions.h"
 #include "Comport_Main.h"
+#include <inttypes.h>
 
 /*** DEFINES                  ***/
 
@@ -81,6 +82,8 @@ t_ConnectionWidgetsType *Comport_ConnectionOptionsWidgets_AllocWidgets(
         t_WidgetSysHandle *WidgetHandle)
 {
     struct Comport_OptionWidgets *Widgets;
+    int r;
+    char buff[100];
 
     Widgets=NULL;
     try
@@ -132,6 +135,14 @@ t_ConnectionWidgetsType *Comport_ConnectionOptionsWidgets_AllocWidgets(
         g_CP_UI->AddItem2ComboBox(WidgetHandle,Widgets->BaudRate->Ctrl,"230400",230400);
         g_CP_UI->AddItem2ComboBox(WidgetHandle,Widgets->BaudRate->Ctrl,"460800",460800);
         g_CP_UI->AddItem2ComboBox(WidgetHandle,Widgets->BaudRate->Ctrl,"921600",921600);
+        for(r=0;r<USER_BAUDRATE_MAX;r++)
+        {
+            if(g_Comport_Settings.UserBaudRate[r]>0)
+            {
+                sprintf(buff,"%" PRIu32,g_Comport_Settings.UserBaudRate[r]);
+                g_CP_UI->AddItem2ComboBox(WidgetHandle,Widgets->BaudRate->Ctrl,buff,g_Comport_Settings.UserBaudRate[r]);
+            }
+        }
 
         g_CP_UI->ClearComboBox(WidgetHandle,Widgets->DataBits->Ctrl);
         g_CP_UI->AddItem2ComboBox(WidgetHandle,Widgets->DataBits->Ctrl,"7 Bit",e_ComportDataBits_7);

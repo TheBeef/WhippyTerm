@@ -31,6 +31,10 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added comport settings for user speeds",
+            "Added settings for the comport to let the user add"
+            " their own baud rates."},
+    {
         NOTETYPE_ENHANCEMENT,"Added settings to IO Drivers",
             "A new settings area has been added where IO Driver plugins"
             " can now have settings like the Data Processors can."},

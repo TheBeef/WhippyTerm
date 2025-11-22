@@ -92,6 +92,7 @@ void IOS_InitPlugins(void);
 void IOS_InformOfNewPluginInstalled(const char *PluginIDStr);
 void IOS_InformOfPluginUninstalled(const char *PluginIDStr);
 void IOS_Shutdown(void);
+void IOS_ApplySettings(void);
 
 void IOS_ScanForConnections(void);
 struct ConnectionInfoList *IOS_GetListOfAvailableConnections(void);

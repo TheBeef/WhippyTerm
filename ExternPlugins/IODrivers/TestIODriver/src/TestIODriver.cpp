@@ -121,6 +121,7 @@ void TestButton_EventCB(const struct PIButtonEvent *Event,void *UserData);
 t_ConnectionWidgetsType *TestIODrv_AllocSettingsWidgets(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings);
 void TestIODrv_FreeSettingsWidgets(t_ConnectionWidgetsType *PrivData);
 void TestIODrv_StoreSettings(t_ConnectionWidgetsType *PrivData,t_PIKVList *Settings);
+void TestIODrv_ApplySettings(t_PIKVList *Settings);
 
 /*** VARIABLE DEFINITIONS     ***/
 const struct IOS_API *m_TestIODriver_IOSAPI;
@@ -156,7 +157,7 @@ const struct IODriverAPI g_TestIODriverPluginAPI=
     TestIODrv_AllocSettingsWidgets,
     TestIODrv_FreeSettingsWidgets,
     TestIODrv_StoreSettings,
-    NULL, //    void (*TestIODrv_ApplySettings)(t_ConnectionWidgetsType *DataHandle,t_PIKVList *Settings);
+    TestIODrv_ApplySettings,
 };
 struct IODriverInfo m_TestIODriverInfo=
 {
@@ -959,5 +960,19 @@ void TestIODrv_StoreSettings(t_ConnectionWidgetsType *PrivData,t_PIKVList *Setti
 
     sprintf(buff,"%d",C2);
     m_TestIODriver_SysAPI->KVAddItem(Settings,"Checkbox4",buff);
+}
+
+void TestIODrv_ApplySettings(t_PIKVList *Settings)
+{
+    const char *C1;
+    const char *C2;
+
+    C1=m_TestIODriver_SysAPI->KVGetItem(Settings,"Checkbox3");
+    C2=m_TestIODriver_SysAPI->KVGetItem(Settings,"Checkbox4");
+
+    if(C1==NULL)
+        C1="0";
+    if(C2==NULL)
+        C2="0";
 }
 

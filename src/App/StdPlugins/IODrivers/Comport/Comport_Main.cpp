@@ -37,6 +37,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
 using namespace std;
 
@@ -47,6 +48,11 @@ using namespace std;
 /*** MACROS                   ***/
 
 /*** TYPE DEFINITIONS         ***/
+struct ComportSettingsWidgetData
+{
+    t_WidgetSysHandle *WidgetHandle;
+    struct PI_NumberInput *BaudRate[USER_BAUDRATE_MAX];
+};
 
 /*** FUNCTION PROTOTYPES      ***/
 PG_BOOL Comport_Init(void);
@@ -57,6 +63,10 @@ static void Comport_DTRCheckboxCallBack(const struct PICheckboxEvent *Event,void
 static void Comport_RTSCheckboxCallBack(const struct PICheckboxEvent *Event,void *UserData);
 static void Comport_SendBreakButton(const struct PIButtonEvent *Event,void *UserData);
 static void Comport_InfoClearButton(const struct PIButtonEvent *Event,void *UserData);
+static t_ConnectionWidgetsType *Comport_AllocSettingsWidgets(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings);
+static void Comport_FreeSettingsWidgets(t_ConnectionWidgetsType *PrivData);
+static void Comport_StoreSettings(t_ConnectionWidgetsType *PrivData,t_PIKVList *Settings);
+static void Comport_ApplySettings(t_PIKVList *Settings);
 
 /*** VARIABLE DEFINITIONS     ***/
 const struct IODriverAPI g_ComportPluginAPI=
@@ -87,12 +97,12 @@ const struct IODriverAPI g_ComportPluginAPI=
 
     /********* Start of IODRIVER_API_VERSION_2 *********/
     Comport_GetLastErrorMessage,
-    
+
     /* V3 */
-    NULL,   // AllocSettingsWidgets
-    NULL,   // FreeSettingsWidgets
-    NULL,   // SetSettingsFromWidgets
-    NULL,   // ApplySettings
+    Comport_AllocSettingsWidgets,
+    Comport_FreeSettingsWidgets,
+    Comport_StoreSettings,
+    Comport_ApplySettings,
 };
 
 struct IODriverInfo m_ComportInfo=
@@ -104,6 +114,8 @@ struct IODriverInfo m_ComportInfo=
 const struct IOS_API *g_CP_IOSystem;
 const struct PI_UIAPI *g_CP_UI;
 const struct PI_SystemAPI *g_CP_System;
+
+struct Comport_Settings g_Comport_Settings;
 
 /*******************************************************************************
  * NAME:
@@ -774,4 +786,212 @@ void Comport_AddLogMsg(struct Comport_ConAuxWidgets *ConAuxWidgets,const char *M
 
     NewRow=g_CP_UI->ColumnViewInputAddRow(ConAuxWidgets->WidgetHandle,ConAuxWidgets->InfoView->Ctrl);
     g_CP_UI->ColumnViewInputSetColumnText(ConAuxWidgets->WidgetHandle,ConAuxWidgets->InfoView->Ctrl,0,NewRow,Msg);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/*******************************************************************************
+ * NAME:
+ *    Comport_AllocSettingsWidgets
+ *
+ * SYNOPSIS:
+ *    t_ConnectionWidgetsType *Comport_AllocSettingsWidgets(
+ *              t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to send to the widgets
+ *    Settings [I] -- The settings for this plugin.  A standard key value pair
+ *
+ * FUNCTION:
+ *    This function is optional.
+ *
+ *    This function allocates any settings widgets for this plugins settings.
+ *
+ * RETURNS:
+ *    An allocated structure with your private data in it.  This will be
+ *    freed with FreeSettingsWidgets().
+ *
+ * SEE ALSO:
+ *    Comport_FreeSettingsWidgets(), Comport_ApplySettings(),
+ *    Comport_StoreSettings()
+ ******************************************************************************/
+static t_ConnectionWidgetsType *Comport_AllocSettingsWidgets(
+        t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings)
+{
+    struct ComportSettingsWidgetData *WData;
+    int r;
+    char buff[100];
+    const char *ValueStr;
+
+    WData=NULL;
+    try
+    {
+        WData=new ComportSettingsWidgetData;
+        WData->WidgetHandle=WidgetHandle;
+
+        for(r=0;r<USER_BAUDRATE_MAX;r++)
+            WData->BaudRate[r]=NULL;
+
+        g_CP_IOSystem->SetCurrentSettingsTabName("Baud rates");
+        for(r=0;r<USER_BAUDRATE_MAX;r++)
+        {
+            sprintf(buff,"User Baud Rate %d",r+1);
+            WData->BaudRate[r]=g_CP_UI->AddNumberInput(WData->WidgetHandle,buff,
+                    NULL,NULL);
+            if(WData->BaudRate[r]==NULL)
+                throw(0);
+
+            g_CP_UI->SetNumberInputMinMax(WData->WidgetHandle,WData->BaudRate[r]->Ctrl,0,INT32_MAX);
+        }
+
+        /* Set the widgets to our settings */
+        for(r=0;r<USER_BAUDRATE_MAX;r++)
+        {
+            sprintf(buff,"UserBaudRate[%d]",r);
+            ValueStr=g_CP_System->KVGetItem(Settings,buff);
+
+            g_CP_UI->SetNumberInputValue(WData->WidgetHandle,
+                    WData->BaudRate[r]->Ctrl,strtoul(ValueStr,NULL,10));
+        }
+    }
+    catch(...)
+    {
+        if(WData!=NULL)
+        {
+            for(r=0;r<USER_BAUDRATE_MAX;r++)
+            {
+                if(WData->BaudRate[r]!=NULL)
+                {
+                    g_CP_UI->FreeNumberInput(WData->WidgetHandle,
+                            WData->BaudRate[r]);
+                }
+            }
+
+            delete WData;
+        }
+
+        WData=NULL;
+    }
+
+    return (t_ConnectionWidgetsType *)WData;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Comport_FreeSettingsWidgets
+ *
+ * SYNOPSIS:
+ *    void Comport_FreeSettingsWidgets(t_ConnectionWidgetsType *PrivData);
+ *
+ * PARAMETERS:
+ *    PrivData [I] -- The private data allocated in AllocSettingsWidgets()
+ *
+ * FUNCTION:
+ *    This function is optional.
+ *
+ *    This function free the widgets and private data allocated in
+ *    AllocSettingsWidgets().
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    Comport_AllocSettingsWidgets()
+ ******************************************************************************/
+static void Comport_FreeSettingsWidgets(t_ConnectionWidgetsType *PrivData)
+{
+    struct ComportSettingsWidgetData *WData=(struct ComportSettingsWidgetData *)PrivData;
+    int r;
+
+    for(r=0;r<USER_BAUDRATE_MAX;r++)
+    {
+        if(WData->BaudRate[r]!=NULL)
+        {
+            g_CP_UI->FreeNumberInput(WData->WidgetHandle,
+                    WData->BaudRate[r]);
+        }
+    }
+
+    delete WData;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Comport_StoreSettings
+ *
+ * SYNOPSIS:
+ *    void Comport_StoreSettings(t_ConnectionWidgetsType *PrivData,
+ *              t_PIKVList *Settings);
+ *
+ * PARAMETERS:
+ *    PrivData [I] -- The private data allocated in AllocSettingsWidgets()
+ *    Settings [O] -- This is where your settings are stored.
+ *
+ * FUNCTION:
+ *    This function is optional.
+ *
+ *    This takes the data from the widgets and stores it in the settings
+ *    key value pairs.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    Comport_AllocSettingsWidgets()
+ ******************************************************************************/
+static void Comport_StoreSettings(t_ConnectionWidgetsType *PrivData,
+        t_PIKVList *Settings)
+{
+    struct ComportSettingsWidgetData *WData=(struct ComportSettingsWidgetData *)PrivData;
+    int r;
+    char buff[100];
+    char buff2[100];
+    uint32_t Value;
+
+    for(r=0;r<USER_BAUDRATE_MAX;r++)
+    {
+        Value=g_CP_UI->GetNumberInputValue(WData->WidgetHandle,
+                WData->BaudRate[r]->Ctrl);
+
+        sprintf(buff,"UserBaudRate[%d]",r);
+        sprintf(buff2,"%" PRIu32 "",Value);
+        g_CP_System->KVAddItem(Settings,buff,buff2);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Comport_ApplySettings
+ *
+ * SYNOPSIS:
+ *    void Comport_ApplySettings(t_PIKVList *Settings);
+ *
+ * PARAMETERS:
+ *    Settings [I] -- The settings to apply to this plugin
+ *
+ * FUNCTION:
+ *    This function is optional.
+ *
+ *    This function takes the settings stored in the key value pairs and
+ *    applies them to the plugin.  Normally this is copy to local plugin
+ *    vars.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    Comport_AllocSettingsWidgets()
+ ******************************************************************************/
+static void Comport_ApplySettings(t_PIKVList *Settings)
+{
+    int r;
+    char buff[100];
+    const char *ValueStr;
+
+    for(r=0;r<USER_BAUDRATE_MAX;r++)
+    {
+        sprintf(buff,"UserBaudRate[%d]",r);
+        ValueStr=g_CP_System->KVGetItem(Settings,buff);
+
+        g_Comport_Settings.UserBaudRate[r]=strtoul(ValueStr,NULL,10);
+    }
 }

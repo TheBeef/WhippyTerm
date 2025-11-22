@@ -37,6 +37,7 @@
 
 /***  DEFINES                          ***/
 #define COMPORT_URI_PREFIX              "COM"
+#define USER_BAUDRATE_MAX                   5
 
 /***  MACROS                           ***/
 
@@ -104,11 +105,17 @@ struct ComportDetectData
     i_OSComportListType CurrentDev;
 };
 
+struct Comport_Settings
+{
+    uint32_t UserBaudRate[USER_BAUDRATE_MAX];
+};
+
 /***  CLASS DEFINITIONS                ***/
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 extern const struct PI_UIAPI *g_CP_UI;
 extern const struct IOS_API *g_CP_IOSystem;
+extern struct Comport_Settings g_Comport_Settings;
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
 void Comport_DefaultPortOptions(struct ComportPortOptions *Options);

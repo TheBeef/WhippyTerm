@@ -999,6 +999,107 @@ static struct ConnectionOptionsData *m_ActiveConSettingsOptionData;
  * SEE ALSO:
  *    
  *==============================================================================
+ * NAME:
+ *    AllocSettingsWidgets
+ *
+ * SYNOPSIS:
+ *    t_ConnectionWidgetsType *AllocSettingsWidgets(
+ *              t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to send to the widgets
+ *    Settings [I] -- The settings for this plugin.  A standard key value pair
+ *
+ * FUNCTION:
+ *    This function is optional.
+ *
+ *    This function allocates any settings widgets for this plugins settings.
+ *
+ * RETURNS:
+ *    An allocated structure with your private data in it.  This will be
+ *    freed with FreeSettingsWidgets().
+ *
+ * API VERSION:
+ *    3
+ *
+ * SEE ALSO:
+ *    FreeSettingsWidgets(), ApplySettings(), StoreSettings()
+ *==============================================================================
+ * NAME:
+ *    FreeSettingsWidgets
+ *
+ * SYNOPSIS:
+ *    void FreeSettingsWidgets(t_ConnectionWidgetsType *PrivData);
+ *
+ * PARAMETERS:
+ *    PrivData [I] -- The private data allocated in AllocSettingsWidgets()
+ *
+ * FUNCTION:
+ *    This function is optional.
+ *
+ *    This function free the widgets and private data allocated in
+ *    AllocSettingsWidgets().
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * API VERSION:
+ *    3
+ *
+ * SEE ALSO:
+ *    AllocSettingsWidgets()
+ *==============================================================================
+ * NAME:
+ *    StoreSettings
+ *
+ * SYNOPSIS:
+ *    void StoreSettings(t_ConnectionWidgetsType *PrivData,
+ *              t_PIKVList *Settings);
+ *
+ * PARAMETERS:
+ *    PrivData [I] -- The private data allocated in AllocSettingsWidgets()
+ *    Settings [O] -- This is where your settings are stored.
+ *
+ * FUNCTION:
+ *    This function is optional.
+ *
+ *    This takes the data from the widgets and stores it in the settings
+ *    key value pairs.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * API VERSION:
+ *    3
+ *
+ * SEE ALSO:
+ *    AllocSettingsWidgets()
+ *==============================================================================
+ * NAME:
+ *    ApplySettings
+ *
+ * SYNOPSIS:
+ *    void ApplySettings(t_PIKVList *Settings);
+ *
+ * PARAMETERS:
+ *    Settings [I] -- The settings to apply to this plugin
+ *
+ * FUNCTION:
+ *    This function is optional.
+ *
+ *    This function takes the settings stored in the key value pairs and
+ *    applies them to the plugin.  Normally this is copy to local plugin
+ *    vars.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * API VERSION:
+ *    3
+ *
+ * SEE ALSO:
+ *    AllocSettingsWidgets()
+ *==============================================================================
  *
  * RETURNS:
  *    true -- Registration worked
@@ -6098,4 +6199,44 @@ static t_WidgetSysHandle *IOS_AddNewSettingsTab(const char *Name)
     }
 
     return (t_WidgetSysHandle *)ConSettingsOptionData->WidgetSysHandles;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_ApplySettings
+ *
+ * SYNOPSIS:
+ *    void IOS_ApplySettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    Applies the settings to all the IO driver plugins that has settings.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void IOS_ApplySettings(void)
+{
+    i_PluginSettings plug;
+    i_IODriverListType drv;
+
+    for(plug=g_Settings.IODriverPluginsSettings.begin();
+            plug!=g_Settings.IODriverPluginsSettings.end();plug++)
+    {
+        for(drv=m_IODriverList.begin();drv!=m_IODriverList.end();drv++)
+        {
+            if(drv->API.ApplySettings!=NULL)
+            {
+                if(drv->BaseURI==plug->IDStr)
+                {
+                    drv->API.ApplySettings(PIS_ConvertKVList2PIKVList(plug->Settings));
+                }
+            }
+        }
+    }
 }

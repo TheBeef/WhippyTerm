@@ -137,7 +137,7 @@ struct IODriverAPI
     t_ConnectionWidgetsType *(*AllocSettingsWidgets)(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Settings);
     void (*FreeSettingsWidgets)(t_ConnectionWidgetsType *PrivData);
     void (*SetSettingsFromWidgets)(t_ConnectionWidgetsType *PrivData,t_PIKVList *Settings);
-    void (*ApplySettings)(t_ConnectionWidgetsType *DataHandle,t_PIKVList *Settings);
+    void (*ApplySettings)(t_PIKVList *Settings);
     /********* End of IODRIVER_API_VERSION_3 *********/
 };
 

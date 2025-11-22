@@ -61,9 +61,9 @@ protected:
     void paintEvent(QPaintEvent *);
 
 private:
-    void enterEvent(QEvent *event);
-    void leaveEvent(QEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
+    void enterEvent(QEnterEvent *event) override;
+    void leaveEvent(QEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
     bool MouseIn;
     bool DrawPointingUp;
     Form_MainWindow *MainWindow;

@@ -61,7 +61,7 @@ void VerPanelHandle::ChangeArrowDir(bool Left)
     update();
 }
 
-void VerPanelHandle::enterEvent(QEvent *event)
+void VerPanelHandle::enterEvent(QEnterEvent *event)
 {
     MouseIn=true;
     update();

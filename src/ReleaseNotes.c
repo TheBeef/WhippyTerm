@@ -31,6 +31,11 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_BUG_FIX,"Mouse over for panels wasn't working.  Fixed",
+            "When you move the mouse in and out of a side panel"
+            " the panel should highlight.  This was broken and has been"
+            " fixed."},
+    {
         NOTETYPE_ENHANCEMENT,"Added comport settings for user speeds",
             "Added settings for the comport to let the user add"
             " their own baud rates."},

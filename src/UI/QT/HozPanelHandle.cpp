@@ -60,7 +60,7 @@ void HozPanelHandle::ChangeArrowDir(bool Up)
     update();
 }
 
-void HozPanelHandle::enterEvent(QEvent *event)
+void HozPanelHandle::enterEvent(QEnterEvent *event)
 {
     MouseIn=true;
     update();

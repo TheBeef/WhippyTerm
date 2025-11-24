@@ -351,123 +351,16 @@ void Form_MainWindow::on_actionAbout_Whippy_Term_triggered()
 
 void Form_MainWindow::PanelClicked(e_PanelType Panel)
 {
-    QList<int> CurrentSizes;
-    QList<int> newSizes;
-    int SpaceLeft;
-    int OtherPanelWidth;
-    int NewSize;
-
-    if(FirstShow)
-        return;
-
     switch(Panel)
     {
         case e_Panel_Bottom:
-            CurrentSizes=ui->TopBottomSplitter->sizes();
-            SpaceLeft=CurrentSizes[0]+CurrentSizes[1];
-
-            if(CurrentSizes[1]>16)
-            {
-                /* It's open and we are closing it */
-
-                /* Save the height */
-                BottomPanelLastSize=CurrentSizes[1];
-                NewSize=16; // the min size of a hidden panel is 16
-
-                newSizes.append(SpaceLeft-NewSize);
-                newSizes.append(NewSize);
-
-                EnableBottomSplitter(false);
-            }
-            else
-            {
-                /* We are opening it */
-                /* Restore the saved height */
-                newSizes.append(SpaceLeft-BottomPanelLastSize);
-                newSizes.append(BottomPanelLastSize);
-
-                EnableBottomSplitter(true);
-            }
-
-            ui->TopBottomSplitter->setSizes(newSizes);
-
-            ui->BottomResizeFrame->ClearHighlight();
-            on_TopBottomSplitter_splitterMoved(0,0);
+            SendEvent(e_MWEvent_BottomPanelClicked);
         break;
         case e_Panel_Left:
-            CurrentSizes=ui->LeftRightSplitter->sizes();
-            SpaceLeft=CurrentSizes[0]+CurrentSizes[1]+CurrentSizes[2];
-
-            OtherPanelWidth=CurrentSizes[2];
-
-            if(CurrentSizes[0]>16)
-            {
-                /* We are closing it */
-
-                /* Save the height */
-                LeftPanelLastSize=CurrentSizes[0];
-                NewSize=16; // the min size of a hidden panel is 16
-
-                newSizes.append(NewSize);
-                newSizes.append(SpaceLeft-OtherPanelWidth-NewSize);
-                newSizes.append(OtherPanelWidth);
-
-                EnableLeftSplitter(false);
-            }
-            else
-            {
-                /* We are opening it */
-                /* Restore the saved width */
-                newSizes.append(LeftPanelLastSize);
-                newSizes.append(SpaceLeft-OtherPanelWidth-LeftPanelLastSize);
-                newSizes.append(OtherPanelWidth);
-
-                EnableLeftSplitter(true);
-            }
-
-            ui->LeftRightSplitter->setSizes(newSizes);
-
-            ui->LeftResizeFrame->ClearHighlight();
-            on_LeftRightSplitter_splitterMoved(0,1);
+            SendEvent(e_MWEvent_LeftPanelClicked);
         break;
         case e_Panel_Right:
-            CurrentSizes=ui->LeftRightSplitter->sizes();
-            SpaceLeft=CurrentSizes[0]+CurrentSizes[1]+CurrentSizes[2];
-
-            OtherPanelWidth=CurrentSizes[0];
-
-            if(CurrentSizes[2]>16)
-            {
-                /* We are closing it */
-
-                /* Save the height */
-                RightPanelLastSize=CurrentSizes[2];
-                NewSize=16; // the min size of a hidden panel is 16
-
-                newSizes.append(OtherPanelWidth);
-                newSizes.append(SpaceLeft-OtherPanelWidth-NewSize);
-                newSizes.append(NewSize);
-
-                EnableRightSplitter(false);
-            }
-            else
-            {
-                /* We are opening it */
-                /* Restore the saved width */
-                newSizes.append(OtherPanelWidth);
-                newSizes.append(SpaceLeft-OtherPanelWidth-RightPanelLastSize);
-                newSizes.append(RightPanelLastSize);
-
-                EnableRightSplitter(true);
-            }
-
-            ui->LeftRightSplitter->setSizes(newSizes);
-
-            ui->RightResizeFrame->ClearHighlight();
-            on_LeftRightSplitter_splitterMoved(0,2);
-        break;
-        case e_PanelMAX:
-        default:
+            SendEvent(e_MWEvent_RightPanelClicked);
         break;
     }
 }
@@ -1919,3 +1812,20 @@ void Form_MainWindow::on_actionCopy_Selection_To_Send_Buffer_triggered()
     DoMenuTriggered(e_UIMWMenu_CopySelectionToSendBuffer);
 }
 
+
+void Form_MainWindow::on_actionLeft_Side_Panel_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_LeftPanel);
+}
+
+
+void Form_MainWindow::on_actionBottom_Panel_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_BottomPanel);
+}
+
+
+void Form_MainWindow::on_actionRight_Side_Panel_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_RightPanel);
+}

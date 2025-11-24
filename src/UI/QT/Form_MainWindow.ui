@@ -2168,6 +2168,10 @@
     <addaction name="actionShow_End_Of_Lines"/>
     <addaction name="actionWord_Wrap"/>
     <addaction name="separator"/>
+    <addaction name="actionLeft_Side_Panel"/>
+    <addaction name="actionRight_Side_Panel"/>
+    <addaction name="actionBottom_Panel"/>
+    <addaction name="separator"/>
     <addaction name="menuStop_Watch"/>
     <addaction name="separator"/>
     <addaction name="actionZoom_In"/>
@@ -3766,6 +3770,30 @@
   <action name="actionCopy_Selection_To_Send_Buffer">
    <property name="text">
     <string>Copy Selection To Send Buffer...</string>
+   </property>
+  </action>
+  <action name="actionLeft_Side_Panel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Left Side Panel</string>
+   </property>
+  </action>
+  <action name="actionBottom_Panel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Bottom Panel</string>
+   </property>
+  </action>
+  <action name="actionRight_Side_Panel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Right Side Panel</string>
    </property>
   </action>
  </widget>

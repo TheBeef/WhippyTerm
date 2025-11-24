@@ -118,6 +118,9 @@ void Debug6(void);
         void HandlePanelAutoCloseRight(void);
         void HandlePanelAutoCloseBottom(void);
         void InformOfCursorKeyModeChange(void);
+        void InformOf_BottomPanelChange(int NewSize,bool PanelOpen);
+        void InformOf_RightPanelChange(int NewSize,bool PanelOpen);
+        void InformOf_LeftPanelChange(int NewSize,bool PanelOpen);
 
         /* Panel handlers */
         class MWConnectionOptions ConnectionOptionsPanel;

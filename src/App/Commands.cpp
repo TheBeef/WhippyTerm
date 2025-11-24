@@ -203,6 +203,9 @@ const char *m_CmdNames[]=
     "MovementPgUp",                         // e_Cmd_Movement_PgUp
     "MovementPgDown",                       // e_Cmd_Movement_PgDown
     "ToggleCursorKeyMode",                  // e_Cmd_Toggle_CursorKeyMode
+    "ToggleLeftPanel",                      // e_Cmd_ToggleLeftPanel
+    "ToggleBottomPanel",                    // e_Cmd_ToggleBottomPanel
+    "ToggleRightPanel",                     // e_Cmd_ToggleRightPanel
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -317,6 +320,9 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_CalcCRC,                          // e_UIMWMenu_CalcCRC
     e_Cmd_HelpCommandLineOptions,           // e_UIMWMenu_HelpCommandLineOptions
     e_Cmd_Selection2SendBuffer,             // e_UIMWMenu_CopySelectionToSendBuffer
+    e_Cmd_ToggleLeftPanel,                  // e_UIMWMenu_LeftPanel
+    e_Cmd_ToggleBottomPanel,                // e_UIMWMenu_BottomPanel
+    e_Cmd_ToggleRightPanel,                 // e_UIMWMenu_RightPanel
 };
 
 e_CmdType m_Cmd2SendBufferContextMenuMapping[]=
@@ -831,6 +837,9 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     // e_Cmd_Movement_PgUp,
     // e_Cmd_Movement_PgDown,
     // e_Cmd_Toggle_CursorKeyMode,
+    // e_Cmd_ToggleLeftPanel
+    // e_Cmd_ToggleBottomPanel
+    // e_Cmd_ToggleRightPanel
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A

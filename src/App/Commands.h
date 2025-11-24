@@ -194,6 +194,9 @@ typedef enum
     e_Cmd_Movement_PgUp,
     e_Cmd_Movement_PgDown,
     e_Cmd_Toggle_CursorKeyMode,
+    e_Cmd_ToggleLeftPanel,
+    e_Cmd_ToggleBottomPanel,
+    e_Cmd_ToggleRightPanel,
     e_CmdMAX
 } e_CmdType;
 

@@ -71,6 +71,14 @@ typedef enum
     e_BottomPanelTabMAX
 } e_BottomPanelTabType;
 
+typedef enum
+{
+    e_MainWindowPanel_Bottom,
+    e_MainWindowPanel_Left,
+    e_MainWindowPanel_Right,
+    e_MainWindowPanelMAX
+} e_MainWindowPanelType;
+
 /* Don't forget to update 'm_Cmd2MenuMapping' */
 typedef enum
 {
@@ -184,6 +192,9 @@ typedef enum
     e_UIMWMenu_CalcCRC,
     e_UIMWMenu_HelpCommandLineOptions,
     e_UIMWMenu_CopySelectionToSendBuffer,
+    e_UIMWMenu_LeftPanel,
+    e_UIMWMenu_BottomPanel,
+    e_UIMWMenu_RightPanel,
     e_UIMWMenuMAX
 } e_UIMWMenuType;
 
@@ -363,6 +374,9 @@ typedef enum
     e_MWEvent_ApplyTerminalEmulationMenuTriggered,
     e_MWEvent_ContextMenuTriggered,
     e_MWEvent_ScrollLockHint,
+    e_MWEvent_LeftPanelClicked,
+    e_MWEvent_RightPanelClicked,
+    e_MWEvent_BottomPanelClicked,
     e_MWEventMAX
 } e_MWEventType;
 
@@ -526,6 +540,7 @@ void UIMW_Maximize(t_UIMainWindow *win);
 void UIMW_SetBottomPanel(t_UIMainWindow *win,int NewSize,bool PanelOpen);
 void UIMW_SetLeftPanel(t_UIMainWindow *win,int NewSize,bool PanelOpen);
 void UIMW_SetRightPanel(t_UIMainWindow *win,int NewSize,bool PanelOpen);
+void UIMW_TogglePanel(t_UIMainWindow *win,e_MainWindowPanelType Panel);
 t_UIFrameContainerCtrl *UIMW_GetContainerFrameCtrlHandle(t_UIMainWindow *win);
 void UIMW_SetWindowTitle(t_UIMainWindow *win,const char *Title);
 void UIMW_SwitchTabControlCloseBttnPos(t_UIMainWindow *win,bool OnTab);

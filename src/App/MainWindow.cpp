@@ -4217,6 +4217,102 @@ void TheMainWindow::ApplyTerminalEmulationMenuTriggered(uint64_t ID)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::InformOf_LeftPanelChange
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::InformOf_LeftPanelChange(int NewSize,bool PanelOpen);
+ *
+ * PARAMETERS:
+ *    NewSize [I] -- The new size of the panel
+ *    PanelOpen [I] -- Is the panel open or closed
+ *
+ * FUNCTION:
+ *    This function changes what the left panel is set to.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::InformOf_LeftPanelChange(int NewSize,bool PanelOpen)
+{
+    e_UIMenuCtrl *Menu;
+
+    Menu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_LeftPanel);
+    UICheckMenu(Menu,PanelOpen);
+
+    g_Session.LeftPanelSize=NewSize;
+    g_Session.LeftPanelOpen=PanelOpen;
+    NoteSessionChanged();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::InformOf_RightPanelChange
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::InformOf_RightPanelChange(int NewSize,bool PanelOpen);
+ *
+ * PARAMETERS:
+ *    NewSize [I] -- The new size of the panel
+ *    PanelOpen [I] -- Is the panel open or closed
+ *
+ * FUNCTION:
+ *    This function changes what the right panel is set to.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::InformOf_RightPanelChange(int NewSize,bool PanelOpen)
+{
+    e_UIMenuCtrl *Menu;
+
+    Menu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_RightPanel);
+    UICheckMenu(Menu,PanelOpen);
+
+    g_Session.RightPanelSize=NewSize;
+    g_Session.RightPanelOpen=PanelOpen;
+    NoteSessionChanged();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::InformOf_BottomPanelChange
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::InformOf_BottomPanelChange(int NewSize,bool PanelOpen);
+ *
+ * PARAMETERS:
+ *    NewSize [I] -- The new size of the panel
+ *    PanelOpen [I] -- Is the panel open or closed
+ *
+ * FUNCTION:
+ *    This function changes what the right panel is set to.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::InformOf_BottomPanelChange(int NewSize,bool PanelOpen)
+{
+    e_UIMenuCtrl *Menu;
+
+    Menu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_BottomPanel);
+    UICheckMenu(Menu,PanelOpen);
+
+    g_Session.BottomPanelSize=NewSize;
+    g_Session.BottomPanelOpen=PanelOpen;
+    NoteSessionChanged();
+}
+
+/*******************************************************************************
+ * NAME:
  *    TheMainWindow::InformOfNewPluginInstalled
  *
  * SYNOPSIS:
@@ -4952,19 +5048,16 @@ bool MW_Event(const struct MWEvent *Event)
             NoteSessionChanged();
         break;
         case e_MWEvent_LeftPanelSizeChange:
-            g_Session.LeftPanelSize=Event->Info.PanelInfo.NewSize;
-            g_Session.LeftPanelOpen=Event->Info.PanelInfo.PanelOpen;
-            NoteSessionChanged();
+            Event->MW->InformOf_LeftPanelChange(Event->Info.PanelInfo.NewSize,
+                    Event->Info.PanelInfo.PanelOpen);
         break;
         case e_MWEvent_RightPanelSizeChange:
-            g_Session.RightPanelSize=Event->Info.PanelInfo.NewSize;
-            g_Session.RightPanelOpen=Event->Info.PanelInfo.PanelOpen;
-            NoteSessionChanged();
+            Event->MW->InformOf_RightPanelChange(Event->Info.PanelInfo.NewSize,
+                    Event->Info.PanelInfo.PanelOpen);
         break;
         case e_MWEvent_BottomPanelSizeChange:
-            g_Session.BottomPanelSize=Event->Info.PanelInfo.NewSize;
-            g_Session.BottomPanelOpen=Event->Info.PanelInfo.PanelOpen;
-            NoteSessionChanged();
+            Event->MW->InformOf_BottomPanelChange(Event->Info.PanelInfo.NewSize,
+                    Event->Info.PanelInfo.PanelOpen);
         break;
         case e_MWEvent_WindowSet2Maximized:
             g_Session.AppMaximized=Event->Info.MaximizedInfo.Max;
@@ -5077,6 +5170,17 @@ bool MW_Event(const struct MWEvent *Event)
                DO NOT RELY ON THIS MESSAGE COMING IN SCROLL LOCK CHANGES! */
             MW_InformOfCursorKeyModeChange();
         break;
+
+        case e_MWEvent_BottomPanelClicked:
+            Event->MW->ExeCmd(e_Cmd_ToggleBottomPanel);
+        break;
+        case e_MWEvent_LeftPanelClicked:
+            Event->MW->ExeCmd(e_Cmd_ToggleLeftPanel);
+        break;
+        case e_MWEvent_RightPanelClicked:
+            Event->MW->ExeCmd(e_Cmd_ToggleRightPanel);
+        break;
+
         case e_MWEventMAX:
         default:
         break;
@@ -5188,6 +5292,9 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_Movement_PgUp -- Move 1 page up
  *                  e_Cmd_Movement_PgDown -- Move 1 page down
  *                  e_Cmd_Toggle_CursorKeyMode -- Toggle the cursor key mode
+ *                  e_Cmd_ToggleLeftPanel -- Open or closes the left panel
+ *                  e_Cmd_ToggleBottomPanel -- Open or closes the bottom panel
+ *                  e_Cmd_ToggleRightPanel -- Open or closes the right panel
  *
  * FUNCTION:
  *    This function executes a command.
@@ -5759,6 +5866,15 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_Toggle_CursorKeyMode:
             SetCursorKeyModeLocal(!GetCurrentCursorKeyModeIsLocal());
+        break;
+        case e_Cmd_ToggleLeftPanel:
+            UIMW_TogglePanel(UIWin,e_MainWindowPanel_Left);
+        break;
+        case e_Cmd_ToggleBottomPanel:
+            UIMW_TogglePanel(UIWin,e_MainWindowPanel_Bottom);
+        break;
+        case e_Cmd_ToggleRightPanel:
+            UIMW_TogglePanel(UIWin,e_MainWindowPanel_Right);
         break;
         case e_CmdMAX:
         default:

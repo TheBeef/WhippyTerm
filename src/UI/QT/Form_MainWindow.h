@@ -429,6 +429,12 @@ private slots:
     
     void on_actionCopy_Selection_To_Send_Buffer_triggered();
     
+    void on_actionLeft_Side_Panel_triggered();
+    
+    void on_actionBottom_Panel_triggered();
+    
+    void on_actionRight_Side_Panel_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

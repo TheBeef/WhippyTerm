@@ -304,6 +304,12 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionCommand_Line_Options;
         case e_UIMWMenu_CopySelectionToSendBuffer:
             return (e_UIMenuCtrl *)realwin->ui->actionCopy_Selection_To_Send_Buffer;
+        case e_UIMWMenu_LeftPanel:
+            return (e_UIMenuCtrl *)realwin->ui->actionLeft_Side_Panel;
+        case e_UIMWMenu_BottomPanel:
+            return (e_UIMenuCtrl *)realwin->ui->actionBottom_Panel;
+        case e_UIMWMenu_RightPanel:
+            return (e_UIMenuCtrl *)realwin->ui->actionRight_Side_Panel;
         case e_UIMWMenuMAX:
         default:
         break;
@@ -991,6 +997,147 @@ void UIMW_SetRightPanel(t_UIMainWindow *win,int NewSize,bool PanelOpen)
     realwin->ui->LeftRightSplitter->setSizes(newSizes);
     realwin->ui->RightResizeFrame->ClearHighlight();
     realwin->on_LeftRightSplitter_splitterMoved(0,2);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIMW_TogglePanel
+ *
+ * SYNOPSIS:
+ *    void UIMW_TogglePanel(t_UIMainWindow *win,e_MainWindowPanelType Panel);
+ *
+ * PARAMETERS:
+ *    win [I] -- The main window to work on
+ *    Panel [I] -- What panel to toggle
+ *
+ * FUNCTION:
+ *    This function toggles a main window open or closed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UIMW_TogglePanel(t_UIMainWindow *win,e_MainWindowPanelType Panel)
+{
+    Form_MainWindow *realwin=(Form_MainWindow *)win;
+    QList<int> CurrentSizes;
+    QList<int> newSizes;
+    int SpaceLeft;
+    int OtherPanelWidth;
+    int NewSize;
+
+    switch(Panel)
+    {
+        case e_MainWindowPanel_Bottom:
+            CurrentSizes=realwin->ui->TopBottomSplitter->sizes();
+            SpaceLeft=CurrentSizes[0]+CurrentSizes[1];
+
+            if(CurrentSizes[1]>16)
+            {
+                /* It's open and we are closing it */
+
+                /* Save the height */
+                realwin->BottomPanelLastSize=CurrentSizes[1];
+                NewSize=16; // the min size of a hidden panel is 16
+
+                newSizes.append(SpaceLeft-NewSize);
+                newSizes.append(NewSize);
+
+                realwin->EnableBottomSplitter(false);
+            }
+            else
+            {
+                /* We are opening it */
+                /* Restore the saved height */
+                newSizes.append(SpaceLeft-realwin->BottomPanelLastSize);
+                newSizes.append(realwin->BottomPanelLastSize);
+
+                realwin->EnableBottomSplitter(true);
+            }
+
+            realwin->ui->TopBottomSplitter->setSizes(newSizes);
+
+            realwin->ui->BottomResizeFrame->ClearHighlight();
+            realwin->on_TopBottomSplitter_splitterMoved(0,0);
+        break;
+        case e_MainWindowPanel_Left:
+            CurrentSizes=realwin->ui->LeftRightSplitter->sizes();
+            SpaceLeft=CurrentSizes[0]+CurrentSizes[1]+CurrentSizes[2];
+
+            OtherPanelWidth=CurrentSizes[2];
+
+            if(CurrentSizes[0]>16)
+            {
+                /* We are closing it */
+
+                /* Save the height */
+                realwin->LeftPanelLastSize=CurrentSizes[0];
+                NewSize=16; // the min size of a hidden panel is 16
+
+                newSizes.append(NewSize);
+                newSizes.append(SpaceLeft-OtherPanelWidth-NewSize);
+                newSizes.append(OtherPanelWidth);
+
+                realwin->EnableLeftSplitter(false);
+            }
+            else
+            {
+                /* We are opening it */
+                /* Restore the saved width */
+                newSizes.append(realwin->LeftPanelLastSize);
+                newSizes.append(SpaceLeft-OtherPanelWidth-realwin->LeftPanelLastSize);
+                newSizes.append(OtherPanelWidth);
+
+                realwin->EnableLeftSplitter(true);
+            }
+
+            realwin->ui->LeftRightSplitter->setSizes(newSizes);
+
+            realwin->ui->LeftResizeFrame->ClearHighlight();
+            realwin->on_LeftRightSplitter_splitterMoved(0,1);
+        break;
+        case e_MainWindowPanel_Right:
+            CurrentSizes=realwin->ui->LeftRightSplitter->sizes();
+            SpaceLeft=CurrentSizes[0]+CurrentSizes[1]+CurrentSizes[2];
+
+            OtherPanelWidth=CurrentSizes[0];
+
+            if(CurrentSizes[2]>16)
+            {
+                /* We are closing it */
+
+                /* Save the height */
+                realwin->RightPanelLastSize=CurrentSizes[2];
+                NewSize=16; // the min size of a hidden panel is 16
+
+                newSizes.append(OtherPanelWidth);
+                newSizes.append(SpaceLeft-OtherPanelWidth-NewSize);
+                newSizes.append(NewSize);
+
+                realwin->EnableRightSplitter(false);
+            }
+            else
+            {
+                /* We are opening it */
+                /* Restore the saved width */
+                newSizes.append(OtherPanelWidth);
+                newSizes.append(SpaceLeft-OtherPanelWidth-realwin->RightPanelLastSize);
+                newSizes.append(realwin->RightPanelLastSize);
+
+                realwin->EnableRightSplitter(true);
+            }
+
+            realwin->ui->LeftRightSplitter->setSizes(newSizes);
+
+            realwin->ui->RightResizeFrame->ClearHighlight();
+            realwin->on_LeftRightSplitter_splitterMoved(0,2);
+        break;
+        case e_MainWindowPanelMAX:
+        default:
+        break;
+    }
 }
 
 /*******************************************************************************

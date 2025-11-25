@@ -465,6 +465,12 @@ t_UIButtonCtrl *UIMW_GetButtonHandle(t_UIMainWindow *win,e_UIMWBttnType UIObj)
             return (t_UIButtonCtrl *)realwin->ui->pushButton_Bridge_Bridge;
         case e_UIMWBttn_Bridge_Release:
             return (t_UIButtonCtrl *)realwin->ui->pushButton_Bridge_Release;
+        case e_UIMWBttn_OutGoingHexDisplay_Clear:
+            return (t_UIButtonCtrl *)realwin->ui->pushButton_OutGoing_HexClear;
+        case e_UIMWBttn_OutGoingHexDisplay_Copy:
+            return (t_UIButtonCtrl *)realwin->ui->pushButton_OutGoing_HexCopy;
+        case e_UIMWBttn_OutGoingHexDisplay_CopyAs:
+            return (t_UIButtonCtrl *)realwin->ui->pushButton_OutGoing_HexCopyAs;
         case e_UIMWBttnMAX:
         default:
         break;
@@ -498,6 +504,8 @@ t_UICheckboxCtrl *UIMW_GetCheckboxHandle(t_UIMainWindow *win,e_UIMWCheckboxType 
             return (t_UICheckboxCtrl *)realwin->ui->checkBox_Bridge_Lockout1;
         case e_UIMWCheckbox_Bridge_Lock2:
             return (t_UICheckboxCtrl *)realwin->ui->checkBox_Bridge_Lockout2;
+        case e_UIMWCheckbox_OutGoingHexDisplay_Paused:
+            return (t_UICheckboxCtrl *)realwin->ui->checkBox_OutGoing_HexPaused;
 
         case e_UIMWCheckboxMAX:
         default:
@@ -1486,6 +1494,34 @@ t_UIFrameContainerCtrl *UIMW_GetHexDisplayContainerFrameCtrlHandle(t_UIMainWindo
     Form_MainWindow *realwin=(Form_MainWindow *)win;
 
     return (t_UIFrameContainerCtrl *)realwin->ui->frame_HexDisplayContainer;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UIMW_GetOutGoingHexDisplayContainerFrameCtrlHandle
+ *
+ * SYNOPSIS:
+ *    t_UIFrameContainerCtrl *UIMW_GetOutGoingHexDisplayContainerFrameCtrlHandle(
+ *              t_UIMainWindow *win);
+ *
+ * PARAMETERS:
+ *    win [I] -- The main window with the control to get the handle for
+ *
+ * FUNCTION:
+ *    This function gets a handle to out going hex display frame that can be
+ *    used to display the hex view.
+ *
+ * RETURNS:
+ *    A handle to the container frame.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIFrameContainerCtrl *UIMW_GetOutGoingHexDisplayContainerFrameCtrlHandle(t_UIMainWindow *win)
+{
+    Form_MainWindow *realwin=(Form_MainWindow *)win;
+
+    return (t_UIFrameContainerCtrl *)realwin->ui->frame_OutgoingHexDisplayContainer;
 }
 
 /*******************************************************************************

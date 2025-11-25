@@ -362,6 +362,8 @@ void Form_MainWindow::PanelClicked(e_PanelType Panel)
         case e_Panel_Right:
             SendEvent(e_MWEvent_RightPanelClicked);
         break;
+        case e_PanelMAX:
+        break;
     }
 }
 
@@ -1829,3 +1831,27 @@ void Form_MainWindow::on_actionRight_Side_Panel_triggered()
 {
     DoMenuTriggered(e_UIMWMenu_RightPanel);
 }
+
+void Form_MainWindow::on_checkBox_OutGoing_HexPaused_clicked(bool checked)
+{
+    DoCheckboxTriggered(e_UIMWCheckbox_OutGoingHexDisplay_Paused,checked);
+}
+
+
+void Form_MainWindow::on_pushButton_OutGoing_HexClear_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_OutGoingHexDisplay_Clear);
+}
+
+
+void Form_MainWindow::on_pushButton_OutGoing_HexCopy_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_OutGoingHexDisplay_Copy);
+}
+
+
+void Form_MainWindow::on_pushButton_OutGoing_HexCopyAs_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_OutGoingHexDisplay_CopyAs);
+}
+

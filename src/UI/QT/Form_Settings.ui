@@ -36,7 +36,7 @@
       <item>
        <widget class="QStackedWidget" name="Editing_stackedWidget">
         <property name="currentIndex">
-         <number>6</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="page_Panel">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -430,48 +430,114 @@
              </attribute>
              <layout class="QVBoxLayout" name="verticalLayout_33">
               <item>
-               <widget class="QCheckBox" name="HexDisplay_Enable_checkBox">
-                <property name="text">
-                 <string>Enabled</string>
+               <widget class="QGroupBox" name="groupBox_44">
+                <property name="title">
+                 <string>In Coming Hex Display</string>
                 </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QWidget" name="widget_10" native="true">
-                <layout class="QHBoxLayout" name="horizontalLayout_31">
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
+                <layout class="QVBoxLayout" name="verticalLayout_56">
                  <item>
-                  <widget class="QLabel" name="label_10">
+                  <widget class="QCheckBox" name="HexDisplay_Enable_checkBox">
                    <property name="text">
-                    <string>History Size</string>
+                    <string>Enabled</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QSpinBox" name="HexDisplay_BufferSize_spinBox">
-                   <property name="maximumSize">
-                    <size>
-                     <width>150</width>
-                     <height>16777215</height>
-                    </size>
+                  <widget class="QWidget" name="widget_10" native="true">
+                   <layout class="QHBoxLayout" name="horizontalLayout_31">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="label_10">
+                      <property name="text">
+                       <string>History Size</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QSpinBox" name="HexDisplay_BufferSize_spinBox">
+                      <property name="maximumSize">
+                       <size>
+                        <width>150</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="minimum">
+                       <number>16</number>
+                      </property>
+                      <property name="maximum">
+                       <number>10000000</number>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_45">
+                <property name="title">
+                 <string>Out Going Hex Display</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_57">
+                 <item>
+                  <widget class="QCheckBox" name="OutGoing_HexDisplay_Enable_checkBox">
+                   <property name="text">
+                    <string>Enabled</string>
                    </property>
-                   <property name="minimum">
-                    <number>16</number>
-                   </property>
-                   <property name="maximum">
-                    <number>10000000</number>
-                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QWidget" name="widget_21" native="true">
+                   <layout class="QHBoxLayout" name="horizontalLayout_37">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="label_19">
+                      <property name="text">
+                       <string>History Size</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QSpinBox" name="OutGoing_HexDisplay_BufferSize_spinBox">
+                      <property name="maximumSize">
+                       <size>
+                        <width>150</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="minimum">
+                       <number>16</number>
+                      </property>
+                      <property name="maximum">
+                       <number>10000000</number>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </widget>
                  </item>
                 </layout>

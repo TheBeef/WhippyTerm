@@ -1,14 +1,14 @@
 /*******************************************************************************
- * FILENAME: MW_HexDisplay.cpp
+ * FILENAME: MW_OutGoingHexDisplay.cpp
  *
  * PROJECT:
  *    Whippy Term
  *
  * FILE DESCRIPTION:
- *    This file has the UI for the hex display panel in it.
+ *    This file has the UI for the outgoing hex display panel in it.
  *
  * COPYRIGHT:
- *    Copyright 2021 Paul Hutchinson.
+ *    Copyright 24 Nov 2025 Paul Hutchinson.
  *
  *    This program is free software: you can redistribute it and/or modify it
  *    under the terms of the GNU General Public License as published by the
@@ -24,7 +24,7 @@
  *    with this program. If not, see https://www.gnu.org/licenses/.
  *
  * CREATED BY:
- *    Paul Hutchinson (16 May 2021)
+ *    Paul Hutchinson (24 Nov 2025)
  *
  ******************************************************************************/
 
@@ -32,7 +32,7 @@
 #include "App/Dialogs/Dialog_HexDisplayCopyAs.h"
 #include "App/Dialogs/Dialog_CRCFinder.h"
 #include "App/Dialogs/Dialog_SendBufferSelect.h"
-#include "App/MWPanels/MW_HexDisplay.h"
+#include "App/MWPanels/MW_OutGoingHexDisplay.h"
 #include "App/MWPanels/MWPanels.h"
 #include "App/MainWindow.h"
 #include "App/Connections.h"
@@ -51,13 +51,12 @@
 /*** TYPE DEFINITIONS         ***/
 
 /*** FUNCTION PROTOTYPES      ***/
-static bool MWHexDisplay_HexDisplayBufferEvent(const struct HDEvent *Event);
 
 /*** VARIABLE DEFINITIONS     ***/
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay_HexDisplayBufferEvent
+ *    MWOutGoingHexDisplay_HexDisplayBufferEvent
  *
  * SYNOPSIS:
  *    static bool MWHexDisplay_HexDisplayBufferEvent(const struct HDEvent *
@@ -76,34 +75,34 @@ static bool MWHexDisplay_HexDisplayBufferEvent(const struct HDEvent *Event);
  * SEE ALSO:
  *    
  ******************************************************************************/
-static bool MWHexDisplay_HexDisplayBufferEvent(const struct HDEvent *Event)
+static bool MWOutGoingHexDisplay_HexDisplayBufferEvent(const struct HDEvent *Event)
 {
-    class MWHexDisplay *MWHD=(class MWHexDisplay *)Event->ID;
+    class MWOutGoingHexDisplay *MWHD=(class MWOutGoingHexDisplay *)Event->ID;
 
     return MWHD->HexDisplayBufferEvent(Event);
 }
 
-MWHexDisplay::MWHexDisplay()
+MWOutGoingHexDisplay::MWOutGoingHexDisplay()
 {
     UIWin=NULL;
     MW=NULL;
 
-    IncomingHistoryHexDisplay=new HexDisplayBuffer();
+    OutGoingHistoryHexDisplay=new HexDisplayBuffer();
 
     PanelActive=false;
 }
 
-MWHexDisplay::~MWHexDisplay()
+MWOutGoingHexDisplay::~MWOutGoingHexDisplay()
 {
-    delete IncomingHistoryHexDisplay;
+    delete OutGoingHistoryHexDisplay;
 }
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay::Setup
+ *    MWOutGoingHexDisplay::Setup
  *
  * SYNOPSIS:
- *    void MWHexDisplay::Setup(class TheMainWindow *Parent,
+ *    void MWOutGoingHexDisplay::Setup(class TheMainWindow *Parent,
  *              t_UIMainWindow *Win);
  *
  * PARAMETERS:
@@ -119,33 +118,33 @@ MWHexDisplay::~MWHexDisplay()
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWHexDisplay::Setup(class TheMainWindow *Parent,t_UIMainWindow *Win)
+void MWOutGoingHexDisplay::Setup(class TheMainWindow *Parent,t_UIMainWindow *Win)
 {
     MW=Parent;
     UIWin=Win;
 
-    if(!IncomingHistoryHexDisplay->Init(
-            UIMW_GetHexDisplayContainerFrameCtrlHandle(UIWin),
-            MWHexDisplay_HexDisplayBufferEvent,(uintptr_t)this))
+    if(!OutGoingHistoryHexDisplay->Init(
+            UIMW_GetOutGoingHexDisplayContainerFrameCtrlHandle(UIWin),
+            MWOutGoingHexDisplay_HexDisplayBufferEvent,(uintptr_t)this))
     {
-        UIAsk("Error","Failed to connect incoming hex display to UI",e_AskBox_Error,
+        UIAsk("Error","Failed to connect outgoing hex display to UI",e_AskBox_Error,
                 e_AskBttns_Ok);
     }
 
-    IncomingHistoryHexDisplay->SetLossOfFocusBehavior(false);
-    IncomingHistoryHexDisplay->SetFont(g_Settings.HexDisplaysFontName.c_str(),
+    OutGoingHistoryHexDisplay->SetLossOfFocusBehavior(false);
+    OutGoingHistoryHexDisplay->SetFont(g_Settings.HexDisplaysFontName.c_str(),
             g_Settings.HexDisplaysFontSize,g_Settings.HexDisplaysFontBold,
             g_Settings.HexDisplaysFontItalic);
-    IncomingHistoryHexDisplay->SetColors(g_Settings.HexDisplaysFGColor,
+    OutGoingHistoryHexDisplay->SetColors(g_Settings.HexDisplaysFGColor,
             g_Settings.HexDisplaysBGColor,g_Settings.HexDisplaysSelBGColor);
 }
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay::ActivateCtrls
+ *    MWOutGoingHexDisplay::ActivateCtrls
  *
  * SYNOPSIS:
- *    void MWHexDisplay::ActivateCtrls(bool Active);
+ *    void MWOutGoingHexDisplay::ActivateCtrls(bool Active);
  *
  * PARAMETERS:
  *    Active [I] -- Should we activate the controls (true), or deactivate them
@@ -160,7 +159,7 @@ void MWHexDisplay::Setup(class TheMainWindow *Parent,t_UIMainWindow *Win)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWHexDisplay::ActivateCtrls(bool Active)
+void MWOutGoingHexDisplay::ActivateCtrls(bool Active)
 {
     PanelActive=Active;
 
@@ -172,10 +171,10 @@ void MWHexDisplay::ActivateCtrls(bool Active)
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay::ConnectionAbout2Changed
+ *    MWOutGoingHexDisplay::ConnectionAbout2Changed
  *
  * SYNOPSIS:
- *    void MWHexDisplay::ConnectionAbout2Changed(void);
+ *    void MWOutGoingHexDisplay::ConnectionAbout2Changed(void);
  *
  * PARAMETERS:
  *    NONE
@@ -192,7 +191,7 @@ void MWHexDisplay::ActivateCtrls(bool Active)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWHexDisplay::ConnectionAbout2Changed(void)
+void MWOutGoingHexDisplay::ConnectionAbout2Changed(void)
 {
     if(MW->ActiveCon==NULL)
         return;
@@ -200,10 +199,10 @@ void MWHexDisplay::ConnectionAbout2Changed(void)
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay::ConnectionChanged
+ *    MWOutGoingHexDisplay::ConnectionChanged
  *
  * SYNOPSIS:
- *    void MWHexDisplay::ConnectionChanged(void);
+ *    void MWOutGoingHexDisplay::ConnectionChanged(void);
  *
  * PARAMETERS:
  *    NONE
@@ -218,7 +217,7 @@ void MWHexDisplay::ConnectionAbout2Changed(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWHexDisplay::ConnectionChanged(void)
+void MWOutGoingHexDisplay::ConnectionChanged(void)
 {
     t_UICheckboxCtrl *EnabledCheckbox;
     const uint8_t *Buffer;
@@ -229,35 +228,35 @@ void MWHexDisplay::ConnectionChanged(void)
     if(MW->ActiveCon==NULL)
     {
         /* We are removing the active connection.  Clear the hex display */
-        IncomingHistoryHexDisplay->ClearSelection();
-        IncomingHistoryHexDisplay->SetBuffer((uint8_t *)NULL,0);
+        OutGoingHistoryHexDisplay->ClearSelection();
+        OutGoingHistoryHexDisplay->SetBuffer((uint8_t *)NULL,0);
     }
     else
     {
-        EnabledCheckbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_HexDisplay_Paused);
+        EnabledCheckbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_OutGoingHexDisplay_Paused);
 
-        UICheckCheckbox(EnabledCheckbox,MW->ActiveCon->GetHexDisplayPaused());
+        UICheckCheckbox(EnabledCheckbox,MW->ActiveCon->GetOutGoingHexDisplayPaused());
 
         /* Connect this hex display buffer to the data buffers */
-        MW->ActiveCon->HexDisplayGetBufferInfo(&Buffer,&InsertPos,&BufferIsCircular,
-                &BufferSize);
-        IncomingHistoryHexDisplay->SetBuffer(Buffer,BufferSize);
-        IncomingHistoryHexDisplay->SetDisplayParms(InsertPos,BufferIsCircular);
+        MW->ActiveCon->OutGoingHexDisplayGetBufferInfo(&Buffer,&InsertPos,
+                &BufferIsCircular,&BufferSize);
+        OutGoingHistoryHexDisplay->SetBuffer(Buffer,BufferSize);
+        OutGoingHistoryHexDisplay->SetDisplayParms(InsertPos,BufferIsCircular);
 
         /* DEBUG PAUL: We need to set the last top byte for this hex display */
     }
 
-    IncomingHistoryHexDisplay->RebuildDisplay();
+    OutGoingHistoryHexDisplay->RebuildDisplay();
 
     RethinkUI();
 }
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay::NewConnectionAllocated
+ *    MWOutGoingHexDisplay::NewConnectionAllocated
  *
  * SYNOPSIS:
- *    void MWHexDisplay::NewConnectionAllocated(class Connection *NewCon);
+ *    void MWOutGoingHexDisplay::NewConnectionAllocated(class Connection *NewCon);
  *
  * PARAMETERS:
  *    NewCon [I] -- The new connection that was allocated
@@ -274,7 +273,7 @@ void MWHexDisplay::ConnectionChanged(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWHexDisplay::NewConnectionAllocated(class Connection *NewCon)
+void MWOutGoingHexDisplay::NewConnectionAllocated(class Connection *NewCon)
 {
     /* Update the GUI */
     ConnectionChanged();
@@ -282,10 +281,10 @@ void MWHexDisplay::NewConnectionAllocated(class Connection *NewCon)
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay::InformOfBufferChange
+ *    MWOutGoingHexDisplay::InformOfBufferChange
  *
  * SYNOPSIS:
- *    void MWHexDisplay::InformOfBufferChange(class Connection *EffectedCon,
+ *    void MWOutGoingHexDisplay::InformOfBufferChange(class Connection *EffectedCon,
  *          const struct ConMWHexDisplayData *UpdateInfo);
  *
  * PARAMETERS:
@@ -302,7 +301,7 @@ void MWHexDisplay::NewConnectionAllocated(class Connection *NewCon)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWHexDisplay::InformOfBufferChange(class Connection *EffectedCon,
+void MWOutGoingHexDisplay::InformOfBufferChange(class Connection *EffectedCon,
         const struct ConMWHexDisplayData *UpdateInfo)
 {
     /* Update the GUI */
@@ -311,10 +310,10 @@ void MWHexDisplay::InformOfBufferChange(class Connection *EffectedCon,
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay::RethinkUI
+ *    MWOutGoingHexDisplay::RethinkUI
  *
  * SYNOPSIS:
- *    void MWHexDisplay::RethinkUI(void);
+ *    void MWOutGoingHexDisplay::RethinkUI(void);
  *
  * PARAMETERS:
  *    NONE
@@ -328,7 +327,7 @@ void MWHexDisplay::InformOfBufferChange(class Connection *EffectedCon,
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWHexDisplay::RethinkUI(void)
+void MWOutGoingHexDisplay::RethinkUI(void)
 {
     t_UIButtonCtrl *ClearBttn;
     t_UIButtonCtrl *CopyBttn;
@@ -342,21 +341,21 @@ void MWHexDisplay::RethinkUI(void)
     t_UIContextMenuCtrl *ContextMenu_FindCRCAlgorithm;
     t_UIContextMenuCtrl *ContextMenu_CopyToSendBuffer;
 
-    ClearBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_HexDisplay_Clear);
-    CopyBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_HexDisplay_Copy);
-    CopyAsBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_HexDisplay_CopyAs);
-    PausedCheckbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_HexDisplay_Paused);
+    ClearBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_OutGoingHexDisplay_Clear);
+    CopyBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_OutGoingHexDisplay_Copy);
+    CopyAsBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_OutGoingHexDisplay_CopyAs);
+    PausedCheckbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_OutGoingHexDisplay_Paused);
 
-    ContextMenu_Copy=IncomingHistoryHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_Copy);
-    ContextMenu_Paste=IncomingHistoryHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_Paste);
-    ContextMenu_FindCRCAlgorithm=IncomingHistoryHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_FindCRCAlgorithm);
-    ContextMenu_CopyToSendBuffer=IncomingHistoryHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_CopyToSendBuffer);
+    ContextMenu_Copy=OutGoingHistoryHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_Copy);
+    ContextMenu_Paste=OutGoingHistoryHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_Paste);
+    ContextMenu_FindCRCAlgorithm=OutGoingHistoryHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_FindCRCAlgorithm);
+    ContextMenu_CopyToSendBuffer=OutGoingHistoryHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_CopyToSendBuffer);
 
     ControlsEnabled=PanelActive;
     PauseCheckEnabled=PanelActive;
     ClipboardBttnEnabled=PanelActive;
 
-    if(!g_Settings.HexDisplayEnabled)
+    if(!g_Settings.OutGoingHexDisplayEnabled)
         PanelActive=false;
 
     if(PanelActive)
@@ -364,14 +363,14 @@ void MWHexDisplay::RethinkUI(void)
         if(MW->ActiveCon==NULL)
             return;
 
-        if(IncomingHistoryHexDisplay->
+        if(OutGoingHistoryHexDisplay->
                 GetSizeOfSelection(e_HDBCFormat_RAW)==0)
         {
             ClipboardBttnEnabled=false;
         }
     }
 
-    IncomingHistoryHexDisplay->Enable(ControlsEnabled);
+    OutGoingHistoryHexDisplay->Enable(ControlsEnabled);
 
     UIEnableButton(ClearBttn,ControlsEnabled);
     UIEnableButton(CopyBttn,ClipboardBttnEnabled);
@@ -389,10 +388,10 @@ void MWHexDisplay::RethinkUI(void)
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay::TogglePause
+ *    MWOutGoingHexDisplay::TogglePause
  *
  * SYNOPSIS:
- *    void MWHexDisplay::TogglePause(void);
+ *    void MWOutGoingHexDisplay::TogglePause(void);
  *
  * PARAMETERS:
  *    NONE
@@ -407,20 +406,21 @@ void MWHexDisplay::RethinkUI(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWHexDisplay::TogglePause(void)
+void MWOutGoingHexDisplay::TogglePause(void)
 {
     if(MW->ActiveCon==NULL)
         return;
 
-    MW->ActiveCon->SetHexDisplayPaused(!MW->ActiveCon->GetHexDisplayPaused());
+    MW->ActiveCon->SetOutGoingHexDisplayPaused(!MW->ActiveCon->
+            GetOutGoingHexDisplayPaused());
 }
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay::Clear
+ *    MWOutGoingHexDisplay::Clear
  *
  * SYNOPSIS:
- *    void MWHexDisplay::Clear(void);
+ *    void MWOutGoingHexDisplay::Clear(void);
  *
  * PARAMETERS:
  *    NONE
@@ -434,7 +434,7 @@ void MWHexDisplay::TogglePause(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWHexDisplay::Clear(void)
+void MWOutGoingHexDisplay::Clear(void)
 {
     const uint8_t *Buffer;
     const uint8_t *InsertPos;
@@ -444,22 +444,22 @@ void MWHexDisplay::Clear(void)
     if(MW->ActiveCon==NULL)
         return;
 
-    MW->ActiveCon->HexDisplayClear();
+    MW->ActiveCon->OutGoingHexDisplayClear();
 
-    MW->ActiveCon->HexDisplayGetBufferInfo(&Buffer,&InsertPos,&BufferIsCircular,
-            &BufferSize);
+    MW->ActiveCon->OutGoingHexDisplayGetBufferInfo(&Buffer,&InsertPos,
+            &BufferIsCircular,&BufferSize);
 
-    IncomingHistoryHexDisplay->ClearSelection();
-    IncomingHistoryHexDisplay->SetDisplayParms(InsertPos,BufferIsCircular);
-    IncomingHistoryHexDisplay->RebuildDisplay();
+    OutGoingHistoryHexDisplay->ClearSelection();
+    OutGoingHistoryHexDisplay->SetDisplayParms(InsertPos,BufferIsCircular);
+    OutGoingHistoryHexDisplay->RebuildDisplay();
 }
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay::InformOfUpdate
+ *    MWOutGoingHexDisplay::InformOfUpdate
  *
  * SYNOPSIS:
- *    void MWHexDisplay::InformOfUpdate(class Connection *EffectedCon,
+ *    void MWOutGoingHexDisplay::InformOfUpdate(class Connection *EffectedCon,
  *          const struct ConMWHexDisplayData *UpdateInfo);
  *
  * PARAMETERS:
@@ -476,7 +476,7 @@ void MWHexDisplay::Clear(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWHexDisplay::InformOfUpdate(class Connection *EffectedCon,
+void MWOutGoingHexDisplay::InformOfUpdate(class Connection *EffectedCon,
         const struct ConMWHexDisplayData *UpdateInfo)
 {
     bool WasAtBottom;
@@ -485,26 +485,26 @@ void MWHexDisplay::InformOfUpdate(class Connection *EffectedCon,
     if(EffectedCon!=MW->ActiveCon)
         return;
 
-    WasAtBottom=IncomingHistoryHexDisplay->IsYScrollBarAtBottom();
+    WasAtBottom=OutGoingHistoryHexDisplay->IsYScrollBarAtBottom();
 
-    IncomingHistoryHexDisplay->SetDisplayParms(UpdateInfo->InsertPos,
+    OutGoingHistoryHexDisplay->SetDisplayParms(UpdateInfo->InsertPos,
             UpdateInfo->BufferIsCircular);
 
     /* Only redraw if the current tab is hex display */
-    if(EffectedCon->GetBottomPanelInfo()!=e_BottomPanelTab_IncomingHex)
+    if(EffectedCon->GetBottomPanelInfo()!=e_BottomPanelTab_OutGoingHex)
         return;
 
     if(WasAtBottom)
-        IncomingHistoryHexDisplay->ScrollToBottom();
-    IncomingHistoryHexDisplay->RebuildDisplay();
+        OutGoingHistoryHexDisplay->ScrollToBottom();
+    OutGoingHistoryHexDisplay->RebuildDisplay();
 }
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay::InformOfPanelTabChange
+ *    MWOutGoingHexDisplay::InformOfPanelTabChange
  *
  * SYNOPSIS:
- *    void MWHexDisplay::InformOfPanelTabChange(e_BottomPanelTabType PanelTab);
+ *    void MWOutGoingHexDisplay::InformOfPanelTabChange(e_BottomPanelTabType PanelTab);
  *
  * PARAMETERS:
  *    PanelTab [I] -- What tab was selected in the bottom panel.
@@ -522,7 +522,7 @@ void MWHexDisplay::InformOfUpdate(class Connection *EffectedCon,
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWHexDisplay::InformOfPanelTabChange(e_BottomPanelTabType PanelTab)
+void MWOutGoingHexDisplay::InformOfPanelTabChange(e_BottomPanelTabType PanelTab)
 {
     if(MW->ActiveCon==NULL)
         return;
@@ -530,10 +530,10 @@ void MWHexDisplay::InformOfPanelTabChange(e_BottomPanelTabType PanelTab)
     switch(PanelTab)
     {
         case e_BottomPanelTab_IncomingHex:
-            /* We just switch back to the hex display, redraw */
-            IncomingHistoryHexDisplay->RebuildDisplay();
         break;
         case e_BottomPanelTab_OutGoingHex:
+            /* We just switch back to the hex display, redraw */
+            OutGoingHistoryHexDisplay->RebuildDisplay();
         break;
 //        case e_BottomPanelTab_Injection:
 //        break;
@@ -546,10 +546,10 @@ void MWHexDisplay::InformOfPanelTabChange(e_BottomPanelTabType PanelTab)
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay::Copy2Clip
+ *    MWOutGoingHexDisplay::Copy2Clip
  *
  * SYNOPSIS:
- *    void MWHexDisplay::Copy2Clip(void);
+ *    void MWOutGoingHexDisplay::Copy2Clip(void);
  *
  * PARAMETERS:
  *    NONE
@@ -563,20 +563,20 @@ void MWHexDisplay::InformOfPanelTabChange(e_BottomPanelTabType PanelTab)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWHexDisplay::Copy2Clip(void)
+void MWOutGoingHexDisplay::Copy2Clip(void)
 {
-    IncomingHistoryHexDisplay->SendSelection2Clipboard(e_Clipboard_Selection,
+    OutGoingHistoryHexDisplay->SendSelection2Clipboard(e_Clipboard_Selection,
             e_HDBCFormat_Default);
-    IncomingHistoryHexDisplay->SendSelection2Clipboard(e_Clipboard_Clipboard,
+    OutGoingHistoryHexDisplay->SendSelection2Clipboard(e_Clipboard_Clipboard,
             e_HDBCFormat_Default);
 }
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay::CopyAs
+ *    MWOutGoingHexDisplay::CopyAs
  *
  * SYNOPSIS:
- *    void MWHexDisplay::CopyAs(void);
+ *    void MWOutGoingHexDisplay::CopyAs(void);
  *
  * PARAMETERS:
  *    NONE
@@ -591,25 +591,25 @@ void MWHexDisplay::Copy2Clip(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWHexDisplay::CopyAs(void)
+void MWOutGoingHexDisplay::CopyAs(void)
 {
     e_HDBCFormatType SelectedFormat;
 
     SelectedFormat=e_HDBCFormat_HexDump;
     RunHexDisplayCopyAsDialog(SelectedFormat);
 
-    IncomingHistoryHexDisplay->SendSelection2Clipboard(e_Clipboard_Selection,
+    OutGoingHistoryHexDisplay->SendSelection2Clipboard(e_Clipboard_Selection,
             SelectedFormat);
-    IncomingHistoryHexDisplay->SendSelection2Clipboard(e_Clipboard_Clipboard,
+    OutGoingHistoryHexDisplay->SendSelection2Clipboard(e_Clipboard_Clipboard,
             SelectedFormat);
 }
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay::HexDisplayBufferEvent
+ *    MWOutGoingHexDisplay::HexDisplayBufferEvent
  *
  * SYNOPSIS:
- *    bool MWHexDisplay::HexDisplayBufferEvent(const struct HDEvent *Event);
+ *    bool MWOutGoingHexDisplay::HexDisplayBufferEvent(const struct HDEvent *Event);
  *
  * PARAMETERS:
  *    Event [I] -- The event from the hex display buffer.
@@ -624,7 +624,7 @@ void MWHexDisplay::CopyAs(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool MWHexDisplay::HexDisplayBufferEvent(const struct HDEvent *Event)
+bool MWOutGoingHexDisplay::HexDisplayBufferEvent(const struct HDEvent *Event)
 {
     switch(Event->EventType)
     {
@@ -632,7 +632,7 @@ bool MWHexDisplay::HexDisplayBufferEvent(const struct HDEvent *Event)
             RethinkUI();
         return true;
         case e_HDEvent_MouseMove:
-            IncomingHistoryHexDisplay->
+            OutGoingHistoryHexDisplay->
                     SendSelection2Clipboard(e_Clipboard_Selection,
                     e_HDBCFormat_Default);
         return true;
@@ -673,10 +673,10 @@ bool MWHexDisplay::HexDisplayBufferEvent(const struct HDEvent *Event)
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay::OpenFindCRCAlgDialog
+ *    MWOutGoingHexDisplay::OpenFindCRCAlgDialog
  *
  * SYNOPSIS:
- *    void MWHexDisplay::OpenFindCRCAlgDialog(void);
+ *    void MWOutGoingHexDisplay::OpenFindCRCAlgDialog(void);
  *
  * PARAMETERS:
  *    NONE
@@ -691,12 +691,12 @@ bool MWHexDisplay::HexDisplayBufferEvent(const struct HDEvent *Event)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWHexDisplay::OpenFindCRCAlgDialog(void)
+void MWOutGoingHexDisplay::OpenFindCRCAlgDialog(void)
 {
     int Bytes;
     uint8_t *HexBuff;
 
-    Bytes=IncomingHistoryHexDisplay->GetSizeOfSelection(e_HDBCFormat_RAW);
+    Bytes=OutGoingHistoryHexDisplay->GetSizeOfSelection(e_HDBCFormat_RAW);
     if(Bytes==0)
         return;
 
@@ -707,7 +707,7 @@ void MWHexDisplay::OpenFindCRCAlgDialog(void)
         return;
     }
 
-    IncomingHistoryHexDisplay->CopySelection2Buffer(HexBuff,e_HDBCFormat_RAW);
+    OutGoingHistoryHexDisplay->CopySelection2Buffer(HexBuff,e_HDBCFormat_RAW);
 
     RunCRCFinderDialog(HexBuff,Bytes);
 
@@ -716,10 +716,10 @@ void MWHexDisplay::OpenFindCRCAlgDialog(void)
 
 /*******************************************************************************
  * NAME:
- *    MWHexDisplay::OpenSendBufferDialog
+ *    MWOutGoingHexDisplay::OpenSendBufferDialog
  *
  * SYNOPSIS:
- *    void MWHexDisplay::OpenSendBufferDialog(void);
+ *    void MWOutGoingHexDisplay::OpenSendBufferDialog(void);
  *
  * PARAMETERS:
  *    NONE
@@ -733,12 +733,12 @@ void MWHexDisplay::OpenFindCRCAlgDialog(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWHexDisplay::OpenSendBufferDialog(void)
+void MWOutGoingHexDisplay::OpenSendBufferDialog(void)
 {
     int Bytes;
     uint8_t *HexBuff;
 
-    Bytes=IncomingHistoryHexDisplay->GetSizeOfSelection(e_HDBCFormat_RAW);
+    Bytes=OutGoingHistoryHexDisplay->GetSizeOfSelection(e_HDBCFormat_RAW);
     if(Bytes==0)
         return;
 
@@ -749,7 +749,7 @@ void MWHexDisplay::OpenSendBufferDialog(void)
         return;
     }
 
-    IncomingHistoryHexDisplay->CopySelection2Buffer(HexBuff,e_HDBCFormat_RAW);
+    OutGoingHistoryHexDisplay->CopySelection2Buffer(HexBuff,e_HDBCFormat_RAW);
 
     RunSendBufferSelectDialog(MW,e_SBSD_Copy2Buffer,HexBuff,Bytes);
 

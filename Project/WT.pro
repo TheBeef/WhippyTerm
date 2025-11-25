@@ -51,6 +51,7 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/Dialogs/Dialog_DataProPluginSettings.cpp \
     ../src/App/Dialogs/Dialog_HelpCommandLineOptions.cpp \
     ../src/App/Dialogs/Dialog_IODriverSettings.cpp \
+    ../src/App/MWPanels/MW_OutGoingHexDisplay.cpp \
     ../src/App/PluginSupport/PluginSystem.cpp \
     ../src/App/Portable.cpp \
     ../src/BuildOptions/BuildOptions.cpp \

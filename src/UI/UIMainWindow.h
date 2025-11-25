@@ -65,8 +65,9 @@ typedef enum
 /* Must match GUI, also don't forget to add new values to session */
 typedef enum
 {
-    e_BottomPanelTab_Hex,
-    e_BottomPanelTab_Injection,
+    e_BottomPanelTab_IncomingHex,
+    e_BottomPanelTab_OutGoingHex,
+//    e_BottomPanelTab_Injection,
     e_BottomPanelTab_Buffers,
     e_BottomPanelTabMAX
 } e_BottomPanelTabType;
@@ -268,6 +269,9 @@ typedef enum
     e_UIMWBttn_SendBuffers_Send,
     e_UIMWBttn_Bridge_Bridge,
     e_UIMWBttn_Bridge_Release,
+    e_UIMWBttn_OutGoingHexDisplay_Clear,
+    e_UIMWBttn_OutGoingHexDisplay_Copy,
+    e_UIMWBttn_OutGoingHexDisplay_CopyAs,
     e_UIMWBttnMAX
 } e_UIMWBttnType;
 
@@ -291,6 +295,7 @@ typedef enum
     e_UIMWCheckbox_HexDisplay_Paused,
     e_UIMWCheckbox_Bridge_Lock1,
     e_UIMWCheckbox_Bridge_Lock2,
+    e_UIMWCheckbox_OutGoingHexDisplay_Paused,
     e_UIMWCheckboxMAX
 } e_UIMWCheckboxType;
 
@@ -549,6 +554,7 @@ e_UIMenuCtrl *UIMW_AddBookmarkMenuItem(t_UIMainWindow *win,
 e_UISubMenuCtrl *UIMW_AddBookmarkSubMenu(t_UIMainWindow *win,const char *Title);
 void UIMW_AddBookmarkClearAllMenus(t_UIMainWindow *win);
 t_UIFrameContainerCtrl *UIMW_GetHexDisplayContainerFrameCtrlHandle(t_UIMainWindow *win);
+t_UIFrameContainerCtrl *UIMW_GetOutGoingHexDisplayContainerFrameCtrlHandle(t_UIMainWindow *win);
 t_UIFrameContainerCtrl *UIMW_GetSendBuffersContainerFrameCtrlHandle(t_UIMainWindow *win);
 e_UIMenuCtrl *UIMW_AddFTPUploadMenuItem(t_UIMainWindow *win,const char *Title,
         uintptr_t ID);

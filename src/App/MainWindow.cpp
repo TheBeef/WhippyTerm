@@ -446,6 +446,7 @@ TheMainWindow::TheMainWindow()
     UploadPanel.Setup(this,UIWin);
     DownloadPanel.Setup(this,UIWin);
     HexDisplayPanel.Setup(this,UIWin);
+    OutGoingHexDisplayPanel.Setup(this,UIWin);
     SendBuffersPanel.Setup(this,UIWin);
     BridgePanel.Setup(this,UIWin);
     AuxControlsPanel.Setup(this,UIWin);
@@ -576,6 +577,7 @@ void TheMainWindow::Init(void)
     UploadPanel.ActivateCtrls(false);
     DownloadPanel.ActivateCtrls(false);
     HexDisplayPanel.ActivateCtrls(false);
+    OutGoingHexDisplayPanel.ActivateCtrls(false);
     SendBuffersPanel.ActivateCtrls(false);
     BridgePanel.ActivateCtrls(false);
     AuxControlsPanel.ActivateCtrls(false);
@@ -1936,6 +1938,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     UploadPanel.ActivateCtrls(ActivatePanels);
     DownloadPanel.ActivateCtrls(ActivatePanels);
     HexDisplayPanel.ActivateCtrls(ActivatePanels);
+    OutGoingHexDisplayPanel.ActivateCtrls(ActivatePanels);
     SendBuffersPanel.ActivateCtrls(ActivatePanels);
     BridgePanel.ActivateCtrls(ActivatePanels);
     AuxControlsPanel.ActivateCtrls(ActivatePanels);
@@ -2341,6 +2344,7 @@ void TheMainWindow::RemoveAllTabPanelControls(void)
     UploadPanel.ActivateCtrls(false);
     DownloadPanel.ActivateCtrls(false);
     HexDisplayPanel.ActivateCtrls(false);
+    OutGoingHexDisplayPanel.ActivateCtrls(false);
     SendBuffersPanel.ActivateCtrls(false);
     BridgePanel.ActivateCtrls(false);
     AuxControlsPanel.ActivateCtrls(false);
@@ -3485,6 +3489,7 @@ void TheMainWindow::SetActiveConnection(class Connection *NewCon)
     UploadPanel.ConnectionAbout2Changed();
     DownloadPanel.ConnectionAbout2Changed();
     HexDisplayPanel.ConnectionAbout2Changed();
+    OutGoingHexDisplayPanel.ConnectionAbout2Changed();
     SendBuffersPanel.ConnectionAbout2Changed();
     BridgePanel.ConnectionAbout2Changed();
     ConnectionOptionsPanel.ConnectionAbout2Changed();
@@ -3498,6 +3503,7 @@ void TheMainWindow::SetActiveConnection(class Connection *NewCon)
     UploadPanel.ConnectionChanged();
     DownloadPanel.ConnectionChanged();
     HexDisplayPanel.ConnectionChanged();
+    OutGoingHexDisplayPanel.ConnectionChanged();
     SendBuffersPanel.ConnectionChanged();
     BridgePanel.ConnectionChanged();
     ConnectionOptionsPanel.ConnectionChanged();
@@ -3592,6 +3598,13 @@ void TheMainWindow::ConnectionEvent(const struct ConMWEvent *Event)
         case ConMWEvent_AutoReopenChanged:
             RethinkActiveConnectionUI();
         break;
+        case ConMWEvent_OutGoingHexDisplayUpdate:
+            OutGoingHexDisplayPanel.InformOfUpdate(Event->Con,
+                    &Event->Info->HexDis);
+        break;
+        case ConMWEvent_OutGoingHexDisplayBufferChange:
+            OutGoingHexDisplayPanel.InformOfBufferChange(Event->Con,
+                    &Event->Info->HexDis);
         break;
         case ConMWEventMAX:
         default:
@@ -4989,6 +5002,9 @@ bool MW_Event(const struct MWEvent *Event)
                 case e_UIMWBttn_SendBuffers_Edit:
                 case e_UIMWBttn_Bridge_Bridge:
                 case e_UIMWBttn_Bridge_Release:
+                case e_UIMWBttn_OutGoingHexDisplay_Clear:
+                case e_UIMWBttn_OutGoingHexDisplay_Copy:
+                case e_UIMWBttn_OutGoingHexDisplay_CopyAs:
                 case e_UIMWBttnMAX:
                 default:
                     Event->MW->ExeCmd(MainWindowBttn2Cmd(Event->
@@ -5126,6 +5142,9 @@ bool MW_Event(const struct MWEvent *Event)
                                 (e_BottomPanelTabType)Event->Info.PanelTab.
                                 NewIndex);
                         Event->MW->HexDisplayPanel.InformOfPanelTabChange(
+                                (e_BottomPanelTabType)Event->Info.PanelTab.
+                                NewIndex);
+                        Event->MW->OutGoingHexDisplayPanel.InformOfPanelTabChange(
                                 (e_BottomPanelTabType)Event->Info.PanelTab.
                                 NewIndex);
                     }
@@ -5876,6 +5895,19 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         case e_Cmd_ToggleRightPanel:
             UIMW_TogglePanel(UIWin,e_MainWindowPanel_Right);
         break;
+        case e_Cmd_HexDisplay_OutGoingPauseToggle:
+            OutGoingHexDisplayPanel.TogglePause();
+        break;
+        case e_Cmd_OutGoingHexDisplay_Clear:
+            OutGoingHexDisplayPanel.Clear();
+        break;
+        case e_Cmd_OutGoingHexDisplay_Copy:
+            OutGoingHexDisplayPanel.Copy2Clip();
+        break;
+        case e_Cmd_OutGoingHexDisplay_CopyAs:
+            OutGoingHexDisplayPanel.CopyAs();
+        break;
+
         case e_CmdMAX:
         default:
         break;

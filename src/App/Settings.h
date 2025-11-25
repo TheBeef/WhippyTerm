@@ -216,9 +216,13 @@ class Settings
         std::string CaptureDefaultFilename;
         bool CaptureShowPanel;
 
-        /* Hex Display */
+        /* In Coming Hex Display */
         bool HexDisplayEnabled;
         int HexDisplayBufferSize;
+
+        /* Out Going Hex Display */
+        bool OutGoingHexDisplayEnabled;
+        int OutGoingHexDisplayBufferSize;
 
         /***** Display *****/
         bool AlwaysShowTabs;

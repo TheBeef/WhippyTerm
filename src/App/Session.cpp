@@ -620,10 +620,10 @@ bool RegisterSessionOpenConnectionsList_TinyCFG(class TinyCFG &cfg,
 //
 //bool BottomPanelTabCFG::LoadData(string &LoadedString)
 //{
-//    *Ptr=e_BottomPanelTab_Hex;
+//    *Ptr=e_BottomPanelTab_IncomingHex;
 //
 //    if(strcmp(LoadedString.c_str(),"Hex")==0)
-//        *Ptr=e_BottomPanelTab_Hex;
+//        *Ptr=e_BottomPanelTab_IncomingHex;
 //    if(strcmp(LoadedString.c_str(),"Injection")==0)
 //        *Ptr=e_BottomPanelTab_Injection;
 //    if(strcmp(LoadedString.c_str(),"Buffers")==0)
@@ -636,7 +636,7 @@ bool RegisterSessionOpenConnectionsList_TinyCFG(class TinyCFG &cfg,
 //{
 //    switch(*Ptr)
 //    {
-//        case e_BottomPanelTab_Hex:
+//        case e_BottomPanelTab_IncomingHex:
 //            StoreString="Hex";
 //        break;
 //        case e_BottomPanelTab_Injection:

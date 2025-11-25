@@ -555,6 +555,12 @@ Connection::Connection(const char *URI)
     HexDisplay.InsertPos=NULL;
     HexDisplay.BufferWrapped=false;
 
+    OutGoingHexDisplay.Paused=false;
+    OutGoingHexDisplay.BufferSize=0;
+    OutGoingHexDisplay.Buffer=NULL;
+    OutGoingHexDisplay.InsertPos=NULL;
+    OutGoingHexDisplay.BufferWrapped=false;
+
     ComTest.Sender=false;
     ComTest.SendingPackets=false;
     ComTest.PacketLen=1;
@@ -674,6 +680,12 @@ void Connection::FreeConnectionResources(bool FreeDB)
     HexDisplay.Buffer=NULL;
     HexDisplay.InsertPos=NULL;
     HexDisplay.BufferSize=0;
+
+    if(OutGoingHexDisplay.Buffer!=NULL)
+        free(OutGoingHexDisplay.Buffer);
+    OutGoingHexDisplay.Buffer=NULL;
+    OutGoingHexDisplay.InsertPos=NULL;
+    OutGoingHexDisplay.BufferSize=0;
 
     if(IOHandle!=NULL)
     {
@@ -1007,6 +1019,49 @@ bool Connection::ApplySettings(void)
         EventData.HexDis.BufferSize=HexDisplay.BufferSize;
 
         SendMWEvent(ConMWEvent_HexDisplayBufferChange,&EventData);
+    }
+
+    RoundedBufferSize=g_Settings.OutGoingHexDisplayBufferSize;
+    if(RoundedBufferSize<16)
+        RoundedBufferSize=16;
+    RoundedBufferSize=RoundedBufferSize/16*16; // Round to be a multable of 16
+
+    if(OutGoingHexDisplay.BufferSize!=RoundedBufferSize ||
+            (OutGoingHexDisplay.Buffer==NULL &&
+            g_Settings.OutGoingHexDisplayEnabled) ||
+            (OutGoingHexDisplay.Buffer!=NULL &&
+            !g_Settings.OutGoingHexDisplayEnabled))
+    {
+        /* Free the old buffer (if needed) */
+        if(OutGoingHexDisplay.Buffer!=NULL)
+            free(OutGoingHexDisplay.Buffer);
+        OutGoingHexDisplay.Buffer=NULL;
+        OutGoingHexDisplay.InsertPos=NULL;
+
+        OutGoingHexDisplay.BufferSize=RoundedBufferSize;
+
+        if(g_Settings.OutGoingHexDisplayEnabled)
+        {
+            /* Allocate a new buffer */
+            OutGoingHexDisplay.Buffer=(uint8_t *)malloc(OutGoingHexDisplay.
+                    BufferSize);
+            if(OutGoingHexDisplay.Buffer==NULL)
+                return false;
+        }
+        else
+        {
+            OutGoingHexDisplay.Buffer=NULL;
+            OutGoingHexDisplay.BufferSize=0;
+        }
+        OutGoingHexDisplay.InsertPos=OutGoingHexDisplay.Buffer;
+
+        /* Update the HEX UI */
+        EventData.HexDis.Buffer=OutGoingHexDisplay.Buffer;
+        EventData.HexDis.InsertPos=OutGoingHexDisplay.InsertPos;
+        EventData.HexDis.BufferIsCircular=OutGoingHexDisplay.BufferWrapped;
+        EventData.HexDis.BufferSize=OutGoingHexDisplay.BufferSize;
+
+        SendMWEvent(ConMWEvent_OutGoingHexDisplayBufferChange,&EventData);
     }
 
     return true;
@@ -1788,6 +1843,7 @@ e_ConWriteType Connection::InternalWriteBytes(const uint8_t *Data,int Bytes)
     switch(IOS_WriteData(IOHandle,Data,Bytes))
     {
         case e_IOSysIOError_Success:
+            HandleHexDisplayOutGoingData(Data,Bytes);
             RetValue=e_ConWrite_Success;
         break;
         case e_IOSysIOError_GenericIO:
@@ -4836,6 +4892,85 @@ void Connection::HandleHexDisplayIncomingData(const uint8_t *inbuff,int Bytes)
 
 /*******************************************************************************
  * NAME:
+ *    Connection::HandleHexDisplayOutGoingData
+ *
+ * SYNOPSIS:
+ *    void Connection::HandleHexDisplayOutGoingData(const uint8_t *Inbuff,
+ *              int Bytes);
+ *
+ * PARAMETERS:
+ *    InBuff [I] -- The bytes we just read in
+ *    Bytes [I] -- The number of bytes we just read in
+ *
+ * FUNCTION:
+ *    This function adds new bytes to the internal buffer.  The internal buffer
+ *    is circular and will wrap to be start of the buffer if more bytes are
+ *    inserted that the size of the buffer.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::HandleHexDisplayOutGoingData(const uint8_t *inbuff,int Bytes)
+{
+    uint8_t *BufferEnd;
+    const uint8_t *CopyFrom;
+    int CopyBytes;
+    union ConMWInfo EventData;
+
+    if(OutGoingHexDisplay.Paused || !g_Settings.OutGoingHexDisplayEnabled)
+        return;
+
+    if(OutGoingHexDisplay.Buffer==NULL)
+        return;
+
+    CopyFrom=inbuff;
+
+    if(Bytes>OutGoingHexDisplay.BufferSize)
+    {
+        CopyFrom+=Bytes-OutGoingHexDisplay.BufferSize;
+        memcpy(OutGoingHexDisplay.Buffer,CopyFrom,OutGoingHexDisplay.BufferSize);
+        OutGoingHexDisplay.InsertPos=OutGoingHexDisplay.Buffer;
+        return;
+    }
+
+    BufferEnd=OutGoingHexDisplay.Buffer+OutGoingHexDisplay.BufferSize;
+
+    if(OutGoingHexDisplay.InsertPos+Bytes>BufferEnd)
+    {
+        /* We need to split it over to copies */
+        CopyBytes=BufferEnd-OutGoingHexDisplay.InsertPos;
+        memcpy(OutGoingHexDisplay.InsertPos,CopyFrom,CopyBytes);
+        memcpy(OutGoingHexDisplay.Buffer,&CopyFrom[CopyBytes],Bytes-CopyBytes);
+        OutGoingHexDisplay.InsertPos=OutGoingHexDisplay.Buffer+Bytes-CopyBytes;
+        OutGoingHexDisplay.BufferWrapped=true;
+    }
+    else
+    {
+        /* Things will fit copy the whole thing */
+        memcpy(OutGoingHexDisplay.InsertPos,CopyFrom,Bytes);
+        OutGoingHexDisplay.InsertPos+=Bytes;
+    }
+
+    if(OutGoingHexDisplay.InsertPos>=BufferEnd)
+    {
+        OutGoingHexDisplay.InsertPos=OutGoingHexDisplay.Buffer;
+        OutGoingHexDisplay.BufferWrapped=true;
+    }
+
+    /* Update the UI */
+    EventData.HexDis.Buffer=OutGoingHexDisplay.Buffer;
+    EventData.HexDis.InsertPos=OutGoingHexDisplay.InsertPos;
+    EventData.HexDis.BufferIsCircular=OutGoingHexDisplay.BufferWrapped;
+    EventData.HexDis.BufferSize=OutGoingHexDisplay.BufferSize;
+
+    SendMWEvent(ConMWEvent_OutGoingHexDisplayUpdate,&EventData);
+}
+
+/*******************************************************************************
+ * NAME:
  *    Connection::GetHexDisplayPaused
  *
  * SYNOPSIS:
@@ -4958,6 +5093,132 @@ void Connection::HexDisplayClear(void)
 {
     HexDisplay.InsertPos=HexDisplay.Buffer;
     HexDisplay.BufferWrapped=false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::GetOutGoingHexDisplayPaused
+ *
+ * SYNOPSIS:
+ *    bool Connection::GetOutGoingHexDisplayPaused(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets the pause status of the out going hex display capture.
+ *
+ * RETURNS:
+ *    true -- Hex display is enabled
+ *    false -- Hex display is disabled
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::GetOutGoingHexDisplayPaused(void)
+{
+    return OutGoingHexDisplay.Paused;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::SetOutGoingHexDisplayPaused
+ *
+ * SYNOPSIS:
+ *    bool Connection::SetOutGoingHexDisplayPaused(bool Paused,bool Force=false);
+ *
+ * PARAMETERS:
+ *    Paused [I] -- Pause collecting more data for the hex display.
+ *    Force [I] -- If true then we do it even if it wouldn't be needed.
+ *
+ * FUNCTION:
+ *    This function changes the pause state of the hex display capture system.
+ *
+ * RETURNS:
+ *    true -- New value taken
+ *    false -- There was an error allocating the new buffer.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::SetOutGoingHexDisplayPaused(bool Paused,bool Force)
+{
+    /* If there is no change don't do anything */
+    if(OutGoingHexDisplay.Paused==Paused && !Force)
+        return true;
+
+    OutGoingHexDisplay.Paused=Paused;
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::OutGoingHexDisplayGetBufferInfo
+ *
+ * SYNOPSIS:
+ *    void Connection::OutGoingHexDisplayGetBufferInfo(const uint8_t **Buffer,
+ *              const uint8_t **InsertPos,bool *BufferIsCircular,
+ *              int *BufferSize);
+ *
+ * PARAMETERS:
+ *    Buffer [O] -- A pointer to write with the address of the hex display
+ *                  buffer
+ *    InsertPos [O] -- A pointer to the end of the data.  This is one past then
+ *                     end of valid data.  When 'BufferIsCircular' is
+ *                     true then data starts at this point, if it's false
+ *                     then data starts at 'Buffer'.
+ *    BufferIsCircular [O] -- This tells you if the buffer has wrapped or not.
+ *                            Before the wrap data goes from 'Buffer' to
+ *                            'InsertPos'.  After the wrap the data goes from
+ *                            'InsertPos' until 'InsertPos-1'
+ *    BufferSize [O] -- The size of the hex display buffer.  This is the
+ *                      total size.  When 'BufferIsCircular' is true then
+ *                      you must wrap back to 'Buffer' and keep going until
+ *                      you get back to 'InsertPos'.
+ *
+ * FUNCTION:
+ *    This function gets access to the RAW buffers for the out going hex display.
+ *    This is ment to be used to display the contents of the buffer.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::OutGoingHexDisplayGetBufferInfo(const uint8_t **Buffer,
+        const uint8_t **InsertPos,bool *BufferIsCircular,int *BufferSize)
+{
+    *Buffer=OutGoingHexDisplay.Buffer;
+    *InsertPos=OutGoingHexDisplay.InsertPos;
+    *BufferIsCircular=OutGoingHexDisplay.BufferWrapped;
+    *BufferSize=OutGoingHexDisplay.BufferSize;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::OutGoingHexDisplayClear
+ *
+ * SYNOPSIS:
+ *    void Connection::OutGoingHexDisplayClear(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function clears the out going hex display.  Does not inform the UI.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::OutGoingHexDisplayClear(void)
+{
+    OutGoingHexDisplay.InsertPos=OutGoingHexDisplay.Buffer;
+    OutGoingHexDisplay.BufferWrapped=false;
 }
 
 /*******************************************************************************

@@ -435,6 +435,14 @@ private slots:
     
     void on_actionRight_Side_Panel_triggered();
     
+    void on_checkBox_OutGoing_HexPaused_clicked(bool checked);
+    
+    void on_pushButton_OutGoing_HexClear_clicked();
+    
+    void on_pushButton_OutGoing_HexCopy_clicked();
+    
+    void on_pushButton_OutGoing_HexCopyAs_clicked();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

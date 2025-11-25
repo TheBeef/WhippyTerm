@@ -1161,6 +1161,10 @@ void Settings::RegisterAllMembers(class TinyCFG &cfg)
                 cfg.Register("HexDisplayEnabled",HexDisplayEnabled);
                 cfg.Register("HexDisplayBufferSize",HexDisplayBufferSize);
             cfg.EndBlock();
+            cfg.StartBlock("OutGoingHexDisplay");
+                cfg.Register("OutGoingHexDisplayEnabled",OutGoingHexDisplayEnabled);
+                cfg.Register("OutGoingHexDisplayBufferSize",OutGoingHexDisplayBufferSize);
+            cfg.EndBlock();
         cfg.EndBlock();
     cfg.EndBlock();
 
@@ -1440,6 +1444,8 @@ void Settings::DefaultSettings(void)
     /* Hex Display */
     HexDisplayEnabled=true;
     HexDisplayBufferSize=100000;
+    OutGoingHexDisplayEnabled=true;
+    OutGoingHexDisplayBufferSize=10000;
     HexDisplaysFGColor=0xFFFFFF;
     HexDisplaysBGColor=0x000000;
     HexDisplaysSelBGColor=SELECTION_BG_COLOR_DEFAULT;

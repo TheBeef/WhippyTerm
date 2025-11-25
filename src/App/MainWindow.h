@@ -44,6 +44,7 @@
 #include "MWPanels/MW_Download.h"
 #include "MWPanels/MW_StopWatch.h"
 #include "MWPanels/MW_HexDisplay.h"
+#include "MWPanels/MW_OutGoingHexDisplay.h"
 #include "MWPanels/MW_SendBuffers.h"
 #include "MWPanels/MW_Bridge.h"
 #include "MWPanels/MW_AuxControls.h"
@@ -129,6 +130,7 @@ void Debug6(void);
         class MWUpload UploadPanel;
         class MWDownload DownloadPanel;
         class MWHexDisplay HexDisplayPanel;
+        class MWOutGoingHexDisplay OutGoingHexDisplayPanel;
         class MWSendBuffers SendBuffersPanel;
         class MWAuxControls AuxControlsPanel;
 

@@ -246,6 +246,8 @@ typedef enum
     ConMWEvent_HexDisplayBufferChange,
     ConMWEvent_SelectionChanged,
     ConMWEvent_AutoReopenChanged,
+    ConMWEvent_OutGoingHexDisplayUpdate,
+    ConMWEvent_OutGoingHexDisplayBufferChange,
     ConMWEventMAX
 } ConMWEventType;
 
@@ -403,10 +405,16 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         struct UploadStats const *UploadGetStats(void);
         void UploadSetNumberOfBytesSent(uint64_t BytesTransfered);
         void DownloadSetNumberOfBytesRecv(uint64_t BytesTransfered);
+
         bool GetHexDisplayPaused(void);
         bool SetHexDisplayPaused(bool Paused,bool Force=false);
         void HexDisplayGetBufferInfo(const uint8_t **Buffer,const uint8_t **InsertPos,bool *BufferIsCircular,int *BufferSize);
         void HexDisplayClear(void);
+        bool GetOutGoingHexDisplayPaused(void);
+        bool SetOutGoingHexDisplayPaused(bool Paused,bool Force=false);
+        void OutGoingHexDisplayGetBufferInfo(const uint8_t **Buffer,const uint8_t **InsertPos,bool *BufferIsCircular,int *BufferSize);
+        void OutGoingHexDisplayClear(void);
+
         void SetLockOutConnectionWhenBridged(bool Lockout);
         bool GetLockOutConnectionWhenBridged(void);
         void BridgeConnection(class Connection *Con);
@@ -543,6 +551,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         struct UploadType Upload;
         struct DownloadType Download;
         struct HexDisplayType HexDisplay;
+        struct HexDisplayType OutGoingHexDisplay;
         struct ComTestType ComTest;
         e_LeftPanelTabType LeftPanelInfo;
         e_RightPanelTabType RightPanelInfo;
@@ -588,6 +597,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void SendMWEvent(ConMWEventType Event,union ConMWInfo *ExtraInfo=NULL);
         void StopWatchHandleAutoLap(void);
         void HandleHexDisplayIncomingData(const uint8_t *inbuff,int Bytes);
+        void HandleHexDisplayOutGoingData(const uint8_t *inbuff,int Bytes);
         void HandleComTestRx(uint8_t *inbuff,int bytes);
         bool QueueTransmitDelayData(const uint8_t *Data,int Bytes);
         void ApplyTransmitDelayChange(void);

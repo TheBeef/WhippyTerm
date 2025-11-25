@@ -31,6 +31,12 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added new out going hex panel",
+            "A new hex display was been added to the bottom panel.  This"
+            " new display shows the outgoing bytes in hex the same as the"
+            " incoming hex panel does.  The Hex panel has also been renamed"
+            " to incoming hex."},
+    {
         NOTETYPE_ENHANCEMENT,"Added menu entries to open/close the panels",
             "New menu options where added to the view menu to show the status"
             " and let you control if the panels are open or closed.  You can"

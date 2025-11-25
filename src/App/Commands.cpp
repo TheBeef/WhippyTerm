@@ -206,6 +206,10 @@ const char *m_CmdNames[]=
     "ToggleLeftPanel",                      // e_Cmd_ToggleLeftPanel
     "ToggleBottomPanel",                    // e_Cmd_ToggleBottomPanel
     "ToggleRightPanel",                     // e_Cmd_ToggleRightPanel
+    "OutGoingHexDisplayPauseToggle",        // e_Cmd_HexDisplay_OutGoingPauseToggle
+    "OutGoingHexDisplay_Clear",             // e_Cmd_OutGoingHexDisplay_Clear
+    "OutGoingHexDisplay_Copy",              // e_Cmd_OutGoingHexDisplay_Copy
+    "OutGoingHexDisplay_CopyAs",            // e_Cmd_OutGoingHexDisplay_CopyAs
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -372,20 +376,24 @@ e_CmdType m_Cmd2ButtonMapping[]=
     e_CmdMAX,                           // e_UIMWBttn_SendBuffers_Send      (Not used)
     e_Cmd_BridgeConnections,            // e_UIMWBttn_Bridge_Bridge
     e_Cmd_ReleaseBridge,                // e_UIMWBttn_Bridge_Release
+    e_Cmd_OutGoingHexDisplay_Clear,     // e_UIMWBttn_OutGoingHexDisplay_Clear
+    e_Cmd_OutGoingHexDisplay_Copy,      // e_UIMWBttn_OutGoingHexDisplay_Copy
+    e_Cmd_OutGoingHexDisplay_CopyAs,    // e_UIMWBttn_OutGoingHexDisplay_CopyAs
 };
 
 e_CmdType m_Cmd2CheckboxMapping[]=
 {
-    e_Cmd_StopWatch_AutoStart,          // e_UIMWCheckbox_StopWatch_StartOnTx
-    e_Cmd_StopWatch_AutoLap,            // e_UIMWCheckbox_StopWatch_AutoLap
-    e_Cmd_Capture_TimestampToggle,      // e_UIMWCheckbox_Capture_Timestamp
-    e_Cmd_Capture_AppendToggle,         // e_UIMWCheckbox_Capture_Append
-    e_Cmd_Capture_StripCtrlCharsToggle, // e_UIMWCheckbox_Capture_StripCtrlChars
-    e_Cmd_Capture_StripEscSeqToggle,    // e_UIMWCheckbox_Capture_StripEscSeq
-    e_Cmd_Capture_HexDumpToggle,        // e_UIMWCheckbox_Capture_HexDump
-    e_Cmd_HexDisplay_PauseToggle,       // e_UIMWCheckbox_HexDisplay_Paused
-    e_Cmd_BridgeLockConnection1,        // e_UIMWCheckbox_Bridge_Lock1
-    e_Cmd_BridgeLockConnection2,        // e_UIMWCheckbox_Bridge_Lock2
+    e_Cmd_StopWatch_AutoStart,              // e_UIMWCheckbox_StopWatch_StartOnTx
+    e_Cmd_StopWatch_AutoLap,                // e_UIMWCheckbox_StopWatch_AutoLap
+    e_Cmd_Capture_TimestampToggle,          // e_UIMWCheckbox_Capture_Timestamp
+    e_Cmd_Capture_AppendToggle,             // e_UIMWCheckbox_Capture_Append
+    e_Cmd_Capture_StripCtrlCharsToggle,     // e_UIMWCheckbox_Capture_StripCtrlChars
+    e_Cmd_Capture_StripEscSeqToggle,        // e_UIMWCheckbox_Capture_StripEscSeq
+    e_Cmd_Capture_HexDumpToggle,            // e_UIMWCheckbox_Capture_HexDump
+    e_Cmd_HexDisplay_PauseToggle,           // e_UIMWCheckbox_HexDisplay_Paused
+    e_Cmd_BridgeLockConnection1,            // e_UIMWCheckbox_Bridge_Lock1
+    e_Cmd_BridgeLockConnection2,            // e_UIMWCheckbox_Bridge_Lock2
+    e_Cmd_HexDisplay_OutGoingPauseToggle,   // e_UIMWCheckbox_OutGoingHexDisplay_Paused
 };
 
 /*******************************************************************************
@@ -840,6 +848,10 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     // e_Cmd_ToggleLeftPanel
     // e_Cmd_ToggleBottomPanel
     // e_Cmd_ToggleRightPanel
+    // e_Cmd_HexDisplay_OutGoingPauseToggle
+    // e_Cmd_OutGoingHexDisplay_Clear
+    // e_Cmd_OutGoingHexDisplay_Copy
+    // e_Cmd_OutGoingHexDisplay_CopyAs
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A

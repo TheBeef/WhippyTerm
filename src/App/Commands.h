@@ -197,6 +197,10 @@ typedef enum
     e_Cmd_ToggleLeftPanel,
     e_Cmd_ToggleBottomPanel,
     e_Cmd_ToggleRightPanel,
+    e_Cmd_HexDisplay_OutGoingPauseToggle,
+    e_Cmd_OutGoingHexDisplay_Clear,
+    e_Cmd_OutGoingHexDisplay_Copy,
+    e_Cmd_OutGoingHexDisplay_CopyAs,
     e_CmdMAX
 } e_CmdType;
 

@@ -727,6 +727,11 @@ static void DS_SetSettingGUI(void)
     NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_HexDisplay_BufferSize);
     UISetNumberInputCtrlValue(NumberInputHandle,g_Settings.HexDisplayBufferSize);
 
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_OutGoingHexDisplayEnabled);
+    UICheckCheckbox(CheckboxHandle,g_Settings.OutGoingHexDisplayEnabled);
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_OutGoingHexDisplay_BufferSize);
+    UISetNumberInputCtrlValue(NumberInputHandle,g_Settings.OutGoingHexDisplayBufferSize);
+
     m_HexDisplaysFGColor=g_Settings.HexDisplaysFGColor;
     ColorPreviewHandle=UIS_GetColorPreviewHandle(e_UIS_ColorPreview_HexDisplay_FGDisplay);
     UISetColorPreviewColor(ColorPreviewHandle,m_HexDisplaysFGColor);
@@ -1158,6 +1163,11 @@ static void DS_GetSettingsFromGUI(void)
         g_Settings.HexDisplayEnabled=UIGetCheckboxCheckStatus(CheckboxHandle);
         NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_HexDisplay_BufferSize);
         g_Settings.HexDisplayBufferSize=UIGetNumberInputCtrlValue(NumberInputHandle);
+
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_OutGoingHexDisplayEnabled);
+        g_Settings.OutGoingHexDisplayEnabled=UIGetCheckboxCheckStatus(CheckboxHandle);
+        NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_OutGoingHexDisplay_BufferSize);
+        g_Settings.OutGoingHexDisplayBufferSize=UIGetNumberInputCtrlValue(NumberInputHandle);
 
         g_Settings.HexDisplaysFGColor=m_HexDisplaysFGColor;
         g_Settings.HexDisplaysBGColor=m_HexDisplaysBGColor;
@@ -2881,6 +2891,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Checkbox_ReopenConnectionsOnStartup:
                 case e_UIS_Checkbox_ConfirmQuit:
                 case e_UIS_Checkbox_OverrideHR:
+                case e_UIS_Checkbox_OutGoingHexDisplayEnabled:
                 case e_UIS_CheckboxMAX:
                 default:
                 break;
@@ -3023,6 +3034,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_NumberInput_DelayBetweenBytes:
                 case e_UIS_NumberInput_DelayAfterNewLineSent:
                 case e_UIS_NumberInput_TabSize:
+                case e_UIS_NumberInput_OutGoingHexDisplay_BufferSize:
                 case e_UIS_NumberInputMAX:
                 default:
                 break;

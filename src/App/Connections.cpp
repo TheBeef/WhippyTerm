@@ -4853,32 +4853,33 @@ void Connection::HandleHexDisplayIncomingData(const uint8_t *inbuff,int Bytes)
     {
         CopyFrom+=Bytes-HexDisplay.BufferSize;
         memcpy(HexDisplay.Buffer,CopyFrom,HexDisplay.BufferSize);
-        HexDisplay.InsertPos=HexDisplay.Buffer;
-        return;
-    }
-
-    BufferEnd=HexDisplay.Buffer+HexDisplay.BufferSize;
-
-    if(HexDisplay.InsertPos+Bytes>BufferEnd)
-    {
-        /* We need to split it over to copies */
-        CopyBytes=BufferEnd-HexDisplay.InsertPos;
-        memcpy(HexDisplay.InsertPos,CopyFrom,CopyBytes);
-        memcpy(HexDisplay.Buffer,&CopyFrom[CopyBytes],Bytes-CopyBytes);
-        HexDisplay.InsertPos=HexDisplay.Buffer+Bytes-CopyBytes;
-        HexDisplay.BufferWrapped=true;
+        HexDisplay.InsertPos=HexDisplay.Buffer+HexDisplay.BufferSize;
     }
     else
     {
-        /* Things will fit copy the whole thing */
-        memcpy(HexDisplay.InsertPos,CopyFrom,Bytes);
-        HexDisplay.InsertPos+=Bytes;
-    }
+        BufferEnd=HexDisplay.Buffer+HexDisplay.BufferSize;
 
-    if(HexDisplay.InsertPos>=BufferEnd)
-    {
-        HexDisplay.InsertPos=HexDisplay.Buffer;
-        HexDisplay.BufferWrapped=true;
+        if(HexDisplay.InsertPos+Bytes>BufferEnd)
+        {
+            /* We need to split it over to copies */
+            CopyBytes=BufferEnd-HexDisplay.InsertPos;
+            memcpy(HexDisplay.InsertPos,CopyFrom,CopyBytes);
+            memcpy(HexDisplay.Buffer,&CopyFrom[CopyBytes],Bytes-CopyBytes);
+            HexDisplay.InsertPos=HexDisplay.Buffer+Bytes-CopyBytes;
+            HexDisplay.BufferWrapped=true;
+        }
+        else
+        {
+            /* Things will fit copy the whole thing */
+            memcpy(HexDisplay.InsertPos,CopyFrom,Bytes);
+            HexDisplay.InsertPos+=Bytes;
+        }
+
+        if(HexDisplay.InsertPos>=BufferEnd)
+        {
+            HexDisplay.InsertPos=HexDisplay.Buffer;
+            HexDisplay.BufferWrapped=true;
+        }
     }
 
     /* Update the UI */
@@ -4895,12 +4896,12 @@ void Connection::HandleHexDisplayIncomingData(const uint8_t *inbuff,int Bytes)
  *    Connection::HandleHexDisplayOutGoingData
  *
  * SYNOPSIS:
- *    void Connection::HandleHexDisplayOutGoingData(const uint8_t *Inbuff,
+ *    void Connection::HandleHexDisplayOutGoingData(const uint8_t *outbuff,
  *              int Bytes);
  *
  * PARAMETERS:
- *    InBuff [I] -- The bytes we just read in
- *    Bytes [I] -- The number of bytes we just read in
+ *    outbuff [I] -- The bytes we just sent out
+ *    Bytes [I] -- The number of bytes we just sent out
  *
  * FUNCTION:
  *    This function adds new bytes to the internal buffer.  The internal buffer
@@ -4913,7 +4914,7 @@ void Connection::HandleHexDisplayIncomingData(const uint8_t *inbuff,int Bytes)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void Connection::HandleHexDisplayOutGoingData(const uint8_t *inbuff,int Bytes)
+void Connection::HandleHexDisplayOutGoingData(const uint8_t *outbuff,int Bytes)
 {
     uint8_t *BufferEnd;
     const uint8_t *CopyFrom;
@@ -4926,38 +4927,38 @@ void Connection::HandleHexDisplayOutGoingData(const uint8_t *inbuff,int Bytes)
     if(OutGoingHexDisplay.Buffer==NULL)
         return;
 
-    CopyFrom=inbuff;
+    CopyFrom=outbuff;
+
+    BufferEnd=OutGoingHexDisplay.Buffer+OutGoingHexDisplay.BufferSize;
 
     if(Bytes>OutGoingHexDisplay.BufferSize)
     {
         CopyFrom+=Bytes-OutGoingHexDisplay.BufferSize;
         memcpy(OutGoingHexDisplay.Buffer,CopyFrom,OutGoingHexDisplay.BufferSize);
-        OutGoingHexDisplay.InsertPos=OutGoingHexDisplay.Buffer;
-        return;
-    }
-
-    BufferEnd=OutGoingHexDisplay.Buffer+OutGoingHexDisplay.BufferSize;
-
-    if(OutGoingHexDisplay.InsertPos+Bytes>BufferEnd)
-    {
-        /* We need to split it over to copies */
-        CopyBytes=BufferEnd-OutGoingHexDisplay.InsertPos;
-        memcpy(OutGoingHexDisplay.InsertPos,CopyFrom,CopyBytes);
-        memcpy(OutGoingHexDisplay.Buffer,&CopyFrom[CopyBytes],Bytes-CopyBytes);
-        OutGoingHexDisplay.InsertPos=OutGoingHexDisplay.Buffer+Bytes-CopyBytes;
-        OutGoingHexDisplay.BufferWrapped=true;
+        OutGoingHexDisplay.InsertPos=OutGoingHexDisplay.Buffer+OutGoingHexDisplay.BufferSize;
     }
     else
     {
-        /* Things will fit copy the whole thing */
-        memcpy(OutGoingHexDisplay.InsertPos,CopyFrom,Bytes);
-        OutGoingHexDisplay.InsertPos+=Bytes;
-    }
-
-    if(OutGoingHexDisplay.InsertPos>=BufferEnd)
-    {
-        OutGoingHexDisplay.InsertPos=OutGoingHexDisplay.Buffer;
-        OutGoingHexDisplay.BufferWrapped=true;
+        if(OutGoingHexDisplay.InsertPos+Bytes>BufferEnd)
+        {
+            /* We need to split it over to copies */
+            CopyBytes=BufferEnd-OutGoingHexDisplay.InsertPos;
+            memcpy(OutGoingHexDisplay.InsertPos,CopyFrom,CopyBytes);
+            memcpy(OutGoingHexDisplay.Buffer,&CopyFrom[CopyBytes],Bytes-CopyBytes);
+            OutGoingHexDisplay.InsertPos=OutGoingHexDisplay.Buffer+Bytes-CopyBytes;
+            OutGoingHexDisplay.BufferWrapped=true;
+        }
+        else
+        {
+            /* Things will fit copy the whole thing */
+            memcpy(OutGoingHexDisplay.InsertPos,CopyFrom,Bytes);
+            OutGoingHexDisplay.InsertPos+=Bytes;
+        }
+        if(OutGoingHexDisplay.InsertPos>=BufferEnd)
+        {
+            OutGoingHexDisplay.InsertPos=OutGoingHexDisplay.Buffer;
+            OutGoingHexDisplay.BufferWrapped=true;
+        }
     }
 
     /* Update the UI */

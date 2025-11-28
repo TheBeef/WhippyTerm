@@ -39,10 +39,14 @@
 #include "App/Settings.h"
 #include "App/Session.h"
 #include "UI/UIAsk.h"
+#include "UI/UIFileReq.h"
 #include <inttypes.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string>
+
+using namespace std;
 
 /*** DEFINES                  ***/
 
@@ -239,8 +243,8 @@ void MWHexDisplay::ConnectionChanged(void)
         UICheckCheckbox(EnabledCheckbox,MW->ActiveCon->GetHexDisplayPaused());
 
         /* Connect this hex display buffer to the data buffers */
-        MW->ActiveCon->HexDisplayGetBufferInfo(&Buffer,&InsertPos,&BufferIsCircular,
-                &BufferSize);
+        MW->ActiveCon->HexDisplayGetBufferInfo(&Buffer,&InsertPos,
+                &BufferIsCircular,&BufferSize);
         IncomingHistoryHexDisplay->SetBuffer(Buffer,BufferSize);
         IncomingHistoryHexDisplay->SetDisplayParms(InsertPos,BufferIsCircular);
 
@@ -333,6 +337,7 @@ void MWHexDisplay::RethinkUI(void)
     t_UIButtonCtrl *ClearBttn;
     t_UIButtonCtrl *CopyBttn;
     t_UIButtonCtrl *CopyAsBttn;
+    t_UIButtonCtrl *SaveBttn;
     t_UICheckboxCtrl *PausedCheckbox;
     bool ControlsEnabled;
     bool PauseCheckEnabled;
@@ -341,10 +346,13 @@ void MWHexDisplay::RethinkUI(void)
     t_UIContextMenuCtrl *ContextMenu_Paste;
     t_UIContextMenuCtrl *ContextMenu_FindCRCAlgorithm;
     t_UIContextMenuCtrl *ContextMenu_CopyToSendBuffer;
+    int Bytes;
+    bool SaveEnabled;
 
     ClearBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_HexDisplay_Clear);
     CopyBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_HexDisplay_Copy);
     CopyAsBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_HexDisplay_CopyAs);
+    SaveBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_InComingHexSave);
     PausedCheckbox=UIMW_GetCheckboxHandle(UIWin,e_UIMWCheckbox_HexDisplay_Paused);
 
     ContextMenu_Copy=IncomingHistoryHexDisplay->GetContextMenuHandle(e_UICTW_ContextMenu_Copy);
@@ -355,6 +363,11 @@ void MWHexDisplay::RethinkUI(void)
     ControlsEnabled=PanelActive;
     PauseCheckEnabled=PanelActive;
     ClipboardBttnEnabled=PanelActive;
+
+    Bytes=IncomingHistoryHexDisplay->GetSizeOfData();
+    SaveEnabled=ControlsEnabled;
+    if(Bytes==0)
+        SaveEnabled=false;
 
     if(!g_Settings.HexDisplayEnabled)
         PanelActive=false;
@@ -373,6 +386,7 @@ void MWHexDisplay::RethinkUI(void)
 
     IncomingHistoryHexDisplay->Enable(ControlsEnabled);
 
+    UIEnableButton(SaveBttn,SaveEnabled);
     UIEnableButton(ClearBttn,ControlsEnabled);
     UIEnableButton(CopyBttn,ClipboardBttnEnabled);
     UIEnableButton(CopyAsBttn,ClipboardBttnEnabled);
@@ -452,6 +466,8 @@ void MWHexDisplay::Clear(void)
     IncomingHistoryHexDisplay->ClearSelection();
     IncomingHistoryHexDisplay->SetDisplayParms(InsertPos,BufferIsCircular);
     IncomingHistoryHexDisplay->RebuildDisplay();
+
+    RethinkUI();
 }
 
 /*******************************************************************************
@@ -480,10 +496,15 @@ void MWHexDisplay::InformOfUpdate(class Connection *EffectedCon,
         const struct ConMWHexDisplayData *UpdateInfo)
 {
     bool WasAtBottom;
+    int Bytes;
+    bool SaveEnabled;
+    t_UIButtonCtrl *SaveBttn;
 
     /* Don't update the screen if this connection is not active */
     if(EffectedCon!=MW->ActiveCon)
         return;
+
+    SaveBttn=UIMW_GetButtonHandle(UIWin,e_UIMWBttn_InComingHexSave);
 
     WasAtBottom=IncomingHistoryHexDisplay->IsYScrollBarAtBottom();
 
@@ -497,6 +518,12 @@ void MWHexDisplay::InformOfUpdate(class Connection *EffectedCon,
     if(WasAtBottom)
         IncomingHistoryHexDisplay->ScrollToBottom();
     IncomingHistoryHexDisplay->RebuildDisplay();
+
+    Bytes=IncomingHistoryHexDisplay->GetSizeOfData();
+    SaveEnabled=true;
+    if(Bytes==0)
+        SaveEnabled=false;
+    UIEnableButton(SaveBttn,SaveEnabled);
 }
 
 /*******************************************************************************
@@ -602,6 +629,75 @@ void MWHexDisplay::CopyAs(void)
             SelectedFormat);
     IncomingHistoryHexDisplay->SendSelection2Clipboard(e_Clipboard_Clipboard,
             SelectedFormat);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWHexDisplay::Save
+ *
+ * SYNOPSIS:
+ *    void MWHexDisplay::Save(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function prompts the user for a file name and then saves the current
+ *    buffer to the file.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWHexDisplay::Save(void)
+{
+    string Path;
+    string Filename;
+    string Error;
+    int Bytes;
+    uint8_t *HexBuff;
+    FILE *out;
+
+    Bytes=IncomingHistoryHexDisplay->GetSizeOfData();
+    if(Bytes==0)
+    {
+        UIAsk("Info","No bytes to save",e_AskBox_Info,e_AskBttns_Ok);
+        return;
+    }
+
+    HexBuff=(uint8_t *)malloc(Bytes+1);
+    if(HexBuff==NULL)
+    {
+        UIAsk("Error","Out of memory",e_AskBox_Error,e_AskBttns_Ok);
+        return;
+    }
+
+    if(UI_SaveFileReq("Save Buffer",Path,Filename,
+            "All Files|*\nBinary|*.bin\n",1))
+    {
+        Filename=UI_ConcatFile2Path(Path,Filename);
+
+        IncomingHistoryHexDisplay->CopyData2Buffer(HexBuff,Bytes);
+        HexBuff[Bytes]=0;
+
+        out=fopen(Filename.c_str(),"wb");
+        if(out==NULL)
+        {
+            Error="Failed to open ";
+            Error+=Filename;
+            Error+=" for writing";
+            UIAsk("Error",Error.c_str(),e_AskBox_Error,e_AskBttns_Ok);
+        }
+        else
+        {
+            fwrite(HexBuff,Bytes,1,out);
+            fclose(out);
+        }
+    }
+
+    free(HexBuff);
 }
 
 /*******************************************************************************

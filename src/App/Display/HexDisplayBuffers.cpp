@@ -3608,7 +3608,7 @@ void HexDisplayBuffer::CopySelection2Buffer(uint8_t *OutBuff,
         case e_HDBCFormat_RAW:
             if(SelStart+Bytes>BufferEnd)
             {
-                /* We need to split it over to copies */
+                /* We need to split it over two copies */
                 CopyBytes=BufferEnd-SelStart;
                 memcpy(OutBuff,SelStart,CopyBytes);
                 memcpy(&OutBuff[CopyBytes],Buffer,Bytes-CopyBytes);
@@ -4269,3 +4269,108 @@ t_UIContextMenuCtrl *HexDisplayBuffer::GetContextMenuHandle(e_UICTW_ContextMenuT
     return UICTW_GetContextMenuHandle(TextDisplayCtrl,UIObj);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    HexDisplayBuffer::GetSizeOfData
+ *
+ * SYNOPSIS:
+ *    int HexDisplayBuffer::GetSizeOfData(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets the number of bytes of data is in the buffer.
+ *
+ * RETURNS:
+ *    The number of bytes of data in the buffer.
+ *
+ * SEE ALSO:
+ *    HexDisplayBuffer::CopyData2Buffer(),
+ ******************************************************************************/
+int HexDisplayBuffer::GetSizeOfData(void)
+{
+    uint8_t *BufferEnd;
+    int RetValue;
+
+    if(BufferIsCircular)
+    {
+        BufferEnd=Buffer+BufferSize;
+
+        if(InsertPos<=StartOfData)
+        {
+            /* Wrapped buffer */
+            RetValue=BufferEnd-StartOfData;
+            RetValue+=InsertPos-Buffer;
+        }
+        else
+        {
+            /* Linear */
+            RetValue=InsertPos-StartOfData;
+        }
+    }
+    else
+    {
+        RetValue=InsertPos-Buffer;
+    }
+    return RetValue;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    HexDisplayBuffer::CopyData2Buffer
+ *
+ * SYNOPSIS:
+ *    void HexDisplayBuffer::CopyData2Buffer(uint8_t *OutBuff,
+ *              int NumOfBytes2Copy);
+ *
+ * PARAMETERS:
+ *    OutBuff [O] -- This is the buffer that is filled with the copied data.
+ *    NumOfBytes2Copy [I] -- The number of bytes to copy into 'OutBuff'.  Can't
+ *                           be more than the number of bytes available.
+ *
+ * FUNCTION:
+ *    This function copies bytes from the internal buffer to 'OutBuff'.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void HexDisplayBuffer::CopyData2Buffer(uint8_t *OutBuff,int NumOfBytes2Copy)
+{
+    uint8_t *BufferEnd;
+    int CopyBytes;
+    int Bytes;
+
+    Bytes=GetSizeOfData();
+    if(Bytes==0)
+        return;
+
+    if(NumOfBytes2Copy<Bytes)
+        Bytes=NumOfBytes2Copy;
+
+    if(BufferIsCircular)
+    {
+        BufferEnd=Buffer+BufferSize;
+
+        if(StartOfData+Bytes>BufferEnd)
+        {
+            /* We need to split it over two copies */
+            CopyBytes=BufferEnd-StartOfData;
+            memcpy(OutBuff,StartOfData,CopyBytes);
+            memcpy(&OutBuff[CopyBytes],Buffer,Bytes-CopyBytes);
+        }
+        else
+        {
+            /* Things will fit copy the whole thing */
+            memcpy(OutBuff,StartOfData,Bytes);
+        }
+    }
+    else
+    {
+        /* Simple copy */
+        memcpy(OutBuff,Buffer,Bytes);
+    }
+}

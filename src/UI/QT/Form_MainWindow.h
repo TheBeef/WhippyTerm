@@ -443,6 +443,10 @@ private slots:
     
     void on_pushButton_OutGoing_HexCopyAs_clicked();
     
+    void on_OutGoingHex_Save_pushButton_clicked();
+    
+    void on_IncomingHex_Save_pushButton_clicked();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

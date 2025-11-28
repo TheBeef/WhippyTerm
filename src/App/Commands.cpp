@@ -210,6 +210,8 @@ const char *m_CmdNames[]=
     "OutGoingHexDisplay_Clear",             // e_Cmd_OutGoingHexDisplay_Clear
     "OutGoingHexDisplay_Copy",              // e_Cmd_OutGoingHexDisplay_Copy
     "OutGoingHexDisplay_CopyAs",            // e_Cmd_OutGoingHexDisplay_CopyAs
+    "InComingHexSave",                      // e_Cmd_InComingHexSave
+    "OutGoingHexSave",                      // e_Cmd_OutGoingHexSave
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -379,6 +381,8 @@ e_CmdType m_Cmd2ButtonMapping[]=
     e_Cmd_OutGoingHexDisplay_Clear,     // e_UIMWBttn_OutGoingHexDisplay_Clear
     e_Cmd_OutGoingHexDisplay_Copy,      // e_UIMWBttn_OutGoingHexDisplay_Copy
     e_Cmd_OutGoingHexDisplay_CopyAs,    // e_UIMWBttn_OutGoingHexDisplay_CopyAs
+    e_Cmd_InComingHexSave,              // e_UIMWBttn_InComingHexSave
+    e_Cmd_OutGoingHexSave,              // e_UIMWBttn_OutGoingHexSave
 };
 
 e_CmdType m_Cmd2CheckboxMapping[]=

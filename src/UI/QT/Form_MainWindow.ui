@@ -1903,6 +1903,13 @@
                       </widget>
                      </item>
                      <item>
+                      <widget class="QPushButton" name="IncomingHex_Save_pushButton">
+                       <property name="text">
+                        <string>Save...</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
                       <spacer name="verticalSpacer_2">
                        <property name="orientation">
                         <enum>Qt::Vertical</enum>
@@ -1999,6 +2006,13 @@
                       <widget class="QPushButton" name="pushButton_OutGoing_HexCopyAs">
                        <property name="text">
                         <string>Copy As...</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="OutGoingHex_Save_pushButton">
+                       <property name="text">
+                        <string>Save...</string>
                        </property>
                       </widget>
                      </item>

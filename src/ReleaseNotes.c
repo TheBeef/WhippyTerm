@@ -31,6 +31,16 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added a save button to the hex panels",
+            "A new save button has been added to the incoming and outgoing"
+            " bottom hex panels.  The just saves the contents of the panel"
+            " to a file as RAW binary data."},
+    {
+        NOTETYPE_BUG_FIX,"Fixed a bug where if a block of bytes came in it wouldn't add to hex panel",
+            "When a block of bytes came in and it was bigger than the size of"
+            " the hex buffer it would just clear the hex panel instead of"
+            " coping the last bytes."},
+    {
         NOTETYPE_ENHANCEMENT,"Added new out going hex panel",
             "A new hex display was been added to the bottom panel.  This"
             " new display shows the outgoing bytes in hex the same as the"

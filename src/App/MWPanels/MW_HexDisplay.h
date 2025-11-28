@@ -63,6 +63,7 @@ class MWHexDisplay
         void Clear(void);
         void Copy2Clip(void);
         void CopyAs(void);
+        void Save(void);
         bool HexDisplayBufferEvent(const struct HDEvent *Event);
 
     private:

@@ -159,6 +159,10 @@ class HexDisplayBuffer
         void DoInsertFromClipboard(e_HDBCFormatType ClipFormat);
         t_UIContextMenuCtrl *GetContextMenuHandle(e_UICTW_ContextMenuType UIObj);
 
+        /* Data */
+        int GetSizeOfData(void);
+        void CopyData2Buffer(uint8_t *OutBuff,int NumOfData);
+
     private:
         t_UICustomTextWidgetCtrl *TextDisplayCtrl;
         uintptr_t HDID;
@@ -167,11 +171,11 @@ class HexDisplayBuffer
         bool ResizeNeeded;
         bool HasFocus;      // Does this control have focus
         bool HideSelectionOnLossOfFocus;
-        bool LeftMouseDown; // Is the left mouse button down
-        uint8_t *Buffer;          // The start of the memory with the data in it
-        uint8_t *StartOfData;     // The point in 'Buffer' where we start drawing data from.  This is an adjusted 'InsertPos'
-        uint8_t *InsertPos;       // The point in 'Buffer' where the next byte of data will be inserted.  When the buffer is circular this also is the oldest data
-        bool BufferIsCircular;          // Is 'Buffer' flat (and data starts at 'Buffer' or is it circular data starts at 'InsertPos'
+        bool LeftMouseDown;         // Is the left mouse button down
+        uint8_t *Buffer;            // The start of the memory with the data in it
+        uint8_t *StartOfData;       // The point in 'Buffer' where we start drawing data from.  This is an adjusted 'InsertPos'
+        uint8_t *InsertPos;         // The point in 'Buffer' where the next byte of data will be inserted.  When the buffer is circular this also is the oldest data
+        bool BufferIsCircular;      // Is 'Buffer' flat (and data starts at 'Buffer' or is it circular data starts at 'InsertPos'
         int BufferSize;             // The number of bytes in 'Buffer'
         int BufferAllocatedSize;    // This is the number of bytes 'Buffer' has been allocated with.  This is used because when we grow/shrink 'Buffer' we allocate more bytes than is actually in 'BufferSize'.  This is so we don't realloc the buffer everytime a byte is added.
         int BufferBytes2Draw;

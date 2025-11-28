@@ -5005,6 +5005,8 @@ bool MW_Event(const struct MWEvent *Event)
                 case e_UIMWBttn_OutGoingHexDisplay_Clear:
                 case e_UIMWBttn_OutGoingHexDisplay_Copy:
                 case e_UIMWBttn_OutGoingHexDisplay_CopyAs:
+                case e_UIMWBttn_InComingHexSave:
+                case e_UIMWBttn_OutGoingHexSave:
                 case e_UIMWBttnMAX:
                 default:
                     Event->MW->ExeCmd(MainWindowBttn2Cmd(Event->
@@ -5906,6 +5908,12 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_OutGoingHexDisplay_CopyAs:
             OutGoingHexDisplayPanel.CopyAs();
+        break;
+        case e_Cmd_InComingHexSave:
+            HexDisplayPanel.Save();
+        break;
+        case e_Cmd_OutGoingHexSave:
+            OutGoingHexDisplayPanel.Save();
         break;
 
         case e_CmdMAX:

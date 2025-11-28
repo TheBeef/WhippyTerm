@@ -1855,3 +1855,15 @@ void Form_MainWindow::on_pushButton_OutGoing_HexCopyAs_clicked()
     DoBttnTriggered(e_UIMWBttn_OutGoingHexDisplay_CopyAs);
 }
 
+
+void Form_MainWindow::on_OutGoingHex_Save_pushButton_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_OutGoingHexSave);
+}
+
+
+void Form_MainWindow::on_IncomingHex_Save_pushButton_clicked()
+{
+    DoBttnTriggered(e_UIMWBttn_InComingHexSave);
+}
+

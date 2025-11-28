@@ -272,6 +272,8 @@ typedef enum
     e_UIMWBttn_OutGoingHexDisplay_Clear,
     e_UIMWBttn_OutGoingHexDisplay_Copy,
     e_UIMWBttn_OutGoingHexDisplay_CopyAs,
+    e_UIMWBttn_InComingHexSave,
+    e_UIMWBttn_OutGoingHexSave,
     e_UIMWBttnMAX
 } e_UIMWBttnType;
 

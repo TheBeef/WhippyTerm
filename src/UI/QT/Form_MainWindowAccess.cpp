@@ -471,6 +471,10 @@ t_UIButtonCtrl *UIMW_GetButtonHandle(t_UIMainWindow *win,e_UIMWBttnType UIObj)
             return (t_UIButtonCtrl *)realwin->ui->pushButton_OutGoing_HexCopy;
         case e_UIMWBttn_OutGoingHexDisplay_CopyAs:
             return (t_UIButtonCtrl *)realwin->ui->pushButton_OutGoing_HexCopyAs;
+        case e_UIMWBttn_InComingHexSave:
+            return (t_UIButtonCtrl *)realwin->ui->IncomingHex_Save_pushButton;
+        case e_UIMWBttn_OutGoingHexSave:
+            return (t_UIButtonCtrl *)realwin->ui->OutGoingHex_Save_pushButton;
         case e_UIMWBttnMAX:
         default:
         break;

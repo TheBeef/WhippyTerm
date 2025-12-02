@@ -7,7 +7,7 @@ LNK_FLAGS = -shared
 BIN = ExampleComport.dll
 
 # Put all auto generated stuff to this build dir.
-BUILD_DIR = ./build
+BUILD_DIR = .\build
 
 SOURCE_DIR = ..
 
@@ -15,11 +15,11 @@ SRC_DIR = src
 LIBS_DIR = ..
 
 # List of all .c source files.
-SOURCE = $(SRC_DIR)/Comport_Main.cpp \
-	$(SRC_DIR)/Comport_ConnectionOptions.cpp \
-	$(SRC_DIR)/OS/Win/Comport_OS_Serial.cpp \
+SOURCE = $(SRC_DIR)\Comport_Main.cpp \
+	$(SRC_DIR)\Comport_ConnectionOptions.cpp \
+	$(SRC_DIR)\OS\Win\Comport_OS_Serial.cpp \
 
-INCLUDES = ../src \
+INCLUDES = ..\src \
 
 # All .o files go to build dir.
 OBJ = $(SOURCE:%.c=$(BUILD_DIR)\\%.o)

@@ -1,7 +1,7 @@
 CC = g++
 # add -g for debugging info
 CC_FLAGS = -g -Wall -fmax-errors=1 -Wfatal-errors -Wno-memset-transposed-args -fPIC
-LNK_FLAGS = -shared
+LNK_FLAGS = -shared -lSetupApi
 
 # Final binary
 BIN = ExampleComport.dll

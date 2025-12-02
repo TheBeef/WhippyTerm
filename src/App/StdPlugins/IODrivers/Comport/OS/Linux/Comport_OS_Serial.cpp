@@ -1522,11 +1522,11 @@ PG_BOOL Comport_GetConnectionInfo(const char *DeviceUniqueID,t_PIKVList *Options
 void Comport_CustomizeComportInfo(struct IODriverInfo *ComportInfo)
 {
     ComportInfo->URIHelpString=
-            "<URI>COM://[Device Path],[Bit Rate],[Data Bits],[Parity],[Stop Bits]</URI>"
+            "<URI>" COMPORT_URI_PREFIX "://[Device Path],[Bit Rate],[Data Bits],[Parity],[Stop Bits]</URI>"
             "<ARG>Device Path -- The path and filename of the driver for this connection.  This is normally in the /dev directory.  For example /dev/ttyUSB0</ARG>"
             "<ARG>Bit Rate -- The speed to use for this connection.</ARG>"
             "<ARG>Data Bits -- The number of data bits for this connection.  Supported values are 7 or 8 bits.</ARG>"
             "<ARG>Parity -- What parity to use for this connection.  Supported values are n=none, o=odd, e=even, m=mark, s=space.</ARG>"
             "<ARG>Stop Bits -- How many stop bits to use.  Supported values are 1 or 2 stop bits.</ARG>"
-            "<Example>COM:///dev/ttyUSB0,9600,8,n,1</Example>";
+            "<Example>" COMPORT_URI_PREFIX ":///dev/ttyUSB0,9600,8,n,1</Example>";
 }

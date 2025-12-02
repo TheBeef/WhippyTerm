@@ -33,7 +33,6 @@
 #include "Comport_Main.h"
 #include "Comport_ConnectionOptions.h"
 #include "OS/Comport_Serial.h"
-#include "UI/UIDebug.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -42,7 +41,7 @@
 using namespace std;
 
 /*** DEFINES                  ***/
-#define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      Comport // The name to append on the RegisterPlugin() function for built in version
+#define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      ExampleComport // The name to append on the RegisterPlugin() function for built in version
 #define NEEDED_MIN_API_VERSION                  0x01000000
 
 /*** MACROS                   ***/

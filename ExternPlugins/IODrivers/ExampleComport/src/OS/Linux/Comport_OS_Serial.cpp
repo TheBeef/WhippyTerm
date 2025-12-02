@@ -5,7 +5,7 @@
  *    Whippy Term
  *
  * FILE DESCRIPTION:
- *    // Format: "COM64:9600,n,8,1"
+ *    
  *
  * COPYRIGHT:
  *    Copyright 2018 Paul Hutchinson.
@@ -31,50 +31,58 @@
 /*** HEADER FILES TO INCLUDE  ***/
 #include "../Comport_Serial.h"
 #include "../../Comport_Main.h"
+#include <list>
 #include <string>
-#include <stdbool.h>
-#include <windows.h>
+#include <map>
+#include <dirent.h>
 #include <stdio.h>
-#include <SetupAPI.h>
+#include <sys/stat.h>
+#include <linux/serial.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
+#include <pthread.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <termios.h>
+#include <unistd.h>
+
+//#include <stdio.h>  // Remove me
 
 using namespace std;
 
 /*** DEFINES                  ***/
-#define INBUFFER_GROW_SIZE                      10000   // We grow by 10k at a time
-#define INBUFFER_MAX_SIZE                       1000000 // Cap at 1M
-
-//#define INBUFFER_GROW_SIZE                      100   // We grow by 10k at a time
-//#define INBUFFER_MAX_SIZE                       10000 // Cap at 1M
 
 /*** MACROS                   ***/
 
 /*** TYPE DEFINITIONS         ***/
 struct OpenComportInfo
 {
+    int fd;
     t_IOSystemHandle *DriverIO;
     string DriverName;
-    HANDLE hComm;
-    HANDLE ThreadMutex;
-    HANDLE ThreadHandle;
-    uint8_t *InBuffer;
-    unsigned int InBufferSize;
-    unsigned int InBufferHead;
-    unsigned int InBufferTail;
+    pthread_t ThreadInfo;
+    pthread_mutex_t UpdateMutex;
     volatile bool RequestThreadQuit;
     volatile bool ThreadHasQuit;
     volatile bool Opened;
+    volatile int ModemBits;
+    int LastModemBits;
+    int SetModemBits;
     struct Comport_ConAuxWidgets *AuxWidgets;
-    bool RTSSet;
-    bool DTRSet;
-    DWORD LastModemBits;
-    volatile DWORD ModemBits;
-    volatile DWORD CommErrors;
-    DWORD LastCommErrors;
+    int ReadEsc;   // Did we see the 0xFF esc values and are in esc bytes?
     string LastErrorMsg;
 };
 
+typedef list<string> t_PossibleComPortList;
+typedef t_PossibleComPortList::iterator i_PossibleComPortList;
+
 /*** FUNCTION PROTOTYPES      ***/
-static DWORD WINAPI Comport_OS_PollThread(LPVOID lpParameter);
+static bool Comport_ProcessUEventFile(const char *Filename,const char *Tag,
+        char *Value,int MaxValueLen);
+static void *Comport_OS_PollThread(void *arg);
 static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
         uint32_t BitRate,e_ComportDataBitsType DataBits,
         e_ComportParityType Parity,e_ComportStopBitsType StopBits,
@@ -84,120 +92,212 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
 
 bool Comport_OS_GetSerialPortList(t_OSComportListType &List)
 {
-    bool RetValue;
-    string DevName;
-    i_OSComportListType FoundPorts;
+    DIR *d;
+    struct dirent *dir;
+    t_PossibleComPortList Possibles;
+    string filename;
+    i_PossibleComPortList pcpli;
     struct ComportInfo NewComportInfo;
-    GUID WorkingGuid;
-    DWORD dwRequiredSize;
-    DWORD DeviceIndex;
-    SP_DEVINFO_DATA DeviceInfoData;
-    HDEVINFO DeviceInfoSet;
-    char szFriendlyName[MAX_PATH];
-    char szPortName[MAX_PATH];
-    HKEY hKey;
-    DWORD dwReqSize;
+    char driver[100];
+    char devname[100];
+    int fd;
+    struct serial_struct serialinfo;
+    bool Valid;
+    bool TryGetSerialInfo;
+    struct termios tio;
 
-    DeviceInfoSet=NULL;
-    hKey=NULL;
-    RetValue=false;
-    try
+    /*
+        Ok, the philosophy we are using here is we look at all the stuff in
+        /sys/class/tty and assume everything is a real device.  We then
+        look at each one and if we recognize something that is known
+        to not be a real device, we test it, if the test fails then it
+        must not have been the thing that is known to have problems and we
+        add it as a real device.
+
+        We basicly error on the side of it being a real device and try to
+        screen out things known to give false positives.
+
+        Currently we check:
+            * If it has a "device/" driver named then it's a real device,
+              unless it is a "serial8250" or "port" in which case do more
+              testing
+            * If it doesn't have "device/" driver then do more testing.
+        If more testing needed then we open the device and check if:
+            * It supports 'TIOCGSERIAL' (real serial devices seem to all
+              support this)
+            * If it's "port" driver then we also check if we can do a
+              tcgetattr() on it (a number of devices get listed as tty,
+              have driver, support 'TIOCGSERIAL', but you can't do a
+              tcgetattr())
+    */
+
+    d=opendir("/sys/class/tty");
+    if(d)
     {
-        /* SetupAPI method */
-        DeviceInfoData.cbSize=sizeof(SP_DEVINFO_DATA);
-
-        if(!SetupDiClassGuidsFromNameA("PORTS",(LPGUID)&WorkingGuid,1,
-                                      &dwRequiredSize))
+        while((dir = readdir(d)) != NULL)
         {
-            throw(0);
+            /* Check if it has a real driver */
+            filename="/sys/class/tty/";
+            filename+=dir->d_name;
+
+            if(strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0)
+            {
+                Possibles.push_back(dir->d_name);
+            }
         }
 
-        DeviceInfoSet=SetupDiGetClassDevsA(&WorkingGuid,NULL,NULL,
-                DIGCF_PRESENT|DIGCF_PROFILE);
-        if(DeviceInfoSet==INVALID_HANDLE_VALUE)
-            throw(0);
+        closedir(d);
+    }
 
-        for(DeviceIndex=0;SetupDiEnumDeviceInfo(DeviceInfoSet,DeviceIndex,
-                &DeviceInfoData);DeviceIndex++)
+    /* Ok, try to open each com port to which ones are really instead */
+    for(pcpli=Possibles.begin();pcpli!=Possibles.end();pcpli++)
+    {
+        TryGetSerialInfo=false;
+
+        filename="/sys/class/tty/";
+        filename+=*pcpli;
+        filename+="/device/uevent";
+
+        if(!Comport_ProcessUEventFile(filename.c_str(),"DRIVER",driver,
+                sizeof(driver)))
         {
-            if(!SetupDiGetDeviceRegistryPropertyA(DeviceInfoSet,
-                                                &DeviceInfoData,
-                                                SPDRP_FRIENDLYNAME,
-                                                NULL,
-                                                (BYTE *)szFriendlyName,
-                                                sizeof(szFriendlyName),
-                                                NULL))
-            {
-                /* Skip */
-                continue;
-            }
+            TryGetSerialInfo=true;
+        }
 
-            hKey=SetupDiOpenDevRegKey(DeviceInfoSet,&DeviceInfoData,
-                    DICS_FLAG_GLOBAL,0,DIREG_DEV,KEY_READ);
-            if(hKey)
+        Valid=false;
+        /* We need to double check if it's a 8250 or "port" */
+        if(TryGetSerialInfo || strcmp(driver,"serial8250")==0 ||
+                strcmp(driver,"port")==0)
+        {
+            filename="/sys/class/tty/";
+            filename+=*pcpli;
+            filename+="/uevent";
+
+            if(Comport_ProcessUEventFile(filename.c_str(),"DEVNAME",devname,
+                    sizeof(devname)))
             {
-                dwReqSize=sizeof(szPortName);
-                if(RegQueryValueExA(hKey,"PortName",NULL,NULL,
-                        (LPBYTE)&szPortName,&dwReqSize)!=ERROR_SUCCESS)
+                filename="/dev/";
+                filename+=devname;
+
+                /* Check if it's real */
+                fd=open(filename.c_str(),O_RDWR | O_NONBLOCK | O_NOCTTY);
+                if(fd!=-1)
                 {
-                    /* Skip */
-                    RegCloseKey(hKey);
-                    continue;
+                    if(ioctl(fd,TIOCGSERIAL,&serialinfo)>=0)
+                    {
+                        /* If it supports this ioctl then we count it as serial
+                           port */
+
+                        /* Ok, ttySx drivers that say they are "port" need more
+                           verifing because they reply to TIOCGSERIAL but don't
+                           let you do a tcgetattr() on them. */
+                        if(strcmp(driver,"port")==0)
+                        {
+                            if(tcgetattr(fd,&tio)>=0)
+                            {
+                                /* Looks like it's a real port */
+                                Valid=true;
+                            }
+                        }
+                        else
+                        {
+                            Valid=true;
+                        }
+                    }
+                    close(fd);
                 }
-
-                RegCloseKey(hKey);
-            }
-
-            /* We have to name it "\\.\COMxx" for comports over 9 because...
-               Windows... */
-            DevName="\\\\.\\";
-            DevName+=szPortName;
-
-            /* See if we found this port already */
-            for(FoundPorts=List.begin();FoundPorts!=List.end();FoundPorts++)
-            {
-                if(DevName==FoundPorts->DriverName)
-                    break;
-            }
-
-            if(FoundPorts==List.end())
-            {
-                /* Didn't find it, add it */
-                NewComportInfo.DriverName=DevName;
-                NewComportInfo.FullName=szFriendlyName;
-                NewComportInfo.ShortName=szPortName;
-                List.push_back(NewComportInfo);
             }
         }
+        else
+        {
+            Valid=true;
+        }
 
-        RetValue=true;
+        if(Valid)
+        {
+            NewComportInfo.DriverName="/dev/";
+            NewComportInfo.DriverName+=*pcpli;
+            NewComportInfo.FullName="Example ";
+            NewComportInfo.FullName+=*pcpli;
+            NewComportInfo.ShortName="Ex ";
+            NewComportInfo.ShortName=*pcpli;
+            List.push_back(NewComportInfo);
+        }
     }
-    catch(...)
+
+    return true;
+}
+
+static bool Comport_ProcessUEventFile(const char *Filename,const char *Tag,
+        char *Value,int MaxValueLen)
+{
+    char buff[100];
+    FILE *in;
+    char *s;
+    char *e;
+    char *v;
+    char *ve;
+
+    in=fopen(Filename,"r");
+    if(in==NULL)
+        return false;
+
+    while(fgets(buff,sizeof(buff)-1,in)!=NULL)
     {
-        RetValue=false;
+        /* Skip any white space */
+        s=buff;
+        while(*s==' ' || *s=='\t')
+            s++;
+
+        /* Find the = */
+        e=s;
+        while(*e!='=' && *e!=0)
+            e++;
+
+        if(*e==0)
+        {
+            fclose(in);
+            return false;
+        }
+
+        v=e+1;
+        /* Back up to the last of the name */
+        while(*(e-1)==' ' || *(e-1)=='\t')
+            e--;
+        *e=0;
+
+        /* To the start of the value */
+        while(*v==' ' || *v=='\t')
+            v++;
+
+        ve=v+strlen(v)-1;
+
+        while(*ve==' ' || *ve=='\t' || *ve=='\n' || *ve=='\r')
+            ve--;
+
+        *(ve+1)=0;
+
+        if(strcmp(s,Tag)==0)
+        {
+            /* Found it */
+            strncpy(Value,v,MaxValueLen);
+            Value[MaxValueLen-1]=0;
+            fclose(in);
+            return true;
+        }
     }
 
-    if(DeviceInfoSet!=NULL)
-        SetupDiDestroyDeviceInfoList(DeviceInfoSet);
+    fclose(in);
 
-    return RetValue;
+    return false;
 }
 
 bool Comport_OS_SerialPortBusy(const std::string &DriverName)
 {
-    HANDLE hComm;
-//    string OpenName;
+    /* Not sure how to detect if someone has the serial port in linux so for
+       now this does nothing. */
 
-    /* See if we can open it */
-//    OpenName="\\\\.\\";
-//    OpenName+=DriverName;
-
-    hComm=CreateFileA(DriverName.c_str(),GENERIC_READ|GENERIC_WRITE,0,0,
-            OPEN_EXISTING,FILE_FLAG_OVERLAPPED,0);
-    if(hComm==INVALID_HANDLE_VALUE)
-        return true;
-
-    CloseHandle(hComm);
+//https://stackoverflow.com/questions/18648291/how-to-check-if-a-file-is-already-opened-in-c
 
     return false;
 }
@@ -250,55 +350,42 @@ bool Comport_OS_SerialPortBusy(const std::string &DriverName)
 t_DriverIOHandleType *Comport_AllocateHandle(const char *DeviceUniqueID,
         t_IOSystemHandle *IOHandle)
 {
-    string filename;
     struct OpenComportInfo *NewComInfo;
 
     NewComInfo=NULL;
     try
     {
-        NewComInfo=new(struct OpenComportInfo);
+        NewComInfo=new struct OpenComportInfo;
         if(NewComInfo==NULL)
             throw(0);
 
-        NewComInfo->hComm=INVALID_HANDLE_VALUE;
+        NewComInfo->fd=-1;
         NewComInfo->DriverIO=IOHandle;
-        NewComInfo->ThreadMutex=NULL;
-        NewComInfo->DriverName=DeviceUniqueID;
         NewComInfo->RequestThreadQuit=false;
         NewComInfo->ThreadHasQuit=false;
         NewComInfo->Opened=false;
-        NewComInfo->InBuffer=(uint8_t *)malloc(INBUFFER_GROW_SIZE);
-        NewComInfo->InBufferSize=INBUFFER_GROW_SIZE;
-        NewComInfo->InBufferHead=0;
-        NewComInfo->InBufferTail=0;
-        NewComInfo->LastModemBits=0;
+        NewComInfo->DriverName=DeviceUniqueID;
         NewComInfo->ModemBits=0;
+        NewComInfo->LastModemBits=0;
+        NewComInfo->SetModemBits=0;
         NewComInfo->AuxWidgets=NULL;
-        NewComInfo->CommErrors=0;
-        NewComInfo->LastCommErrors=0;
+        NewComInfo->ReadEsc=0;
         NewComInfo->LastErrorMsg="";
 
-        NewComInfo->ThreadMutex=CreateMutex(NULL,FALSE,NULL);
-        if(NewComInfo->ThreadMutex==NULL)
+        if(pthread_mutex_init(&NewComInfo->UpdateMutex,NULL)!=0)
             throw(0);
 
-        NewComInfo->ThreadHandle=CreateThread(NULL,0,Comport_OS_PollThread,
-                NewComInfo,CREATE_SUSPENDED,NULL);
-        if(NewComInfo->ThreadHandle==NULL)
+        /* Startup the thread for polling if we have data available */
+        if(pthread_create(&NewComInfo->ThreadInfo,NULL,
+                Comport_OS_PollThread,NewComInfo)<0)
+        {
             throw(0);
-
-        /* Ok, start the thread */
-        ResumeThread(NewComInfo->ThreadHandle);
+        }
     }
     catch(...)
     {
         if(NewComInfo!=NULL)
-        {
-            if(NewComInfo->ThreadMutex!=NULL)
-                CloseHandle(NewComInfo->ThreadMutex);
-
             delete NewComInfo;
-        }
 
         return NULL;
     }
@@ -336,10 +423,12 @@ void Comport_FreeHandle(t_DriverIOHandleType *DriverIO)
 
     /* Wait for the thread to exit */
     while(!ComInfo->ThreadHasQuit)
-        Sleep(1);   // Wait 1 ms
+        usleep(1000);   // Wait 1 ms
 
-    if(ComInfo->hComm!=INVALID_HANDLE_VALUE)
-        CloseHandle(ComInfo->hComm);
+    if(ComInfo->fd>=0)
+        close(ComInfo->fd);
+
+    pthread_mutex_destroy(&ComInfo->UpdateMutex);
 
     delete ComInfo;
 }
@@ -364,7 +453,7 @@ void Comport_FreeHandle(t_DriverIOHandleType *DriverIO)
  *    false -- There was an error.
  *
  * SEE ALSO:
- *    Close(), Read(), Write()
+ *    Close(), Read(), Write(), ChangeOptions()
  ******************************************************************************/
 PG_BOOL Comport_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
 {
@@ -372,25 +461,26 @@ PG_BOOL Comport_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
     struct ComportPortOptions PortOptions;
 
     ComInfo->LastErrorMsg="";
-
-    ComInfo->hComm=CreateFileA(ComInfo->DriverName.c_str(),
-            GENERIC_READ|GENERIC_WRITE,0,0,OPEN_EXISTING,0,0);
-    if(ComInfo->hComm==INVALID_HANDLE_VALUE)
+    ComInfo->fd=open(ComInfo->DriverName.c_str(),O_RDWR|O_NOCTTY|O_NONBLOCK);
+    if(ComInfo->fd<0)
     {
-        LPTSTR errorText;
-
-        FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_IGNORE_INSERTS,
-                NULL,GetLastError(),MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                (LPTSTR)&errorText,
-                0,
-                NULL);
-        if(errorText!=NULL)
-        {
-            ComInfo->LastErrorMsg=errorText;
-            LocalFree(errorText);
-        }
+        ComInfo->LastErrorMsg=strerror(errno);
         return false;
     }
+
+    if(ComInfo->AuxWidgets!=NULL)
+    {
+        Comport_UpdateRTS(DriverIO,Comport_ReadAuxRTSCheckbox(ComInfo->
+                AuxWidgets));
+        Comport_UpdateDTR(DriverIO,Comport_ReadAuxDTRCheckbox(ComInfo->
+                AuxWidgets));
+    }
+
+//    if(ioctl(ComInfo->fd,TIOCEXCL))
+//    {
+//        close(ComInfo->fd);
+//        return false;
+//    }
 
     Comport_ConvertFromKVList(&PortOptions,Options);
 
@@ -398,14 +488,9 @@ PG_BOOL Comport_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
             PortOptions.DataBits,PortOptions.Parity,
             PortOptions.StopBits,PortOptions.FlowControl))
     {
-        CloseHandle(ComInfo->hComm);
+        close(ComInfo->fd);
         return false;
     }
-
-    ComInfo->RTSSet=true;
-    ComInfo->DTRSet=true;
-    EscapeCommFunction(ComInfo->hComm,SETRTS);
-    EscapeCommFunction(ComInfo->hComm,SETDTR);
 
     g_CP_IOSystem->DrvDataEvent(ComInfo->DriverIO,e_DataEventCode_Connected);
 
@@ -520,9 +605,9 @@ void Comport_Close(t_DriverIOHandleType *DriverIO)
 
     ComInfo->LastErrorMsg="";
 
-    if(ComInfo->hComm!=INVALID_HANDLE_VALUE)
-        CloseHandle(ComInfo->hComm);
-    ComInfo->hComm=INVALID_HANDLE_VALUE;
+    if(ComInfo->fd>=0)
+        close(ComInfo->fd);
+    ComInfo->fd=-1;
 
     ComInfo->Opened=false;
 
@@ -558,99 +643,127 @@ int Comport_Read(t_DriverIOHandleType *DriverIO,uint8_t *Data,int Bytes)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
     int ReadBytes;
-    bool HaveMutex;
-    DWORD TmpModemBits;
-    DWORD TmpErrorBits;
+    struct serial_struct serialinfo;
+    int TmpModemBits;
+    int r;
+    int RetBytes;
+    uint8_t *Dest;
+    uint8_t *Src;
 
-    HaveMutex=false;
-    try
+    ComInfo->LastErrorMsg="";
+
+    if(ComInfo->ModemBits!=ComInfo->LastModemBits)
     {
-        ComInfo->LastErrorMsg="";
-
-        /* Grab the com port */
-        WaitForSingleObject(ComInfo->ThreadMutex,INFINITE);
-        HaveMutex=true;
-
-        if(ComInfo->ModemBits!=ComInfo->LastModemBits)
+        /* Update the indicators */
+        /* See https://man7.org/linux/man-pages/man2/TIOCMSET.2const.html 
+           for bits */
+        TmpModemBits=ComInfo->ModemBits;
+        if(ComInfo->AuxWidgets!=NULL)
         {
-            /* Update the indicators */
-            TmpModemBits=ComInfo->ModemBits;
-            if(ComInfo->AuxWidgets!=NULL)
-            {
-                Comport_NotifyOfModemBitsChange(ComInfo->AuxWidgets,
-                        TmpModemBits&MS_RLSD_ON,TmpModemBits&MS_RING_ON,
-                        TmpModemBits&MS_DSR_ON,TmpModemBits&MS_CTS_ON);
-            }
-            ComInfo->LastModemBits=ComInfo->ModemBits;
+            Comport_NotifyOfModemBitsChange(ComInfo->AuxWidgets,
+                    TmpModemBits&TIOCM_CD,TmpModemBits&TIOCM_RI,
+                    TmpModemBits&TIOCM_DSR,TmpModemBits&TIOCM_CTS);
         }
-
-        if(ComInfo->CommErrors!=ComInfo->LastCommErrors)
-        {
-            /* Update the any errors we support */
-            TmpErrorBits=ComInfo->CommErrors;
-            if(ComInfo->AuxWidgets!=NULL)
-            {
-                if(ComInfo->CommErrors&CE_BREAK &&
-                        !(ComInfo->LastCommErrors&CE_BREAK))
-                {
-                    Comport_AddLogMsg(ComInfo->AuxWidgets,"BREAK");
-                }
-                if(ComInfo->CommErrors&CE_FRAME &&
-                        !(ComInfo->LastCommErrors&CE_FRAME))
-                {
-                    Comport_AddLogMsg(ComInfo->AuxWidgets,"Framing error");
-                }
-                if(ComInfo->CommErrors&CE_RXPARITY &&
-                        !(ComInfo->LastCommErrors&CE_RXPARITY))
-                {
-                    Comport_AddLogMsg(ComInfo->AuxWidgets,"Parity error");
-                }
-                if(ComInfo->CommErrors&CE_RXOVER &&
-                        !(ComInfo->LastCommErrors&CE_RXOVER))
-                {
-                    Comport_AddLogMsg(ComInfo->AuxWidgets,"Overrun error");
-                }
-                if(ComInfo->CommErrors&CE_OVERRUN &&
-                        !(ComInfo->LastCommErrors&CE_OVERRUN))
-                {
-                    Comport_AddLogMsg(ComInfo->AuxWidgets,"Overrun error");
-                }
-            }
-            ComInfo->LastCommErrors=ComInfo->CommErrors;
-        }
-
-        ReadBytes=RETERROR_NOBYTES;
-
-        if(ComInfo->InBufferTail!=ComInfo->InBufferHead)
-        {
-            /* We have bytes available */
-            if(ComInfo->InBufferHead>=ComInfo->InBufferTail)
-            {
-                ReadBytes=ComInfo->InBufferHead-ComInfo->InBufferTail;
-            }
-            else
-            {
-                ReadBytes=ComInfo->InBufferSize-ComInfo->InBufferTail;
-            }
-            if(ReadBytes>Bytes)
-                ReadBytes=Bytes;
-
-            memcpy(Data,&ComInfo->InBuffer[ComInfo->InBufferTail],ReadBytes);
-            ComInfo->InBufferTail+=ReadBytes;
-            if(ComInfo->InBufferTail>=ComInfo->InBufferSize)
-                ComInfo->InBufferTail=0;
-        }
-
-        ReleaseMutex(ComInfo->ThreadMutex);
-        HaveMutex=false;
+        ComInfo->LastModemBits=ComInfo->ModemBits;
     }
-    catch(...)
+
+    ReadBytes=read(ComInfo->fd,Data,Bytes);
+    if(ReadBytes==0)
     {
-        if(HaveMutex)
-            ReleaseMutex(ComInfo->ThreadMutex);
-        ReadBytes=-1;
+        /* Device has disappeared? */
+        if(ioctl(ComInfo->fd,TIOCGSERIAL,&serialinfo)<0)
+        {
+            /* We had an error getting serial info, there for it must have been unplugged? */
+            if(ComInfo->fd>=0)
+                close(ComInfo->fd);
+            ComInfo->fd=-1;
+            ComInfo->Opened=false;
+            g_CP_IOSystem->DrvDataEvent(ComInfo->DriverIO,e_DataEventCode_Disconnected);
+        }
+        RetBytes=0;
     }
-    return ReadBytes;
+    else if(ReadBytes<0)
+    {
+        if(errno==EWOULDBLOCK)
+        {
+            /* Not really an error */
+            RetBytes=0;
+        }
+        else
+        {
+            RetBytes=RETERROR_IOERROR;
+        }
+    }
+    else
+    {
+        /* We need to walk all the bytes looking for 0xFF because the driver
+           uses these to mark breaks and errors */
+        RetBytes=ReadBytes;
+        Dest=Data;
+        Src=Data;
+        for(r=0;r<ReadBytes;r++)
+        {
+            switch(ComInfo->ReadEsc)
+            {
+                case 0: // Normal
+                    if(*Src==0xFF)
+                    {
+                        /* Esc */
+                        ComInfo->ReadEsc=1;
+                        RetBytes--;
+                    }
+                    else
+                    {
+                        *Dest++=*Src;
+                    }
+                break;
+                case 1: // Byte 1 of esc
+                    if(*Src==0xFF)
+                    {
+                        /* It was a real 0xFF byte */
+                        /* Esc */
+                        ComInfo->ReadEsc=0;
+                        *Dest++=0xFF;
+                    }
+                    else if(*Src==0x00)
+                    {
+                        ComInfo->ReadEsc=2;
+                        RetBytes--;
+                    }
+                    else
+                    {
+                        /* We don't know what this means... */
+                        ComInfo->ReadEsc=0;
+                        RetBytes--;
+                    }
+                break;
+                case 2: // Byte 2 of esc
+                    if(ComInfo->AuxWidgets!=NULL)
+                    {
+                        if(*Src==0)
+                        {
+                            /* It was a break */
+                            Comport_AddLogMsg(ComInfo->AuxWidgets,"BREAK");
+                        }
+                        else
+                        {
+                            /* Framing / parity errors */
+                            Comport_AddLogMsg(ComInfo->AuxWidgets,
+                                    "Framing / parity error");
+                        }
+                    }
+                    ComInfo->ReadEsc=0;
+                    RetBytes--;
+                break;
+                default:
+                    ComInfo->ReadEsc=0;
+                break;
+            }
+            Src++;
+        }
+    }
+
+    return RetBytes;
 }
 
 /*******************************************************************************
@@ -683,30 +796,37 @@ int Comport_Write(t_DriverIOHandleType *DriverIO,const uint8_t *Data,int Bytes)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
     int RetBytes;
-    DWORD dwWritten;
-    bool HaveMutex;
 
-    try
+    ComInfo->LastErrorMsg="";
+
+    RetBytes=write(ComInfo->fd,Data,Bytes);
+    if(RetBytes<0)
     {
-        ComInfo->LastErrorMsg="";
-
-        /* Grab the com port */
-        WaitForSingleObject(ComInfo->ThreadMutex,INFINITE);
-        HaveMutex=true;
-
-        if(!WriteFile(ComInfo->hComm,Data,Bytes,&dwWritten,NULL))
-            throw(0);
-        RetBytes=dwWritten;
-
-        ReleaseMutex(ComInfo->ThreadMutex);
-        HaveMutex=false;
+        /* We had an error, convert to our error codes */
+        switch(errno)
+        {
+            case EAGAIN:
+            case ENOBUFS:
+                RetBytes=RETERROR_BUSY;
+            break;
+            case EBADF:
+            case EBADFD:
+            case ECONNABORTED:
+            case ECONNREFUSED:
+            case ECONNRESET:
+            case EHOSTDOWN:
+            case EHOSTUNREACH:
+            case ENETDOWN:
+            case ENETRESET:
+            case ENETUNREACH:
+                RetBytes=RETERROR_DISCONNECT;
+            break;
+            default:
+                RetBytes=RETERROR_IOERROR;
+            break;
+        }
     }
-    catch(...)
-    {
-        if(HaveMutex)
-            ReleaseMutex(ComInfo->ThreadMutex);
-        RetBytes=-1;
-    }
+
     return RetBytes;
 }
 
@@ -794,11 +914,15 @@ void Comport_UpdateDTR(t_DriverIOHandleType *DriverIO,bool DTR)
 
     ComInfo->LastErrorMsg="";
 
-    if(ComInfo->hComm==INVALID_HANDLE_VALUE)
+    if(ComInfo->fd<0)
         return;
 
-    EscapeCommFunction(ComInfo->hComm,DTR?SETDTR:CLRDTR);
-    ComInfo->DTRSet=DTR;
+    if(DTR)
+        ComInfo->SetModemBits|=TIOCM_DTR;
+    else
+        ComInfo->SetModemBits&=~TIOCM_DTR;
+
+    ioctl(ComInfo->fd,TIOCMSET,&ComInfo->SetModemBits);
 }
 
 void Comport_UpdateRTS(t_DriverIOHandleType *DriverIO,bool RTS)
@@ -807,11 +931,15 @@ void Comport_UpdateRTS(t_DriverIOHandleType *DriverIO,bool RTS)
 
     ComInfo->LastErrorMsg="";
 
-    if(ComInfo->hComm==INVALID_HANDLE_VALUE)
+    if(ComInfo->fd<0)
         return;
 
-    EscapeCommFunction(ComInfo->hComm,RTS?SETRTS:CLRRTS);
-    ComInfo->RTSSet=RTS;
+    if(RTS)
+        ComInfo->SetModemBits|=TIOCM_RTS;
+    else
+        ComInfo->SetModemBits&=~TIOCM_RTS;
+
+    ioctl(ComInfo->fd,TIOCMSET,&ComInfo->SetModemBits);
 }
 
 void Comport_SendBreak(t_DriverIOHandleType *DriverIO)
@@ -820,12 +948,10 @@ void Comport_SendBreak(t_DriverIOHandleType *DriverIO)
 
     ComInfo->LastErrorMsg="";
 
-    if(ComInfo->hComm==INVALID_HANDLE_VALUE)
+    if(ComInfo->fd<0)
         return;
 
-    SetCommBreak(ComInfo->hComm);
-    Sleep(100);
-    ClearCommBreak(ComInfo->hComm);
+    ioctl(ComInfo->fd,TCSBRK,0);
 }
 
 /*******************************************************************************
@@ -861,85 +987,188 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
         e_ComportParityType Parity,e_ComportStopBitsType StopBits,
         e_ComportFlowControlType FlowControl)
 {
-    DCB dcb;
-    COMMTIMEOUTS timeouts;
+    uint32_t SetBitRate;
+    struct termios tio;
+    int ret;
 
     try
     {
-        FillMemory(&dcb, sizeof(dcb), 0);
-        dcb.DCBlength = sizeof(dcb);
-        if(!BuildCommDCB("9600,n,8,1", &dcb))
+        switch(BitRate)
         {
-            return false;
-        }
-
-        dcb.BaudRate=BitRate;
-        dcb.fBinary=true;
-
-        switch(Parity)
-        {
-            case e_ComportParity_none:
-                dcb.fParity=false;
-                dcb.Parity=NOPARITY;
+            case 50:
+                SetBitRate=B50;
             break;
-            case e_ComportParity_odd:
-                dcb.fParity=true;
-                dcb.Parity=ODDPARITY;
+            case 75:
+                SetBitRate=B75;
             break;
-            case e_ComportParity_even:
-                dcb.fParity=true;
-                dcb.Parity=EVENPARITY;
+            case 110:
+                SetBitRate=B110;
             break;
-            case e_ComportParity_mark:
-                dcb.fParity=true;
-                dcb.Parity=MARKPARITY;
+            case 134:
+                SetBitRate=B134;
             break;
-            case e_ComportParity_space:
-                dcb.fParity=true;
-                dcb.Parity=SPACEPARITY;
+            case 150:
+                SetBitRate=B150;
             break;
-            case e_ComportParityMAX:
+            case 200:
+                SetBitRate=B200;
+            break;
+            case 300:
+                SetBitRate=B300;
+            break;
+            case 600:
+                SetBitRate=B600;
+            break;
+            case 1200:
+                SetBitRate=B1200;
+            break;
+            case 1800:
+                SetBitRate=B1800;
+            break;
+            case 2400:
+                SetBitRate=B2400;
+            break;
+            case 4800:
+                SetBitRate=B4800;
+            break;
+            case 9600:
+                SetBitRate=B9600;
+            break;
+            case 19200:
+                SetBitRate=B19200;
+            break;
+            case 38400:
+                SetBitRate=B38400;
+            break;
+            case 57600:
+                SetBitRate=B57600;
+            break;
+            case 115200:
+                SetBitRate=B115200;
+            break;
+            case 230400:
+                SetBitRate=B230400;
+            break;
+            case 460800:
+                SetBitRate=B460800;
+            break;
+            case 500000:
+                SetBitRate=B500000;
+            break;
+            case 576000:
+                SetBitRate=B576000;
+            break;
+            case 921600:
+                SetBitRate=B921600;
+            break;
+            case 1000000:
+                SetBitRate=B1000000;
+            break;
+            case 1152000:
+                SetBitRate=B1152000;
+            break;
+            case 1500000:
+                SetBitRate=B1500000;
+            break;
+            case 2000000:
+                SetBitRate=B2000000;
+            break;
+            case 2500000:
+                SetBitRate=B2500000;
+            break;
+            case 3000000:
+                SetBitRate=B3000000;
+            break;
+            case 3500000:
+                SetBitRate=B3500000;
+            break;
+            case 4000000:
+                SetBitRate=B4000000;
+            break;
             default:
                 throw(0);
         }
 
-        dcb.fOutxDsrFlow=false;
-        dcb.fDtrControl=DTR_CONTROL_DISABLE;
-        dcb.fNull=false;
-        dcb.fRtsControl=RTS_CONTROL_ENABLE;
-        dcb.fTXContinueOnXoff=false;
-        dcb.fOutX=false;
-        dcb.fInX=false;
-        dcb.fOutxCtsFlow=false;
-        dcb.fAbortOnError=false;
+        ret=tcgetattr(ComInfo->fd,&tio);
+        if(ret<0)
+            throw(0);
+
+//        if(tcgetattr(ComInfo->fd,&tio)<0)
+//            throw(0);
+
+        cfmakeraw(&tio);
+
+        if(cfsetispeed(&tio,SetBitRate)<0)
+            throw(0);
+
+        if(cfsetospeed(&tio,SetBitRate)<0)
+            throw(0);
 
         switch(FlowControl)
         {
             case e_ComportFlowControl_None:
+                tio.c_iflag&=~(IXON|IXOFF);
+                tio.c_iflag&=~CRTSCTS;
+                tio.c_cflag|=CLOCAL;
             break;
             case e_ComportFlowControl_XONXOFF:
-                dcb.fTXContinueOnXoff=true;
-                dcb.fOutX=true;
-                dcb.fInX=true;
+                tio.c_iflag|=IXON|IXOFF;
+                tio.c_iflag&=~CRTSCTS;
+                tio.c_cflag|=CLOCAL;
             break;
             case e_ComportFlowControl_Hardware:
-                dcb.fOutxCtsFlow=true;
-                dcb.fRtsControl=RTS_CONTROL_TOGGLE;
+                tio.c_iflag&=~(IXON|IXOFF);
+                tio.c_cflag&=~CLOCAL;
+                tio.c_iflag|=CRTSCTS;
             break;
             case e_ComportFlowControlMAX:
             default:
                 throw(0);
         }
 
+        tio.c_cflag&=~(CS5|CS6|CS7|CS8);
         switch(DataBits)
         {
             case e_ComportDataBits_7:
-                dcb.ByteSize=7;
+                tio.c_cflag|=CS7;
             break;
             case e_ComportDataBits_8:
-                dcb.ByteSize=8;
+                tio.c_cflag|=CS8;
             break;
             case e_ComportDataBitsMAX:
+            default:
+                throw(0);
+        }
+
+        switch(Parity)
+        {
+            case e_ComportParity_none:
+                tio.c_cflag&=~PARENB;
+                tio.c_iflag&=~INPCK;
+            break;
+            case e_ComportParity_odd:
+                tio.c_cflag|=PARENB;
+                tio.c_cflag|=PARODD;
+                tio.c_iflag|=INPCK;
+            break;
+            case e_ComportParity_even:
+                tio.c_cflag|=PARENB;
+                tio.c_cflag&=~PARODD;
+                tio.c_iflag|=INPCK;
+            break;
+            case e_ComportParity_mark:
+                tio.c_cflag|=PARENB;
+                tio.c_cflag&=~CMSPAR;   // DEBUG PAUL: Not sure
+                tio.c_cflag|=PARODD;
+                tio.c_iflag|=INPCK;
+            break;
+            case e_ComportParity_space:
+                tio.c_cflag|=PARENB;
+                tio.c_cflag&=~CMSPAR;   // DEBUG PAUL: Not sure
+                tio.c_cflag&=~PARODD;
+                tio.c_iflag|=INPCK;
+            break;
+            case e_ComportParityMAX:
             default:
                 throw(0);
         }
@@ -947,33 +1176,25 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
         switch(StopBits)
         {
             case e_ComportStopBits_1:
-                dcb.StopBits=ONESTOPBIT;
+                tio.c_cflag&=~CSTOPB;
             break;
             case e_ComportStopBits_2:
-                dcb.StopBits=TWOSTOPBITS;
+                tio.c_cflag|=CSTOPB;
             break;
             case e_ComportStopBitsMAX:
             default:
                 throw(0);
         }
 
-        if(!SetCommState(ComInfo->hComm,&dcb))
-            return false;
+        /* We want break's in the stream */
+        tio.c_iflag&=~BRKINT;
+        tio.c_iflag&=~IGNBRK;
 
-        /* Restore RTS and DTR lines */
-        EscapeCommFunction(ComInfo->hComm,ComInfo->RTSSet?SETRTS:CLRRTS);
-        EscapeCommFunction(ComInfo->hComm,ComInfo->DTRSet?SETDTR:CLRDTR);
+        /* We want to know about framing / parity errors */
+        tio.c_iflag|=PARMRK;
 
-        GetCommTimeouts(ComInfo->hComm,&timeouts);
-
-        timeouts.ReadIntervalTimeout=0;
-        timeouts.ReadTotalTimeoutMultiplier=0;
-        timeouts.ReadTotalTimeoutConstant=1;
-        timeouts.WriteTotalTimeoutMultiplier=0;
-        timeouts.WriteTotalTimeoutConstant=1000;
-
-        if(!SetCommTimeouts(ComInfo->hComm,&timeouts))
-            return false;
+        if(tcsetattr(ComInfo->fd,TCSANOW,&tio)<0)
+            throw(0);
     }
     catch(...)
     {
@@ -983,139 +1204,73 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
     return true;
 }
 
-static DWORD WINAPI Comport_OS_PollThread(LPVOID lpParameter)
+static void *Comport_OS_PollThread(void *arg)
 {
     struct OpenComportInfo *ComInfo;
-    DWORD Errors;
-    COMSTAT Stat;
-    BOOL Ret;
-    unsigned int MaxBytes;
-    DWORD BytesRead;
-    uint8_t *NewBuffer;
-    unsigned int NextHead;
-    unsigned int Bytes2Copy;
-    DWORD dwModemStatus;
+    fd_set rfds;
+    struct timeval tv;
+    int retval;
+    int ReadModemBits;
+    int LastModemBits=0;
 
-    ComInfo=(struct OpenComportInfo *)lpParameter;
+    ComInfo=(struct OpenComportInfo *)arg;
 
     while(!ComInfo->RequestThreadQuit)
     {
         if(!ComInfo->Opened)
         {
-            Sleep(1);   // Wait 1ms
+            usleep(1000);   // Wait 1ms
             continue;
         }
 
-        /* Grab com port while we wait for incoming bytes */
-        WaitForSingleObject(ComInfo->ThreadMutex,INFINITE);
-        Ret=ClearCommError(ComInfo->hComm,&Errors,&Stat);
+        FD_ZERO(&rfds);
+        FD_SET(ComInfo->fd,&rfds);
 
-        /* Check the Line Status */
-        if(Ret)
+        /* 1ms timeout */
+        tv.tv_sec=0;
+        tv.tv_usec=1000;
+
+        retval=select(ComInfo->fd+1,&rfds,NULL,NULL,&tv);
+        if(retval==0)
         {
-            if(Errors!=ComInfo->CommErrors)
-            {
-                ComInfo->CommErrors=Errors;
-
-                /* Data available */
-                g_CP_IOSystem->DrvDataEvent(ComInfo->DriverIO,
-                        e_DataEventCode_BytesAvailable);
-            }
+            /* Timeout */
         }
-
-        /* Read any bytes into our InBuffer */
-        if(Ret && Stat.cbInQue>0)
+        else if(retval==-1)
+        {
+            /* Error */
+        }
+        else
         {
             /* Data available */
             g_CP_IOSystem->DrvDataEvent(ComInfo->DriverIO,
                     e_DataEventCode_BytesAvailable);
 
-            /* Check if we are full */
-            NextHead=ComInfo->InBufferHead+1;
-            if(NextHead>=ComInfo->InBufferSize)
-                NextHead=0;
-
-            if(NextHead==ComInfo->InBufferTail)
-            {
-                /* We are full, make more space */
-                if(ComInfo->InBufferSize>=INBUFFER_MAX_SIZE)
-                {
-                    /* We don't have any room and we can't make more, wait */
-                    ReleaseMutex(ComInfo->ThreadMutex);
-                    Sleep(1);   // Wait 1ms
-                    continue;
-                }
-                NewBuffer=(uint8_t *)malloc(ComInfo->InBufferSize+
-                        INBUFFER_GROW_SIZE);
-                if(NewBuffer==NULL)
-                {
-                    /* We couldn't get more memory, wait and try again */
-                    ReleaseMutex(ComInfo->ThreadMutex);
-                    Sleep(1);   // Wait 1ms
-                    continue;
-                }
-                /* We need to copy the old data over to the new buffer */
-                if(ComInfo->InBufferHead>ComInfo->InBufferTail)
-                {
-                    Bytes2Copy=ComInfo->InBufferHead-ComInfo->InBufferTail;
-                    memcpy(NewBuffer,&ComInfo->InBuffer[ComInfo->InBufferTail],
-                            Bytes2Copy);
-                    ComInfo->InBufferTail=0;
-                    ComInfo->InBufferHead=Bytes2Copy;
-                }
-                else
-                {
-                    Bytes2Copy=ComInfo->InBufferSize-ComInfo->InBufferTail;
-                    memcpy(NewBuffer,&ComInfo->InBuffer[ComInfo->InBufferTail],
-                            Bytes2Copy);
-                    memcpy(&NewBuffer[Bytes2Copy],ComInfo->InBuffer,
-                            ComInfo->InBufferHead);
-                    ComInfo->InBufferTail=0;
-                    ComInfo->InBufferHead+=Bytes2Copy;
-                }
-                free(ComInfo->InBuffer);
-                ComInfo->InBuffer=NewBuffer;
-                ComInfo->InBufferSize+=INBUFFER_GROW_SIZE;
-            }
-
-            if(ComInfo->InBufferHead>=ComInfo->InBufferTail)
-            {
-                MaxBytes=ComInfo->InBufferSize-ComInfo->InBufferHead;
-                if(ComInfo->InBufferTail==0)
-                    MaxBytes--;
-            }
-            else
-            {
-                MaxBytes=ComInfo->InBufferTail-ComInfo->InBufferHead-1;
-            }
-
-            if(!ReadFile(ComInfo->hComm,&ComInfo->InBuffer[ComInfo->InBufferHead],
-                    MaxBytes,&BytesRead,NULL))
-            {
-                /* DEBUG PAUL: We need to flag an error */
-            }
-
-            ComInfo->InBufferHead+=BytesRead;
-            if(ComInfo->InBufferHead>=ComInfo->InBufferSize)
-                ComInfo->InBufferHead=0;
+            /* Give the main thead some time to read out all the bytes */
+            usleep(1000);   // Wait 1ms
         }
 
-        /* Check the Line Status */
-        if(GetCommModemStatus(ComInfo->hComm,&dwModemStatus))
+        /* Check the CD (Carrier Detect) (1) */
+        /* Check the DSR (Data Set Ready) (6) */
+        /* Check the CTS (Clear to Send) (8) */
+        /* Check the RI (Ring Indicator) (9) */
+        ioctl(ComInfo->fd,TIOCMGET,&ReadModemBits);
+
+        if(ReadModemBits!=LastModemBits)
         {
-            if(dwModemStatus!=ComInfo->ModemBits)
-            {
-                ComInfo->ModemBits=dwModemStatus;
+            pthread_mutex_lock(&ComInfo->UpdateMutex);
+            ComInfo->ModemBits=ReadModemBits;
+            pthread_mutex_unlock(&ComInfo->UpdateMutex);
 
-                /* Data available */
-                g_CP_IOSystem->DrvDataEvent(ComInfo->DriverIO,
-                        e_DataEventCode_BytesAvailable);
-            }
+            /* Data available */
+            g_CP_IOSystem->DrvDataEvent(ComInfo->DriverIO,
+                    e_DataEventCode_BytesAvailable);
+
+            LastModemBits=ReadModemBits;
         }
+        /* DEBUG PAUL: We need to set DTR (4) and RTS (7) (although not here) */
+        /* DSR -> DTR */
+        /* CTS -> RTS */
 
-        ReleaseMutex(ComInfo->ThreadMutex);
-
-        Sleep(1);   // Wait 1ms
     }
 
     ComInfo->ThreadHasQuit=true;
@@ -1158,51 +1313,39 @@ PG_BOOL Comport_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,
             PG_BOOL Update)
 {
     const char *PosStart;
-    const char *StartOfComPortNum;
-    const char *EndOfComPortNum;
-    string DevName;
+    const char *PosEnd;
+    string DevPath;
 
-    // Format: "COM64:9600,n,8,1"
-
-    if(strlen(URI)<(sizeof(COMPORT_URI_PREFIX)-1))  // Prefix (-1 to remove \0)
+    if(strlen(URI)<(sizeof(COMPORT_URI_PREFIX)-1)+1+2)  // Prefix (-1 to remove \0) + ':' + '//'
         return false;
 
-    /* Make sure it starts with COM: */
-    if(strncasecmp(URI,COMPORT_URI_PREFIX,(sizeof(COMPORT_URI_PREFIX)-1))!=0)
+    /* Make sure it starts with COM:// */
+    if(strncasecmp(URI,COMPORT_URI_PREFIX "://",(sizeof(COMPORT_URI_PREFIX)-1)+1+2)!=0)
         return false;
-
-    PosStart=URI;
-    PosStart+=sizeof(COMPORT_URI_PREFIX)-1;
-
-    StartOfComPortNum=PosStart;
-
-    /* Should be a comport number */
-    while(*PosStart>='0' && *PosStart<='9')
-        PosStart++;
-
-    /* We should be on a colon */
-    if(*PosStart!=':')
-        return false;
-
-    EndOfComPortNum=PosStart;
-
-    PosStart+=1;    // move past the :
 
     /* Make sure there are 3 commons */
+    PosStart=URI;
+    PosStart+=sizeof(COMPORT_URI_PREFIX)-1;
+    PosStart+=3;    // ://
+
+    /* Find the first , (end of path, start of baud) */
+    PosEnd=PosStart;
+    while(*PosEnd!=',' && *PosEnd!=0)
+        PosEnd++;
+    if(*PosEnd==0)
+        return false;
+    DevPath.assign(PosStart,PosEnd-PosStart);
+
     /* Move to the baud rate */
+    PosStart=PosEnd+1;
     if(!Comport_SetOptionsFromURI(PosStart,Options,Update))
         return false;
 
     /* Build the DeviceUniqueID */
-
-    /* We have to name it "\\.\COMxx" for comports over 9 because...
-       Windows... */
-    DevName="\\\\.\\COM";
-    DevName.append(StartOfComPortNum,EndOfComPortNum-StartOfComPortNum);
-
-    if(DevName.length()>=MaxDeviceUniqueIDLen)
+    if(DevPath.length()>=MaxDeviceUniqueIDLen)
         return false;
-    strcpy(DeviceUniqueID,DevName.c_str());
+
+    strcpy(DeviceUniqueID,DevPath.c_str());
 
     return true;
 }
@@ -1244,15 +1387,11 @@ PG_BOOL Comport_Convert_Options_To_URI(const char *DeviceUniqueID,
 
     Comport_ConvertFromKVList(&PortOptions,Options);
 
-    if(strlen(DeviceUniqueID)<8)
-        return false;
-
-    if(sizeof(COMPORT_URI_PREFIX)+1+strlen(&DeviceUniqueID[7])>=MaxURILen-1)
-        return false;
-
     strcpy(URI,COMPORT_URI_PREFIX);
-    strcat(URI,&DeviceUniqueID[7]);
-    strcat(URI,":");
+    strcat(URI,"://");
+    if(strlen(URI)+strlen(DeviceUniqueID)>=MaxURILen-1)
+        return false;
+    strcat(URI,DeviceUniqueID);
 
     DataBitsChar='?';
     switch(PortOptions.DataBits)
@@ -1305,7 +1444,7 @@ PG_BOOL Comport_Convert_Options_To_URI(const char *DeviceUniqueID,
         break;
     }
 
-    sprintf(buff,"%d,%c,%c,%c",PortOptions.BitRate,DataBitsChar,ParityChar,
+    sprintf(buff,",%d,%c,%c,%c",PortOptions.BitRate,DataBitsChar,ParityChar,
             StopBitsChar);
 
     if(strlen(URI)+strlen(buff)>=MaxURILen-1)
@@ -1345,111 +1484,21 @@ PG_BOOL Comport_GetConnectionInfo(const char *DeviceUniqueID,t_PIKVList *Options
         struct IODriverDetectedInfo *RetInfo)
 {
     static string Name;
-    bool RetValue;
-    string DevName;
-    i_OSComportListType FoundPorts;
-    struct ComportInfo NewComportInfo;
-    GUID WorkingGuid;
-    DWORD dwRequiredSize;
-    DWORD DeviceIndex;
-    SP_DEVINFO_DATA DeviceInfoData;
-    HDEVINFO DeviceInfoSet;
-    char szFriendlyName[MAX_PATH];
-    char szPortName[MAX_PATH];
-    HKEY hKey;
-    DWORD dwReqSize;
     const char *p;
-    int ComPortNum;
 
-    DeviceInfoSet=NULL;
-    hKey=NULL;
-    RetValue=false;
-    try
-    {
-        /* Fill in defaults */
-        if(strlen(DeviceUniqueID)<7)
-            throw(0);
-        p=DeviceUniqueID;
-        p+=7;   // Slip the "\\.\COM"
+    /* Find the start of the name */
+    p=&DeviceUniqueID[strlen(DeviceUniqueID)-1];
+    while(*p!='/' && p>DeviceUniqueID)
+        p--;
+    if(*p=='/')
+        p++;
+    Name=p;
 
-        ComPortNum=atoi(p);
+    snprintf(RetInfo->Name,sizeof(RetInfo->Name),"%s",Name.c_str());
+    snprintf(RetInfo->Title,sizeof(RetInfo->Title),"%s",Name.c_str());
+    RetInfo->Flags=0;
 
-        snprintf(RetInfo->Name,sizeof(RetInfo->Name),"COM%d",ComPortNum);
-        snprintf(RetInfo->Title,sizeof(RetInfo->Title),"COM%d",ComPortNum);
-        RetInfo->Flags=0;
-
-        /* The only way to get the name is to search all the comports */
-
-        /* SetupAPI method */
-        DeviceInfoData.cbSize=sizeof(SP_DEVINFO_DATA);
-
-        if(!SetupDiClassGuidsFromNameA("PORTS",(LPGUID)&WorkingGuid,1,
-                                      &dwRequiredSize))
-        {
-            throw(0);
-        }
-
-        DeviceInfoSet=SetupDiGetClassDevsA(&WorkingGuid,NULL,NULL,
-                DIGCF_PRESENT|DIGCF_PROFILE);
-        if(DeviceInfoSet==INVALID_HANDLE_VALUE)
-            throw(0);
-
-        for(DeviceIndex=0;SetupDiEnumDeviceInfo(DeviceInfoSet,DeviceIndex,
-                &DeviceInfoData);DeviceIndex++)
-        {
-            if(!SetupDiGetDeviceRegistryPropertyA(DeviceInfoSet,
-                                                &DeviceInfoData,
-                                                SPDRP_FRIENDLYNAME,
-                                                NULL,
-                                                (BYTE *)szFriendlyName,
-                                                sizeof(szFriendlyName),
-                                                NULL))
-            {
-                /* Skip */
-                continue;
-            }
-
-            hKey=SetupDiOpenDevRegKey(DeviceInfoSet,&DeviceInfoData,
-                    DICS_FLAG_GLOBAL,0,DIREG_DEV,KEY_READ);
-            if(hKey)
-            {
-                dwReqSize=sizeof(szPortName);
-                if(RegQueryValueExA(hKey,"PortName",NULL,NULL,
-                        (LPBYTE)&szPortName,&dwReqSize)!=ERROR_SUCCESS)
-                {
-                    /* Skip */
-                    RegCloseKey(hKey);
-                    continue;
-                }
-
-                RegCloseKey(hKey);
-            }
-
-            /* We have to name it "\\.\COMxx" for comports over 9 because...
-               Windows... */
-            DevName="\\\\.\\";
-            DevName+=szPortName;
-
-            if(strcmp(DevName.c_str(),DeviceUniqueID)==0)
-            {
-                /* We found it */
-                snprintf(RetInfo->Name,sizeof(RetInfo->Name),"%s",szFriendlyName);
-                snprintf(RetInfo->Title,sizeof(RetInfo->Title),"%s",szPortName);
-                RetInfo->Flags=0;
-                break;
-            }
-        }
-        RetValue=true;
-    }
-    catch(...)
-    {
-        RetValue=false;
-    }
-
-    if(DeviceInfoSet!=NULL)
-        SetupDiDestroyDeviceInfoList(DeviceInfoSet);
-
-    return RetValue;
+    return true;
 }
 
 /*******************************************************************************
@@ -1475,12 +1524,11 @@ PG_BOOL Comport_GetConnectionInfo(const char *DeviceUniqueID,t_PIKVList *Options
 void Comport_CustomizeComportInfo(struct IODriverInfo *ComportInfo)
 {
     ComportInfo->URIHelpString=
-            "<URI>" COMPORT_URI_PREFIX "[Port]:[Bit Rate],[Data Bits],[Parity],[Stop Bits]</URI>"
-            "<ARG>Port -- Which com port to use for this connection.</ARG>"
+            "<URI>" COMPORT_URI_PREFIX "://[Device Path],[Bit Rate],[Data Bits],[Parity],[Stop Bits]</URI>"
+            "<ARG>Device Path -- The path and filename of the driver for this connection.  This is normally in the /dev directory.  For example /dev/ttyUSB0</ARG>"
             "<ARG>Bit Rate -- The speed to use for this connection.</ARG>"
             "<ARG>Data Bits -- The number of data bits for this connection.  Supported values are 7 or 8 bits.</ARG>"
             "<ARG>Parity -- What parity to use for this connection.  Supported values are n=none, o=odd, e=even, m=mark, s=space.</ARG>"
             "<ARG>Stop Bits -- How many stop bits to use.  Supported values are 1 or 2 stop bits.</ARG>"
-            "<Example>" COMPORT_URI_PREFIX "1:9600,8,n,1</Example>";
+            "<Example>" COMPORT_URI_PREFIX ":///dev/ttyUSB0,9600,8,n,1</Example>";
 }
-

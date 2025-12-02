@@ -1,0 +1,287 @@
+/*******************************************************************************
+ * FILENAME: KeyDefines.h
+ * 
+ * PROJECT:
+ *    WhippyTerm
+ *
+ * FILE DESCRIPTION:
+ *    
+ *
+ * COPYRIGHT:
+ *    Copyright 2018 Paul Hutchinson.
+ *
+ *    This program is free software: you can redistribute it and/or modify it
+ *    under the terms of the GNU General Public License as published by the
+ *    Free Software Foundation, either version 3 of the License, or (at your
+ *    option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ *    General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License along
+ *    with this program. If not, see https://www.gnu.org/licenses/.
+ *
+ * HISTORY:
+ *    Paul Hutchinson (05 Dec 2018)
+ *       Created
+ *
+ *******************************************************************************/
+#ifndef __KEYDEFINES_H_
+#define __KEYDEFINES_H_
+
+/***  HEADER FILES TO INCLUDE          ***/
+
+/***  DEFINES                          ***/
+#define KEYMOD_NONE             0x0000
+#define KEYMOD_SHIFT            0x0001
+#define KEYMOD_CONTROL          0x0002
+#define KEYMOD_ALT              0x0004
+#define KEYMOD_LOGO             0x0008
+
+/***  MACROS                           ***/
+
+/***  TYPE DEFINITIONS                 ***/
+enum e_UIKeys
+{
+    e_UIKeys_Escape=0,
+    e_UIKeys_Tab,
+    e_UIKeys_Backtab,
+    e_UIKeys_Backspace,
+    e_UIKeys_Return,
+    e_UIKeys_Enter,
+    e_UIKeys_Insert,
+    e_UIKeys_Delete,
+    e_UIKeys_Pause,
+    e_UIKeys_Print,
+    e_UIKeys_SysReq,
+    e_UIKeys_Clear,
+    e_UIKeys_Home,
+    e_UIKeys_End,
+    e_UIKeys_Left,
+    e_UIKeys_Up,
+    e_UIKeys_Right,
+    e_UIKeys_Down,
+    e_UIKeys_PageUp,
+    e_UIKeys_PageDown,
+    e_UIKeys_Shift,
+    e_UIKeys_Control,
+    e_UIKeys_Meta,
+    e_UIKeys_Alt,
+    e_UIKeys_AltGr,
+    e_UIKeys_CapsLock,
+    e_UIKeys_NumLock,
+    e_UIKeys_ScrollLock,
+    e_UIKeys_F1,
+    e_UIKeys_F2,
+    e_UIKeys_F3,
+    e_UIKeys_F4,
+    e_UIKeys_F5,
+    e_UIKeys_F6,
+    e_UIKeys_F7,
+    e_UIKeys_F8,
+    e_UIKeys_F9,
+    e_UIKeys_F10,
+    e_UIKeys_F11,
+    e_UIKeys_F12,
+    e_UIKeys_F13,
+    e_UIKeys_F14,
+    e_UIKeys_F15,
+    e_UIKeys_F16,
+    e_UIKeys_F17,
+    e_UIKeys_F18,
+    e_UIKeys_F19,
+    e_UIKeys_F20,
+    e_UIKeys_F21,
+    e_UIKeys_F22,
+    e_UIKeys_F23,
+    e_UIKeys_F24,
+    e_UIKeys_F25,
+    e_UIKeys_F26,
+    e_UIKeys_F27,
+    e_UIKeys_F28,
+    e_UIKeys_F29,
+    e_UIKeys_F30,
+    e_UIKeys_F31,
+    e_UIKeys_F32,
+    e_UIKeys_F33,
+    e_UIKeys_F34,
+    e_UIKeys_F35,
+    e_UIKeys_Super_L,
+    e_UIKeys_Super_R,
+    e_UIKeys_Menu,
+    e_UIKeys_Hyper_L,
+    e_UIKeys_Hyper_R,
+    e_UIKeys_Help,
+    e_UIKeys_Direction_L,
+    e_UIKeys_Direction_R,
+    e_UIKeys_Back,
+    e_UIKeys_Forward,
+    e_UIKeys_Stop,
+    e_UIKeys_Refresh,
+    e_UIKeys_VolumeDown,
+    e_UIKeys_VolumeMute,
+    e_UIKeys_VolumeUp,
+    e_UIKeys_BassBoost,
+    e_UIKeys_BassUp,
+    e_UIKeys_BassDown,
+    e_UIKeys_TrebleUp,
+    e_UIKeys_TrebleDown,
+    e_UIKeys_MediaPlay,
+    e_UIKeys_MediaStop,
+    e_UIKeys_MediaPrevious,
+    e_UIKeys_MediaNext,
+    e_UIKeys_MediaRecord,
+    e_UIKeys_MediaPause,
+    e_UIKeys_MediaTogglePlayPause,
+    e_UIKeys_HomePage,
+    e_UIKeys_Favorites,
+    e_UIKeys_Search,
+    e_UIKeys_Standby,
+    e_UIKeys_OpenUrl,
+    e_UIKeys_LaunchMail,
+    e_UIKeys_LaunchMedia,
+    e_UIKeys_Launch0,
+    e_UIKeys_Launch1,
+    e_UIKeys_Launch2,
+    e_UIKeys_Launch3,
+    e_UIKeys_Launch4,
+    e_UIKeys_Launch5,
+    e_UIKeys_Launch6,
+    e_UIKeys_Launch7,
+    e_UIKeys_Launch8,
+    e_UIKeys_Launch9,
+    e_UIKeys_LaunchA,
+    e_UIKeys_LaunchB,
+    e_UIKeys_LaunchC,
+    e_UIKeys_LaunchD,
+    e_UIKeys_LaunchE,
+    e_UIKeys_LaunchF,
+    e_UIKeys_LaunchG,
+    e_UIKeys_LaunchH,
+    e_UIKeys_MonBrightnessUp,
+    e_UIKeys_MonBrightnessDown,
+    e_UIKeys_KeyboardLightOnOff,
+    e_UIKeys_KeyboardBrightnessUp,
+    e_UIKeys_KeyboardBrightnessDown,
+    e_UIKeys_PowerOff,
+    e_UIKeys_WakeUp,
+    e_UIKeys_Eject,
+    e_UIKeys_ScreenSaver,
+    e_UIKeys_WWW,
+    e_UIKeys_Memo,
+    e_UIKeys_LightBulb,
+    e_UIKeys_Shop,
+    e_UIKeys_History,
+    e_UIKeys_AddFavorite,
+    e_UIKeys_HotLinks,
+    e_UIKeys_BrightnessAdjust,
+    e_UIKeys_Finance,
+    e_UIKeys_Community,
+    e_UIKeys_AudioRewind,
+    e_UIKeys_BackForward,
+    e_UIKeys_ApplicationLeft,
+    e_UIKeys_ApplicationRight,
+    e_UIKeys_Book,
+    e_UIKeys_CD,
+    e_UIKeys_Calculator,
+    e_UIKeys_ToDoList,
+    e_UIKeys_ClearGrab,
+    e_UIKeys_Close,
+    e_UIKeys_Copy,
+    e_UIKeys_Cut,
+    e_UIKeys_Display,
+    e_UIKeys_DOS,
+    e_UIKeys_Documents,
+    e_UIKeys_Excel,
+    e_UIKeys_Explorer,
+    e_UIKeys_Game,
+    e_UIKeys_Go,
+    e_UIKeys_iTouch,
+    e_UIKeys_LogOff,
+    e_UIKeys_Market,
+    e_UIKeys_Meeting,
+    e_UIKeys_MenuKB,
+    e_UIKeys_MenuPB,
+    e_UIKeys_MySites,
+    e_UIKeys_News,
+    e_UIKeys_OfficeHome,
+    e_UIKeys_Option,
+    e_UIKeys_Paste,
+    e_UIKeys_Phone,
+    e_UIKeys_Calendar,
+    e_UIKeys_Reply,
+    e_UIKeys_Reload,
+    e_UIKeys_RotateWindows,
+    e_UIKeys_RotationPB,
+    e_UIKeys_RotationKB,
+    e_UIKeys_Save,
+    e_UIKeys_Send,
+    e_UIKeys_Spell,
+    e_UIKeys_SplitScreen,
+    e_UIKeys_Support,
+    e_UIKeys_TaskPane,
+    e_UIKeys_Terminal,
+    e_UIKeys_Tools,
+    e_UIKeys_Travel,
+    e_UIKeys_Video,
+    e_UIKeys_Word,
+    e_UIKeys_Xfer,
+    e_UIKeys_ZoomIn,
+    e_UIKeys_ZoomOut,
+    e_UIKeys_Away,
+    e_UIKeys_Messenger,
+    e_UIKeys_WebCam,
+    e_UIKeys_MailForward,
+    e_UIKeys_Pictures,
+    e_UIKeys_Music,
+    e_UIKeys_Battery,
+    e_UIKeys_Bluetooth,
+    e_UIKeys_WLAN,
+    e_UIKeys_UWB,
+    e_UIKeys_AudioForward,
+    e_UIKeys_AudioRepeat,
+    e_UIKeys_AudioRandomPlay,
+    e_UIKeys_Subtitle,
+    e_UIKeys_AudioCycleTrack,
+    e_UIKeys_Time,
+    e_UIKeys_Hibernate,
+    e_UIKeys_View,
+    e_UIKeys_TopMenu,
+    e_UIKeys_PowerDown,
+    e_UIKeys_Suspend,
+    e_UIKeys_ContrastAdjust,
+    e_UIKeys_MediaLast,
+    e_UIKeys_unknown,
+    e_UIKeys_Call,
+    e_UIKeys_Camera,
+    e_UIKeys_CameraFocus,
+    e_UIKeys_Context1,
+    e_UIKeys_Context2,
+    e_UIKeys_Context3,
+    e_UIKeys_Context4,
+    e_UIKeys_Flip,
+    e_UIKeys_Hangup,
+    e_UIKeys_No,
+    e_UIKeys_Select,
+    e_UIKeys_Yes,
+    e_UIKeys_ToggleCallHangup,
+    e_UIKeys_VoiceDial,
+    e_UIKeys_LastNumberRedial,
+    e_UIKeys_Execute,
+    e_UIKeys_Printer,
+    e_UIKeys_Play,
+    e_UIKeys_Sleep,
+    e_UIKeys_Zoom,
+    e_UIKeys_Cancel,
+    e_UIKeysMAX
+};
+
+/***  CLASS DEFINITIONS                ***/
+
+/***  GLOBAL VARIABLE DEFINITIONS      ***/
+
+/***  EXTERNAL FUNCTION PROTOTYPES     ***/
+
+#endif

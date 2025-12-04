@@ -14,7 +14,7 @@ devices. It supports serial communication such as serial ports
 protocols such as I2C and SPI though plugins.
 
 #### Terminal emulations
-Terminal emulations such as ANSI and VT100 can be added (ANSI is builtin
+Terminal emulations such as ANSI and others can be added (ANSI is builtin
 and always available) through plugins.
 
 #### Binary protocols

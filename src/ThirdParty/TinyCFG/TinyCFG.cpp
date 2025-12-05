@@ -567,7 +567,7 @@ bool TinyCFG::Register(const char *XmlName,string &Data)
     {
         NewDataClass=new TinyCFG_DefaultStringData;
     }
-    catch(std::bad_alloc &)
+    catch(std::bad_alloc)
     {
         Failure=true;
         return false;
@@ -635,7 +635,7 @@ bool TinyCFG::RegisterInt(const char *XmlName,unsigned int *Data,bool OutputHex,
     {
         NewDataClass=new TinyCFG_DefaultIntData(IsUnsigned,OutputHex);
     }
-    catch(std::bad_alloc &)
+    catch(std::bad_alloc)
     {
         Failure=true;
         return false;
@@ -663,7 +663,7 @@ bool TinyCFG::RegisterShort(const char *XmlName,unsigned short *Data,
     {
         NewDataClass=new TinyCFG_DefaultShortData(IsUnsigned);
     }
-    catch(std::bad_alloc &)
+    catch(std::bad_alloc)
     {
         Failure=true;
         return false;
@@ -691,7 +691,7 @@ bool TinyCFG::RegisterLong(const char *XmlName,unsigned long *Data,
     {
         NewDataClass=new TinyCFG_DefaultLongData(IsUnsigned);
     }
-    catch(std::bad_alloc &)
+    catch(std::bad_alloc)
     {
         Failure=true;
         return false;
@@ -719,7 +719,7 @@ bool TinyCFG::RegisterLongLong(const char *XmlName,unsigned long long *Data,
     {
         NewDataClass=new TinyCFG_DefaultLongLongData(IsUnsigned);
     }
-    catch(std::bad_alloc &)
+    catch(std::bad_alloc)
     {
         Failure=true;
         return false;
@@ -747,7 +747,7 @@ bool TinyCFG::Register(const char *XmlName,char *Data,int MaxSize)
     {
         NewDataClass=new TinyCFG_DefaultCharData(MaxSize);
     }
-    catch(std::bad_alloc &)
+    catch(std::bad_alloc)
     {
         Failure=true;
         return false;
@@ -774,7 +774,7 @@ bool TinyCFG::Register(const char *XmlName,bool &Data)
     {
         NewDataClass=new TinyCFG_DefaultBoolData;
     }
-    catch(std::bad_alloc &)
+    catch(std::bad_alloc)
     {
         Failure=true;
         return false;
@@ -801,7 +801,7 @@ bool TinyCFG::Register(const char *XmlName,double &Data,const char *FormatStr)
     {
         NewDataClass=new TinyCFG_DefaultDoubleData;
     }
-    catch(std::bad_alloc &)
+    catch(std::bad_alloc)
     {
         Failure=true;
         return false;
@@ -829,7 +829,7 @@ bool TinyCFG::Register(const char *XmlName,list<string> &Data)
     {
         NewDataClass=new TinyCFG_DefaultStringListData;
     }
-    catch(std::bad_alloc &)
+    catch(std::bad_alloc)
     {
         Failure=true;
         return false;
@@ -856,7 +856,7 @@ bool TinyCFG::Register(const char *XmlName,list<int> &Data)
     {
         NewDataClass=new TinyCFG_DefaultIntListData;
     }
-    catch(std::bad_alloc &)
+    catch(std::bad_alloc)
     {
         Failure=true;
         return false;
@@ -954,7 +954,7 @@ bool TinyCFG::RegisterEnum(const char *XmlName,int &Data,int DefaultValue,
     {
         NewDataClass=new TinyCFG_EnumData;
     }
-    catch(std::bad_alloc &)
+    catch(std::bad_alloc)
     {
         Failure=true;
         return false;
@@ -1035,7 +1035,7 @@ bool TinyCFG::RegisterGeneric(class TinyCFGBaseData *Generic)
     {
         NewData=new struct TinyCFG_RegData;
     }
-    catch(std::bad_alloc &)
+    catch(std::bad_alloc)
     {
         Failure=true;
         return false;
@@ -1108,7 +1108,7 @@ bool TinyCFG::StartBlock(const char *BlockName)
     {
         NewEntry=new struct TinyCFG_Entry;
     }
-    catch(std::bad_alloc &)
+    catch(std::bad_alloc)
     {
         Failure=true;
         return false;
@@ -1466,7 +1466,7 @@ void TinyCFG::WriteXMLCloseDataElement(const char *ElementName)
  *    NONE
  *
  * SEE ALSO:
- *    TinyCFG::WriteXMLOpenElement()
+ *    TinyCFG::WriteXMLOpenElement(), UnEscapedString()
  ******************************************************************************/
 void TinyCFG::WriteXMLEscapedString(const char *OutString)
 {
@@ -1555,6 +1555,78 @@ void TinyCFG::WriteDataElement(const char *XmlName,const char *Value)
     WriteXMLOpenDataElement(XmlName);
     WriteXMLEscapedString(Value);
     WriteXMLCloseDataElement(XmlName);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TinyCFG::UnEscapedString
+ *
+ * SYNOPSIS:
+ *    std::string TinyCFG::UnEscapedString(std::string &RetStr,char *InString);
+ *
+ * PARAMETERS:
+ *    RetStr [O] -- The string we are returning.  The converted string.
+ *    InString [I] -- The string to convert
+ *
+ * FUNCTION:
+ *    This function unconverts a string for xml data.  It unescapes the string
+ *    correctly for XML.  It will convert the following:
+ *          &amp; -- &
+ *          &lt; -- <
+ *          &gt; -- >
+ *          &#xx; -- 0-31
+ *          &#xxx; -- 127-255
+ *
+ * RETURNS:
+ *    A new string that has been unescaped.
+ *
+ * SEE ALSO:
+ *    TinyCFG::WriteXMLEscapedString()
+ ******************************************************************************/
+void TinyCFG::UnEscapedString(std::string &RetStr,const char *OutString)
+{
+    int Len;
+    const char *Pos;
+    char c;
+
+    RetStr="";
+
+    Len=strlen(OutString);
+    RetStr.reserve(Len);
+
+    Pos=OutString;
+    while(*Pos!=0)
+    {
+        c=*Pos;
+        if(strncmp(Pos,"&amp;",5)==0)
+        {
+            c='&';
+            Pos+=4;
+        }
+        else if(strncmp(Pos,"&lt;",4)==0)
+        {
+            c='<';
+            Pos+=3;
+        }
+        else if(strncmp(Pos,"&gt;",4)==0)
+        {
+            c='>';
+            Pos+=3;
+        }
+        else if(strncmp(Pos,"&#",2)==0)
+        {
+            Pos+=2;
+            c=strtol(Pos,NULL,10);
+            while(*Pos!=';' && *Pos!=0)
+                Pos++;
+
+            /* If we are at the end of the string then back up by 1 */
+            if(*Pos==0)
+                Pos--;
+        }
+        RetStr.push_back(c);
+        Pos++;
+    }
 }
 
 /*******************************************************************************
@@ -1789,7 +1861,8 @@ bool TinyCFG::GetAndSetFromXml(void)
                                     /* Copy to a string (because the old
                                        API used a string instead of a C
                                        String */
-                                    DataString=DataStart;
+//                                    DataString=DataStart;
+                                    UnEscapedString(DataString,DataStart);
                                     DataEntry->Data->LoadData(DataString);
                                 }
                             }
@@ -2010,12 +2083,16 @@ bool TinyCFG::CheckXMLName(const char *CheckName)
  *
  * RETURNS:
  *    The data from the 'DataElementName' element or NULL if it was not found.
+ *    This is valid until the next call to this function.
  *
  * SEE ALSO:
  *    ReadNextDataElement()
  ******************************************************************************/
 const char *TinyCFG::ReadDataElement(const char *DataElementName)
 {
+    char *StartOfElementData;
+    char *p;
+
     /* Start at the top of the data block again */
     LoadDataReadPoint=LoadDataDataStart;
 
@@ -2063,7 +2140,7 @@ const char *TinyCFG::ReadDataElement(const char *DataElementName)
  *
  * RETURNS:
  *    The data from the 'DataElementName' element or NULL if there where no
- *    more found.
+ *    more found.  This is only valid until the call to this to this funciton.
  *
  * NOTES:
  *    WARNING: the current position is not reset if the element name changes.
@@ -2081,6 +2158,7 @@ const char *TinyCFG::ReadNextDataElement(const char *DataElementName)
 {
     char *StartOfElementData;
     char *p;
+    static string RetStr;
 
     /* Ok, we search for the next element named 'DataElementName' that is
        inside this levels data.  Start from 'LoadDataReadPoint' */
@@ -2106,7 +2184,9 @@ const char *TinyCFG::ReadNextDataElement(const char *DataElementName)
 
     LoadDataReadPoint++;    // Move past the >
 
-    return StartOfElementData;
+    UnEscapedString(RetStr,StartOfElementData);
+
+    return RetStr.c_str();
 }
 
 /*******************************************************************************
@@ -2154,6 +2234,9 @@ const char *TinyCFG::ReadNextDataElement(const char *DataElementName)
  ******************************************************************************/
 bool TinyCFG::ReadFirstTag(std::string &XmlName,std::string &DataElement)
 {
+    char *StartOfElementData;
+    char *p;
+
     /* Start at the top of the data block again */
     LoadDataReadPoint=LoadDataDataStart;
 
@@ -2220,12 +2303,15 @@ bool TinyCFG::ReadNextTag(const char **XmlName,const char **DataElement)
     char *Tag;
     char *Data;
     char *EndTag;
+    static string RetStr;
 
     if(!FindNextTagStartAndEndAtThisLevel(&Tag,&Data,&EndTag))
         return false;
 
+    UnEscapedString(RetStr,Data);
+
     *XmlName=Tag;
-    *DataElement=Data;
+    *DataElement=RetStr.c_str();
 
     return true;
 }
@@ -2239,7 +2325,7 @@ bool TinyCFG::ReadNextTag(std::string &XmlName,std::string &DataElement)
         return false;
 
     XmlName=Tag;
-    DataElement=Data;
+    UnEscapedString(DataElement,Data);
 
     return true;
 }
@@ -2496,7 +2582,7 @@ bool RegisterStructDataList(class TinyCFG &cfg,const char *XmlName,
     {
         NewDataClass=new TestStructList;
     }
-    catch(std::bad_alloc &)
+    catch(std::bad_alloc)
     {
         return false;
     }

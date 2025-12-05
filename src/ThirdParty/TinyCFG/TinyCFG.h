@@ -1,4 +1,4 @@
-/* Prerelease Version 0.9 */
+/* Prerelease Version 0.6 */
 
 /*******************************************************************************
  * FILENAME: TinyCFG.h
@@ -149,6 +149,7 @@ class TinyCFG
         void WriteXMLOpenDataElement(const char *ElementName);
         void WriteXMLCloseDataElement(const char *ElementName);
         void WriteXMLEscapedString(const char *OutString);
+        void UnEscapedString(std::string &RetStr,const char *OutString);
         bool EnterElementLevel(const char *Name);
         void ExitElementLevel(const char *Name);
         bool SkipToEndTag(const char *ElementName);

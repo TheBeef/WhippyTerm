@@ -127,6 +127,7 @@ struct CWD_WidgetData
     struct PI_TextBox *TextBox;
     struct PI_GroupBox *GroupBox;
     struct PI_ColorPick *ColorPick;
+    struct PI_StylePick *StylePick;
     struct ConnectionOptionsData *Owner;
     void *UserData;
     void (*EventCB)(const struct PICBEvent *Event,void *UserData);
@@ -249,6 +250,13 @@ static struct PluginSettings *IOS_FindPluginSetting(const char *BaseURI,
 static void IOS_SetCurrentSettingsTabName(const char *Name);
 static t_WidgetSysHandle *IOS_AddNewSettingsTab(const char *Name);
 
+static struct PI_StylePick *IOS_AddStylePick(t_WidgetSysHandle *WidgetHandle,
+        const char *Label,struct StyleData *SD,
+        void (*EventCB)(const struct PIStylePickEvent *Event,void *UserData),
+        void *UserData);
+static void IOS_FreeStylePick(t_WidgetSysHandle *WidgetHandle,
+        struct PI_StylePick *Handle);
+
 /*** VARIABLE DEFINITIONS     ***/
 const struct IOS_API g_IOS_API=
 {
@@ -332,6 +340,27 @@ static struct PI_UIAPI IOS_UIAPI=
     IOS_FreeColorPick,
     PIUSDefault_GetColorPickValue,
     PIUSDefault_SetColorPickValue,
+
+    IOS_AddStylePick,
+    IOS_FreeStylePick,
+    PIUSDefault_GetStylePickValue,
+    PIUSDefault_SetStylePickValue,
+    PIUSDefault_Style2StrHelper,
+    PIUSDefault_Str2StyleHelper,
+
+    PIUSDefault_ChangeTextBoxProp,
+    PIUSDefault_ChangeComboBoxProp,
+    PIUSDefault_ChangeRadioBttnProp,
+    PIUSDefault_ChangeCheckboxProp,
+    PIUSDefault_ChangeTextInputProp,
+    PIUSDefault_ChangeNumberInputProp,
+    PIUSDefault_ChangeDoubleInputProp,
+    PIUSDefault_ChangeColumnViewInputProp,
+    PIUSDefault_ChangeButtonInputProp,
+    PIUSDefault_ChangeIndicatorProp,
+    PIUSDefault_ChangeGroupBoxProp,
+    PIUSDefault_ChangeColorPickProp,
+    PIUSDefault_ChangeStylePickProp,
 };
 
 bool m_NeverScanned4Connections;
@@ -5612,10 +5641,10 @@ struct PI_ColorPick *IOS_AddColorPick(t_WidgetSysHandle *WidgetHandle,
  * PARAMETERS:
  *    WidgetHandle [I] -- The handle to the widget data.
  *    Handle [I] -- The handle to the widget to free.  Allocated with
- *                     PIUSDefault_AddColorPick()
+ *                     IOS_AddColorPick()
  *
  * FUNCTION:
- *    This function frees the widget allocated with PIUSDefault_AddGroupBox()
+ *    This function frees the widget allocated with IOS_AddColorPick()
  *
  * RETURNS:
  *    NONE
@@ -5651,6 +5680,126 @@ void IOS_FreeColorPick(t_WidgetSysHandle *WidgetHandle,
     }
 
     UIPI_FreeColorPickInput(Handle);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_AddStylePick
+ *
+ * SYNOPSIS:
+ *    struct PI_StylePick *IOS_AddStylePick(t_WidgetSysHandle *WidgetHandle,
+ *          const char *Label,struct StyleData *SD,
+ *          void (*EventCB)(const struct PIStylePickEvent *Event,void *UserData),
+ *          void *UserData)
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Label [I] -- The label text for this style picker.
+ *    SD [I] -- The styling data to apply to this widget.
+ *    EventCB [I] -- The event callback when the user changes the style.
+ *                   This can be NULL.
+ *    Event [I] -- The style picker event
+ *    UserData [I] -- The user data that will be sent back into event callback.
+ *
+ * FUNCTION:
+ *    This is a version of add a style picker widget for the IO system.
+ *
+ * RETURNS:
+ *    A handle to the style picker.
+ *
+ * SEE ALSO:
+ *    IOS_FreeStylePick(), PIUSDefault_GetStylePickValue(),
+ *    PIUSDefault_SetStylePickValue()
+ ******************************************************************************/
+struct PI_StylePick *IOS_AddStylePick(t_WidgetSysHandle *WidgetHandle,
+        const char *Label,struct StyleData *SD,
+        void (*EventCB)(const struct PIStylePickEvent *Event,void *UserData),
+        void *UserData)
+{
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct PI_StylePick *NewStylePick;
+
+    NewStylePick=NULL;
+    ExtraData=NULL;
+    try
+    {
+        ExtraData=(struct CWD_WidgetData *)
+                malloc(sizeof(struct CWD_WidgetData));
+        memset(ExtraData,0x00,sizeof(struct CWD_WidgetData));
+        ExtraData->Owner=ConWidgetData->COD;
+
+        NewStylePick=UIPI_AddStylePickInput(ConWidgetData->ContainerWidget,
+                Label,SD,EventCB,UserData);
+        if(NewStylePick==NULL)
+            throw(0);
+        ExtraData->StylePick=NewStylePick;
+
+        /* Link in */
+        ExtraData->Next=ConWidgetData->COD->WidgetExtraData;
+        ConWidgetData->COD->WidgetExtraData=ExtraData;
+    }
+    catch(...)
+    {
+        if(NewStylePick!=NULL)
+            UIPI_FreeStylePickInput(NewStylePick);
+        if(ExtraData==NULL)
+            free(ExtraData);
+        NewStylePick=NULL;
+    }
+    return NewStylePick;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    IOS_FreeStylePick
+ *
+ * SYNOPSIS:
+ *    void IOS_FreeStylePick(t_WidgetSysHandle *WidgetHandle,
+ *              struct PI_StylePick *Handle)
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Handle [I] -- The handle to the widget to free.  Allocated with
+ *                     IOS_AddStylePick()
+ *
+ * FUNCTION:
+ *    This function frees the widget allocated with IOS_AddStylePick()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    IOS_AddStylePick()
+ ******************************************************************************/
+void IOS_FreeStylePick(t_WidgetSysHandle *WidgetHandle,
+        struct PI_StylePick *Handle)
+{
+    struct ConnectionWidgetData *ConWidgetData=(struct ConnectionWidgetData *)WidgetHandle;
+    struct CWD_WidgetData *ExtraData;
+    struct CWD_WidgetData *PrevExtraData;
+
+    /* Find and unlink (and free) this style picker */
+    PrevExtraData=NULL;
+    for(ExtraData=ConWidgetData->COD->WidgetExtraData;ExtraData!=NULL;
+            ExtraData=ExtraData->Next)
+    {
+        if(ExtraData->StylePick==Handle)
+        {
+            /* Found it, unlink and free */
+            if(PrevExtraData==NULL)
+                ConWidgetData->COD->WidgetExtraData=ExtraData->Next;
+            else
+                PrevExtraData->Next=ExtraData->Next;
+
+            free(ExtraData);
+
+            break;
+        }
+        PrevExtraData=ExtraData;
+    }
+
+    UIPI_FreeStylePickInput(Handle);
 }
 
 /*******************************************************************************

@@ -31,6 +31,20 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added change property widget control",
+            "Plugins can now change the properties of widgets with the"
+            " new change property functions.  Currently only the"
+            " font type of text box's can be changed."},
+    {
+        NOTETYPE_ENHANCEMENT,"Added new event for text input widgets",
+            "A new event for text input widgets has been added.  The"
+            " e_PIECB_TextInputEditFinished event is sent when the user"
+            " moves out of text input (they are finished editing)."},
+    {
+        NOTETYPE_ENHANCEMENT,"Added new style picker widget",
+            "A new style picker widget has been added to available"
+            " widgets plugins can select from."},
+    {
         NOTETYPE_ENHANCEMENT,"Added a save button to the hex panels",
             "A new save button has been added to the incoming and outgoing"
             " bottom hex panels.  The just saves the contents of the panel"

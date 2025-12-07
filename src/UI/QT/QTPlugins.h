@@ -109,6 +109,7 @@ public:
 
 public slots:
     void TextInputTextChanged(const QString &NewText);
+    void TextInputEditingFinished();
 };
 
 class PIQNumberInput : public QSpinBox

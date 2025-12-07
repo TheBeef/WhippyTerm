@@ -183,8 +183,6 @@ bool LoadSettings(const char *Filename)
 
         g_Settings.DefaultSettings();;
         cfg.LoadCFGFile(UseFilename);
-
-/* DEBUG PAUL: We need to ask each plugin to load it's settings data here */
     }
     catch(...)
     {

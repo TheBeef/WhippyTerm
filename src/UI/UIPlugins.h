@@ -117,6 +117,7 @@ struct PI_TextBox *UIPI_AddTextBox(t_UILayoutContainerCtrl *ContainerWidget,cons
 void UIPI_FreeTextBox(struct PI_TextBox *UICtrl);
 void UIPI_ShowTextBox(struct PI_TextBox *UICtrl,bool Show);
 void UIPI_SetTextBoxText(t_PIUITextBoxCtrl *UICtrl,const char *NewText);
+PG_BOOL UIPI_SetTextBoxText(t_PIUITextBoxCtrl *UICtrl,e_TextBoxPropType Prop,uint32_t Value,void *Ptr);
 
 struct PI_GroupBox *UIPI_AddGroupBox(t_UILayoutContainerCtrl *ContainerWidget,const char *Label);
 void UIPI_FreeGroupBox(struct PI_GroupBox *BoxHandle);
@@ -130,5 +131,13 @@ struct PI_ColorPick *UIPI_AddColorPickInput(t_UILayoutContainerCtrl *WidgetHandl
 void UIPI_FreeColorPickInput(struct PI_ColorPick *Handle);
 uint32_t UIPI_GetColorPickValue(t_PIUIColorPickCtrl *UICtrl);
 void UIPI_SetColorPickValue(t_PIUIColorPickCtrl *UICtrl,uint32_t RGB);
+
+struct PI_StylePick *UIPI_AddStylePickInput(t_UILayoutContainerCtrl *WidgetHandle,
+        const char *Label,struct StyleData *SD,
+        void (*EventCB)(const struct PIStylePickEvent *Event,void *UserData),
+        void *UserData);
+void UIPI_FreeStylePickInput(struct PI_StylePick *Handle);
+void UIPI_GetStylePickValue(t_PIUIStylePickCtrl *UICtrl,struct StyleData *SD);
+void UIPI_SetStylePickValue(t_PIUIStylePickCtrl *UICtrl,struct StyleData *SD);
 
 #endif

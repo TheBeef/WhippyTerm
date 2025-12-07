@@ -39,6 +39,7 @@
 /* Versions of struct PI_UIAPI */
 #define PI_UIAPI_API_VERSION_1          1
 #define PI_UIAPI_API_VERSION_2          2
+#define PI_UIAPI_API_VERSION_3          3
 
 /* Ask Types */
 #define PIUI_ASK_OK             0x0001
@@ -54,6 +55,8 @@
 #define PIUI_ASK_NO_BTTN        0
 #define PIUI_ASK_RETRY_BTTN     1
 #define PIUI_ASK_IGNORE_BTTN    1
+
+#define SUGGESTED_STYLE_DATA_STR_BUFFER_LEN             512
 
 /***  MACROS                           ***/
 
@@ -102,11 +105,15 @@ typedef struct PIUIGroupBoxCtrl t_PIUIGroupBoxCtrl;
 struct PIUIColorPickCtrl {int PrivateData;};
 typedef struct PIUIColorPickCtrl t_PIUIColorPickCtrl;
 
+struct PIUIStylePickCtrl {int PrivateData;};
+typedef struct PIUIStylePickCtrl t_PIUIStylePickCtrl;
+
 /* PI_Event_ComboxBox */
 typedef enum
 {
     e_PIECB_IndexChanged,
     e_PIECB_TextInputChanged,
+    e_PIECB_TextInputEditFinished,          // PI_UIAPI_API_VERSION_3
     e_PIECBMAX
 } e_PIECBType;
 
@@ -178,6 +185,18 @@ typedef enum
 struct PIColorPickEvent
 {
     e_PIEColorPickType EventType;
+};
+
+/* PIStylePickEvent */
+typedef enum
+{
+    e_PIEStylePick_NewStyle,
+    e_PIEStylePickMAX
+} e_PIEStylePickType;
+
+struct PIStylePickEvent
+{
+    e_PIEStylePickType EventType;
 };
 
 struct PI_ComboBox
@@ -266,12 +285,85 @@ struct PI_ColorPick
     void *UIData;
 };
 
+struct PI_StylePick
+{
+    t_PIUIStylePickCtrl *Ctrl;
+    t_PIUILabelCtrl *Label;
+    void *UIData;
+};
+
 typedef enum
 {
     e_FileReqType_Load,
     e_FileReqType_Save,
     e_FileReqTypeMAX
 } e_FileReqTypeType;
+
+typedef enum
+{
+    e_TextBoxProp_FontMode,
+    e_TextBoxPropMAX
+} e_TextBoxPropType;
+
+typedef enum
+{
+    e_ComboBoxPropMAX
+} e_ComboBoxPropType;
+
+typedef enum
+{
+    e_RadioBttnPropMAX
+} e_RadioBttnPropType;
+
+typedef enum
+{
+    e_CheckboxPropMAX
+} e_CheckboxPropType;
+
+typedef enum
+{
+    e_TextInputPropMAX
+} e_TextInputPropType;
+
+typedef enum
+{
+    e_NumberInputPropMAX
+} e_NumberInputPropType;
+
+typedef enum
+{
+    e_DoubleInputPropMAX
+} e_DoubleInputPropType;
+
+typedef enum
+{
+    e_ColumnViewInputPropMAX
+} e_ColumnViewInputPropType;
+
+typedef enum
+{
+    e_ButtonInputPropMAX
+} e_ButtonInputPropType;
+
+typedef enum
+{
+    e_IndicatorPropMAX
+} e_IndicatorPropType;
+
+typedef enum
+{
+    e_GroupBoxPropMAX
+} e_GroupBoxPropType;
+
+typedef enum
+{
+    e_ColorPickPropMAX
+} e_ColorPickPropType;
+
+typedef enum
+{
+    e_StylePickPropMAX
+} e_StylePickPropType;
 
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */
 struct PI_UIAPI
@@ -372,6 +464,29 @@ struct PI_UIAPI
     void (*SetColorPickValue)(t_WidgetSysHandle *WidgetHandle,t_PIUIColorPickCtrl *UICtrl,uint32_t RGB);
     /********* End of PI_UIAPI_API_VERSION_2 *********/
 
+    /********* Start of PI_UIAPI_API_VERSION_3 *********/
+    struct PI_StylePick *(*AddStylePick)(t_WidgetSysHandle *WidgetHandle,const char *Label,struct StyleData *SD,void (*EventCB)(const struct PIStylePickEvent *Event,void *UserData),void *UserData);
+    void (*FreeStylePick)(t_WidgetSysHandle *WidgetHandle,struct PI_StylePick *Handle);
+    void (*GetStylePickValue)(t_WidgetSysHandle *WidgetHandle,t_PIUIStylePickCtrl *UICtrl,struct StyleData *SD);
+    void (*SetStylePickValue)(t_WidgetSysHandle *WidgetHandle,t_PIUIStylePickCtrl *UICtrl,struct StyleData *SD);
+    PG_BOOL (*Style2StrHelper)(struct StyleData *SD,char *Str,int MaxLen);
+    void (*Str2StyleHelper)(struct StyleData *SD,const char *Str);
+
+    /* Widget Properties */
+    PG_BOOL (*ChangeTextBoxProp)(t_WidgetSysHandle *WidgetHandle,t_PIUITextBoxCtrl *UICtrl,e_TextBoxPropType Prop,uint32_t Value,void *Ptr);
+    PG_BOOL (*ChangeComboBoxProp)(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCtrl *UICtrl,e_ComboBoxPropType Prop,uint32_t Value,void *Ptr);
+    PG_BOOL (*ChangeRadioBttnProp)(t_WidgetSysHandle *WidgetHandle,t_PIUIRadioBttnCtrl *UICtrl,e_RadioBttnPropType Prop,uint32_t Value,void *Ptr);
+    PG_BOOL (*ChangeCheckboxProp)(t_WidgetSysHandle *WidgetHandle,t_PIUICheckboxCtrl *UICtrl,e_CheckboxPropType Prop,uint32_t Value,void *Ptr);
+    PG_BOOL (*ChangeTextInputProp)(t_WidgetSysHandle *WidgetHandle,t_PIUITextInputCtrl *UICtrl,e_TextInputPropType Prop,uint32_t Value,void *Ptr);
+    PG_BOOL (*ChangeNumberInputProp)(t_WidgetSysHandle *WidgetHandle,t_PIUINumberInputCtrl *UICtrl,e_NumberInputPropType Prop,uint32_t Value,void *Ptr);
+    PG_BOOL (*ChangeDoubleInputProp)(t_WidgetSysHandle *WidgetHandle,t_PIUIDoubleInputCtrl *UICtrl,e_DoubleInputPropType Prop,uint32_t Value,void *Ptr);
+    PG_BOOL (*ChangeColumnViewInputProp)(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl,e_ColumnViewInputPropType Prop,uint32_t Value,void *Ptr);
+    PG_BOOL (*ChangeButtonInputProp)(t_WidgetSysHandle *WidgetHandle,t_PIUIButtonInputCtrl *UICtrl,e_ButtonInputPropType Prop,uint32_t Value,void *Ptr);
+    PG_BOOL (*ChangeIndicatorProp)(t_WidgetSysHandle *WidgetHandle,t_PIUIIndicatorCtrl *UICtrl,e_IndicatorPropType Prop,uint32_t Value,void *Ptr);
+    PG_BOOL (*ChangeGroupBoxProp)(t_WidgetSysHandle *WidgetHandle,t_PIUIGroupBoxCtrl *UICtrl,e_GroupBoxPropType Prop,uint32_t Value,void *Ptr);
+    PG_BOOL (*ChangeColorPickProp)(t_WidgetSysHandle *WidgetHandle,t_PIUIColorPickCtrl *UICtrl,e_ColorPickPropType Prop,uint32_t Value,void *Ptr);
+    PG_BOOL (*ChangeStylePickProp)(t_WidgetSysHandle *WidgetHandle,t_PIUIStylePickCtrl *UICtrl,e_StylePickPropType Prop,uint32_t Value,void *Ptr);
+    /********* End of PI_UIAPI_API_VERSION_3 *********/
 };
 
 /***  CLASS DEFINITIONS                ***/

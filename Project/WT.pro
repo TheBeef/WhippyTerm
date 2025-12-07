@@ -51,6 +51,7 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/Dialogs/Dialog_DataProPluginSettings.cpp \
     ../src/App/Dialogs/Dialog_HelpCommandLineOptions.cpp \
     ../src/App/Dialogs/Dialog_IODriverSettings.cpp \
+    ../src/App/Dialogs/Dialog_StylePicker.cpp \
     ../src/App/MWPanels/MW_OutGoingHexDisplay.cpp \
     ../src/App/PluginSupport/PluginSystem.cpp \
     ../src/App/Portable.cpp \
@@ -83,9 +84,12 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/UI/QT/Form_SendBufferSelectAccess.cpp \
     ../src/UI/QT/Form_SendByte.cpp \
     ../src/UI/QT/Form_SendByteAccess.cpp \
+    ../src/UI/QT/Form_StylePickerDialog.cpp \
+    ../src/UI/QT/Form_StylePickerDialogAccess.cpp \
     ../src/UI/QT/Frame_ColorPickerWidget.cpp \
     ../src/UI/QT/Frame_CustomTextWidget.cpp \
     ../src/UI/QT/Frame_CustomTextWidgetAccess.cpp \
+    ../src/UI/QT/Frame_StylePickerWidget.cpp \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.cpp \
     ../src/UI/QT/QTKeyHandleScrollLock.cpp \
     ../src/UI/QT/QTSound.cpp \
@@ -298,8 +302,10 @@ HEADERS  += ../src/UI/QT/Form_MainWindow.h \
     ../src/UI/QT/Form_NewConnectionFromURI.h \
     ../src/UI/QT/Form_SendBufferSelect.h \
     ../src/UI/QT/Form_SendByte.h \
+    ../src/UI/QT/Form_StylePickerDialog.h \
     ../src/UI/QT/Frame_ColorPickerWidget.h \
     ../src/UI/QT/Frame_CustomTextWidget.h \
+    ../src/UI/QT/Frame_StylePickerWidget.h \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.h \
     ../src/UI/QT/VerPanelHandle.h \
     ../src/UI/QT/HozPanelHandle.h \
@@ -358,6 +364,7 @@ FORMS    += ../src/UI/QT/Form_MainWindow.ui \
     ../src/UI/QT/Form_ESB_Fill.ui \
     ../src/UI/QT/Form_ConnectionOptions.ui \
     ../src/UI/QT/Form_ComTest.ui \
+    ../src/UI/QT/Form_StylePickerDialog.ui \
     ../src/UI/QT/Form_TransmitDelay.ui \
     ../src/UI/QT/Form_ManagePlugins.ui \
     ../src/UI/QT/Form_InstallPlugin.ui \
@@ -367,6 +374,7 @@ FORMS    += ../src/UI/QT/Form_MainWindow.ui \
     ../src/UI/QT/Form_BridgeConnection.ui \
     ../src/UI/QT/Form_ESB_InsertProp.ui \
     ../src/UI/QT/Form_PasteData.ui \
+    ../src/UI/QT/Frame_StylePickerWidget.ui \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.ui
 
 RESOURCES += \

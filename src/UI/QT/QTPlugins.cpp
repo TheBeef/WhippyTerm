@@ -32,6 +32,7 @@
 #include "UI/UIPlugins.h"
 #include "QTPlugins.h"
 #include "Frame_ColorPickerWidget.h"
+#include "Frame_StylePickerWidget.h"
 #include <QFormLayout>
 #include <QComboBox>
 #include <QLabel>
@@ -40,6 +41,7 @@
 #include <QVBoxLayout>
 #include <QPainter>
 #include <QGroupBox>
+#include <QFontDatabase>
 
 /*** DEFINES                  ***/
 
@@ -495,6 +497,7 @@ struct PI_TextInput *UIPI_AddTextInput(t_UILayoutContainerCtrl *ContainerWidget,
 
 //        QObject::connect(NewCtrl,SIGNAL(textEdited(const QString &)),NewCtrl,SLOT(TextInputTextChanged(const QString &)));
         QObject::connect(NewCtrl,SIGNAL(textChanged(const QString &)),NewCtrl,SLOT(TextInputTextChanged(const QString &)));
+        QObject::connect(NewCtrl,SIGNAL(editingFinished()),NewCtrl,SLOT(TextInputEditingFinished()));
 
         NewPIC->Ctrl=(t_PIUITextInputCtrl *)NewCtrl;
         NewPIC->Label=(t_PIUILabelCtrl *)NewLabel;
@@ -545,6 +548,18 @@ void PIQTextInput::TextInputTextChanged(const QString &NewText)
     if(EventCB!=NULL)
     {
         Event.EventType=e_PIECB_TextInputChanged;
+
+        EventCB(&Event,UserData);
+    }
+}
+
+void PIQTextInput::TextInputEditingFinished()
+{
+    struct PICBEvent Event;
+
+    if(EventCB!=NULL)
+    {
+        Event.EventType=e_PIECB_TextInputEditFinished;
 
         EventCB(&Event,UserData);
     }
@@ -1292,6 +1307,36 @@ void UIPI_SetTextBoxText(t_PIUITextBoxCtrl *UICtrl,const char *NewText)
     Ctrl->setText(NewText);
 }
 
+PG_BOOL UIPI_SetTextBoxText(t_PIUITextBoxCtrl *UICtrl,e_TextBoxPropType Prop,uint32_t Value,void *Ptr)
+{
+    QLabel *Ctrl=(QLabel *)UICtrl;
+
+    switch(Prop)
+    {
+        case e_TextBoxProp_FontMode:
+        {
+            if(Value)
+            {
+                QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+                font.setFixedPitch(true);
+                font.setStyleHint(QFont::TypeWriter);
+                Ctrl->setFont(font);
+            }
+            else
+            {
+                QFont font = Ctrl->font();
+                font.setFixedPitch(false);
+                Ctrl->setFont(font);
+            }
+        }
+        return true;
+        default:
+        case e_TextBoxPropMAX:
+        break;
+    }
+    return false;
+}
+
 struct PI_GroupBox *UIPI_AddGroupBox(t_UILayoutContainerCtrl *ContainerWidget,const char *Label)
 {
     QFormLayout *Layout=(QFormLayout *)ContainerWidget;
@@ -1444,5 +1489,79 @@ void UIPI_SetColorPickValue(t_PIUIColorPickCtrl *UICtrl,uint32_t RGB)
 {
     Frame_ColorPickerWidget *Ctrl=(Frame_ColorPickerWidget *)UICtrl;
     Ctrl->SetRGBValue(RGB);
+}
+
+struct PI_StylePick *UIPI_AddStylePickInput(t_UILayoutContainerCtrl *WidgetHandle,
+        const char *Label,struct StyleData *SD,
+        void (*EventCB)(const struct PIStylePickEvent *Event,void *UserData),
+        void *UserData)
+{
+    QFormLayout *Layout=(QFormLayout *)WidgetHandle;
+    struct PI_StylePick *NewPIC;
+    Frame_StylePickerWidget *NewCtrl;
+    QLabel *NewLabel;
+
+    NewCtrl=NULL;
+    NewLabel=NULL;
+    try
+    {
+        NewPIC=new PI_StylePick();
+        NewCtrl=new Frame_StylePickerWidget(Layout->parentWidget());
+        NewLabel=new QLabel(Layout->parentWidget());
+
+        NewLabel->setText(Label);
+        NewCtrl->Init(EventCB,UserData,SD);
+
+        Layout->addRow(NewLabel,NewCtrl);
+
+        NewPIC->Ctrl=(t_PIUIStylePickCtrl *)NewCtrl;
+        NewPIC->Label=(t_PIUILabelCtrl *)NewLabel;
+        NewPIC->UIData=NULL;
+    }
+    catch(...)
+    {
+        if(NewCtrl!=NULL)
+            delete NewCtrl;
+        if(NewLabel!=NULL)
+            delete NewLabel;
+
+        return NULL;
+    }
+
+    return (struct PI_StylePick *)NewPIC;
+}
+
+void UIPI_FreeStylePickInput(struct PI_StylePick *Handle)
+{
+    Frame_StylePickerWidget *Ctrl;
+    QLabel *Label;
+
+    Ctrl=(Frame_StylePickerWidget *)Handle->Ctrl;
+    Label=(QLabel *)Handle->Label;
+
+    delete Ctrl;
+    delete Label;
+    delete Handle;
+}
+
+void UIPI_ShowStylePickInput(struct PI_StylePick *Handle,bool Show)
+{
+    Frame_StylePickerWidget *Ctrl=(Frame_StylePickerWidget *)Handle->Ctrl;
+    QLabel *Label=(QLabel *)Handle->Label;;
+
+    Ctrl->setVisible(Show);
+    Label->setVisible(Show);
+}
+
+void UIPI_GetStylePickValue(t_PIUIStylePickCtrl *UICtrl,struct StyleData *SD)
+{
+    Frame_StylePickerWidget *Ctrl=(Frame_StylePickerWidget *)UICtrl;
+    Ctrl->GetStyleValue(SD);
+}
+
+void UIPI_SetStylePickValue(t_PIUIStylePickCtrl *UICtrl,struct StyleData *SD)
+{
+    Frame_StylePickerWidget *Ctrl=(Frame_StylePickerWidget *)UICtrl;
+    Ctrl->SetStyleValue(SD);
 }
 

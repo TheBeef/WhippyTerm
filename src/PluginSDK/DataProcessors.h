@@ -97,6 +97,15 @@ typedef enum
     e_DefaultColorsMAX
 } e_DefaultColorsType;
 
+struct StyleData
+{
+    uint32_t FGColor;
+    uint32_t BGColor;
+    uint32_t Attribs;
+    uint32_t ULineColor;
+    uint8_t Reserved[512];
+};
+
 typedef struct DataProcessorHandle {int PrivateDataHere;} t_DataProcessorHandleType;            // Fake type holder
 typedef struct DataProSettingsWidgets {int PrivateDataHere;} t_DataProSettingsWidgetsType;      // Fake type holder
 typedef struct DataProMark {int PrivateDataHere;} t_DataProMark;                                // Fake type holder
@@ -233,6 +242,11 @@ struct DPS_API
     void (*ReleaseFrozenStream)(void);
     const uint8_t *(*GetFrozenString)(uint32_t *Size);
     /********* End of DPS_API_VERSION_2 *********/
+    /********* Start of DPS_API_VERSION_3 *********/
+    // DEBUG PAUL: Add a get default styling that returns a struct StyleData *SD, does:uint32_t (*GetSysDefaultColor)(uint32_t DefaultColor);
+    // DEBUG PAUL: Add a set styling, does:void (*SetFGColor)(uint32_t FGColor);
+    // DEBUG PAUL: Add a get styling, does:uint32_t (*GetFGColor)(void);
+    /********* End of DPS_API_VERSION_3 *********/
 };
 
 /***  CLASS DEFINITIONS                ***/

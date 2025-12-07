@@ -1,14 +1,16 @@
 /*******************************************************************************
- * FILENAME: Dialog_TransmitDelay.cpp
+ * FILENAME: Dialog_StylePicker.cpp
  *
  * PROJECT:
  *    Whippy Term
  *
  * FILE DESCRIPTION:
- *    This file has the code to run the transmit delay dialog in it.
+ *    This file has a style picker dialog in it.  Normally called from the
+ *    UI to do a popup that lets the user select styles, but can be called
+ *    from anywhere.
  *
  * COPYRIGHT:
- *    Copyright 2022 Paul Hutchinson.
+ *    Copyright 05 Dec 2025 Paul Hutchinson.
  *
  *    This program is free software: you can redistribute it and/or modify it
  *    under the terms of the GNU General Public License as published by the
@@ -24,20 +26,16 @@
  *    with this program. If not, see https://www.gnu.org/licenses/.
  *
  * CREATED BY:
- *    Paul Hutchinson (12 Feb 2022)
+ *    Paul Hutchinson (05 Dec 2025)
  *
  ******************************************************************************/
 
 /*** HEADER FILES TO INCLUDE  ***/
-#include "App/Dialogs/Dialog_TransmitDelay.h"
+#include "App/Dialogs/Dialog_StylePicker.h"
 #include "App/IOSystem.h"
 #include "App/Connections.h"
-#include "UI/UITransmitDelay.h"
+#include "UI/UIStylePicker.h"
 #include "UI/UIAsk.h"
-#include <string.h>
-#include <string>
-
-using namespace std;
 
 /*** DEFINES                  ***/
 
@@ -51,17 +49,16 @@ using namespace std;
 
 /*******************************************************************************
  * NAME:
- *    RunTransmitDelayDialog
+ *    RunStylePickerDialog
  *
  * SYNOPSIS:
- *    bool RunTransmitDelayDialog(class Connection *Con);
+ *    bool RunStylePickerDialog(struct StyleData *SD);
  *
  * PARAMETERS:
- *    Con [I] -- The connection that this delay goes with
+ *    SD [I/O] -- The styling to use, and where we store what the user selected.
  *
  * FUNCTION:
- *    This function shows the transmit delay dialog.  It will edit the
- *    requested connection.
+ *    This function shows the style picker dialog.
  *
  * RETURNS:
  *    true -- User selected Ok
@@ -70,26 +67,21 @@ using namespace std;
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool RunTransmitDelayDialog(class Connection *Con)
+bool RunStylePickerDialog(struct StyleData *SD)
 {
     bool RetValue;
-    string UniqueID;
-    t_KVList Options;
-
     try
     {
-        if(!UIAlloc_TransmitDelay())
+        if(!UIAlloc_StylePicker())
             return false;
 
-        UITD_SetByteDelay(Con->GetTransmitDelayPerByte());
-        UITD_SetLineDelay(Con->GetTransmitDelayPerLine());
+        UISP_SetStyleData(SD);
 
-        RetValue=UIShow_TransmitDelay();
+        RetValue=UIShow_StylePicker();
         if(RetValue)
         {
             /* Ok, apply any changes */
-            Con->SetTransmitDelayPerByte(UITD_GetByteDelay());
-            Con->SetTransmitDelayPerLine(UITD_GetLineDelay());
+            UISP_GetStyleData(SD);
         }
     }
     catch(const char *Msg)
@@ -102,7 +94,7 @@ bool RunTransmitDelayDialog(class Connection *Con)
         RetValue=false;
     }
 
-    UIFree_TransmitDelay();
+    UIFree_StylePicker();
 
     return RetValue;
 }

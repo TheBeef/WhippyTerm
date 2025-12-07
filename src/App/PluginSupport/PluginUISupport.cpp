@@ -39,11 +39,13 @@
 /*** HEADER FILES TO INCLUDE  ***/
 #include "App/MainApp.h"
 #include "App/PluginSupport/PluginUISupport.h"
+#include "App/Settings.h"
 #include "UI/UIAsk.h"
 #include "UI/UIPlugins.h"
 #include "UI/UIControl.h"
 #include "UI/UIFileReq.h"
 #include <string.h>
+#include <stdlib.h>
 #include <string>
 
 using namespace std;
@@ -138,6 +140,28 @@ struct PI_UIAPI m_PIUSDefault_UIAPI=
     PIUSDefault_FreeColorPick,
     PIUSDefault_GetColorPickValue,
     PIUSDefault_SetColorPickValue,
+
+    /* Version 3 */
+    PIUSDefault_AddStylePick,
+    PIUSDefault_FreeStylePick,
+    PIUSDefault_GetStylePickValue,
+    PIUSDefault_SetStylePickValue,
+    PIUSDefault_Style2StrHelper,
+    PIUSDefault_Str2StyleHelper,
+
+    PIUSDefault_ChangeTextBoxProp,
+    PIUSDefault_ChangeComboBoxProp,
+    PIUSDefault_ChangeRadioBttnProp,
+    PIUSDefault_ChangeCheckboxProp,
+    PIUSDefault_ChangeTextInputProp,
+    PIUSDefault_ChangeNumberInputProp,
+    PIUSDefault_ChangeDoubleInputProp,
+    PIUSDefault_ChangeColumnViewInputProp,
+    PIUSDefault_ChangeButtonInputProp,
+    PIUSDefault_ChangeIndicatorProp,
+    PIUSDefault_ChangeGroupBoxProp,
+    PIUSDefault_ChangeColorPickProp,
+    PIUSDefault_ChangeStylePickProp,
 };
 
 /*******************************************************************************
@@ -753,7 +777,8 @@ void PIUSDefault_FreeFileReqPathAndFile(char **Path,char **Filename)
  *    A handle to the text box.
  *
  * SEE ALSO:
- *    PIUSDefault_FreeTextBox(), PIUSDefault_SetTextBox()
+ *    PIUSDefault_FreeTextBox(), PIUSDefault_SetTextBox(),
+ *    PIUSDefault_SetTextBoxText()
  ******************************************************************************/
 struct PI_TextBox *PIUSDefault_AddTextBox(t_WidgetSysHandle *WidgetHandle,
         const char *Label,const char *Text)
@@ -816,6 +841,46 @@ void PIUSDefault_SetTextBox(t_WidgetSysHandle *WidgetHandle,
 {
     UIPI_SetTextBoxText(UICtrl,Text);
 }
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetTextBoxText
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_SetTextBoxText(t_WidgetSysHandle *WidgetHandle,
+ *          t_PIUITextBoxCtrl *UICtrl,e_TextBoxPropType Prop,uint32_t Value,
+ *          void *Ptr);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Prop [I] -- The property to change
+ *                Supported properties:
+ *                      e_TextBoxProp_FontMode -- Changes if the display is
+ *                              fixed width or not.
+ *                          Value: fixed width (true), or proportional (false).
+ *                          Ptr: NULL
+ *    Value [I] -- The value for the property (depends on 'Prop')
+ *    Ptr [I] -- A pointer for the property (depends on 'Prop')
+ *
+ * FUNCTION:
+ *    This function changes a property of a text box control.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddTextBox()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_ChangeTextBoxProp(t_WidgetSysHandle *WidgetHandle,
+        t_PIUITextBoxCtrl *UICtrl,e_TextBoxPropType Prop,uint32_t Value,
+        void *Ptr)
+{
+    return UIPI_SetTextBoxText(UICtrl,Prop,Value,Ptr);
+}
+
+
 
 /*******************************************************************************
  * NAME:
@@ -1019,3 +1084,615 @@ void PIUSDefault_SetColorPickValue(t_WidgetSysHandle *WidgetHandle,
 {
     UIPI_SetColorPickValue(UICtrl,RGB);
 }
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AddStylePick
+ *
+ * SYNOPSIS:
+ *    struct PI_StylePick *PIUSDefault_AddStylePick(t_WidgetSysHandle *WidgetHandle,
+ *          const char *Label,struct StyleData *SD,
+ *          void (*EventCB)(const struct PIStylePickEvent *Event,void *UserData),
+ *          void *UserData)
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Label [I] -- The label text for this style picker.
+ *    SD [I] -- The styling data to apply to this widget.
+ *    EventCB [I] -- The event callback when the user changes picker style.
+ *                   This can be NULL
+ *    Event [I] -- The style picker event
+ *    UserData [I] -- The user data that will be sent back into event callback.
+ *
+ * FUNCTION:
+ *    This function allocates a style picker widget.
+ *
+ * RETURNS:
+ *    A handle to the style picker.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_FreeStylePick(), PIUSDefault_GetStylePickValue(),
+ *    PIUSDefault_SetStylePickValue()
+ ******************************************************************************/
+struct PI_StylePick *PIUSDefault_AddStylePick(t_WidgetSysHandle *WidgetHandle,
+        const char *Label,struct StyleData *SD,
+        void (*EventCB)(const struct PIStylePickEvent *Event,void *UserData),
+        void *UserData)
+{
+    return UIPI_AddStylePickInput((t_UILayoutContainerCtrl *)WidgetHandle,
+            Label,SD,EventCB,UserData);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_FreeStylePick
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_FreeStylePick(t_WidgetSysHandle *WidgetHandle,
+ *              struct PI_StylePick *Handle)
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Handle [I] -- The handle to the widget to free.  Allocated with
+ *                     PIUSDefault_AddStylePick()
+ *
+ * FUNCTION:
+ *    This function frees the widget allocated with PIUSDefault_AddGroupBox()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddStylePick()
+ ******************************************************************************/
+void PIUSDefault_FreeStylePick(t_WidgetSysHandle *WidgetHandle,
+        struct PI_StylePick *Handle)
+{
+    UIPI_FreeStylePickInput(Handle);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_GetStylePickValue
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_GetStylePickValue(t_WidgetSysHandle *WidgetHandle,
+ *              t_PIUIStylePickCtrl *UICtrl,struct StyleData *SD);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    SD [O] -- The style data that this widget is set to
+ *
+ * FUNCTION:
+ *    This function reads the current style value from the widget.
+ *
+ * RETURNS:
+ *    The current style value in the widget
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddStylePick()
+ ******************************************************************************/
+void PIUSDefault_GetStylePickValue(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIStylePickCtrl *UICtrl,struct StyleData *SD)
+{
+    UIPI_GetStylePickValue(UICtrl,SD);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetStylePickValue
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetStylePickValue(t_WidgetSysHandle *WidgetHandle,
+ *              t_PIUIStylePickCtrl *UICtrl,struct StyleData *SD);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    SD [I] -- The styling data to apply to this widget.
+ *
+ * FUNCTION:
+ *    This function sets the current style value in the widget.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddStylePick()
+ ******************************************************************************/
+void PIUSDefault_SetStylePickValue(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIStylePickCtrl *UICtrl,struct StyleData *SD)
+{
+    UIPI_SetStylePickValue(UICtrl,SD);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_Style2StrHelper
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_Style2StrHelper(struct StyleData *SD,char *Str,
+ *              int MaxLen);
+ *
+ * PARAMETERS:
+ *    SD [I] -- The style data to convert to a string
+ *    Str [O] -- The place to store the string
+ *    MaxLen [I] -- The size of the 'Str' buffer.  It is suggested to use
+ *                  'SUGGESTED_STYLE_DATA_STR_BUFFER_LEN'
+ *
+ * FUNCTION:
+ *    This function takes styling data and converts it to a string that can be
+ *    used to store this styling data in a KV list or any where you want to
+ *    store the data.  It is not ment to be shown to the user.
+ *
+ * RETURNS:
+ *    true -- The buffer is big enough and the conversion has been done.
+ *    false -- The buffer is not big enough.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_Str2StyleHelper()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_Style2StrHelper(struct StyleData *SD,char *Str,
+        int MaxLen)
+{
+    if(MaxLen<7*4+1)    // 6 dig + 1 comma, 4 numbers, + an extra 1 for end of string
+        return false;
+
+    sprintf(Str,"%06X,%06X,%06X,%06X,",SD->FGColor,SD->BGColor,SD->ULineColor,
+            SD->Attribs);
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_Str2StyleHelper
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_Str2StyleHelper(struct StyleData *SD,const char *Str);
+ *
+ * PARAMETERS:
+ *    SD [O] -- Where to place the converted string
+ *    Str [I] -- The string to convert.
+ *
+ * FUNCTION:
+ *    This function converts a string made with PIUSDefault_Str2StyleHelper()
+ *    back to style data.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    If the string is not valid or is missing things then defaults will be
+ *    used.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_Str2StyleHelper()
+ ******************************************************************************/
+void PIUSDefault_Str2StyleHelper(struct StyleData *SD,const char *Str)
+{
+    char *NextStart;
+
+    memset(SD,0x00,sizeof(struct StyleData));
+
+    /* Use styling defaults */
+    SD->FGColor=g_Settings.DefaultConSettings.DefaultColors[e_DefaultColors_FG];
+    SD->BGColor=g_Settings.DefaultConSettings.DefaultColors[e_DefaultColors_BG];
+    SD->ULineColor=SD->FGColor;
+    SD->Attribs=0;
+
+    NextStart=(char *)Str;
+    SD->FGColor=strtoul(NextStart,&NextStart,16);
+    if(NextStart!=NULL && *NextStart==',')
+    {
+        NextStart++;
+        SD->BGColor=strtoul(NextStart,&NextStart,16);
+        if(NextStart!=NULL && *NextStart==',')
+        {
+            NextStart++;
+            SD->ULineColor=strtoul(NextStart,&NextStart,16);
+            if(NextStart!=NULL && *NextStart==',')
+            {
+                NextStart++;
+                SD->Attribs=strtoul(NextStart,&NextStart,16);
+            }
+        }
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ChangeComboBoxProp
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_ChangeComboBoxProp(t_WidgetSysHandle *WidgetHandle,
+ *          t_PIUIComboBoxCtrl *UICtrl,e_ComboBoxPropType Prop,uint32_t Value,
+ *          void *Ptr);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Prop [I] -- The property to change
+ *    Value [I] -- The value for the property (depends on 'Prop')
+ *    Ptr [I] -- A pointer for the property (depends on 'Prop')
+ *
+ * FUNCTION:
+ *    This function changes a property of a combo box control.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    AddComboBox()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_ChangeComboBoxProp(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIComboBoxCtrl *UICtrl,e_ComboBoxPropType Prop,uint32_t Value,
+        void *Ptr)
+{
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ChangeRadioBttnProp
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_ChangeRadioBttnProp(t_WidgetSysHandle *WidgetHandle,
+ *          t_PIUIRadioBttnCtrl *UICtrl,e_RadioBttnPropType Prop,uint32_t Value,
+ *          void *Ptr);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Prop [I] -- The property to change
+ *    Value [I] -- The value for the property (depends on 'Prop')
+ *    Ptr [I] -- A pointer for the property (depends on 'Prop')
+ *
+ * FUNCTION:
+ *    This function changes a property of a radio button control.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    AddRadioBttn()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_ChangeRadioBttnProp(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIRadioBttnCtrl *UICtrl,e_RadioBttnPropType Prop,uint32_t Value,
+        void *Ptr)
+{
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ChangeCheckboxProp
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_ChangeCheckboxProp(t_WidgetSysHandle *WidgetHandle,
+ *          t_PIUICheckboxCtrl *UICtrl,e_CheckboxPropType Prop,uint32_t Value,
+ *          void *Ptr);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Prop [I] -- The property to change
+ *    Value [I] -- The value for the property (depends on 'Prop')
+ *    Ptr [I] -- A pointer for the property (depends on 'Prop')
+ *
+ * FUNCTION:
+ *    This function changes a property of a checkbox control.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    AddCheckbox()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_ChangeCheckboxProp(t_WidgetSysHandle *WidgetHandle,
+        t_PIUICheckboxCtrl *UICtrl,e_CheckboxPropType Prop,uint32_t Value,
+        void *Ptr)
+{
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ChangeTextInputProp
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_ChangeTextInputProp(t_WidgetSysHandle *WidgetHandle,
+ *          t_PIUITextInputCtrl *UICtrl,e_TextInputPropType Prop,uint32_t Value,
+ *          void *Ptr);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Prop [I] -- The property to change
+ *    Value [I] -- The value for the property (depends on 'Prop')
+ *    Ptr [I] -- A pointer for the property (depends on 'Prop')
+ *
+ * FUNCTION:
+ *    This function changes a property of a text input control.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    AddTextInput()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_ChangeTextInputProp(t_WidgetSysHandle *WidgetHandle,
+        t_PIUITextInputCtrl *UICtrl,e_TextInputPropType Prop,uint32_t Value,
+        void *Ptr)
+{
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ChangeNumberInputProp
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_ChangeNumberInputProp(t_WidgetSysHandle *WidgetHandle,
+ *          t_PIUINumberInputCtrl *UICtrl,e_NumberInputPropType Prop,uint32_t Value,
+ *          void *Ptr);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Prop [I] -- The property to change
+ *    Value [I] -- The value for the property (depends on 'Prop')
+ *    Ptr [I] -- A pointer for the property (depends on 'Prop')
+ *
+ * FUNCTION:
+ *    This function changes a property of a number input control.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    AddNumberInput()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_ChangeNumberInputProp(t_WidgetSysHandle *WidgetHandle,
+        t_PIUINumberInputCtrl *UICtrl,e_NumberInputPropType Prop,uint32_t Value,
+        void *Ptr)
+{
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ChangeDoubleInputProp
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_ChangeDoubleInputProp(t_WidgetSysHandle *WidgetHandle,
+ *          t_PIUIDoubleInputCtrl *UICtrl,e_DoubleInputPropType Prop,uint32_t Value,
+ *          void *Ptr);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Prop [I] -- The property to change
+ *    Value [I] -- The value for the property (depends on 'Prop')
+ *    Ptr [I] -- A pointer for the property (depends on 'Prop')
+ *
+ * FUNCTION:
+ *    This function changes a property of a double input control.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    AddDoubleInput()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_ChangeDoubleInputProp(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIDoubleInputCtrl *UICtrl,e_DoubleInputPropType Prop,uint32_t Value,
+        void *Ptr)
+{
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ChangeColumnViewInputProp
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_ChangeColumnViewInputProp(t_WidgetSysHandle *WidgetHandle,
+ *          t_PIUIColumnViewInputCtrl *UICtrl,e_ColumnViewInputPropType Prop,uint32_t Value,
+ *          void *Ptr);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Prop [I] -- The property to change
+ *    Value [I] -- The value for the property (depends on 'Prop')
+ *    Ptr [I] -- A pointer for the property (depends on 'Prop')
+ *
+ * FUNCTION:
+ *    This function changes a property of a column view control.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    AddColumnViewInput()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_ChangeColumnViewInputProp(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIColumnViewInputCtrl *UICtrl,e_ColumnViewInputPropType Prop,uint32_t Value,
+        void *Ptr)
+{
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ChangeButtonInputProp
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_ChangeButtonInputProp(t_WidgetSysHandle *WidgetHandle,
+ *          t_PIUIButtonInputCtrl *UICtrl,e_ButtonInputPropType Prop,uint32_t Value,
+ *          void *Ptr);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Prop [I] -- The property to change
+ *    Value [I] -- The value for the property (depends on 'Prop')
+ *    Ptr [I] -- A pointer for the property (depends on 'Prop')
+ *
+ * FUNCTION:
+ *    This function changes a property of a button input control.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    AddButtonInput()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_ChangeButtonInputProp(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIButtonInputCtrl *UICtrl,e_ButtonInputPropType Prop,uint32_t Value,
+        void *Ptr)
+{
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ChangeIndicatorProp
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_ChangeIndicatorProp(t_WidgetSysHandle *WidgetHandle,
+ *          t_PIUIIndicatorCtrl *UICtrl,e_IndicatorPropType Prop,uint32_t Value,
+ *          void *Ptr);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Prop [I] -- The property to change
+ *    Value [I] -- The value for the property (depends on 'Prop')
+ *    Ptr [I] -- A pointer for the property (depends on 'Prop')
+ *
+ * FUNCTION:
+ *    This function changes a property of a indicator control.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    AddIndicator()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_ChangeIndicatorProp(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIIndicatorCtrl *UICtrl,e_IndicatorPropType Prop,uint32_t Value,
+        void *Ptr)
+{
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ChangeGroupBoxProp
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_ChangeGroupBoxProp(t_WidgetSysHandle *WidgetHandle,
+ *          t_PIUIGroupBoxCtrl *UICtrl,e_GroupBoxPropType Prop,uint32_t Value,
+ *          void *Ptr);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Prop [I] -- The property to change
+ *    Value [I] -- The value for the property (depends on 'Prop')
+ *    Ptr [I] -- A pointer for the property (depends on 'Prop')
+ *
+ * FUNCTION:
+ *    This function changes a property of a group box control.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    AddGroupBox()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_ChangeGroupBoxProp(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIGroupBoxCtrl *UICtrl,e_GroupBoxPropType Prop,uint32_t Value,
+        void *Ptr)
+{
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ChangeColorPickProp
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_ChangeColorPickProp(t_WidgetSysHandle *WidgetHandle,
+ *          t_PIUIColorPickCtrl *UICtrl,e_ColorPickPropType Prop,uint32_t Value,
+ *          void *Ptr);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Prop [I] -- The property to change
+ *    Value [I] -- The value for the property (depends on 'Prop')
+ *    Ptr [I] -- A pointer for the property (depends on 'Prop')
+ *
+ * FUNCTION:
+ *    This function changes a property of a color picker control.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    AddColorPick()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_ChangeColorPickProp(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIColorPickCtrl *UICtrl,e_ColorPickPropType Prop,uint32_t Value,
+        void *Ptr)
+{
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ChangeStylePickProp
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_ChangeStylePickProp(t_WidgetSysHandle *WidgetHandle,
+ *          t_PIUIStylePickCtrl *UICtrl,e_StylePickPropType Prop,uint32_t Value,
+ *          void *Ptr);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Prop [I] -- The property to change
+ *    Value [I] -- The value for the property (depends on 'Prop')
+ *    Ptr [I] -- A pointer for the property (depends on 'Prop')
+ *
+ * FUNCTION:
+ *    This function changes a property of a style picker control.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    AddStylePick()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_ChangeStylePickProp(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIStylePickCtrl *UICtrl,e_StylePickPropType Prop,uint32_t Value,
+        void *Ptr)
+{
+    return false;
+}
+

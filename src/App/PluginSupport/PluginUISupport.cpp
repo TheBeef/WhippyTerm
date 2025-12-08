@@ -162,6 +162,8 @@ struct PI_UIAPI m_PIUSDefault_UIAPI=
     PIUSDefault_ChangeGroupBoxProp,
     PIUSDefault_ChangeColorPickProp,
     PIUSDefault_ChangeStylePickProp,
+
+    PIUSDefault_SetLabelText,
 };
 
 /*******************************************************************************
@@ -1696,3 +1698,30 @@ PG_BOOL PIUSDefault_ChangeStylePickProp(t_WidgetSysHandle *WidgetHandle,
     return false;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetLabelText
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetLabelText(t_WidgetSysHandle *WidgetHandle,
+ *          t_PIUILabelCtrl *UILabel,const char *Txt);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UILabel [I] -- The label for a widget to change.
+ *    Txt [I] -- The new text to set this label to
+ *
+ * FUNCTION:
+ *    This function changes the text for a widgets label.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void PIUSDefault_SetLabelText(t_WidgetSysHandle *WidgetHandle,
+        t_PIUILabelCtrl *UILabel,const char *Txt)
+{
+    UIPI_SetLabelText(UILabel,Txt);
+}

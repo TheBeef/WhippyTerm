@@ -140,4 +140,6 @@ void UIPI_FreeStylePickInput(struct PI_StylePick *Handle);
 void UIPI_GetStylePickValue(t_PIUIStylePickCtrl *UICtrl,struct StyleData *SD);
 void UIPI_SetStylePickValue(t_PIUIStylePickCtrl *UICtrl,struct StyleData *SD);
 
+void UIPI_SetLabelText(t_PIUILabelCtrl *UILabel,const char *Txt);
+
 #endif

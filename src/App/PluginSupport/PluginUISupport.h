@@ -144,5 +144,7 @@ PG_BOOL PIUSDefault_Style2StrHelper(struct StyleData *SD,char *Str,int MaxLen);
 void PIUSDefault_Str2StyleHelper(struct StyleData *SD,const char *Str);
 
 int PIUSDefault_Ask(const char *Message,int Type);
+void PIUSDefault_SetLabelText(t_WidgetSysHandle *WidgetHandle,
+        t_PIUILabelCtrl *UILabel,const char *Txt);
 
 #endif

@@ -31,6 +31,10 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added function to let plugins change a widgets label",
+            "Plugins can now change the label of a widget after it's"
+            " been added to the display."},
+    {
         NOTETYPE_ENHANCEMENT,"Added change property widget control",
             "Plugins can now change the properties of widgets with the"
             " new change property functions.  Currently only the"

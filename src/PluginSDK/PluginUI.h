@@ -486,6 +486,9 @@ struct PI_UIAPI
     PG_BOOL (*ChangeGroupBoxProp)(t_WidgetSysHandle *WidgetHandle,t_PIUIGroupBoxCtrl *UICtrl,e_GroupBoxPropType Prop,uint32_t Value,void *Ptr);
     PG_BOOL (*ChangeColorPickProp)(t_WidgetSysHandle *WidgetHandle,t_PIUIColorPickCtrl *UICtrl,e_ColorPickPropType Prop,uint32_t Value,void *Ptr);
     PG_BOOL (*ChangeStylePickProp)(t_WidgetSysHandle *WidgetHandle,t_PIUIStylePickCtrl *UICtrl,e_StylePickPropType Prop,uint32_t Value,void *Ptr);
+
+    void (*SetLabelText)(t_WidgetSysHandle *WidgetHandle,t_PIUILabelCtrl *UILabel,const char *Txt);
+
     /********* End of PI_UIAPI_API_VERSION_3 *********/
 };
 

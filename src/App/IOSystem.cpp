@@ -341,6 +341,7 @@ static struct PI_UIAPI IOS_UIAPI=
     PIUSDefault_GetColorPickValue,
     PIUSDefault_SetColorPickValue,
 
+    /* Version 3 */
     IOS_AddStylePick,
     IOS_FreeStylePick,
     PIUSDefault_GetStylePickValue,
@@ -361,6 +362,8 @@ static struct PI_UIAPI IOS_UIAPI=
     PIUSDefault_ChangeGroupBoxProp,
     PIUSDefault_ChangeColorPickProp,
     PIUSDefault_ChangeStylePickProp,
+
+    PIUSDefault_SetLabelText,
 };
 
 bool m_NeverScanned4Connections;

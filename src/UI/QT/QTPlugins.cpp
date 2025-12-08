@@ -1565,3 +1565,11 @@ void UIPI_SetStylePickValue(t_PIUIStylePickCtrl *UICtrl,struct StyleData *SD)
     Ctrl->SetStyleValue(SD);
 }
 
+
+void UIPI_SetLabelText(t_PIUILabelCtrl *UILabel,const char *Txt)
+{
+    QLabel *Label=(QLabel *)UILabel;
+
+    Label->setText(Txt);
+}
+

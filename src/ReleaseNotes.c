@@ -31,6 +31,10 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_BUG_FIX,"Reset term didn't reset colors in binary mode",
+            "When you where in the binary mode selecting reset terminal"
+            " didn't reset the current styling.  It does now."},
+    {
         NOTETYPE_ENHANCEMENT,"Added function to let plugins change a widgets label",
             "Plugins can now change the label of a widget after it's"
             " been added to the display."},

@@ -1489,6 +1489,11 @@ void DisplayBinary::SetInFocus(void)
  ******************************************************************************/
 void DisplayBinary::ResetTerm(void)
 {
+    CurrentStyle.FGColor=Settings->DefaultColors[e_DefaultColors_FG];
+    CurrentStyle.BGColor=Settings->DefaultColors[e_DefaultColors_BG];
+    CurrentStyle.Attribs=0;
+    CurrentStyle.ULineColor=CurrentStyle.FGColor;
+
     ClearScreen(e_ScreenClear_Clear);
 }
 

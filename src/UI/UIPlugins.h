@@ -142,4 +142,9 @@ void UIPI_SetStylePickValue(t_PIUIStylePickCtrl *UICtrl,struct StyleData *SD);
 
 void UIPI_SetLabelText(t_PIUILabelCtrl *UILabel,const char *Txt);
 
+struct PI_WebLink *UIPI_AddWebLink(t_UILayoutContainerCtrl *ContainerWidget,
+        const char *Label,const char *Text,const char *URL);
+void UIPI_FreeWebLink(struct PI_WebLink *UICtrl);
+void UIPI_SetWebLinkURL(t_PIUIWebLinkCtrl *UICtrl,const char *Text,const char *URL);
+
 #endif

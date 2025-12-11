@@ -147,4 +147,9 @@ int PIUSDefault_Ask(const char *Message,int Type);
 void PIUSDefault_SetLabelText(t_WidgetSysHandle *WidgetHandle,
         t_PIUILabelCtrl *UILabel,const char *Txt);
 
+struct PI_WebLink *PIUSDefault_AddWebLink(t_WidgetSysHandle *WidgetHandle,const char *Label,const char *Text,const char *URL);
+void PIUSDefault_FreeWebLink(t_WidgetSysHandle *WidgetHandle,struct PI_WebLink *WebLinkHandle);
+void PIUSDefault_SetWebLinkURL(t_WidgetSysHandle *WidgetHandle,t_PIUIWebLinkCtrl *UICtrl,const char *Text,const char *URL);
+PG_BOOL PIUSDefault_ChangeWebLinkProp(t_WidgetSysHandle *WidgetHandle,t_PIUIWebLinkCtrl *UICtrl,e_WebLinkPropType Prop,uint32_t Value,void *Ptr);
+
 #endif

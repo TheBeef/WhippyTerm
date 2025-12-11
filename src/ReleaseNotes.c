@@ -31,6 +31,9 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added new widget WebLink for plugins",
+            "A new widget for showing http links the user can click on."},
+    {
         NOTETYPE_BUG_FIX,"Reset term didn't reset colors in binary mode",
             "When you where in the binary mode selecting reset terminal"
             " didn't reset the current styling.  It does now."},

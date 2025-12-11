@@ -78,7 +78,7 @@ extern "C"
     unsigned int TestLB_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
 #endif
 
-    unsigned int BASIC_HEX_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+    unsigned int HexDumpDecoder_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
 }
 
 /*** VARIABLE DEFINITIONS     ***/
@@ -119,7 +119,7 @@ void RegisterStdPlugins(void)
     RegisterStdPlugin(CodePage437Decode_RegisterPlugin,"CodePage437Decode");
     RegisterStdPlugin(UnicodeDecoder_RegisterPlugin,"UnicodeDecoder");
 
-    RegisterStdPlugin(BASIC_HEX_RegisterPlugin,"BASIC_HEX");
+    RegisterStdPlugin(HexDumpDecoder_RegisterPlugin,"BASIC_HEX");
 
     /* File Transfer Protocols */
     RegisterStdPlugin(RAWFileUpload_RegisterPlugin,"RAWFileUpload");

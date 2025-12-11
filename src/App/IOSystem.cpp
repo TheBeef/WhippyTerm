@@ -362,8 +362,13 @@ static struct PI_UIAPI IOS_UIAPI=
     PIUSDefault_ChangeGroupBoxProp,
     PIUSDefault_ChangeColorPickProp,
     PIUSDefault_ChangeStylePickProp,
+    PIUSDefault_ChangeWebLinkProp,
 
     PIUSDefault_SetLabelText,
+
+    PIUSDefault_AddWebLink,
+    PIUSDefault_FreeWebLink,
+    PIUSDefault_SetWebLinkURL,
 };
 
 bool m_NeverScanned4Connections;

@@ -55,6 +55,9 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/MWPanels/MW_OutGoingHexDisplay.cpp \
     ../src/App/PluginSupport/PluginSystem.cpp \
     ../src/App/Portable.cpp \
+    ../src/App/StdPlugins/DataProcessors/HexDump/src/BPDS.c \
+    ../src/App/StdPlugins/DataProcessors/HexDump/src/ColorStream.cpp \
+    ../src/App/StdPlugins/DataProcessors/HexDump/src/HexDump.cpp \
     ../src/BuildOptions/BuildOptions.cpp \
     ../src/App/Dialogs/Dialog_NewConnectionFromURI.cpp \
     ../src/App/Dialogs/Dialog_SendBufferSelect.cpp \
@@ -124,7 +127,6 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/PluginSupport/SystemSupport.cpp \
     ../src/ThirdParty/strnatcmp/strnatcmp.cpp \
     ../src/App/DataProcessorsSystem.cpp \
-    ../src/App/StdPlugins/DataProcessors/BasicHex/src/BasicHex.cpp \
     ../src/App/StdPlugins/DataProcessors/TermEmulation/ANSIX3_64.cpp \
     ../src/App/ConnectionsGlobal.cpp \
     ../src/App/StdPlugins/IODrivers/Comport/Comport_Main.cpp \

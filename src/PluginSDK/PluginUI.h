@@ -108,6 +108,9 @@ typedef struct PIUIColorPickCtrl t_PIUIColorPickCtrl;
 struct PIUIStylePickCtrl {int PrivateData;};
 typedef struct PIUIStylePickCtrl t_PIUIStylePickCtrl;
 
+struct PIUIWebLinkCtrl {int PrivateData;};
+typedef struct PIUIWebLinkCtrl t_PIUIWebLinkCtrl;
+
 /* PI_Event_ComboxBox */
 typedef enum
 {
@@ -292,6 +295,13 @@ struct PI_StylePick
     void *UIData;
 };
 
+struct PI_WebLink
+{
+    t_PIUIWebLinkCtrl *Ctrl;
+    t_PIUILabelCtrl *Label;
+    void *UIData;
+};
+
 typedef enum
 {
     e_FileReqType_Load,
@@ -364,6 +374,11 @@ typedef enum
 {
     e_StylePickPropMAX
 } e_StylePickPropType;
+
+typedef enum
+{
+    e_WebLinkPropMAX
+} e_WebLinkPropType;
 
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */
 struct PI_UIAPI
@@ -486,8 +501,13 @@ struct PI_UIAPI
     PG_BOOL (*ChangeGroupBoxProp)(t_WidgetSysHandle *WidgetHandle,t_PIUIGroupBoxCtrl *UICtrl,e_GroupBoxPropType Prop,uint32_t Value,void *Ptr);
     PG_BOOL (*ChangeColorPickProp)(t_WidgetSysHandle *WidgetHandle,t_PIUIColorPickCtrl *UICtrl,e_ColorPickPropType Prop,uint32_t Value,void *Ptr);
     PG_BOOL (*ChangeStylePickProp)(t_WidgetSysHandle *WidgetHandle,t_PIUIStylePickCtrl *UICtrl,e_StylePickPropType Prop,uint32_t Value,void *Ptr);
+    PG_BOOL (*ChangeWebLinkProp)(t_WidgetSysHandle *WidgetHandle,t_PIUIWebLinkCtrl *UICtrl,e_WebLinkPropType Prop,uint32_t Value,void *Ptr);
 
     void (*SetLabelText)(t_WidgetSysHandle *WidgetHandle,t_PIUILabelCtrl *UILabel,const char *Txt);
+
+    struct PI_WebLink *(*AddWebLink)(t_WidgetSysHandle *WidgetHandle,const char *Label,const char *Text,const char *URL);
+    void (*FreeWebLink)(t_WidgetSysHandle *WidgetHandle,struct PI_WebLink *WebLinkHandle);
+    void (*SetWebLink)(t_WidgetSysHandle *WidgetHandle,t_PIUIWebLinkCtrl *UICtrl,const char *Text,const char *URL);
 
     /********* End of PI_UIAPI_API_VERSION_3 *********/
 };

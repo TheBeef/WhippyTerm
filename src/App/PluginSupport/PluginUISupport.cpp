@@ -162,8 +162,13 @@ struct PI_UIAPI m_PIUSDefault_UIAPI=
     PIUSDefault_ChangeGroupBoxProp,
     PIUSDefault_ChangeColorPickProp,
     PIUSDefault_ChangeStylePickProp,
+    PIUSDefault_ChangeWebLinkProp,
 
     PIUSDefault_SetLabelText,
+
+    PIUSDefault_AddWebLink,
+    PIUSDefault_FreeWebLink,
+    PIUSDefault_SetWebLinkURL,
 };
 
 /*******************************************************************************
@@ -1724,4 +1729,126 @@ void PIUSDefault_SetLabelText(t_WidgetSysHandle *WidgetHandle,
         t_PIUILabelCtrl *UILabel,const char *Txt)
 {
     UIPI_SetLabelText(UILabel,Txt);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AddWebLink
+ *
+ * SYNOPSIS:
+ *    struct PI_WebLink *PIUSDefault_AddWebLink(t_WidgetSysHandle *WidgetHandle,
+ *              const char *Label,const char *Text,const char *URL);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Label [I] -- The label for this web link.  The text that is shown to the
+ *                 user.
+ *    Text [I] -- The text to display to the user.
+ *    URL [I] -- The URL to open when the user clicks on the 'Text'.
+ *
+ * FUNCTION:
+ *    This function allocates and adds a web link control to the display.
+ *
+ * RETURNS:
+ *    A pointer to the web link or NULL if there was an error.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_FreeWebLink(), PIUSDefault_SetWebLinkURL(),
+ *    PIUSDefault_ChangeWebLinkProp()
+ ******************************************************************************/
+struct PI_WebLink *PIUSDefault_AddWebLink(t_WidgetSysHandle *WidgetHandle,
+        const char *Label,const char *Text,const char *URL)
+{
+    return UIPI_AddWebLink((t_UILayoutContainerCtrl *)WidgetHandle,Label,Text,
+            URL);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_FreeWebLink
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_FreeWebLink(t_WidgetSysHandle *WidgetHandle,
+ *              struct PI_WebLink *WebLinkHandle);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    WebLinkHandle [I] -- The web link to free
+ *
+ * FUNCTION:
+ *    This function frees a web link control that was allocated with
+ *    PIUSDefault_AddWebLink().
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void PIUSDefault_FreeWebLink(t_WidgetSysHandle *WidgetHandle,struct PI_WebLink *WebLinkHandle)
+{
+    UIPI_FreeWebLink(WebLinkHandle);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetWebLinkURL
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetWebLinkURL(t_WidgetSysHandle *WidgetHandle,
+ *              t_PIUIWebLinkCtrl *UICtrl,const char *Text,const char *URL);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Text [I] -- The text to display.
+ *    URL [I] -- The URL to open when the link is clicked on
+ *
+ * FUNCTION:
+ *    This function changes the text and URL that the web link goes to when
+ *    clicked on.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    AddWebLink()
+ ******************************************************************************/
+void PIUSDefault_SetWebLinkURL(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIWebLinkCtrl *UICtrl,const char *Text,const char *URL)
+{
+    UIPI_SetWebLinkURL(UICtrl,Text,URL);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ChangeWebLinkProp
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_ChangeWebLinkProp(t_WidgetSysHandle *WidgetHandle,
+ *          t_PIUIWebLinkCtrl *UICtrl,e_WebLinkPropType Prop,uint32_t Value,
+ *          void *Ptr);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The handle to the widget to work on.
+ *    Prop [I] -- The property to change
+ *    Value [I] -- The value for the property (depends on 'Prop')
+ *    Ptr [I] -- A pointer for the property (depends on 'Prop')
+ *
+ * FUNCTION:
+ *    This function changes a property of a web link control.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    AddWebLink()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_ChangeWebLinkProp(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIWebLinkCtrl *UICtrl,e_WebLinkPropType Prop,uint32_t Value,
+        void *Ptr)
+{
+    return false;
 }

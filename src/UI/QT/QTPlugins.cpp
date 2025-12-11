@@ -1565,11 +1565,93 @@ void UIPI_SetStylePickValue(t_PIUIStylePickCtrl *UICtrl,struct StyleData *SD)
     Ctrl->SetStyleValue(SD);
 }
 
-
 void UIPI_SetLabelText(t_PIUILabelCtrl *UILabel,const char *Txt)
 {
     QLabel *Label=(QLabel *)UILabel;
 
     Label->setText(Txt);
+}
+
+struct PI_WebLink *UIPI_AddWebLink(t_UILayoutContainerCtrl *ContainerWidget,
+        const char *Label,const char *Text,const char *URL)
+{
+    struct PI_WebLink *NewPIWL;
+    QFormLayout *Layout=(QFormLayout *)ContainerWidget;
+    QLabel *NewCtrl;
+    QLabel *NewLabel;
+
+    NewCtrl=NULL;
+    NewLabel=NULL;
+    try
+    {
+        NewPIWL=new PI_WebLink();
+        NewCtrl=new QLabel(Layout->parentWidget());
+        NewLabel=new QLabel(Layout->parentWidget());
+
+        NewCtrl->setTextFormat(Qt::RichText);
+        NewCtrl->setTextInteractionFlags(Qt::TextBrowserInteraction);
+        NewCtrl->setOpenExternalLinks(true);
+
+        NewLabel->setText(Label);
+
+        Layout->addRow(NewLabel,NewCtrl);
+
+        NewPIWL->Ctrl=(t_PIUIWebLinkCtrl *)NewCtrl;
+        NewPIWL->Label=(t_PIUILabelCtrl *)NewLabel;
+        NewPIWL->UIData=NULL;
+
+        UIPI_SetWebLinkURL(NewPIWL->Ctrl,Text,URL);
+    }
+    catch(...)
+    {
+        if(NewCtrl!=NULL)
+            delete NewCtrl;
+        if(NewLabel!=NULL)
+            delete NewLabel;
+
+        return NULL;
+    }
+
+    return (struct PI_WebLink *)NewPIWL;
+}
+
+void UIPI_FreeWebLink(struct PI_WebLink *UICtrl)
+{
+    QLabel *Ctrl;
+    QLabel *Label;
+
+    Ctrl=(QLabel *)UICtrl->Ctrl;
+    Label=(QLabel *)UICtrl->Label;
+
+    delete Ctrl;
+    delete Label;
+    delete UICtrl;
+}
+
+void UIPI_SetWebLinkURL(t_PIUIWebLinkCtrl *UICtrl,const char *Text,const char *URL)
+{
+    QLabel *Ctrl=(QLabel *)UICtrl;
+    QString NewCtrlStr;
+    QString EscedText;
+    QString EscedURL;
+
+    try
+    {
+        EscedText=Text;
+        EscedURL=URL;
+        EscedText=EscedText.toHtmlEscaped();
+        EscedURL.replace("\'", "%27");
+
+        NewCtrlStr="<a href='";
+        NewCtrlStr+=URL;
+        NewCtrlStr+="'>";
+        NewCtrlStr+=Text;
+        NewCtrlStr+="</a>";
+
+        Ctrl->setText(NewCtrlStr);
+    }
+    catch(...)
+    {
+    }
 }
 

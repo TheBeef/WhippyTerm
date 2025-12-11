@@ -31,6 +31,12 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Updated Binary HexDump to support Binary Protocol Documentation Standard strings",
+            "The settings for the binary hexdump data processor has been"
+            " updated to let the user input a binary protocol documentation"
+            " standard string that it will then use to color the incoming"
+            " bytes."},
+    {
         NOTETYPE_ENHANCEMENT,"Added new widget WebLink for plugins",
             "A new widget for showing http links the user can click on."},
     {

@@ -1,0 +1,19 @@
+<?xml version="1.0" standalone="no" ?>
+<ExternPluginMaker>
+    <LastBuildFile>HexDump.wtp</LastBuildFile>
+    <LinuxFilename></LinuxFilename>
+    <WindowsFilename></WindowsFilename>
+    <MacFilename></MacFilename>
+    <RPI64Filename></RPI64Filename>
+    <RPI32Filename></RPI32Filename>
+    <PluginName>LessBasicHex</PluginName>
+    <InstallFilename>LessBasicHex</InstallFilename>
+    <Description>desc</Description>
+    <Contributors>me</Contributors>
+    <Copyright>2025</Copyright>
+    <ReleaseDate>today</ReleaseDate>
+    <Version>1.0</Version>
+    <APIVersion>2.1</APIVersion>
+    <PluginClass>1</PluginClass>
+    <PluginSubClass>0</PluginSubClass>
+</ExternPluginMaker>

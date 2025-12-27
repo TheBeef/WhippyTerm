@@ -84,7 +84,7 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="Widget_TextCanvas" name="TextDisplay" native="true">
+             <widget class="Widget_TextCanvas" name="TextDisplayBox" native="true">
               <property name="focusPolicy">
                <enum>Qt::StrongFocus</enum>
               </property>

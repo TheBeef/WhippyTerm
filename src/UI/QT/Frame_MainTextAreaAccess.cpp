@@ -80,7 +80,7 @@ t_UITextDisplayCtrl *UITC_AllocTextDisplay(void *ParentWidget,
         NewTextArea->EventHandler=EventHandler;
         NewTextArea->ID=ID;
 
-        NewTextArea->ui->TextDisplay->SetEventHandler(UITC_EventHandler,
+        NewTextArea->ui->TextDisplayBox->SetEventHandler(UITC_EventHandler,
                 (uintptr_t)NewTextArea);
 
         NewTextArea->Layout=new QHBoxLayout(QParent);
@@ -504,7 +504,7 @@ void UITC_SetFont(t_UITextDisplayCtrl *ctrl,const char *FontName,int Size,
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->SetFont(FontName,Size,Bold,Italic);
+    TextDisplay->ui->TextDisplayBox->SetFont(FontName,Size,Bold,Italic);
 }
 
 /*******************************************************************************
@@ -530,7 +530,7 @@ void UITC_ClearAllLines(t_UITextDisplayCtrl *ctrl)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->ClearAllLines();
+    TextDisplay->ui->TextDisplayBox->ClearAllLines();
 }
 
 /*******************************************************************************
@@ -586,7 +586,7 @@ void UITC_End(t_UITextDisplayCtrl *ctrl)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->RedrawLine(TextDisplay->WorkingLine);
+    TextDisplay->ui->TextDisplayBox->RedrawLine(TextDisplay->WorkingLine);
 }
 
 /*******************************************************************************
@@ -613,7 +613,7 @@ void UITC_ClearLine(t_UITextDisplayCtrl *ctrl,uint32_t BGColor)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->ClearLine(TextDisplay->WorkingLine,BGColor);
+    TextDisplay->ui->TextDisplayBox->ClearLine(TextDisplay->WorkingLine,BGColor);
 }
 
 /*******************************************************************************
@@ -642,7 +642,7 @@ void UITC_AddFragment(t_UITextDisplayCtrl *ctrl,const struct TextCanvasFrag *Fra
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->AppendTextFrag(TextDisplay->WorkingLine,Frag);
+    TextDisplay->ui->TextDisplayBox->AppendTextFrag(TextDisplay->WorkingLine,Frag);
 }
 
 /*******************************************************************************
@@ -669,8 +669,8 @@ void UITC_SetCursorColor(t_UITextDisplayCtrl *ctrl,uint32_t Color)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->CursorColor=Color;
-    TextDisplay->ui->TextDisplay->RedrawScreen();
+    TextDisplay->ui->TextDisplayBox->CursorColor=Color;
+    TextDisplay->ui->TextDisplayBox->RedrawScreen();
 }
 
 /*******************************************************************************
@@ -697,7 +697,7 @@ void UITC_SetCursorBlinking(t_UITextDisplayCtrl *ctrl,bool Blinking)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->SetCursorBlinking(Blinking);
+    TextDisplay->ui->TextDisplayBox->SetCursorBlinking(Blinking);
 }
 
 /*******************************************************************************
@@ -725,7 +725,7 @@ void UITC_SetCursorStyle(t_UITextDisplayCtrl *ctrl,e_TextCursorStyleType Style)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->ChangeCursorStyle(Style);
+    TextDisplay->ui->TextDisplayBox->ChangeCursorStyle(Style);
 }
 
 /*******************************************************************************
@@ -755,7 +755,7 @@ void UITC_SetCursorPos(t_UITextDisplayCtrl *ctrl,unsigned int x,unsigned int y)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->SetCursorPos(x,y);
+    TextDisplay->ui->TextDisplayBox->SetCursorPos(x,y);
 }
 
 /*******************************************************************************
@@ -784,7 +784,7 @@ void UITC_SetFocus(t_UITextDisplayCtrl *ctrl,e_UITCSetFocusType What)
     switch(What)
     {
         case e_UITCSetFocus_Main:
-            TextDisplay->ui->TextDisplay->setFocus(Qt::OtherFocusReason);
+            TextDisplay->ui->TextDisplayBox->setFocus(Qt::OtherFocusReason);
         break;
         case e_UITCSetFocus_SendPanel:
             TextDisplay->ui->BlockSend_textEdit->setFocus(Qt::OtherFocusReason);
@@ -820,7 +820,7 @@ int UITC_GetFragWidth(t_UITextDisplayCtrl *ctrl,const struct TextCanvasFrag *Fra
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    return TextDisplay->ui->TextDisplay->GetTextWidth(Frag);
+    return TextDisplay->ui->TextDisplayBox->GetTextWidth(Frag);
 }
 
 /*******************************************************************************
@@ -849,7 +849,7 @@ int UITC_GetWidgetWidth(t_UITextDisplayCtrl *ctrl)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    return TextDisplay->ui->TextDisplay->GetWidgetWidth();
+    return TextDisplay->ui->TextDisplayBox->GetWidgetWidth();
 }
 
 /*******************************************************************************
@@ -878,7 +878,7 @@ int UITC_GetWidgetHeight(t_UITextDisplayCtrl *ctrl)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    return TextDisplay->ui->TextDisplay->GetWidgetHeight();
+    return TextDisplay->ui->TextDisplayBox->GetWidgetHeight();
 }
 
 /*******************************************************************************
@@ -904,7 +904,7 @@ int UITC_GetCharPxWidth(t_UITextDisplayCtrl *ctrl)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    return TextDisplay->ui->TextDisplay->GetCharPxWidth();
+    return TextDisplay->ui->TextDisplayBox->GetCharPxWidth();
 }
 
 /*******************************************************************************
@@ -930,7 +930,7 @@ int UITC_GetCharPxHeight(t_UITextDisplayCtrl *ctrl)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    return TextDisplay->ui->TextDisplay->GetCharPxHeight();
+    return TextDisplay->ui->TextDisplayBox->GetCharPxHeight();
 }
 
 /*******************************************************************************
@@ -1016,7 +1016,7 @@ void UITC_SetXOffset(t_UITextDisplayCtrl *ctrl,int XOffsetPx)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->SetXOffsetPx(XOffsetPx);
+    TextDisplay->ui->TextDisplayBox->SetXOffsetPx(XOffsetPx);
 }
 
 /*******************************************************************************
@@ -1045,7 +1045,7 @@ void UITC_SetMaxLines(t_UITextDisplayCtrl *ctrl,int MaxLines,uint32_t BGColor)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->SetMaxLines(MaxLines,BGColor);
+    TextDisplay->ui->TextDisplayBox->SetMaxLines(MaxLines,BGColor);
 }
 
 /*******************************************************************************
@@ -1079,7 +1079,7 @@ void UITC_SetClippingWindow(t_UITextDisplayCtrl *ctrl,int LeftEdge,int TopEdge,
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->SetDisplaySize(LeftEdge,TopEdge,Width,Height);
+    TextDisplay->ui->TextDisplayBox->SetDisplaySize(LeftEdge,TopEdge,Width,Height);
 }
 
 /*******************************************************************************
@@ -1107,7 +1107,7 @@ void UITC_SetTextAreaBackgroundColor(t_UITextDisplayCtrl *ctrl,uint32_t BgColor)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->SetTextAreaBackgroundColor(BgColor);
+    TextDisplay->ui->TextDisplayBox->SetTextAreaBackgroundColor(BgColor);
 }
 
 /*******************************************************************************
@@ -1134,7 +1134,7 @@ void UITC_SetTextDefaultColor(t_UITextDisplayCtrl *ctrl,uint32_t FgColor)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->SetTextDefaultColor(FgColor);
+    TextDisplay->ui->TextDisplayBox->SetTextDefaultColor(FgColor);
 }
 
 /*******************************************************************************
@@ -1164,7 +1164,7 @@ void UITC_SetBorderBackgroundColor(t_UITextDisplayCtrl *ctrl,uint32_t BgColor,
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->SetDisplayBackgroundColor(BgColor,Fill);
+    TextDisplay->ui->TextDisplayBox->SetDisplayBackgroundColor(BgColor,Fill);
 }
 
 /*******************************************************************************
@@ -1193,7 +1193,7 @@ void UITC_SetOverrideMsg(t_UITextDisplayCtrl *ctrl,const char *Msg,bool OnOff)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->SetOverrideMsg(Msg,OnOff);
+    TextDisplay->ui->TextDisplayBox->SetOverrideMsg(Msg,OnOff);
 }
 
 /*******************************************************************************
@@ -1219,7 +1219,7 @@ void UITC_RedrawScreen(t_UITextDisplayCtrl *ctrl)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->RedrawScreen();
+    TextDisplay->ui->TextDisplayBox->RedrawScreen();
 }
 
 /*******************************************************************************
@@ -1247,7 +1247,7 @@ void UITC_SetDrawMask(t_UITextDisplayCtrl *ctrl,uint16_t Mask)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->SetDrawMask(Mask);
+    TextDisplay->ui->TextDisplayBox->SetDrawMask(Mask);
 }
 
 /*******************************************************************************
@@ -1274,7 +1274,7 @@ void UITC_ShowBellIcon(t_UITextDisplayCtrl *ctrl)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->ShowBell();
+    TextDisplay->ui->TextDisplayBox->ShowBell();
 }
 
 /*******************************************************************************
@@ -1302,7 +1302,7 @@ void UITC_SetMouseCursor(t_UITextDisplayCtrl *ctrl,e_UIMouse_CursorType Cursor)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplay->SetMouseCursor(Cursor);
+    TextDisplay->ui->TextDisplayBox->SetMouseCursor(Cursor);
 }
 
 /*******************************************************************************

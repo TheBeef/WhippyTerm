@@ -464,9 +464,9 @@ Connection::Connection(const char *URI)
     FrozenRetStr=NULL;
     FrozenQueueEnd=NULL;
     BinaryConnection=false;
-    DoAutoReopen=false;
     FrozenRetStrBufferSize=0;
     FrozenQueueStrLen=0;
+    AutoReopenEnabled=false;
 
     Bookmark=0;
     ZoomLevel=0;
@@ -689,7 +689,6 @@ void Connection::FreeConnectionResources(bool FreeDB)
 
     if(IOHandle!=NULL)
     {
-        DoAutoReopen=false;
         if(IsConnected)
             IOS_Close(IOHandle);
         IOS_FreeIOSystemHandle(IOHandle);
@@ -704,6 +703,7 @@ void Connection::FreeConnectionResources(bool FreeDB)
 
     IOHandle=NULL;
     IsConnected=false;
+    AutoReopenEnabled=false;
 }
 
 /*******************************************************************************
@@ -857,6 +857,8 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
  ******************************************************************************/
 void Connection::FinalizeNewConnection(bool IgnoreAutoConnect)
 {
+    AutoReopenEnabled=CustomSettings.AutoReopen;
+
     /* We auto open this when we open the tab */
     if(!IgnoreAutoConnect && g_Settings.AutoConnectOnNewConnection)
     {
@@ -866,7 +868,6 @@ void Connection::FinalizeNewConnection(bool IgnoreAutoConnect)
             UITimerStop(AutoReopenTimer);
         }
 
-        DoAutoReopen=CustomSettings.AutoReopen;
         if(!IOS_Open(IOHandle))
         {
             /* Mark this connection as closed */
@@ -1197,9 +1198,6 @@ void Connection::ApplyCustomSettings(void)
 
     Display->SetDrawMask(DrawMask);
 
-    DoAutoReopen=CustomSettings.AutoReopen;
-    DoAutoReopenIfNeeded();
-
     if(LastSettingsTransmitDelayByte!=CustomSettings.DelayBetweenBytes ||
             LastSettingsTransmitDelayLine!=CustomSettings.DelayAfterNewLineSent)
     {
@@ -1209,6 +1207,8 @@ void Connection::ApplyCustomSettings(void)
         LastSettingsTransmitDelayLine=CustomSettings.DelayAfterNewLineSent;
         ApplyTransmitDelayChange();
     }
+
+    AutoReopenEnabled=CustomSettings.AutoReopen;
 
     /* We also need to update the session open conneciton list */
     NoteSessionChanged();
@@ -1970,7 +1970,11 @@ void Connection::InformOfDisconnected(void)
     SendMWEvent(ConMWEvent_StatusChange);
     RethinkCursor();
 
-    DoAutoReopenIfNeeded();
+    if(AutoReopenEnabled)
+    {
+        /* Start the auto reopen timer */
+        UITimerStart(AutoReopenTimer);
+    }
 
     /* We also need to update the session open conneciton list */
     NoteSessionChanged();
@@ -2658,15 +2662,8 @@ void Connection::SetConnectedState(bool Connect)
     if(IOHandle==NULL)
         return;
 
-    if(UITimerRunning(AutoReopenTimer))
-    {
-        /* The auto reopen timer was running.  Kill it */
-        UITimerStop(AutoReopenTimer);
-    }
-
     if(Connect)
     {
-        DoAutoReopen=false;
         if(!IOS_Open(IOHandle))
         {
             /* Mark this connection as closed */
@@ -2682,7 +2679,6 @@ void Connection::SetConnectedState(bool Connect)
                         e_AskBox_Question,e_AskBttns_YesNo)==e_AskRet_Yes)
                 {
                     /* Ok, they want to keep trying */
-                    DoAutoReopen=true;
                     if(!IOS_Open(IOHandle))
                     {
                         /* Mark this connection as closed */
@@ -2691,11 +2687,9 @@ void Connection::SetConnectedState(bool Connect)
                 }
             }
         }
-        DoAutoReopen=CustomSettings.AutoReopen;
     }
     else
     {
-        DoAutoReopen=false;
         if(IsConnected)
             IOS_Close(IOHandle);
     }
@@ -6976,12 +6970,14 @@ void Connection::InformOfSmartClipTimeout(void)
  ******************************************************************************/
 void Connection::InformOfAutoReopenTimeout(void)
 {
-    UITimerStop(AutoReopenTimer);
-
-    if(!IOS_Open(IOHandle))
+    if(!IsConnected)
     {
-        /* Mark this connection as closed */
-        InformOfDisconnected();
+        /* Try opening again */
+        if(!IOS_Open(IOHandle))
+        {
+            /* Mark this connection as closed */
+            InformOfDisconnected();
+        }
     }
 }
 
@@ -7230,49 +7226,13 @@ void Connection::DoBell(bool VisualOnly)
  ******************************************************************************/
 void Connection::ToggleAutoReopen(void)
 {
-    DoAutoReopen=!DoAutoReopen;
+    AutoReopenEnabled=!AutoReopenEnabled;
 
     /* Update the settings */
     UsingCustomSettings=true;
-    CustomSettings.AutoReopen=DoAutoReopen;
-
-    DoAutoReopenIfNeeded();
+    CustomSettings.AutoReopen=AutoReopenEnabled;
 
     SendReopenChangeEvent();
-}
-
-/*******************************************************************************
- * NAME:
- *    Connection::DoAutoReopenIfNeeded
- *
- * SYNOPSIS:
- *    void Connection::DoAutoReopenIfNeeded(void);
- *
- * PARAMETERS:
- *    NONE
- *
- * FUNCTION:
- *    This function checks to see if we should setup the reopen timer to
- *    open the connection again.
- *
- * RETURNS:
- *    NONE
- *
- * SEE ALSO:
- *    
- ******************************************************************************/
-void Connection::DoAutoReopenIfNeeded(void)
-{
-    /* If we are not currently connected we should try to open again */
-    if(!IsConnected && DoAutoReopen)
-    {
-        /* If there is already a timer running cancel it and start a new open */
-        if(UITimerRunning(AutoReopenTimer))
-            UITimerStop(AutoReopenTimer);
-
-        UITimerSetTimeout(AutoReopenTimer,CustomSettings.AutoReopenWaitTime);
-        UITimerStart(AutoReopenTimer);
-    }
 }
 
 /*******************************************************************************

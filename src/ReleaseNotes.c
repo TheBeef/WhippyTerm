@@ -31,6 +31,12 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Complete rewrite on auto reconnect system",
+            "Count not find a problem with the auto reconnect but have"
+            " a bug report.  Deleted and rewrote the auto reconnect"
+            " to be a simpler system that uses less code (less code ="
+            " less likely to mess up)"},
+    {
         NOTETYPE_ENHANCEMENT,"Updated Binary HexDump to support Binary Protocol Documentation Standard strings",
             "The settings for the binary hexdump data processor has been"
             " updated to let the user input a binary protocol documentation"

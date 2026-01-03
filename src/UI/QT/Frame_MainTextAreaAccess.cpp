@@ -1,3 +1,8 @@
+#include <stdio.h>
+/* TBD:
+ * Rename Frame_MainTextCavnas ro Frame_MainTextColumn
+ * Right mouse button on header
+*/
 /*******************************************************************************
  * FILENAME: Frame_MainTextAreaAccess.cpp
  *
@@ -5,7 +10,24 @@
  *    Whippy Term
  *
  * FILE DESCRIPTION:
- *    
+ *    How this thing is put together:
+ *
+ *    Connection->DisplayText->Frame_MainTextArea->Frame_MainTextCanvas->
+ *    Widget_TextCanvas
+ *
+ *    Connection->DisplayText: This is where the connection connects to the
+ *          display, it picks a display type (text/binary/etc)
+ *
+ *    DisplayText->Frame_MainTextArea: This allocates the full frame
+ *          including the send block controls at the bottom.  This also includes
+ *          the side scroll bar and has access functions to work with the
+ *          full frame and all it's sub components.
+ *
+ *    Frame_MainTextArea->Frame_MainTextCanvas: This is another frame with the
+ *          text area, the header and bottom scroll bar.
+ *
+ *    Frame_MainTextCanvas->Widget_TextCanvas: This is the connection to the
+ *          actual text drawing area (text canvas).
  *
  * COPYRIGHT:
  *    Copyright 2023 Paul Hutchinson.
@@ -31,6 +53,8 @@
 /*** HEADER FILES TO INCLUDE  ***/
 #include "UI/UITextMainArea.h"
 #include "Frame_MainTextArea.h"
+#include "Frame_MainTextCanvas.h"
+#include "Widget_TextCanvas.h"
 
 /*** DEFINES                  ***/
 
@@ -40,6 +64,8 @@
 
 /*** FUNCTION PROTOTYPES      ***/
 static bool UITC_EventHandler(const struct WTCEvent *Event);
+static bool UITC_HeaderEventHandler(const struct WHQEvent *Event);
+static bool UITC_MainTextAreaColumnEventHandler(const struct FMTCEvent *Event);
 
 /*** VARIABLE DEFINITIONS     ***/
 
@@ -80,8 +106,19 @@ t_UITextDisplayCtrl *UITC_AllocTextDisplay(void *ParentWidget,
         NewTextArea->EventHandler=EventHandler;
         NewTextArea->ID=ID;
 
-        NewTextArea->ui->TextDisplayBox->SetEventHandler(UITC_EventHandler,
+        NewTextArea->ui->PrimaryTextArea->ui->TextDisplayBox->
+                SetEventHandler(UITC_EventHandler,(uintptr_t)NewTextArea);
+        NewTextArea->ui->PrimaryTextArea->ui->HeaderLabel->
+                SetEventHandler(UITC_HeaderEventHandler,(uintptr_t)NewTextArea);
+        NewTextArea->ui->PrimaryTextArea->
+                SetEventHandler(UITC_MainTextAreaColumnEventHandler,
                 (uintptr_t)NewTextArea);
+
+        NewTextArea->ui->PrimaryTextArea->SetParentSplitter(NewTextArea->ui->
+                TextArea_splitter);
+
+        /* By default we do not show the headers */
+        NewTextArea->ui->PrimaryTextArea->HeaderVisible(false);
 
         NewTextArea->Layout=new QHBoxLayout(QParent);
         NewTextArea->Layout->setSpacing(0);
@@ -130,6 +167,32 @@ void UITC_FreeTextDisplay(t_UITextDisplayCtrl *ctrl)
         delete TextDisplay->Layout;
 
     delete TextDisplay;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_GetTextDisplayPrimaryColumn
+ *
+ * SYNOPSIS:
+ *    t_UITextDisplayColumn *UITC_GetTextDisplayPrimaryColumn(t_UITextDisplayCtrl *ctrl);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- What control to work on
+ *
+ * FUNCTION:
+ *    This function gets a handle to the primary column.
+ *
+ * RETURNS:
+ *    A handle to the primary column.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UITextDisplayColumn *UITC_GetTextDisplayPrimaryColumn(t_UITextDisplayCtrl *ctrl)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    return (t_UITextDisplayColumn *)TextDisplay->ui->PrimaryTextArea;
 }
 
 /*******************************************************************************
@@ -235,6 +298,11 @@ t_UIContextMenuCtrl *UITC_GetContextMenuHandle(t_UITextDisplayCtrl *ctrl,e_UITD_
             return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_Yellow;
         case e_UITD_ContextMenu_StyleBGColor_BrightWhite:
             return (t_UIContextMenuCtrl *)TextDisplay->ui->actionStyleBGColor_BrightWhite;
+        case e_UITD_ContextMenu_ColumnHeader_Hide:
+            /* We need more info to get this handle, use need to include
+               t_UITextDisplayColumn. */
+            return NULL;
+        break;
 
         case e_UITD_ContextMenuMAX:
         default:
@@ -242,6 +310,56 @@ t_UIContextMenuCtrl *UITC_GetContextMenuHandle(t_UITextDisplayCtrl *ctrl,e_UITD_
     }
     return NULL;
 }
+
+t_UIContextMenuCtrl *UITC_GetContextMenuHandle(t_UITextDisplayCtrl *ctrl,
+        e_UITD_ContextMenuType UIObj,t_UITextDisplayColumn *Handle)
+{
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
+
+    switch(UIObj)
+    {
+        case e_UITD_ContextMenu_ColumnHeader_Hide:
+            return (t_UIContextMenuCtrl *)Column->ui->Menu_HeaderLabel_x1_Hide;
+        break;
+
+        case e_UITD_ContextMenu_SendBuffers:
+        case e_UITD_ContextMenu_CalcCRC:
+        case e_UITD_ContextMenu_FindCRCAlgorithm:
+        case e_UITD_ContextMenu_SendToSendBuffer:
+        case e_UITD_ContextMenu_Copy:
+        case e_UITD_ContextMenu_Paste:
+        case e_UITD_ContextMenu_ClearScreen:
+        case e_UITD_ContextMenu_ZoomIn:
+        case e_UITD_ContextMenu_ZoomOut:
+        case e_UITD_ContextMenu_Edit:
+        case e_UITD_ContextMenu_EndianSwap:
+        case e_UITD_ContextMenu_Bold:
+        case e_UITD_ContextMenu_Italics:
+        case e_UITD_ContextMenu_Underline:
+        case e_UITD_ContextMenu_StrikeThrough:
+        case e_UITD_ContextMenu_StyleBGColor_Black:
+        case e_UITD_ContextMenu_StyleBGColor_Blue:
+        case e_UITD_ContextMenu_StyleBGColor_Green:
+        case e_UITD_ContextMenu_StyleBGColor_Cyan:
+        case e_UITD_ContextMenu_StyleBGColor_Red:
+        case e_UITD_ContextMenu_StyleBGColor_Magenta:
+        case e_UITD_ContextMenu_StyleBGColor_Brown:
+        case e_UITD_ContextMenu_StyleBGColor_White:
+        case e_UITD_ContextMenu_StyleBGColor_Gray:
+        case e_UITD_ContextMenu_StyleBGColor_LightBlue:
+        case e_UITD_ContextMenu_StyleBGColor_LightGreen:
+        case e_UITD_ContextMenu_StyleBGColor_LightCyan:
+        case e_UITD_ContextMenu_StyleBGColor_LightRed:
+        case e_UITD_ContextMenu_StyleBGColor_LightMagenta:
+        case e_UITD_ContextMenu_StyleBGColor_Yellow:
+        case e_UITD_ContextMenu_StyleBGColor_BrightWhite:
+        case e_UITD_ContextMenuMAX:
+        default:
+            break;
+    }
+    return NULL;
+}
+
 
 t_UIContextSubMenuCtrl *UITC_GetContextSubMenuHandle(t_UITextDisplayCtrl *ctrl,e_UITD_ContextSubMenuType UIObj)
 {
@@ -365,14 +483,21 @@ t_UIComboBoxCtrl *UITC_GetComboBoxHandle(t_UITextDisplayCtrl *ctrl,e_UITC_Combox
 static bool UITC_EventHandler(const struct WTCEvent *Event)
 {
     Frame_MainTextArea *ThisFrame=(Frame_MainTextArea *)Event->UserData;
+    Frame_MainTextCanvas *MainTextColumn;
     struct TextDisplayEvent NewEvent;
 
     if(ThisFrame->EventHandler==nullptr)
         return true;
 
+    /* If you change the Frame_MainTextCanvas.ui then you need to fix the
+       parents */
+    MainTextColumn=static_cast<Frame_MainTextCanvas *>(Event->Source->parent()->parent());
+
     /* Translate the event */
     NewEvent.ID=ThisFrame->ID;
     NewEvent.Ctrl=(t_UITextDisplayCtrl *)ThisFrame;
+    NewEvent.Column=(t_UITextDisplayColumn *)MainTextColumn;
+
     switch(Event->EventType)
     {
         case e_WTCEvent_MouseDown:
@@ -449,6 +574,116 @@ static bool UITC_EventHandler(const struct WTCEvent *Event)
 
 /*******************************************************************************
  * NAME:
+ *    UITC_HeaderEventHandler
+ *
+ * SYNOPSIS:
+ *    static bool UITC_HeaderEventHandler(const struct WHQEvent *Event);
+ *
+ * PARAMETERS:
+ *    Event [I] -- The Widget Text Cavnas event
+ *
+ * FUNCTION:
+ *    This function is called from the widget header QLabel when there is an
+ *    event.
+ *
+ *    This function will convert the event and call our event handler callback.
+ *
+ * RETURNS:
+ *    true -- Let the event continue
+ *    false -- Cancel the event
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static bool UITC_HeaderEventHandler(const struct WHQEvent *Event)
+{
+    Frame_MainTextArea *ThisFrame=(Frame_MainTextArea *)Event->UserData;
+    Frame_MainTextCanvas *MainTextColumn;
+    struct TextDisplayEvent NewEvent;
+
+    if(ThisFrame->EventHandler==nullptr)
+        return true;
+
+    /* If you change the Frame_MainTextCanvas.ui then you need to fix the
+       parents */
+    MainTextColumn=static_cast<Frame_MainTextCanvas *>(Event->Source->parent()->parent());
+
+    /* Translate the event */
+    NewEvent.ID=ThisFrame->ID;
+    NewEvent.Ctrl=(t_UITextDisplayCtrl *)ThisFrame;
+    NewEvent.Column=(t_UITextDisplayColumn *)MainTextColumn;
+
+    switch(Event->EventType)
+    {
+        case e_WHQEvent_HeaderMoved:
+            NewEvent.EventType=e_TextDisplayEvent_HeadersRearranged;
+            NewEvent.Column=NULL;   // global
+        break;
+        case e_WHQEventMAX:
+        default:
+            return true;
+    }
+    return ThisFrame->EventHandler(&NewEvent);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_MainTextAreaColumnEventHandler
+ *
+ * SYNOPSIS:
+ *    static bool UITC_MainTextAreaColumnEventHandler(const struct FMTCEvent *Event)
+ *
+ * PARAMETERS:
+ *    Event [I] -- The frame main text column event
+ *
+ * FUNCTION:
+ *    This function is called from the Frame_MainTextColumn when there is an
+ *    event.
+ *
+ *    This function will convert the event and call our event handler callback.
+ *
+ * RETURNS:
+ *    true -- Let the event continue
+ *    false -- Cancel the event
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static bool UITC_MainTextAreaColumnEventHandler(const struct FMTCEvent *Event)
+{
+    Frame_MainTextArea *ThisFrame=(Frame_MainTextArea *)Event->UserData;
+    Frame_MainTextCanvas *MainTextColumn;
+    struct TextDisplayEvent NewEvent;
+
+    if(ThisFrame->EventHandler==nullptr)
+        return true;
+
+    MainTextColumn=static_cast<Frame_MainTextCanvas *>(Event->Source);
+
+    /* Translate the event */
+    NewEvent.ID=ThisFrame->ID;
+    NewEvent.Ctrl=(t_UITextDisplayCtrl *)ThisFrame;
+    NewEvent.Column=(t_UITextDisplayColumn *)MainTextColumn;
+
+    switch(Event->EventType)
+    {
+        case e_FMTCEvent_ScrollX:
+            NewEvent.EventType=e_TextDisplayEvent_DisplayFrameScrollX;
+            NewEvent.Info.Scroll.Amount=Event->Info->Scroll.Amount;
+        break;
+        case e_FMTCEvent_ContextMenu:
+            NewEvent.EventType=e_TextDisplayEvent_ContextMenu;
+            NewEvent.Info.Context.Menu=Event->Info->Context.Menu;
+        break;
+        case e_FMTCEventMAX:
+        default:
+            return true;
+    }
+    return ThisFrame->EventHandler(&NewEvent);
+}
+
+/*******************************************************************************
+ * NAME:
  *    UITC_ShowSendPanel
  *
  * SYNOPSIS:
@@ -480,11 +715,11 @@ void UITC_ShowSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible)
  *    UITC_SetFont
  *
  * SYNOPSIS:
- *    void UITC_SetFont(t_UITextDisplayCtrl *ctrl,const char *FontName,int Size,
- *              bool Bold,bool Italic);
+ *    void UITC_SetFont(t_UITextDisplayColumn *Handle,const char *FontName,
+ *          int Size,bool Bold,bool Italic);
  *
  * PARAMETERS:
- *    ctrl [I] -- What control to work on
+ *    Handle [I] -- What column to work on
  *    FontName [I] -- The font to use
  *    Size [I] -- The size of the font (height)
  *    Bold [I] -- Use the bold version
@@ -499,12 +734,12 @@ void UITC_ShowSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UITC_SetFont(t_UITextDisplayCtrl *ctrl,const char *FontName,int Size,
+void UITC_SetFont(t_UITextDisplayColumn *Handle,const char *FontName,int Size,
         bool Bold,bool Italic)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    TextDisplay->ui->TextDisplayBox->SetFont(FontName,Size,Bold,Italic);
+    Column->ui->TextDisplayBox->SetFont(FontName,Size,Bold,Italic);
 }
 
 /*******************************************************************************
@@ -512,10 +747,10 @@ void UITC_SetFont(t_UITextDisplayCtrl *ctrl,const char *FontName,int Size,
  *    UITC_ClearAllLines
  *
  * SYNOPSIS:
- *    void UITC_ClearAllLines(t_UITextDisplayCtrl *ctrl);
+ *    void UITC_ClearAllLines(t_UITextDisplayColumn *Handle);
  *
  * PARAMETERS:
- *    ctrl [I] -- The control to work on
+ *    Handle [I] -- What column to work on
  *
  * FUNCTION:
  *    This function clears all the lines from the control.
@@ -526,11 +761,11 @@ void UITC_SetFont(t_UITextDisplayCtrl *ctrl,const char *FontName,int Size,
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UITC_ClearAllLines(t_UITextDisplayCtrl *ctrl)
+void UITC_ClearAllLines(t_UITextDisplayColumn *Handle)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    TextDisplay->ui->TextDisplayBox->ClearAllLines();
+    Column->ui->TextDisplayBox->ClearAllLines();
 }
 
 /*******************************************************************************
@@ -538,10 +773,10 @@ void UITC_ClearAllLines(t_UITextDisplayCtrl *ctrl)
  *    UITC_Begin
  *
  * SYNOPSIS:
- *    void UITC_Begin(t_UITextDisplayCtrl *ctrl,int Line);
+ *    void UITC_Begin(t_UITextDisplayColumn *Handle,int Line);
  *
  * PARAMETERS:
- *    ctrl [I] -- The control to work on
+ *    Handle [I] -- What column to work on
  *    Line [I] -- What screen line to work on
  *
  * FUNCTION:
@@ -554,12 +789,11 @@ void UITC_ClearAllLines(t_UITextDisplayCtrl *ctrl)
  * SEE ALSO:
  *    UITC_End(), UITC_ClearLine(), UITC_AddFragment()
  ******************************************************************************/
-void UITC_Begin(t_UITextDisplayCtrl *ctrl,int Line)
+void UITC_Begin(t_UITextDisplayColumn *Handle,int Line)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    TextDisplay->WorkingLine=Line;
-    /* DEBUG PAUL: Setup any pointers to the line we are going to work on here */
+    Column->WorkingLine=Line;
 }
 
 /*******************************************************************************
@@ -567,10 +801,10 @@ void UITC_Begin(t_UITextDisplayCtrl *ctrl,int Line)
  *    UITC_End
  *
  * SYNOPSIS:
- *    void UITC_End(t_UITextDisplayCtrl *ctrl);
+ *    void UITC_End(t_UITextDisplayColumn *Handle);
  *
  * PARAMETERS:
- *    ctrl [I] -- The control to work on
+ *    Handle [I] -- What column to work on
  *
  * FUNCTION:
  *    This function ends the changes we are making to a line on the screen.
@@ -582,11 +816,11 @@ void UITC_Begin(t_UITextDisplayCtrl *ctrl,int Line)
  * SEE ALSO:
  *    UITC_Begin()
  ******************************************************************************/
-void UITC_End(t_UITextDisplayCtrl *ctrl)
+void UITC_End(t_UITextDisplayColumn *Handle)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    TextDisplay->ui->TextDisplayBox->RedrawLine(TextDisplay->WorkingLine);
+    Column->ui->TextDisplayBox->RedrawLine(Column->WorkingLine);
 }
 
 /*******************************************************************************
@@ -594,10 +828,10 @@ void UITC_End(t_UITextDisplayCtrl *ctrl)
  *    UITC_ClearLine
  *
  * SYNOPSIS:
- *    void UITC_ClearLine(t_UITextDisplayCtrl *ctrl,uint32_t BGColor);
+ *    void UITC_ClearLine(t_UITextDisplayColumn *Handle,uint32_t BGColor);
  *
  * PARAMETERS:
- *    ctrl [I] -- The control to work on
+ *    Handle [I] -- What column to work on
  *    BGColor [I] -- The background color for this line.
  *
  * FUNCTION:
@@ -609,11 +843,11 @@ void UITC_End(t_UITextDisplayCtrl *ctrl)
  * SEE ALSO:
  *    UITC_Begin()
  ******************************************************************************/
-void UITC_ClearLine(t_UITextDisplayCtrl *ctrl,uint32_t BGColor)
+void UITC_ClearLine(t_UITextDisplayColumn *Handle,uint32_t BGColor)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    TextDisplay->ui->TextDisplayBox->ClearLine(TextDisplay->WorkingLine,BGColor);
+    Column->ui->TextDisplayBox->ClearLine(Column->WorkingLine,BGColor);
 }
 
 /*******************************************************************************
@@ -621,11 +855,11 @@ void UITC_ClearLine(t_UITextDisplayCtrl *ctrl,uint32_t BGColor)
  *    UITC_AddFragment
  *
  * SYNOPSIS:
- *    void UITC_AddFragment(t_UITextDisplayCtrl *ctrl,
+ *    void UITC_AddFragment(t_UITextDisplayColumn *Handle,
  *          const struct TextCanvasFrag *Frag);
  *
  * PARAMETERS:
- *    ctrl [I] -- The control to work on
+ *    Handle [I] -- What column to work on
  *    Frag [I] -- The fragment to add to the screen
  *
  * FUNCTION:
@@ -638,11 +872,11 @@ void UITC_ClearLine(t_UITextDisplayCtrl *ctrl,uint32_t BGColor)
  * SEE ALSO:
  *    UITC_Begin()
  ******************************************************************************/
-void UITC_AddFragment(t_UITextDisplayCtrl *ctrl,const struct TextCanvasFrag *Frag)
+void UITC_AddFragment(t_UITextDisplayColumn *Handle,const struct TextCanvasFrag *Frag)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    TextDisplay->ui->TextDisplayBox->AppendTextFrag(TextDisplay->WorkingLine,Frag);
+    Column->ui->TextDisplayBox->AppendTextFrag(Column->WorkingLine,Frag);
 }
 
 /*******************************************************************************
@@ -669,8 +903,8 @@ void UITC_SetCursorColor(t_UITextDisplayCtrl *ctrl,uint32_t Color)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplayBox->CursorColor=Color;
-    TextDisplay->ui->TextDisplayBox->RedrawScreen();
+    TextDisplay->ui->PrimaryTextArea->ui->TextDisplayBox->CursorColor=Color;
+    TextDisplay->ui->PrimaryTextArea->ui->TextDisplayBox->RedrawScreen();
 }
 
 /*******************************************************************************
@@ -697,7 +931,8 @@ void UITC_SetCursorBlinking(t_UITextDisplayCtrl *ctrl,bool Blinking)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplayBox->SetCursorBlinking(Blinking);
+    TextDisplay->ui->PrimaryTextArea->ui->TextDisplayBox->
+            SetCursorBlinking(Blinking);
 }
 
 /*******************************************************************************
@@ -725,7 +960,8 @@ void UITC_SetCursorStyle(t_UITextDisplayCtrl *ctrl,e_TextCursorStyleType Style)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplayBox->ChangeCursorStyle(Style);
+    TextDisplay->ui->PrimaryTextArea->ui->TextDisplayBox->
+            ChangeCursorStyle(Style);
 }
 
 /*******************************************************************************
@@ -755,7 +991,7 @@ void UITC_SetCursorPos(t_UITextDisplayCtrl *ctrl,unsigned int x,unsigned int y)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplayBox->SetCursorPos(x,y);
+    TextDisplay->ui->PrimaryTextArea->ui->TextDisplayBox->SetCursorPos(x,y);
 }
 
 /*******************************************************************************
@@ -784,7 +1020,8 @@ void UITC_SetFocus(t_UITextDisplayCtrl *ctrl,e_UITCSetFocusType What)
     switch(What)
     {
         case e_UITCSetFocus_Main:
-            TextDisplay->ui->TextDisplayBox->setFocus(Qt::OtherFocusReason);
+            TextDisplay->ui->PrimaryTextArea->ui->TextDisplayBox->
+                    setFocus(Qt::OtherFocusReason);
         break;
         case e_UITCSetFocus_SendPanel:
             TextDisplay->ui->BlockSend_textEdit->setFocus(Qt::OtherFocusReason);
@@ -800,11 +1037,11 @@ void UITC_SetFocus(t_UITextDisplayCtrl *ctrl,e_UITCSetFocusType What)
  *    UITC_GetFragWidth
  *
  * SYNOPSIS:
- *    int UITC_GetFragWidth(t_UITextDisplayCtrl *ctrl,
+ *    int UITC_GetFragWidth(t_UITextDisplayColumn *Handle,
  *              const struct TextCanvasFrag *Frag);
  *
  * PARAMETERS:
- *    ctrl [I] -- The control to work on
+ *    Handle [I] -- What column to work on
  *    Frag [I] -- The frag to get the render width of
  *
  * FUNCTION:
@@ -816,11 +1053,11 @@ void UITC_SetFocus(t_UITextDisplayCtrl *ctrl,e_UITCSetFocusType What)
  * SEE ALSO:
  *    
  ******************************************************************************/
-int UITC_GetFragWidth(t_UITextDisplayCtrl *ctrl,const struct TextCanvasFrag *Frag)
+int UITC_GetFragWidth(t_UITextDisplayColumn *Handle,const struct TextCanvasFrag *Frag)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    return TextDisplay->ui->TextDisplayBox->GetTextWidth(Frag);
+    return Column->ui->TextDisplayBox->GetTextWidth(Frag);
 }
 
 /*******************************************************************************
@@ -828,28 +1065,28 @@ int UITC_GetFragWidth(t_UITextDisplayCtrl *ctrl,const struct TextCanvasFrag *Fra
  *    UITC_GetWidgetWidth
  *
  * SYNOPSIS:
- *    int UITC_GetWidgetWidth(t_UITextDisplayCtrl *ctrl);
+ *    int UITC_GetWidgetWidth(t_UITextDisplayColumn *Handle);
  *
  * PARAMETERS:
- *    ctrl [I] -- The control to work on
+ *    Handle [I] -- What column to work on
  *
  * FUNCTION:
- *    This function gets the size of the widget in pixels.
+ *    This function gets the size of the text canvas in pixels.
  *
  * RETURNS:
- *    The width of the widget
+ *    The width of the text cavnas widget
  *
  * LIMITATIONS:
  *    This maybe 0 if the widget hasn't been drawen on the screen
  *
  * SEE ALSO:
- *    UITC_GetWidgetHeight()
+ *    UITC_GetWidgetHeight(), UITC_GetColumnWidth()
  ******************************************************************************/
-int UITC_GetWidgetWidth(t_UITextDisplayCtrl *ctrl)
+int UITC_GetWidgetWidth(t_UITextDisplayColumn *Handle)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    return TextDisplay->ui->TextDisplayBox->GetWidgetWidth();
+    return Column->ui->TextDisplayBox->GetWidgetWidth();
 }
 
 /*******************************************************************************
@@ -878,7 +1115,8 @@ int UITC_GetWidgetHeight(t_UITextDisplayCtrl *ctrl)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    return TextDisplay->ui->TextDisplayBox->GetWidgetHeight();
+    return TextDisplay->ui->PrimaryTextArea->ui->TextDisplayBox->
+            GetWidgetHeight();
 }
 
 /*******************************************************************************
@@ -886,10 +1124,10 @@ int UITC_GetWidgetHeight(t_UITextDisplayCtrl *ctrl)
  *    UITC_GetCharPxWidth
  *
  * SYNOPSIS:
- *    int UITC_GetCharPxWidth(t_UITextDisplayCtrl *ctrl);
+ *    int UITC_GetCharPxWidth(t_UITextDisplayColumn *Handle);
  *
  * PARAMETERS:
- *    ctrl [I] -- The control to work on
+ *    Handle [I] -- What column to work on
  *
  * FUNCTION:
  *    This function gets the average width of a char.
@@ -900,11 +1138,11 @@ int UITC_GetWidgetHeight(t_UITextDisplayCtrl *ctrl)
  * SEE ALSO:
  *    UITC_GetCharPxHeight()
  ******************************************************************************/
-int UITC_GetCharPxWidth(t_UITextDisplayCtrl *ctrl)
+int UITC_GetCharPxWidth(t_UITextDisplayColumn *Handle)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    return TextDisplay->ui->TextDisplayBox->GetCharPxWidth();
+    return Column->ui->TextDisplayBox->GetCharPxWidth();
 }
 
 /*******************************************************************************
@@ -912,10 +1150,10 @@ int UITC_GetCharPxWidth(t_UITextDisplayCtrl *ctrl)
  *    UITC_GetCharPxHeight
  *
  * SYNOPSIS:
- *    int UITC_GetCharPxHeight(t_UITextDisplayCtrl *ctrl);
+ *    int UITC_GetCharPxHeight(t_UITextDisplayColumn *Handle);
  *
  * PARAMETERS:
- *    ctrl [I] -- The control to work on
+ *    Handle [I] -- What column to work on
  *
  * FUNCTION:
  *    This function gets the average height of a char.
@@ -926,11 +1164,11 @@ int UITC_GetCharPxWidth(t_UITextDisplayCtrl *ctrl)
  * SEE ALSO:
  *    UITC_GetCharPxWidth()
  ******************************************************************************/
-int UITC_GetCharPxHeight(t_UITextDisplayCtrl *ctrl)
+int UITC_GetCharPxHeight(t_UITextDisplayColumn *Handle)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    return TextDisplay->ui->TextDisplayBox->GetCharPxHeight();
+    return Column->ui->TextDisplayBox->GetCharPxHeight();
 }
 
 /*******************************************************************************
@@ -938,10 +1176,10 @@ int UITC_GetCharPxHeight(t_UITextDisplayCtrl *ctrl)
  *    UITC_GetHorzSlider
  *
  * SYNOPSIS:
- *    t_UIScrollBarCtrl *UITC_GetHorzSlider(t_UITextDisplayCtrl *ctrl);
+ *    t_UIScrollBarCtrl *UITC_GetHorzSlider(t_UITextDisplayColumn *Handle);
  *
  * PARAMETERS:
- *    ctrl [I] -- The control to work on
+ *    Handle [I] -- What column to work on
  *
  * FUNCTION:
  *    This function gets the sub-widget for the horz slider
@@ -952,12 +1190,11 @@ int UITC_GetCharPxHeight(t_UITextDisplayCtrl *ctrl)
  * SEE ALSO:
  *    UITC_GetVertSlider()
  ******************************************************************************/
-t_UIScrollBarCtrl *UITC_GetHorzSlider(t_UITextDisplayCtrl *ctrl)
+t_UIScrollBarCtrl *UITC_GetHorzSlider(t_UITextDisplayColumn *Handle)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    return (t_UIScrollBarCtrl *)TextDisplay->ui->TexthorizontalScrollBar;
-
+    return (t_UIScrollBarCtrl *)Column->ui->TexthorizontalScrollBar;
 }
 
 /*******************************************************************************
@@ -991,10 +1228,10 @@ t_UIScrollBarCtrl *UITC_GetVertSlider(t_UITextDisplayCtrl *ctrl)
  *    UITC_SetXOffset
  *
  * SYNOPSIS:
- *    void UITC_SetXOffset(t_UITextDisplayCtrl *ctrl,int XOffsetPx);
+ *    void UITC_SetXOffset(t_UITextDisplayColumn *Handle,int XOffsetPx);
  *
  * PARAMETERS:
- *    ctrl [I] -- The control to work on
+ *    Handle [I] -- What column to work on
  *    XOffsetPx [I] -- The number of pixels to skip off the left side of
  *                     text.
  *
@@ -1012,11 +1249,11 @@ t_UIScrollBarCtrl *UITC_GetVertSlider(t_UITextDisplayCtrl *ctrl)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UITC_SetXOffset(t_UITextDisplayCtrl *ctrl,int XOffsetPx)
+void UITC_SetXOffset(t_UITextDisplayColumn *Handle,int XOffsetPx)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    TextDisplay->ui->TextDisplayBox->SetXOffsetPx(XOffsetPx);
+    Column->ui->TextDisplayBox->SetXOffsetPx(XOffsetPx);
 }
 
 /*******************************************************************************
@@ -1024,11 +1261,11 @@ void UITC_SetXOffset(t_UITextDisplayCtrl *ctrl,int XOffsetPx)
  *    UITC_SetMaxLines
  *
  * SYNOPSIS:
- *    void UITC_SetMaxLines(t_UITextDisplayCtrl *ctrl,int MaxLines,
+ *    void UITC_SetMaxLines(t_UITextDisplayColumn *Handle,int MaxLines,
  *          uint32_t BGColor);
  *
  * PARAMETERS:
- *    ctrl [I] -- The control to work on
+ *    Handle [I] -- What column to work on
  *    MaxLiners [I] -- The max number of lines to draw.
  *    BGColor [I] -- The background color for these lines.
  *
@@ -1041,11 +1278,11 @@ void UITC_SetXOffset(t_UITextDisplayCtrl *ctrl,int XOffsetPx)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UITC_SetMaxLines(t_UITextDisplayCtrl *ctrl,int MaxLines,uint32_t BGColor)
+void UITC_SetMaxLines(t_UITextDisplayColumn *Handle,int MaxLines,uint32_t BGColor)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    TextDisplay->ui->TextDisplayBox->SetMaxLines(MaxLines,BGColor);
+    Column->ui->TextDisplayBox->SetMaxLines(MaxLines,BGColor);
 }
 
 /*******************************************************************************
@@ -1053,11 +1290,11 @@ void UITC_SetMaxLines(t_UITextDisplayCtrl *ctrl,int MaxLines,uint32_t BGColor)
  *    UITC_SetClippingWindow
  *
  * SYNOPSIS:
- *    void UITC_SetClippingWindow(t_UITextDisplayCtrl *ctrl,int LeftEdge,
+ *    void UITC_SetClippingWindow(t_UITextDisplayColumn *Handle,int LeftEdge,
  *          int TopEdge,int Width,int Height);
  *
  * PARAMETERS:
- *    ctrl [I] -- The control to work on
+ *    Handle [I] -- What column to work on
  *    LeftEdge [I] -- The left edge of the window box
  *    TopEdge [I] -- The top edge of the window box
  *    Width [I] -- The width of the window box
@@ -1074,12 +1311,12 @@ void UITC_SetMaxLines(t_UITextDisplayCtrl *ctrl,int MaxLines,uint32_t BGColor)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UITC_SetClippingWindow(t_UITextDisplayCtrl *ctrl,int LeftEdge,int TopEdge,
+void UITC_SetClippingWindow(t_UITextDisplayColumn *Handle,int LeftEdge,int TopEdge,
         int Width,int Height)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    TextDisplay->ui->TextDisplayBox->SetDisplaySize(LeftEdge,TopEdge,Width,Height);
+    Column->ui->TextDisplayBox->SetDisplaySize(LeftEdge,TopEdge,Width,Height);
 }
 
 /*******************************************************************************
@@ -1087,10 +1324,11 @@ void UITC_SetClippingWindow(t_UITextDisplayCtrl *ctrl,int LeftEdge,int TopEdge,
  *    UITC_SetTextAreaBackgroundColor
  *
  * SYNOPSIS:
- *    void UITC_SetTextAreaBackgroundColor(t_UITextDisplayCtrl *ctrl,
+ *    void UITC_SetTextAreaBackgroundColor(t_UITextDisplayColumn *Handle,
  *              uint32_t BgColor);
  *
  * PARAMETERS:
+ *    Handle [I] -- What column to work on
  *    BgColor [I] -- The background fill color
  *
  * FUNCTION:
@@ -1103,11 +1341,12 @@ void UITC_SetClippingWindow(t_UITextDisplayCtrl *ctrl,int LeftEdge,int TopEdge,
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UITC_SetTextAreaBackgroundColor(t_UITextDisplayCtrl *ctrl,uint32_t BgColor)
+void UITC_SetTextAreaBackgroundColor(t_UITextDisplayColumn *Handle,
+        uint32_t BgColor)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    TextDisplay->ui->TextDisplayBox->SetTextAreaBackgroundColor(BgColor);
+    Column->ui->TextDisplayBox->SetTextAreaBackgroundColor(BgColor);
 }
 
 /*******************************************************************************
@@ -1115,10 +1354,11 @@ void UITC_SetTextAreaBackgroundColor(t_UITextDisplayCtrl *ctrl,uint32_t BgColor)
  *    UITC_SetTextDefaultColor
  *
  * SYNOPSIS:
- *    void UITC_SetTextDefaultColor(t_UITextDisplayCtrl *ctrl,
+ *    void UITC_SetTextDefaultColor(t_UITextDisplayColumn *Handle,
  *              uint32_t FgColor);
  *
  * PARAMETERS:
+ *    Handle [I] -- What column to work on
  *    BgColor [I] -- The background fill color
  *
  * FUNCTION:
@@ -1130,11 +1370,11 @@ void UITC_SetTextAreaBackgroundColor(t_UITextDisplayCtrl *ctrl,uint32_t BgColor)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UITC_SetTextDefaultColor(t_UITextDisplayCtrl *ctrl,uint32_t FgColor)
+void UITC_SetTextDefaultColor(t_UITextDisplayColumn *Handle,uint32_t FgColor)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    TextDisplay->ui->TextDisplayBox->SetTextDefaultColor(FgColor);
+    Column->ui->TextDisplayBox->SetTextDefaultColor(FgColor);
 }
 
 /*******************************************************************************
@@ -1142,10 +1382,11 @@ void UITC_SetTextDefaultColor(t_UITextDisplayCtrl *ctrl,uint32_t FgColor)
  *    UITC_SetBorderBackgroundColor
  *
  * SYNOPSIS:
- *    void UITC_SetBorderBackgroundColor(t_UITextDisplayCtrl *ctrl,
+ *    void UITC_SetBorderBackgroundColor(t_UITextDisplayColumn *Handle,
  *              uint32_t BgColor,bool Fill);
  *
  * PARAMETERS:
+ *    Handle [I] -- What column to work on
  *    BgColor [I] -- The background fill color
  *    Fill [I] -- True = fill the border area, false = just ignore the border
  *                       screen area.
@@ -1159,12 +1400,12 @@ void UITC_SetTextDefaultColor(t_UITextDisplayCtrl *ctrl,uint32_t FgColor)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UITC_SetBorderBackgroundColor(t_UITextDisplayCtrl *ctrl,uint32_t BgColor,
-        bool Fill)
+void UITC_SetBorderBackgroundColor(t_UITextDisplayColumn *Handle,
+        uint32_t BgColor,bool Fill)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    TextDisplay->ui->TextDisplayBox->SetDisplayBackgroundColor(BgColor,Fill);
+    Column->ui->TextDisplayBox->SetDisplayBackgroundColor(BgColor,Fill);
 }
 
 /*******************************************************************************
@@ -1193,7 +1434,8 @@ void UITC_SetOverrideMsg(t_UITextDisplayCtrl *ctrl,const char *Msg,bool OnOff)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplayBox->SetOverrideMsg(Msg,OnOff);
+    TextDisplay->ui->PrimaryTextArea->ui->TextDisplayBox->
+            SetOverrideMsg(Msg,OnOff);
 }
 
 /*******************************************************************************
@@ -1201,10 +1443,10 @@ void UITC_SetOverrideMsg(t_UITextDisplayCtrl *ctrl,const char *Msg,bool OnOff)
  *    UITC_RedrawScreen
  *
  * SYNOPSIS:
- *    void UITC_RedrawScreen(t_UITextDisplayCtrl *ctrl);
+ *    void UITC_RedrawScreen(t_UITextDisplayColumn *Handle);
  *
  * PARAMETERS:
- *    ctrl [I] -- The control to work on
+ *    Handle [I] -- What column to work on
  *
  * FUNCTION:
  *    This function redraws the control.
@@ -1215,11 +1457,11 @@ void UITC_SetOverrideMsg(t_UITextDisplayCtrl *ctrl,const char *Msg,bool OnOff)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UITC_RedrawScreen(t_UITextDisplayCtrl *ctrl)
+void UITC_RedrawScreen(t_UITextDisplayColumn *Handle)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    TextDisplay->ui->TextDisplayBox->RedrawScreen();
+    Column->ui->TextDisplayBox->RedrawScreen();
 }
 
 /*******************************************************************************
@@ -1227,10 +1469,10 @@ void UITC_RedrawScreen(t_UITextDisplayCtrl *ctrl)
  *    UITC_SetDrawMask
  *
  * SYNOPSIS:
- *    void UITC_SetDrawMask(t_UITextDisplayCtrl *ctrl,uint16_t Mask);
+ *    void UITC_SetDrawMask(t_UITextDisplayColumn *Handle,uint16_t Mask);
  *
  * PARAMETERS:
- *    ctrl [I] -- The control to work on
+ *    Handle [I] -- What column to work on
  *    Mask [I] -- What mask to apply to drawing attributes.  If the bit is
  *                set then this is drawen.
  *
@@ -1243,11 +1485,11 @@ void UITC_RedrawScreen(t_UITextDisplayCtrl *ctrl)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UITC_SetDrawMask(t_UITextDisplayCtrl *ctrl,uint16_t Mask)
+void UITC_SetDrawMask(t_UITextDisplayColumn *Handle,uint16_t Mask)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    TextDisplay->ui->TextDisplayBox->SetDrawMask(Mask);
+    Column->ui->TextDisplayBox->SetDrawMask(Mask);
 }
 
 /*******************************************************************************
@@ -1274,7 +1516,7 @@ void UITC_ShowBellIcon(t_UITextDisplayCtrl *ctrl)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
-    TextDisplay->ui->TextDisplayBox->ShowBell();
+    TextDisplay->ui->PrimaryTextArea->ui->TextDisplayBox->ShowBell();
 }
 
 /*******************************************************************************
@@ -1282,11 +1524,11 @@ void UITC_ShowBellIcon(t_UITextDisplayCtrl *ctrl)
  *    UITC_SetMouseCursor
  *
  * SYNOPSIS:
- *    void UITC_SetMouseCursor(t_UITextDisplayCtrl *ctrl,
+ *    void UITC_SetMouseCursor(t_UITextDisplayColumn *Handle,
  *              e_UIMouse_CursorType Cursor);
  *
  * PARAMETERS:
- *    ctrl [I] -- The control to work on
+ *    Handle [I] -- What column to work on
  *    Cursor [I] -- What mouse pointer to use
  *
  * FUNCTION:
@@ -1298,11 +1540,12 @@ void UITC_ShowBellIcon(t_UITextDisplayCtrl *ctrl)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UITC_SetMouseCursor(t_UITextDisplayCtrl *ctrl,e_UIMouse_CursorType Cursor)
+void UITC_SetMouseCursor(t_UITextDisplayColumn *Handle,
+        e_UIMouse_CursorType Cursor)
 {
-    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
 
-    TextDisplay->ui->TextDisplayBox->SetMouseCursor(Cursor);
+    Column->ui->TextDisplayBox->SetMouseCursor(Cursor);
 }
 
 /*******************************************************************************
@@ -1367,3 +1610,389 @@ void UITC_SendPanelShowHexOrTextInput(t_UITextDisplayCtrl *ctrl,bool ShowText)
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    UITC_AddColumn
+ *
+ * SYNOPSIS:
+ *    t_UITextDisplayColumn *UITC_AddColumn(t_UITextDisplayCtrl *ctrl,
+ *              const char *Name,bool Add2Right);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- What control to work on
+ *    Name [I] -- The name for the header of this column.
+ *    Add2Right [I] -- If this is true then it will be added to the far right,
+ *                     if false then it will be added to the far left.
+ *
+ * FUNCTION:
+ *    This function adds a new column to a text display control.  It will have
+ *    a header turned on by default.
+ *
+ * RETURNS:
+ *    A pointer to the new column or NULL if there was an error.
+ *
+ * SEE ALSO:
+ *    UITC_DeleteColumn(), UITC_GetColumnIndex(), UITC_SetColumnIndex(),
+ *    UITC_GetAllColumnsWidths(), UITC_SetAllColumnsWidths(),
+ *    UITC_SetColumnWidth(), UITC_SetColumnHeaderLabel(),
+ *    UITC_SetColumnHeaderVisible()
+ ******************************************************************************/
+t_UITextDisplayColumn *UITC_AddColumn(t_UITextDisplayCtrl *ctrl,
+        const char *Name,bool Add2Right)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *NewColumn;
+    int NewIndex;
+
+    NewColumn=NULL;
+    try
+    {
+        if(Add2Right)
+            NewIndex=-1;
+        else
+            NewIndex=0;
+
+        NewColumn=new class Frame_MainTextCanvas(TextDisplay->ui->TextArea_splitter);
+        NewColumn->HeaderVisible(true);
+        NewColumn->SetParentSplitter(TextDisplay->ui->TextArea_splitter);
+        NewColumn->SetHeaderLabel(Name);
+        NewColumn->ui->TextDisplayBox->SetEventHandler(UITC_EventHandler,
+                (uintptr_t)TextDisplay);
+        NewColumn->ui->HeaderLabel->SetEventHandler(UITC_HeaderEventHandler,
+                (uintptr_t)TextDisplay);
+        NewColumn->SetEventHandler(UITC_MainTextAreaColumnEventHandler,
+                (uintptr_t)TextDisplay);
+        NewColumn->ui->TextDisplayBox->SetCursorBlinking(false);
+        NewColumn->ui->TextDisplayBox->ChangeCursorStyle(e_TextCursorStyle_Hidden);
+        TextDisplay->ui->TextArea_splitter->insertWidget(NewIndex,NewColumn);
+    }
+    catch(...)
+    {
+        if(NewColumn!=NULL)
+            delete NewColumn;
+        NewColumn=NULL;
+    }
+
+    return (t_UITextDisplayColumn *)NewColumn;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_DeleteColumn
+ *
+ * SYNOPSIS:
+ *    void UITC_DeleteColumn(t_UITextDisplayCtrl *ctrl,
+ *              t_UITextDisplayColumn *Handle);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- What control the has this column in it
+ *    Handle [I] -- The handle to the column to delete
+ *
+ * FUNCTION:
+ *    This function deletes a column from a text display control.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    You can not delete the primary column
+ *
+ * SEE ALSO:
+ *    UITC_AddColumn()
+ ******************************************************************************/
+void UITC_DeleteColumn(t_UITextDisplayCtrl *ctrl,t_UITextDisplayColumn *Handle)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
+
+    if(Column==TextDisplay->ui->PrimaryTextArea)
+        return;
+
+    Column->ui->TextDisplayBox->SetEventHandler(NULL,0);
+    delete Column;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_GetColumnIndex
+ *
+ * SYNOPSIS:
+ *    int UITC_GetColumnIndex(t_UITextDisplayCtrl *ctrl,
+ *              t_UITextDisplayColumn *Handle);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- What control the has this column in it
+ *    Handle [I] -- The handle to the column to work on
+ *
+ * FUNCTION:
+ *    This function gets the index of this column.  The index is the array
+ *    position of the column.  For example if you have 3 column in this
+ *    order A,B,C.  then A will have index 0, B=1, C=2.  If you reorder the
+ *    columns to C,B,A then the indexes change to C=0,B=1,A=2.
+ *
+ * RETURNS:
+ *    The index of this column.
+ *
+ * NOTES:
+ *    When a new column is added then the indexs of all the column after
+ *    the new column will change.
+ *
+ * SEE ALSO:
+ *    UITC_AddColumn(), UITC_SetColumnIndex()
+ ******************************************************************************/
+int UITC_GetColumnIndex(t_UITextDisplayCtrl *ctrl,t_UITextDisplayColumn *Handle)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
+
+    return TextDisplay->ui->TextArea_splitter->indexOf(Column);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_SetColumnIndex
+ *
+ * SYNOPSIS:
+ *    void UITC_SetColumnIndex(t_UITextDisplayCtrl *ctrl,
+ *              t_UITextDisplayColumn *Handle,int NewIndex);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- What control the has this column in it
+ *    Handle [I] -- The handle to the column to work on
+ *    NewIndex [I] -- The new index for this column.
+ *
+ * FUNCTION:
+ *    This function sets the index of this column.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    UITC_AddColumn(), UITC_GetColumnIndex()
+ ******************************************************************************/
+void UITC_SetColumnIndex(t_UITextDisplayCtrl *ctrl,
+        t_UITextDisplayColumn *Handle,int NewIndex)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
+
+    TextDisplay->ui->TextArea_splitter->insertWidget(NewIndex,Column);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_GetAllColumnsWidths
+ *
+ * SYNOPSIS:
+ *    int UITC_GetAllColumnsWidths(t_UITextDisplayCtrl *ctrl,
+ *              unsigned int *RetArray,unsigned int MaxRetArrayLen);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- What control the has this column in it
+ *    RetArray [O] -- An array to fill in with the sizes.
+ *    MaxRetArrayLen [I] -- The number of entries that will fit into 'RetArray'
+ *
+ * FUNCTION:
+ *    This function gets all the widths of the columns in a text display
+ *    control.
+ *
+ * RETURNS:
+ *    The number of columns or -1 if 'RetArray' wasn't big enough to fit the
+ *    columns.
+ *
+ * SEE ALSO:
+ *    UITC_AddColumn(), UITC_SetAllColumnsWidths()
+ ******************************************************************************/
+int UITC_GetAllColumnsWidths(t_UITextDisplayCtrl *ctrl,
+        unsigned int *RetArray,unsigned int MaxRetArrayLen)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    QList<int> Sizes;
+    int r;
+
+    Sizes=TextDisplay->ui->TextArea_splitter->sizes();
+    if(Sizes.length()>MaxRetArrayLen)
+    {
+        /* Reject */
+        return -1;
+    }
+
+    for(r=0;r<Sizes.length();r++)
+        RetArray[r]=Sizes[r];
+
+    return Sizes.length();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_SetAllColumnsWidths
+ *
+ * SYNOPSIS:
+ *    void UITC_SetAllColumnsWidths(t_UITextDisplayCtrl *ctrl,
+ *              unsigned int *SizeArray,unsigned int SizeArrayLen);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- What control the has this column in it
+ *    SizeArray [I] -- An array with the new sizes in it.
+ *    SizeArrayLen [I] -- The number of entries in 'SizeArray'.  This must
+ *                        have the same number of columns connected to 'ctrl'
+ *                        or less.
+ *
+ * FUNCTION:
+ *    This function sets the widths of all the columns on a 'ctrl'.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    UITC_AddColumn(), UITC_GetAllColumnsWidths()
+ ******************************************************************************/
+void UITC_SetAllColumnsWidths(t_UITextDisplayCtrl *ctrl,unsigned int *SizeArray,
+        unsigned int SizeArrayLen)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    QList<int> Sizes;
+    unsigned int r;
+
+    Sizes=TextDisplay->ui->TextArea_splitter->sizes();
+    if(Sizes.length()<SizeArrayLen)
+    {
+        /* Reject */
+        return;
+    }
+
+    for(r=0;r<SizeArrayLen;r++)
+        Sizes[r]=SizeArray[r];
+    TextDisplay->ui->TextArea_splitter->setSizes(Sizes);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_SetColumnWidth
+ *
+ * SYNOPSIS:
+ *    void UITC_SetColumnWidth(t_UITextDisplayCtrl *ctrl,
+ *              t_UITextDisplayColumn *Handle,unsigned int NewWidth);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- What control the has this column in it
+ *    Handle [I] -- The handle to the column to work on
+ *    NewWidth [I] -- The new width of the column.
+ *
+ * FUNCTION:
+ *    This function sets the width of a column.  The other columns will have
+ *    their widths changed as well.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    UITC_AddColumn()
+ ******************************************************************************/
+void UITC_SetColumnWidth(t_UITextDisplayCtrl *ctrl,
+        t_UITextDisplayColumn *Handle,unsigned int NewWidth)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
+    QList<int> Sizes;
+    int Index;
+    int Delta;
+    int Needed;
+    int NewSize;
+    int r;
+
+    Index=TextDisplay->ui->TextArea_splitter->indexOf(Column);
+    if(Index<0)
+        return;
+
+    Sizes=TextDisplay->ui->TextArea_splitter->sizes();
+
+    /* See if we are shrinking the current column or expanding it */
+    if(Sizes[Index]>(int)NewWidth)
+    {
+        /* We are shrinking it, so we just add the extra to the next one */
+        Delta=Sizes[Index]-NewWidth;
+        Sizes[Index]=NewWidth;
+        if(Index+1<Sizes.length())
+            Sizes[Index+1]+=Delta;
+    }
+    else
+    {
+        /* We are growing it, so we need to take from the next column */
+        Needed=NewWidth-Sizes[Index];
+        Sizes[Index]=NewWidth;
+        for(r=Index+1;r<Sizes.length() && Needed>0;r++)
+        {
+            NewSize=Sizes[r]-Needed;
+
+            /* Don't let it get smaller than 50 (why 50? just a number that
+               didn't seem to small) */
+            if(NewSize<50)
+                NewSize=50;
+
+            Needed-=Sizes[r]-NewSize;
+
+            Sizes[r]=NewSize;
+        }
+        /* If Needed is still >0 then we didn't have enough space, in this
+           case we are just going to hope for the best */
+    }
+
+    TextDisplay->ui->TextArea_splitter->setSizes(Sizes);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_SetColumnHeaderVisible
+ *
+ * SYNOPSIS:
+ *    void UITC_SetColumnHeaderVisible(t_UITextDisplayColumn *Handle,
+ *              bool Visible);
+ *
+ * PARAMETERS:
+ *    Handle [I] -- The handle to the column to work on
+ *    Visible [I] -- true = show header, false = hide header
+ *
+ * FUNCTION:
+ *    This function changes if the header if visible or not.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    UITC_AddColumn()
+ ******************************************************************************/
+void UITC_SetColumnHeaderVisible(t_UITextDisplayColumn *Handle,bool Visible)
+{
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
+
+    Column->HeaderVisible(Visible);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_SetColumnHeaderLabel
+ *
+ * SYNOPSIS:
+ *    void UITC_SetColumnHeaderLabel(t_UITextDisplayColumn *Handle,
+ *              const char *Text);
+ *
+ * PARAMETERS:
+ *    Handle [I] -- The handle to the column to work on
+ *    Text [I] -- The new text for the label.
+ *
+ * FUNCTION:
+ *    This function changes a columns header label.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    UITC_AddColumn()
+ ******************************************************************************/
+void UITC_SetColumnHeaderLabel(t_UITextDisplayColumn *Handle,const char *Text)
+{
+    Frame_MainTextCanvas *Column=(Frame_MainTextCanvas *)Handle;
+
+    Column->ui->HeaderLabel->setText(Text);
+}

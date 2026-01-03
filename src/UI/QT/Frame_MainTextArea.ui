@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>738</width>
-    <height>547</height>
+    <width>983</width>
+    <height>649</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -49,7 +49,7 @@
       </property>
       <item>
        <widget class="QWidget" name="TextContainerWidget" native="true">
-        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <layout class="QHBoxLayout" name="horizontalLayout">
          <property name="spacing">
           <number>0</number>
          </property>
@@ -67,7 +67,7 @@
          </property>
          <item>
           <widget class="QWidget" name="widget" native="true">
-           <layout class="QHBoxLayout" name="horizontalLayout">
+           <layout class="QVBoxLayout" name="verticalLayout_5">
             <property name="spacing">
              <number>0</number>
             </property>
@@ -84,26 +84,29 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="Widget_TextCanvas" name="TextDisplayBox" native="true">
-              <property name="focusPolicy">
-               <enum>Qt::StrongFocus</enum>
+             <widget class="QSplitter" name="TextArea_splitter">
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
               </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QScrollBar" name="TextverticalScrollBar">
               <property name="orientation">
-               <enum>Qt::Vertical</enum>
+               <enum>Qt::Horizontal</enum>
               </property>
+              <property name="handleWidth">
+               <number>0</number>
+              </property>
+              <property name="childrenCollapsible">
+               <bool>false</bool>
+              </property>
+              <widget class="Frame_MainTextCanvas" name="PrimaryTextArea" native="true"/>
              </widget>
             </item>
            </layout>
           </widget>
          </item>
          <item>
-          <widget class="QScrollBar" name="TexthorizontalScrollBar">
+          <widget class="QScrollBar" name="TextverticalScrollBar">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Vertical</enum>
            </property>
           </widget>
          </item>
@@ -659,9 +662,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>Widget_TextCanvas</class>
+   <class>Frame_MainTextCanvas</class>
    <extends>QWidget</extends>
-   <header>Widget_TextCanvas.h</header>
+   <header>Frame_MainTextCanvas.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

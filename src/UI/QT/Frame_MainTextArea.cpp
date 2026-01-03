@@ -86,19 +86,19 @@ void Frame_MainTextArea::on_TextverticalScrollBar_valueChanged(int value)
     EventHandler(&NewEvent);
 }
 
-void Frame_MainTextArea::on_TexthorizontalScrollBar_valueChanged(int value)
-{
-    struct TextDisplayEvent NewEvent;
-
-    if(EventHandler==nullptr)
-        return;
-
-    NewEvent.EventType=e_TextDisplayEvent_DisplayFrameScrollX;
-    NewEvent.ID=ID;
-    NewEvent.Info.Scroll.Amount=value;
-
-    EventHandler(&NewEvent);
-}
+//void Frame_MainTextArea::on_TexthorizontalScrollBar_valueChanged(int value)
+//{
+//    struct TextDisplayEvent NewEvent;
+//
+//    if(EventHandler==nullptr)
+//        return;
+//
+//    NewEvent.EventType=e_TextDisplayEvent_DisplayFrameScrollX;
+//    NewEvent.ID=ID;
+//    NewEvent.Info.Scroll.Amount=value;
+//
+//    EventHandler(&NewEvent);
+//}
 
 void Frame_MainTextArea::SendContextMenuEvent(e_UITD_ContextMenuType EventMenu)
 {

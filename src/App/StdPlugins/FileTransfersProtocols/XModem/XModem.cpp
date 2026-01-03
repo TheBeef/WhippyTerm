@@ -45,8 +45,8 @@
 #define XMODEM_STANDARD_PACKET_SIZE         128
 #define XMODEM_LARGE_PACKET_SIZE            1024
 #define MAX_START_WAIT_TIME                 90 // You have 90 seconds for the rx to startup
-#define XMODEM_MAX_NAKS                     10
-#define MAX_PACKET_WAIT_TIME                90  // How long do we wait with no after the last packet before we abort
+#define XMODEM_MAX_NAKS                     5   // Number of nak's that will abort the tran
+#define MAX_PACKET_WAIT_TIME                30  // How long do we wait with no after the last packet before we abort
 
 #define XMODEM_DOWNLOAD_START_TIMEOUT       10  // 10 seconds between start chars
 #define XMODEM_DOWNLOAD_START_TRYS_BEFORE_FALLBACK          5   // How many times do we try starting the download before we switch from CRC to Checksum

@@ -355,7 +355,10 @@ bool DisplayText::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
             WindowXOffsetPx=Event->Info.Scroll.Amount;
 
             if(TextDisplayCtrl!=NULL)
-                UITC_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
+            {
+                UITC_SetXOffset(UITC_GetTextDisplayPrimaryColumn(
+                        TextDisplayCtrl),WindowXOffsetPx);
+            }
 
             RedrawFullScreen();
         break;
@@ -509,6 +512,8 @@ break;
                 default:
                 break;
             }
+        break;
+        case e_TextDisplayEvent_HeadersRearranged:
         break;
         case e_TextDisplayEvent_ComboxChange:
         case e_TextDisplayEventMAX:
@@ -907,17 +912,20 @@ void DisplayText::SetBlockDeviceMode(bool On)
  ******************************************************************************/
 void DisplayText::SetupCanvas(void)
 {
-    UITC_SetFont(TextDisplayCtrl,FontName.c_str(),FontSize,FontBold,FontItalic);
+//    UITC_SetFont(TextDisplayCtrl,FontName.c_str(),FontSize,FontBold,FontItalic);
+    UITC_SetFont(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),FontName.c_str(),FontSize,FontBold,FontItalic);
 
     UITC_SetCursorColor(TextDisplayCtrl,Settings->CursorColor);
 
-    UITC_SetTextAreaBackgroundColor(TextDisplayCtrl,Settings->
-            DefaultColors[e_DefaultColors_BG]);
-    UITC_SetTextDefaultColor(TextDisplayCtrl,Settings->
-            DefaultColors[e_DefaultColors_FG]);
+    UITC_SetTextAreaBackgroundColor(UITC_GetTextDisplayPrimaryColumn(
+            TextDisplayCtrl),Settings->DefaultColors[e_DefaultColors_BG]);
+    UITC_SetTextDefaultColor(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+            Settings->DefaultColors[e_DefaultColors_FG]);
 
-    CharWidthPx=UITC_GetCharPxWidth(TextDisplayCtrl);
-    CharHeightPx=UITC_GetCharPxHeight(TextDisplayCtrl);
+    CharWidthPx=UITC_GetCharPxWidth(UITC_GetTextDisplayPrimaryColumn(
+            TextDisplayCtrl));
+    CharHeightPx=UITC_GetCharPxHeight(UITC_GetTextDisplayPrimaryColumn(
+            TextDisplayCtrl));
     if(CharWidthPx<1)
         CharWidthPx=1;
     if(CharHeightPx<1)
@@ -1104,8 +1112,9 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
     }
 
     /* Redraw the line */
-    UITC_Begin(TextDisplayCtrl,ScreenLine);
-    UITC_ClearLine(TextDisplayCtrl,Line->LineBackgroundColor);
+    UITC_Begin(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),ScreenLine);
+    UITC_ClearLine(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+            Line->LineBackgroundColor);
 
     LineLenPx=0;
     for(CurFrag=Line->Frags.begin(),FragIndex=0;CurFrag!=Line->Frags.end();
@@ -1175,7 +1184,8 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
             }
             TmpStr.erase(StartOfStr,TmpStr.end());
             DisplayFrag.Text=TmpStr.c_str();
-            UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
+            UITC_AddFragment(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                    &DisplayFrag);
 
             /* Place things so the end of the string is in this fragment */
             DisplayFrag.Text=TmpStr2.c_str();
@@ -1232,7 +1242,8 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
             DisplayFrag.Styling.FGColor=Settings->SelectionColors[e_Color_FG];
             DisplayFrag.Styling.BGColor=Settings->SelectionColors[e_Color_BG];
             DisplayFrag.Styling.Attribs=TXT_ATTRIB_FORCE;
-            UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
+            UITC_AddFragment(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                    &DisplayFrag);
 
             /* Restore the color */
             DisplayFrag.Styling.FGColor=SavedFGColor;
@@ -1251,7 +1262,8 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
             DisplayFrag.Styling.Attribs=TXT_ATTRIB_FORCE;
         }
 
-        UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
+        UITC_AddFragment(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                &DisplayFrag);
 
         LineLenPx+=CurFrag->WidthPx;
     }
@@ -1282,8 +1294,12 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
             }
             if(DisplayFrag.FragType!=e_TextCanvasFragMAX)
             {
-                UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
-                LineLenPx+=UITC_GetFragWidth(TextDisplayCtrl,&DisplayFrag);
+                UITC_AddFragment(
+                        UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                        &DisplayFrag);
+                LineLenPx+=UITC_GetFragWidth(
+                        UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                        &DisplayFrag);
             }
         }
 
@@ -1327,8 +1343,12 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
 
             if(DisplayFrag.FragType!=e_TextCanvasFragMAX)
             {
-                UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
-                LineLenPx+=UITC_GetFragWidth(TextDisplayCtrl,&DisplayFrag);
+                UITC_AddFragment(
+                        UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                        &DisplayFrag);
+                LineLenPx+=UITC_GetFragWidth(
+                        UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                        &DisplayFrag);
             }
 
             DisplayFrag.FragType=e_TextCanvasFragMAX;
@@ -1352,14 +1372,18 @@ int DisplayText::DrawLine(int LineY,int ScreenLine,struct TextLine *Line)
 
             if(DisplayFrag.FragType!=e_TextCanvasFragMAX)
             {
-                UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
-                LineLenPx+=UITC_GetFragWidth(TextDisplayCtrl,&DisplayFrag);
+                UITC_AddFragment(
+                        UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                        &DisplayFrag);
+                LineLenPx+=UITC_GetFragWidth(
+                        UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                        &DisplayFrag);
             }
         }
 
     }
 
-    UITC_End(TextDisplayCtrl);
+    UITC_End(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
 
     return LineLenPx;
 }
@@ -1406,7 +1430,7 @@ void DisplayText::RedrawFullScreen(void)
         }
     }
 
-    UITC_SetMaxLines(TextDisplayCtrl,y,
+    UITC_SetMaxLines(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),y,
             Settings->DefaultColors[e_DefaultColors_BG]);
 
     if(LineLenChanged)
@@ -1800,9 +1824,15 @@ void DisplayText::ApplySettings(void)
     SetupCanvas();
 
     if(g_Settings.MouseCursorIBeam)
-        UITC_SetMouseCursor(TextDisplayCtrl,e_UIMouse_Cursor_IBeam);
+    {
+        UITC_SetMouseCursor(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                e_UIMouse_Cursor_IBeam);
+    }
     else
-        UITC_SetMouseCursor(TextDisplayCtrl,e_UIMouse_Cursor_Default);
+    {
+        UITC_SetMouseCursor(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                e_UIMouse_Cursor_Default);
+    }
 
     RedrawFullScreen();
 }
@@ -2620,7 +2650,9 @@ void DisplayText::AdjustCursorAfterWriteChar(uint8_t *Chr)
                 DisplayFrag.Data=NULL;
             }
 
-            CursorXPx+=UITC_GetFragWidth(TextDisplayCtrl,&DisplayFrag);
+            CursorXPx+=UITC_GetFragWidth(
+                    UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                    &DisplayFrag);
         }
     }
 
@@ -2668,7 +2700,8 @@ void DisplayText::RethinkFragWidth(i_TextLineFrags Frag)
     DisplayFrag.Value=Frag->Value;
     DisplayFrag.Data=Frag->Data;
 
-    Frag->WidthPx=UITC_GetFragWidth(TextDisplayCtrl,&DisplayFrag);
+    Frag->WidthPx=UITC_GetFragWidth(
+            UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),&DisplayFrag);
 }
 
 /*******************************************************************************
@@ -2865,7 +2898,8 @@ void DisplayText::RethinkTextAreaSize(void)
     if(TextDisplayCtrl==NULL)
         return;
 
-    TextAreaWidthPx=UITC_GetWidgetWidth(TextDisplayCtrl);
+    TextAreaWidthPx=UITC_GetWidgetWidth(UITC_GetTextDisplayPrimaryColumn(
+            TextDisplayCtrl));
     TextAreaHeightPx=UITC_GetWidgetHeight(TextDisplayCtrl);
 }
 
@@ -3017,7 +3051,8 @@ void DisplayText::RethinkWindowSize(void)
                 TopEdge=0;
         }
 
-        UITC_SetClippingWindow(TextDisplayCtrl,LeftEdge,TopEdge,Width,Height);
+        UITC_SetClippingWindow(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                LeftEdge,TopEdge,Width,Height);
     }
 
     /* We need to invalidate any markers that are off the top of the screen */
@@ -3060,7 +3095,8 @@ void DisplayText::RethinkScrollBars(void)
         return;
 
     /* Hozr */
-    HorzScroll=UITC_GetHorzSlider(TextDisplayCtrl);
+    HorzScroll=UITC_GetHorzSlider(UITC_GetTextDisplayPrimaryColumn(
+            TextDisplayCtrl));
     ScreenWidthPx=ScreenWidthChars*CharWidthPx;
 
     MaxLength=LongestLinePx;
@@ -3447,7 +3483,8 @@ int DisplayText::GetLineEndSize(struct TextLine *Line)
     DisplayFrag.Value=0;
     DisplayFrag.Data=NULL;
 
-    return UITC_GetFragWidth(TextDisplayCtrl,&DisplayFrag);
+    return UITC_GetFragWidth(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+            &DisplayFrag);
 }
 
 /*******************************************************************************
@@ -3934,7 +3971,9 @@ bool DisplayText::ConvertScreenXY2Chars(int x,int y,int *CharX,int *CharY)
 
                 TmpStr.assign(StartPos,EndPos);
                 DisplayFrag.Text=TmpStr.c_str();
-                FragWidthPx=UITC_GetFragWidth(TextDisplayCtrl,&DisplayFrag);
+                FragWidthPx=UITC_GetFragWidth(
+                        UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                        &DisplayFrag);
 
                 if(UseX<StartPx+FragWidthPx)
                     break;
@@ -4215,7 +4254,8 @@ void DisplayText::ScrollScreen(int dxpx,int dy)
     if(TextDisplayCtrl==NULL)
         return;
 
-    HorzScroll=UITC_GetHorzSlider(TextDisplayCtrl);
+    HorzScroll=UITC_GetHorzSlider(UITC_GetTextDisplayPrimaryColumn(
+            TextDisplayCtrl));
     VertScroll=UITC_GetVertSlider(TextDisplayCtrl);
 
     /* Hozr */
@@ -4351,7 +4391,8 @@ void DisplayText::ScrollScreen2MakeCursorVisible(void)
     }
 
     /* Deal with X */
-    HorzScroll=UITC_GetHorzSlider(TextDisplayCtrl);
+    HorzScroll=UITC_GetHorzSlider(UITC_GetTextDisplayPrimaryColumn(
+            TextDisplayCtrl));
 
     if(CursorXPx<WindowXOffsetPx)
     {
@@ -4447,7 +4488,9 @@ int DisplayText::CalcCursorXPx(void)
                 /* Ok, add in the first part of this fragment */
                 TmpStr.assign(StartPos,EndPos);
                 DisplayFrag.Text=TmpStr.c_str();
-                Pixels+=UITC_GetFragWidth(TextDisplayCtrl,&DisplayFrag);
+                Pixels+=UITC_GetFragWidth(
+                        UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                        &DisplayFrag);
                 break;
             }
 
@@ -4537,7 +4580,9 @@ int DisplayText::CharUnderCursorWidthPx(void)
                 /* Ok, we found the char */
                 TmpStr.assign(StartPos,EndPos);
                 DisplayFrag.Text=TmpStr.c_str();
-                WidthPx=UITC_GetFragWidth(TextDisplayCtrl,&DisplayFrag);
+                WidthPx=UITC_GetFragWidth(
+                        UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                        &DisplayFrag);
                 break;
             }
 
@@ -4586,7 +4631,7 @@ void DisplayText::SetOverrideMessage(const char *Msg)
         UITC_SetOverrideMsg(TextDisplayCtrl,Msg,true);
 
     if(TextDisplayCtrl!=NULL)
-        UITC_RedrawScreen(TextDisplayCtrl);
+        UITC_RedrawScreen(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
 }
 
 /*******************************************************************************
@@ -4730,7 +4775,10 @@ void DisplayText::ClearScreen(e_ScreenClearType Type)
         RethinkScrollBars();
 
         if(TextDisplayCtrl!=NULL)
-            UITC_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
+        {
+            UITC_SetXOffset(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                    WindowXOffsetPx);
+        }
 
         /* Now we have to move the cursor to the top/left */
         /* Reset the max cursor */
@@ -5069,7 +5117,7 @@ void DisplayText::SetDrawMask(uint16_t Mask)
     if(TextDisplayCtrl==NULL)
         return;
 
-    UITC_SetDrawMask(TextDisplayCtrl,Mask);
+    UITC_SetDrawMask(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),Mask);
 }
 
 /*******************************************************************************
@@ -7983,13 +8031,15 @@ void DisplayText::MoveViewTop(void)
     if(TextDisplayCtrl==NULL)
         return;
 
-    HorzScroll=UITC_GetHorzSlider(TextDisplayCtrl);
+    HorzScroll=UITC_GetHorzSlider(UITC_GetTextDisplayPrimaryColumn(
+            TextDisplayCtrl));
 
     WindowXOffsetPx=0;
     TopLine=Lines.begin();
     TopLineY=0;
 
-    UITC_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
+    UITC_SetXOffset(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+            WindowXOffsetPx);
     UISetScrollBarPos(HorzScroll,WindowXOffsetPx);
     UITC_SetCursorPos(TextDisplayCtrl,CursorX,CalcCorrectedCursorPos());
     RethinkCursorHidden();
@@ -8022,7 +8072,8 @@ void DisplayText::MoveViewBottom(void)
     if(TextDisplayCtrl==NULL)
         return;
 
-    HorzScroll=UITC_GetHorzSlider(TextDisplayCtrl);
+    HorzScroll=UITC_GetHorzSlider(UITC_GetTextDisplayPrimaryColumn(
+            TextDisplayCtrl));
 
     /* Scroll the window to be at the bottom */
     WindowXOffsetPx=0;
@@ -8032,7 +8083,8 @@ void DisplayText::MoveViewBottom(void)
     else
         TopLineY=0;
 
-    UITC_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
+    UITC_SetXOffset(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+            WindowXOffsetPx);
     UISetScrollBarPos(HorzScroll,WindowXOffsetPx);
     UITC_SetCursorPos(TextDisplayCtrl,CursorX,CalcCorrectedCursorPos());
     RethinkCursorHidden();

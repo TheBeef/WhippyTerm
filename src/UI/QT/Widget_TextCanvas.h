@@ -79,6 +79,7 @@ struct WTCEvent
     e_WTCEventType EventType;
     uintptr_t UserData;
     union WTCEventData *Info;
+    class Widget_TextCanvas *Source;
 };
 
 struct WTCFrag

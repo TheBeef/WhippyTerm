@@ -1,6 +1,7 @@
 #ifndef FRAME_MAINTEXTAREA_H
 #define FRAME_MAINTEXTAREA_H
 
+#include "UI/UITextMainArea.h"
 #include <QWidget>
 #include "ui_Frame_MainTextArea.h"
 #include <QHBoxLayout>
@@ -25,14 +26,14 @@ public:
     QMenu *ContextMenu;
     QMenu *ColorBGSubmenu;
 
-    int WorkingLine;
+//    int WorkingLine;
 
 private slots:
     void on_BlockSendSend_pushButton_clicked();
 
     void on_TextverticalScrollBar_valueChanged(int value);
     
-    void on_TexthorizontalScrollBar_valueChanged(int value);
+//    void on_TexthorizontalScrollBar_valueChanged(int value);
     
     void on_actionSend_Buffer_triggered();
     

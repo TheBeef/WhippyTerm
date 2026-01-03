@@ -8,7 +8,7 @@
  *    This file has a helper function to handle setting up a right mouse
  *    context for a widget.  It will take and search the QAction's that
  *    are in a class.  It will search for QAction that start with "Menu_"
- *    followed by the name of the width it goes with.  This is followed
+ *    followed by the name of the widget it goes with.  This is followed
  *    by a "_x" and a number.  This number is the order in which it will
  *    show up in the menu.  This is followed by a "_" and then the name of
  *    the action.
@@ -102,7 +102,7 @@ bool ContextMenuSortCmp(QAction * &a,QAction * &b)
  *      NAME -- The name of the action.
  *
  *    The 'Target' will be set to custom context menu and the menu will be
- *    connected to this width.  Your class ('Widgets') must have a slot with
+ *    connected to this widget.  Your class ('Widgets') must have a slot with
  *    this in it:
  *      void YOURCLASS::ContextMenu(const QPoint &pos)
  *      {

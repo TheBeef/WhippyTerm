@@ -92,12 +92,14 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/UI/QT/Frame_ColorPickerWidget.cpp \
     ../src/UI/QT/Frame_CustomTextWidget.cpp \
     ../src/UI/QT/Frame_CustomTextWidgetAccess.cpp \
+    ../src/UI/QT/Frame_MainTextCanvas.cpp \
     ../src/UI/QT/Frame_StylePickerWidget.cpp \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.cpp \
     ../src/UI/QT/QTKeyHandleScrollLock.cpp \
     ../src/UI/QT/QTSound.cpp \
     ../src/UI/QT/VerPanelHandle.cpp \
     ../src/UI/QT/HozPanelHandle.cpp \
+    ../src/UI/QT/Widget_HeaderQLabel.cpp \
     ../src/UI/QT/Widget_MovableTabWidget.cpp \
     ../src/App/MainApp.cpp \
     ../src/UI/QT/Form_MainWindowAccess.cpp \
@@ -307,10 +309,12 @@ HEADERS  += ../src/UI/QT/Form_MainWindow.h \
     ../src/UI/QT/Form_StylePickerDialog.h \
     ../src/UI/QT/Frame_ColorPickerWidget.h \
     ../src/UI/QT/Frame_CustomTextWidget.h \
+    ../src/UI/QT/Frame_MainTextCanvas.h \
     ../src/UI/QT/Frame_StylePickerWidget.h \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.h \
     ../src/UI/QT/VerPanelHandle.h \
     ../src/UI/QT/HozPanelHandle.h \
+    ../src/UI/QT/Widget_HeaderQLabel.h \
     ../src/UI/QT/Widget_MovableTabWidget.h \
     ../src/UI/QT/main.h \
     ../src/UI/QT/Widget_CloseBttn.h \
@@ -376,6 +380,7 @@ FORMS    += ../src/UI/QT/Form_MainWindow.ui \
     ../src/UI/QT/Form_BridgeConnection.ui \
     ../src/UI/QT/Form_ESB_InsertProp.ui \
     ../src/UI/QT/Form_PasteData.ui \
+    ../src/UI/QT/Frame_MainTextCanvas.ui \
     ../src/UI/QT/Frame_StylePickerWidget.ui \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.ui
 

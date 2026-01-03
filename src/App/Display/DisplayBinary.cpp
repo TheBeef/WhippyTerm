@@ -552,8 +552,8 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
             if(TextDisplayCtrl==NULL)
                 break;
             WindowXOffsetPx=Event->Info.Scroll.Amount*CharWidthPx;
-            UITC_SetXOffset(TextDisplayCtrl,WindowXOffsetPx);
-            UITC_RedrawScreen(TextDisplayCtrl);
+            UITC_SetXOffset(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),WindowXOffsetPx);
+            UITC_RedrawScreen(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
         break;
         case e_TextDisplayEvent_DisplayFrameScrollY:
             TopLine=TopOfBufferLine+Event->Info.Scroll.Amount*HEX_BYTES_PER_LINE;
@@ -681,6 +681,7 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
                 break;
             }
         break;
+        case e_TextDisplayEvent_HeadersRearranged:
         case e_TextDisplayEvent_ComboxChange:
         case e_TextDisplayEventMAX:
         default:
@@ -717,9 +718,9 @@ void DisplayBinary::ScreenResize(void)
     if(TextDisplayCtrl==NULL)
         return;
 
-    HozScroll=UITC_GetHorzSlider(TextDisplayCtrl);
+    HozScroll=UITC_GetHorzSlider(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
 
-    ScreenWidthPx=UITC_GetWidgetWidth(TextDisplayCtrl);
+    ScreenWidthPx=UITC_GetWidgetWidth(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
     ScreenHeightPx=UITC_GetWidgetHeight(TextDisplayCtrl);
 
     if(Settings->TermSizeFixedHeight)
@@ -840,8 +841,8 @@ void DisplayBinary::RethinkWindowSize(void)
             TopEdge=0;
     }
 
-    UITC_SetClippingWindow(TextDisplayCtrl,LeftEdge,TopEdge,Width,Height);
-    UITC_SetMaxLines(TextDisplayCtrl,DisplayLines,
+    UITC_SetClippingWindow(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),LeftEdge,TopEdge,Width,Height);
+    UITC_SetMaxLines(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),DisplayLines,
             Settings->DefaultColors[e_DefaultColors_BG]);
 }
 
@@ -867,17 +868,17 @@ void DisplayBinary::RethinkWindowSize(void)
  ******************************************************************************/
 void DisplayBinary::SetupCanvas(void)
 {
-    UITC_SetFont(TextDisplayCtrl,FontName.c_str(),FontSize,FontBold,FontItalic);
+    UITC_SetFont(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),FontName.c_str(),FontSize,FontBold,FontItalic);
 
     UITC_SetCursorColor(TextDisplayCtrl,Settings->CursorColor);
 
-    UITC_SetTextAreaBackgroundColor(TextDisplayCtrl,Settings->
+    UITC_SetTextAreaBackgroundColor(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),Settings->
             DefaultColors[e_DefaultColors_BG]);
-    UITC_SetTextDefaultColor(TextDisplayCtrl,Settings->
+    UITC_SetTextDefaultColor(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),Settings->
             DefaultColors[e_DefaultColors_FG]);
 
-    CharWidthPx=UITC_GetCharPxWidth(TextDisplayCtrl);
-    CharHeightPx=UITC_GetCharPxHeight(TextDisplayCtrl);
+    CharWidthPx=UITC_GetCharPxWidth(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
+    CharHeightPx=UITC_GetCharPxHeight(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
     if(CharWidthPx<1)
         CharWidthPx=1;
     if(CharHeightPx<1)
@@ -1216,8 +1217,8 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
     DisplayFrag.Value=0;
     DisplayFrag.Data=0;
 
-    UITC_Begin(TextDisplayCtrl,ScreenLine);
-    UITC_ClearLine(TextDisplayCtrl,Settings->DefaultColors[e_DefaultColors_BG]);
+    UITC_Begin(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),ScreenLine);
+    UITC_ClearLine(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),Settings->DefaultColors[e_DefaultColors_BG]);
 
     /* Add the different fragments based on styling */
     StartOfStr=0;
@@ -1231,7 +1232,7 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
             LineBuff[r]=0;  // Make it a smaller string
             DisplayFrag.Text=&LineBuff[StartOfStr];
             DisplayFrag.Styling=ColorBuff[StartOfStr];
-            UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
+            UITC_AddFragment(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),&DisplayFrag);
 
             LineBuff[r]=c;  // Restore the string
 
@@ -1242,9 +1243,9 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
     /* Add the last fragment */
     DisplayFrag.Text=&LineBuff[StartOfStr];
     DisplayFrag.Styling=ColorBuff[StartOfStr];
-    UITC_AddFragment(TextDisplayCtrl,&DisplayFrag);
+    UITC_AddFragment(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),&DisplayFrag);
 
-    UITC_End(TextDisplayCtrl);
+    UITC_End(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
 }
 
 /*******************************************************************************
@@ -1333,11 +1334,11 @@ void DisplayBinary::ClearScreen(e_ScreenClearType Type)
 
     InvalidateAllMarks();
 
-    UITC_ClearAllLines(TextDisplayCtrl);
+    UITC_ClearAllLines(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
     RethinkYScrollBar();
     RethinkCursor();
     RedrawScreen();
-    UITC_RedrawScreen(TextDisplayCtrl);
+    UITC_RedrawScreen(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
 }
 
 /*******************************************************************************
@@ -1548,7 +1549,7 @@ void DisplayBinary::SetDrawMask(uint16_t Mask)
     if(TextDisplayCtrl==NULL)
         return;
 
-    UITC_SetDrawMask(TextDisplayCtrl,Mask);
+    UITC_SetDrawMask(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),Mask);
 }
 
 /*******************************************************************************
@@ -1728,7 +1729,7 @@ void DisplayBinary::HandleMouseMove(int x,int y)
         AutoSelectionScrolldx=0;
         if(x<0)
             AutoSelectionScrolldx=-1;
-        else if(x>UITC_GetWidgetWidth(TextDisplayCtrl))
+        else if(x>UITC_GetWidgetWidth(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl)))
             AutoSelectionScrolldx=1;
 
         AutoSelectionScrolldy=0;
@@ -1961,7 +1962,7 @@ void DisplayBinary::ScrollScreen(int dxpx,int dy)
     if(TextDisplayCtrl==NULL)
         return;
 
-    HorzScroll=UITC_GetHorzSlider(TextDisplayCtrl);
+    HorzScroll=UITC_GetHorzSlider(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
     VertScroll=UITC_GetVertSlider(TextDisplayCtrl);
 
     /* Hozr */
@@ -2407,9 +2408,9 @@ void DisplayBinary::ApplySettings(void)
         return;
 
     if(g_Settings.MouseCursorIBeam)
-        UITC_SetMouseCursor(TextDisplayCtrl,e_UIMouse_Cursor_IBeam);
+        UITC_SetMouseCursor(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),e_UIMouse_Cursor_IBeam);
     else
-        UITC_SetMouseCursor(TextDisplayCtrl,e_UIMouse_Cursor_Default);
+        UITC_SetMouseCursor(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),e_UIMouse_Cursor_Default);
 }
 
 /*******************************************************************************

@@ -54,6 +54,10 @@ static struct ReleaseNote m_Notes_NEXT[]=
             "Plugins can now change the label of a widget after it's"
             " been added to the display."},
     {
+        NOTETYPE_ENHANCEMENT,"Added support code for columns",
+            "Support code was added to make it easier to add columns to"
+            " the text display."},
+    {
         NOTETYPE_ENHANCEMENT,"Added change property widget control",
             "Plugins can now change the properties of widgets with the"
             " new change property functions.  Currently only the"

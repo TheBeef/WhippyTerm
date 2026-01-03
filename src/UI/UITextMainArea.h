@@ -53,6 +53,9 @@
 struct UITextDisplay {int x;};
 typedef struct UITextDisplay t_UITextDisplayCtrl;
 
+struct UITextDisplayColumn {int x;};
+typedef struct UITextDisplayColumn t_UITextDisplayColumn;
+
 typedef enum
 {
     e_UITD_ContextMenu_SendBuffers,
@@ -86,6 +89,7 @@ typedef enum
     e_UITD_ContextMenu_StyleBGColor_LightMagenta,
     e_UITD_ContextMenu_StyleBGColor_Yellow,
     e_UITD_ContextMenu_StyleBGColor_BrightWhite,
+    e_UITD_ContextMenu_ColumnHeader_Hide,
     e_UITD_ContextMenuMAX
 } e_UITD_ContextMenuType;
 
@@ -151,6 +155,7 @@ typedef enum
     e_TextDisplayEvent_RadioButtonPress,
     e_TextDisplayEvent_MouseDoubleClick,
     e_TextDisplayEvent_MouseTripleClick,
+    e_TextDisplayEvent_HeadersRearranged,
     e_TextDisplayEventMAX
 } e_TextDisplayEventType;
 
@@ -224,6 +229,7 @@ struct TextDisplayEvent
     e_TextDisplayEventType EventType;
     uintptr_t ID;
     t_UITextDisplayCtrl *Ctrl;
+    t_UITextDisplayColumn *Column;
     union TextDisplayEventData Info;
 };
 
@@ -255,9 +261,10 @@ void UITC_SetFocus(t_UITextDisplayCtrl *ctrl,e_UITCSetFocusType What);
 void UITC_SetSelectionAvailable(t_UITextDisplayCtrl *ctrl,bool Available);
 
 /* Sub-Widgets */
-t_UIScrollBarCtrl *UITC_GetHorzSlider(t_UITextDisplayCtrl *ctrl);
+t_UIScrollBarCtrl *UITC_GetHorzSlider(t_UITextDisplayColumn *Handle);
 t_UIScrollBarCtrl *UITC_GetVertSlider(t_UITextDisplayCtrl *ctrl);
 t_UIContextMenuCtrl *UITC_GetContextMenuHandle(t_UITextDisplayCtrl *ctrl,e_UITD_ContextMenuType UIObj);
+t_UIContextMenuCtrl *UITC_GetContextMenuHandle(t_UITextDisplayCtrl *ctrl,e_UITD_ContextMenuType UIObj,t_UITextDisplayColumn *Handle);
 t_UIContextSubMenuCtrl *UITC_GetContextSubMenuHandle(t_UITextDisplayCtrl *ctrl,e_UITD_ContextSubMenuType UIObj);
 t_UIFrameContainerCtrl *UITC_GetSendHexDisplayContainerFrameCtrlHandle(t_UITextDisplayCtrl *ctrl);
 t_UIButtonCtrl *UITC_GetButtonHandle(t_UITextDisplayCtrl *ctrl,e_UITC_BttnType Bttn);
@@ -265,38 +272,48 @@ t_UITextInputCtrl *UITC_GetTextInputHandle(t_UITextDisplayCtrl *ctrl,e_UITC_TxtT
 t_UIRadioBttnCtrl *UITC_GetRadioButton(t_UITextDisplayCtrl *ctrl,e_UITC_RadioButtonType bttn);
 t_UIComboBoxCtrl *UITC_GetComboBoxHandle(t_UITextDisplayCtrl *ctrl,e_UITC_ComboxType UIObj);
 t_UIMuliLineTextInputCtrl *UITC_GetMuliLineTextInputHandle(t_UITextDisplayCtrl *ctrl,e_UITC_MuliTxtType Txt);
+t_UITextDisplayColumn *UITC_GetTextDisplayPrimaryColumn(t_UITextDisplayCtrl *ctrl);
 
 /* Info */
-int UITC_GetFragWidth(t_UITextDisplayCtrl *ctrl,const struct TextCanvasFrag *Frag);
-int UITC_GetWidgetWidth(t_UITextDisplayCtrl *ctrl);
+int UITC_GetFragWidth(t_UITextDisplayColumn *Handle,const struct TextCanvasFrag *Frag);
+int UITC_GetWidgetWidth(t_UITextDisplayColumn *Handle);
+int UITC_GetCharPxHeight(t_UITextDisplayColumn *Handle);
+int UITC_GetCharPxWidth(t_UITextDisplayColumn *Handle);
 int UITC_GetWidgetHeight(t_UITextDisplayCtrl *ctrl);
-int UITC_GetCharPxHeight(t_UITextDisplayCtrl *ctrl);
-int UITC_GetCharPxWidth(t_UITextDisplayCtrl *ctrl);
 
 /* Setup */
-void UITC_SetFont(t_UITextDisplayCtrl *ctrl,const char *FontName,int Size,bool Bold,bool Italic);
+void UITC_SetFont(t_UITextDisplayColumn *Handle,const char *FontName,int Size,bool Bold,bool Italic);
 void UITC_SetCursorColor(t_UITextDisplayCtrl *ctrl,uint32_t Color);
 void UITC_SetCursorStyle(t_UITextDisplayCtrl *ctrl,e_TextCursorStyleType Style);
-void UITC_SetClippingWindow(t_UITextDisplayCtrl *ctrl,int LeftEdge,int TopEdge,
-        int Width,int Height);
-void UITC_SetTextAreaBackgroundColor(t_UITextDisplayCtrl *ctrl,uint32_t BgColor);
-void UITC_SetTextDefaultColor(t_UITextDisplayCtrl *ctrl,uint32_t FgColor);
-void UITC_SetBorderBackgroundColor(t_UITextDisplayCtrl *ctrl,uint32_t BgColor,bool Fill);
+void UITC_SetClippingWindow(t_UITextDisplayColumn *Handle,int LeftEdge,int TopEdge,int Width,int Height);
+void UITC_SetTextAreaBackgroundColor(t_UITextDisplayColumn *Handle,uint32_t BgColor);
+void UITC_SetTextDefaultColor(t_UITextDisplayColumn *Handle,uint32_t FgColor);
+void UITC_SetBorderBackgroundColor(t_UITextDisplayColumn *Handle,uint32_t BgColor,bool Fill);
 void UITC_SetOverrideMsg(t_UITextDisplayCtrl *ctrl,const char *Msg,bool OnOff);
 
 /* Rendering */
-void UITC_ClearAllLines(t_UITextDisplayCtrl *ctrl);
-void UITC_Begin(t_UITextDisplayCtrl *ctrl,int Line);
-void UITC_End(t_UITextDisplayCtrl *ctrl);
-void UITC_ClearLine(t_UITextDisplayCtrl *ctrl,uint32_t BGColor);
-void UITC_AddFragment(t_UITextDisplayCtrl *ctrl,const struct TextCanvasFrag *Frag);
-void UITC_SetXOffset(t_UITextDisplayCtrl *ctrl,int XOffsetPx);
-void UITC_SetMaxLines(t_UITextDisplayCtrl *ctrl,int MaxLines,uint32_t BGColor);
-void UITC_RedrawScreen(t_UITextDisplayCtrl *ctrl);
-void UITC_SetDrawMask(t_UITextDisplayCtrl *ctrl,uint16_t Mask);
+void UITC_ClearAllLines(t_UITextDisplayColumn *Handle);
+void UITC_Begin(t_UITextDisplayColumn *Handle,int Line);
+void UITC_End(t_UITextDisplayColumn *Handle);
+void UITC_ClearLine(t_UITextDisplayColumn *Handle,uint32_t BGColor);
+void UITC_AddFragment(t_UITextDisplayColumn *Handle,const struct TextCanvasFrag *Frag);
+void UITC_SetXOffset(t_UITextDisplayColumn *Handle,int XOffsetPx);
+void UITC_SetMaxLines(t_UITextDisplayColumn *Handle,int MaxLines,uint32_t BGColor);
+void UITC_RedrawScreen(t_UITextDisplayColumn *Handle);
+void UITC_SetDrawMask(t_UITextDisplayColumn *Handle,uint16_t Mask);
+
+/* Columns */
+t_UITextDisplayColumn *UITC_AddColumn(t_UITextDisplayCtrl *ctrl,const char *Name,bool Add2Right);
+void UITC_DeleteColumn(t_UITextDisplayCtrl *ctrl,t_UITextDisplayColumn *Handle);
+int UITC_GetColumnIndex(t_UITextDisplayCtrl *ctrl,t_UITextDisplayColumn *Handle);
+void UITC_SetColumnIndex(t_UITextDisplayCtrl *ctrl,t_UITextDisplayColumn *Handle,int NewIndex);
+void UITC_SetAllColumnsWidths(t_UITextDisplayCtrl *ctrl,unsigned int *SizeArray,unsigned int SizeArrayLen);
+int UITC_GetAllColumnsWidths(t_UITextDisplayCtrl *ctrl,unsigned int *RetArray,unsigned int MaxRetArrayLen);
+void UITC_SetColumnWidth(t_UITextDisplayCtrl *ctrl,t_UITextDisplayColumn *Handle,unsigned int NewWidth);
+void UITC_SetColumnHeaderVisible(t_UITextDisplayColumn *Handle,bool Visible);
+void UITC_SetColumnHeaderLabel(t_UITextDisplayColumn *Handle,const char *Text);
 
 void UITC_ShowBellIcon(t_UITextDisplayCtrl *ctrl);
-void UITC_SetMouseCursor(t_UITextDisplayCtrl *ctrl,e_UIMouse_CursorType Cursor);
-
+void UITC_SetMouseCursor(t_UITextDisplayColumn *Handle,e_UIMouse_CursorType Cursor);
 
 #endif

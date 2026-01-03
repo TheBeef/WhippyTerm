@@ -133,6 +133,7 @@ bool Widget_TextCanvas::SendEvent(e_WTCEventType EventType,
     NewEvent.EventType=EventType;
     NewEvent.UserData=WTCEventHandlerUserData;
     NewEvent.Info=Info;
+    NewEvent.Source=this;
 
     if(WTCEventHandler!=NULL)
         return WTCEventHandler(&NewEvent);

@@ -44,7 +44,7 @@
 #define XMODEM_MAX_PACKET_SIZE              (3+1024+2)
 #define XMODEM_STANDARD_PACKET_SIZE         128
 #define XMODEM_LARGE_PACKET_SIZE            1024
-#define MAX_START_WAIT_TIME                 90 // You have 90 seconds for the rx to startup
+#define MAX_START_WAIT_TIME                 90  // You have 90 seconds for the rx to startup
 #define XMODEM_MAX_NAKS                     5   // Number of nak's that will abort the tran
 #define MAX_PACKET_WAIT_TIME                30  // How long do we wait with no after the last packet before we abort
 
@@ -111,6 +111,9 @@ struct XModemUploadData
     bool Waiting4DoneAck;
     int LastPacketTimeout;
     e_XModemDelayedErrorType DelayedError;
+    int MaxStartWaitTime;
+    int MaxNaks;
+    int MaxPacketWaitTime;
 };
 
 typedef enum
@@ -147,6 +150,9 @@ struct XModemDownloadData
     int LastByteTimeout;
     int TimeSinceLastStartChar;
     int LastPacketTimeout;
+    int MaxStartWaitTime;
+    int MaxNaks;
+    int MaxPacketWaitTime;
 };
 
 struct XModem_Widgets
@@ -157,6 +163,9 @@ struct XModem_Widgets
     struct PI_RadioBttn *ModeBttnBasic;
     struct PI_RadioBttn *ModeBttnCRC;
     struct PI_RadioBttn *ModeBttn1K;
+    struct PI_NumberInput *MaxStartWaitTime;
+    struct PI_NumberInput *MaxNAKPackets;
+    struct PI_NumberInput *PacketTimeOut;
 };
 
 /*** FUNCTION PROTOTYPES      ***/
@@ -456,6 +465,10 @@ t_FTPOptionsWidgetsType *XModemUpload_AllocOptionsWidgets(t_WidgetSysHandle *Wid
     try
     {
         Widgets=new struct XModem_Widgets;
+        Widgets->Padding=NULL;
+        Widgets->MaxStartWaitTime=NULL;
+        Widgets->MaxNAKPackets=NULL;
+        Widgets->PacketTimeOut=NULL;
 
         Widgets->WidgetHandle=WidgetHandle;
 
@@ -493,12 +506,37 @@ t_FTPOptionsWidgetsType *XModemUpload_AllocOptionsWidgets(t_WidgetSysHandle *Wid
             m_UIAPI->SetComboBoxSelectedEntry(WidgetHandle,
                     Widgets->Padding->Ctrl,26);   // 26 is the default padding char
         }
+
+        Widgets->MaxNAKPackets=m_UIAPI->AddNumberInput(WidgetHandle,
+                "Max number of failed blocks",NULL,NULL);
+        if(Widgets->MaxNAKPackets==NULL)
+            throw(0);
+        m_UIAPI->SetNumberInputMinMax(WidgetHandle,
+                Widgets->MaxNAKPackets->Ctrl,1,20);
+        m_UIAPI->SetNumberInputValue(WidgetHandle,
+                Widgets->MaxNAKPackets->Ctrl,XMODEM_MAX_NAKS);
+        Value=m_System->KVGetItem(Options,"XMODEM_MAX_NAKS");
+        if(Value!=NULL)
+        {
+            m_UIAPI->SetNumberInputValue(WidgetHandle,
+                    Widgets->MaxNAKPackets->Ctrl,atoi(Value));
+        }
+        else
+        {
+            m_UIAPI->SetNumberInputValue(WidgetHandle,
+                    Widgets->MaxNAKPackets->Ctrl,XMODEM_MAX_NAKS);
+        }
     }
     catch(...)
     {
         if(Widgets!=NULL)
         {
             XModem_FreeCommonWidgets(Widgets);
+
+            if(Widgets->MaxNAKPackets!=NULL)
+            {
+                m_UIAPI->FreeNumberInput(WidgetHandle,Widgets->MaxNAKPackets);
+            }
 
             if(Widgets->Padding!=NULL)
                 m_UIAPI->FreeComboBox(WidgetHandle,Widgets->Padding);
@@ -562,6 +600,46 @@ static bool XModem_AllocCommonWidgets(struct XModem_Widgets *Widgets,
             m_UIAPI->SetRadioBttnChecked(WidgetHandle,Widgets->ModeBttnCRC,
                     true);
         }
+
+        Widgets->MaxStartWaitTime=m_UIAPI->AddNumberInput(WidgetHandle,
+                "Max start wait time (seconds)",NULL,NULL);
+        if(Widgets->MaxStartWaitTime==NULL)
+            throw(0);
+        m_UIAPI->SetNumberInputMinMax(WidgetHandle,
+                Widgets->MaxStartWaitTime->Ctrl,5,120);   // 5s-120s
+        m_UIAPI->SetNumberInputValue(WidgetHandle,
+                Widgets->MaxStartWaitTime->Ctrl,MAX_START_WAIT_TIME);
+        Value=m_System->KVGetItem(Options,"MAX_START_WAIT_TIME");
+        if(Value!=NULL)
+        {
+            m_UIAPI->SetNumberInputValue(WidgetHandle,
+                    Widgets->MaxStartWaitTime->Ctrl,atoi(Value));
+        }
+        else
+        {
+            m_UIAPI->SetNumberInputValue(WidgetHandle,
+                    Widgets->MaxStartWaitTime->Ctrl,MAX_START_WAIT_TIME);
+        }
+
+        Widgets->PacketTimeOut=m_UIAPI->AddNumberInput(WidgetHandle,
+                "Packet time out (seconds)",NULL,NULL);
+        if(Widgets->PacketTimeOut==NULL)
+            throw(0);
+        m_UIAPI->SetNumberInputMinMax(WidgetHandle,
+                Widgets->PacketTimeOut->Ctrl,1,300);
+        m_UIAPI->SetNumberInputValue(WidgetHandle,
+                Widgets->PacketTimeOut->Ctrl,MAX_PACKET_WAIT_TIME);
+        Value=m_System->KVGetItem(Options,"MAX_PACKET_WAIT_TIME");
+        if(Value!=NULL)
+        {
+            m_UIAPI->SetNumberInputValue(WidgetHandle,
+                    Widgets->PacketTimeOut->Ctrl,atoi(Value));
+        }
+        else
+        {
+            m_UIAPI->SetNumberInputValue(WidgetHandle,
+                    Widgets->PacketTimeOut->Ctrl,MAX_PACKET_WAIT_TIME);
+        }
     }
     catch(...)
     {
@@ -571,12 +649,17 @@ static bool XModem_AllocCommonWidgets(struct XModem_Widgets *Widgets,
     return true;
 }
 
-
 void XModemUpload_FreeOptionsWidgets(t_FTPOptionsWidgetsType *FTPOptions)
 {
     struct XModem_Widgets *Widgets=(struct XModem_Widgets *)FTPOptions;
 
     XModem_FreeCommonWidgets(Widgets);
+
+    if(Widgets->MaxNAKPackets!=NULL)
+    {
+        m_UIAPI->FreeNumberInput(Widgets->WidgetHandle,
+                Widgets->MaxNAKPackets);
+    }
 
     if(Widgets->Padding!=NULL)
         m_UIAPI->FreeComboBox(Widgets->WidgetHandle,Widgets->Padding);
@@ -587,6 +670,18 @@ void XModemUpload_FreeOptionsWidgets(t_FTPOptionsWidgetsType *FTPOptions)
 
 static void XModem_FreeCommonWidgets(struct XModem_Widgets *Widgets)
 {
+    if(Widgets->PacketTimeOut!=NULL)
+    {
+        m_UIAPI->FreeNumberInput(Widgets->WidgetHandle,
+                Widgets->PacketTimeOut);
+    }
+
+    if(Widgets->MaxStartWaitTime!=NULL)
+    {
+        m_UIAPI->FreeNumberInput(Widgets->WidgetHandle,
+                Widgets->MaxStartWaitTime);
+    }
+
     if(Widgets->ModeBttn1K!=NULL)
         m_UIAPI->FreeRadioBttn(Widgets->WidgetHandle,Widgets->ModeBttn1K);
     if(Widgets->ModeBttnCRC!=NULL)
@@ -596,6 +691,8 @@ static void XModem_FreeCommonWidgets(struct XModem_Widgets *Widgets)
     if(Widgets->ModeGroup!=NULL)
         m_UIAPI->FreeRadioBttnGroup(Widgets->WidgetHandle,Widgets->ModeGroup);
 
+    Widgets->PacketTimeOut=NULL;
+    Widgets->MaxStartWaitTime=NULL;
     Widgets->ModeBttn1K=NULL;
     Widgets->ModeBttnCRC=NULL;
     Widgets->ModeBttnBasic=NULL;
@@ -608,8 +705,10 @@ void XModemUpload_StoreOptions(t_FTPOptionsWidgetsType *FTPOptions,t_PIKVList *O
     uintptr_t Value;
     char buff[100];
 
-    if(Widgets->Padding==NULL)
+    if(Widgets->Padding==NULL || Widgets->MaxNAKPackets==NULL)
+    {
         return;
+    }
 
     m_System->KVClear(Options);
 
@@ -620,6 +719,12 @@ void XModemUpload_StoreOptions(t_FTPOptionsWidgetsType *FTPOptions,t_PIKVList *O
             Widgets->Padding->Ctrl);
     sprintf(buff,"%" PRIuPTR,Value);
     m_System->KVAddItem(Options,"Padding",buff);
+
+    Value=m_UIAPI->GetNumberInputValue(Widgets->WidgetHandle,
+            Widgets->MaxNAKPackets->Ctrl);
+    sprintf(buff,"%" PRIuPTR,Value);
+    m_System->KVAddItem(Options,"XMODEM_MAX_NAKS",buff);
+
 }
 
 static bool XModem_StoreCommonWidgetsOptions(struct XModem_Widgets *Widgets,t_PIKVList *Options)
@@ -628,7 +733,8 @@ static bool XModem_StoreCommonWidgetsOptions(struct XModem_Widgets *Widgets,t_PI
     char buff[100];
 
     if(Widgets->ModeBttnBasic==NULL || Widgets->ModeBttnCRC==NULL ||
-            Widgets->ModeBttn1K==NULL)
+            Widgets->ModeBttn1K==NULL || Widgets->MaxStartWaitTime==NULL ||
+            Widgets->PacketTimeOut==NULL)
     {
         return false;
     }
@@ -643,6 +749,16 @@ static bool XModem_StoreCommonWidgetsOptions(struct XModem_Widgets *Widgets,t_PI
 
     sprintf(buff,"%" PRIuPTR,Value);
     m_System->KVAddItem(Options,"Mode",buff);
+
+    Value=m_UIAPI->GetNumberInputValue(Widgets->WidgetHandle,
+            Widgets->MaxStartWaitTime->Ctrl);
+    sprintf(buff,"%" PRIuPTR,Value);
+    m_System->KVAddItem(Options,"MAX_START_WAIT_TIME",buff);
+
+    Value=m_UIAPI->GetNumberInputValue(Widgets->WidgetHandle,
+            Widgets->PacketTimeOut->Ctrl);
+    sprintf(buff,"%" PRIuPTR,Value);
+    m_System->KVAddItem(Options,"MAX_PACKET_WAIT_TIME",buff);
 
     return true;
 }
@@ -697,6 +813,9 @@ static PG_BOOL XModemUpload_StartUpload(t_FTPSystemData *SysHandle,
     Data->Waiting4DoneAck=false;
     Data->NAKCount=0;
     Data->DelayedError=e_XModemDelayedError_None;
+    Data->MaxStartWaitTime=MAX_START_WAIT_TIME;
+    Data->MaxNaks=XMODEM_MAX_NAKS;
+    Data->MaxPacketWaitTime=MAX_PACKET_WAIT_TIME;
 
     Mode=e_XModemMode_CRC;
     Value=m_System->KVGetItem(Options,"Mode");
@@ -710,6 +829,18 @@ static PG_BOOL XModemUpload_StartUpload(t_FTPSystemData *SysHandle,
     Value=m_System->KVGetItem(Options,"Padding");
     if(Value!=NULL)
         Data->PaddingChar=atoi(Value);
+
+    Value=m_System->KVGetItem(Options,"MAX_START_WAIT_TIME");
+    if(Value!=NULL)
+        Data->MaxStartWaitTime=atoi(Value);
+
+    Value=m_System->KVGetItem(Options,"XMODEM_MAX_NAKS");
+    if(Value!=NULL)
+        Data->MaxNaks=atoi(Value);
+
+    Value=m_System->KVGetItem(Options,"MAX_PACKET_WAIT_TIME");
+    if(Value!=NULL)
+        Data->MaxPacketWaitTime=atoi(Value);
 
     Data->FileHandle=fopen(FilenameWithPath,"rb");
     if(Data->FileHandle==NULL)
@@ -929,7 +1060,7 @@ static PG_BOOL XModemUpload_RxData(t_FTPSystemData *SysHandle,
                     SendBlockNum=Data->PacketNum;
 
                     Data->NAKCount++;
-                    if(Data->NAKCount>XMODEM_MAX_NAKS)
+                    if(Data->NAKCount>Data->MaxNaks)
                     {
                         memset(Block,XMODEM_CAN,sizeof(Block));
                         if(m_FTPS->ULSendData(SysHandle,Block,sizeof(Block))!=e_FTPS_SendDataRet_Success)
@@ -1050,7 +1181,7 @@ static void XModemUpload_Timeout(t_FTPSystemData *SysHandle,
     {
         /* Ok, we wait for the rx side to signal us it's ready */
         Data->StartTimeout++;
-        if(Data->StartTimeout>MAX_START_WAIT_TIME)
+        if(Data->StartTimeout>Data->MaxStartWaitTime)
         {
             m_FTPS->ULFinish(SysHandle,true);
             return;    // 'Data' is no longer valid, so we are done
@@ -1096,7 +1227,7 @@ static void XModemUpload_Timeout(t_FTPSystemData *SysHandle,
         }
 
         Data->LastPacketTimeout++;
-        if(Data->LastPacketTimeout>MAX_PACKET_WAIT_TIME)
+        if(Data->LastPacketTimeout>Data->MaxPacketWaitTime)
         {
             m_FTPS->ULFinish(SysHandle,true);
             return;    // 'Data' is no longer valid, so we are done
@@ -1173,6 +1304,9 @@ t_FTPOptionsWidgetsType *XModemDownload_AllocOptionsWidgets(t_WidgetSysHandle *W
     try
     {
         Widgets=new struct XModem_Widgets;
+        Widgets->MaxStartWaitTime=NULL;
+        Widgets->MaxNAKPackets=NULL;
+        Widgets->PacketTimeOut=NULL;
 
         if(!XModem_AllocCommonWidgets(Widgets,WidgetHandle,Options))
             throw(0);
@@ -1265,6 +1399,9 @@ static PG_BOOL XModemDownload_StartDownload(t_FTPSystemData *SysHandle,
     Data->Waiting4Start=true;
     Data->TimeSinceLastStartChar=0;
     Data->LastPacketTimeout=0;
+    Data->MaxStartWaitTime=MAX_START_WAIT_TIME;
+    Data->MaxNaks=XMODEM_MAX_NAKS;
+    Data->MaxPacketWaitTime=MAX_PACKET_WAIT_TIME;
 
     Mode=e_XModemMode_CRC;
     Value=m_System->KVGetItem(Options,"Mode");
@@ -1274,6 +1411,18 @@ static PG_BOOL XModemDownload_StartDownload(t_FTPSystemData *SysHandle,
         if(Mode>=e_XModemModeMAX)
             return false;
     }
+
+    Value=m_System->KVGetItem(Options,"MAX_START_WAIT_TIME");
+    if(Value!=NULL)
+        Data->MaxStartWaitTime=atoi(Value);
+
+    Value=m_System->KVGetItem(Options,"XMODEM_MAX_NAKS");
+    if(Value!=NULL)
+        Data->MaxNaks=atoi(Value);
+
+    Value=m_System->KVGetItem(Options,"MAX_PACKET_WAIT_TIME");
+    if(Value!=NULL)
+        Data->MaxPacketWaitTime=atoi(Value);
 
     Filename=m_FTPS->GetDownloadFilename(SysHandle,NULL);
     if(Filename==NULL)
@@ -1623,7 +1772,7 @@ static void XModemDownload_Timeout(t_FTPSystemData *SysHandle,
         }
 
         Data->StartTimeout++;
-        if(Data->StartTimeout>MAX_START_WAIT_TIME)
+        if(Data->StartTimeout>Data->MaxStartWaitTime)
         {
             m_FTPS->DLFinish(SysHandle,true);
             return;    // Data has been free'ed we are done
@@ -1652,7 +1801,7 @@ static void XModemDownload_Timeout(t_FTPSystemData *SysHandle,
             }
         }
         Data->LastPacketTimeout++;
-        if(Data->LastPacketTimeout>=MAX_PACKET_WAIT_TIME)
+        if(Data->LastPacketTimeout>=Data->MaxPacketWaitTime)
         {
             m_FTPS->DLFinish(SysHandle,true);
             return;    // Data has been free'ed we are done

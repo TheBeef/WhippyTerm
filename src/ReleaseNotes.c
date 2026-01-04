@@ -31,6 +31,10 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added new options to xmodem tranfer",
+            "New options for start timeout, max NAK's before abort, and"
+            " timeout between packets have been added."},
+    {
         NOTETYPE_POLISH,"Changed file transfers to auto open side panel",
             "When the user selects a file upload/download the side panel"
             " is now opened."},

@@ -1,8 +1,8 @@
-#ifndef FRAME_MAINTEXTCANVAS_H
-#define FRAME_MAINTEXTCANVAS_H
+#ifndef FRAME_MAINTEXTCOLUMN_H
+#define FRAME_MAINTEXTCOLUMN_H
 
 #include <QWidget>
-#include "ui_Frame_MainTextCanvas.h"
+#include "ui_Frame_MainTextColumn.h"
 
 typedef enum
 {
@@ -32,20 +32,20 @@ struct FMTCEvent
     e_FMTCEventType EventType;
     uintptr_t UserData;
     union FMTCEventData *Info;
-    class Frame_MainTextCanvas *Source;
+    class Frame_MainTextColumn *Source;
 };
 
 namespace Ui {
-class Frame_MainTextCanvas;
+class Frame_MainTextColumn;
 }
 
-class Frame_MainTextCanvas : public QWidget
+class Frame_MainTextColumn : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit Frame_MainTextCanvas(QWidget *parent = nullptr);
-    ~Frame_MainTextCanvas();
+    explicit Frame_MainTextColumn(QWidget *parent = nullptr);
+    ~Frame_MainTextColumn();
     void SetEventHandler(bool (*EventHandler)(const struct FMTCEvent *Event),uintptr_t UserData);
     void HeaderVisible(bool Visible);
     void SetParentSplitter(QSplitter *Splitter);
@@ -53,7 +53,7 @@ public:
     int WorkingLine;
 
 public:
-    Ui::Frame_MainTextCanvas *ui;
+    Ui::Frame_MainTextColumn *ui;
     
 private slots:
     void on_TexthorizontalScrollBar_valueChanged(int value);

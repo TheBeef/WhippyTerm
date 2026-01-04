@@ -1,11 +1,10 @@
-/* DEBUG PAUL: Rename this to Frame_MainTextColumn */
-#include "Frame_MainTextCanvas.h"
-#include "ui_Frame_MainTextCanvas.h"
+#include "Frame_MainTextColumn.h"
+#include "ui_Frame_MainTextColumn.h"
 #include "ContextMenuHelper.h"
 
-Frame_MainTextCanvas::Frame_MainTextCanvas(QWidget *parent)
+Frame_MainTextColumn::Frame_MainTextColumn(QWidget *parent)
     : QWidget(parent)
-    , ui(new Ui::Frame_MainTextCanvas)
+    , ui(new Ui::Frame_MainTextColumn)
 {
     ui->setupUi(this);
     ui->HeaderLabel->ParentSplitter=NULL;
@@ -14,27 +13,27 @@ Frame_MainTextCanvas::Frame_MainTextCanvas(QWidget *parent)
     AddContextMenu2Widget(this,ui->TexthorizontalScrollBar);
 }
 
-Frame_MainTextCanvas::~Frame_MainTextCanvas()
+Frame_MainTextColumn::~Frame_MainTextColumn()
 {
     delete ui;
 }
 
-void Frame_MainTextCanvas::HeaderVisible(bool Visible)
+void Frame_MainTextColumn::HeaderVisible(bool Visible)
 {
     ui->HeaderLabel->setVisible(Visible);
 }
 
-void Frame_MainTextCanvas::SetParentSplitter(QSplitter *Splitter)
+void Frame_MainTextColumn::SetParentSplitter(QSplitter *Splitter)
 {
     ui->HeaderLabel->ParentSplitter=Splitter;
 }
 
-void Frame_MainTextCanvas::SetHeaderLabel(const char *Name)
+void Frame_MainTextColumn::SetHeaderLabel(const char *Name)
 {
     ui->HeaderLabel->setText(Name);
 }
 
-void Frame_MainTextCanvas::SetEventHandler(bool (*EventHandler)(const struct FMTCEvent *Event),uintptr_t UserData)
+void Frame_MainTextColumn::SetEventHandler(bool (*EventHandler)(const struct FMTCEvent *Event),uintptr_t UserData)
 {
     FMTCEventHandler=EventHandler;
     FMTCEventHandlerUserData=UserData;
@@ -42,10 +41,10 @@ void Frame_MainTextCanvas::SetEventHandler(bool (*EventHandler)(const struct FMT
 
 /*******************************************************************************
  * NAME:
- *    Frame_MainTextCanvas::SendEvent()
+ *    Frame_MainTextColumn::SendEvent()
  *
  * SYNOPSIS:
- *    bool Frame_MainTextCanvas::SendEvent(e_FMTCEventType EventType,
+ *    bool Frame_MainTextColumn::SendEvent(e_FMTCEventType EventType,
  *          union FMTCEventData *Info);
  *
  * PARAMETERS:
@@ -66,7 +65,7 @@ void Frame_MainTextCanvas::SetEventHandler(bool (*EventHandler)(const struct FMT
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool Frame_MainTextCanvas::SendEvent(e_FMTCEventType EventType,union FMTCEventData *Info)
+bool Frame_MainTextColumn::SendEvent(e_FMTCEventType EventType,union FMTCEventData *Info)
 {
     struct FMTCEvent NewEvent;
 
@@ -80,12 +79,12 @@ bool Frame_MainTextCanvas::SendEvent(e_FMTCEventType EventType,union FMTCEventDa
     return true;
 }
 
-bool Frame_MainTextCanvas::SendEvent(e_FMTCEventType EventType)
+bool Frame_MainTextColumn::SendEvent(e_FMTCEventType EventType)
 {
     return SendEvent(EventType,nullptr);
 }
 
-void Frame_MainTextCanvas::on_TexthorizontalScrollBar_valueChanged(int value)
+void Frame_MainTextColumn::on_TexthorizontalScrollBar_valueChanged(int value)
 {
     union FMTCEventData Info;
 
@@ -94,13 +93,13 @@ void Frame_MainTextCanvas::on_TexthorizontalScrollBar_valueChanged(int value)
     SendEvent(e_FMTCEvent_ScrollX,&Info);
 }
 
-void Frame_MainTextCanvas::ContextMenu(const QPoint &pos)
+void Frame_MainTextColumn::ContextMenu(const QPoint &pos)
 {
     HandleContextMenuClick(sender(),pos);
 }
 
 
-void Frame_MainTextCanvas::on_Menu_HeaderLabel_x1_Hide_triggered()
+void Frame_MainTextColumn::on_Menu_HeaderLabel_x1_Hide_triggered()
 {
     union FMTCEventData Info;
 

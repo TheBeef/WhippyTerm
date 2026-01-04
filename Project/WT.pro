@@ -92,7 +92,7 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/UI/QT/Frame_ColorPickerWidget.cpp \
     ../src/UI/QT/Frame_CustomTextWidget.cpp \
     ../src/UI/QT/Frame_CustomTextWidgetAccess.cpp \
-    ../src/UI/QT/Frame_MainTextCanvas.cpp \
+    ../src/UI/QT/Frame_MainTextColumn.cpp \
     ../src/UI/QT/Frame_StylePickerWidget.cpp \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.cpp \
     ../src/UI/QT/QTKeyHandleScrollLock.cpp \
@@ -309,7 +309,7 @@ HEADERS  += ../src/UI/QT/Form_MainWindow.h \
     ../src/UI/QT/Form_StylePickerDialog.h \
     ../src/UI/QT/Frame_ColorPickerWidget.h \
     ../src/UI/QT/Frame_CustomTextWidget.h \
-    ../src/UI/QT/Frame_MainTextCanvas.h \
+    ../src/UI/QT/Frame_MainTextColumn.h \
     ../src/UI/QT/Frame_StylePickerWidget.h \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.h \
     ../src/UI/QT/VerPanelHandle.h \
@@ -380,7 +380,7 @@ FORMS    += ../src/UI/QT/Form_MainWindow.ui \
     ../src/UI/QT/Form_BridgeConnection.ui \
     ../src/UI/QT/Form_ESB_InsertProp.ui \
     ../src/UI/QT/Form_PasteData.ui \
-    ../src/UI/QT/Frame_MainTextCanvas.ui \
+    ../src/UI/QT/Frame_MainTextColumn.ui \
     ../src/UI/QT/Frame_StylePickerWidget.ui \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.ui
 

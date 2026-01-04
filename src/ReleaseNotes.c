@@ -31,6 +31,10 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_POLISH,"Changed file transfers to auto open side panel",
+            "When the user selects a file upload/download the side panel"
+            " is now opened."},
+    {
         NOTETYPE_ENHANCEMENT,"Complete rewrite on auto reconnect system",
             "Count not find a problem with the auto reconnect but have"
             " a bug report.  Deleted and rewrote the auto reconnect"

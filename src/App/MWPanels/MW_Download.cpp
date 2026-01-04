@@ -916,6 +916,9 @@ void MWDownload::DownloadMenuTriggered(uint64_t ID)
         DownloadProtocolChange(ID);
     }
 
+    /* Show the download panel */
+    MW->ShowPanel(e_MWPanels_Downloadload);
+
     Start();
 }
 

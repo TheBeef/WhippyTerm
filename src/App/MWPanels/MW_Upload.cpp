@@ -1001,6 +1001,9 @@ void MWUpload::UploadMenuTriggered(uint64_t ID)
     /* Prompt for the filename (don't trust the input widget) */
     SelectFilename();
 
+    /* Show the upload panel */
+    MW->ShowPanel(e_MWPanels_Upload);
+
     Start();
 }
 

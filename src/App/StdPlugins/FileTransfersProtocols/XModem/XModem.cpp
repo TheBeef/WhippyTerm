@@ -36,10 +36,13 @@
 #include <string.h>
 #include <stdio.h>
 #include <inttypes.h>
+#include <string>
+
+using namespace std;
 
 /*** DEFINES                  ***/
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      XModemUpload // The name to append on the RegisterPlugin() function for built in version
-#define NEEDED_MIN_API_VERSION                  0x01000000
+#define NEEDED_MIN_API_VERSION                  0x02010000  // DEBUG PAUL: This needs to be 2.2
 
 #define XMODEM_MAX_PACKET_SIZE              (3+1024+2)
 #define XMODEM_STANDARD_PACKET_SIZE         128
@@ -114,6 +117,7 @@ struct XModemUploadData
     int MaxStartWaitTime;
     int MaxNaks;
     int MaxPacketWaitTime;
+    string ErrorStr;
 };
 
 typedef enum
@@ -153,6 +157,7 @@ struct XModemDownloadData
     int MaxStartWaitTime;
     int MaxNaks;
     int MaxPacketWaitTime;
+    string ErrorStr;
 };
 
 struct XModem_Widgets
@@ -190,6 +195,7 @@ static void XModemUpload_Timeout(t_FTPSystemData *SysHandle,
         t_FTPHandlerDataType *DataHandle);
 static PG_BOOL XModemUpload_RxData(t_FTPSystemData *SysHandle,
         t_FTPHandlerDataType *DataHandle,uint8_t *RxData,uint32_t Bytes);
+static const char *XModemUpload_GetLastErrorMsg(t_FTPSystemData *SysHandle,t_FTPHandlerDataType *DataHandle);
 
 t_FTPHandlerDataType *XModemDownload_AllocateData(void);
 void XModemDownload_FreeData(t_FTPHandlerDataType *DataHandle);
@@ -205,6 +211,7 @@ static PG_BOOL XModemDownload_RxData(t_FTPSystemData *SysHandle,
 static PG_BOOL XModemDownload_StartDownload(t_FTPSystemData *SysHandle,
         t_FTPHandlerDataType *DataHandle,t_PIKVList *Options);
 static void XModemDownload_Setup4NextPacket(struct XModemDownloadData *Data);
+static const char *XModemDownload_GetLastErrorMsg(t_FTPSystemData *SysHandle,t_FTPHandlerDataType *DataHandle);
 
 /*** VARIABLE DEFINITIONS     ***/
 struct FileTransferHandlerAPI m_XModemUploadCBs=
@@ -219,6 +226,9 @@ struct FileTransferHandlerAPI m_XModemUploadCBs=
     XModemUpload_AbortUpload,
     XModemUpload_Timeout,
     XModemUpload_RxData,
+
+    /* V2 */
+    XModemUpload_GetLastErrorMsg,
 };
 
 struct FileTransferHandlerAPI m_XModemDownloadCBs=
@@ -233,6 +243,9 @@ struct FileTransferHandlerAPI m_XModemDownloadCBs=
     XModemDownload_AbortDownload,
     XModemDownload_Timeout,
     XModemDownload_RxData,
+
+    /* V2 */
+    XModemDownload_GetLastErrorMsg,
 };
 
 struct FTPHandlerInfo m_XModemUpload_Info=
@@ -415,11 +428,16 @@ static uint8_t XModem_CalcChecksum(uint8_t *DataPtr,int Bytes)
 t_FTPHandlerDataType *XModemUpload_AllocateData(void)
 {
     struct XModemUploadData *Data;
-    Data=(struct XModemUploadData *)malloc(sizeof(struct XModemUploadData));
-    if(Data==NULL)
-        return NULL;
 
-    Data->FileHandle=NULL;
+    try
+    {
+        Data=new struct XModemUploadData;
+        Data->FileHandle=NULL;
+    }
+    catch(...)
+    {
+        return NULL;
+    }
 
     return (t_FTPHandlerDataType *)Data;
 }
@@ -451,7 +469,7 @@ void XModemUpload_FreeData(t_FTPHandlerDataType *DataHandle)
     if(Data->FileHandle!=NULL)
         fclose(Data->FileHandle);
 
-    free(Data);
+    delete Data;
 }
 
 t_FTPOptionsWidgetsType *XModemUpload_AllocOptionsWidgets(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Options)
@@ -927,6 +945,7 @@ static void XModemUpload_AbortUpload(t_FTPSystemData *SysHandle,
         fclose(Data->FileHandle);
         Data->FileHandle=NULL;
     }
+    Data->ErrorStr="User abort";
 }
 
 /*******************************************************************************
@@ -1022,6 +1041,7 @@ static PG_BOOL XModemUpload_RxData(t_FTPSystemData *SysHandle,
             {
                 if(Data->Waiting4DoneAck)
                 {
+                    Data->ErrorStr="";
                     m_FTPS->ULFinish(SysHandle,false);
                     return true;    // 'Data' is no longer valid, so we are done
                 }
@@ -1065,6 +1085,7 @@ static PG_BOOL XModemUpload_RxData(t_FTPSystemData *SysHandle,
                         memset(Block,XMODEM_CAN,sizeof(Block));
                         if(m_FTPS->ULSendData(SysHandle,Block,sizeof(Block))!=e_FTPS_SendDataRet_Success)
                             Data->DelayedError=e_XModemDelayedError_Cancel;
+                        Data->ErrorStr="To many NAK's in a row";
                         m_FTPS->ULFinish(SysHandle,true);
                         return true;    // 'Data' is no longer valid, so we are done
                     }
@@ -1124,6 +1145,7 @@ static PG_BOOL XModemUpload_RxData(t_FTPSystemData *SysHandle,
                 case e_FTPS_SendDataRet_Fail:
                 default:
                     Data->Done=true;
+                    Data->ErrorStr="Failed to send the data";
                     m_FTPS->ULFinish(SysHandle,true);
                     return true;    // 'Data' is no longer valid, so we are done
                 break;
@@ -1183,6 +1205,7 @@ static void XModemUpload_Timeout(t_FTPSystemData *SysHandle,
         Data->StartTimeout++;
         if(Data->StartTimeout>Data->MaxStartWaitTime)
         {
+            Data->ErrorStr="Timed out waiting to start";
             m_FTPS->ULFinish(SysHandle,true);
             return;    // 'Data' is no longer valid, so we are done
         }
@@ -1229,11 +1252,51 @@ static void XModemUpload_Timeout(t_FTPSystemData *SysHandle,
         Data->LastPacketTimeout++;
         if(Data->LastPacketTimeout>Data->MaxPacketWaitTime)
         {
+            Data->ErrorStr="Timed out waiting for an ACK/NACK";
             m_FTPS->ULFinish(SysHandle,true);
             return;    // 'Data' is no longer valid, so we are done
         }
     }
 }
+
+/*******************************************************************************
+ * NAME:
+ *    XModemUpload_GetLastErrorMsg
+ *
+ * SYNOPSIS:
+ *    const char *XModemUpload_GetLastErrorMsg(t_FTPSystemData *SysHandle,
+ *              t_FTPHandlerDataType *DataHandle);
+ *
+ * PARAMETERS:
+ *    SysHandle [I] -- An handle to be passed back to the file transfer protocol
+ *                     system through the 'struct FileTransferHandlerAPI' API.
+ *    DataHandle [I] -- An handle to the driver's data that was allocated with
+ *                      AllocateData().
+ *
+ * FUNCTION:
+ *    This function gets the last error message from the system.  The system
+ *    will call then when a function returns an error or abort to find more
+ *    details.
+ *
+ * RETURNS:
+ *    A pointer to an error message or NULL if there was no message.  This must
+ *    remain valid until the next call to any 'FileTransferHandlerAPI' function.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static const char *XModemUpload_GetLastErrorMsg(t_FTPSystemData *SysHandle,
+        t_FTPHandlerDataType *DataHandle)
+{
+    struct XModemUploadData *Data=(struct XModemUploadData *)DataHandle;
+
+    if(Data->ErrorStr=="")
+        return NULL;
+
+    return Data->ErrorStr.c_str();
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
  * NAME:
@@ -1257,11 +1320,17 @@ static void XModemUpload_Timeout(t_FTPSystemData *SysHandle,
 t_FTPHandlerDataType *XModemDownload_AllocateData(void)
 {
     struct XModemDownloadData *Data;
-    Data=(struct XModemDownloadData *)malloc(sizeof(struct XModemDownloadData));
-    if(Data==NULL)
-        return NULL;
 
-    Data->FileHandle=NULL;
+    try
+    {
+        Data=new struct XModemDownloadData;
+
+        Data->FileHandle=NULL;
+    }
+    catch(...)
+    {
+        return NULL;
+    }
 
     return (t_FTPHandlerDataType *)Data;
 }
@@ -1293,7 +1362,7 @@ void XModemDownload_FreeData(t_FTPHandlerDataType *DataHandle)
     if(Data->FileHandle!=NULL)
         fclose(Data->FileHandle);
 
-    free(Data);
+    delete Data;
 }
 
 t_FTPOptionsWidgetsType *XModemDownload_AllocOptionsWidgets(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Options)
@@ -1402,6 +1471,7 @@ static PG_BOOL XModemDownload_StartDownload(t_FTPSystemData *SysHandle,
     Data->MaxStartWaitTime=MAX_START_WAIT_TIME;
     Data->MaxNaks=XMODEM_MAX_NAKS;
     Data->MaxPacketWaitTime=MAX_PACKET_WAIT_TIME;
+    Data->ErrorStr="";
 
     Mode=e_XModemMode_CRC;
     Value=m_System->KVGetItem(Options,"Mode");
@@ -1500,6 +1570,8 @@ static void XModemDownload_AbortDownload(t_FTPSystemData *SysHandle,
         fclose(Data->FileHandle);
         Data->FileHandle=NULL;
     }
+
+    Data->ErrorStr="User abort";
 }
 
 /*******************************************************************************
@@ -1571,6 +1643,7 @@ static PG_BOOL XModemDownload_RxData(t_FTPSystemData *SysHandle,
                     c=XMODEM_ACK;
                     m_FTPS->DLSendData(SysHandle,&c,1);
 
+                    Data->ErrorStr="";
                     m_FTPS->DLFinish(SysHandle,false);
                     return true;    // Data has been free'ed we are done
                 }
@@ -1774,6 +1847,7 @@ static void XModemDownload_Timeout(t_FTPSystemData *SysHandle,
         Data->StartTimeout++;
         if(Data->StartTimeout>Data->MaxStartWaitTime)
         {
+            Data->ErrorStr="Time out waiting to start";
             m_FTPS->DLFinish(SysHandle,true);
             return;    // Data has been free'ed we are done
         }
@@ -1803,10 +1877,48 @@ static void XModemDownload_Timeout(t_FTPSystemData *SysHandle,
         Data->LastPacketTimeout++;
         if(Data->LastPacketTimeout>=Data->MaxPacketWaitTime)
         {
+            Data->ErrorStr="Time out waiting for packet";
             m_FTPS->DLFinish(SysHandle,true);
             return;    // Data has been free'ed we are done
         }
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    XModemDownload_GetLastErrorMsg
+ *
+ * SYNOPSIS:
+ *    const char *XModemDownload_GetLastErrorMsg(t_FTPSystemData *SysHandle,
+ *              t_FTPHandlerDataType *DataHandle);
+ *
+ * PARAMETERS:
+ *    SysHandle [I] -- An handle to be passed back to the file transfer protocol
+ *                     system through the 'struct FileTransferHandlerAPI' API.
+ *    DataHandle [I] -- An handle to the driver's data that was allocated with
+ *                      AllocateData().
+ *
+ * FUNCTION:
+ *    This function gets the last error message from the system.  The system
+ *    will call then when a function returns an error or abort to find more
+ *    details.
+ *
+ * RETURNS:
+ *    A pointer to an error message or NULL if there was no message.  This must
+ *    remain valid until the next call to any 'FileTransferHandlerAPI' function.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static const char *XModemDownload_GetLastErrorMsg(t_FTPSystemData *SysHandle,
+        t_FTPHandlerDataType *DataHandle)
+{
+    struct XModemDownloadData *Data=(struct XModemDownloadData *)DataHandle;
+
+    if(Data->ErrorStr=="")
+        return NULL;
+
+    return Data->ErrorStr.c_str();
 }
 
 static void XModemDownload_Setup4NextPacket(struct XModemDownloadData *Data)

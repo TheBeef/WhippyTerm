@@ -371,6 +371,31 @@ struct FTPS_API g_FTPSAPI=
  * SEE ALSO:
  *    
  *==============================================================================
+ * NAME:
+ *    GetLastErrorMsg
+ *
+ * SYNOPSIS:
+ *    const char *GetLastErrorMsg(t_FTPSystemData *SysHandle,
+ *              t_FTPHandlerDataType *DataHandle);
+ *
+ * PARAMETERS:
+ *    SysHandle [I] -- An handle to be passed back to the file transfer protocol
+ *                     system through the 'struct FileTransferHandlerAPI' API.
+ *    DataHandle [I] -- An handle to the driver's data that was allocated with
+ *                      AllocateData().
+ *
+ * FUNCTION:
+ *    This function gets the last error message from the system.  The system
+ *    will call then when a function returns an error or abort to find more
+ *    details.
+ *
+ * RETURNS:
+ *    A pointer to an error message or NULL if there was no message.  This must
+ *    remain valid until the next call to any 'FileTransferHandlerAPI' function.
+ *
+ * SEE ALSO:
+ *    
+ *==============================================================================
  *
  * SEE ALSO:
  *    
@@ -618,11 +643,32 @@ static int FTPSPIA_ULSendData(t_FTPSystemData *SysHandle,void *Data,
 static void FTPSPIA_ULFinishUpload(t_FTPSystemData *SysHandle,PG_BOOL Aborted)
 {
     struct RealFTPData *RealFData=(struct RealFTPData *)SysHandle;
+    const char *Msg;
+    string ErrorMsg;
 
     if(RealFData->Con==NULL)
         return;
 
     RealFData->Con->FinishedUpload(Aborted);
+
+    /* DEBUG PAUL: Do ask here */
+    if(Aborted)
+    {
+        /* Upload was aborted, see if we have an error string and if so show
+           it */
+        if(RealFData->HandlerAPI->GetLastErrorMsg!=NULL)
+        {
+            Msg=RealFData->HandlerAPI->GetLastErrorMsg(SysHandle,
+                    RealFData->HandlerData);
+            if(Msg!=NULL)
+            {
+                ErrorMsg="Upload failed with error message:\n";
+                ErrorMsg+=Msg;
+                UIAsk("Upload failed",ErrorMsg.c_str(),e_AskBox_Error,
+                        e_AskBttns_Ok);
+            }
+        }
+    }
 
     /* We are done free the resourses */
     FTPS_FreeCurrentHander(RealFData);

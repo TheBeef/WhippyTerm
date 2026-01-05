@@ -31,6 +31,10 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_ENHANCEMENT,"Added error messages to the upload/download",
+            "The upload/download file transfer didn't show any errors, just"
+            " quit the transfer.  There are now error messages."},
+    {
         NOTETYPE_ENHANCEMENT,"Added new options to xmodem tranfer",
             "New options for start timeout, max NAK's before abort, and"
             " timeout between packets have been added."},

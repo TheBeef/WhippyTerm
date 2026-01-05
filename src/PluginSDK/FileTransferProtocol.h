@@ -40,6 +40,7 @@
 /***  DEFINES                          ***/
 /* Versions of struct FTPHandlerInfo */
 #define FILE_TRANSFER_HANDLER_API_VERSION_1             1
+#define FILE_TRANSFER_HANDLER_API_VERSION_2             2
 
 /* Versions of struct FTPS_API */
 #define FTPS_API_VERSION_1                              1
@@ -76,6 +77,9 @@ struct FileTransferHandlerAPI
     void (*Timeout)(t_FTPSystemData *SysHandle,t_FTPHandlerDataType *DataHandle);
     PG_BOOL (*RxData)(t_FTPSystemData *SysHandle,t_FTPHandlerDataType *DataHandle,uint8_t *Data,uint32_t Bytes);
     /********* End of FILE_TRANSFER_HANDLER_API_VERSION_1 *********/
+    /********* Start of FILE_TRANSFER_HANDLER_API_VERSION_2 *********/
+    const char *(*GetLastErrorMsg)(t_FTPSystemData *SysHandle,t_FTPHandlerDataType *DataHandle);
+    /********* End of FILE_TRANSFER_HANDLER_API_VERSION_2 *********/
 };
 
 struct FTPHandlerInfo

@@ -12,6 +12,9 @@
 #include <QDateTime>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QGuiApplication>
+#include <QPalette>
+#include <QStyleHints>
 #include "QTKeyHandleScrollLock.h"
 #include "Form_MainWindow.h"
 #include "QTKeyMappings.h"
@@ -332,4 +335,18 @@ static void HandleGlobalKeyPressEvent(QKeyEvent *event)
     }
 
     m_KeyCallback(Mods,UIKey,Text);
+}
+
+/* Copied from: https://stackoverflow.com/questions/75457687/detect-dark-application-style-theme-of-currently-used-desktop-in-qt */
+bool OS_IsSystemInDarkMode(void)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    const auto scheme = QGuiApplication::styleHints()->colorScheme();
+    return scheme == Qt::ColorScheme::Dark;
+#else
+    const QPalette defaultPalette;
+    const auto text = defaultPalette.color(QPalette::WindowText);
+    const auto window = defaultPalette.color(QPalette::Window);
+    return text.lightness() > window.lightness();
+#endif // QT_VERSION
 }

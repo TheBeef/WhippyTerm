@@ -64,8 +64,6 @@ void Form_MainWindow::on_actionTest4_triggered()
 
 void Form_MainWindow::on_actionTest5_triggered()
 {
-qDebug("DEBUG5");
-
     Debug_Send2DebugFn(MWDebug5);
 //    MW_Test5();
 }

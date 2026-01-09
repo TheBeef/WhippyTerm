@@ -59,5 +59,6 @@ uint64_t GetMSCounter(void);
 void UI_GotoWebPage(const char *WebSite);
 int caseinsensitivestrcmp(const char *a,const char *b);
 void UI_CollectAllKeyPresses(void (*Callback)(uint8_t Mods,e_UIKeys UIKey,std::string &Text));
+bool OS_IsSystemInDarkMode(void);
 
 #endif

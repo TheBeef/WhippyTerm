@@ -141,6 +141,13 @@ void MWDebug4(uintptr_t ID)
 void MWDebug5(uintptr_t ID)
 {
     class Connection *Con=(class Connection *)ID;
+
+    {
+        bool InDark;
+        InDark=OS_IsSystemInDarkMode();
+        printf("%d\n",InDark);
+    }
+
     if(Con!=NULL) return Con->Debug5();
 }
 void MWDebug6(uintptr_t ID)

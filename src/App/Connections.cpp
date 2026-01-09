@@ -103,11 +103,9 @@ void Connection::Debug3(void)
 }
 void Connection::Debug4(void)
 {
-    FreezeStream();
 }
 void Connection::Debug5(void)
 {
-    ReleaseFrozenStream();
 }
 void Connection::Debug6(void)
 {
@@ -3206,6 +3204,7 @@ bool Connection::ProcessDisplayEvent(const struct DBEvent *Event)
                 case e_UITD_ContextMenu_StyleBGColor_BrightWhite:
                     MW->ExeCmd(e_Cmd_ApplyStyleBGColor_BrightWhite);
                 break;
+                case e_UITD_ContextMenu_ColumnHeader_Hide:
                 case e_UITD_ContextMenu_EndianSwap:
                 case e_UITD_ContextMenu_Edit:
                 case e_UITD_ContextMenuMAX:

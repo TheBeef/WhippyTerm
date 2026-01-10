@@ -56,6 +56,7 @@ public:
     t_MWListOfActionsType FTPDownloadMenuItems;
     t_MWListOfActionsType ApplyTerminalEmulationMenuItems;
     QTimer *StopWatchTimer;
+    QTimer *DelayedThemeChangeTimer;
 
 public slots:
     void on_TopBottomSplitter_splitterMoved(int pos, int index);
@@ -68,6 +69,7 @@ private slots:
     void on_actionTest2_triggered();
     void GlobalCloseTabBttnClicked(void);
     void StopWatchTimer_triggered();
+    void DelayedThemeChangeTimer_triggered();
     void ContextMenu(const QPoint &pos);
 
     void on_Main_tabWidget_TabMoved(int from,int to);

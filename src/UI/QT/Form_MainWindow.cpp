@@ -119,6 +119,10 @@ Form_MainWindow::Form_MainWindow(QWidget *parent) :
     StopWatchTimer->setInterval(13);   // 13ms so the updates look like they are coming in faster
     connect(StopWatchTimer, SIGNAL(timeout()), this, SLOT(StopWatchTimer_triggered()));
 
+    DelayedThemeChangeTimer=new QTimer(this);
+    DelayedThemeChangeTimer->setSingleShot(true);
+    connect(DelayedThemeChangeTimer, SIGNAL(timeout()), this, SLOT(DelayedThemeChangeTimer_triggered()));
+
     ui->treeWidget_Buffer_BufferList->header()->resizeSection(0,256);
 
     AddContextMenu2Widget(this,ui->treeWidget_Buffer_BufferList);
@@ -878,6 +882,11 @@ void Form_MainWindow::on_actionManage_Bookmarks_triggered()
 void Form_MainWindow::StopWatchTimer_triggered()
 {
     SendEvent(e_MWEvent_StopWatch_Timer);
+}
+
+void Form_MainWindow::DelayedThemeChangeTimer_triggered()
+{
+    RethinkColors();
 }
 
 void Form_MainWindow::on_actionStopWatch_Start_triggered()
@@ -1884,18 +1893,11 @@ void Form_MainWindow::on_IncomingHex_Save_pushButton_clicked()
 
 bool Form_MainWindow::event(QEvent *event)
 {
-    bool DoLater;
-    bool RetValue;
-
-    DoLater=false;
     if (event->type() == QEvent::ThemeChange)
-        DoLater=true;
+    {
+        DelayedThemeChangeTimer->start(10);
+    }
 
-    RetValue=QMainWindow::event(event);
-
-    if(DoLater)
-        RethinkColors();
-
-    return RetValue;
+    return QMainWindow::event(event);
 }
 

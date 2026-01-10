@@ -143,11 +143,11 @@ void VerPanelHandle::paintEvent(QPaintEvent *Event)
     painter.fillRect(0,0,BarWidth,BarHeight,brush);
 
     /* Draw the border */
-    painter.setPen(QColor(255,255,255));
+    painter.setPen(this->palette().color(QPalette::Light));
     painter.drawLine(0,0,BarWidth,0);
     painter.drawLine(0,0,0,BarHeight);
 
-    painter.setPen(QColor(128,128,128));
+    painter.setPen(this->palette().color(QPalette::Dark));
     painter.drawLine(BarWidth,0,BarWidth,BarHeight);
     painter.drawLine(0,BarHeight,BarWidth,BarHeight);
 
@@ -176,7 +176,7 @@ void VerPanelHandle::paintEvent(QPaintEvent *Event)
     painter.drawImage(BAR_MARGIN_TB,BarHeight-5-ArrowHeight,*Arrow);
 
     /* Draw the dividers */
-    painter.setPen(QColor(0x90,0x90,0x90));
+    painter.setPen(this->palette().color(QPalette::Dark));
     painter.drawLine(BAR_MARGIN_TB,5+ArrowHeight+5,
             BarWidth-BAR_MARGIN_TB,5+ArrowHeight+5);
     painter.drawLine(BAR_MARGIN_TB,BarHeight-(5+ArrowHeight+5),

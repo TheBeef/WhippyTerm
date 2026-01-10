@@ -33,6 +33,7 @@
 #include <QtGui>
 #include "HozPanelHandle.h"
 #include "Form_MainWindow.h"
+#include "UI/UISystem.h"
 
 /*** DEFINES                  ***/
 #define BAR_MARGIN_TB    3
@@ -100,17 +101,33 @@ void HozPanelHandle::paintEvent(QPaintEvent *Event)
     QImage Background(":/G/Graphics/PanelHandleBackground.png");
     QImage Up(":/G/Graphics/Arrow_Up.png");
     QImage Down(":/G/Graphics/Arrow_Down.png");
+    QImage BackgroundDark(":/G/Graphics/PanelHandleBackground_Dark.png");
+    QImage UpDark(":/G/Graphics/Arrow_Up_Dark.png");
+    QImage DownDark(":/G/Graphics/Arrow_Down_Dark.png");
     QImage *Arrow;
+    QImage *UseBackground;
     int BarWidth;
     int BarHeight;
     int x,y,x2,y2;
     int ArrowWidth;
     qreal InverseDPR;
 
-    if(DrawPointingUp)
-        Arrow=&Up;
+    if(OS_IsSystemInDarkMode())
+    {
+        UseBackground=&Background;
+        if(DrawPointingUp)
+            Arrow=&UpDark;
+        else
+            Arrow=&DownDark;
+    }
     else
-        Arrow=&Down;
+    {
+        UseBackground=&BackgroundDark;
+        if(DrawPointingUp)
+            Arrow=&Up;
+        else
+            Arrow=&Down;
+    }
 
     brush=painter.brush();
 
@@ -131,18 +148,18 @@ void HozPanelHandle::paintEvent(QPaintEvent *Event)
     painter.fillRect(0,0,BarWidth,BarHeight,brush);
 
     /* Draw the border */
-    painter.setPen(QColor(255,255,255));
+    painter.setPen(this->palette().color(QPalette::Light));
     painter.drawLine(0,0,BarWidth,0);
     painter.drawLine(0,0,0,BarHeight);
 
-    painter.setPen(QColor(128,128,128));
+    painter.setPen(this->palette().color(QPalette::Dark));
     painter.drawLine(BarWidth,0,BarWidth,BarHeight);
     painter.drawLine(0,BarHeight,BarWidth,BarHeight);
 
     /* Fill in the dots */
-    brush.setTextureImage(Background);
+    brush.setTextureImage(*UseBackground);
     brush.setStyle(Qt::TexturePattern);
-    brush.setTextureImage(Background);
+    brush.setTextureImage(*UseBackground);
 
     /* Left side */
     x=5+ArrowWidth+5+1;
@@ -163,7 +180,7 @@ void HozPanelHandle::paintEvent(QPaintEvent *Event)
     painter.drawImage(BarWidth-4-ArrowWidth,BAR_MARGIN_TB,*Arrow);
 
     /* Draw the dividers */
-    painter.setPen(QColor(0x90,0x90,0x90));
+    painter.setPen(this->palette().color(QPalette::Dark));
     painter.drawLine(5+ArrowWidth+5,BAR_MARGIN_TB,
             5+ArrowWidth+5,BarHeight-BAR_MARGIN_TB);
     painter.drawLine(BarWidth-(5+ArrowWidth+5),BAR_MARGIN_TB,

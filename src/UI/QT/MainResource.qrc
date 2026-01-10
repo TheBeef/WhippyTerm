@@ -81,6 +81,11 @@
         <file>Graphics/ColorSelect_00FFFF.png</file>
         <file>Graphics/ColorSelect_AAAAAA.png</file>
         <file>Graphics/famfamfam_arrow_right.png</file>
+        <file>Graphics/Arrow_Down_Dark.png</file>
+        <file>Graphics/Arrow_Left_Dark.png</file>
+        <file>Graphics/Arrow_Right_Dark.png</file>
+        <file>Graphics/Arrow_Up_Dark.png</file>
+        <file>Graphics/PanelHandleBackground_Dark.png</file>
     </qresource>
     <qresource prefix="/S">
         <file>Sounds/Computer_Error_Alert_Short.wav</file>

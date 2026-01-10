@@ -114,7 +114,7 @@ void HozPanelHandle::paintEvent(QPaintEvent *Event)
 
     if(OS_IsSystemInDarkMode())
     {
-        UseBackground=&Background;
+        UseBackground=&BackgroundDark;
         if(DrawPointingUp)
             Arrow=&UpDark;
         else
@@ -122,7 +122,7 @@ void HozPanelHandle::paintEvent(QPaintEvent *Event)
     }
     else
     {
-        UseBackground=&BackgroundDark;
+        UseBackground=&Background;
         if(DrawPointingUp)
             Arrow=&Up;
         else

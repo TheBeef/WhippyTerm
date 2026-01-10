@@ -112,6 +112,9 @@ void VerPanelHandle::paintEvent(QPaintEvent *Event)
     QImage Background(":/G/Graphics/PanelHandleBackground.png");
     QImage Left(":/G/Graphics/Arrow_Left.png");
     QImage Right(":/G/Graphics/Arrow_Right.png");
+    QImage BackgroundDark(":/G/Graphics/PanelHandleBackground_Dark.png");
+    QImage LeftDark(":/G/Graphics/Arrow_Left_Dark.png");
+    QImage RightDark(":/G/Graphics/Arrow_Right_Dark.png");
     QImage *Arrow;
     int BarWidth;
     int BarHeight;
@@ -119,10 +122,22 @@ void VerPanelHandle::paintEvent(QPaintEvent *Event)
     int ArrowHeight;
     qreal InverseDPR;
 
-    if(DrawPointingLeft)
-        Arrow=&Left;
+    if(OS_IsSystemInDarkMode())
+    {
+        UseBackground=&BackgroundDark;
+        if(DrawPointingLeft)
+            Arrow=&Left;
+        else
+            Arrow=&Right;
+    }
     else
-        Arrow=&Right;
+    {
+        UseBackground=&Background;
+        if(DrawPointingLeft)
+            Arrow=&Left;
+        else
+            Arrow=&Right;
+    }
 
     brush=painter.brush();
 
@@ -152,9 +167,9 @@ void VerPanelHandle::paintEvent(QPaintEvent *Event)
     painter.drawLine(0,BarHeight,BarWidth,BarHeight);
 
     /* Fill in the dots */
-    brush.setTextureImage(Background);
+    brush.setTextureImage(*UseBackground);
     brush.setStyle(Qt::TexturePattern);
-    brush.setTextureImage(Background);
+    brush.setTextureImage(*UseBackground);
 
     /* Top */
     x=BAR_MARGIN_TB;

@@ -33,6 +33,7 @@
 #include <QtGui>
 #include "VerPanelHandle.h"
 #include "Form_MainWindow.h"
+#include "UI/UISystem.h"
 
 /*** DEFINES                  ***/
 #define BAR_MARGIN_TB    3
@@ -116,6 +117,7 @@ void VerPanelHandle::paintEvent(QPaintEvent *Event)
     QImage LeftDark(":/G/Graphics/Arrow_Left_Dark.png");
     QImage RightDark(":/G/Graphics/Arrow_Right_Dark.png");
     QImage *Arrow;
+    QImage *UseBackground;
     int BarWidth;
     int BarHeight;
     int x,y,x2,y2;

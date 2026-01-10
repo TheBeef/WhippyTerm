@@ -117,6 +117,7 @@ void VerPanelHandle::paintEvent(QPaintEvent *Event)
     int BarHeight;
     int x,y,x2,y2;
     int ArrowHeight;
+    qreal InverseDPR;
 
     if(DrawPointingLeft)
         Arrow=&Left;
@@ -125,9 +126,13 @@ void VerPanelHandle::paintEvent(QPaintEvent *Event)
 
     brush=painter.brush();
 
-    BarWidth=this->width()-1;
-    BarHeight=this->height()-1;
+    InverseDPR=1.0/this->devicePixelRatio();
+
+    BarWidth=(this->width()-1)*this->devicePixelRatio();
+    BarHeight=(this->height()-1)*this->devicePixelRatio();
     ArrowHeight=Arrow->height();
+
+    painter.scale(InverseDPR,InverseDPR);
 
     /* Fill the whole background */
     if(MouseIn)
@@ -157,6 +162,7 @@ void VerPanelHandle::paintEvent(QPaintEvent *Event)
     x2=BarWidth-BAR_MARGIN_TB;
     y2=BarHeight/2-BAR_CENTER_MARGIN-ArrowHeight/2;
     painter.fillRect(x,y,x2-x,y2-y,brush);
+
     /* Bottom */
     x=BAR_MARGIN_TB;
     y=BarHeight/2+BAR_CENTER_MARGIN+ArrowHeight/2;
@@ -167,13 +173,13 @@ void VerPanelHandle::paintEvent(QPaintEvent *Event)
     /* Draw the arrows */
     painter.drawImage(BAR_MARGIN_TB,6,*Arrow);
     painter.drawImage(BAR_MARGIN_TB,BarHeight/2-ArrowHeight/2,*Arrow);
-    painter.drawImage(BAR_MARGIN_TB,BarHeight-6-ArrowHeight,*Arrow);
+    painter.drawImage(BAR_MARGIN_TB,BarHeight-5-ArrowHeight,*Arrow);
 
     /* Draw the dividers */
     painter.setPen(QColor(0x90,0x90,0x90));
     painter.drawLine(BAR_MARGIN_TB,5+ArrowHeight+5,
             BarWidth-BAR_MARGIN_TB,5+ArrowHeight+5);
     painter.drawLine(BAR_MARGIN_TB,BarHeight-(5+ArrowHeight+5),
-            BarHeight-BAR_MARGIN_TB,BarHeight-(5+ArrowHeight+5));
+            BarWidth-BAR_MARGIN_TB,BarHeight-(5+ArrowHeight+5));
 }
 

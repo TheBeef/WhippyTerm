@@ -31,6 +31,11 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_BUG_FIX,"Fixed a problem with the DPI not drawing the panels open/close bars correctly.",
+            "When running with a high-DPI the dot pattern was being stretched"
+            " and making an odd pattern.  This has changed to diable"
+            " stretching when drawing the panel open/close bars."},
+    {
         NOTETYPE_ENHANCEMENT,"Added error messages to the upload/download",
             "The upload/download file transfer didn't show any errors, just"
             " quit the transfer.  There are now error messages."},

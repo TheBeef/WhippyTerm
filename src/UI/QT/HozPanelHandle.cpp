@@ -105,6 +105,7 @@ void HozPanelHandle::paintEvent(QPaintEvent *Event)
     int BarHeight;
     int x,y,x2,y2;
     int ArrowWidth;
+    qreal InverseDPR;
 
     if(DrawPointingUp)
         Arrow=&Up;
@@ -113,9 +114,13 @@ void HozPanelHandle::paintEvent(QPaintEvent *Event)
 
     brush=painter.brush();
 
-    BarWidth=this->width()-1;
-    BarHeight=this->height()-1;
+    InverseDPR=1.0/this->devicePixelRatio();
+
+    BarWidth=(this->width()-1)*this->devicePixelRatio();
+    BarHeight=(this->height()-1)*this->devicePixelRatio();
     ArrowWidth=Arrow->width();
+
+    painter.scale(InverseDPR,InverseDPR);
 
     /* Fill the whole background */
     if(MouseIn)
@@ -155,7 +160,7 @@ void HozPanelHandle::paintEvent(QPaintEvent *Event)
     /* Draw the arrows */
     painter.drawImage(6,BAR_MARGIN_TB,*Arrow);
     painter.drawImage(BarWidth/2-ArrowWidth/2,BAR_MARGIN_TB,*Arrow);
-    painter.drawImage(BarWidth-6-ArrowWidth,BAR_MARGIN_TB,*Arrow);
+    painter.drawImage(BarWidth-4-ArrowWidth,BAR_MARGIN_TB,*Arrow);
 
     /* Draw the dividers */
     painter.setPen(QColor(0x90,0x90,0x90));

@@ -1884,26 +1884,18 @@ void Form_MainWindow::on_IncomingHex_Save_pushButton_clicked()
 
 bool Form_MainWindow::event(QEvent *event)
 {
+    bool DoLater;
+    bool RetValue;
+
+    DoLater=false;
     if (event->type() == QEvent::ThemeChange)
-    {
+        DoLater=true;
+
+    RetValue=QMainWindow::event(event);
+
+    if(DoLater)
         RethinkColors();
-//        if(OS_IsSystemInDarkMode())
-//        {
-//        }
-//        if (QGuiApplication::styleHints().colorScheme() == Qt::ColorScheme::Dark)
-//        {
-//            // Apply dark theme
-//            qDebug() << "Dark Mode Detected!";
-//            // Use setStyleSheet or setPalette for dark mode
-//        }
-//        else
-//        {
-//            // Apply light theme
-//            qDebug() << "Light Mode Detected!";
-//            // Revert to light theme
-//        }
-        return true; // Event handled
-    }
-    return QMainWindow::event(event);
+
+    return RetValue;
 }
 

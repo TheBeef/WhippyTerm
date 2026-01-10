@@ -153,7 +153,7 @@
           <item>
            <widget class="Line" name="line_4">
             <property name="styleSheet">
-             <string notr="true">color:lightgray;</string>
+             <string notr="true"/>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Plain</enum>
@@ -218,7 +218,7 @@
           <item>
            <widget class="Line" name="line_5">
             <property name="styleSheet">
-             <string notr="true">color:lightgray;</string>
+             <string notr="true"/>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Plain</enum>
@@ -376,7 +376,7 @@
           <item>
            <widget class="Line" name="line_7">
             <property name="styleSheet">
-             <string notr="true">color:lightgray;</string>
+             <string notr="true"/>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Plain</enum>
@@ -415,7 +415,7 @@
           <item>
            <widget class="Line" name="line_6">
             <property name="styleSheet">
-             <string notr="true">color:lightgray;</string>
+             <string notr="true"/>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Plain</enum>
@@ -494,7 +494,7 @@
        <item>
         <widget class="Line" name="line_3">
          <property name="styleSheet">
-          <string notr="true">color:lightgray;</string>
+          <string notr="true"/>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Plain</enum>

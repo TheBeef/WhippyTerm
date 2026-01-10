@@ -122,6 +122,19 @@ Form_MainWindow::Form_MainWindow(QWidget *parent) :
     ui->treeWidget_Buffer_BufferList->header()->resizeSection(0,256);
 
     AddContextMenu2Widget(this,ui->treeWidget_Buffer_BufferList);
+    
+    /* Fix the color of the div line between the toolbar and the main area */
+    QPalette p=this->palette();
+    p.setColor(QPalette::WindowText,this->palette().color(QPalette::Midlight));
+//    p.setColor(QPalette::WindowText,Qt::red); // Just for testing, unrem to make sure you have your bar correct
+    ui->line_3->setPalette(p);
+
+    /* Fix all the div bars in the toolbar */
+    ui->line_6->setPalette(p);
+    ui->line_4->setPalette(p);
+    ui->line_5->setPalette(p);
+    ui->line_7->setPalette(p);
+    
 
 #if OFFICIAL_RELEASE==1
     /* Hide anything that shouldn't be in the release build */

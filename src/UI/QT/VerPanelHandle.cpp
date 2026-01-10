@@ -128,9 +128,9 @@ void VerPanelHandle::paintEvent(QPaintEvent *Event)
     {
         UseBackground=&BackgroundDark;
         if(DrawPointingLeft)
-            Arrow=&Left;
+            Arrow=&LeftDark;
         else
-            Arrow=&Right;
+            Arrow=&RightDark;
     }
     else
     {

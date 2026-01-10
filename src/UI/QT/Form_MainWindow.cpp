@@ -1886,10 +1886,10 @@ bool Form_MainWindow::event(QEvent *event)
 {
     if (event->type() == QEvent::ThemeChange)
     {
-        if(OS_IsSystemInDarkMode())
-        {
-            RethinkColors();
-        }
+        RethinkColors();
+//        if(OS_IsSystemInDarkMode())
+//        {
+//        }
 //        if (QGuiApplication::styleHints().colorScheme() == Qt::ColorScheme::Dark)
 //        {
 //            // Apply dark theme

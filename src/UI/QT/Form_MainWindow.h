@@ -470,6 +470,8 @@ private:
     bool SendEvent(e_MWEventType EventType,union MWEventData *Info);
     bool SendEvent(e_MWEventType EventType);
     class TheMainWindow *MainWindowClassPtr;
+    bool event(QEvent *event);
+    void RethinkColors(void);
 
 void Debug_Send2DebugFn(void (*fn)(uintptr_t ID));
 };

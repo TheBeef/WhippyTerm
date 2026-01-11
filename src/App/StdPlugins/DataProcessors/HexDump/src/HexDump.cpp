@@ -46,7 +46,7 @@ using namespace std;
 
 /*** DEFINES                  ***/
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      HexDumpDecoder // The name to append on the RegisterPlugin() function for built in version
-#define NEEDED_MIN_API_VERSION                  0x02010000  //` DEBUG PAUL: TBD 2.2 likely
+#define NEEDED_MIN_API_VERSION                  0x02020000
 
 #define NUMBER_OF_SETS                          5
 #define MAX_NUMBER_OF_FIELDS                    20

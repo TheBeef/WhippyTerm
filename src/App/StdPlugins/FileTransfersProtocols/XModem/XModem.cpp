@@ -42,7 +42,7 @@ using namespace std;
 
 /*** DEFINES                  ***/
 #define REGISTER_PLUGIN_FUNCTION_PRIV_NAME      XModemUpload // The name to append on the RegisterPlugin() function for built in version
-#define NEEDED_MIN_API_VERSION                  0x02010000  // DEBUG PAUL: This needs to be 2.2
+#define NEEDED_MIN_API_VERSION                  0x02020000
 
 #define XMODEM_MAX_PACKET_SIZE              (3+1024+2)
 #define XMODEM_STANDARD_PACKET_SIZE         128

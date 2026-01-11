@@ -854,8 +854,11 @@ static t_ConnectionWidgetsType *Comport_AllocSettingsWidgets(
             sprintf(buff,"UserBaudRate[%d]",r);
             ValueStr=g_CP_System->KVGetItem(Settings,buff);
 
-            g_CP_UI->SetNumberInputValue(WData->WidgetHandle,
-                    WData->BaudRate[r]->Ctrl,strtoul(ValueStr,NULL,10));
+            if(ValueStr!=NULL)
+            {
+                g_CP_UI->SetNumberInputValue(WData->WidgetHandle,
+                        WData->BaudRate[r]->Ctrl,strtoul(ValueStr,NULL,10));
+            }
         }
     }
     catch(...)
@@ -997,6 +1000,7 @@ static void Comport_ApplySettings(t_PIKVList *Settings)
         sprintf(buff,"UserBaudRate[%d]",r);
         ValueStr=g_CP_System->KVGetItem(Settings,buff);
 
-        g_Comport_Settings.UserBaudRate[r]=strtoul(ValueStr,NULL,10);
+        if(ValueStr!=NULL)
+            g_Comport_Settings.UserBaudRate[r]=strtoul(ValueStr,NULL,10);
     }
 }

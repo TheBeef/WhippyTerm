@@ -68,7 +68,7 @@ static struct ReleaseNote m_Notes_Rel2_2_0_0[]=
             " to be a simpler system that uses less code (less code ="
             " less likely to mess up)"},
     {
-        NOTETYPE_ENHANCEMENT,"Updated Binary HexDump to support Binary Protocol Documentation Standard strings",
+        NOTETYPE_NEW_FEATURE,"Updated Binary HexDump to support Binary Protocol Documentation Standard strings",
             "The settings for the binary hexdump data processor has been"
             " updated to let the user input a binary protocol documentation"
             " standard string that it will then use to color the incoming"
@@ -113,7 +113,7 @@ static struct ReleaseNote m_Notes_Rel2_2_0_0[]=
             " the hex buffer it would just clear the hex panel instead of"
             " coping the last bytes."},
     {
-        NOTETYPE_ENHANCEMENT,"Added new out going hex panel",
+        NOTETYPE_NEW_FEATURE,"Added new out going hex panel",
             "A new hex display was been added to the bottom panel.  This"
             " new display shows the outgoing bytes in hex the same as the"
             " incoming hex panel does.  The Hex panel has also been renamed"
@@ -519,7 +519,7 @@ static struct ReleaseNote m_Notes_Rel1_0_0_0[]=
 const struct ReleaseInfo m_ReleaseNotes[]=
 {
 //    {RELEASE_NOTE("x.x.x.x","-- -- ----",NULL,m_Notes_NEXT)},
-    {RELEASE_NOTE("2.2.0.0","11 Jan 2025","Added support for the Binary Protocol Documentation Standard",m_Notes_Rel2_2_0_0)},
+    {RELEASE_NOTE("2.2.0.0","11 Jan 2026","Added support for the Binary Protocol Documentation Standard",m_Notes_Rel2_2_0_0)},
     {RELEASE_NOTE("2.1.0.0","29 Oct 2025","Scroll Lock cursor key mode",m_Notes_Rel2_1_0_0)},
     {RELEASE_NOTE("2.0.2.0","03 Oct 2025",NULL,m_Notes_Rel2_0_2_0)},
     {RELEASE_NOTE("2.0.1.0","30 Sep 2025",NULL,m_Notes_Rel2_0_1_0)},

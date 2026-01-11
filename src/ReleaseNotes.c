@@ -30,6 +30,12 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_ENHANCEMENT,"Title",
+            "Descrition"},
+};
+
+static struct ReleaseNote m_Notes_Rel2_1_0_0[]=
+{
     {
         NOTETYPE_FUNCTIONALLY_FIX,"Changed side panels to have control together",
             "Moved the controls on the side panels so that the start / abort"
@@ -513,6 +519,7 @@ static struct ReleaseNote m_Notes_Rel1_0_0_0[]=
 const struct ReleaseInfo m_ReleaseNotes[]=
 {
 //    {RELEASE_NOTE("x.x.x.x","-- -- ----",NULL,m_Notes_NEXT)},
+    {RELEASE_NOTE("2.2.0.0","11 Jan 2025","Added support for the Binary Protocol Documentation Standard",m_Notes_Rel2_2_0_0)},
     {RELEASE_NOTE("2.1.0.0","29 Oct 2025","Scroll Lock cursor key mode",m_Notes_Rel2_1_0_0)},
     {RELEASE_NOTE("2.0.2.0","03 Oct 2025",NULL,m_Notes_Rel2_0_2_0)},
     {RELEASE_NOTE("2.0.1.0","30 Sep 2025",NULL,m_Notes_Rel2_0_1_0)},

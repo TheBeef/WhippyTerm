@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1114</width>
-    <height>699</height>
+    <width>895</width>
+    <height>655</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -748,19 +748,6 @@
                            </property>
                           </widget>
                          </item>
-                         <item>
-                          <spacer name="verticalSpacer_3">
-                           <property name="orientation">
-                            <enum>Qt::Vertical</enum>
-                           </property>
-                           <property name="sizeHint" stdset="0">
-                            <size>
-                             <width>20</width>
-                             <height>40</height>
-                            </size>
-                           </property>
-                          </spacer>
-                         </item>
                         </layout>
                        </widget>
                       </item>
@@ -773,6 +760,19 @@
                          <string>Start</string>
                         </property>
                        </widget>
+                      </item>
+                      <item>
+                       <spacer name="verticalSpacer">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>20</width>
+                          <height>40</height>
+                         </size>
+                        </property>
+                       </spacer>
                       </item>
                      </layout>
                     </widget>
@@ -860,19 +860,6 @@
                        </widget>
                       </item>
                       <item>
-                       <spacer name="verticalSpacer_4">
-                        <property name="orientation">
-                         <enum>Qt::Vertical</enum>
-                        </property>
-                        <property name="sizeHint" stdset="0">
-                         <size>
-                          <width>20</width>
-                          <height>40</height>
-                         </size>
-                        </property>
-                       </spacer>
-                      </item>
-                      <item>
                        <widget class="QWidget" name="widget_7" native="true">
                         <layout class="QHBoxLayout" name="horizontalLayout_16">
                          <property name="leftMargin">
@@ -952,6 +939,19 @@
                         </layout>
                        </widget>
                       </item>
+                      <item>
+                       <spacer name="verticalSpacer_3">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>20</width>
+                          <height>40</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
                      </layout>
                     </widget>
                     <widget class="QWidget" name="tab_Download">
@@ -1011,19 +1011,6 @@
                          </item>
                         </layout>
                        </widget>
-                      </item>
-                      <item>
-                       <spacer name="verticalSpacer_5">
-                        <property name="orientation">
-                         <enum>Qt::Vertical</enum>
-                        </property>
-                        <property name="sizeHint" stdset="0">
-                         <size>
-                          <width>20</width>
-                          <height>74</height>
-                         </size>
-                        </property>
-                       </spacer>
                       </item>
                       <item>
                        <widget class="QWidget" name="widget_9" native="true">
@@ -1121,6 +1108,19 @@
                         </layout>
                        </widget>
                       </item>
+                      <item>
+                       <spacer name="verticalSpacer_4">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>20</width>
+                          <height>40</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
                      </layout>
                     </widget>
                     <widget class="QWidget" name="tab_ConnectionOptions">
@@ -1152,19 +1152,6 @@
                             <number>9</number>
                            </property>
                           </layout>
-                         </item>
-                         <item>
-                          <spacer name="verticalSpacer">
-                           <property name="orientation">
-                            <enum>Qt::Vertical</enum>
-                           </property>
-                           <property name="sizeHint" stdset="0">
-                            <size>
-                             <width>20</width>
-                             <height>40</height>
-                            </size>
-                           </property>
-                          </spacer>
                          </item>
                          <item>
                           <widget class="QWidget" name="widget_3" native="true">
@@ -1206,6 +1193,19 @@
                          </item>
                         </layout>
                        </widget>
+                      </item>
+                      <item>
+                       <spacer name="verticalSpacer_5">
+                        <property name="orientation">
+                         <enum>Qt::Vertical</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>20</width>
+                          <height>40</height>
+                         </size>
+                        </property>
+                       </spacer>
                       </item>
                      </layout>
                     </widget>
@@ -2172,7 +2172,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1114</width>
+     <width>895</width>
      <height>23</height>
     </rect>
    </property>

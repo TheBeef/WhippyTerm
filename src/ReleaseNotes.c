@@ -31,6 +31,11 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_FUNCTIONALLY_FIX,"Changed side panels to have control together",
+            "Moved the controls on the side panels so that the start / abort"
+            " and other controls are not at the bottom but are now grouped"
+            " with the other controls."},
+    {
         NOTETYPE_POLISH,"Fixed a number of issues with Dark Mode",
             "Not all widgets where drawn correctly when in dark mode."},
     {

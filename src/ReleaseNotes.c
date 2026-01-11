@@ -31,6 +31,9 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {
+        NOTETYPE_POLISH,"Fixed a number of issues with Dark Mode",
+            "Not all widgets where drawn correctly when in dark mode."},
+    {
         NOTETYPE_BUG_FIX,"Fixed a problem with the DPI not drawing the panels open/close bars correctly.",
             "When running with a high-DPI the dot pattern was being stretched"
             " and making an odd pattern.  This has changed to diable"

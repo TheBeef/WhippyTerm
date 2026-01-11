@@ -26,7 +26,7 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        sudo apt-get install qt6-base-dev qmake6 qt6-tools-dev qt6-base-dev-tools qt6-multimedia-dev fakeroot gzip dpkg
+        sudo apt-get update && sudo apt-get install qt6-base-dev qmake6 qt6-tools-dev qt6-base-dev-tools qt6-multimedia-dev fakeroot gzip dpkg
 
     - name: Build
       working-directory: ./Project

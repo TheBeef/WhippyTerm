@@ -34,7 +34,7 @@ static struct ReleaseNote m_Notes_NEXT[]=
             "Descrition"},
 };
 
-static struct ReleaseNote m_Notes_Rel2_1_0_0[]=
+static struct ReleaseNote m_Notes_Rel2_2_0_0[]=
 {
     {
         NOTETYPE_FUNCTIONALLY_FIX,"Changed side panels to have control together",

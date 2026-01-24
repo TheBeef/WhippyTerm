@@ -1,8 +1,8 @@
 <?xml version="1.0" standalone="no" ?>
 <ExternPluginMaker>
-    <LastBuildFile>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/IODrivers/TestLoopback/TestLoopback.wtp</LastBuildFile>
-    <LinuxFilename>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/IODrivers/TestLoopback/Linux/build/TestLoopback.so</LinuxFilename>
-    <WindowsFilename>/home/paul/Dropbox/Projects/WhippyTerm/ExternPlugins/IODrivers/TestLoopback/Windows/TestLoopback.dll</WindowsFilename>
+    <LastBuildFile>/home/paul/Dropbox/Projects/WhippyTerm/WhippyTerm/ExternPlugins/IODrivers/TestLoopback/TestLoopback.wtp</LastBuildFile>
+    <LinuxFilename>/home/paul/Dropbox/Projects/WhippyTerm/WhippyTerm/ExternPlugins/IODrivers/TestLoopback/Linux/TestLoopback.so</LinuxFilename>
+    <WindowsFilename>/home/paul/Dropbox/Projects/WhippyTerm/WhippyTerm/ExternPlugins/IODrivers/TestLoopback/Windows/TestLoopback.dll</WindowsFilename>
     <MacFilename></MacFilename>
     <RPI64Filename></RPI64Filename>
     <RPI32Filename></RPI32Filename>
@@ -10,9 +10,9 @@
     <InstallFilename>TestLoopback</InstallFilename>
     <Description>A test plugin to echo back any bytes send out back in.  A loopback.</Description>
     <Contributors>Paul Hutchinson</Contributors>
-    <Copyright>2025</Copyright>
-    <ReleaseDate>29 Apr 2025</ReleaseDate>
-    <Version>1.0.1</Version>
+    <Copyright>2026</Copyright>
+    <ReleaseDate>23 Jan 2026</ReleaseDate>
+    <Version>1.1</Version>
     <APIVersion>1.0.0.0</APIVersion>
     <PluginClass>2</PluginClass>
     <PluginSubClass>0</PluginSubClass>

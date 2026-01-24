@@ -725,7 +725,7 @@ static void Session_DefaultSession(struct Session &session)
     /* Panels */
     session.LeftPanelSize=80;
     session.RightPanelSize=80;
-    session.BottomPanelSize=80;
+    session.BottomPanelSize=180;
     session.LeftPanelOpen=false;
     session.RightPanelOpen=false;
     session.BottomPanelOpen=false;

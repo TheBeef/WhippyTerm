@@ -1401,7 +1401,7 @@ void Settings::DefaultSettings(void)
 
     LeftPanelSize=80;
     RightPanelSize=80;
-    BottomPanelSize=80;
+    BottomPanelSize=180;
     LeftPanelOpenOnStartup=false;
     RightPanelOpenOnStartup=false;
     BottomPanelOpenOnStartup=false;

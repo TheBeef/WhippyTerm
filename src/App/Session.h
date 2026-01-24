@@ -102,6 +102,9 @@ struct Session
 
     /* Calc CRC */
     e_CRCType LastSelectedCalcCRCType;
+
+    /* Send Buffers */
+    bool ClearScreenOnSend;
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

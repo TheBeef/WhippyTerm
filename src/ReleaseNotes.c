@@ -30,6 +30,9 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_ENHANCEMENT,"Added new option to clear the screeen on send buffer",
+            "An option has been added that will clear then screen when a send"
+            " buffer is sent."},
     {   NOTETYPE_FUNCTIONALLY_FIX,"Changed default bottom panel size",
             "The bottom panel was not showing the controls, so the default"
             " value has been updated to be 180 instead of 80."},

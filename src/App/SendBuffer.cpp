@@ -825,7 +825,7 @@ void SendBuffer::ClearAllBuffers(void)
 
 /*******************************************************************************
  * NAME:
- *    SendBuffer::SendBuffer
+ *    SendBuffer::Send
  *
  * SYNOPSIS:
  *    bool SendBuffer::Send(class Connection *Con,int BufferIndex);
@@ -846,6 +846,8 @@ void SendBuffer::ClearAllBuffers(void)
  ******************************************************************************/
 bool SendBuffer::Send(class Connection *Con,int BufferIndex)
 {
+    class TheMainWindow *TheMW;
+
     if(BufferIndex>=MAX_SEND_BUFFERS)
         return false;
 
@@ -861,6 +863,10 @@ bool SendBuffer::Send(class Connection *Con,int BufferIndex)
     /* Force the send as if we are doing a block send device we want to send
        everything we just queued */
     Con->TransmitQueuedData();
+
+    TheMW=Con->GetMainWindowHandle();
+    if(TheMW!=NULL)
+        TheMW->HandleSendBufferClearOnSend();
 
     return true;
 }

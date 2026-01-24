@@ -64,6 +64,8 @@ typedef t_MainWindowConnectionList::iterator i_MainWindowConnectionList;
 /***  CLASS DEFINITIONS                ***/
 class TheMainWindow
 {
+    friend void MW_HandleClearScreenOnSendBuffer(bool ClearScreenOnSendSetting);
+
     public:
 void Debug1(void);
 void Debug2(void);
@@ -122,6 +124,7 @@ void Debug6(void);
         void InformOf_BottomPanelChange(int NewSize,bool PanelOpen);
         void InformOf_RightPanelChange(int NewSize,bool PanelOpen);
         void InformOf_LeftPanelChange(int NewSize,bool PanelOpen);
+        void HandleSendBufferClearOnSend(void);
 
         /* Panel handlers */
         class MWConnectionOptions ConnectionOptionsPanel;
@@ -191,6 +194,7 @@ void Debug6(void);
         void DoCalcCRCFromSelection(void);
         void ToggleConnectionUseGlobalSettings(void);
         void RestoreSessionConnections(void);
+        void HandleClearScreenOnSendBuffer(bool ClearScreenOnSendSetting);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
@@ -204,5 +208,6 @@ void MW_InformOfPluginAboutToUninstall(const char *PluginIDStr);
 void MW_InformOfPluginUninstalled(const char *PluginIDStr);
 void MW_InformOfSendBufferChange(int BufferIndex);
 void MW_InformOfCursorKeyModeChange(void);
+void MW_HandleClearScreenOnSendBuffer(bool ClearScreenOnSendSetting);
 
 #endif

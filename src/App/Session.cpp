@@ -474,283 +474,6 @@ bool RegisterSessionOpenConnectionsList_TinyCFG(class TinyCFG &cfg,
 }
 /////////////////////
 
-/* DEBUG PAUL: Removed this because it should be done on a connection by connection basis instead 1 global */
-/////////////////////
-//class LeftPanelTabCFG : public TinyCFGBaseData
-//{
-//   public:
-//      e_LeftPanelTabType *Ptr;
-//      bool LoadData(string &LoadedString);
-//      bool SaveData(string &StoreString);
-//};
-//
-//bool LeftPanelTabCFG::LoadData(string &LoadedString)
-//{
-//    *Ptr=e_LeftPanelTab_Display;
-//
-//    if(strcmp(LoadedString.c_str(),"Display")==0)
-//        *Ptr=e_LeftPanelTab_Display;
-//    if(strcmp(LoadedString.c_str(),"ConOptions")==0)
-//        *Ptr=e_LeftPanelTab_ConOptions;
-//    if(strcmp(LoadedString.c_str(),"Capture")==0)
-//        *Ptr=e_LeftPanelTab_Capture;
-//    if(strcmp(LoadedString.c_str(),"Upload")==0)
-//        *Ptr=e_LeftPanelTab_Upload;
-//    if(strcmp(LoadedString.c_str(),"Download")==0)
-//        *Ptr=e_LeftPanelTab_Download;
-//    if(strcmp(LoadedString.c_str(),"Bridge")==0)
-//        *Ptr=e_LeftPanelTab_Bridge;
-//
-//    return true;
-//}
-//
-//bool LeftPanelTabCFG::SaveData(string &StoreString)
-//{
-//    switch(*Ptr)
-//    {
-//        default:
-//        case e_LeftPanelTab_Display:
-//            StoreString="Display";
-//        break;
-//        case e_LeftPanelTab_ConOptions:
-//            StoreString="ConOptions";
-//        break;
-//        case e_LeftPanelTab_Capture:
-//            StoreString="Capture";
-//        break;
-//        case e_LeftPanelTab_Upload:
-//            StoreString="Upload";
-//        break;
-//        case e_LeftPanelTab_Download:
-//            StoreString="Download";
-//        break;
-//        case e_LeftPanelTab_Bridge:
-//            StoreString="Bridge";
-//        break;
-//    }
-//    if(*Ptr>=e_LeftPanelTabMAX)
-//        StoreString="Display";
-//    return true;
-//}
-//
-//static bool RegisterLeftPanelTab(class TinyCFG &cfg,const char *XmlName,
-//        e_LeftPanelTabType &Data)
-//{
-//    class LeftPanelTabCFG *NewDataClass;
-//
-//    /* Make a new class to handle this new piece of data */
-//    try
-//    {
-//        NewDataClass=new LeftPanelTabCFG;
-//    }
-//    catch(std::bad_alloc const &)
-//    {
-//        return false;
-//    }
-//
-//    /* Setup the data */
-//    NewDataClass->Ptr=&Data;
-//    NewDataClass->XmlName=XmlName;
-//
-//    return cfg.RegisterGeneric(NewDataClass);
-//}
-//////////////////////
-//class RightPanelTabCFG : public TinyCFGBaseData
-//{
-//   public:
-//      e_RightPanelTabType *Ptr;
-//      bool LoadData(string &LoadedString);
-//      bool SaveData(string &StoreString);
-//};
-//
-//bool RightPanelTabCFG::LoadData(string &LoadedString)
-//{
-//    *Ptr=e_RightPanelTab_StopWatch;
-//
-//    if(strcmp(LoadedString.c_str(),"StopWatch")==0)
-//        *Ptr=e_RightPanelTab_StopWatch;
-//
-//    return true;
-//}
-//
-//bool RightPanelTabCFG::SaveData(string &StoreString)
-//{
-//    switch(*Ptr)
-//    {
-//        case e_RightPanelTab_StopWatch:
-//            StoreString="StopWatch";
-//        break;
-//        case e_RightPanelTabMAX:
-//        break;
-//    }
-//    if(*Ptr>=e_RightPanelTabMAX)
-//        StoreString="StopWatch";
-//    return true;
-//}
-//
-//static bool RegisterRightPanelTab(class TinyCFG &cfg,const char *XmlName,
-//        e_RightPanelTabType &Data)
-//{
-//    class RightPanelTabCFG *NewDataClass;
-//
-//    /* Make a new class to handle this new piece of data */
-//    try
-//    {
-//        NewDataClass=new RightPanelTabCFG;
-//    }
-//    catch(std::bad_alloc const &)
-//    {
-//        return false;
-//    }
-//
-//    /* Setup the data */
-//    NewDataClass->Ptr=&Data;
-//    NewDataClass->XmlName=XmlName;
-//
-//    return cfg.RegisterGeneric(NewDataClass);
-//}
-//////////////////////
-//class BottomPanelTabCFG : public TinyCFGBaseData
-//{
-//   public:
-//      e_BottomPanelTabType *Ptr;
-//      bool LoadData(string &LoadedString);
-//      bool SaveData(string &StoreString);
-//};
-//
-//bool BottomPanelTabCFG::LoadData(string &LoadedString)
-//{
-//    *Ptr=e_BottomPanelTab_IncomingHex;
-//
-//    if(strcmp(LoadedString.c_str(),"Hex")==0)
-//        *Ptr=e_BottomPanelTab_IncomingHex;
-//    if(strcmp(LoadedString.c_str(),"Injection")==0)
-//        *Ptr=e_BottomPanelTab_Injection;
-//    if(strcmp(LoadedString.c_str(),"Buffers")==0)
-//        *Ptr=e_BottomPanelTab_Buffers;
-//
-//    return true;
-//}
-//
-//bool BottomPanelTabCFG::SaveData(string &StoreString)
-//{
-//    switch(*Ptr)
-//    {
-//        case e_BottomPanelTab_IncomingHex:
-//            StoreString="Hex";
-//        break;
-//        case e_BottomPanelTab_Injection:
-//            StoreString="Injection";
-//        break;
-//        case e_BottomPanelTab_Buffers:
-//            StoreString="Buffers";
-//        break;
-//        case e_BottomPanelTabMAX:
-//        break;
-//    }
-//    if(*Ptr>=e_BottomPanelTabMAX)
-//        StoreString="Hex";
-//    return true;
-//}
-//
-//static bool RegisterBottomPanelTab(class TinyCFG &cfg,const char *XmlName,
-//        e_BottomPanelTabType &Data)
-//{
-//    class BottomPanelTabCFG *NewDataClass;
-//
-//    /* Make a new class to handle this new piece of data */
-//    try
-//    {
-//        NewDataClass=new BottomPanelTabCFG;
-//    }
-//    catch(std::bad_alloc const &)
-//    {
-//        return false;
-//    }
-//
-//    /* Setup the data */
-//    NewDataClass->Ptr=&Data;
-//    NewDataClass->XmlName=XmlName;
-//
-//    return cfg.RegisterGeneric(NewDataClass);
-//}
-//////////////////////
-
-static void Session_RegisterAllMembers(struct Session &session,
-        class TinyCFG &cfg)
-{
-    cfg.StartBlock("MainWindow");
-    cfg.Register("AppMaximized",session.AppMaximized);
-    cfg.Register("WindowPosX",session.WindowPosX);
-    cfg.Register("WindowPosY",session.WindowPosY);
-    cfg.Register("WindowWidth",session.WindowWidth);
-    cfg.Register("WindowHeight",session.WindowHeight);
-    cfg.Register("SendBufferPath",session.SendBufferPath);
-
-    cfg.StartBlock("Panels");
-    cfg.Register("LeftPanelSize",session.LeftPanelSize);
-    cfg.Register("RightPanelSize",session.RightPanelSize);
-    cfg.Register("BottomPanelSize",session.BottomPanelSize);
-    cfg.Register("LeftPanelOpen",session.LeftPanelOpen);
-    cfg.Register("RightPanelOpen",session.RightPanelOpen);
-    cfg.Register("BottomPanelOpen",session.BottomPanelOpen);
-    cfg.EndBlock();
-
-    cfg.EndBlock();
-
-    cfg.StartBlock("Connections");
-    cfg.Register("LastConnectionOpened",session.LastConnectionOpened);
-    RegisterConnectionOptions_TinyCFG(cfg,"Options",session.ConnectionsOptions);
-
-    RegisterSessionOpenConnectionsList_TinyCFG(cfg,"OpenConnections",session.OpenConnections);
-
-    cfg.EndBlock();
-
-    cfg.StartBlock("Transfers");
-    RegisterConUploadOptions_TinyCFG(cfg,"UploadOptions",session.LastUsedUploadOptions);
-    RegisterConDownloadOptions_TinyCFG(cfg,"DownloadOptions",session.LastUsedDownloadOptions);
-    cfg.EndBlock();
-
-    cfg.StartBlock("Buffers");
-    RegisterCRCType(cfg,"LastSelectedCRCType",session.LastSelectedCRCType);
-    cfg.EndBlock();
-
-    cfg.StartBlock("CalcCRC");
-    RegisterCRCType(cfg,"LastSelectedCalcCRCType",session.LastSelectedCalcCRCType);
-    cfg.EndBlock();
-}
-
-static void Session_DefaultSession(struct Session &session)
-{
-    /* Panels */
-    session.LeftPanelSize=80;
-    session.RightPanelSize=80;
-    session.BottomPanelSize=180;
-    session.LeftPanelOpen=false;
-    session.RightPanelOpen=false;
-    session.BottomPanelOpen=false;
-
-    /* Other */
-    session.AppMaximized=false;
-    session.WindowPosX=-1;
-    session.WindowPosY=-1;
-    session.WindowWidth=640;
-    session.WindowHeight=480;
-
-    session.LastConnectionOpened="";
-    session.ConnectionsOptions.clear();
-    session.LastUsedUploadOptions.clear();
-    session.LastUsedDownloadOptions.clear();
-    session.OpenConnections.clear();
-
-    /* Edit Buffer */
-    session.LastSelectedCRCType=e_CRC_CRC32;
-
-    /* Calc Buffer */
-    session.LastSelectedCalcCRCType=e_CRC_CRC32;
-}
-
-///////////////////
 class CRCTypeCFG : public TinyCFGBaseData
 {
    public:
@@ -1053,4 +776,86 @@ static bool RegisterCRCType(class TinyCFG &cfg,const char *XmlName,
     NewDataClass->XmlName=XmlName;
 
     return cfg.RegisterGeneric(NewDataClass);
+}
+///////////////////
+
+static void Session_RegisterAllMembers(struct Session &session,
+        class TinyCFG &cfg)
+{
+    cfg.StartBlock("MainWindow");
+    cfg.Register("AppMaximized",session.AppMaximized);
+    cfg.Register("WindowPosX",session.WindowPosX);
+    cfg.Register("WindowPosY",session.WindowPosY);
+    cfg.Register("WindowWidth",session.WindowWidth);
+    cfg.Register("WindowHeight",session.WindowHeight);
+    cfg.Register("SendBufferPath",session.SendBufferPath);
+
+    cfg.StartBlock("Panels");
+    cfg.Register("LeftPanelSize",session.LeftPanelSize);
+    cfg.Register("RightPanelSize",session.RightPanelSize);
+    cfg.Register("BottomPanelSize",session.BottomPanelSize);
+    cfg.Register("LeftPanelOpen",session.LeftPanelOpen);
+    cfg.Register("RightPanelOpen",session.RightPanelOpen);
+    cfg.Register("BottomPanelOpen",session.BottomPanelOpen);
+    cfg.EndBlock();
+
+    cfg.EndBlock();
+
+    cfg.StartBlock("Connections");
+    cfg.Register("LastConnectionOpened",session.LastConnectionOpened);
+    RegisterConnectionOptions_TinyCFG(cfg,"Options",session.ConnectionsOptions);
+
+    RegisterSessionOpenConnectionsList_TinyCFG(cfg,"OpenConnections",session.OpenConnections);
+
+    cfg.EndBlock();
+
+    cfg.StartBlock("Transfers");
+    RegisterConUploadOptions_TinyCFG(cfg,"UploadOptions",session.LastUsedUploadOptions);
+    RegisterConDownloadOptions_TinyCFG(cfg,"DownloadOptions",session.LastUsedDownloadOptions);
+    cfg.EndBlock();
+
+    cfg.StartBlock("Buffers");
+    RegisterCRCType(cfg,"LastSelectedCRCType",session.LastSelectedCRCType);
+    cfg.EndBlock();
+
+    cfg.StartBlock("CalcCRC");
+    RegisterCRCType(cfg,"LastSelectedCalcCRCType",session.LastSelectedCalcCRCType);
+    cfg.EndBlock();
+
+    cfg.StartBlock("SendBuffer");
+    cfg.Register("ClearScreenOnSend",session.ClearScreenOnSend);
+    cfg.EndBlock();
+}
+
+static void Session_DefaultSession(struct Session &session)
+{
+    /* Panels */
+    session.LeftPanelSize=80;
+    session.RightPanelSize=80;
+    session.BottomPanelSize=180;
+    session.LeftPanelOpen=false;
+    session.RightPanelOpen=false;
+    session.BottomPanelOpen=false;
+
+    /* Other */
+    session.AppMaximized=false;
+    session.WindowPosX=-1;
+    session.WindowPosY=-1;
+    session.WindowWidth=640;
+    session.WindowHeight=480;
+
+    session.LastConnectionOpened="";
+    session.ConnectionsOptions.clear();
+    session.LastUsedUploadOptions.clear();
+    session.LastUsedDownloadOptions.clear();
+    session.OpenConnections.clear();
+
+    /* Edit Buffer */
+    session.LastSelectedCRCType=e_CRC_CRC32;
+
+    /* Calc Buffer */
+    session.LastSelectedCalcCRCType=e_CRC_CRC32;
+
+    /* Send Buffer */
+    session.ClearScreenOnSend=false;
 }

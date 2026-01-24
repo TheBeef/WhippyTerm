@@ -449,6 +449,10 @@ private slots:
     
     void on_IncomingHex_Save_pushButton_clicked();
     
+    void on_ClearScreenOnSend_checkBox_clicked(bool checked);
+    
+    void on_actionClear_Screen_On_Send_Buffer_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

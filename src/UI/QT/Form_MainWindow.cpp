@@ -1901,3 +1901,15 @@ bool Form_MainWindow::event(QEvent *event)
     return QMainWindow::event(event);
 }
 
+
+void Form_MainWindow::on_ClearScreenOnSend_checkBox_clicked(bool checked)
+{
+    DoCheckboxTriggered(e_UIMWCheckbox_SendBufferClearScreenOnSend,checked);
+}
+
+
+void Form_MainWindow::on_actionClear_Screen_On_Send_Buffer_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_ClearScreenOnSend);
+}
+

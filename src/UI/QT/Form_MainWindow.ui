@@ -1828,7 +1828,7 @@
               <item>
                <widget class="QTabWidget" name="BottomPanel_tabWidget">
                 <property name="currentIndex">
-                 <number>0</number>
+                 <number>2</number>
                 </property>
                 <widget class="QWidget" name="Hex_Tab">
                  <attribute name="title">
@@ -2139,6 +2139,13 @@
                          </spacer>
                         </item>
                         <item>
+                         <widget class="QCheckBox" name="ClearScreenOnSend_checkBox">
+                          <property name="text">
+                           <string>Clear Screen On Send</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
                          <widget class="QPushButton" name="pushButton_Buffer_Send">
                           <property name="text">
                            <string>Send</string>
@@ -2430,6 +2437,8 @@
     <addaction name="actionSend_Buffer"/>
     <addaction name="actionEdit_Send_Buffer"/>
     <addaction name="actionClear_All_Buffers"/>
+    <addaction name="separator"/>
+    <addaction name="actionClear_Screen_On_Send_Buffer"/>
     <addaction name="separator"/>
     <addaction name="actionLoad_Buffer_Set"/>
     <addaction name="actionSave_Buffer_Set"/>
@@ -3908,6 +3917,14 @@
    </property>
    <property name="text">
     <string>Right Side Panel</string>
+   </property>
+  </action>
+  <action name="actionClear_Screen_On_Send_Buffer">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Clear Screen On Send Buffer</string>
    </property>
   </action>
  </widget>

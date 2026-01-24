@@ -403,6 +403,36 @@ void MW_InformOfCursorKeyModeChange(void)
 
 /*******************************************************************************
  * NAME:
+ *    MW_HandleClearScreenOnSendBuffer
+ *
+ * SYNOPSIS:
+ *    void MW_HandleClearScreenOnSendBuffer(bool ClearScreenOnSendSetting);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called to update the clear screen on send checkboxes
+ *    on all the main windows.  It calls the HandleClearScreenOnSendBuffer()
+ *    method on each of the main windows.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MW_HandleClearScreenOnSendBuffer(bool ClearScreenOnSendSetting)
+{
+    i_MainWindowsListType MW;
+
+    /* Update all the main windows */
+    for(MW=m_MainWindowsList.begin();MW!=m_MainWindowsList.end();MW++)
+        (*MW)->HandleClearScreenOnSendBuffer(ClearScreenOnSendSetting);
+}
+
+/*******************************************************************************
+ * NAME:
  *    TheMainWindow::TheMainWindow
  *
  * SYNOPSIS:
@@ -758,6 +788,9 @@ void TheMainWindow::RestoreFromSession(void)
         UIMW_SetRightPanel(UIWin,g_Session.RightPanelSize,
                 g_Session.RightPanelOpen);
     }
+
+    /* Send Buffers */
+    HandleClearScreenOnSendBuffer(g_Session.ClearScreenOnSend);
 }
 
 /*******************************************************************************
@@ -4949,6 +4982,69 @@ void TheMainWindow::InformOfCursorKeyModeChange(void)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::HandleSendBufferClearOnSend
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::HandleSendBufferClearOnSend(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function handles the clear screen on send function.  This should
+ *    be called when a send buffer is sent.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::HandleSendBufferClearOnSend(void)
+{
+    if(g_Session.ClearScreenOnSend)
+        ClearScreen();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::HandleClearScreenOnSendBuffer
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::HandleClearScreenOnSendBuffer(bool ClearScreenOnSendSetting);
+ *
+ * PARAMETERS:
+ *    ClearScreenOnSendSetting [I] -- Is the checkbox checked or not.
+ *
+ * FUNCTION:
+ *    This function updates the clear screen on send GUI with the new setting
+ *    of 'ClearScreenOnSendSetting'.
+ *
+ *    It does not update the setting it's self just the GUI.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    Call MW_HandleClearScreenOnSendBuffer() to update all the main windows.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::HandleClearScreenOnSendBuffer(bool ClearScreenOnSendSetting)
+{
+    t_UICheckboxCtrl *Checkbox;
+    e_UIMenuCtrl *Menu;
+
+    Checkbox=UIMW_GetCheckboxHandle(UIWin,
+            e_UIMWCheckbox_SendBufferClearScreenOnSend);
+    UICheckCheckbox(Checkbox,ClearScreenOnSendSetting);
+    Menu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_ClearScreenOnSend);
+    UICheckMenu(Menu,ClearScreenOnSendSetting);
+}
+
+/*******************************************************************************
+ * NAME:
  *    MW_Event
  *
  * SYNOPSIS:
@@ -5921,6 +6017,11 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_OutGoingHexSave:
             OutGoingHexDisplayPanel.Save();
+        break;
+        case e_Cmd_SendBufferClearScreenOnSendToggle:
+            /* Toggle it */
+            g_Session.ClearScreenOnSend=!g_Session.ClearScreenOnSend;
+            MW_HandleClearScreenOnSendBuffer(g_Session.ClearScreenOnSend);
         break;
 
         case e_CmdMAX:

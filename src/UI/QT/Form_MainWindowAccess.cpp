@@ -310,6 +310,8 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionBottom_Panel;
         case e_UIMWMenu_RightPanel:
             return (e_UIMenuCtrl *)realwin->ui->actionRight_Side_Panel;
+        case e_UIMWMenu_ClearScreenOnSend:
+            return (e_UIMenuCtrl *)realwin->ui->actionClear_Screen_On_Send_Buffer;
         case e_UIMWMenuMAX:
         default:
         break;
@@ -510,6 +512,8 @@ t_UICheckboxCtrl *UIMW_GetCheckboxHandle(t_UIMainWindow *win,e_UIMWCheckboxType 
             return (t_UICheckboxCtrl *)realwin->ui->checkBox_Bridge_Lockout2;
         case e_UIMWCheckbox_OutGoingHexDisplay_Paused:
             return (t_UICheckboxCtrl *)realwin->ui->checkBox_OutGoing_HexPaused;
+        case e_UIMWCheckbox_SendBufferClearScreenOnSend:
+            return (t_UICheckboxCtrl *)realwin->ui->ClearScreenOnSend_checkBox;
 
         case e_UIMWCheckboxMAX:
         default:

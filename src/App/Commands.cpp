@@ -212,6 +212,7 @@ const char *m_CmdNames[]=
     "OutGoingHexDisplay_CopyAs",            // e_Cmd_OutGoingHexDisplay_CopyAs
     "InComingHexSave",                      // e_Cmd_InComingHexSave
     "OutGoingHexSave",                      // e_Cmd_OutGoingHexSave
+    "SendBufferClearScreenOnSendToggle",    // e_Cmd_SendBufferClearScreenOnSendToggle
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -329,6 +330,7 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_ToggleLeftPanel,                  // e_UIMWMenu_LeftPanel
     e_Cmd_ToggleBottomPanel,                // e_UIMWMenu_BottomPanel
     e_Cmd_ToggleRightPanel,                 // e_UIMWMenu_RightPanel
+    e_Cmd_SendBufferClearScreenOnSendToggle,// e_UIMWMenu_ClearScreenOnSend
 };
 
 e_CmdType m_Cmd2SendBufferContextMenuMapping[]=
@@ -398,6 +400,7 @@ e_CmdType m_Cmd2CheckboxMapping[]=
     e_Cmd_BridgeLockConnection1,            // e_UIMWCheckbox_Bridge_Lock1
     e_Cmd_BridgeLockConnection2,            // e_UIMWCheckbox_Bridge_Lock2
     e_Cmd_HexDisplay_OutGoingPauseToggle,   // e_UIMWCheckbox_OutGoingHexDisplay_Paused
+    e_Cmd_SendBufferClearScreenOnSendToggle,// e_UIMWCheckbox_SendBufferClearScreenOnSend
 };
 
 /*******************************************************************************
@@ -856,6 +859,7 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     // e_Cmd_OutGoingHexDisplay_Clear
     // e_Cmd_OutGoingHexDisplay_Copy
     // e_Cmd_OutGoingHexDisplay_CopyAs
+    // e_Cmd_SendBufferClearScreenOnSendToggle
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A

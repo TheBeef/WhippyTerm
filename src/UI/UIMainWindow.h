@@ -196,6 +196,7 @@ typedef enum
     e_UIMWMenu_LeftPanel,
     e_UIMWMenu_BottomPanel,
     e_UIMWMenu_RightPanel,
+    e_UIMWMenu_ClearScreenOnSend,
     e_UIMWMenuMAX
 } e_UIMWMenuType;
 
@@ -298,6 +299,7 @@ typedef enum
     e_UIMWCheckbox_Bridge_Lock1,
     e_UIMWCheckbox_Bridge_Lock2,
     e_UIMWCheckbox_OutGoingHexDisplay_Paused,
+    e_UIMWCheckbox_SendBufferClearScreenOnSend,
     e_UIMWCheckboxMAX
 } e_UIMWCheckboxType;
 

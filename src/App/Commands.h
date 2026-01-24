@@ -203,6 +203,7 @@ typedef enum
     e_Cmd_OutGoingHexDisplay_CopyAs,
     e_Cmd_InComingHexSave,
     e_Cmd_OutGoingHexSave,
+    e_Cmd_SendBufferClearScreenOnSendToggle,
     e_CmdMAX
 } e_CmdType;
 

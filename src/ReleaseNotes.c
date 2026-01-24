@@ -30,7 +30,7 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
-    {   NOTETYPE_ENHANCEMENT,"Changed default bottom panel size",
+    {   NOTETYPE_FUNCTIONALLY_FIX,"Changed default bottom panel size",
             "The bottom panel was not showing the controls, so the default"
             " value has been updated to be 180 instead of 80."},
 };

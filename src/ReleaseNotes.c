@@ -34,6 +34,16 @@ static struct ReleaseNote m_Notes_NEXT[]=
             "Descrition"},
 };
 
+static struct ReleaseNote m_Notes_Rel2_2_1_0[]=
+{
+    {
+        NOTETYPE_BUG_FIX,"Upload files that are to small crashs",
+            "If you tried sending a small file it would crash WhippyTerm."
+            "  If the file all fit in the first send buffer then the upload"
+            " system would close the connected before then try updating"
+            " the current position on a closed file and would crash.  Fixed."},
+};
+
 static struct ReleaseNote m_Notes_Rel2_2_0_0[]=
 {
     {
@@ -519,6 +529,7 @@ static struct ReleaseNote m_Notes_Rel1_0_0_0[]=
 const struct ReleaseInfo m_ReleaseNotes[]=
 {
 //    {RELEASE_NOTE("x.x.x.x","-- -- ----",NULL,m_Notes_NEXT)},
+    {RELEASE_NOTE("2.2.1.0","26 Jan 2026","Bug fix",m_Notes_Rel2_2_1_0)},
     {RELEASE_NOTE("2.2.0.0","11 Jan 2026","Added support for the Binary Protocol Documentation Standard",m_Notes_Rel2_2_0_0)},
     {RELEASE_NOTE("2.1.0.0","29 Oct 2025","Scroll Lock cursor key mode",m_Notes_Rel2_1_0_0)},
     {RELEASE_NOTE("2.0.2.0","03 Oct 2025",NULL,m_Notes_Rel2_0_2_0)},

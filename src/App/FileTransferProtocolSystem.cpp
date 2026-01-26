@@ -1311,15 +1311,15 @@ bool FTPS_UploadFile(t_FTPData *FData,class Connection *ParentCon,
 
         FilenameOnly=Basename(Filename);
 
+        /* Tell the connection that we have 0 progress */
+        RealFData->Con->UploadSetNumberOfBytesSent(0);
+
         if(!RealFData->HandlerAPI->StartUpload((t_FTPSystemData *)RealFData,
                 RealFData->HandlerData,Filename,FilenameOnly,FileSize,
                 PIS_ConvertKVList2PIKVList(Options)))
         {
             throw(0);
         }
-
-        /* Tell the connection that we have 0 progress */
-        RealFData->Con->UploadSetNumberOfBytesSent(0);
     }
     catch(...)
     {

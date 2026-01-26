@@ -37,7 +37,7 @@ static struct ReleaseNote m_Notes_NEXT[]=
 static struct ReleaseNote m_Notes_Rel2_2_1_0[]=
 {
     {
-        NOTETYPE_BUG_FIX,"Upload files that are to small crashs",
+        NOTETYPE_BUG_FIX,"Upload files that are to small crashes",
             "If you tried sending a small file it would crash WhippyTerm."
             "  If the file all fit in the first send buffer then the upload"
             " system would close the connected before then try updating"

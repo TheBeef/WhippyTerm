@@ -742,7 +742,7 @@ void MWUpload::Abort(void)
  *    MWUpload::SelectFilename
  *
  * SYNOPSIS:
- *    void MWUpload::SelectFilename(void);
+ *    bool MWUpload::SelectFilename(void);
  *
  * PARAMETERS:
  *    NONE
@@ -751,19 +751,21 @@ void MWUpload::Abort(void)
  *    This function selects a filename for the upload.
  *
  * RETURNS:
- *    NONE
+ *    true -- User selected ok
+ *    false -- User selected cancel or there was an error
  *
  * SEE ALSO:
  *    
  ******************************************************************************/
-void MWUpload::SelectFilename(void)
+bool MWUpload::SelectFilename(void)
 {
     std::string Path;
     std::string Filename;
     t_UITextInputCtrl *FilenameInput;
+    bool RetValue;
 
     if(!PanelActive)
-        return;
+        return false;
 
     FilenameInput=UIMW_GetTxtInputHandle(UIWin,e_UIMWTxtInput_Upload_Filename);
 
@@ -772,15 +774,21 @@ void MWUpload::SelectFilename(void)
     Filename="";
     if(Path=="")
         Filename="Upload.txt";
-    if(UI_LoadFileReq("Upload file",Path,Filename,
-            "All Files|*\n",0))
+    if(UI_LoadFileReq("Upload file",Path,Filename,"All Files|*\n",0))
     {
         Filename=UI_ConcatFile2Path(Path,Filename);
         UISetTextCtrlText(FilenameInput,Filename.c_str());
         MW->ActiveCon->SetUploadFilename(Filename.c_str());
+        RetValue=true;
+    }
+    else
+    {
+        RetValue=false;
     }
 
     RethinkUI();
+
+    return RetValue;
 }
 
 /*******************************************************************************
@@ -999,12 +1007,13 @@ void MWUpload::UploadMenuTriggered(uint64_t ID)
     }
 
     /* Prompt for the filename (don't trust the input widget) */
-    SelectFilename();
+    if(SelectFilename())
+    {
+        /* Show the upload panel */
+        MW->ShowPanel(e_MWPanels_Upload);
 
-    /* Show the upload panel */
-    MW->ShowPanel(e_MWPanels_Upload);
-
-    Start();
+        Start();
+    }
 }
 
 /*******************************************************************************

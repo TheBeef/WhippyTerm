@@ -42,6 +42,11 @@ static struct ReleaseNote m_Notes_Rel2_2_1_0[]=
             "  If the file all fit in the first send buffer then the upload"
             " system would close the connected before then try updating"
             " the current position on a closed file and would crash.  Fixed."},
+    {
+        NOTETYPE_BUG_FIX,"Pressing cancel on the send file file requester didn't abort upload",
+            "When you where uploading a RAW file from the menu, but select to"
+            " cancel the upload, WhippyTerm just went ahead an uploads the "
+            "file anyway.  This has been fixed."},
 };
 
 static struct ReleaseNote m_Notes_Rel2_2_0_0[]=

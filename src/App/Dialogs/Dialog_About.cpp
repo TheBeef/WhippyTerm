@@ -84,7 +84,7 @@ void RunAboutDialog(void)
             __TIME__);
     UISetAboutText(buff,e_UIAboutTab_About);
 
-    snprintf(buff,sizeof(buff)-1,"Paul Hutchinson<br/>hutchinson.paul@gmail.com");
+    snprintf(buff,sizeof(buff)-1,"Paul Hutchinson<br/>paul@whippyterm.com");
     UISetAboutText(buff,e_UIAboutTab_Author);
 
     snprintf(buff,sizeof(buff)-1,

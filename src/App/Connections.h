@@ -37,6 +37,7 @@
 #include "App/Display/DisplayBase.h"
 #include "App/IOSystem.h"
 #include "App/MaxSizes.h"
+#include "App/ScriptingSystem.h"
 #include "App/Settings.h"
 #include "UI/UIClipboard.h"
 #include "UI/UITimers.h"
@@ -89,6 +90,7 @@ typedef enum
     e_ConWriteSource_Buffers,
     e_ConWriteSource_BlockSend,
     e_ConWriteSource_Bridge,
+    e_ConWriteSource_Script,
     e_ConWriteSourceMAX
 } e_ConWriteSourceType;
 
@@ -441,6 +443,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void InformOfDisconnected(void);
         bool InformOfDataAvaiable(void);
         void InformOfCursorKeyModeChange(void);
+        void InformOfScriptDone(struct ScriptHandle *Script);
 //        struct ProcessorConData *GetCurrentProcessorData(void);
         bool GetConnectedStatus(void);
         void SetFGColor(uint32_t FGColor);
@@ -454,7 +457,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
                 uintptr_t Arg3,uintptr_t Arg4,uintptr_t Arg5,uintptr_t Arg6);
         void GetCursorXY(int *RetCursorX,int *RetCursorY);
-        bool InsertString(uint8_t *Str,uint32_t Len);
+        bool InsertString(const uint8_t *Str,uint32_t Len);
         void GetScreenSize(int32_t *RetRows,int32_t *RetColumns);
         void SetConnectedState(bool Connected);
         void ToggleConnectedState(void);
@@ -504,6 +507,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void MoveMark(t_DataProMark *Mark,int Amount);
         const uint8_t *GetMarkString(t_DataProMark *Mark,uint32_t *Size,uint32_t Offset,uint32_t Len);
 
+        void SuppressFrozenStream(bool Suppress);
         void FreezeStream(void);
         void ReleaseFrozenStream(void);
         void ClearFrozenStream(void);
@@ -534,8 +538,14 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         const struct ComTestStats *GetComTestStats(void);
         void RegisterComTestUpdateFn(void (*Update)(class Connection *));
 
+        void DisableTxKeyboard(bool Enabled);
+
         bool UsingCustomSettings;
         class ConSettings CustomSettings;
+
+        /* Scripting */
+        struct ScriptHandle *GetScriptHandle(e_SysScriptType TypeOfScript);
+        void SetScriptHandle(e_SysScriptType TypeOfScript,struct ScriptHandle *Script);
 
     private:
         void *OurParentWidget;
@@ -585,12 +595,16 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
 
         /* Frozen */
         bool InputFrozen;
+        bool SupressFrozen; // If something wants to ignore the forzen queuing then set this (this should be tmp, don't set and leave it)
         struct Connection_FrozenQueueEntry *FrozenQueue;
         struct Connection_FrozenQueueEntry *FrozenQueueEnd;
         bool DoingIncomingByteProcessing;
         uint_fast32_t FrozenQueueStrLen;    // We add up the length that we will be returning from GetFrozenString() so we don't need to loop over the string
         uint8_t *FrozenRetStr;
         uint_fast32_t FrozenRetStrBufferSize;
+
+        /* Scripting */
+        struct ScriptHandle *RunningScripts[e_SysScriptMAX];
 
         void FreeConnectionResources(bool FreeDB);
         void HandleCaptureIncomingData(const uint8_t *Inbuff,int bytes);
@@ -618,11 +632,14 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         bool FrozenQueueIfNeeded_SetULineColor(uint32_t NewColor);
         bool FrozenQueueIfNeeded_SetAttrib(uint32_t NewAttrib);
         bool FrozenQueueIfNeeded_Function(e_ConFuncType Func,uintptr_t Arg1,uintptr_t Arg2,uintptr_t Arg3,uintptr_t Arg4,uintptr_t Arg5,uintptr_t Arg6);
-        bool FrozenQueueIfNeeded_InsertStr(uint8_t *Str,uint32_t Len);
+        bool FrozenQueueIfNeeded_InsertStr(const uint8_t *Str,uint32_t Len);
         bool FrozenQueueIfNeeded_Bell(bool VisualOnly);
         void Add2FrozenQueue(struct Connection_FrozenQueueEntry *Ent);
         void FreeFrozenQueue(void);
         void PlayBackFrozenQueue(void);
+
+        /* Things that can be enabled / disabled */
+        bool TxKeyboardEnabled; // Currently can only be set from scripts, because when a script ends it reenables this
 
         /* Call backs */
         void InformOfDelayTransmitTimeout(void);

@@ -3942,3 +3942,41 @@ void DisplayBinary::MovePageDown(void)
 {
     ScrollScreen(0,ScreenHeightPx/CharHeightPx);
 }
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetScreenSize
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::GetScreenSize(uint32_t *Width,uint32_t *Height);
+ *
+ * PARAMETERS:
+ *    Width [O] -- The width (in chars) of the screen.  This is the average.
+ *    Height [O] -- The height (in chars) of the screen
+ *
+ * FUNCTION:
+ *    This function gets the size of the screen.  This is basicly the size
+ *    of the canvas divided by the current font height/width.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::GetScreenSize(uint32_t *Width,uint32_t *Height)
+{
+    int width;
+    int height;
+
+    width=CharWidthPx;
+    if(width<0)
+        width=1;
+
+    height=CharHeightPx;
+    if(height<0)
+        height=1;
+
+    *Width=ScreenWidthPx/width;
+    *Height=ScreenHeightPx/height;
+}

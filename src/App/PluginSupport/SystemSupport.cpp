@@ -34,6 +34,7 @@
 #include "App/ConnectionsGlobal.h"
 #include "App/DataProcessorsSystem.h"
 #include "App/FileTransferProtocolSystem.h"
+#include "App/ScriptingSystem.h"
 #include "App/PluginSupport/ExperimentalID.h"
 #include "App/PluginSupport/KeyValueSupport.h"
 #include "App/PluginSupport/PluginUISupport.h"
@@ -50,6 +51,7 @@ const struct IOS_API *PISys_GetAPI_IO(void);
 const struct DPS_API *PISys_GetAPI_DataProcessors(void);
 const struct FTPS_API *PISys_GetAPI_FileTransferProtocol(void);
 static uint32_t PISys_GetExperimentalID(void);
+const struct ScriptingSystem_API *PISys_GetAPI_Scripting(void);
 
 /*** VARIABLE DEFINITIONS     ***/
 const struct PI_SystemAPI g_PISystemAPI=
@@ -61,6 +63,7 @@ const struct PI_SystemAPI g_PISystemAPI=
     PI_KVAddItem,
     PI_KVGetItem,
     PISys_GetExperimentalID,
+    PISys_GetAPI_Scripting,
 };
 
 /*******************************************************************************
@@ -125,7 +128,7 @@ const struct DPS_API *PISys_GetAPI_DataProcessors(void)
  *    This function gets access to the File Transfer System API.
  *
  * RETURNS:
- *    A pointer to the Data Processors System API.
+ *    A pointer to the File Transfer System API.
  *
  * SEE ALSO:
  *    
@@ -252,7 +255,30 @@ static uint32_t PISys_GetExperimentalID(void)
     return EXPERIMENTAL_PLUGIN_API_ID;
 }
 
-//
+/*******************************************************************************
+ * NAME:
+ *    PISys_GetAPI_Scripting
+ *
+ * SYNOPSIS:
+ *    const struct ScriptingSystem_API *PISys_GetAPI_Scripting(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets access to the Scripting System API.
+ *
+ * RETURNS:
+ *    A pointer to the Scripting System API.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+const struct ScriptingSystem_API *PISys_GetAPI_Scripting(void)
+{
+    return &g_ScriptingAPI;
+}
+
 ///*******************************************************************************
 // * NAME:
 // *    PISys_LoadKVList

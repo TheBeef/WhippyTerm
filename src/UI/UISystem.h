@@ -44,6 +44,13 @@
 /***  TYPE DEFINITIONS                 ***/
 typedef struct UIMutex {int Private;} t_UIMutex;
 
+struct UI_RPCData
+{
+    int (*MainThreadFunction)(struct UI_RPCData *RPCData);
+    int RetValue;
+    void *Data;
+};
+
 /***  CLASS DEFINITIONS                ***/
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
@@ -60,5 +67,8 @@ void UI_GotoWebPage(const char *WebSite);
 int caseinsensitivestrcmp(const char *a,const char *b);
 void UI_CollectAllKeyPresses(void (*Callback)(uint8_t Mods,e_UIKeys UIKey,std::string &Text));
 bool OS_IsSystemInDarkMode(void);
+
+void DoGenericRPC2MainThread(struct UI_RPCData *RPCData);
+int DoGenericRPC2MainThread(int (*MainThreadFunction)(struct UI_RPCData *RPCData),void *Data);
 
 #endif

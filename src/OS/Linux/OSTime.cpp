@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include <sys/time.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 /*** DEFINES                  ***/
 
@@ -54,4 +55,9 @@ uint32_t GetElapsedTime_ms(void)
     MillSec+=tv.tv_usec/1000;
 
     return MillSec;
+}
+
+void OS_Sleep(unsigned int ms)
+{
+    usleep(ms*1000);
 }

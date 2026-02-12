@@ -825,6 +825,10 @@ static void Session_RegisterAllMembers(struct Session &session,
     cfg.StartBlock("SendBuffer");
     cfg.Register("ClearScreenOnSend",session.ClearScreenOnSend);
     cfg.EndBlock();
+
+    cfg.StartBlock("Scripts");
+    cfg.Register("LastScriptPath",session.LastScriptPath);
+    cfg.EndBlock();
 }
 
 static void Session_DefaultSession(struct Session &session)
@@ -858,4 +862,7 @@ static void Session_DefaultSession(struct Session &session)
 
     /* Send Buffer */
     session.ClearScreenOnSend=false;
+
+    /* Scripts */
+    session.LastScriptPath="";
 }

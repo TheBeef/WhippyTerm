@@ -54,10 +54,14 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/Dialogs/Dialog_StylePicker.cpp \
     ../src/App/MWPanels/MW_OutGoingHexDisplay.cpp \
     ../src/App/PluginSupport/PluginSystem.cpp \
+    ../src/App/PluginSupport/StyleData.cpp \
     ../src/App/Portable.cpp \
+    ../src/App/ScriptingSystem.cpp \
     ../src/App/StdPlugins/DataProcessors/HexDump/src/BPDS.c \
     ../src/App/StdPlugins/DataProcessors/HexDump/src/ColorStream.cpp \
     ../src/App/StdPlugins/DataProcessors/HexDump/src/HexDump.cpp \
+    ../src/App/StdPlugins/Scrips/MyBasic/src/ThirdParty/my_basic.c \
+    ../src/App/StdPlugins/Scrips/MyBasic/src/WTBasic_Main.cpp \
     ../src/BuildOptions/BuildOptions.cpp \
     ../src/App/Dialogs/Dialog_NewConnectionFromURI.cpp \
     ../src/App/Dialogs/Dialog_SendBufferSelect.cpp \
@@ -257,6 +261,7 @@ linux {
         ../src/OS/RPI/Directorys.cpp \
         ../src/OS/RPI/OSTime.cpp \
         ../src/OS/RPI/System.cpp \
+        ../src/OS/RPI/Threads.cpp \
 
     }else{
         message("Building Linux")

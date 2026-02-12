@@ -124,6 +124,7 @@ void Debug6(void);
         void InformOf_BottomPanelChange(int NewSize,bool PanelOpen);
         void InformOf_RightPanelChange(int NewSize,bool PanelOpen);
         void InformOf_LeftPanelChange(int NewSize,bool PanelOpen);
+        void InformOf_ScriptDone(struct ScriptHandle *Script);
         void HandleSendBufferClearOnSend(void);
 
         /* Panel handlers */
@@ -140,6 +141,9 @@ void Debug6(void);
         class MWBridge BridgePanel;
 
         class Connection *ActiveCon;
+
+        /* Scripting */
+        struct ScriptHandle *ActiveManualScript;  // If we started a script without an open connection, then we place it's handle here
 
     private:
         t_UIMainWindow *UIWin;
@@ -195,6 +199,10 @@ void Debug6(void);
         void ToggleConnectionUseGlobalSettings(void);
         void RestoreSessionConnections(void);
         void HandleClearScreenOnSendBuffer(bool ClearScreenOnSendSetting);
+
+        /* Scripting */
+        void StartManualScript(void);
+        void StopManualScript(void);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

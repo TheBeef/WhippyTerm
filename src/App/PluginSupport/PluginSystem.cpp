@@ -32,10 +32,12 @@
 #include "PluginSystem.h"
 #include "App/FileTransferProtocolSystem.h"
 #include "App/DataProcessorsSystem.h"
+#include "App/ScriptingSystem.h"
 #include "App/IOSystem.h"
 #include "App/MainWindow.h"
 #include "App/PluginSupport/ExternPluginsSystem.h"
 #include "App/StdPlugins/RegisterStdPlugins.h"
+#include "UI/UIAsk.h"
 #include <map>
 #include <string>
 
@@ -86,6 +88,7 @@ void InitPluginSystem(void)
     RegisterStdPlugins();
 
     IOS_InitPlugins();
+    Scripting_InitPlugins();
 }
 
 /*******************************************************************************
@@ -283,6 +286,7 @@ void InformOfNewPluginInstalled(struct ExternPluginInfo *Info)
             IOS_InformOfNewPluginInstalled(Plugin->first.c_str());
             DPS_InformOfNewPluginInstalled(Plugin->first.c_str());
             MW_InformOfNewPluginInstalled(Plugin->first.c_str());
+            Scripting_InformOfNewPluginInstalled(Plugin->first.c_str());
         }
     }
 }
@@ -319,6 +323,15 @@ void InformOfPluginUninstalled(struct ExternPluginInfo *Info)
     {
         if(Plugin->second.ExternPluginHandle==Info->DLLHandle)
         {
+            /* The scripting system uses threads that it can't just kill
+               so we need to check if something is running (if something's
+               running we can't uninstall the plugin) */
+            if(!Scripting_CheckifPluginCanUninstall(Plugin->first.c_str()))
+            {
+                UIAsk("Error","Can't uninstall there is a script running.",
+                        e_AskBox_Error,e_AskBttns_Ok);
+                return;
+            }
             /* Because the main window may need to release the resources
                used by the plugin we tell it we are about to uninstall this
                plugin (we will tell it we are done later) */
@@ -329,6 +342,7 @@ void InformOfPluginUninstalled(struct ExternPluginInfo *Info)
             IOS_InformOfPluginUninstalled(Plugin->first.c_str());
             DPS_InformOfPluginUninstalled(Plugin->first.c_str());
             MW_InformOfPluginUninstalled(Plugin->first.c_str());
+            Scripting_InformOfPluginUninstalled(Plugin->first.c_str());
 
             /* List likely changed, start again */
             Plugin=m_PluginList.begin();

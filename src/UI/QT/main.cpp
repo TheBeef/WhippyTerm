@@ -29,6 +29,8 @@
 
 MainApp *g_MainApp;
 class MainMethodCB g_MainMethodCB;
+class MainMethodCB_GenericRPC g_MainMethodCB_GenericRPC;
+
 QMutex m_DataAvail_mutex;
 //t_ConID m_DataAvail_ArraySize;
 //uint8_t *m_DataAvail_AlreadyBeingProcessed;
@@ -128,6 +130,7 @@ int main(int argc, char *argv[])
 //            STARTING_DATAEVENT_QUEUE_SIZE));
 
     qRegisterMetaType<t_IOSystemHandle *>("t_IOSystemHandle *");
+    qRegisterMetaType<struct UI_RPCData *>("struct UI_RPCData *");
 
     QTInitScrollLockHandler();
 
@@ -214,6 +217,58 @@ void MainMethodCB::NewDataEvent(t_IOSystemHandle *IOHandle)
 {
 DB_StopTimer(e_DBT_SignalFromThread);
     IOS_InformOfNewDataEvent(IOHandle);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DoGenericRPC2MainThread
+ *
+ * SYNOPSIS:
+ *    void DoGenericRPC2MainThread(struct UI_RPCData *RPCData);
+ *    int DoGenericRPC2MainThread(int (*MainThreadFunction)(
+ *              struct UI_RPCData *RPCData),void *Data);
+
+ *
+ * PARAMETERS:
+ *    RPCData [I] -- The function and args for this function call.
+ *    MainThreadFunction [I] -- The function to call in the main thread
+ *    Data [I] -- The data to send as an arg to the function.
+ *
+ * FUNCTION:
+ *    This function is called from a thread to inform the main thread (and
+ *    system) that there is a data event on the connection.
+ *
+ *    This has to be in the UI because it need to tell the main thread
+ *    (however that is done).
+ *
+ * RETURNS:
+ *    The return value from the RPC.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DoGenericRPC2MainThread(struct UI_RPCData *RPCData)
+{
+    QMetaObject::invokeMethod(&g_MainMethodCB_GenericRPC,"RPC",
+            Qt::BlockingQueuedConnection,Q_ARG(struct UI_RPCData *,RPCData));
+}
+int DoGenericRPC2MainThread(int (*MainThreadFunction)(
+        struct UI_RPCData *RPCData),void *Data)
+{
+    struct UI_RPCData RPCData;
+
+    RPCData.MainThreadFunction=MainThreadFunction;
+    RPCData.Data=Data;
+
+    DoGenericRPC2MainThread(&RPCData);
+
+    return RPCData.RetValue;
+}
+
+/* This runs in the main thread */
+void MainMethodCB_GenericRPC::RPC(struct UI_RPCData *RPCData)
+{
+    RPCData->RetValue=RPCData->MainThreadFunction(RPCData);
 }
 
 /*******************************************************************************

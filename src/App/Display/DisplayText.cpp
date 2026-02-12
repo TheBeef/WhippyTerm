@@ -1978,6 +1978,33 @@ void DisplayText::GetCursorXY(unsigned int *x,unsigned int *y)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayText::GetScreenSize
+ *
+ * SYNOPSIS:
+ *    void DisplayText::GetScreenSize(uint32_t *Width,uint32_t *Height);
+ *
+ * PARAMETERS:
+ *    Width [O] -- The width (in chars) of the screen.  This is the average.
+ *    Height [O] -- The height (in chars) of the screen
+ *
+ * FUNCTION:
+ *    This function gets the size of the screen.  This is basicly the size
+ *    of the canvas divided by the current font height/width.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::GetScreenSize(uint32_t *Width,uint32_t *Height)
+{
+    *Width=ScreenWidthChars;
+    *Height=ScreenHeightChars;
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayText::RethinkInsertFrag
  *
  * SYNOPSIS:

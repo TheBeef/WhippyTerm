@@ -102,6 +102,7 @@ class DisplayBinary : public DisplayBase
         void ApplyBGColor2Selection(uint32_t RGB);
         bool IsAttribSetInSelection(uint32_t Attribs);
         uint8_t *GetSelectionRAW(unsigned int *Bytes);
+        void GetScreenSize(uint32_t *Width,uint32_t *Height);
 
         t_DataProMark *AllocateMark(void);
         void FreeMark(t_DataProMark *Mark);

@@ -1912,4 +1912,16 @@ void Form_MainWindow::on_actionClear_Screen_On_Send_Buffer_triggered()
 {
     DoMenuTriggered(e_UIMWMenu_ClearScreenOnSend);
 }
+ 
+
+void Form_MainWindow::on_actionRun_Script_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_RunScript);
+}
+
+
+void Form_MainWindow::on_actionStop_Script_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_StopScript);
+}
 

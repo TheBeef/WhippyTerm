@@ -441,23 +441,19 @@ static struct ConnectionOptionsData *m_ActiveConSettingsOptionData;
  *                       Supported flags:
  *                           IODRVINFOFLAG_BLOCKDEV -- This is block device.
  *           URIHelpString -- This is a help string that explains the URI to
- *                            the user.  This is HTML (basic only) and is
- *                            in this format:
- *                            <h3>FORMAT</h3>
- *                            <p style='margin-left:60px;text-indent: -30px;'>
- *                              URI:[parm1],[parm2],etc...
- *                            </p>
- *                            <h3>WHERE</h3>
- *                            <p style='margin-left:60px;text-indent: -30px;'>
- *                              parm1 -- description
- *                            </p>
- *                            <p style='margin-left:60px;text-indent: -30px;'>
- *                              parm2 -- description
- *                            </p>
- *                            <h3>EXAMPLE</h3>
- *                            <p style='margin-left:60px;text-indent: -30px;'>
- *                              URI:100,2000
- *                            </p>
+ *                            the user.  It is a string that has parts of
+ *                            the help in html style tags (it's not HTML).
+ *                            The help will be built in the same order as the
+ *                            string (but sections may be reordered).
+ *                            Supported tags:
+ *                              URI -- The URI line.  Args are in [] brackes
+ *                              ARG -- An arg from the URI line
+ *                              Example -- An example of the URI
+ *                            So for example here is a help string:
+ *                              "<URI>EG://[DeviceID],[Speed]</URI>"
+ *                              "<ARG>DeviceID -- The string that for the dev</ARG>"
+ *                              "<ARG>Speed -- What speed to work at</ARG>"
+ *                              "<Example>EG://First,1000</Example>"
  *
  * RETURNS:
  *   NONE

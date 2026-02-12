@@ -19,10 +19,11 @@
 #include "App/DataProcessorsSystem.h"
 #include "App/FileTransferProtocolSystem.h"
 #include "App/MainWindow.h"
+#include "App/IOSystem.h"
 #include "App/Portable.h"
 #include "App/Session.h"
 #include "App/Settings.h"
-#include "App/IOSystem.h"
+#include "App/ScriptingSystem.h"
 #include "App/SendBuffer.h"
 #include "App/Util/CRCSystem.h"
 #include "App/Dialogs/Dialog_EditSendBuffer.h"
@@ -141,6 +142,7 @@ bool AppMain(int argc,char *argv[])
     IOS_Init();
     DPS_Init();
     FTPS_Init();
+    Scripting_Init();
 
     InitPluginSystem();
 

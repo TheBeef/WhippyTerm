@@ -453,6 +453,10 @@ private slots:
     
     void on_actionClear_Screen_On_Send_Buffer_triggered();
     
+    void on_actionRun_Script_triggered();
+    
+    void on_actionStop_Script_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

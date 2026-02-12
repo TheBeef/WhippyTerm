@@ -67,6 +67,8 @@ extern "C"
     unsigned int UDPClient_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
     unsigned int UDPServer_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
 
+    unsigned int WTBasic_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
+
 #ifdef ALL_PLUGINS
     /* For testing we do all plugins */
     unsigned int HTTPClient_RegisterPlugin(const struct PI_SystemAPI *SysAPI,unsigned int Version);
@@ -124,6 +126,9 @@ void RegisterStdPlugins(void)
     /* File Transfer Protocols */
     RegisterStdPlugin(RAWFileUpload_RegisterPlugin,"RAWFileUpload");
     RegisterStdPlugin(XModemUpload_RegisterPlugin,"XModemUpload");
+
+    /* Scripting languages */
+    RegisterStdPlugin(WTBasic_RegisterPlugin,"WTBasic");
 
 #ifdef ALL_PLUGINS
     /* For testing we do all plugins */

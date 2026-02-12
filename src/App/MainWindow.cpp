@@ -50,6 +50,7 @@
 #include "App/MainApp.h"
 #include "App/MainWindow.h"
 #include "App/PluginSupport/ExternPluginsSystem.h"
+#include "App/ScriptingSystem.h"
 #include "App/SendBuffer.h"
 #include "App/Session.h"
 #include "App/Settings.h"
@@ -463,6 +464,7 @@ TheMainWindow::TheMainWindow()
     ActiveCon=NULL;
     CurrentBGStyleColor=e_SysCol_Black;
     CurrentBGStyleShade=e_SysColShade_Normal;
+    ActiveManualScript=NULL;
 
     UIWin=UIMW_AllocMainWindow(this,0);
     if(UIWin==NULL)
@@ -1483,7 +1485,9 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     bool EnableSelectionBased;
     bool IsBinaryCon;
     bool Checked;
+    bool ScriptRunning;
     i_BookmarkList bm;
+    struct ScriptHandle *Script;
     t_UIToolbarCtrl *ConnectToggle;
     t_UIToolbarCtrl *CopyTool;
     t_UIToolbarCtrl *PasteTool;
@@ -1561,6 +1565,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *StyleUnderline;
     e_UIMenuCtrl *StyleStrikeThrough;
     e_UIMenuCtrl *CopySelectionToSendBuffer;
+    e_UIMenuCtrl *StopScript;
     t_UIContextMenuCtrl *ContextMenu_SendBuffer;
     t_UIContextMenuCtrl *ContextMenu_FindCRCAlgorithm;
     t_UIContextMenuCtrl *ContextMenu_CalcCRC;
@@ -1673,6 +1678,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     SendBuffer12=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBuffer12);
     SendBufferSendGeneric=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Buffers_SendBufferSendGeneric);
     CopySelectionToSendBuffer=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_CopySelectionToSendBuffer);
+    StopScript=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_StopScript);
 
     if(UITabCtrlGetTabCount(MainTabs)==0)
     {
@@ -1971,6 +1977,19 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     HandleGoURIToolBttnEnabled();
 
     RethinkBridgeMenu();
+
+    ScriptRunning=false;
+    if(ActiveManualScript!=NULL)
+    {
+        ScriptRunning=true;
+    }
+    else if(ActiveCon!=NULL)
+    {
+        Script=ActiveCon->GetScriptHandle(e_SysScript_ManualScript);
+        if(Script!=NULL)
+            ScriptRunning=true;
+    }
+    UIEnableMenu(StopScript,ScriptRunning);
 
     ConnectionOptionsPanel.ActivateCtrls(ActivatePanels);
     StopWatchPanel.ActivateCtrls(ActivatePanels);
@@ -5045,6 +5064,170 @@ void TheMainWindow::HandleClearScreenOnSendBuffer(bool ClearScreenOnSendSetting)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::StartManualScript
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::StartManualScript(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function prompts the user for a script to run and then starts
+ *    the selected script.  This is a manually started script and fits in
+ *    the manual script slot in the connection / UI.  A manually started script
+ *    can be started with an open connection.  If a new connect it made it will
+ *    be moved over to that connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    TheMainWindow::StopManualScript()
+ ******************************************************************************/
+void TheMainWindow::StartManualScript(void)
+{
+    string FileName;
+    string Filters;
+    string FullFilename;
+    struct ScriptHandle *Script;
+    bool ScriptAlreadyRunning;
+
+    /* See if we already have a script running */
+    ScriptAlreadyRunning=false;
+    if(ActiveManualScript!=NULL)
+    {
+        ScriptAlreadyRunning=true;
+    }
+    else if(ActiveCon!=NULL)
+    {
+        Script=ActiveCon->GetScriptHandle(e_SysScript_ManualScript);
+        if(Script!=NULL)
+            ScriptAlreadyRunning=true;
+    }
+
+    if(ScriptAlreadyRunning)
+    {
+        /* We can only have 1 manual script running */
+        UIAsk("Error","You can only have one script running at a time",
+                e_AskBox_Error,e_AskBttns_Ok);
+        return;
+    }
+
+    Filters="All Files|*\n";
+    Scripting_AppendListOfFileTypeFilters(Filters);
+    if(Filters.back()=='\n')
+        Filters.pop_back();
+
+    if(!UI_LoadFileReq("Select Script To Run",g_Session.LastScriptPath,
+        FileName,Filters.c_str(),0))
+    {
+        return;
+    }
+    FullFilename=UI_ConcatFile2Path(g_Session.LastScriptPath,FileName);
+
+    /* Note that the path changed */
+    NoteSessionChanged();
+
+    Script=Scripting_LoadScript(FullFilename.c_str());
+    if(Script==NULL)
+        return;
+
+    /* Connect this script to this main window and the active connection (if
+       there is one) */
+    Scripting_SetConnectedWindow(Script,this,ActiveCon);
+
+    /* Connect this script to the connection */
+    if(ActiveCon!=NULL)
+        ActiveCon->SetScriptHandle(e_SysScript_ManualScript,Script);
+    else
+        ActiveManualScript=Script;
+
+    /* Start running the script */
+    Scripting_RunScript(Script);
+
+    /* Rethink the menus/controls related to the scripting */
+    RethinkActiveConnectionUI();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::StopManualScript
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::StopManualScript(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function aborts the manually started script if there is one running.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::StopManualScript(void)
+{
+    struct ScriptHandle *Script;
+
+    if(ActiveManualScript!=NULL)
+    {
+        Scripting_AbortRunningScript(ActiveManualScript);
+        ActiveManualScript=NULL;    // Not really needed because we will get a InformOf_ScriptDone() but it doesn't hurt
+    }
+    else if(ActiveCon!=NULL)
+    {
+        /* See if the active connection has a script */
+        Script=ActiveCon->GetScriptHandle(e_SysScript_ManualScript);
+        if(Script!=NULL)
+        {
+            Scripting_AbortRunningScript(Script);
+            ActiveCon->SetScriptHandle(e_SysScript_ManualScript,NULL);
+        }
+    }
+
+    /* Rethink the menus/controls related to the scripting */
+    RethinkActiveConnectionUI();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::InformOf_ScriptDone
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::InformOf_ScriptDone(struct ScriptHandle *Script);
+ *
+ * PARAMETERS:
+ *    Script [I] -- What script just finished
+ *
+ * FUNCTION:
+ *    This function is called when a script finishs running (error or normally).
+ *    The script has stopped, and is about to be freed so we need to disconnect
+ *    our selfs from it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::InformOf_ScriptDone(struct ScriptHandle *Script)
+{
+    if(ActiveManualScript==Script)
+    {
+        /* The active script just finished */
+        ActiveManualScript=NULL;
+    }
+
+    /* Rethink the menus/controls related to the scripting */
+    RethinkActiveConnectionUI();
+}
+
+/*******************************************************************************
+ * NAME:
  *    MW_Event
  *
  * SYNOPSIS:
@@ -6021,7 +6204,14 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         case e_Cmd_SendBufferClearScreenOnSendToggle:
             /* Toggle it */
             g_Session.ClearScreenOnSend=!g_Session.ClearScreenOnSend;
+            NoteSessionChanged();
             MW_HandleClearScreenOnSendBuffer(g_Session.ClearScreenOnSend);
+        break;
+        case e_Cmd_RunScript:
+            StartManualScript();
+        break;
+        case e_Cmd_StopScript:
+            StopManualScript();
         break;
 
         case e_CmdMAX:

@@ -105,6 +105,9 @@ struct Session
 
     /* Send Buffers */
     bool ClearScreenOnSend;
+
+    /* Scripts */
+    std::string LastScriptPath;
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

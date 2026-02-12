@@ -312,6 +312,10 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionRight_Side_Panel;
         case e_UIMWMenu_ClearScreenOnSend:
             return (e_UIMenuCtrl *)realwin->ui->actionClear_Screen_On_Send_Buffer;
+        case e_UIMWMenu_RunScript:
+            return (e_UIMenuCtrl *)realwin->ui->actionRun_Script;
+        case e_UIMWMenu_StopScript:
+            return (e_UIMenuCtrl *)realwin->ui->actionStop_Script;
         case e_UIMWMenuMAX:
         default:
         break;

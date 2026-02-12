@@ -213,6 +213,8 @@ const char *m_CmdNames[]=
     "InComingHexSave",                      // e_Cmd_InComingHexSave
     "OutGoingHexSave",                      // e_Cmd_OutGoingHexSave
     "SendBufferClearScreenOnSendToggle",    // e_Cmd_SendBufferClearScreenOnSendToggle
+    "RunScript",                            // e_Cmd_RunScript
+    "StopScript",                           // e_Cmd_StopScript
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -331,6 +333,8 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_ToggleBottomPanel,                // e_UIMWMenu_BottomPanel
     e_Cmd_ToggleRightPanel,                 // e_UIMWMenu_RightPanel
     e_Cmd_SendBufferClearScreenOnSendToggle,// e_UIMWMenu_ClearScreenOnSend
+    e_Cmd_RunScript,                        // e_UIMWMenu_RunScript
+    e_Cmd_StopScript,                       // e_UIMWMenu_StopScript
 };
 
 e_CmdType m_Cmd2SendBufferContextMenuMapping[]=
@@ -860,6 +864,8 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     // e_Cmd_OutGoingHexDisplay_Copy
     // e_Cmd_OutGoingHexDisplay_CopyAs
     // e_Cmd_SendBufferClearScreenOnSendToggle
+    // e_Cmd_RunScript
+    // e_Cmd_StopScript
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A

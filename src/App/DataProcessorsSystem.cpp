@@ -2193,8 +2193,8 @@ void DPS_DoBackspace(void)
  *    void DPS_SetCursorXY(uint32_t X,uint32_t Y);
  *
  * PARAMETERS:
- *    X [I] -- The new X pos.  DEBUG PAUL: Add doc about if this is from 0 or 1
- *    Y [I] -- The new Y pos
+ *    X [I] -- The new X pos.  This is 0 indexed (0=the farthest left)
+ *    Y [I] -- The new Y pos.  This is 0 indexed.
  *
  * FUNCTION:
  *    This function moves the cursor around on the Screen.  It can not be

@@ -204,6 +204,8 @@ typedef enum
     e_Cmd_InComingHexSave,
     e_Cmd_OutGoingHexSave,
     e_Cmd_SendBufferClearScreenOnSendToggle,
+    e_Cmd_RunScript,
+    e_Cmd_StopScript,
     e_CmdMAX
 } e_CmdType;
 

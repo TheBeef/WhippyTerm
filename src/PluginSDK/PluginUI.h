@@ -32,7 +32,7 @@
 #define __PLUGINUI_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
-#include "PluginSDK/PluginTypes.h"
+#include "PluginTypes.h"
 #include <stdint.h>
 
 /***  DEFINES                          ***/

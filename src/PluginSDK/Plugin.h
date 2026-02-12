@@ -37,6 +37,7 @@
 #include "IODriver.h"
 #include "DataProcessors.h"
 #include "FileTransferProtocol.h"
+#include "ScriptingEngine.h"
 #include "PluginUI.h"
 #include "PluginSystem.h"
 

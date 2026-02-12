@@ -30,5 +30,6 @@
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
 uint32_t GetElapsedTime_ms(void);
+void OS_Sleep(unsigned int ms);
 
 #endif

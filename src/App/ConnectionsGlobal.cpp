@@ -114,6 +114,8 @@ void Con_WriteData(const uint8_t *Data,int Bytes)
  *
  * PARAMETERS:
  *    Chr [I] -- The char to write (this is UTF8).  This is 0 term.
+ *    ScreenOnly [I] -- If this is true then it is only written to the
+ *                      screen and nothing else will be able see the char.
  *
  * FUNCTION:
  *    This function writes a char to the display buffer for the active
@@ -561,7 +563,7 @@ void Con_GetCursorXY(int32_t *RetCursorX,int32_t *RetCursorY)
     m_ActiveConnection->GetCursorXY(RetCursorX,RetCursorY);
 }
 
-void Con_InsertString(uint8_t *Str,uint32_t Len)
+void Con_InsertString(const uint8_t *Str,uint32_t Len)
 {
     if(m_ActiveConnection==NULL)
         return;

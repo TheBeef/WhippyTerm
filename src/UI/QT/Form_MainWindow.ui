@@ -2456,6 +2456,13 @@
     <addaction name="actionSend_Buffer_11"/>
     <addaction name="actionSend_Buffer_12"/>
    </widget>
+   <widget class="QMenu" name="menuScript">
+    <property name="title">
+     <string>Scripts</string>
+    </property>
+    <addaction name="actionRun_Script"/>
+    <addaction name="actionStop_Script"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
@@ -2464,6 +2471,7 @@
    <addaction name="menuConnection"/>
    <addaction name="menuBuffers"/>
    <addaction name="menuPlugins"/>
+   <addaction name="menuScript"/>
    <addaction name="menuTools"/>
    <addaction name="menuSettings"/>
    <addaction name="menuHelp"/>
@@ -3925,6 +3933,16 @@
    </property>
    <property name="text">
     <string>Clear Screen On Send Buffer</string>
+   </property>
+  </action>
+  <action name="actionRun_Script">
+   <property name="text">
+    <string>Run Script...</string>
+   </property>
+  </action>
+  <action name="actionStop_Script">
+   <property name="text">
+    <string>Stop Script</string>
    </property>
   </action>
  </widget>

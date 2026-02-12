@@ -76,6 +76,9 @@ struct FileTransferHandlerAPI m_RAWFileUploadCBs=
     RAWFileUpload_AbortUpload,
     RAWFileUpload_Timeout,
     NULL,
+    /********* Start of FILE_TRANSFER_HANDLER_API_VERSION_2 *********/
+    NULL, // GetLastErrorMsg
+    /********* End of FILE_TRANSFER_HANDLER_API_VERSION_2 *********/
 };
 
 struct FTPHandlerInfo m_RAWFileUpload_Info=

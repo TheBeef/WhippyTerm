@@ -2294,3 +2294,31 @@ void DisplayBase::MovePageUp(void)
 void DisplayBase::MovePageDown(void)
 {
 }
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetScreenSize
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::GetScreenSize(uint32_t *Width,uint32_t *Height);
+ *
+ * PARAMETERS:
+ *    Width [O] -- The width (in chars) of the screen.  This is the average.
+ *    Height [O] -- The height (in chars) of the screen
+ *
+ * FUNCTION:
+ *    This function gets the size of the screen.  This is basicly the size
+ *    of the canvas divided by the current font height/width.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::GetScreenSize(uint32_t *Width,uint32_t *Height)
+{
+    *Width=0;
+    *Height=0;
+}
+

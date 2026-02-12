@@ -36,3 +36,7 @@ uint32_t GetElapsedTime_ms(void)
     return CurrentTime.dwLowDateTime;
 }
 
+void OS_Sleep(unsigned int ms)
+{
+    Sleep(ms*1000);
+}

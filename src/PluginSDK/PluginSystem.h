@@ -36,6 +36,7 @@
 /***  DEFINES                          ***/
 /* Versions of struct PI_SystemAPI */
 #define PI_SYSTEM_API_VERSION_1             1
+#define PI_SYSTEM_API_VERSION_2             2
 
 /***  MACROS                           ***/
 #ifdef BUILT_IN_PLUGINS // defined in WhippyTerm project
@@ -61,6 +62,9 @@ struct PI_SystemAPI
     const char *(*KVGetItem)(const t_PIKVList *Handle,const char *Key);
     uint32_t (*GetExperimentalID)(void);
     /********* Start of PI_SYSTEM_API_VERSION_1 *********/
+    /********* Start of PI_SYSTEM_API_VERSION_2 *********/
+    const struct ScriptingSystem_API *(*GetAPI_Scripting)(void);
+    /********* Start of PI_SYSTEM_API_VERSION_2 *********/
 };
 
 /***  CLASS DEFINITIONS                ***/

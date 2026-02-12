@@ -453,6 +453,8 @@ void Con_GetListOfConnections(t_ConnectionList &List)
  ******************************************************************************/
 Connection::Connection(const char *URI)
 {
+    unsigned int r;
+
     IOHandle=NULL;
     Display=NULL;
     MW=NULL;
@@ -468,6 +470,9 @@ Connection::Connection(const char *URI)
 
     Bookmark=0;
     ZoomLevel=0;
+
+    for(r=0;r<(int)e_SysScriptMAX;r++)
+        RunningScripts[r]=NULL;
 
     /* Copy the default settings for this connection from settings */
     UsingCustomSettings=false;
@@ -504,6 +509,7 @@ Connection::Connection(const char *URI)
     ConnectionLockedOut=false;
     ShowNonPrintables=false;
     ShowEndOfLines=false;
+    TxKeyboardEnabled=true;
 
     DisplayName[0]=0;
 
@@ -587,6 +593,8 @@ Connection::Connection(const char *URI)
     BottomPanelInfo=e_BottomPanelTabMAX;
 
     InputFrozen=false;
+    SupressFrozen=false;
+
     DoingIncomingByteProcessing=false;
 }
 
@@ -648,6 +656,25 @@ Connection::~Connection()
  ******************************************************************************/
 void Connection::FreeConnectionResources(bool FreeDB)
 {
+    unsigned int script;
+
+    /* Abort any running scripts */
+    for(script=0;script<(unsigned int)e_SysScriptMAX;script++)
+    {
+        if(RunningScripts[script]!=NULL)
+        {
+            /* Now disconnect this script because we are about to free this
+               connection */
+            Scripting_SetConnectedWindow(RunningScripts[script],
+                    NULL,NULL);
+
+            Scripting_AbortRunningScript(RunningScripts[script]);
+
+            Scripting_FreeScriptHandle(RunningScripts[script]);
+            RunningScripts[script]=NULL;
+        }
+    }
+
     if(TransmitDelayTimer!=NULL)
     {
         FreeUITimer(TransmitDelayTimer);
@@ -1501,6 +1528,7 @@ bool Connection::KeyPress(uint8_t Mods,e_UIKeys Key,const uint8_t *TextPtr,
 {
     bool RetValue;
     e_CmdType DoCmd;
+    unsigned int script;
 
     if(IOHandle==NULL || Display==NULL || MW==NULL)
         return false;
@@ -1639,6 +1667,16 @@ bool Connection::KeyPress(uint8_t Mods,e_UIKeys Key,const uint8_t *TextPtr,
     }
     else
     {
+        /* We need to send this key press to all the active scripts */
+        for(script=0;script<e_SysScriptMAX;script++)
+        {
+            if(RunningScripts[script]!=NULL)
+            {
+                Scripting_KeyPress(RunningScripts[script],this,Mods,Key,
+                        TextPtr,TextLen);
+            }
+        }
+
         RetValue=false;
         if(BinaryConnection)
         {
@@ -1694,6 +1732,7 @@ bool Connection::KeyPress(uint8_t Mods,e_UIKeys Key,const uint8_t *TextPtr,
  *                              buffer (used with block devices).
  *                      e_ConWriteSource_Bridge -- Sent from a bridged
  *                              connection.
+ *                      e_ConWriteSource_Script -- Send from a running script.
  *
  * FUNCTION:
  *    This function writes to the connection.  It send this data to the
@@ -1758,6 +1797,9 @@ e_ConWriteType Connection::WriteData(const uint8_t *Data,int Bytes,
 //            return e_ConWrite_Ignored;
 //        }
     }
+
+    if(!TxKeyboardEnabled && Source==e_ConWriteSource_Keyboard)
+        return e_ConWrite_Ignored;
 
     if(TransmitDelayByte!=0 || TransmitDelayLine!=0)
     {
@@ -2033,6 +2075,7 @@ bool Connection::InformOfDataAvaiable(void)
     uint8_t inbuff[100];
     bool ProcessBlock;
     bool RetValue;
+    unsigned int script;
 
     Con_SetActiveConnection(this);
 
@@ -2049,6 +2092,19 @@ bool Connection::InformOfDataAvaiable(void)
     {
         bytes=IOS_ReadData(IOHandle,inbuff,sizeof(inbuff));
 
+        /* We need to send this incoming data to all the active scripts */
+        if(bytes>0)
+        {
+            for(script=0;script<e_SysScriptMAX;script++)
+            {
+                if(RunningScripts[script]!=NULL)
+                {
+                    Scripting_RecvBytes(RunningScripts[script],this,inbuff,
+                            bytes);
+                }
+            }
+        }
+  
         if(BridgedTo!=NULL)
         {
             /* Send this into the bridged connection */
@@ -2213,7 +2269,7 @@ void Connection::WriteChar2Display(uint8_t *Chr)
  *    Connection::InsertString
  *
  * SYNOPSIS:
- *    bool Connection::InsertString(uint8_t *Str,uint32_t Len);
+ *    bool Connection::InsertString(const uint8_t *Str,uint32_t Len);
  *
  * PARAMETERS:
  *    Str [I] -- The UTF8 string to insert
@@ -2229,7 +2285,7 @@ void Connection::WriteChar2Display(uint8_t *Chr)
  * SEE ALSO:
  *    Connection::WriteChar2Display()
  ******************************************************************************/
-bool Connection::InsertString(uint8_t *Str,uint32_t Len)
+bool Connection::InsertString(const uint8_t *Str,uint32_t Len)
 {
     uint_fast32_t r;
     uint8_t CharBuff[10];
@@ -2630,6 +2686,14 @@ void Connection::GetCursorXY(int *RetCursorX,int *RetCursorY)
 
 void Connection::GetScreenSize(int32_t *RetRows,int32_t *RetColumns)
 {
+    if(Display==NULL)
+    {
+        *RetRows=0;
+        *RetColumns=0;
+        return;
+    }
+
+    Display->GetScreenSize((uint32_t *)RetColumns,(uint32_t *)RetRows);
 }
 
 /*******************************************************************************
@@ -7769,6 +7833,35 @@ const uint8_t *Connection::GetMarkString(t_DataProMark *Mark,uint32_t *Size,
 
 /*******************************************************************************
  * NAME:
+ *    Connection::SuppressFrozenStream
+ *
+ * SYNOPSIS:
+ *    void Connection::SuppressFrozenStream(bool Suppress);
+ *
+ * PARAMETERS:
+ *    Suppress [I] -- true = suppress the frozen system, false = return to
+ *                    normal function.
+ *
+ * FUNCTION:
+ *    This function tells the connection to ignore the forzen system and just
+ *    do whatever function would have been queued by the frozen system.
+ *
+ *    Only use this temporarily, do not set it and leave it.  Basicly set
+ *    it, do your thing, and clear it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    Connection::FreezeStream()
+ ******************************************************************************/
+void Connection::SuppressFrozenStream(bool Suppress)
+{
+    SupressFrozen=Suppress;
+}
+
+/*******************************************************************************
+ * NAME:
  *    Connection::FreezeStream
  *
  * SYNOPSIS:
@@ -7940,6 +8033,9 @@ bool Connection::FrozenQueueIfNeeded_Write(uint8_t *Str)
     struct Connection_FrozenQueueEntry Entry;
     size_t Len;
 
+    if(SupressFrozen)
+        return false;
+
     if(!InputFrozen || !DoingIncomingByteProcessing)
         return false;
 
@@ -7984,6 +8080,9 @@ bool Connection::FrozenQueueIfNeeded_SetFGColor(uint32_t NewColor)
 {
     struct Connection_FrozenQueueEntry Entry;
 
+    if(SupressFrozen)
+        return false;
+
     if(!InputFrozen || !DoingIncomingByteProcessing)
         return false;
 
@@ -8021,6 +8120,9 @@ bool Connection::FrozenQueueIfNeeded_SetFGColor(uint32_t NewColor)
 bool Connection::FrozenQueueIfNeeded_SetBGColor(uint32_t NewColor)
 {
     struct Connection_FrozenQueueEntry Entry;
+
+    if(SupressFrozen)
+        return false;
 
     if(!InputFrozen || !DoingIncomingByteProcessing)
         return false;
@@ -8060,6 +8162,9 @@ bool Connection::FrozenQueueIfNeeded_SetULineColor(uint32_t NewColor)
 {
     struct Connection_FrozenQueueEntry Entry;
 
+    if(SupressFrozen)
+        return false;
+
     if(!InputFrozen || !DoingIncomingByteProcessing)
         return false;
 
@@ -8097,6 +8202,9 @@ bool Connection::FrozenQueueIfNeeded_SetULineColor(uint32_t NewColor)
 bool Connection::FrozenQueueIfNeeded_SetAttrib(uint32_t NewAttrib)
 {
     struct Connection_FrozenQueueEntry Entry;
+
+    if(SupressFrozen)
+        return false;
 
     if(!InputFrozen || !DoingIncomingByteProcessing)
         return false;
@@ -8146,6 +8254,9 @@ bool Connection::FrozenQueueIfNeeded_Function(e_ConFuncType Func,
 {
     struct Connection_FrozenQueueEntry Entry;
     size_t Len;
+
+    if(SupressFrozen)
+        return false;
 
     if(!InputFrozen || !DoingIncomingByteProcessing)
         return false;
@@ -8204,7 +8315,8 @@ bool Connection::FrozenQueueIfNeeded_Function(e_ConFuncType Func,
  *    Connection::FrozenQueueIfNeeded_InsertStr
  *
  * SYNOPSIS:
- *    bool Connection::FrozenQueueIfNeeded_InsertStr(uint8_t *Str,uint32_t Len);
+ *    bool Connection::FrozenQueueIfNeeded_InsertStr(const uint8_t *Str,
+ *              uint32_t Len);
  *
  * PARAMETERS:
  *    Str [I] -- The same as InsertString()
@@ -8223,10 +8335,13 @@ bool Connection::FrozenQueueIfNeeded_Function(e_ConFuncType Func,
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool Connection::FrozenQueueIfNeeded_InsertStr(uint8_t *Str,uint32_t Len)
+bool Connection::FrozenQueueIfNeeded_InsertStr(const uint8_t *Str,uint32_t Len)
 {
     struct Connection_FrozenQueueEntry Entry;
     size_t StrLen;
+
+    if(SupressFrozen)
+        return false;
 
     if(!InputFrozen || !DoingIncomingByteProcessing)
         return false;
@@ -8271,6 +8386,9 @@ bool Connection::FrozenQueueIfNeeded_InsertStr(uint8_t *Str,uint32_t Len)
 bool Connection::FrozenQueueIfNeeded_Bell(bool VisualOnly)
 {
     struct Connection_FrozenQueueEntry Entry;
+
+    if(SupressFrozen)
+        return false;
 
     if(!InputFrozen || !DoingIncomingByteProcessing)
         return false;
@@ -8559,4 +8677,132 @@ void Connection::ChangeView(e_ConViewChangeType Move)
         default:
         return;
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::GetScriptHandle
+ *
+ * SYNOPSIS:
+ *    struct ScriptHandle *Connection::GetScriptHandle(
+ *              e_SysScriptType TypeOfScript);
+ *
+ * PARAMETERS:
+ *    TypeOfScript [I] -- What type of script do we want to get the handle for
+ *
+ * FUNCTION:
+ *    This function gets the handle to a running script for one of the different
+ *    types of scripts that can be running.
+ *
+ * RETURNS:
+ *    A handle to the running script or NULL if there isn't one connected to
+ *    this connection.
+ *
+ * SEE ALSO:
+ *    SetScriptHandle()
+ ******************************************************************************/
+struct ScriptHandle *Connection::GetScriptHandle(e_SysScriptType TypeOfScript)
+{
+    return RunningScripts[TypeOfScript];
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::SetScriptHandle
+ *
+ * SYNOPSIS:
+ *    void Connection::SetScriptHandle(e_SysScriptType TypeOfScript,
+ *              struct ScriptHandle *Script);
+ *
+ * PARAMETERS:
+ *    TypeOfScript [I] -- What type of script do we want to set the handle for
+ *
+ * FUNCTION:
+ *    This function sets the handle to a running script for one of the different
+ *    types of scripts that can be running.  If there is already a running
+ *    script handle for this type then it is replaced by the new one (it
+ *    does not stop the old handle).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    GetScriptHandle()
+ ******************************************************************************/
+void Connection::SetScriptHandle(e_SysScriptType TypeOfScript,
+        struct ScriptHandle *Script)
+{
+    RunningScripts[TypeOfScript]=Script;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::InformOfScriptDone
+ *
+ * SYNOPSIS:
+ *    void Connection::InformOfScriptDone(struct ScriptHandle *Script);
+ *
+ * PARAMETERS:
+ *    Script [I] -- The script handle that just finished and is about to be
+ *                  freed.
+ *
+ * FUNCTION:
+ *    This function is called when a script finishs.  We clear our copy of
+ *    the script handle.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::InformOfScriptDone(struct ScriptHandle *Script)
+{
+    unsigned int r;
+    unsigned int RunningScriptsCount;
+
+    /* We need to find this script */
+    RunningScriptsCount=0;
+    for(r=0;r<(int)e_SysScriptMAX;r++)
+    {
+        if(RunningScripts[r]==Script)
+        {
+            /* This script has finished running and is about to be freed */
+            RunningScripts[r]=NULL;
+        }
+
+        if(RunningScripts[r]!=NULL)
+            RunningScriptsCount++;
+    }
+    /* If all the scripts have finished then we need to reenable the keyboard */
+    if(RunningScriptsCount==0)
+    {
+        TxKeyboardEnabled=true;
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::DisableTxKeyboard
+ *
+ * SYNOPSIS:
+ *    void Connection::DisableTxKeyboard(bool Enabled);
+ *
+ * PARAMETERS:
+ *    Enabled [I] -- If this is true then we send keyboard keys, else
+ *                   we disable them.
+ *
+ * FUNCTION:
+ *    This function turn on/off sending keyboard keypresses out to the
+ *    IODriver.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::DisableTxKeyboard(bool Enabled)
+{
+    TxKeyboardEnabled=Enabled;
 }

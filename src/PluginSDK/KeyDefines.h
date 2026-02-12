@@ -32,6 +32,7 @@
 #define __KEYDEFINES_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
+#include <stdint.h>
 
 /***  DEFINES                          ***/
 #define KEYMOD_NONE             0x0000
@@ -43,6 +44,13 @@
 /***  MACROS                           ***/
 
 /***  TYPE DEFINITIONS                 ***/
+struct PluginKeyPress
+{
+    uint8_t Mod;
+    uint16_t ExtendedKey;       // e_UIKeys
+    uint8_t KeyChar[10];        // UTF-8 string.  Likely only needed to be 5 (4+\0) but I made it bigger
+};
+
 enum e_UIKeys
 {
     e_UIKeys_Escape=0,

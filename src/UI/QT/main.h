@@ -76,6 +76,18 @@ public slots:
     void NewDataEvent(t_IOSystemHandle *IOHandle);
 };
 
+class MainMethodCB_GenericRPC : public QObject
+{
+    Q_OBJECT
+
+public:
+    MainMethodCB_GenericRPC() : QObject() {}
+    virtual ~MainMethodCB_GenericRPC() {}
+
+public slots:
+    void RPC(struct UI_RPCData *RPCData);
+};
+
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 extern Form_MainWindow *g_FocusedMainWindow;
 extern MainApp *g_MainApp;

@@ -539,6 +539,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void RegisterComTestUpdateFn(void (*Update)(class Connection *));
 
         void DisableTxKeyboard(bool Enabled);
+        void DisableDisplayWrite(bool Enabled);
 
         bool UsingCustomSettings;
         class ConSettings CustomSettings;
@@ -639,7 +640,8 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void PlayBackFrozenQueue(void);
 
         /* Things that can be enabled / disabled */
-        bool TxKeyboardEnabled; // Currently can only be set from scripts, because when a script ends it reenables this
+        bool TxKeyboardEnabled;     // Currently can only be set from scripts, because when a script ends it reenables this
+        bool DisplayWriteEnabled;   // Currently can only be set from scripts
 
         /* Call backs */
         void InformOfDelayTransmitTimeout(void);

@@ -510,6 +510,7 @@ Connection::Connection(const char *URI)
     ShowNonPrintables=false;
     ShowEndOfLines=false;
     TxKeyboardEnabled=true;
+    DisplayWriteEnabled=true;
 
     DisplayName[0]=0;
 
@@ -2104,7 +2105,7 @@ bool Connection::InformOfDataAvaiable(void)
                 }
             }
         }
-  
+
         if(BridgedTo!=NULL)
         {
             /* Send this into the bridged connection */
@@ -2138,7 +2139,7 @@ bool Connection::InformOfDataAvaiable(void)
                 HandleCaptureIncomingData(inbuff,bytes);
                 StopWatchHandleAutoLap();
 
-                if(ProcessBlock)
+                if(ProcessBlock && DisplayWriteEnabled)
                 {
                     DoingIncomingByteProcessing=true;
                     DPS_ProcessorIncomingBytes(&ProcessorData,inbuff,bytes,
@@ -8778,6 +8779,7 @@ void Connection::InformOfScriptDone(struct ScriptHandle *Script)
     if(RunningScriptsCount==0)
     {
         TxKeyboardEnabled=true;
+        DisplayWriteEnabled=true;
     }
 }
 
@@ -8805,4 +8807,30 @@ void Connection::InformOfScriptDone(struct ScriptHandle *Script)
 void Connection::DisableTxKeyboard(bool Enabled)
 {
     TxKeyboardEnabled=Enabled;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::DisableDisplayWrite
+ *
+ * SYNOPSIS:
+ *    void Connection::DisableDisplayWrite(bool Enabled);
+ *
+ * PARAMETERS:
+ *    Enabled [I] -- If this is true then we write to the screen, else
+ *                   we disable it.
+ *
+ * FUNCTION:
+ *    This function turn on/off writing bytes that come from the IODriver to
+ *    the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::DisableDisplayWrite(bool Enabled)
+{
+    DisplayWriteEnabled=Enabled;
 }

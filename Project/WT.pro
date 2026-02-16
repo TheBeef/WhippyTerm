@@ -244,6 +244,7 @@ win32 {
     ../src/App/StdPlugins/IODrivers/UDPClient/src/OS/Win/UDPClient_OS_Socket.cpp \
     ../src/App/StdPlugins/IODrivers/UDPServer/src/OS/Win/UDPServer_OS_Socket.cpp \
     ../src/App/StdPlugins/Scrips/WhippyTermBasic/src/OS/Windows/WTB_OSTime.cpp \
+    ../src/App/StdPlugins/Scrips/WhippyTermBasic/src/OS/Windows/WTB_OSFile.cpp \
 
     CONFIG(debug, debug|release){
         SOURCES += \
@@ -264,6 +265,7 @@ linux {
         ../src/OS/RPI/System.cpp \
         ../src/OS/RPI/Threads.cpp \
         ../src/App/StdPlugins/Scrips/WhippyTermBasic/src/OS/RPI/WTB_OSTime.cpp \
+        ../src/App/StdPlugins/Scrips/WhippyTermBasic/src/OS/RPI/WTB_OSFile.cpp \
 
     }else{
         message("Building Linux")
@@ -275,6 +277,7 @@ linux {
         ../src/OS/Linux/OSTime.cpp \
         ../src/OS/Linux/System.cpp \
         ../src/App/StdPlugins/Scrips/WhippyTermBasic/src/OS/Linux/WTB_OSTime.cpp \
+        ../src/App/StdPlugins/Scrips/WhippyTermBasic/src/OS/Linux/WTB_OSFile.cpp \
 
     }
 

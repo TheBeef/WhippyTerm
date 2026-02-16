@@ -1,6 +1,6 @@
 /*******************************************************************************
- * FILENAME: WTB_OSTime.cpp
- *
+ * FILENAME: WTB_OSFile.h
+ * 
  * PROJECT:
  *    Whippy Term
  *
@@ -8,7 +8,7 @@
  *    
  *
  * COPYRIGHT:
- *    Copyright 14 Feb 2026 Paul Hutchinson.
+ *    Copyright 16 Feb 2026 Paul Hutchinson.
  *
  *    This program is free software: you can redistribute it and/or modify it
  *    under the terms of the GNU General Public License as published by the
@@ -23,27 +23,28 @@
  *    You should have received a copy of the GNU General Public License along
  *    with this program. If not, see https://www.gnu.org/licenses/.
  *
- * CREATED BY:
- *    Paul Hutchinson (14 Feb 2026)
+ * HISTORY:
+ *    Paul Hutchinson (16 Feb 2026)
+ *       Created
  *
- ******************************************************************************/
+ *******************************************************************************/
+#ifndef __WTB_OSFILE_H_
+#define __WTB_OSFILE_H_
 
-/*** HEADER FILES TO INCLUDE  ***/
-#include "../WTB_OSTime.h"
-#include <unistd.h>
+/***  HEADER FILES TO INCLUDE          ***/
 
-/*** DEFINES                  ***/
+/***  DEFINES                          ***/
 
-/*** MACROS                   ***/
+/***  MACROS                           ***/
 
-/*** TYPE DEFINITIONS         ***/
+/***  TYPE DEFINITIONS                 ***/
 
-/*** FUNCTION PROTOTYPES      ***/
+/***  CLASS DEFINITIONS                ***/
 
-/*** VARIABLE DEFINITIONS     ***/
+/***  GLOBAL VARIABLE DEFINITIONS      ***/
 
-void WTB_Sleep(unsigned int ms)
-{
-    usleep(ms*1000);
-}
+/***  EXTERNAL FUNCTION PROTOTYPES     ***/
+void WTB_Mkdir(const char *DirName);
+void WTB_Rmdir(const char *DirName);
 
+#endif   /* end of "#ifndef __WTB_OSFILE_H_" */

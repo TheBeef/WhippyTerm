@@ -1,5 +1,5 @@
 /*******************************************************************************
- * FILENAME: WTB_OSTime.cpp
+ * FILENAME: WTB_OSFile.cpp
  *
  * PROJECT:
  *    Whippy Term
@@ -8,7 +8,7 @@
  *    
  *
  * COPYRIGHT:
- *    Copyright 14 Feb 2026 Paul Hutchinson.
+ *    Copyright 16 Feb 2026 Paul Hutchinson.
  *
  *    This program is free software: you can redistribute it and/or modify it
  *    under the terms of the GNU General Public License as published by the
@@ -24,12 +24,13 @@
  *    with this program. If not, see https://www.gnu.org/licenses/.
  *
  * CREATED BY:
- *    Paul Hutchinson (14 Feb 2026)
+ *    Paul Hutchinson (16 Feb 2026)
  *
  ******************************************************************************/
 
 /*** HEADER FILES TO INCLUDE  ***/
-#include "../WTB_OSTime.h"
+#include "../WTB_OSFile.h"
+#include <sys/stat.h>
 #include <unistd.h>
 
 /*** DEFINES                  ***/
@@ -42,8 +43,12 @@
 
 /*** VARIABLE DEFINITIONS     ***/
 
-void WTB_Sleep(unsigned int ms)
+void WTB_Mkdir(const char *DirName)
 {
-    usleep(ms*1000);
+    mkdir(DirName,0777);
 }
 
+void WTB_Rmdir(const char *DirName)
+{
+    rmdir(DirName);
+}

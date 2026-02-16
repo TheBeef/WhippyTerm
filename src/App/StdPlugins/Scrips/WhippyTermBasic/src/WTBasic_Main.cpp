@@ -1,3 +1,62 @@
+/*
+
+Need a call from the script thread when the script is done so the GUI can
+update it's self (diable the stop button for example)
+---
+Basic commands:
+    x Open
+    x Close
+    x Write
+    x Read
+    x Seek
+    x Tell
+    x mkdir
+    x rmdir
+    x DeleteFile
+    * GetDirListing
+
+    x WriteCom
+    x ReadCom
+    x WriteScreen
+    x ReadKeyboard
+    * Wait <- Wait for one of the provided strings
+    * SendFile
+    * RecvFile
+    * StartDownload
+    * StartUpload
+    * FlushKeyboard
+    * FlushCom
+
+    * OpenURI
+    * OpenConnection
+    * CloseConnection
+    * GetConnectionStatus   <- Open/Close
+    * ChangeOptions
+    * ChangeAuxControl
+    * BridgeConnections
+    * SetTerminalEmulation
+    * SetCharacterEncoding
+    * Enable/Disable Data Processor
+    * SetTerminalDataProcessorMode
+    * SetAutoConnect
+    * SetTranDelay
+    * GetConnectionTitle
+    * SetConnectionTitle
+
+    x Cls
+    x Sleep
+    * ClearHex
+    * SetZoom
+    * InsertHR
+    * ShowPanel
+    * beep
+    * MessageBox
+    * CRC
+    * Date
+    * StopWatch
+    * Capture
+
+*/
 /*******************************************************************************
  * FILENAME: WTBasic_Main.cpp
  *
@@ -36,6 +95,7 @@
 #include "PluginSDK/Plugin.h"
 #include "ThirdParty/my_basic.h"
 #include "OS/WTB_OSTime.h"
+#include "OS/WTB_OSFile.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -94,7 +154,16 @@ int RPrintFn(struct mb_interpreter_t *bas, void **arg);
 int RecvFn(struct mb_interpreter_t *bas, void **arg);
 int KeyboardFn(struct mb_interpreter_t *bas, void **arg);
 int ScreenFn(struct mb_interpreter_t *bas, void **arg);
-int StdioFn(struct mb_interpreter_t *bas, void **arg);
+int CMDFn(struct mb_interpreter_t *bas, void **arg);
+static int OpenFn(struct mb_interpreter_t *bas, void **arg);
+static int CloseFn(struct mb_interpreter_t *bas, void **arg);
+static int TellFn(struct mb_interpreter_t *bas, void **arg);
+static int SeekFn(struct mb_interpreter_t *bas, void **arg);
+static int ReadFn(struct mb_interpreter_t *bas, void **arg);
+static int WriteFn(struct mb_interpreter_t *bas, void **arg);
+static int MkdirFn(struct mb_interpreter_t *bas, void **arg);
+static int RmdirFn(struct mb_interpreter_t *bas, void **arg);
+static int DelFileFn(struct mb_interpreter_t *bas, void **arg);
 
 //static int WTBasic_PreStepCallback(struct mb_interpreter_t *bas, void **l, const char *Filename, int SourcePos, unsigned short SourceRow, unsigned short SourceCol);
 
@@ -241,8 +310,18 @@ t_ScriptingEngineContextType *WTBasic_AllocateContext(t_ScriptingEngineInstType 
         mb_register_func(NewContext->bas,"RECV",RecvFn);
         mb_register_func(NewContext->bas,"KEYBOARD",KeyboardFn);
         mb_register_func(NewContext->bas,"SCREEN",ScreenFn);
-        mb_register_func(NewContext->bas,"STDIO",StdioFn);
-//        mb_register_func(NewContext->bas,"RECVLN",InKeyFn);
+        mb_register_func(NewContext->bas,"CMD",CMDFn);
+
+        /* File IO */
+        mb_register_func(NewContext->bas,"OPEN",OpenFn);
+        mb_register_func(NewContext->bas,"CLOSE",CloseFn);
+        mb_register_func(NewContext->bas,"TELL",TellFn);
+        mb_register_func(NewContext->bas,"SEEK",SeekFn);
+        mb_register_func(NewContext->bas,"READ",ReadFn);
+        mb_register_func(NewContext->bas,"WRITE",WriteFn);
+        mb_register_func(NewContext->bas,"MKDIR",MkdirFn);
+        mb_register_func(NewContext->bas,"RMDIR",RmdirFn);
+        mb_register_func(NewContext->bas,"DELFILE",DelFileFn);
 
         /* Override stdio */
         mb_set_printer(NewContext->bas,WriteStdOut);
@@ -315,9 +394,13 @@ PG_BOOL WTBasic_LoadScriptFromString(t_ScriptingEngineContextType *Context,const
         Data->LastErrorMsg="Error on line ";
         sprintf(buff,"%d",Row);
         Data->LastErrorMsg+=buff;
-        Data->LastErrorMsg+=" of file \"";
-        Data->LastErrorMsg+=FileName;
-        Data->LastErrorMsg+="\":\n";
+        if(FileName!=NULL)
+        {
+            Data->LastErrorMsg+=" of file \"";
+            Data->LastErrorMsg+=FileName;
+            Data->LastErrorMsg+="\"";
+        }
+        Data->LastErrorMsg+=":\n";
 
         Data->LastErrorMsg+=ErrorMsg;
         Data->LastErrorMsg+="\n";
@@ -360,9 +443,13 @@ PG_BOOL WTBasic_RunLoadedScript(t_ScriptingEngineContextType *Context)
             Data->LastErrorMsg="Error on line ";
             sprintf(buff,"%d",Row);
             Data->LastErrorMsg+=buff;
-            Data->LastErrorMsg+=" of file \"";
-            Data->LastErrorMsg+=FileName;
-            Data->LastErrorMsg+="\":\n";
+            if(FileName!=NULL)
+            {
+                Data->LastErrorMsg+=" of file \"";
+                Data->LastErrorMsg+=FileName;
+                Data->LastErrorMsg+="\"";
+            }
+            Data->LastErrorMsg+=":\n";
         }
 
         Data->LastErrorMsg+=ErrorMsg;
@@ -1524,7 +1611,7 @@ int ScreenFn(struct mb_interpreter_t *bas, void **arg)
     return MB_FUNC_OK;
 }
 
-int StdioFn(struct mb_interpreter_t *bas, void **arg)
+int CMDFn(struct mb_interpreter_t *bas, void **arg)
 {
     struct WTBasicContext *Data;
     int Local;
@@ -1536,6 +1623,275 @@ int StdioFn(struct mb_interpreter_t *bas, void **arg)
     mb_check(mb_attempt_func_end(bas,arg));
 
     m_StdioGoes2Com=!Local;
+
+    return MB_FUNC_OK;
+}
+
+static int OpenFn(struct mb_interpreter_t* s, void** l)
+{
+    int result = MB_FUNC_OK;
+    FILE* fp = 0;
+    char* fn = 0;
+    char* fm = 0;
+
+    mb_check(mb_attempt_open_bracket(s, l));
+    mb_check(mb_pop_string(s, l, &fn));
+    mb_check(mb_pop_string(s, l, &fm));
+    mb_check(mb_attempt_close_bracket(s, l));
+
+    if(!fn)
+    {
+        result = MB_FUNC_ERR;
+
+        goto _exit;
+    }
+
+    fp = fopen(fn, fm);
+    if(!fp)
+    {
+        result = MB_FUNC_ERR;
+
+        goto _exit;
+    }
+
+_exit:
+    mb_check(mb_push_usertype(s, l, (void*)fp));
+
+    return result;
+}
+
+static int CloseFn(struct mb_interpreter_t* s, void** l)
+{
+    int result = MB_FUNC_OK;
+    FILE* fp = 0;
+    void* up = 0;
+
+    mb_check(mb_attempt_open_bracket(s, l));
+    mb_check(mb_pop_usertype(s, l, &up));
+    mb_check(mb_attempt_close_bracket(s, l));
+
+    if(!up)
+        return MB_FUNC_ERR;
+
+    fp = (FILE*)up;
+    fclose(fp);
+
+    return result;
+}
+
+static int TellFn(struct mb_interpreter_t* s, void** l)
+{
+    int result = MB_FUNC_OK;
+    FILE* fp = 0;
+    void* up = 0;
+    long ft = -1; /* Push -1 for error */
+
+    mb_check(mb_attempt_open_bracket(s, l));
+    mb_check(mb_pop_usertype(s, l, &up));
+    mb_check(mb_attempt_close_bracket(s, l));
+
+    if(!up) {
+        result = MB_FUNC_ERR;
+
+        goto _exit;
+    }
+
+    fp = (FILE*)up;
+    ft = ftell(fp);
+
+_exit:
+    mb_check(mb_push_int(s, l, ft));
+
+    return result;
+}
+
+static int SeekFn(struct mb_interpreter_t* s, void** l)
+{
+    int result = MB_FUNC_OK;
+    FILE* fp = 0;
+    void* up = 0;
+    int fo = 0;
+    int set = 0;
+    int What;
+
+    mb_check(mb_attempt_open_bracket(s, l));
+    mb_check(mb_pop_usertype(s, l, &up));
+    mb_check(mb_pop_int(s, l, &fo));
+    mb_check(mb_pop_int(s, l, &set));
+    mb_check(mb_attempt_close_bracket(s, l));
+
+    if(!up)
+        return MB_FUNC_ERR;
+
+    switch(set)
+    {
+        case 0:
+            What=SEEK_SET;
+        break;
+        case 1:
+            What=SEEK_CUR;
+        break;
+        case 2:
+            What=SEEK_END;
+        break;
+        default:
+            return MB_FUNC_ERR;
+    }
+
+    fp = (FILE*)up;
+    fseek(fp, fo, What);
+
+    return result;
+}
+
+static int ReadFn(struct mb_interpreter_t* s, void** l)
+{
+    int result = MB_FUNC_OK;
+    FILE* fp = 0;
+    void* up = 0;
+    int ln = 0;
+
+    mb_check(mb_attempt_open_bracket(s, l));
+    mb_check(mb_pop_usertype(s, l, &up));
+    if(mb_has_arg(s, l))
+    {
+        mb_check(mb_pop_int(s, l, &ln));
+    }
+    mb_check(mb_attempt_close_bracket(s, l));
+
+    if(!up)
+    {
+        result = MB_FUNC_ERR;
+        goto _exit;
+    }
+
+    fp = (FILE*)up;
+    if(ln)
+    {
+        char* buf = (char*)malloc(ln + 1);
+        fgets(buf, ln + 1, fp);
+        buf[ln] = '\0';
+        mb_check(mb_push_string(s, l, mb_memdup(buf, ln + 1)));
+        free(buf);
+    }
+    else
+    {
+        int ret = fgetc(fp);
+        mb_check(mb_push_int(s, l, ret));
+    }
+
+_exit:
+    return result;
+}
+
+static int WriteFn(struct mb_interpreter_t* s, void** l)
+{
+    int result = MB_FUNC_OK;
+    FILE* fp = 0;
+    void* up = 0;
+    mb_value_t val;
+
+    mb_check(mb_attempt_open_bracket(s, l));
+    mb_check(mb_pop_usertype(s, l, &up));
+    if(!up)
+    {
+        result = MB_FUNC_ERR;
+        goto _exit;
+    }
+
+    fp = (FILE*)up;
+
+    while(mb_has_arg(s, l))
+    { /* Support variadic */
+        mb_check(mb_pop_value(s, l, &val));
+        switch(val.type)
+        {
+            case MB_DT_INT:
+                fputc(val.value.integer, fp);
+            break;
+            case MB_DT_REAL:
+                fputc((int_t)val.value.float_point, fp);
+            break;
+            case MB_DT_STRING:
+                fputs(val.value.string, fp);
+            break;
+            case MB_DT_NIL:
+            case MB_DT_UNKNOWN:
+            case MB_DT_NUM:
+            case MB_DT_TYPE:
+            case MB_DT_USERTYPE:
+            case MB_DT_USERTYPE_REF:
+            case MB_DT_ARRAY:
+            case MB_DT_LIST:
+            case MB_DT_LIST_IT:
+            case MB_DT_DICT:
+            case MB_DT_DICT_IT:
+            case MB_DT_COLLECTION:
+            case MB_DT_ITERATOR:
+            case MB_DT_CLASS:
+            case MB_DT_ROUTINE:
+            default:
+                result = MB_FUNC_ERR;
+            break;
+        }
+    }
+
+_exit:
+    mb_check(mb_attempt_close_bracket(s, l));
+
+    return result;
+}
+
+int MkdirFn(struct mb_interpreter_t *bas, void **arg)
+{
+    struct WTBasicContext *Data;
+    char *DirName;
+
+    mb_get_userdata(bas,(void **)&Data);
+
+    mb_check(mb_attempt_func_begin(bas,arg));
+    mb_check(mb_pop_string(bas,arg,&DirName));
+    mb_check(mb_attempt_func_end(bas,arg));
+
+    WTB_Mkdir(DirName);
+
+    return MB_FUNC_OK;
+}
+
+int RmdirFn(struct mb_interpreter_t *bas, void **arg)
+{
+    struct WTBasicContext *Data;
+    char *DirName;
+
+    mb_get_userdata(bas,(void **)&Data);
+
+    mb_check(mb_attempt_func_begin(bas,arg));
+    mb_check(mb_pop_string(bas,arg,&DirName));
+    mb_check(mb_attempt_func_end(bas,arg));
+
+    if(DirName[0]!=0)
+    {
+        WTB_Rmdir(DirName);
+    }
+
+    return MB_FUNC_OK;
+}
+
+int DelFileFn(struct mb_interpreter_t *bas, void **arg)
+{
+    struct WTBasicContext *Data;
+    char *DirFilename;
+
+    mb_get_userdata(bas,(void **)&Data);
+
+    mb_check(mb_attempt_func_begin(bas,arg));
+    mb_check(mb_pop_string(bas,arg,&DirFilename));
+    mb_check(mb_attempt_func_end(bas,arg));
+
+    if(DirFilename[0]!=0)
+    {
+        remove(DirFilename);
+    }
 
     return MB_FUNC_OK;
 }

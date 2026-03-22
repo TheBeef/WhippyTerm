@@ -88,6 +88,7 @@ void InitPluginSystem(void)
     RegisterStdPlugins();
 
     IOS_InitPlugins();
+    FTPS_InitPlugins();
     Scripting_InitPlugins();
 }
 

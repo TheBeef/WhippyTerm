@@ -4158,7 +4158,11 @@ void Connection::SetUploadFilename(const char *Filename)
 {
     try
     {
+        if(MW==NULL)
+            throw(0);
+
         Upload.Filename=Filename;
+        MW->InformOf_UploadSettingsChange(this);
     }
     catch(...)
     {
@@ -4219,7 +4223,11 @@ void Connection::SetUploadProtocol(const char *NewProtocol)
 {
     try
     {
+        if(MW==NULL)
+            throw(0);
+
         Upload.ProtocolID=NewProtocol;
+        MW->InformOf_UploadSettingsChange(this);
     }
     catch(...)
     {
@@ -4275,11 +4283,40 @@ void Connection::GetUploadProtocol(std::string &SelectedProtocol)
  *    A pointer to the KVList of options.
  *
  * SEE ALSO:
- *    
+ *    SetUploadOptions()
  ******************************************************************************/
 t_KVList *Connection::GetUploadOptionsPtr(void)
 {
     return &Upload.UploadOptions;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::SetUploadOptions
+ *
+ * SYNOPSIS:
+ *    void Connection::SetUploadOptions(void);
+ *
+ * PARAMETERS:
+ *    NewList [I] -- A pointer to the KVList of options.
+ *
+ * FUNCTION:
+ *    This function replaces the internal KVList with a new list.  If this
+ *    list is the same as the internal then only the GUI is updated.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::SetUploadOptions(t_KVList *NewList)
+{
+    if(NewList!=&Upload.UploadOptions)
+        Upload.UploadOptions=*NewList;
+
+    if(MW!=NULL)
+        MW->InformOf_UploadSettingsChange(this);
 }
 
 /*******************************************************************************
@@ -4297,10 +4334,12 @@ t_KVList *Connection::GetUploadOptionsPtr(void)
  *    out of the 'Upload' member variable.
  *
  * RETURNS:
- *    See Connection::StartUploadOfFile()
+ *    e_FileTransErr_Success -- Success
+ *    e_FileTransErr_FileError -- Could not open the file to upload
+ *    e_FileTransErr_ProtocolInitFail -- There was an error doing the upload
  *
  * SEE ALSO:
- *    Connection::StartUploadOfFile(), Connection::AbortUpload()
+ *    Connection::AbortUpload()
  ******************************************************************************/
 e_FileTransErrType Connection::StartUpload(void)
 {
@@ -4335,6 +4374,9 @@ e_FileTransErrType Connection::StartUpload(void)
            do everything in the UploadFile() call and be done. */
         RethinkLockOut();
     }
+
+    if(MW!=NULL)
+        MW->InformOf_UploadSettingsChange(this);
 
     return e_FileTransErr_Success;
 }
@@ -8833,4 +8875,36 @@ void Connection::DisableTxKeyboard(bool Enabled)
 void Connection::DisableDisplayWrite(bool Enabled)
 {
     DisplayWriteEnabled=Enabled;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::ConnectionBusy
+ *
+ * SYNOPSIS:
+ *    bool Connection::ConnectionBusy(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function checks if a connection is busy doing something in the
+ *    background.  This is things like uploading/download.  If a connect is
+ *    busy then a new task can not be started.
+ *
+ * RETURNS:
+ *    true -- Conneciton busy
+ *    false -- Connection is free to be assigned a new task.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::ConnectionBusy(void)
+{
+    if(Download.Stats.InProgress || Upload.Stats.InProgress ||
+            ComTest.Stats.InProgress)
+    {
+        return true;
+    }
+    return false;
 }

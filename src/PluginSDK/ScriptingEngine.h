@@ -49,6 +49,12 @@
 typedef struct ScriptingEngineContext {int PrivateDataHere;} t_ScriptingEngineContextType;    // Fake type holder
 typedef struct ScriptingEngineInst {int PrivateDataHere;} t_ScriptingEngineInstType;    // Fake type holder
 
+struct ScriptArgValue
+{
+    const char *ArgName;
+    char *Value;
+};
+
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */
 struct ScriptingEngineAPI
 {
@@ -61,6 +67,19 @@ struct ScriptingEngineAPI
     PG_BOOL (*RunLoadedScript)(t_ScriptingEngineContextType *Context);
     void (*AbortScript)(t_ScriptingEngineContextType *Context);
     void (*NewKeyPressDetected)(t_ScriptingEngineContextType *Context);
+    bool (*RegisterKeyword)(t_ScriptingEngineContextType *Context,
+            const char *Namespace,const char *Keyword,
+            e_ScriptDataArgType RetType,
+            const struct ScriptDataType *Args,unsigned int ArgCount);
+
+/*
+
+    bool (*RegisterKeyword)(t_ScriptingEngineContextType *Context,
+            const char *Namespace,const char *Keyword,
+            e_ScriptDataArgType RetType,
+            const struct ScriptArgValue *Args,unsigned int ArgCount);
+*/
+
     /********* End of SCRIPTING_HANDLER_API_VERSION_1 *********/
 };
 
@@ -109,6 +128,20 @@ struct ScriptingSystem_API
     unsigned int (*ReadCom)(t_ScriptingEngineInstType *Inst,uint8_t *Buffer,uint32_t BufferSize);
     void (*DisableScreenDisplay)(t_ScriptingEngineInstType *Inst,PG_BOOL Enabled);
     void (*DisableKeyboardSend)(t_ScriptingEngineInstType *Inst,PG_BOOL Enabled);
+    PG_BOOL (*ExeRegisteredKeyword)(t_ScriptingEngineInstType *Inst,
+            const char *Namespace,const char *Keyword,
+            char **RetStr,struct ScriptArgValue *Args,unsigned int ArgCount);
+    void (*FreeExeRegisteredKeywordRetStr)(t_ScriptingEngineInstType *Inst,char **RetStr);
+
+/*
+struct ScriptEngArgValue
+{
+    const char *Arg;
+    const char *Value;
+};
+
+*/
+
     /********* End of SCRIPTING_API_VERSION_1 *********/
 };
 

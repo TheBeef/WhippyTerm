@@ -1,3 +1,10 @@
+/*
+
+Bugs:
+    * Error line number off by one when using #!
+
+*/
+
 /*******************************************************************************
  * FILENAME: ScriptingSystem.cpp
  *
@@ -243,6 +250,38 @@ struct RPCDisableScreenDisplayData
     bool Enabled;
 };
 
+struct RPCExeRegisteredKeywordData
+{
+    struct ScriptEngineInstance *SEInstance;
+    const char *Namespace;
+    const char *Keyword;
+    char **RetStr;
+    struct ScriptArgValue *Args;
+    unsigned int ArgCount;
+};
+
+struct RPCFreeExeRegisteredKeywordRetStrData
+{
+    struct ScriptEngineInstance *SEInstance;
+    char **RetStr;
+};
+
+struct ScriptCommand
+{
+    string NameSpace;
+    string Name;
+    e_ScriptDataArgType RetType;
+    void *UserData;
+    bool (*ExeFn)(class Connection *Con,void *UserData,const char *NameSpace,
+        const char *Name,struct ScriptArgValue *Args,unsigned int ArgCount,
+        char **RetValue);
+    struct ScriptDataType *ScriptArgs;
+    uint32_t ArgCount;
+};
+
+typedef list<struct ScriptCommand> t_ScriptCommandList;
+typedef t_ScriptCommandList::iterator i_ScriptCommandList;
+
 /*** FUNCTION PROTOTYPES      ***/
 static PG_BOOL Scripting_RegisterScriptingEngine(const struct ScriptingEngineInfo *Info,unsigned int SizeOfScriptingEngineInfo);
 static uint32_t Scripting_GetSysColor(t_ScriptingEngineInstType *Inst,uint32_t SysColShade,uint32_t SysColor);
@@ -273,6 +312,8 @@ static void Scripting_WriteCom(t_ScriptingEngineInstType *Inst,const uint8_t *St
 static unsigned int Scripting_ReadCom(t_ScriptingEngineInstType *Inst,uint8_t *Buffer,uint32_t BufferSize);
 static void Scripting_DisableKeyboardSend(t_ScriptingEngineInstType *Inst,PG_BOOL Enabled);
 static void Scripting_DisableScreenDisplay(t_ScriptingEngineInstType *Inst,PG_BOOL Enabled);
+static PG_BOOL Scripting_ExeRegisteredKeyword(t_ScriptingEngineInstType *Inst,const char *Namespace,const char *Keyword,char **RetStr,struct ScriptArgValue *Args,unsigned int ArgCount);
+static void Scripting_FreeExeRegisteredKeywordRetStr(t_ScriptingEngineInstType *Inst,char **RetStr);
 
 static int Scripting_MainThreadAskCB(struct UI_RPCData *RPCData);
 static e_AskRetType Scripting_ThreadAsk(const char *Title,const char *Msg,e_AskBoxType BoxType=e_AskBox_Info,e_AskBttnsType Buttons=e_AskBttns_Default);
@@ -294,6 +335,7 @@ static int Scripting_WriteComCB(struct UI_RPCData *RPCData);
 static int Scripting_ReadComCB(struct UI_RPCData *RPCData);
 static int Scripting_DisableKeyboardSendCB(struct UI_RPCData *RPCData);
 static int Scripting_DisableScreenDisplayCB(struct UI_RPCData *RPCData);
+static int Scripting_ExeRegisteredKeywordCB(struct UI_RPCData *RPCData);
 
 static int RunScriptThread(void *data);
 
@@ -331,9 +373,13 @@ struct ScriptingSystem_API g_ScriptingAPI=
     Scripting_ReadCom,
     Scripting_DisableScreenDisplay,
     Scripting_DisableKeyboardSend,
+    Scripting_ExeRegisteredKeyword,
+    Scripting_FreeExeRegisteredKeywordRetStr,
     /* V2 */
 };
 static t_ScriptEngineType m_ScriptEngineList;
+t_ScriptCommandList m_ScriptCommandList;
+mtx_t m_ScriptCommandListMutex;
 
 /*******************************************************************************
  * NAME:
@@ -1843,10 +1889,103 @@ static void Scripting_DisableScreenDisplay(t_ScriptingEngineInstType *Inst,
 
 /*******************************************************************************
  * NAME:
+ *    Scripting_ExeRegisteredKeyword
+ *
+ * SYNOPSIS:
+ *    PG_BOOL Scripting_ExeRegisteredKeyword(t_ScriptingEngineInstType *Inst,
+ *              const char *Namespace,const char *Keyword,char **RetStr,
+ *              struct ScriptArgValue *Args,unsigned int ArgCount);
+ *
+ * PARAMETERS:
+ *    Inst [I] -- The scripting instance that this script is being run with.
+ *                This was passed in when the context was allocated.
+ *    Namespace [I] -- The namespace that was sent into RegisterKeyword()
+ *    Keyword [I] -- The keyword that was sent into RegisterKeyword()
+ *    RetStr [I/O] -- This is a pointer to a char pointer that will be allocated
+ *                    with a return string in it.  If this does not return
+ *                    NULL then you must call FreeExeRegisteredKeywordRetStr()
+ *                    to free this buffer.  If the function returns a value
+ *                    then this will be a string with the value in it.
+ *    Args [I] -- The args that where passed in to the function.
+ *    ArgCount [I] -- The number of args in 'Args'
+ *
+ * FUNCTION:
+ *    This function executes a script function that was registered with
+ *    RegisterKeyword().
+ *
+ *    When the system wants a script engine to add a new keyword to the
+ *    script language then it will call RegisterKeyword() with a Namespace
+ *    and Keyword name (as well as args and return types).  When this
+ *    keyword is eval'ed in the script the scripting engine calls this
+ *    function with the args collected from the script.  This function then
+ *    looks up the namespace+keyword and runs the command.  If there is a
+ *    return type for the command then 'RetStr' will be allocated and filled
+ *    in with a string that has the return value in it.  You must call
+ *    FreeExeRegisteredKeywordRetStr() to free this buffer after you have
+ *    copied the value.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error executing this command.
+ *
+ * SEE ALSO:
+ *    RegisterKeyword(), FreeExeRegisteredKeywordRetStr()
+ ******************************************************************************/
+static PG_BOOL Scripting_ExeRegisteredKeyword(t_ScriptingEngineInstType *Inst,
+        const char *Namespace,const char *Keyword,char **RetStr,
+        struct ScriptArgValue *Args,unsigned int ArgCount)
+{
+    struct RPCExeRegisteredKeywordData RPC;
+
+    RPC.SEInstance=(struct ScriptEngineInstance *)Inst;
+    RPC.Namespace=Namespace;
+    RPC.Keyword=Keyword;
+    RPC.RetStr=RetStr;
+    RPC.Args=Args;
+    RPC.ArgCount=ArgCount;
+
+    return DoGenericRPC2MainThread(Scripting_ExeRegisteredKeywordCB,
+            (void *)&RPC);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Scripting_FreeExeRegisteredKeywordRetStr
+ *
+ * SYNOPSIS:
+ *    static void Scripting_FreeExeRegisteredKeywordRetStr(t_ScriptingEngineInstType *Inst,
+ *          char **RetStr);
+ *
+ * PARAMETERS:
+ *    Inst [I] -- The scripting instance that this script is being run with.
+ *                This was passed in when the context was allocated.
+ *    RetStr [I] -- A pointer to a char pointer that was allocated with
+ *                  ExeRegisteredKeyword().  This will be freed.  It is safe to
+ *                  pass in pointer that points to NULL.
+ *
+ * FUNCTION:
+ *    This function frees the RetStr that was allocated with
+ *    ExeRegisteredKeyword()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    Scripting_ExeRegisteredKeyword()
+ ******************************************************************************/
+static void Scripting_FreeExeRegisteredKeywordRetStr(t_ScriptingEngineInstType *Inst,
+        char **RetStr)
+{
+    if(RetStr==NULL || *RetStr==NULL)
+        return;
+}
+
+/*******************************************************************************
+ * NAME:
  *    Scripting_Init
  *
  * SYNOPSIS:
- *    void Scripting_Init(void);
+ *    bool Scripting_Init(void);
  *
  * PARAMETERS:
  *    NONE
@@ -1860,8 +1999,16 @@ static void Scripting_DisableScreenDisplay(t_ScriptingEngineInstType *Inst,
  * SEE ALSO:
  *    
  ******************************************************************************/
-void Scripting_Init(void)
+bool Scripting_Init(void)
 {
+    if(mtx_init(&m_ScriptCommandListMutex,mtx_plain)!=thrd_success)
+    {
+        UIAsk("Error","Failed to init mutex for scripting system",
+                e_AskBox_Error,e_AskBttns_Ok);
+        return false;
+    }
+
+    return true;
 }
 
 /*******************************************************************************
@@ -1914,6 +2061,30 @@ void Scripting_InitPlugins(void)
         }
         i++;
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Scripting_Shutdown
+ *
+ * SYNOPSIS:
+ *    void Scripting_Shutdown(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function free things allocated in Scripting_Init().
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Scripting_Shutdown(void)
+{
+    mtx_destroy(&m_ScriptCommandListMutex);
 }
 
 /*******************************************************************************
@@ -3149,6 +3320,76 @@ int Scripting_DisableScreenDisplayCB(struct UI_RPCData *RPCData)
     return 0;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Scripting_ExeRegisteredKeywordCB
+ *
+ * SYNOPSIS:
+ *    int Scripting_ExeRegisteredKeywordCB(struct UI_RPCData *RPCData);
+ *
+ * PARAMETERS:
+ *    RPCData [I] -- The Remote proc callback data from the thread.
+ *
+ * FUNCTION:
+ *    This function is called from the thread to the main thread from the
+ *    Scripting_ExeRegisteredKeyword() function.  It does it's function.
+ *
+ * RETURNS:
+ *    0
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+int Scripting_ExeRegisteredKeywordCB(struct UI_RPCData *RPCData)
+{
+    struct RPCExeRegisteredKeywordData *Data=(struct RPCExeRegisteredKeywordData *)RPCData->Data;
+    i_ScriptCommandList cmd;
+    bool RetValue;
+    void *UserData;
+    bool (*ExeFn)(class Connection *Con,void *UserData,const char *NameSpace,
+        const char *Name,struct ScriptArgValue *Args,unsigned int ArgCount,
+        char **RetValue);
+
+    if(Data->SEInstance->ConnectedCon==NULL)
+        return false;
+
+    RetValue=false;
+    ExeFn=NULL;
+    UserData=NULL;
+
+    mtx_lock(&m_ScriptCommandListMutex);
+    /* Find this command */
+    for(cmd=m_ScriptCommandList.begin();cmd!=m_ScriptCommandList.end();
+            cmd++)
+    {
+        if(strcasecmp(cmd->NameSpace.c_str(),Data->Namespace)==0 &&
+                strcasecmp(cmd->Name.c_str(),Data->Keyword)==0)
+        {
+            break;
+        }
+    }
+    if(cmd!=m_ScriptCommandList.end())
+    {
+        ExeFn=cmd->ExeFn;
+        UserData=cmd->UserData;
+    }
+    mtx_unlock(&m_ScriptCommandListMutex);
+
+    /* Call the callback for this command */
+    if(ExeFn!=NULL)
+    {
+// DEBUG PAUL: Need to also send in the connection
+//        Data->SEInstance->ConnectedCon->DisableDisplayWrite(Data->Enabled);
+//    }
+
+        RetValue=ExeFn(Data->SEInstance->ConnectedCon,UserData,
+                Data->Namespace,Data->Keyword,Data->Args,Data->ArgCount,
+                Data->RetStr);
+    }
+
+    return RetValue;
+}
+
 static int RunScriptThread(void *data)
 {
     struct ScriptEngineInstance *SEInstance=(struct ScriptEngineInstance *)data;
@@ -3158,6 +3399,7 @@ static int RunScriptThread(void *data)
     bool FreeInstance;
     struct UI_RPCData RPCData;
     struct RPCScriptDoneData ScriptDoneData;
+    i_ScriptCommandList cmd;
 
     try
     {
@@ -3166,6 +3408,21 @@ static int RunScriptThread(void *data)
                 AllocateContext((t_ScriptingEngineInstType *)SEInstance);
         if(SEInstance->Context==NULL)
             throw("Failed to allocate context for script");
+
+        /* ` */
+        mtx_lock(&m_ScriptCommandListMutex);
+        for(cmd=m_ScriptCommandList.begin();cmd!=m_ScriptCommandList.end();
+                cmd++)
+        {
+            if(API->RegisterKeyword!=NULL)
+            {
+                API->RegisterKeyword(
+                        (t_ScriptingEngineContextType *)SEInstance->Context,
+                        cmd->NameSpace.c_str(),cmd->Name.c_str(),
+                        cmd->RetType,cmd->ScriptArgs,cmd->ArgCount);
+            }
+        }
+        mtx_unlock(&m_ScriptCommandListMutex);
 
         if(!API->LoadScriptFromString(SEInstance->Context,
                 SEInstance->StartOfScript))
@@ -3234,3 +3491,89 @@ static int RunScriptThread(void *data)
 
     return 0;
 }
+
+/*******************************************************************************
+ * NAME:
+ *    
+ *
+ * SYNOPSIS:
+ *    
+ *
+ * PARAMETERS:
+ *    
+ *
+ * FUNCTION:
+ *    
+ *
+ * RETURNS:
+ *    
+ *
+ * NOTES:
+ *    
+ *
+ * LIMITATIONS:
+ *    
+ *
+ * EXAMPLE:
+ *    
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Scripting_AddNewCMD(const char *NameSpace,const char *Name,
+        struct ScriptDataType *ScriptArgs,uint32_t ArgCount,
+        e_ScriptDataArgType RetType,
+        void *UserData,bool (*ExeFn)(class Connection *Con,void *UserData,
+        const char *NameSpace,const char *Name,struct ScriptArgValue *Args,
+        unsigned int ArgCount,char **RetValue))
+{
+    struct ScriptCommand NewSCommand;
+    i_ScriptCommandList cmd;
+
+    NewSCommand.NameSpace=NameSpace;
+    NewSCommand.Name=Name;
+    NewSCommand.ScriptArgs=ScriptArgs;
+    NewSCommand.ArgCount=ArgCount;
+    NewSCommand.RetType=RetType;
+    NewSCommand.ExeFn=ExeFn;
+    NewSCommand.UserData=UserData;
+
+    mtx_lock(&m_ScriptCommandListMutex);
+    /* Make sure we don't already have a command registered under this name */
+    for(cmd=m_ScriptCommandList.begin();cmd!=m_ScriptCommandList.end();
+            cmd++)
+    {
+        if(strcasecmp(cmd->NameSpace.c_str(),NameSpace)==0 &&
+                strcasecmp(cmd->Name.c_str(),Name)==0)
+        {
+            break;
+        }
+    }
+    if(cmd!=m_ScriptCommandList.end())
+    {
+        /* Already in use */
+        mtx_unlock(&m_ScriptCommandListMutex);
+        return false;
+    }
+    m_ScriptCommandList.push_back(NewSCommand);
+    mtx_unlock(&m_ScriptCommandListMutex);
+
+    return true;
+}
+
+//static PG_BOOL FTPSPAI_AddScriptUploadCMD(t_FTPSystemData *SysHandle,
+//        const char *ProtocolName,struct ScriptDataType *ArgList,
+//        uint32_t ArgCount)
+//
+//
+//void Scripting_KeyPress(struct ScriptHandle *Handle,class Connection *Con,
+//        uint8_t Mods,e_UIKeys Key,const uint8_t *TextPtr,unsigned int TextLen);
+/* Things:
+    * Return code need
+    * On Startup:AddUpload->AddNewCMD(Namespace,Name,...,UserData)
+    * On new script:AddKeyword(args)
+    * On new keyword run:ExeRegisteredKeyword(Namespace,Name,args)->Find CMD->DoUpload(UserData,Connection,ScriptHandle)
+    * On exit:UploadFreeUserData(UserData)
+    * 
+    
+*/

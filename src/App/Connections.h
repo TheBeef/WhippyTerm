@@ -402,6 +402,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void SetUploadProtocol(const char *NewProtocol);
         void GetUploadProtocol(std::string &SelectedProtocol);
         t_KVList *GetUploadOptionsPtr(void);
+        void SetUploadOptions(t_KVList *NewList);
         e_FileTransErrType StartUpload(void);
         void AbortUpload(void);
         struct UploadStats const *UploadGetStats(void);
@@ -547,6 +548,9 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         /* Scripting */
         struct ScriptHandle *GetScriptHandle(e_SysScriptType TypeOfScript);
         void SetScriptHandle(e_SysScriptType TypeOfScript,struct ScriptHandle *Script);
+
+        /* Conenction info */
+        bool ConnectionBusy(void);
 
     private:
         void *OurParentWidget;

@@ -5228,6 +5228,34 @@ void TheMainWindow::InformOf_ScriptDone(struct ScriptHandle *Script)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::InformOf_UploadSettingsChange
+ *
+ * SYNOPSIS:
+ *    void void TheMainWindow::InformOf_UploadSettingsChange(class Connection *Con);
+ *
+ * PARAMETERS:
+ *    Con [I] -- The connection that has had the options change.
+ *
+ * FUNCTION:
+ *    This function is called when a connection changes the upload file
+ *    options.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::InformOf_UploadSettingsChange(class Connection *Con)
+{
+    if(Con!=NULL && Con==ActiveCon)
+    {
+        UploadPanel.UpdateGUIFromConnection();
+    }
+}
+
+/*******************************************************************************
+ * NAME:
  *    MW_Event
  *
  * SYNOPSIS:

@@ -52,3 +52,73 @@ void WTB_Rmdir(const char *DirName)
 {
     _rmdir(DirName);
 }
+
+struct OpenDirData
+{
+    WIN32_FIND_DATA FindFileData;
+    HANDLE hFind;
+    bool DataReady;
+};
+
+void *WTB_OpenDir(const char *Path)
+{
+    struct OpenDirData *dir;
+
+    dir=(struct OpenDirData *)malloc(sizeof(struct OpenDirData));
+    if(dir==NULL)
+        return NULL;
+
+    dir->DataReady=true;
+
+    dir->hFind=FindFirstFileA(Path,&dir->FindFileData);
+    if(dir->hFind==INVALID_HANDLE_VALUE)
+    {
+        free(dir);
+        return NULL;
+    }
+    dir->DataReady=true;
+
+    return (void *)dir;
+}
+
+const char *WTB_NextDirEntry(void *DirHandle)
+{
+    struct OpenDirData *dir=(struct OpenDirData *)DirHandle;
+
+    if(dir->DataReady)
+    {
+        dir->DataReady=false;
+    }
+    else
+    {
+        dir->hFind=FindNextFileA(dir->hFind,&dir->FindFileData);
+        if(dir->hFind==NULL)
+            return NULL;
+        dir->DataReady=true;
+    }
+    return dir->FindFileData.cFileName;
+}
+
+void WTB_CloseDir(void *DirHandle)
+{
+    struct OpenDirData *dir=(struct OpenDirData *)DirHandle;
+
+    FindClose(dir->hFind);
+    free(dir);
+}
+
+bool WTB_IsDir(const char *FileName)
+{
+    DWORD Status = ERROR_SUCCESS;
+    FILE_STAT_INFORMATION FileStatInfo;
+
+    if (!GetFileInformationByName(FileName,
+                                  FileStatByNameInfo,
+                                  &FileStatInfo,
+                                  sizeof(FileStatInfo)))
+    {
+        return false;
+    }
+
+    return FileStatInfo.FileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+}

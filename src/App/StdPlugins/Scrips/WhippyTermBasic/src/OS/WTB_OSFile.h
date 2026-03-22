@@ -46,5 +46,9 @@
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
 void WTB_Mkdir(const char *DirName);
 void WTB_Rmdir(const char *DirName);
+void *WTB_OpenDir(const char *Path);
+const char *WTB_NextDirEntry(void *DirHandle);
+void WTB_CloseDir(void *DirHandle);
+bool WTB_IsDir(const char *FileName);
 
 #endif   /* end of "#ifndef __WTB_OSFILE_H_" */

@@ -69,8 +69,9 @@ typedef enum
 extern struct ScriptingSystem_API g_ScriptingAPI;
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
-void Scripting_Init(void);
+bool Scripting_Init(void);
 void Scripting_InitPlugins(void);
+void Scripting_Shutdown(void);
 void Scripting_AppendListOfFileTypeFilters(std::string &RetList);
 void Scripting_InformOfNewPluginInstalled(const char *PluginIDStr);
 void Scripting_InformOfPluginUninstalled(const char *PluginIDStr);
@@ -90,5 +91,12 @@ void Scripting_KeyPress(struct ScriptHandle *Handle,class Connection *Con,
         uint8_t Mods,e_UIKeys Key,const uint8_t *TextPtr,unsigned int TextLen);
 void Scripting_RecvBytes(struct ScriptHandle *Handle,class Connection *Con,
         const uint8_t *inbuff,unsigned int bytes);
+
+bool Scripting_AddNewCMD(const char *NameSpace,const char *Name,
+        struct ScriptDataType *ScriptArgs,uint32_t ArgCount,
+        e_ScriptDataArgType RetType,
+        void *UserData,bool (*ExeFn)(class Connection *Con,void *UserData,
+        const char *NameSpace,const char *Name,struct ScriptArgValue *Args,
+        unsigned int ArgCount,char **RetValue));
 
 #endif   /* end of "#ifndef __SCRIPTINGSYSTEM_H_" */

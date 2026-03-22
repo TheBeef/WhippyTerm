@@ -142,7 +142,8 @@ bool AppMain(int argc,char *argv[])
     IOS_Init();
     DPS_Init();
     FTPS_Init();
-    Scripting_Init();
+    if(!Scripting_Init())
+        return false;
 
     InitPluginSystem();
 
@@ -212,6 +213,7 @@ void FinishAppShutdown(void)
 {
     CRC_ShutDown();
     IOS_Shutdown();
+    Scripting_Shutdown();
 
     FreeLoadedExternPlugins();
 }

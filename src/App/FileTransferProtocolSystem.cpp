@@ -48,6 +48,7 @@
 #include "Version.h"
 #include <string>
 #include <string.h>
+#include <stddef.h>
 
 using namespace std;
 
@@ -56,7 +57,15 @@ using namespace std;
 /*** MACROS                   ***/
 
 /*** TYPE DEFINITIONS         ***/
-typedef std::list<const struct FTPHandlerInfo *> t_FTPHandlersType;
+struct InternalFTPHandlerInfo
+{
+    struct FTPHandlerInfo Info;
+    struct FileTransferHandlerAPI PaddedHandlerAPI;
+    bool InitCalled;
+    bool InitFailed;
+};
+
+typedef std::list<struct InternalFTPHandlerInfo> t_FTPHandlersType;
 typedef t_FTPHandlersType::iterator i_FTPHandlersType;
 
 struct FTPOptionsData
@@ -71,6 +80,14 @@ struct RealFTPData
     const struct FileTransferHandlerAPI *HandlerAPI;
     class Connection *Con;
     i_FTPHandlersType FTPHandlerInfo;
+};
+
+struct FTPS_ScriptData
+{
+    struct RealFTPData *RealFData;
+    struct InternalFTPHandlerInfo *InternalInfo;
+    struct ScriptDataType *ArgList;
+    uint32_t ArgCount;
 };
 
 /*** FUNCTION PROTOTYPES      ***/
@@ -89,16 +106,23 @@ static int FTPSPIA_DLSendData(t_FTPSystemData *SysHandle,void *Packet,
 static void FTPSPIA_DLFinishDownload(t_FTPSystemData *SysHandle,PG_BOOL Aborted);
 static const char *FTPSPIA_GetDownloadFilename(t_FTPSystemData *SysHandle,
         const char *FileNameHint);
+static PG_BOOL FTPSPAI_AddScriptUploadCMD(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount);
+static PG_BOOL FTPSPAI_AddScriptDownloadCMD(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount);
 
 static bool FTPS_SetupCurrentHandler(struct RealFTPData *RealFData,
         i_FTPHandlersType Handler);
 static void FTPS_FreeCurrentHander(struct RealFTPData *RealFData);
+
+static bool FTPS_ScriptStartUploadCB(class Connection *Con,void *UserData,
+        const char *NameSpace,const char *Name,struct ScriptArgValue *Args,
+        unsigned int ArgCount,char **RetValue);
 
 /*** VARIABLE DEFINITIONS     ***/
 t_FTPHandlersType m_FTPHandlersList;     // All available data processors
 
 struct FTPS_API g_FTPSAPI=
 {
+    /* V1 */
     FTPSPIA_RegisterFileTransferProtocol,
     PIUSDefault_GetDefaultAPI,
     FTPSPIA_SetTimeout,
@@ -110,6 +134,11 @@ struct FTPS_API g_FTPSAPI=
     FTPSPIA_DLFinishDownload,
     FTPSPIA_DLSendData,
     FTPSPIA_GetDownloadFilename,
+
+    /* V2 */
+    FTPSPAI_AddScriptUploadCMD,
+    NULL,
+
 };
 
 /*******************************************************************************
@@ -396,33 +425,93 @@ struct FTPS_API g_FTPSAPI=
  * SEE ALSO:
  *    
  *==============================================================================
+ * NAME:
+ *    Init
+ *
+ * SYNOPSIS:
+ *    PG_BOOL Init(t_FTPSystemData *SysHandle);
+ *
+ * PARAMETERS:
+ *    SysHandle [I] -- An handle to be passed back to the file transfer protocol
+ *                     system through the 'struct FileTransferHandlerAPI' API.
+ *
+ * FUNCTION:
+ *    This function is called on startup init.  It lets the plugin add needed
+ *    things to the system (and other init stuff).
+ *
+ * RETURNS:
+ *    true -- Init worked
+ *    false -- There was some kind of error.  Plugin will not be installed.
+ *
+ * SEE ALSO:
+ *    ShutDown()
+ *==============================================================================
+ * NAME:
+ *    ShutDown
+ *
+ * SYNOPSIS:
+ *    void ShutDown(t_FTPSystemData *SysHandle);
+ *
+ * PARAMETERS:
+ *    SysHandle [I] -- An handle to be passed back to the file transfer protocol
+ *                     system through the 'struct FileTransferHandlerAPI' API.
+ *
+ * FUNCTION:
+ *    This function is called when the system is shutting down.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    Init()
+ *==============================================================================
  *
  * SEE ALSO:
  *    
  ******************************************************************************/
 PG_BOOL FTPSPIA_RegisterFileTransferProtocol(const struct FTPHandlerInfo *Info)
 {
+    struct InternalFTPHandlerInfo NewIFHInfo;
+    unsigned int CopySize;
+
     try
     {
         /* Make sure this handler doesn't need a newer version of our
            API than we can support */
-        if(Info->FTPS_APIVersion>FTPS_API_VERSION_1)
+        if(Info->FTPS_APIVersion>FTPS_API_VERSION_2)
         {
             /* Ok, the handler is newer than we are */
             throw("Plugin needs a newer version of " WHIPPYTERM_NAME);
         }
 
-        /* Make sure the handler doesn't use a newer version of their API
-           than what we can use (maybe it will work but maybe they need
-           whatever the new functions provide) */
-        if(Info->FileTransferHandlerAPIVersion>
-                FILE_TRANSFER_HANDLER_API_VERSION_1)
-        {
-            /* Ok, the handler is newer than we are */
-            throw("Plugin needs a newer version of " WHIPPYTERM_NAME);
-        }
+        NewIFHInfo.Info=*Info;
+        NewIFHInfo.InitCalled=false;
+        NewIFHInfo.InitFailed=false;
 
-        m_FTPHandlersList.push_back(Info);
+        /* Setup the API by padding any unknown functions with NULL */
+        /* We copy over the plugins version up to the version number they
+           say they support */
+        switch(Info->FileTransferHandlerAPIVersion)
+        {
+            case FILE_TRANSFER_HANDLER_API_VERSION_1:
+                CopySize=offsetof(struct FileTransferHandlerAPI,RxData)+
+                        sizeof(void *);
+            break;
+            case FILE_TRANSFER_HANDLER_API_VERSION_2:
+                CopySize=offsetof(struct FileTransferHandlerAPI,GetLastErrorMsg)+
+                        sizeof(void *);
+            break;
+            default:
+            case FILE_TRANSFER_HANDLER_API_VERSION_3:
+                CopySize=offsetof(struct FileTransferHandlerAPI,ShutDown)+
+                        sizeof(void *);
+            break;
+        }
+        memset(&NewIFHInfo.PaddedHandlerAPI,0x00,
+                sizeof(struct FileTransferHandlerAPI));
+        memcpy(&NewIFHInfo.PaddedHandlerAPI,Info->API,CopySize);
+
+        m_FTPHandlersList.push_back(NewIFHInfo);
 
         /* Register this plugin with system */
         RegisterPluginWithSystem(Info->IDStr);
@@ -851,6 +940,134 @@ static const char *FTPSPIA_GetDownloadFilename(t_FTPSystemData *SysHandle,
     return RealFData->Con->GetDownloadFileName();
 }
 
+/*******************************************************************************
+ * NAME:
+ *    FTPSPAI_AddScriptUploadCMD
+ *
+ * SYNOPSIS:
+ *    static PG_BOOL FTPSPAI_AddScriptUploadCMD(t_FTPSystemData *SysHandle,
+ *              const char *ProtocolName,struct ScriptDataType *ArgList,
+ *              uint32_t ArgCount);
+ *
+ * PARAMETERS:
+ *    SysHandle [I] -- The FTP system handle.
+ *    ProtocolName [I] -- The name of the type of upload this is for
+ *    ArgList [I] -- An array of arguments this command takes.
+ *                      ArgName -- The name that will be used in the script
+ *                      KeyName -- The name that will be used when building
+ *                                 a t_PIKVList *Options list that will
+ *                                 sent into StartUpload().
+ *                      ArgType -- What type of arg is this.  In the end
+ *                                 all args are converted to strings, but
+ *                                 the script MAY validate the arg before
+ *                                 making a string, and will use this for the
+ *                                 type of data expected in this arg.
+ *
+ * FUNCTION:
+ *    This function adds an upload command to the scripting engines so that
+ *    scripts can start an upload using this plugin.
+ *
+ *    The way this works is you register an upload command using this
+ *    function.  The script engine then adds a new command to it's list
+ *    of keywords.  This keyword takes a format something like (it will
+ *    depend on the scripting engine):
+ *          ProtocolName.Upload(Filename,arg1,arg2,etc...);
+ *
+ *    When an upload is started the standard StartUpload() function will be
+ *    called with the 'Options' fill in the with args.  The system will take
+ *    the args and build a t_PIKVList list with the key's copied from the
+ *    args.  Because a t_PIKVList only supports strings the arg will always
+ *    be converted to a string.  The type MAY be used to validate the arg
+ *    but this optional.
+ *
+ *    So for:
+ *      ProtocolName = "XModem";
+ *      ArgList =
+ *      {
+ *          {"OneK","Mode",e_ScriptDataArg_Bool},
+ *          {"PadChar","Padding",e_ScriptDataArg_Int},
+ *          {"StartTimeout","MAX_START_WAIT_TIME",e_ScriptDataArg_Int},
+ *          {"MaxNaks","XMODEM_MAX_NAKS",e_ScriptDataArg_Int},
+ *          {"PacketTimeout","MAX_PACKET_WAIT_TIME",e_ScriptDataArg_Int},
+ *      }
+ *      You might get:
+ *          XModem.Upload("Filename",true,0xFF,10000,3,250);
+ *          XModemUpload("Filename,true,0xFF,10000,3,250);
+ *          XModem::Upload(name="Filename", OneK=true, PadChar=255,
+ *              StartTimeout=10000, MaxNaks=3, PacketTimeout=250);
+ *      And then calls to StartUpload():
+ *          Options=
+ *          {
+ *              ["Mode"]="1",
+ *              ["Padding"]="\xFF",
+ *              ["MAX_START_WAIT_TIME"]="10000",
+ *              ["XMODEM_MAX_NAKS"]="3",
+ *              ["MAX_PACKET_WAIT_TIME"]="250",
+ *          }
+ *
+ * RETURNS:
+ *    true -- The new command was added
+ *    false -- There was an error adding the command and it wasn't added.
+ *
+ * NOTES:
+ *    This just takes a copy of the command, it is added to the scripting
+ *    engine later in the process.
+ *
+ * SEE ALSO:
+ *    FTPSPAI_AddScriptDownloadCMD()
+ ******************************************************************************/
+static PG_BOOL FTPSPAI_AddScriptUploadCMD(t_FTPSystemData *SysHandle,
+        const char *ProtocolName,struct ScriptDataType *ArgList,
+        uint32_t ArgCount)
+{
+    struct RealFTPData *RealFData=(struct RealFTPData *)SysHandle;
+    struct FTPS_ScriptData *NewData;
+    PG_BOOL RetValue;
+    uint32_t r;
+
+    NewData=NULL;
+    try
+    {
+        NewData=new struct FTPS_ScriptData;
+
+        NewData->RealFData=RealFData;
+        NewData->InternalInfo=&*RealFData->FTPHandlerInfo;
+
+        NewData->ArgList=new struct ScriptDataType[ArgCount+1];
+        NewData->ArgList[0].ArgName="Filename";
+        NewData->ArgList[0].KeyName="";
+        NewData->ArgList[0].ArgType=e_ScriptDataArg_String;
+        for(r=0;r<ArgCount;r++)
+        {
+            NewData->ArgList[r+1].ArgName=ArgList[r].ArgName;
+            NewData->ArgList[r+1].KeyName=ArgList[r].KeyName;
+            NewData->ArgList[r+1].ArgType=ArgList[r].ArgType;
+        }
+        NewData->ArgCount=ArgCount+1;
+
+        if(!Scripting_AddNewCMD(ProtocolName,"Upload",NewData->ArgList,
+                NewData->ArgCount,e_ScriptDataArg_None,
+                (void *)NewData,FTPS_ScriptStartUploadCB))
+        {
+            throw(0);
+        }
+
+        RetValue=true;
+    }
+    catch(...)
+    {
+        if(NewData!=NULL)
+            delete NewData;
+        RetValue=false;
+    }
+    return RetValue;
+}
+
+static PG_BOOL FTPSPAI_AddScriptDownloadCMD(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount)
+{
+    return false;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // /\ 'FTPS_API' functions for the plugins
@@ -878,6 +1095,66 @@ static const char *FTPSPIA_GetDownloadFilename(t_FTPSystemData *SysHandle,
  ******************************************************************************/
 void FTPS_Init(void)
 {
+}
+
+/*******************************************************************************
+ * NAME:
+ *    FTPS_InitPlugins
+ *
+ * SYNOPSIS:
+ *    void FTPS_InitPlugins(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function handles init'ing of stuff related to the plugin's.  This
+ *    can't be done in normal init because the plugin's haven't been
+ *    registered yet.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void FTPS_InitPlugins(void)
+{
+    struct RealFTPData FakeRealFData;   // Ok, I love this name :)  It's a fake FTP data because it wasn't allocated and is static doesn't have a connection, etc, but the structure is called "Real" so you end up a with fake real data
+    i_FTPHandlersType handler;
+
+    /* Call all the plugins init() */
+    for(handler=m_FTPHandlersList.begin();handler!=m_FTPHandlersList.end();
+            handler++)
+    {
+        FakeRealFData.HandlerData=NULL;
+        FakeRealFData.Con=NULL;
+        FakeRealFData.HandlerAPI=&handler->PaddedHandlerAPI;
+        FakeRealFData.FTPHandlerInfo=handler;
+
+        if(!handler->InitCalled)
+        {
+            handler->InitCalled=true;
+            handler->InitFailed=false;
+
+            if(FakeRealFData.HandlerAPI->Init!=NULL)
+            {
+                if(!FakeRealFData.HandlerAPI->
+                        Init((t_FTPSystemData *)&FakeRealFData))
+                {
+                    string ErrorMsg;
+
+                    ErrorMsg="Failed to init FTP plugin \"";
+                    ErrorMsg+=handler->Info.DisplayName;
+                    ErrorMsg+="\"\n";
+
+                    UIAsk("Failed",ErrorMsg,e_AskBox_Error,e_AskBttns_Ok);
+                    handler->InitFailed=true;
+                }
+            }
+        }
+    }
+
 }
 
 /*******************************************************************************
@@ -929,12 +1206,15 @@ void FTPS_GetListOfFTProtocols(e_FileTransferProtocolModeType Mode,
     for(CurFTP=m_FTPHandlersList.begin();CurFTP!=m_FTPHandlersList.end();
             CurFTP++)
     {
-        if((*CurFTP)->Mode==Mode)
+        if(CurFTP->InitFailed)
+            continue;
+
+        if(CurFTP->Info.Mode==Mode)
         {
-            NewEntry.IDStr=(*CurFTP)->IDStr;
-            NewEntry.DisplayName=(*CurFTP)->DisplayName;
-            NewEntry.Tip=(*CurFTP)->Tip;
-            NewEntry.Help=(*CurFTP)->Help;
+            NewEntry.IDStr=CurFTP->Info.IDStr;
+            NewEntry.DisplayName=CurFTP->Info.DisplayName;
+            NewEntry.Tip=CurFTP->Info.Tip;
+            NewEntry.Help=CurFTP->Info.Help;
 
             RetData.push_back(NewEntry);
         }
@@ -959,7 +1239,7 @@ void FTPS_GetListOfFTProtocols(e_FileTransferProtocolModeType Mode,
  *    A pointer to the FTP data for this connection.
  *
  * SEE ALSO:
- *    
+ *    FTPS_FreeFTPData()
  ******************************************************************************/
 t_FTPData *FTPS_AllocFTPData(void)
 {
@@ -1036,7 +1316,7 @@ void FTPS_FreeFTPData(t_FTPData *FData)
 static bool FTPS_SetupCurrentHandler(struct RealFTPData *RealFData,
         i_FTPHandlersType Handler)
 {
-    RealFData->HandlerAPI=(*Handler)->API;
+    RealFData->HandlerAPI=&Handler->PaddedHandlerAPI;
     RealFData->FTPHandlerInfo=Handler;
 
     RealFData->HandlerData=NULL;
@@ -1048,7 +1328,7 @@ static bool FTPS_SetupCurrentHandler(struct RealFTPData *RealFData,
     }
 
     /* Tell the system we are using this plugin */
-    NotePluginInUse((*RealFData->FTPHandlerInfo)->IDStr);
+    NotePluginInUse(RealFData->FTPHandlerInfo->Info.IDStr);
 
     return true;
 }
@@ -1081,7 +1361,7 @@ static void FTPS_FreeCurrentHander(struct RealFTPData *RealFData)
         RealFData->HandlerAPI->FreeData(RealFData->HandlerData);
 
     /* Tell the system we are no longer using this plugin */
-    UnNotePluginInUse((*RealFData->FTPHandlerInfo)->IDStr);
+    UnNotePluginInUse(RealFData->FTPHandlerInfo->Info.IDStr);
 
     RealFData->HandlerAPI=NULL;
     RealFData->HandlerData=NULL;
@@ -1131,13 +1411,15 @@ t_ProtocolOptionsDataType *FTPS_AllocProtocolOptions(
         for(CurFTP=m_FTPHandlersList.begin();
                 CurFTP!=m_FTPHandlersList.end();CurFTP++)
         {
-            if(strcmp((*CurFTP)->IDStr,ProtocolStrID)==0)
+            if(strcmp(CurFTP->Info.IDStr,ProtocolStrID)==0)
                 break;
         }
         if(CurFTP==m_FTPHandlersList.end())
             throw(0);
-        DrvAPI=(*CurFTP)->API;
+        if(CurFTP->InitFailed)
+            throw(0);
 
+        DrvAPI=&CurFTP->PaddedHandlerAPI;
         if(DrvAPI->AllocOptionsWidgets!=NULL)
         {
             FTPOptions=DrvAPI->AllocOptionsWidgets(
@@ -1195,7 +1477,7 @@ void FTPS_FreeProtocolOptions(t_ProtocolOptionsDataType *OptionsHandle)
 
     try
     {
-        DrvAPI=(*FTPOptionData->FTPHandler)->API;
+        DrvAPI=&FTPOptionData->FTPHandler->PaddedHandlerAPI;
 
         if(DrvAPI->FreeOptionsWidgets!=NULL)
         {
@@ -1241,7 +1523,7 @@ void FTPS_StoreOptions(t_ProtocolOptionsDataType *OptionsHandle,
     struct FTPOptionsData *FTPOptionData=(struct FTPOptionsData *)OptionsHandle;
     const struct FileTransferHandlerAPI *DrvAPI;
 
-    DrvAPI=(*FTPOptionData->FTPHandler)->API;
+    DrvAPI=&FTPOptionData->FTPHandler->PaddedHandlerAPI;
 
     if(DrvAPI->StoreOptions!=NULL)
     {
@@ -1294,10 +1576,12 @@ bool FTPS_UploadFile(t_FTPData *FData,class Connection *ParentCon,
         for(CurFTP=m_FTPHandlersList.begin();CurFTP!=m_FTPHandlersList.end();
                 CurFTP++)
         {
-            if(strcmp((*CurFTP)->IDStr,ProtocolID)==0)
+            if(strcmp(CurFTP->Info.IDStr,ProtocolID)==0)
                 break;
         }
         if(CurFTP==m_FTPHandlersList.end())
+            throw(0);
+        if(CurFTP->InitFailed)
             throw(0);
 
         if(!FTPS_SetupCurrentHandler(RealFData,CurFTP))
@@ -1371,10 +1655,12 @@ bool FTPS_DownloadFile(t_FTPData *FData,class Connection *ParentCon,
         for(CurFTP=m_FTPHandlersList.begin();CurFTP!=m_FTPHandlersList.end();
                 CurFTP++)
         {
-            if(strcmp((*CurFTP)->IDStr,ProtocolID)==0)
+            if(strcmp(CurFTP->Info.IDStr,ProtocolID)==0)
                 break;
         }
         if(CurFTP==m_FTPHandlersList.end())
+            throw(0);
+        if(CurFTP->InitFailed)
             throw(0);
 
         if(!FTPS_SetupCurrentHandler(RealFData,CurFTP))
@@ -1562,7 +1848,7 @@ void FTPS_InformOfPluginUninstalled(const char *PluginIDStr)
     for(CurFTP=m_FTPHandlersList.begin();CurFTP!=m_FTPHandlersList.end();
             CurFTP++)
     {
-        if(strcmp((*CurFTP)->IDStr,PluginIDStr)==0)
+        if(strcmp(CurFTP->Info.IDStr,PluginIDStr)==0)
         {
             break;
         }
@@ -1573,4 +1859,96 @@ void FTPS_InformOfPluginUninstalled(const char *PluginIDStr)
 
         UnRegisterPluginWithSystem(PluginIDStr);
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    FTPS_ScriptStartUploadCB
+ *
+ * SYNOPSIS:
+ *    bool FTPS_ScriptStartUploadCB(class Connection *Con,void *UserData,
+ *          const char *NameSpace,const char *Name,struct ScriptArgValue *Args,
+ *          unsigned int ArgCount,char **RetValue);
+ *
+ * PARAMETERS:
+ *    Con [I] -- The connection to work on
+ *    UserData [I] -- The user data.  This is really struct FTPS_ScriptData.
+ *    Name [I] -- The name of script function called
+ *    Args [I] -- The args sent into the script function
+ *    ArgCount [I] -- The number of args in 'Args'
+ *    RetValue [O] -- The value we are returning.  Can be set to *RetValue=NULL
+ *                    for none.
+ *
+ * FUNCTION:
+ *    This is a call back function from Scripting_AddNewCMD() that is called
+ *    when a script hits the registered function (from Scripting_AddNewCMD()).
+ *    It includes the args that where provided.
+ *
+ *    This does the start upload.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    Scripting_AddNewCMD()
+ ******************************************************************************/
+bool FTPS_ScriptStartUploadCB(class Connection *Con,void *UserData,
+        const char *NameSpace,const char *Name,struct ScriptArgValue *Args,
+        unsigned int ArgCount,char **RetValue)
+{
+    struct FTPS_ScriptData *Data=(struct FTPS_ScriptData *)UserData;
+    uint32_t r;
+    const char *Filename;
+    t_KVList *OptionList;
+    unsigned int arg;
+
+    if(Con==NULL)
+        return false;
+
+    /* Need to check connection has an upload OR download started (and reject
+       if already going) */
+    if(Con->ConnectionBusy())
+        return false;
+
+    /* Find the arg filename arg */
+    for(r=0;r<ArgCount;r++)
+    {
+        if(strcmp(Args[r].ArgName,"Filename")==0)
+            break;
+    }
+    if(r==ArgCount)
+        return false;
+    Filename=Args[r].Value;
+
+    Con->SetUploadFilename(Filename);
+    Con->SetUploadProtocol(Data->InternalInfo->Info.IDStr);
+
+    /* Here we just update the list (instead of replacing) */
+    OptionList=Con->GetUploadOptionsPtr();
+    if(OptionList==NULL)
+        return false;
+    for(arg=0;arg<Data->ArgCount;arg++)
+    {
+        if(*Data->ArgList[arg].KeyName==0)
+            continue;
+
+        /* Find the arg in the list of args */
+        for(r=0;r<ArgCount;r++)
+            if(strcmp(Args[r].ArgName,Data->ArgList[arg].ArgName)==0)
+                break;
+        if(r==ArgCount)
+        {
+            /* Didn't find it */
+            return false;
+        }
+        (*OptionList)[Data->ArgList[arg].KeyName]=Args[r].Value;
+    }
+
+    Con->SetUploadOptions(OptionList);
+
+    if(Con->StartUpload()!=e_FileTransErr_Success)
+        return false;
+
+    return true;
 }

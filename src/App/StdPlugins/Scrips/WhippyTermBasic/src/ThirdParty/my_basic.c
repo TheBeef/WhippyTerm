@@ -19448,6 +19448,20 @@ _exit:
 
 /* ========================================================} */
 
+const char *GetCurrentFuncName(struct mb_interpreter_t* s, void** l)
+{
+	_ls_node_t* ast = 0;
+	_object_t* c = 0;
+
+	ast = *l;
+	c = (_object_t*)ast->data;
+    if(c->type == _DT_FUNC)
+    {
+        return c->data.func->name;
+    }
+    return NULL;
+}
+
 #ifdef MB_COMPACT_MODE
 #	pragma pack()
 #endif /* MB_COMPACT_MODE */

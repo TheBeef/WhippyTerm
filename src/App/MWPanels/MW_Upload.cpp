@@ -375,6 +375,7 @@ void MWUpload::ConnectionChanged(void)
     t_KVList *Options;
     const struct UploadStats *UStat;
     char buff[100];
+    t_UIProgressBarCtrl *ProgressBar;
 
     if(MW->ActiveCon==NULL)
         return;
@@ -384,6 +385,7 @@ void MWUpload::ConnectionChanged(void)
     FilenameInput=UIMW_GetTxtInputHandle(UIWin,e_UIMWTxtInput_Upload_Filename);
     OptionsFrame=UIMW_GetUploadOptionsFrameContainer(UIWin);
     BytesTxLabel=UIMW_GetLabelHandle(UIWin,e_UIMWLabel_Upload_BytesTx);
+    ProgressBar=UIMW_GetProgressBarHandle(UIWin,e_UIMWProgressBar_Upload);
 
     UStat=MW->ActiveCon->UploadGetStats();
 
@@ -418,6 +420,11 @@ void MWUpload::ConnectionChanged(void)
     }
     OptionWidgets=FTPS_AllocProtocolOptions(FTPsAvail[SelProto].IDStr,
             OptionsFrame,*Options);
+
+    if(UStat->InProgress)
+    {
+        UISetProgressBarSteps(ProgressBar,UStat->TotalFileSize);
+    }
 
     RethinkUI();
 }
@@ -1038,4 +1045,29 @@ void MWUpload::UploadMenuTriggered(uint64_t ID)
 void MWUpload::UpdateGUI(void)
 {
     RethinkUI();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWUpload::UpdateGUIFromConnection
+ *
+ * SYNOPSIS:
+ *    void MWUpload::UpdateGUIFromConnection(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function makes the panel reload all the values from the connection
+ *    and update the GUI.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWUpload::UpdateGUIFromConnection(void)
+{
+    ConnectionChanged();
 }

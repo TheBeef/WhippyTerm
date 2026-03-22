@@ -902,7 +902,7 @@ t_DataProSettingsWidgetsType *HexDumpDecoder_AllocSettingsWidgets(t_WidgetSysHan
         m_UIAPI->ChangeTextBoxProp(WData->ErrorsGroupBox->GroupWidgetHandle,
                 WData->ErrorsTextBox->Ctrl,e_TextBoxProp_FontMode,true,NULL);
 
-        WData->HelpLink=m_UIAPI->AddWebLink(WData->BPDSTab,"","Click here for information on the Binary Protocol Documentation Standard","https://whippyterm.com/BinaryProtocolDocumentationStandard");
+        WData->HelpLink=m_UIAPI->AddWebLink(WData->BPDSTab,"","Click here for information on the Binary Protocol Description Standard","https://whippyterm.com/BinaryProtocolDescriptionStandard");
         if(WData->HelpLink==NULL)
             throw(0);
 

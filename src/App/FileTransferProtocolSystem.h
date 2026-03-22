@@ -84,5 +84,6 @@ void FTPS_TimeoutTransfer(t_FTPData *FData);
 bool FTPS_ProcessIncomingBytes(t_FTPData *FData,uint8_t *Data,int Bytes);
 void FTPS_InformOfNewPluginInstalled(const char *PluginIDStr);
 void FTPS_InformOfPluginUninstalled(const char *PluginIDStr);
+void FTPS_InitPlugins(void);
 
 #endif

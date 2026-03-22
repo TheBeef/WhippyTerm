@@ -99,6 +99,23 @@ struct StyleData
     uint8_t Reserved[512];
 };
 
+typedef enum
+{
+    e_ScriptDataArg_None,
+    e_ScriptDataArg_String,
+    e_ScriptDataArg_Bool,
+    e_ScriptDataArg_Int,
+    e_ScriptDataArg_Float,
+    e_ScriptDataArgMAX
+} e_ScriptDataArgType;
+
+struct ScriptDataType
+{
+    const char *ArgName;    // Used in the script for the name of the arg
+    const char *KeyName;    // Used when converting an arg from the script to the t_PIKVList key names (the same ones used in the AllocOptionsWidgets() function)
+    e_ScriptDataArgType ArgType;    // Used for validating only (if at all)
+};
+
 /***  CLASS DEFINITIONS                ***/
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

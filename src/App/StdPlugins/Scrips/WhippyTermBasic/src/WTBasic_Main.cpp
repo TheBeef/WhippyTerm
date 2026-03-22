@@ -13,17 +13,22 @@ Basic commands:
     x mkdir
     x rmdir
     x DeleteFile
-    * GetDirListing
+    x Dir
+    x IsDir
 
     x WriteCom
     x ReadCom
     x WriteScreen
     x ReadKeyboard
-    * Wait <- Wait for one of the provided strings
-    * SendFile
-    * RecvFile
+    x Wait <- Wait for one of the provided strings
+    x WaitCom <- Wait for one of the provided strings
+    * GetListOfUploadTypes
+    * GetListOfDownloadTypes
     * StartDownload
     * StartUpload
+    * AbortFileTransfer
+    * SendFile?
+    * RecvFile?
     * FlushKeyboard
     * FlushCom
 
@@ -100,6 +105,10 @@ Basic commands:
 #include <stdio.h>
 #include <string.h>
 #include <string>
+#include <list>
+#include <map>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -110,6 +119,18 @@ using namespace std;
 /*** MACROS                   ***/
 
 /*** TYPE DEFINITIONS         ***/
+struct RegisteredKeyword
+{
+    string Namespace;
+    string Keyword;
+    e_ScriptDataArgType RetType;
+    const struct ScriptDataType *Args;
+    unsigned int ArgCount;
+};
+
+typedef map<string,struct RegisteredKeyword> t_RegisteredKeywordList;
+typedef t_RegisteredKeywordList::iterator i_RegisteredKeywordList;
+
 struct WTBasicContext
 {
     t_ScriptingEngineInstType *Inst;
@@ -119,6 +140,10 @@ struct WTBasicContext
     uint32_t WTBasic_Colors[e_SysColMAX*2];
     int ActiveFGColor;
     int ActiveBGColor;
+    bool StdioGoes2Com;
+    char *PrintBuff;
+    unsigned int PrintBuffSize;
+    t_RegisteredKeywordList RegKeywords;
 };
 
 /*** FUNCTION PROTOTYPES      ***/
@@ -129,32 +154,37 @@ void WTBasic_FreeContext(t_ScriptingEngineContextType *Context);
 PG_BOOL WTBasic_LoadScriptFromString(t_ScriptingEngineContextType *Context,const char *Str);
 PG_BOOL WTBasic_RunLoadedScript(t_ScriptingEngineContextType *Context);
 void WTBasic_AbortScript(t_ScriptingEngineContextType *Context);
+static bool WTBasic_RegisterKeyword(t_ScriptingEngineContextType *Context,
+        const char *Namespace,const char *Keyword,
+        e_ScriptDataArgType RetType,
+        const struct ScriptDataType *Args,unsigned int ArgCount);
 static void ConvertKey2String(struct PluginKeyPress *key,char *RetStr,int Size);
 
 int WriteStdOut(struct mb_interpreter_t *bas,const char *fmt,...);
 int ReadLineStdIn(struct mb_interpreter_t *bas,const char *pmt,char *buf,int s);
+static int WaitFnCommon(struct mb_interpreter_t *bas, void **arg,bool ForceCom);
 
-int SleepFn(struct mb_interpreter_t *bas, void **arg);
-int mSleepFn(struct mb_interpreter_t *bas, void **arg);
-int LPrintFn(struct mb_interpreter_t *bas, void **arg);
-int LocateFn(struct mb_interpreter_t *bas, void **arg);
-int ClsFn(struct mb_interpreter_t *bas, void **arg);
-int PosFn(struct mb_interpreter_t *bas, void **arg);
-int CsrLinFn(struct mb_interpreter_t *bas, void **arg);
-int ScreenSizeFn(struct mb_interpreter_t *bas, void **arg);
-int ColorFn(struct mb_interpreter_t *bas, void **arg);
-int PaletteFn(struct mb_interpreter_t *bas, void **arg);
-int SetTitleFn(struct mb_interpreter_t *bas, void **arg);
-int GetTitleFn(struct mb_interpreter_t *bas, void **arg);
-int ClearAreaFn(struct mb_interpreter_t *bas, void **arg);
-int ScrollAreaFn(struct mb_interpreter_t *bas, void **arg);
-int InKeyFn(struct mb_interpreter_t *bas, void **arg);
-int SendFn(struct mb_interpreter_t *bas, void **arg);
-int RPrintFn(struct mb_interpreter_t *bas, void **arg);
-int RecvFn(struct mb_interpreter_t *bas, void **arg);
-int KeyboardFn(struct mb_interpreter_t *bas, void **arg);
-int ScreenFn(struct mb_interpreter_t *bas, void **arg);
-int CMDFn(struct mb_interpreter_t *bas, void **arg);
+static int SleepFn(struct mb_interpreter_t *bas, void **arg);
+static int mSleepFn(struct mb_interpreter_t *bas, void **arg);
+static int SPrintFn(struct mb_interpreter_t *bas, void **arg);
+static int LocateFn(struct mb_interpreter_t *bas, void **arg);
+static int ClsFn(struct mb_interpreter_t *bas, void **arg);
+static int PosFn(struct mb_interpreter_t *bas, void **arg);
+static int CsrLinFn(struct mb_interpreter_t *bas, void **arg);
+static int ScreenSizeFn(struct mb_interpreter_t *bas, void **arg);
+static int ColorFn(struct mb_interpreter_t *bas, void **arg);
+static int PaletteFn(struct mb_interpreter_t *bas, void **arg);
+static int SetTitleFn(struct mb_interpreter_t *bas, void **arg);
+static int GetTitleFn(struct mb_interpreter_t *bas, void **arg);
+static int ClearAreaFn(struct mb_interpreter_t *bas, void **arg);
+static int ScrollAreaFn(struct mb_interpreter_t *bas, void **arg);
+static int InKeyFn(struct mb_interpreter_t *bas, void **arg);
+static int SendFn(struct mb_interpreter_t *bas, void **arg);
+static int CPrintFn(struct mb_interpreter_t *bas, void **arg);
+static int RecvFn(struct mb_interpreter_t *bas, void **arg);
+static int KeyboardFn(struct mb_interpreter_t *bas, void **arg);
+static int ScreenFn(struct mb_interpreter_t *bas, void **arg);
+static int CMDFn(struct mb_interpreter_t *bas, void **arg);
 static int OpenFn(struct mb_interpreter_t *bas, void **arg);
 static int CloseFn(struct mb_interpreter_t *bas, void **arg);
 static int TellFn(struct mb_interpreter_t *bas, void **arg);
@@ -164,6 +194,12 @@ static int WriteFn(struct mb_interpreter_t *bas, void **arg);
 static int MkdirFn(struct mb_interpreter_t *bas, void **arg);
 static int RmdirFn(struct mb_interpreter_t *bas, void **arg);
 static int DelFileFn(struct mb_interpreter_t *bas, void **arg);
+static int DirFn(struct mb_interpreter_t *bas, void **arg);
+static int IsDirFn(struct mb_interpreter_t *bas, void **arg);
+static int WaitFn(struct mb_interpreter_t *bas, void **arg);
+static int WaitComFn(struct mb_interpreter_t *bas, void **arg);
+static int NlFn(struct mb_interpreter_t *bas, void **arg);
+static int GenericKeywordFn(struct mb_interpreter_t *bas, void **arg);
 
 //static int WTBasic_PreStepCallback(struct mb_interpreter_t *bas, void **l, const char *Filename, int SourcePos, unsigned short SourceRow, unsigned short SourceCol);
 
@@ -178,6 +214,7 @@ const struct ScriptingEngineAPI g_WTBasicPluginAPI=
     WTBasic_RunLoadedScript,
     WTBasic_AbortScript,
     NULL, // NewKeyPressDetected
+    WTBasic_RegisterKeyword,
 };
 
 struct ScriptingEngineInfo m_WTBasicInfo=
@@ -194,9 +231,8 @@ struct ScriptingEngineInfo m_WTBasicInfo=
 //const struct PI_UIAPI *g_WTB_UI;
 const struct PI_SystemAPI *g_WTB_System;
 const struct ScriptingSystem_API *g_WTB_Scripting;
-bool m_StdioGoes2Com=true;
-char *g_PrintBuff;
-unsigned int g_PrintBuffSize;
+//char *g_PrintBuff;              // Move to inst
+//unsigned int g_PrintBuffSize;   // Move to inst
 
 /*******************************************************************************
  * NAME:
@@ -276,6 +312,9 @@ t_ScriptingEngineContextType *WTBasic_AllocateContext(t_ScriptingEngineInstType 
         NewContext->Inst=Inst;
         NewContext->bas=NULL;
 //        NewContext->AbortScript=false;
+        NewContext->StdioGoes2Com=true;
+        NewContext->PrintBuff=NULL;
+        NewContext->PrintBuffSize=0;
 
         if(mb_open(&NewContext->bas)!=MB_FUNC_OK)
             throw(0);
@@ -304,13 +343,16 @@ t_ScriptingEngineContextType *WTBasic_AllocateContext(t_ScriptingEngineInstType 
 
         /* IO */
         mb_register_func(NewContext->bas,"INKEY$",InKeyFn);
-        mb_register_func(NewContext->bas,"LPRINT",LPrintFn);
-        mb_register_func(NewContext->bas,"RPRINT",RPrintFn);
+        mb_register_func(NewContext->bas,"SPRINT",SPrintFn);
+        mb_register_func(NewContext->bas,"CPRINT",CPrintFn);
         mb_register_func(NewContext->bas,"SEND",SendFn);
         mb_register_func(NewContext->bas,"RECV",RecvFn);
         mb_register_func(NewContext->bas,"KEYBOARD",KeyboardFn);
         mb_register_func(NewContext->bas,"SCREEN",ScreenFn);
         mb_register_func(NewContext->bas,"CMD",CMDFn);
+        mb_register_func(NewContext->bas,"WAIT",WaitFn);
+        mb_register_func(NewContext->bas,"WAITCOM",WaitComFn);
+        mb_register_func(NewContext->bas,"NL",NlFn);
 
         /* File IO */
         mb_register_func(NewContext->bas,"OPEN",OpenFn);
@@ -322,6 +364,8 @@ t_ScriptingEngineContextType *WTBasic_AllocateContext(t_ScriptingEngineInstType 
         mb_register_func(NewContext->bas,"MKDIR",MkdirFn);
         mb_register_func(NewContext->bas,"RMDIR",RmdirFn);
         mb_register_func(NewContext->bas,"DELFILE",DelFileFn);
+        mb_register_func(NewContext->bas,"DIR$",DirFn);
+        mb_register_func(NewContext->bas,"ISDIR",IsDirFn);
 
         /* Override stdio */
         mb_set_printer(NewContext->bas,WriteStdOut);
@@ -476,6 +520,215 @@ void WTBasic_AbortScript(t_ScriptingEngineContextType *Context)
 //       interface and use it to check for abort every statement. */
     mb_schedule_suspend(Data->bas,MB_EXTENDED_ABORT);
 }
+
+bool WTBasic_RegisterKeyword(t_ScriptingEngineContextType *Context,
+        const char *Namespace,const char *Keyword,
+        e_ScriptDataArgType RetType,
+        const struct ScriptDataType *Args,unsigned int ArgCount)
+{
+    struct WTBasicContext *Data=(struct WTBasicContext *)Context;
+    string TmpName;
+    struct RegisteredKeyword NewRegKeyword;
+
+    try
+    {
+        /* For basic we just put the namespace and keyword together */
+        TmpName=Namespace;
+        TmpName+=Keyword;
+        transform(TmpName.begin(),TmpName.end(),TmpName.begin(),::toupper);
+
+        if(mb_register_func(Data->bas,TmpName.c_str(),GenericKeywordFn)==0)
+            throw(0);
+
+        NewRegKeyword.Namespace=Namespace;
+        NewRegKeyword.Keyword=Keyword;
+        NewRegKeyword.RetType=RetType;
+        NewRegKeyword.Args=Args;
+        NewRegKeyword.ArgCount=ArgCount;
+
+        Data->RegKeywords.insert({TmpName,NewRegKeyword});
+    }
+    catch(...)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+static int GenericKeywordFn(struct mb_interpreter_t *bas, void **arg)
+{
+    struct WTBasicContext *Data;
+    const char *fnname;
+    i_RegisteredKeywordList keyword;
+    unsigned int a;
+    const struct ScriptDataType *curarg;
+    float ArgReal;
+    int ArgInt;
+    struct ScriptArgValue *ExeArgs;
+    unsigned int ExeArgsCount;
+    char *ValueStr;
+    char TmpBuff[100];
+    int RetValue;
+    int ArgRet;
+    char *RetStr;
+    bool Success;
+
+    ExeArgs=NULL;
+    ExeArgsCount=0;
+    RetStr=NULL;
+    try
+    {
+        mb_get_userdata(bas,(void **)&Data);
+
+        fnname=GetCurrentFuncName(bas,arg);
+
+        /* We need to find this keyword */
+        keyword=Data->RegKeywords.find(fnname);
+        if(keyword==Data->RegKeywords.end())
+        {
+            mb_raise_error(bas,arg,SE_CM_FUNC_DOES_NOT_EXIST,MB_FUNC_ERR);
+            return MB_FUNC_ERR;
+        }
+
+        if(keyword->second.RetType!=e_ScriptDataArg_None)
+        {
+            /* Should use () */
+            mb_check(mb_attempt_open_bracket(bas,arg));
+        }
+        else
+        {
+            mb_check(mb_attempt_func_begin(bas,arg));
+        }
+
+        ExeArgsCount=keyword->second.ArgCount;
+        ExeArgs=new struct ScriptArgValue[ExeArgsCount];
+
+        for(a=0;a<ExeArgsCount;a++)
+            ExeArgs[a].Value=NULL;
+
+        /* Grab args */
+        for(a=0;a<ExeArgsCount;a++)
+        {
+            curarg=&(keyword->second.Args[a]);
+            ExeArgs[a].ArgName=curarg->ArgName;
+            switch(curarg->ArgType)
+            {
+                case e_ScriptDataArg_String:
+                    ArgRet=mb_pop_string(bas,arg,&ValueStr);
+                    if(ArgRet!=MB_FUNC_OK)
+                    {
+                        mb_raise_error(bas,arg,SE_RN_STRING_EXPECTED,MB_FUNC_ERR);
+                        throw(0);
+                    }
+                break;
+                case e_ScriptDataArg_Bool:
+                    ArgRet=mb_pop_int(bas,arg,&ArgInt);
+                    if(ArgRet!=MB_FUNC_OK)
+                    {
+                        mb_raise_error(bas,arg,SE_RN_INTEGER_EXPECTED,MB_FUNC_ERR);
+                        throw(0);
+                    }
+                    ValueStr=TmpBuff;
+                    sprintf(ValueStr,"%d",ArgInt);
+                break;
+                case e_ScriptDataArg_Int:
+                    ArgRet=mb_pop_int(bas,arg,&ArgInt);
+                    if(ArgRet!=MB_FUNC_OK)
+                    {
+                        mb_raise_error(bas,arg,SE_RN_INTEGER_EXPECTED,MB_FUNC_ERR);
+                        throw(0);
+                    }
+                    ValueStr=TmpBuff;
+                    sprintf(ValueStr,"%d",ArgInt);
+                break;
+                case e_ScriptDataArg_Float:
+                    ArgRet=mb_pop_real(bas,arg,&ArgReal);
+                    if(ArgRet!=MB_FUNC_OK)
+                    {
+                        mb_raise_error(bas,arg,SE_RN_NUMBER_EXPECTED,MB_FUNC_ERR);
+                        throw(0);
+                    }
+                    ValueStr=TmpBuff;
+                    sprintf(ValueStr,"%g",ArgReal);
+                break;
+                case e_ScriptDataArg_None:
+                case e_ScriptDataArgMAX:
+                    /* Unknown arg type */
+                    mb_raise_error(bas,arg,SE_CM_NOT_SUPPORTED,MB_FUNC_ERR);
+                    return MB_FUNC_ERR;
+                break;
+            }
+            ExeArgs[a].Value=new char[strlen(ValueStr)+1];
+            strcpy(ExeArgs[a].Value,ValueStr);
+        }
+
+        if(keyword->second.RetType!=e_ScriptDataArg_None)
+        {
+            mb_check(mb_attempt_close_bracket(bas,arg));
+        }
+        else
+        {
+            mb_check(mb_attempt_func_end(bas,arg));
+        }
+
+        Success=g_WTB_Scripting->ExeRegisteredKeyword(Data->Inst,
+                keyword->second.Namespace.c_str(),
+                keyword->second.Keyword.c_str(),
+                &RetStr,ExeArgs,ExeArgsCount);
+        if(!Success)
+        {
+            mb_raise_error(bas,arg,SE_CM_NOT_SUPPORTED,MB_FUNC_ERR);
+            throw(SE_RN_FAILED_TO_OPERATE);
+        }
+
+        switch(keyword->second.RetType)
+        {
+            case e_ScriptDataArg_String:
+    //        mb_check(mb_push_string(bas,arg,mb_memdup("\15\12",3)));
+            break;
+            case e_ScriptDataArg_Bool:
+    //        mb_check(mb_push_string(bas,arg,mb_memdup("\15\12",3)));
+            break;
+            case e_ScriptDataArg_Int:
+    //        mb_check(mb_push_string(bas,arg,mb_memdup("\15\12",3)));
+            break;
+            case e_ScriptDataArg_Float:
+    //        mb_check(mb_push_string(bas,arg,mb_memdup("\15\12",3)));
+            break;
+            case e_ScriptDataArg_None:
+            case e_ScriptDataArgMAX:
+            break;
+        }
+        RetValue=MB_FUNC_OK;
+    }
+    catch(mb_error_e ErrCode)
+    {
+        mb_raise_error(bas,arg,ErrCode,MB_FUNC_ERR);
+        RetValue=MB_FUNC_ERR;
+    }
+    catch(...)
+    {
+        /* Assume out of memory */
+        mb_raise_error(bas,arg,SE_RN_OUT_OF_MEMORY,MB_FUNC_ERR);
+        RetValue=MB_FUNC_ERR;
+    }
+
+    for(a=0;a<ExeArgsCount;a++)
+    {
+        if(ExeArgs[a].Value!=NULL)
+            delete[] ExeArgs[a].Value;
+    }
+
+    if(RetStr!=NULL)
+        g_WTB_Scripting->FreeExeRegisteredKeywordRetStr(Data->Inst,&RetStr);
+
+    if(ExeArgs!=NULL)
+        delete[] ExeArgs;
+
+    return RetValue;
+}
+
 
 void ConvertKey2String(struct PluginKeyPress *key,char *RetStr,int Size)
 {
@@ -836,36 +1089,36 @@ int WriteStdOut(struct mb_interpreter_t *bas,const char *fmt,...)
 
     mb_get_userdata(bas,(void **)&Data);
 
-    if(g_PrintBuff==NULL)
+    if(Data->PrintBuff==NULL)
     {
-        g_PrintBuff=(char *)malloc(100);
-        if(g_PrintBuff==NULL)
+        Data->PrintBuff=(char *)malloc(100);
+        if(Data->PrintBuff==NULL)
             return 0;
-        g_PrintBuffSize=100;
+        Data->PrintBuffSize=100;
     }
 
     va_start(arg,fmt);
     ret=vsnprintf(NULL,0,fmt,arg);
     va_end(arg);
-    if(ret>(int)g_PrintBuffSize)
+    if(ret>(int)Data->PrintBuffSize)
     {
         /* Resize */
-        g_PrintBuff=(char *)realloc(g_PrintBuff,ret+1);
-        if(g_PrintBuff==NULL)
+        Data->PrintBuff=(char *)realloc(Data->PrintBuff,ret+1);
+        if(Data->PrintBuff==NULL)
             return 0;
     }
     va_start(arg,fmt);
-    ret=vsnprintf(g_PrintBuff,g_PrintBuffSize,fmt,arg);
+    ret=vsnprintf(Data->PrintBuff,Data->PrintBuffSize,fmt,arg);
     va_end(arg);
 
-    Start=g_PrintBuff;
-    p=g_PrintBuff;
+    Start=Data->PrintBuff;
+    p=Data->PrintBuff;
     while(*p!=0)
     {
         if(*p=='\n')
         {
             /* Write what we have already */
-            if(m_StdioGoes2Com)
+            if(Data->StdioGoes2Com)
             {
                 g_WTB_Scripting->WriteCom(Data->Inst,(const uint8_t *)Start,
                         p-Start);
@@ -883,7 +1136,7 @@ int WriteStdOut(struct mb_interpreter_t *bas,const char *fmt,...)
         else if(*p=='\b')
         {
             /* Write what we have already */
-            if(m_StdioGoes2Com)
+            if(Data->StdioGoes2Com)
             {
                 g_WTB_Scripting->WriteCom(Data->Inst,(const uint8_t *)Start,
                         p-Start);
@@ -899,7 +1152,7 @@ int WriteStdOut(struct mb_interpreter_t *bas,const char *fmt,...)
         }
         p++;
     }
-    if(m_StdioGoes2Com)
+    if(Data->StdioGoes2Com)
     {
         g_WTB_Scripting->WriteCom(Data->Inst,(const uint8_t *)Start,
                 p-Start);
@@ -926,7 +1179,7 @@ int ReadLineStdIn(struct mb_interpreter_t *bas,const char *pmt,char *buf,int s)
     if(s==0)
         return 0;
 
-    if(m_StdioGoes2Com)
+    if(Data->StdioGoes2Com)
     {
         InsertPos=0;
         buf[0]=0;
@@ -1022,7 +1275,7 @@ int ReadLineStdIn(struct mb_interpreter_t *bas,const char *pmt,char *buf,int s)
 }
 
 
-int LPrintFn(struct mb_interpreter_t *bas, void **arg)
+int SPrintFn(struct mb_interpreter_t *bas, void **arg)
 {
     mb_value_t val;
     string BuildStr;
@@ -1473,7 +1726,7 @@ int SendFn(struct mb_interpreter_t *bas, void **arg)
     return RetValue;
 }
 
-int RPrintFn(struct mb_interpreter_t *bas, void **arg)
+int CPrintFn(struct mb_interpreter_t *bas, void **arg)
 {
     mb_value_t val;
     string BuildStr;
@@ -1622,7 +1875,7 @@ int CMDFn(struct mb_interpreter_t *bas, void **arg)
     mb_check(mb_pop_int(bas,arg,&Local));
     mb_check(mb_attempt_func_end(bas,arg));
 
-    m_StdioGoes2Com=!Local;
+    Data->StdioGoes2Com=!Local;
 
     return MB_FUNC_OK;
 }
@@ -1873,6 +2126,10 @@ int RmdirFn(struct mb_interpreter_t *bas, void **arg)
     {
         WTB_Rmdir(DirName);
     }
+    else
+    {
+        return MB_FUNC_ERR;
+    }
 
     return MB_FUNC_OK;
 }
@@ -1892,6 +2149,251 @@ int DelFileFn(struct mb_interpreter_t *bas, void **arg)
     {
         remove(DirFilename);
     }
+    else
+    {
+        mb_raise_error(bas,arg,SE_RN_STRING_EXPECTED,MB_FUNC_ERR);
+        return MB_FUNC_ERR;
+    }
 
     return MB_FUNC_OK;
 }
+
+int DirFn(struct mb_interpreter_t *bas, void **arg)
+{
+    struct WTBasicContext *Data;
+    char *DirPath;
+    void *array;
+    int dim;
+    mb_value_t val;
+    void *Dir;
+    int Count;
+    const char *FileName;
+
+    mb_get_userdata(bas,(void **)&Data);
+
+    mb_check(mb_attempt_open_bracket(bas,arg));
+    mb_check(mb_pop_string(bas,arg,&DirPath));
+    mb_check(mb_attempt_close_bracket(bas,arg));
+
+    if(DirPath[0]==0)
+    {
+        mb_raise_error(bas,arg,SE_RN_STRING_EXPECTED,MB_FUNC_ERR);
+        return MB_FUNC_ERR;
+    }
+
+    Dir=WTB_OpenDir(DirPath);
+    if(Dir==NULL)
+    {
+        mb_raise_error(bas,arg,SE_PS_FAILED_TO_OPEN_FILE,MB_FUNC_ERR);
+        return MB_FUNC_ERR;
+    }
+    Count=0;
+    while(WTB_NextDirEntry(Dir)!=NULL)
+        Count++;
+    WTB_CloseDir(Dir);
+
+    dim=Count;
+    mb_init_array(bas,arg,MB_DT_STRING,&dim,1,&array);
+
+    /* Walk it again (I know, I know, it could have changed between scans,
+       don't care...) */
+    Dir=WTB_OpenDir(DirPath);
+    if(Dir==NULL)
+    {
+        mb_raise_error(bas,arg,SE_PS_FAILED_TO_OPEN_FILE,MB_FUNC_ERR);
+        return MB_FUNC_ERR;
+    }
+
+    for(dim=0;dim<Count;dim++)
+    {
+        FileName=WTB_NextDirEntry(Dir);
+        if(FileName==NULL)
+        {
+            /* Unexpected. */
+            FileName="";
+        }
+
+        val.type=MB_DT_STRING;
+        val.value.string = (char *)FileName;
+        mb_set_array_elem(bas,arg,array,&dim,1,val);
+    }
+
+    WTB_CloseDir(Dir);
+
+    val.type=MB_DT_ARRAY;
+    val.value.array=array;
+    mb_check(mb_push_value(bas,arg,val));
+
+    return MB_FUNC_OK;
+}
+
+int IsDirFn(struct mb_interpreter_t *bas, void **arg)
+{
+    struct WTBasicContext *Data;
+    char *FileName;
+    bool IsDir;
+
+    mb_get_userdata(bas,(void **)&Data);
+
+    mb_check(mb_attempt_open_bracket(bas,arg));
+    mb_check(mb_pop_string(bas,arg,&FileName));
+    mb_check(mb_attempt_close_bracket(bas,arg));
+
+    if(FileName[0]==0)
+    {
+        mb_raise_error(bas,arg,SE_RN_STRING_EXPECTED,MB_FUNC_ERR);
+        return MB_FUNC_ERR;
+    }
+
+    IsDir=WTB_IsDir(FileName);
+    mb_check(mb_push_int(bas,arg,IsDir));
+
+    return MB_FUNC_OK;
+}
+
+static int NlFn(struct mb_interpreter_t *bas, void **arg)
+{
+    struct WTBasicContext *Data;
+//    int Type;
+
+    mb_get_userdata(bas,(void **)&Data);
+
+    mb_check(mb_attempt_func_begin(bas,arg));
+    mb_check(mb_attempt_func_end(bas,arg));
+//    mb_check(mb_attempt_open_bracket(bas,arg));
+//    mb_check(mb_attempt_close_bracket(bas,arg));
+
+    mb_check(mb_push_string(bas,arg,mb_memdup("\15\12",3)));
+
+    return MB_FUNC_OK;
+}
+
+static int WaitFn(struct mb_interpreter_t *bas, void **arg)
+{
+    return WaitFnCommon(bas,arg,false);
+}
+
+static int WaitComFn(struct mb_interpreter_t *bas, void **arg)
+{
+    return WaitFnCommon(bas,arg,true);
+}
+
+static int WaitFnCommon(struct mb_interpreter_t *bas, void **arg,bool ForceCom)
+{
+    struct WTBasicContext *Data;
+    int result;
+    mb_value_t val;
+    list<string> ListOfStrings;
+    list<string>::iterator i;
+    vector<unsigned int> MatchCounts;
+    int FoundIndex;
+    unsigned int l;
+    unsigned int r;
+    char TmpBuff[10];
+    struct PluginKeyPress key;
+    unsigned int o;
+    bool DoingFirst;
+    int Timeout;
+    int TimeoutCount;
+
+    try
+    {
+        result=MB_FUNC_OK;
+
+        mb_get_userdata(bas,(void **)&Data);
+
+        Timeout=-1;
+        DoingFirst=true;
+        mb_check(mb_attempt_func_begin(bas,arg));
+        while(mb_has_arg(bas,arg))
+        {
+            mb_check(mb_pop_value(bas,arg,&val));
+            if(val.type==MB_DT_INT && DoingFirst)
+            {
+                /* The first arg can be a number for timeout in ms */
+                Timeout=val.value.integer;
+                DoingFirst=false;
+                continue;
+            }
+            DoingFirst=false;
+            if(val.type!=MB_DT_STRING)
+            {
+                /* We can only wait on strings */
+                throw(SE_RN_STRING_EXPECTED);
+            }
+            ListOfStrings.push_back(val.value.string);
+            MatchCounts.push_back(0);
+        }
+        mb_check(mb_attempt_func_end(bas,arg));
+
+        /* Now we wait until we see one of these strings */
+        TimeoutCount=0;
+        FoundIndex=-1;
+        while(FoundIndex<0)
+        {
+            if(Data->StdioGoes2Com || ForceCom)
+            {
+                l=g_WTB_Scripting->ReadCom(Data->Inst,(uint8_t *)TmpBuff,
+                        sizeof(TmpBuff));
+            }
+            else
+            {
+                l=0;
+                if(g_WTB_Scripting->ReadKeyboard(Data->Inst,&key,1)>0)
+                {
+                    ConvertKey2String(&key,TmpBuff,sizeof(TmpBuff)-1);
+                    if(TmpBuff[0]<32)
+                    {
+                        /* Ignore control codes */
+                        continue;
+                    }
+                    l=strlen(TmpBuff);
+                }
+            }
+            for(r=0;r<l;r++)
+            {
+                for(o=0,i=ListOfStrings.begin();i!=ListOfStrings.end();i++,o++)
+                {
+                    if((*i)[MatchCounts[o]]!=TmpBuff[r])
+                        MatchCounts[o]=0;
+
+                    if((*i)[MatchCounts[o]]==TmpBuff[r])
+                    {
+                        MatchCounts[o]++;
+                        if(MatchCounts[o]==i->length())
+                        {
+                            FoundIndex=o;
+                            break;
+                        }
+                    }
+                }
+                if(i!=ListOfStrings.end())
+                    break;
+            }
+
+            WTB_Sleep(1);
+
+            if(Timeout>=0)
+            {
+                TimeoutCount++;
+                if(TimeoutCount>=Timeout)
+                    break;
+            }
+        }
+
+        mb_check(mb_push_int(bas,arg,FoundIndex));
+    }
+    catch(mb_error_e err)
+    {
+        mb_raise_error(bas,arg,err,MB_FUNC_ERR);
+        result=MB_FUNC_ERR;
+    }
+    catch(...)
+    {
+        mb_raise_error(bas,arg,SE_RN_OUT_OF_MEMORY,MB_FUNC_ERR);
+        result=MB_FUNC_ERR;
+    }
+
+    return result;
+}
+

@@ -32,6 +32,7 @@
 #include "../WTB_OSFile.h"
 #include <sys/stat.h>
 #include <unistd.h>
+#include <dirent.h>
 
 /*** DEFINES                  ***/
 
@@ -52,3 +53,43 @@ void WTB_Rmdir(const char *DirName)
 {
     rmdir(DirName);
 }
+
+void *WTB_OpenDir(const char *Path)
+{
+    DIR *dir;
+
+    dir=opendir(Path);
+    if(!dir)
+        return NULL;
+
+    return (void *)dir;
+}
+
+const char *WTB_NextDirEntry(void *DirHandle)
+{
+    DIR *dir=(DIR *)DirHandle;
+    struct dirent *ent;
+
+    ent=readdir(dir);
+    if(ent==NULL)
+        return NULL;
+    return ent->d_name;
+}
+
+void WTB_CloseDir(void *DirHandle)
+{
+    DIR *dir=(DIR *)DirHandle;
+
+    closedir(dir);
+}
+
+bool WTB_IsDir(const char *FileName)
+{
+    struct stat sb;
+
+    if(stat(FileName,&sb)==-1)
+        return false;
+
+    return sb.st_mode&S_IFDIR;
+}
+

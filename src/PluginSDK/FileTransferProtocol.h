@@ -41,9 +41,11 @@
 /* Versions of struct FTPHandlerInfo */
 #define FILE_TRANSFER_HANDLER_API_VERSION_1             1
 #define FILE_TRANSFER_HANDLER_API_VERSION_2             2
+#define FILE_TRANSFER_HANDLER_API_VERSION_3             3
 
 /* Versions of struct FTPS_API */
 #define FTPS_API_VERSION_1                              1
+#define FTPS_API_VERSION_2                              2
 
 /***  MACROS                           ***/
 
@@ -63,7 +65,7 @@ typedef struct FTPOptionsWidgets {int PrivateDataHere;} t_FTPOptionsWidgetsType;
 typedef struct FTPSystemData {int PrivateDataHere;} t_FTPSystemData;    // Fake type holder
 
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */
-struct FileTransferHandlerAPI
+struct FileTransferHandlerAPI       // You provide these, WhippyTerm calls them
 {
     /********* Start of FILE_TRANSFER_HANDLER_API_VERSION_1 *********/
     t_FTPHandlerDataType *(*AllocateData)(void);
@@ -80,16 +82,21 @@ struct FileTransferHandlerAPI
     /********* Start of FILE_TRANSFER_HANDLER_API_VERSION_2 *********/
     const char *(*GetLastErrorMsg)(t_FTPSystemData *SysHandle,t_FTPHandlerDataType *DataHandle);
     /********* End of FILE_TRANSFER_HANDLER_API_VERSION_2 *********/
+    /********* Start of FILE_TRANSFER_HANDLER_API_VERSION_3 *********/
+    PG_BOOL (*Init)(t_FTPSystemData *SysHandle);
+    void (*ShutDown)(t_FTPSystemData *SysHandle);
+    /********* End of FILE_TRANSFER_HANDLER_API_VERSION_3 *********/
 };
 
+/* Can never change this because we don't ever provide a way to know the size */
 struct FTPHandlerInfo
 {
     const char *IDStr;
     const char *DisplayName;
     const char *Tip;
     const char *Help;
-    uint8_t FileTransferHandlerAPIVersion;          /* The version of struct FileTransferHandlerAPI your FTP handler supports */
-    uint8_t FTPS_APIVersion;                        /* The version of struct FTPS_API your FTP handler expects */
+    uint8_t FileTransferHandlerAPIVersion;          /* The version of struct FileTransferHandlerAPI your FTP handler provides functions for */
+    uint8_t FTPS_APIVersion;                        /* The min version of struct FTPS_API your FTP handler needs */
     const struct FileTransferHandlerAPI *API;
     e_FileTransferProtocolModeType Mode;
 };
@@ -103,7 +110,7 @@ typedef enum
 } e_FTPS_SendDataRetType;
 
 /* !!!! You can only add to this.  Changing it will break the plugins !!!! */
-struct FTPS_API
+struct FTPS_API     // WhippyTerm provides these, you call them
 {
     /********* Start of FTPS_API_VERSION_1 *********/
     PG_BOOL (*RegisterFileTransferProtocol)(const struct FTPHandlerInfo *Info);
@@ -117,7 +124,30 @@ struct FTPS_API
     void (*DLFinish)(t_FTPSystemData *SysHandle,PG_BOOL Aborted);
     int (*DLSendData)(t_FTPSystemData *SysHandle,void *Data,uint32_t Bytes);
     const char *(*GetDownloadFilename)(t_FTPSystemData *SysHandle,const char *FileNameHint);
-    /********* End of FTPS_API_VERSION_1 *********/
+    /********* End of FTPS_API_VERSION_1 ********/
+    /********* Start of FTPS_API_VERSION_2 *********/
+    PG_BOOL (*AddScriptUploadCMD)(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount);
+    PG_BOOL (*AddScriptDownloadCMD)(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount);
+    /********* End of FTPS_API_VERSION_2 *********/
+/*
+bool AddScriptUploadCMD(t_FTPSystemData *SysHandle,struct ScriptDataType *ArgList,int ArgCount);
+bool AddScriptDownloadCMD(t_FTPSystemData *SysHandle,struct ScriptDataType *ArgList,int ArgCount);
+
+    AddScriptUpload("XModemUpload",
+        "Mode"="Mode",
+        "MaxStartTime"="MAX_START_WAIT_TIME",
+        "PackTimeOut"="MAX_PACKET_WAIT_TIME",
+        "PaddingChar"="Padding",
+        "MaxFailedBlocks"="XMODEM_MAX_NAKS",
+        6);
+    AddScriptDownload("XModemUpload",
+        "Mode"="Mode",
+        "MaxStartTime"="MAX_START_WAIT_TIME",
+        "PackTimeOut"="MAX_PACKET_WAIT_TIME",
+        "PaddingChar"="Padding",
+        "MaxFailedBlocks"="XMODEM_MAX_NAKS",
+        6);
+*/
 };
 
 /***  CLASS DEFINITIONS                ***/

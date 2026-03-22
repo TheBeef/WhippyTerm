@@ -116,6 +116,9 @@ static void FTPS_FreeCurrentHander(struct RealFTPData *RealFData);
 static bool FTPS_ScriptStartUploadCB(class Connection *Con,void *UserData,
         const char *NameSpace,const char *Name,struct ScriptArgValue *Args,
         unsigned int ArgCount,char **RetValue);
+static bool FTPS_ScriptStartDownloadCB(class Connection *Con,void *UserData,
+        const char *NameSpace,const char *Name,struct ScriptArgValue *Args,
+        unsigned int ArgCount,char **RetValue);
 
 /*** VARIABLE DEFINITIONS     ***/
 t_FTPHandlersType m_FTPHandlersList;     // All available data processors
@@ -137,7 +140,7 @@ struct FTPS_API g_FTPSAPI=
 
     /* V2 */
     FTPSPAI_AddScriptUploadCMD,
-    NULL,
+    FTPSPAI_AddScriptDownloadCMD,
 
 };
 
@@ -931,12 +934,17 @@ static const char *FTPSPIA_GetDownloadFilename(t_FTPSystemData *SysHandle,
     if(RealFData->Con==NULL)
         return NULL;
 
-    if(!UI_SaveFileReq("Select filename to save to",Path,File,"All Files|*",0))
-        return NULL;
+    if(!RealFData->Con->IsDownloadFilenameSet())
+    {
+        if(!UI_SaveFileReq("Select filename to save to",Path,File,
+                "All Files|*",0))
+        {
+            return NULL;
+        }
+        FullPath=UI_ConcatFile2Path(Path,File);
+        RealFData->Con->SetDownloadFileName(FullPath.c_str());
+    }
 
-    FullPath=UI_ConcatFile2Path(Path,File);
-
-    RealFData->Con->SetDownloadFileName(FullPath.c_str());
     return RealFData->Con->GetDownloadFileName();
 }
 
@@ -1063,11 +1071,128 @@ static PG_BOOL FTPSPAI_AddScriptUploadCMD(t_FTPSystemData *SysHandle,
     return RetValue;
 }
 
-static PG_BOOL FTPSPAI_AddScriptDownloadCMD(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount)
+/*******************************************************************************
+ * NAME:
+ *    FTPSPAI_AddScriptDownloadCMD
+ *
+ * SYNOPSIS:
+ *    static PG_BOOL FTPSPAI_AddScriptDownloadCMD(t_FTPSystemData *SysHandle,
+ *              const char *ProtocolName,struct ScriptDataType *ArgList,
+ *              uint32_t ArgCount);
+ *
+ * PARAMETERS:
+ *    SysHandle [I] -- The FTP system handle.
+ *    ProtocolName [I] -- The name of the type of download this is for
+ *    ArgList [I] -- An array of arguments this command takes.
+ *                      ArgName -- The name that will be used in the script
+ *                      KeyName -- The name that will be used when building
+ *                                 a t_PIKVList *Options list that will
+ *                                 sent into StartDownload().
+ *                      ArgType -- What type of arg is this.  In the end
+ *                                 all args are converted to strings, but
+ *                                 the script MAY validate the arg before
+ *                                 making a string, and will use this for the
+ *                                 type of data expected in this arg.
+ *
+ * FUNCTION:
+ *    This function adds an download command to the scripting engines so that
+ *    scripts can start an download using this plugin.
+ *
+ *    The way this works is you register an download command using this
+ *    function.  The script engine then adds a new command to it's list
+ *    of keywords.  This keyword takes a format something like (it will
+ *    depend on the scripting engine):
+ *          ProtocolName.Download(Filename,arg1,arg2,etc...);
+ *
+ *    When an download is started the standard StartDownload() function will be
+ *    called with the 'Options' fill in the with args.  The system will take
+ *    the args and build a t_PIKVList list with the key's copied from the
+ *    args.  Because a t_PIKVList only supports strings the arg will always
+ *    be converted to a string.  The type MAY be used to validate the arg
+ *    but this optional.
+ *
+ *    So for:
+ *      ProtocolName = "XModem";
+ *      ArgList =
+ *      {
+ *          {"OneK","Mode",e_ScriptDataArg_Bool},
+ *          {"PadChar","Padding",e_ScriptDataArg_Int},
+ *          {"StartTimeout","MAX_START_WAIT_TIME",e_ScriptDataArg_Int},
+ *          {"MaxNaks","XMODEM_MAX_NAKS",e_ScriptDataArg_Int},
+ *          {"PacketTimeout","MAX_PACKET_WAIT_TIME",e_ScriptDataArg_Int},
+ *      }
+ *      You might get:
+ *          XModem.Download("Filename",true,0xFF,10000,3,250);
+ *          XModemDownload("Filename,true,0xFF,10000,3,250);
+ *          XModem::Download(name="Filename", OneK=true, PadChar=255,
+ *              StartTimeout=10000, MaxNaks=3, PacketTimeout=250);
+ *      And then calls to StartDownload():
+ *          Options=
+ *          {
+ *              ["Mode"]="1",
+ *              ["Padding"]="\xFF",
+ *              ["MAX_START_WAIT_TIME"]="10000",
+ *              ["XMODEM_MAX_NAKS"]="3",
+ *              ["MAX_PACKET_WAIT_TIME"]="250",
+ *          }
+ *
+ * RETURNS:
+ *    true -- The new command was added
+ *    false -- There was an error adding the command and it wasn't added.
+ *
+ * NOTES:
+ *    This just takes a copy of the command, it is added to the scripting
+ *    engine later in the process.
+ *
+ * SEE ALSO:
+ *    FTPSPAI_AddScriptDownloadCMD()
+ ******************************************************************************/
+static PG_BOOL FTPSPAI_AddScriptDownloadCMD(t_FTPSystemData *SysHandle,
+        const char *ProtocolName,struct ScriptDataType *ArgList,
+        uint32_t ArgCount)
 {
-    return false;
-}
+    struct RealFTPData *RealFData=(struct RealFTPData *)SysHandle;
+    struct FTPS_ScriptData *NewData;
+    PG_BOOL RetValue;
+    uint32_t r;
 
+    NewData=NULL;
+    try
+    {
+        NewData=new struct FTPS_ScriptData;
+
+        NewData->RealFData=RealFData;
+        NewData->InternalInfo=&*RealFData->FTPHandlerInfo;
+
+        NewData->ArgList=new struct ScriptDataType[ArgCount+1];
+        NewData->ArgList[0].ArgName="Filename";
+        NewData->ArgList[0].KeyName="";
+        NewData->ArgList[0].ArgType=e_ScriptDataArg_String;
+        for(r=0;r<ArgCount;r++)
+        {
+            NewData->ArgList[r+1].ArgName=ArgList[r].ArgName;
+            NewData->ArgList[r+1].KeyName=ArgList[r].KeyName;
+            NewData->ArgList[r+1].ArgType=ArgList[r].ArgType;
+        }
+        NewData->ArgCount=ArgCount+1;
+
+        if(!Scripting_AddNewCMD(ProtocolName,"Download",NewData->ArgList,
+                NewData->ArgCount,e_ScriptDataArg_None,
+                (void *)NewData,FTPS_ScriptStartDownloadCB))
+        {
+            throw(0);
+        }
+
+        RetValue=true;
+    }
+    catch(...)
+    {
+        if(NewData!=NULL)
+            delete NewData;
+        RetValue=false;
+    }
+    return RetValue;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // /\ 'FTPS_API' functions for the plugins
@@ -1949,6 +2074,106 @@ bool FTPS_ScriptStartUploadCB(class Connection *Con,void *UserData,
 
     if(Con->StartUpload()!=e_FileTransErr_Success)
         return false;
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    FTPS_ScriptStartDownloadCB
+ *
+ * SYNOPSIS:
+ *    bool FTPS_ScriptStartDownloadCB(class Connection *Con,void *UserData,
+ *          const char *NameSpace,const char *Name,struct ScriptArgValue *Args,
+ *          unsigned int ArgCount,char **RetValue);
+ *
+ * PARAMETERS:
+ *    Con [I] -- The connection to work on
+ *    UserData [I] -- The user data.  This is really struct FTPS_ScriptData.
+ *    Name [I] -- The name of script function called
+ *    Args [I] -- The args sent into the script function
+ *    ArgCount [I] -- The number of args in 'Args'
+ *    RetValue [O] -- The value we are returning.  Can be set to *RetValue=NULL
+ *                    for none.
+ *
+ * FUNCTION:
+ *    This is a call back function from Scripting_AddNewCMD() that is called
+ *    when a script hits the registered function (from Scripting_AddNewCMD()).
+ *    It includes the args that where provided.
+ *
+ *    This does the start download.
+ *
+ * RETURNS:
+ *    true -- Things worked out
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    Scripting_AddNewCMD()
+ ******************************************************************************/
+static bool FTPS_ScriptStartDownloadCB(class Connection *Con,void *UserData,
+        const char *NameSpace,const char *Name,struct ScriptArgValue *Args,
+        unsigned int ArgCount,char **RetValue)
+{
+    struct FTPS_ScriptData *Data=(struct FTPS_ScriptData *)UserData;
+    uint32_t r;
+    const char *Filename;
+    t_KVList *OptionList;
+    unsigned int arg;
+
+    if(Con==NULL)
+        return false;
+
+    /* Need to check connection has an upload OR download started (and reject
+       if already going) */
+    if(Con->ConnectionBusy())
+        return false;
+
+    /* Find the arg filename arg */
+    for(r=0;r<ArgCount;r++)
+    {
+        if(strcmp(Args[r].ArgName,"Filename")==0)
+            break;
+    }
+    if(r==ArgCount)
+        return false;
+    Filename=Args[r].Value;
+
+    Con->SetDownloadFileName(Filename);
+    Con->SetDownloadFilenameSet(true);
+    Con->SetDownloadProtocol(Data->InternalInfo->Info.IDStr);
+
+    /* Here we just update the list (instead of replacing) */
+    OptionList=Con->GetDownloadOptionsPtr();
+    if(OptionList==NULL)
+    {
+        Con->SetDownloadFilenameSet(false);
+        return false;
+    }
+    for(arg=0;arg<Data->ArgCount;arg++)
+    {
+        if(*Data->ArgList[arg].KeyName==0)
+            continue;
+
+        /* Find the arg in the list of args */
+        for(r=0;r<ArgCount;r++)
+            if(strcmp(Args[r].ArgName,Data->ArgList[arg].ArgName)==0)
+                break;
+        if(r==ArgCount)
+        {
+            /* Didn't find it */
+            Con->SetDownloadFilenameSet(false);
+            return false;
+        }
+        (*OptionList)[Data->ArgList[arg].KeyName]=Args[r].Value;
+    }
+
+    Con->SetDownloadOptions(OptionList);
+
+    if(Con->StartDownload()!=e_FileTransErr_Success)
+    {
+        Con->SetDownloadFilenameSet(false);
+        return false;
+    }
 
     return true;
 }

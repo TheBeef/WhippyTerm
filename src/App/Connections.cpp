@@ -547,6 +547,7 @@ Connection::Connection(const char *URI)
     Upload.Stats.TotalFileSize=0;
 
     Download.Filename="";
+    Download.FilenameSet=false;
     Download.ProtocolID="";
     Download.LastTimeoutTick=0;
     Download.Timeout=0;
@@ -4506,6 +4507,125 @@ void Connection::FinishedUpload(bool Aborted)
 
 /*******************************************************************************
  * NAME:
+ *    Connection::SetDownloadFileName
+ *
+ * SYNOPSIS:
+ *    void Connection::SetDownloadFileName(const char *Filename);
+ *
+ * PARAMETERS:
+ *    Filename [I] -- The filename to set for the download.
+ *
+ * FUNCTION:
+ *    This function sets the filename that the connection will be using
+ *    to download files.
+ *
+ *    This is really only used for display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    GetDownloadFileName()
+ ******************************************************************************/
+void Connection::SetDownloadFileName(const char *Filename)
+{
+    Download.Filename=Filename;
+    if(MW!=NULL)
+        MW->InformOf_DownloadSettingsChange(this);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::GetDownloadFileName
+ *
+ * SYNOPSIS:
+ *    const char *Connection::GetDownloadFileName(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets the filename that was set file download.
+ *
+ * RETURNS:
+ *    A pointer to the string the string with the download filename in it.
+ *    This is valid until SetDownloadFileName() is called or the connection
+ *    is freed.
+ *
+ * NOTES:
+ *    The connection will clear this flag when a download is aborted or started.
+ *
+ * SEE ALSO:
+ *    SetDownloadFileName()
+ ******************************************************************************/
+const char *Connection::GetDownloadFileName(void)
+{
+    return Download.Filename.c_str();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::SetDownloadFilenameSet
+ *
+ * SYNOPSIS:
+ *    void Connection::SetDownloadFilenameSet(bool Set);
+ *
+ * PARAMETERS:
+ *    Set [I] -- Is the filename considered set
+ *
+ * FUNCTION:
+ *    This function sets if this connection considers the download filename
+ *    set or not.
+ *
+ *    This isn't really used by the connection it's self, it's just a flag
+ *    that the FTP system can read to know if it should prompt for a filename
+ *    or not.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    The connection will clear this flag when a download is aborted or started.
+ *
+ * SEE ALSO:
+ *    IsDownloadFilenameSet()
+ ******************************************************************************/
+void Connection::SetDownloadFilenameSet(bool Set)
+{
+    Download.FilenameSet=Set;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::IsDownloadFilenameSet
+ *
+ * SYNOPSIS:
+ *    bool Connection::IsDownloadFilenameSet(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function returns if the download filename has been set.  The filename
+ *    is considered set when the SetDownloadFilenameSet() sets the filename
+ *    as set.  The filename being set or not has no effect on the connection
+ *    it's self (it only tracks this flag).  The FTP system can check if
+ *    the filename is set to know if it should prompt the user for a filename.
+ *
+ * RETURNS:
+ *    true -- The filename is set flag is set
+ *    false -- The filename is set flag is clear
+ *
+ * SEE ALSO:
+ *    SetDownloadFilenameSet()
+ ******************************************************************************/
+bool Connection::IsDownloadFilenameSet(void)
+{
+    return Download.FilenameSet;
+}
+
+/*******************************************************************************
+ * NAME:
  *    Connection::SetDownloadProtocol
  *
  * SYNOPSIS:
@@ -4528,6 +4648,8 @@ void Connection::SetDownloadProtocol(const char *NewProtocol)
     try
     {
         Download.ProtocolID=NewProtocol;
+        if(MW!=NULL)
+            MW->InformOf_DownloadSettingsChange(this);
     }
     catch(...)
     {
@@ -4583,11 +4705,40 @@ void Connection::GetDownloadProtocol(std::string &SelectedProtocol)
  *    A pointer to the KVList of options.
  *
  * SEE ALSO:
- *    
+ *    SetDownloadOptions()
  ******************************************************************************/
 t_KVList *Connection::GetDownloadOptionsPtr(void)
 {
     return &Download.DownloadOptions;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::SetDownloadOptions
+ *
+ * SYNOPSIS:
+ *    void Connection::SetDownloadOptions(void);
+ *
+ * PARAMETERS:
+ *    NewList [I] -- A pointer to the KVList of options.
+ *
+ * FUNCTION:
+ *    This function replaces the internal KVList with a new list.  If this
+ *    list is the same as the internal then only the GUI is updated.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    GetDownloadOptionsPtr()
+ ******************************************************************************/
+void Connection::SetDownloadOptions(t_KVList *NewList)
+{
+    if(NewList!=&Download.DownloadOptions)
+        Download.DownloadOptions=*NewList;
+
+    if(MW!=NULL)
+        MW->InformOf_DownloadSettingsChange(this);
 }
 
 /*******************************************************************************
@@ -4628,6 +4779,11 @@ e_FileTransErrType Connection::StartDownload(void)
 
     RethinkLockOut();
 
+    Download.FilenameSet=false;
+
+    if(MW!=NULL)
+        MW->InformOf_DownloadSettingsChange(this);
+
     return e_FileTransErr_Success;
 }
 
@@ -4652,6 +4808,8 @@ e_FileTransErrType Connection::StartDownload(void)
  ******************************************************************************/
 void Connection::AbortDownload(void)
 {
+    Download.FilenameSet=false;
+
     if(Download.Stats.InProgress)
     {
         FTPS_AbortTransfer(FTPConData);
@@ -4856,59 +5014,6 @@ void Connection::FileTransRestartTimeout(void)
 
     Upload.LastTimeoutTick=Time;
     Download.LastTimeoutTick=Time;
-}
-
-/*******************************************************************************
- * NAME:
- *    Connection::SetDownloadFileName
- *
- * SYNOPSIS:
- *    void Connection::SetDownloadFileName(const char *Filename);
- *
- * PARAMETERS:
- *    Filename [I] -- The filename to set for the download.
- *
- * FUNCTION:
- *    This function sets the filename that the connection will be using
- *    to download files.
- *
- *    This is really only used for display.
- *
- * RETURNS:
- *    NONE
- *
- * SEE ALSO:
- *    GetDownloadFileName()
- ******************************************************************************/
-void Connection::SetDownloadFileName(const char *Filename)
-{
-    Download.Filename=Filename;
-}
-
-/*******************************************************************************
- * NAME:
- *    Connection::GetDownloadFileName
- *
- * SYNOPSIS:
- *    const char *Connection::GetDownloadFileName(void);
- *
- * PARAMETERS:
- *    NONE
- *
- * FUNCTION:
- *    This function gets the filename that was set file download.
- *
- * RETURNS:
- *    A pointer to the string the string with the download filename in it.
- *    This is valid until SetDownloadFileName() is called or the connection
- *    is freed.
- *
- * SEE ALSO:
- *    SetDownloadFileName()
- ******************************************************************************/
-const char *Connection::GetDownloadFileName(void)
-{
-    return Download.Filename.c_str();
 }
 
 /*******************************************************************************

@@ -197,6 +197,7 @@ static PG_BOOL XModemUpload_RxData(t_FTPSystemData *SysHandle,
         t_FTPHandlerDataType *DataHandle,uint8_t *RxData,uint32_t Bytes);
 static const char *XModemUpload_GetLastErrorMsg(t_FTPSystemData *SysHandle,t_FTPHandlerDataType *DataHandle);
 static PG_BOOL XModemUpload_Init(t_FTPSystemData *SysHandle);
+static PG_BOOL XModemDownload_Init(t_FTPSystemData *SysHandle);
 
 t_FTPHandlerDataType *XModemDownload_AllocateData(void);
 void XModemDownload_FreeData(t_FTPHandlerDataType *DataHandle);
@@ -247,7 +248,7 @@ struct FTPHandlerInfo m_XModemUpload_Info=
     FILE_TRANSFER_HANDLER_API_VERSION_3,
     FTPS_API_VERSION_2,
     &m_XModemUploadCBs,
-    e_FileTransferProtocolMode_Upload,
+    e_FileTransferProtocolMode_Upload
 };
 
 struct FileTransferHandlerAPI m_XModemDownloadCBs=
@@ -266,6 +267,10 @@ struct FileTransferHandlerAPI m_XModemDownloadCBs=
     /* V2 */
     XModemDownload_GetLastErrorMsg,
 
+    /* V3 */
+    XModemDownload_Init,
+    NULL
+
     /* If you add more remember to add to update 'm_XModemDownload_Info' to the
        new version */
 };
@@ -275,8 +280,8 @@ struct FTPHandlerInfo m_XModemDownload_Info=
     "XModem",
     "Receive a file using XModem.",
     "Receive a file using XModem.",
-    FILE_TRANSFER_HANDLER_API_VERSION_2,
-    FTPS_API_VERSION_1,
+    FILE_TRANSFER_HANDLER_API_VERSION_3,
+    FTPS_API_VERSION_2,
     &m_XModemDownloadCBs,
     e_FileTransferProtocolMode_Download,
 };
@@ -479,6 +484,45 @@ void XModemUpload_FreeData(t_FTPHandlerDataType *DataHandle)
         fclose(Data->FileHandle);
 
     delete Data;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    XModemUpload_Init
+ *
+ * SYNOPSIS:
+ *    PG_BOOL XModemUpload_Init(t_FTPSystemData *SysHandle);
+ *
+ * PARAMETERS:
+ *    SysHandle [I] -- An handle to be passed back to the file transfer protocol
+ *                     system through the 'struct FileTransferHandlerAPI' API.
+ *
+ * FUNCTION:
+ *    This function is called on startup init.  It lets the plugin add needed
+ *    things to the system (and other init stuff).
+ *
+ * RETURNS:
+ *    true -- Init worked
+ *    false -- There was some kind of error.  Plugin will not be installed.
+ *
+ * SEE ALSO:
+ *    ShutDown()
+ ******************************************************************************/
+static PG_BOOL XModemUpload_Init(t_FTPSystemData *SysHandle)
+{
+    static struct ScriptDataType UploadArgs[]=
+    {
+        {"Mode1K","Mode",e_ScriptDataArg_Bool},
+        {"PadChar","Padding",e_ScriptDataArg_Int},
+        {"StartTimeout","MAX_START_WAIT_TIME",e_ScriptDataArg_Int},
+        {"MaxNaks","XMODEM_MAX_NAKS",e_ScriptDataArg_Int},
+        {"PacketTimeout","MAX_PACKET_WAIT_TIME",e_ScriptDataArg_Int},
+    };
+
+    m_FTPS->AddScriptUploadCMD(SysHandle,"XModem",UploadArgs,
+            sizeof(UploadArgs)/sizeof(struct ScriptDataType));
+
+    return true;
 }
 
 t_FTPOptionsWidgetsType *XModemUpload_AllocOptionsWidgets(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Options)
@@ -1305,12 +1349,14 @@ static const char *XModemUpload_GetLastErrorMsg(t_FTPSystemData *SysHandle,
     return Data->ErrorStr.c_str();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 /*******************************************************************************
  * NAME:
- *    XModemUpload_Init
+ *    XModemDownload_Init
  *
  * SYNOPSIS:
- *    PG_BOOL XModemUpload_Init(t_FTPSystemData *SysHandle);
+ *    PG_BOOL XModemDownload_Init(t_FTPSystemData *SysHandle);
  *
  * PARAMETERS:
  *    SysHandle [I] -- An handle to be passed back to the file transfer protocol
@@ -1327,24 +1373,20 @@ static const char *XModemUpload_GetLastErrorMsg(t_FTPSystemData *SysHandle,
  * SEE ALSO:
  *    ShutDown()
  ******************************************************************************/
-static PG_BOOL XModemUpload_Init(t_FTPSystemData *SysHandle)
+static PG_BOOL XModemDownload_Init(t_FTPSystemData *SysHandle)
 {
-    static struct ScriptDataType Args[]=
+    static struct ScriptDataType DownloadArgs[]=
     {
         {"Mode1K","Mode",e_ScriptDataArg_Bool},
-        {"PadChar","Padding",e_ScriptDataArg_Int},
         {"StartTimeout","MAX_START_WAIT_TIME",e_ScriptDataArg_Int},
-        {"MaxNaks","XMODEM_MAX_NAKS",e_ScriptDataArg_Int},
         {"PacketTimeout","MAX_PACKET_WAIT_TIME",e_ScriptDataArg_Int},
     };
 
-    m_FTPS->AddScriptUploadCMD(SysHandle,"XModem",Args,
-            sizeof(Args)/sizeof(struct ScriptDataType));
+    m_FTPS->AddScriptDownloadCMD(SysHandle,"XModem",DownloadArgs,
+            sizeof(DownloadArgs)/sizeof(struct ScriptDataType));
 
     return true;
 }
-
-////////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************
  * NAME:

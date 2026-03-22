@@ -173,6 +173,7 @@ struct DownloadStats
 struct DownloadType
 {
     std::string Filename;
+    bool FilenameSet;
     std::string ProtocolID;
     t_KVList DownloadOptions;
     uint64_t LastTimeoutTick;
@@ -397,17 +398,6 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void StopWatchTakeLap(void);
         void StopWatchClearLaps(void);
         bool StopWatchGetNextLapInfo(bool First,uint64_t &LapTime);
-        void GetUploadFilename(std::string &Filename);
-        void SetUploadFilename(const char *Filename);
-        void SetUploadProtocol(const char *NewProtocol);
-        void GetUploadProtocol(std::string &SelectedProtocol);
-        t_KVList *GetUploadOptionsPtr(void);
-        void SetUploadOptions(t_KVList *NewList);
-        e_FileTransErrType StartUpload(void);
-        void AbortUpload(void);
-        struct UploadStats const *UploadGetStats(void);
-        void UploadSetNumberOfBytesSent(uint64_t BytesTransfered);
-        void DownloadSetNumberOfBytesRecv(uint64_t BytesTransfered);
 
         bool GetHexDisplayPaused(void);
         bool SetHexDisplayPaused(bool Paused,bool Force=false);
@@ -475,12 +465,6 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void GotoColumn(int Column);
         void GotoRow(int Row);
         bool GetURI(std::string &URI);
-        void FileTransSetTimeout(uint32_t MSec);
-        void FileTransRestartTimeout(void);
-        void FinishedUpload(bool Aborted);
-        void FinishedDownload(bool Aborted);
-        void SetDownloadFileName(const char *Filename);
-        const char *GetDownloadFileName(void);
         void SetLeftPanelInfo(e_LeftPanelTabType SelectedTab);
         e_LeftPanelTabType GetLeftPanelInfo(void);
         void SetRightPanelInfo(e_RightPanelTabType SelectedTab);
@@ -514,13 +498,6 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void ClearFrozenStream(void);
         const uint8_t *GetFrozenString(uint32_t *Size);
 
-        void SetDownloadProtocol(const char *NewProtocol);
-        void GetDownloadProtocol(std::string &SelectedProtocol);
-        t_KVList *GetDownloadOptionsPtr(void);
-        e_FileTransErrType StartDownload(void);
-        void AbortDownload(void);
-        struct DownloadStats const *DownloadGetStats(void);
-
         unsigned int GetTransmitDelayPerByte(void);
         unsigned int GetTransmitDelayPerLine(void);
         void SetTransmitDelayPerByte(unsigned int ms);
@@ -551,6 +528,36 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
 
         /* Conenction info */
         bool ConnectionBusy(void);
+
+        /* Upload / Download */
+        void FileTransSetTimeout(uint32_t MSec);
+        void FileTransRestartTimeout(void);
+
+        void GetUploadFilename(std::string &Filename);
+        void SetUploadFilename(const char *Filename);
+        void SetUploadProtocol(const char *NewProtocol);
+        void GetUploadProtocol(std::string &SelectedProtocol);
+        t_KVList *GetUploadOptionsPtr(void);
+        void SetUploadOptions(t_KVList *NewList);
+        e_FileTransErrType StartUpload(void);
+        void AbortUpload(void);
+        struct UploadStats const *UploadGetStats(void);
+        void FinishedUpload(bool Aborted);
+        void UploadSetNumberOfBytesSent(uint64_t BytesTransfered);
+
+        void DownloadSetNumberOfBytesRecv(uint64_t BytesTransfered);
+        void FinishedDownload(bool Aborted);
+        void SetDownloadFileName(const char *Filename);
+        const char *GetDownloadFileName(void);
+        void SetDownloadProtocol(const char *NewProtocol);
+        void GetDownloadProtocol(std::string &SelectedProtocol);
+        t_KVList *GetDownloadOptionsPtr(void);
+        void SetDownloadOptions(t_KVList *NewList);
+        e_FileTransErrType StartDownload(void);
+        void AbortDownload(void);
+        struct DownloadStats const *DownloadGetStats(void);
+        void SetDownloadFilenameSet(bool Set);
+        bool IsDownloadFilenameSet(void);
 
     private:
         void *OurParentWidget;

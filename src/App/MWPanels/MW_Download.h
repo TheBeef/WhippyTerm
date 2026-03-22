@@ -67,6 +67,7 @@ class MWDownload
         void InformOfDownloadDone(void);
         void DownloadMenuTriggered(uint64_t ID);
         void UpdateGUI(void);
+        void UpdateGUIFromConnection(void);
 
     private:
         t_UIMainWindow *UIWin;

@@ -5256,6 +5256,34 @@ void TheMainWindow::InformOf_UploadSettingsChange(class Connection *Con)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::InformOf_DownloadSettingsChange
+ *
+ * SYNOPSIS:
+ *    void void TheMainWindow::InformOf_DownloadSettingsChange(class Connection *Con);
+ *
+ * PARAMETERS:
+ *    Con [I] -- The connection that has had the options change.
+ *
+ * FUNCTION:
+ *    This function is called when a connection changes the download file
+ *    options.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::InformOf_DownloadSettingsChange(class Connection *Con)
+{
+    if(Con!=NULL && Con==ActiveCon)
+    {
+        DownloadPanel.UpdateGUIFromConnection();
+    }
+}
+
+/*******************************************************************************
+ * NAME:
  *    MW_Event
  *
  * SYNOPSIS:

@@ -945,3 +945,29 @@ void MWDownload::UpdateGUI(void)
 {
     RethinkUI();
 }
+
+/*******************************************************************************
+ * NAME:
+ *    MWDownload::UpdateGUIFromConnection
+ *
+ * SYNOPSIS:
+ *    void MWDownload::UpdateGUIFromConnection(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function makes the panel reload all the values from the connection
+ *    and update the GUI.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWDownload::UpdateGUIFromConnection(void)
+{
+    ConnectionChanged();
+    DownloadStatChanged();
+}

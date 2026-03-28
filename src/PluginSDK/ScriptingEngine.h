@@ -1,3 +1,10 @@
+/*******
+
+    DO NOT USE!  THIS IS NOT CURRENTLY IN AN OFFICIAL RELEASE
+
+********/
+
+
 /*******************************************************************************
  * FILENAME: ScriptingEngine.h
  * 
@@ -69,16 +76,8 @@ struct ScriptingEngineAPI
     void (*NewKeyPressDetected)(t_ScriptingEngineContextType *Context);
     bool (*RegisterKeyword)(t_ScriptingEngineContextType *Context,
             const char *Namespace,const char *Keyword,
-            e_ScriptDataArgType RetType,
+            e_ScriptDataArgType RetType,int OptionalArgStart,
             const struct ScriptDataType *Args,unsigned int ArgCount);
-
-/*
-
-    bool (*RegisterKeyword)(t_ScriptingEngineContextType *Context,
-            const char *Namespace,const char *Keyword,
-            e_ScriptDataArgType RetType,
-            const struct ScriptArgValue *Args,unsigned int ArgCount);
-*/
 
     /********* End of SCRIPTING_HANDLER_API_VERSION_1 *********/
 };
@@ -132,15 +131,6 @@ struct ScriptingSystem_API
             const char *Namespace,const char *Keyword,
             char **RetStr,struct ScriptArgValue *Args,unsigned int ArgCount);
     void (*FreeExeRegisteredKeywordRetStr)(t_ScriptingEngineInstType *Inst,char **RetStr);
-
-/*
-struct ScriptEngArgValue
-{
-    const char *Arg;
-    const char *Value;
-};
-
-*/
 
     /********* End of SCRIPTING_API_VERSION_1 *********/
 };

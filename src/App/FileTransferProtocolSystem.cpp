@@ -106,8 +106,8 @@ static int FTPSPIA_DLSendData(t_FTPSystemData *SysHandle,void *Packet,
 static void FTPSPIA_DLFinishDownload(t_FTPSystemData *SysHandle,PG_BOOL Aborted);
 static const char *FTPSPIA_GetDownloadFilename(t_FTPSystemData *SysHandle,
         const char *FileNameHint);
-static PG_BOOL FTPSPAI_AddScriptUploadCMD(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount);
-static PG_BOOL FTPSPAI_AddScriptDownloadCMD(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount);
+static PG_BOOL FTPSPAI_AddScriptUploadCMD(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount,int OptionalArgStart);
+static PG_BOOL FTPSPAI_AddScriptDownloadCMD(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount,int OptionalArgStart);
 
 static bool FTPS_SetupCurrentHandler(struct RealFTPData *RealFData,
         i_FTPHandlersType Handler);
@@ -139,8 +139,8 @@ struct FTPS_API g_FTPSAPI=
     FTPSPIA_GetDownloadFilename,
 
     /* V2 */
-    FTPSPAI_AddScriptUploadCMD,
-    FTPSPAI_AddScriptDownloadCMD,
+//    FTPSPAI_AddScriptUploadCMD,
+//    FTPSPAI_AddScriptDownloadCMD,
 
 };
 
@@ -955,7 +955,7 @@ static const char *FTPSPIA_GetDownloadFilename(t_FTPSystemData *SysHandle,
  * SYNOPSIS:
  *    static PG_BOOL FTPSPAI_AddScriptUploadCMD(t_FTPSystemData *SysHandle,
  *              const char *ProtocolName,struct ScriptDataType *ArgList,
- *              uint32_t ArgCount);
+ *              uint32_t ArgCount,int OptionalArgStart);
  *
  * PARAMETERS:
  *    SysHandle [I] -- The FTP system handle.
@@ -970,6 +970,10 @@ static const char *FTPSPIA_GetDownloadFilename(t_FTPSystemData *SysHandle,
  *                                 the script MAY validate the arg before
  *                                 making a string, and will use this for the
  *                                 type of data expected in this arg.
+ *    ArgCount [I] -- The number of args in 'ArgList'
+ *    OptionalArgStart [I] -- If some of the arguments are optional then you
+ *                            provide the index of the first optional argument.
+ *                            Set to -1 if there are no optional args.
  *
  * FUNCTION:
  *    This function adds an upload command to the scripting engines so that
@@ -1026,16 +1030,21 @@ static const char *FTPSPIA_GetDownloadFilename(t_FTPSystemData *SysHandle,
  ******************************************************************************/
 static PG_BOOL FTPSPAI_AddScriptUploadCMD(t_FTPSystemData *SysHandle,
         const char *ProtocolName,struct ScriptDataType *ArgList,
-        uint32_t ArgCount)
+        uint32_t ArgCount,int OptionalArgStart)
 {
     struct RealFTPData *RealFData=(struct RealFTPData *)SysHandle;
     struct FTPS_ScriptData *NewData;
     PG_BOOL RetValue;
     uint32_t r;
+    int UseOptionalArgStart;
 
     NewData=NULL;
     try
     {
+        UseOptionalArgStart=OptionalArgStart;
+        if(UseOptionalArgStart<0)
+            UseOptionalArgStart=0;
+
         NewData=new struct FTPS_ScriptData;
 
         NewData->RealFData=RealFData;
@@ -1054,7 +1063,7 @@ static PG_BOOL FTPSPAI_AddScriptUploadCMD(t_FTPSystemData *SysHandle,
         NewData->ArgCount=ArgCount+1;
 
         if(!Scripting_AddNewCMD(ProtocolName,"Upload",NewData->ArgList,
-                NewData->ArgCount,e_ScriptDataArg_None,
+                NewData->ArgCount,UseOptionalArgStart+1,e_ScriptDataArg_None,
                 (void *)NewData,FTPS_ScriptStartUploadCB))
         {
             throw(0);
@@ -1078,7 +1087,7 @@ static PG_BOOL FTPSPAI_AddScriptUploadCMD(t_FTPSystemData *SysHandle,
  * SYNOPSIS:
  *    static PG_BOOL FTPSPAI_AddScriptDownloadCMD(t_FTPSystemData *SysHandle,
  *              const char *ProtocolName,struct ScriptDataType *ArgList,
- *              uint32_t ArgCount);
+ *              uint32_t ArgCount,int OptionalArgStart);
  *
  * PARAMETERS:
  *    SysHandle [I] -- The FTP system handle.
@@ -1093,6 +1102,10 @@ static PG_BOOL FTPSPAI_AddScriptUploadCMD(t_FTPSystemData *SysHandle,
  *                                 the script MAY validate the arg before
  *                                 making a string, and will use this for the
  *                                 type of data expected in this arg.
+ *    ArgCount [I] -- The number of args in 'ArgList'
+ *    OptionalArgStart [I] -- If some of the arguments are optional then you
+ *                            provide the index of the first optional argument.
+ *                            Set to -1 if there are no optional args.
  *
  * FUNCTION:
  *    This function adds an download command to the scripting engines so that
@@ -1149,16 +1162,22 @@ static PG_BOOL FTPSPAI_AddScriptUploadCMD(t_FTPSystemData *SysHandle,
  ******************************************************************************/
 static PG_BOOL FTPSPAI_AddScriptDownloadCMD(t_FTPSystemData *SysHandle,
         const char *ProtocolName,struct ScriptDataType *ArgList,
-        uint32_t ArgCount)
+        uint32_t ArgCount,int OptionalArgStart)
 {
     struct RealFTPData *RealFData=(struct RealFTPData *)SysHandle;
     struct FTPS_ScriptData *NewData;
     PG_BOOL RetValue;
     uint32_t r;
+    int UseOptionalArgStart;
 
     NewData=NULL;
     try
     {
+        UseOptionalArgStart=OptionalArgStart;
+
+        if(UseOptionalArgStart<0)
+            UseOptionalArgStart=0;
+
         NewData=new struct FTPS_ScriptData;
 
         NewData->RealFData=RealFData;
@@ -1177,7 +1196,7 @@ static PG_BOOL FTPSPAI_AddScriptDownloadCMD(t_FTPSystemData *SysHandle,
         NewData->ArgCount=ArgCount+1;
 
         if(!Scripting_AddNewCMD(ProtocolName,"Download",NewData->ArgList,
-                NewData->ArgCount,e_ScriptDataArg_None,
+                NewData->ArgCount,UseOptionalArgStart+1,e_ScriptDataArg_None,
                 (void *)NewData,FTPS_ScriptStartDownloadCB))
         {
             throw(0);
@@ -2027,6 +2046,7 @@ bool FTPS_ScriptStartUploadCB(class Connection *Con,void *UserData,
     const char *Filename;
     t_KVList *OptionList;
     unsigned int arg;
+    const char *Value;
 
     if(Con==NULL)
         return false;
@@ -2067,7 +2087,9 @@ bool FTPS_ScriptStartUploadCB(class Connection *Con,void *UserData,
             /* Didn't find it */
             return false;
         }
-        (*OptionList)[Data->ArgList[arg].KeyName]=Args[r].Value;
+        Value=Args[r].Value;
+        if(Value!=NULL)
+            (*OptionList)[Data->ArgList[arg].KeyName]=Value;
     }
 
     Con->SetUploadOptions(OptionList);

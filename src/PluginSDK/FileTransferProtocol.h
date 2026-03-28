@@ -126,28 +126,10 @@ struct FTPS_API     // WhippyTerm provides these, you call them
     const char *(*GetDownloadFilename)(t_FTPSystemData *SysHandle,const char *FileNameHint);
     /********* End of FTPS_API_VERSION_1 ********/
     /********* Start of FTPS_API_VERSION_2 *********/
-    PG_BOOL (*AddScriptUploadCMD)(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount);
-    PG_BOOL (*AddScriptDownloadCMD)(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount);
+// FUTURE...
+//    PG_BOOL (*AddScriptUploadCMD)(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount,int OptionalArgStart);
+//    PG_BOOL (*AddScriptDownloadCMD)(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount,int OptionalArgStart);
     /********* End of FTPS_API_VERSION_2 *********/
-/*
-bool AddScriptUploadCMD(t_FTPSystemData *SysHandle,struct ScriptDataType *ArgList,int ArgCount);
-bool AddScriptDownloadCMD(t_FTPSystemData *SysHandle,struct ScriptDataType *ArgList,int ArgCount);
-
-    AddScriptUpload("XModemUpload",
-        "Mode"="Mode",
-        "MaxStartTime"="MAX_START_WAIT_TIME",
-        "PackTimeOut"="MAX_PACKET_WAIT_TIME",
-        "PaddingChar"="Padding",
-        "MaxFailedBlocks"="XMODEM_MAX_NAKS",
-        6);
-    AddScriptDownload("XModemUpload",
-        "Mode"="Mode",
-        "MaxStartTime"="MAX_START_WAIT_TIME",
-        "PackTimeOut"="MAX_PACKET_WAIT_TIME",
-        "PaddingChar"="Padding",
-        "MaxFailedBlocks"="XMODEM_MAX_NAKS",
-        6);
-*/
 };
 
 /***  CLASS DEFINITIONS                ***/

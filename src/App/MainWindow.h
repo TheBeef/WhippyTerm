@@ -149,7 +149,7 @@ void Debug6(void);
 
     private:
         t_UIMainWindow *UIWin;
-        void EarlyRestoreWindowSize(void);
+        void RestoreWindowSize(void);
         void RestoreFromSettings(void);
         void RestoreFromSession(void);
 //        void SetupTabDisplay(void);

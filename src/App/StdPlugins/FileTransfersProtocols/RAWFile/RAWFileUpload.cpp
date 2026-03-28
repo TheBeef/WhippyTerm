@@ -62,6 +62,7 @@ static void RAWFileUpload_AbortUpload(t_FTPSystemData *SysHandle,
         t_FTPHandlerDataType *DataHandle);
 static void RAWFileUpload_Timeout(t_FTPSystemData *SysHandle,
         t_FTPHandlerDataType *DataHandle);
+static PG_BOOL RAWFileUpload_Init(t_FTPSystemData *SysHandle);
 
 /*** VARIABLE DEFINITIONS     ***/
 struct FileTransferHandlerAPI m_RAWFileUploadCBs=
@@ -79,6 +80,10 @@ struct FileTransferHandlerAPI m_RAWFileUploadCBs=
     /********* Start of FILE_TRANSFER_HANDLER_API_VERSION_2 *********/
     NULL, // GetLastErrorMsg
     /********* End of FILE_TRANSFER_HANDLER_API_VERSION_2 *********/
+
+    /* V3 */
+    RAWFileUpload_Init,
+    NULL
 };
 
 struct FTPHandlerInfo m_RAWFileUpload_Info=
@@ -87,8 +92,8 @@ struct FTPHandlerInfo m_RAWFileUpload_Info=
     "Send File",
     "Sends a file without using a protocol.  Bytes are just sent.",
     "Sends a file without using a protocol.  Bytes are just sent.",
-    FILE_TRANSFER_HANDLER_API_VERSION_1,
-    FTPS_API_VERSION_1,
+    FILE_TRANSFER_HANDLER_API_VERSION_3,
+    FTPS_API_VERSION_2,
     &m_RAWFileUploadCBs,
     e_FileTransferProtocolMode_Upload,
 };
@@ -214,6 +219,34 @@ void RAWFileUpload_FreeData(t_FTPHandlerDataType *DataHandle)
         fclose(Data->FileHandle);
 
     free(Data);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    RAWFileUpload_Init
+ *
+ * SYNOPSIS:
+ *    PG_BOOL RAWFileUpload_Init(t_FTPSystemData *SysHandle);
+ *
+ * PARAMETERS:
+ *    SysHandle [I] -- An handle to be passed back to the file transfer protocol
+ *                     system through the 'struct FileTransferHandlerAPI' API.
+ *
+ * FUNCTION:
+ *    This function is called on startup init.  It lets the plugin add needed
+ *    things to the system (and other init stuff).
+ *
+ * RETURNS:
+ *    true -- Init worked
+ *    false -- There was some kind of error.  Plugin will not be installed.
+ *
+ * SEE ALSO:
+ *    ShutDown()
+ ******************************************************************************/
+static PG_BOOL RAWFileUpload_Init(t_FTPSystemData *SysHandle)
+{
+//    return m_FTPS->AddScriptUploadCMD(SysHandle,"SendFile",NULL,0,-1);
+    return true;
 }
 
 /*******************************************************************************

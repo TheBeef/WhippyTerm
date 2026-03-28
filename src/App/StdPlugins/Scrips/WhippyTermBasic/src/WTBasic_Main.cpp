@@ -61,6 +61,8 @@ Basic commands:
     * StopWatch
     * Capture
 
+    * Strings need to support 0 (chr$(0))
+
 */
 /*******************************************************************************
  * FILENAME: WTBasic_Main.cpp
@@ -126,6 +128,7 @@ struct RegisteredKeyword
     e_ScriptDataArgType RetType;
     const struct ScriptDataType *Args;
     unsigned int ArgCount;
+    int OptionalArgStart;
 };
 
 typedef map<string,struct RegisteredKeyword> t_RegisteredKeywordList;
@@ -156,7 +159,7 @@ PG_BOOL WTBasic_RunLoadedScript(t_ScriptingEngineContextType *Context);
 void WTBasic_AbortScript(t_ScriptingEngineContextType *Context);
 static bool WTBasic_RegisterKeyword(t_ScriptingEngineContextType *Context,
         const char *Namespace,const char *Keyword,
-        e_ScriptDataArgType RetType,
+        e_ScriptDataArgType RetType,int OptionalArgStart,
         const struct ScriptDataType *Args,unsigned int ArgCount);
 static void ConvertKey2String(struct PluginKeyPress *key,char *RetStr,int Size);
 
@@ -523,7 +526,7 @@ void WTBasic_AbortScript(t_ScriptingEngineContextType *Context)
 
 bool WTBasic_RegisterKeyword(t_ScriptingEngineContextType *Context,
         const char *Namespace,const char *Keyword,
-        e_ScriptDataArgType RetType,
+        e_ScriptDataArgType RetType,int OptionalArgStart,
         const struct ScriptDataType *Args,unsigned int ArgCount)
 {
     struct WTBasicContext *Data=(struct WTBasicContext *)Context;
@@ -534,6 +537,7 @@ bool WTBasic_RegisterKeyword(t_ScriptingEngineContextType *Context,
     {
         /* For basic we just put the namespace and keyword together */
         TmpName=Namespace;
+        TmpName+=".";
         TmpName+=Keyword;
         transform(TmpName.begin(),TmpName.end(),TmpName.begin(),::toupper);
 
@@ -545,6 +549,7 @@ bool WTBasic_RegisterKeyword(t_ScriptingEngineContextType *Context,
         NewRegKeyword.RetType=RetType;
         NewRegKeyword.Args=Args;
         NewRegKeyword.ArgCount=ArgCount;
+        NewRegKeyword.OptionalArgStart=OptionalArgStart;
 
         Data->RegKeywords.insert({TmpName,NewRegKeyword});
     }
@@ -604,21 +609,42 @@ static int GenericKeywordFn(struct mb_interpreter_t *bas, void **arg)
         ExeArgsCount=keyword->second.ArgCount;
         ExeArgs=new struct ScriptArgValue[ExeArgsCount];
 
+        /* Default all the args (include optional ones) */
         for(a=0;a<ExeArgsCount;a++)
+        {
+            curarg=&(keyword->second.Args[a]);
+            ExeArgs[a].ArgName=curarg->ArgName;
             ExeArgs[a].Value=NULL;
+        }
 
         /* Grab args */
         for(a=0;a<ExeArgsCount;a++)
         {
             curarg=&(keyword->second.Args[a]);
-            ExeArgs[a].ArgName=curarg->ArgName;
+
+            if(!mb_has_arg(bas,arg))
+            {
+                if(keyword->second.OptionalArgStart>=0 &&
+                        a>=keyword->second.OptionalArgStart)
+                {
+                    /* This arg was optional, so we are done */
+                    break;
+                }
+                else
+                {
+                    mb_raise_error(bas,arg,SE_RN_VAR_EXPECTED,
+                            MB_FUNC_ERR);
+                    throw(0);
+                }
+            }
             switch(curarg->ArgType)
             {
                 case e_ScriptDataArg_String:
                     ArgRet=mb_pop_string(bas,arg,&ValueStr);
                     if(ArgRet!=MB_FUNC_OK)
                     {
-                        mb_raise_error(bas,arg,SE_RN_STRING_EXPECTED,MB_FUNC_ERR);
+                        mb_raise_error(bas,arg,SE_RN_STRING_EXPECTED,
+                                MB_FUNC_ERR);
                         throw(0);
                     }
                 break;
@@ -626,7 +652,8 @@ static int GenericKeywordFn(struct mb_interpreter_t *bas, void **arg)
                     ArgRet=mb_pop_int(bas,arg,&ArgInt);
                     if(ArgRet!=MB_FUNC_OK)
                     {
-                        mb_raise_error(bas,arg,SE_RN_INTEGER_EXPECTED,MB_FUNC_ERR);
+                        mb_raise_error(bas,arg,SE_RN_INTEGER_EXPECTED,
+                                MB_FUNC_ERR);
                         throw(0);
                     }
                     ValueStr=TmpBuff;
@@ -636,7 +663,8 @@ static int GenericKeywordFn(struct mb_interpreter_t *bas, void **arg)
                     ArgRet=mb_pop_int(bas,arg,&ArgInt);
                     if(ArgRet!=MB_FUNC_OK)
                     {
-                        mb_raise_error(bas,arg,SE_RN_INTEGER_EXPECTED,MB_FUNC_ERR);
+                        mb_raise_error(bas,arg,SE_RN_INTEGER_EXPECTED,
+                                MB_FUNC_ERR);
                         throw(0);
                     }
                     ValueStr=TmpBuff;
@@ -646,7 +674,8 @@ static int GenericKeywordFn(struct mb_interpreter_t *bas, void **arg)
                     ArgRet=mb_pop_real(bas,arg,&ArgReal);
                     if(ArgRet!=MB_FUNC_OK)
                     {
-                        mb_raise_error(bas,arg,SE_RN_NUMBER_EXPECTED,MB_FUNC_ERR);
+                        mb_raise_error(bas,arg,SE_RN_NUMBER_EXPECTED,
+                                MB_FUNC_ERR);
                         throw(0);
                     }
                     ValueStr=TmpBuff;

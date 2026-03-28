@@ -271,6 +271,7 @@ struct ScriptCommand
     string NameSpace;
     string Name;
     e_ScriptDataArgType RetType;
+    int OptionalArgStart;
     void *UserData;
     bool (*ExeFn)(class Connection *Con,void *UserData,const char *NameSpace,
         const char *Name,struct ScriptArgValue *Args,unsigned int ArgCount,
@@ -3378,10 +3379,6 @@ int Scripting_ExeRegisteredKeywordCB(struct UI_RPCData *RPCData)
     /* Call the callback for this command */
     if(ExeFn!=NULL)
     {
-// DEBUG PAUL: Need to also send in the connection
-//        Data->SEInstance->ConnectedCon->DisableDisplayWrite(Data->Enabled);
-//    }
-
         RetValue=ExeFn(Data->SEInstance->ConnectedCon,UserData,
                 Data->Namespace,Data->Keyword,Data->Args,Data->ArgCount,
                 Data->RetStr);
@@ -3419,7 +3416,8 @@ static int RunScriptThread(void *data)
                 API->RegisterKeyword(
                         (t_ScriptingEngineContextType *)SEInstance->Context,
                         cmd->NameSpace.c_str(),cmd->Name.c_str(),
-                        cmd->RetType,cmd->ScriptArgs,cmd->ArgCount);
+                        cmd->RetType,cmd->OptionalArgStart,
+                        cmd->ScriptArgs,cmd->ArgCount);
             }
         }
         mtx_unlock(&m_ScriptCommandListMutex);
@@ -3494,35 +3492,41 @@ static int RunScriptThread(void *data)
 
 /*******************************************************************************
  * NAME:
- *    
+ *    Scripting_AddNewCMD
  *
  * SYNOPSIS:
- *    
+ *    bool Scripting_AddNewCMD(const char *NameSpace,const char *Name,
+ *          struct ScriptDataType *ScriptArgs,uint32_t ArgCount,
+ *          int OptionalArgStart,e_ScriptDataArgType RetType,
+ *          void *UserData,bool (*ExeFn)(class Connection *Con,void *UserData,
+ *          const char *NameSpace,const char *Name,struct ScriptArgValue *Args,
+ *          unsigned int ArgCount,char **RetValue));
  *
  * PARAMETERS:
- *    
+ *    NameSpace [I] -- The name of the area this new command will work in
+ *    Name [I] -- The name of the new command
+ *    ScriptArgs [I] -- The args for this command
+ *    ArgCount [I] -- The number of args in 'ScriptArgs'
+ *    OptionalArgStart [I] -- The index of the first optional arg.  -1 for none.
+ *    RetType [I] -- The type of the return value
+ *    UserData [I] -- The user data to pass to the callback
+ *    ExeFn [I] -- The callback function that will be called when the script
+ *                 run this command.
  *
  * FUNCTION:
- *    
+ *    This function adds a new command to the scripting system.  All scripting
+ *    plugins will be told to add this command.
  *
  * RETURNS:
- *    
- *
- * NOTES:
- *    
- *
- * LIMITATIONS:
- *    
- *
- * EXAMPLE:
- *    
+ *    true -- things worked out
+ *    false -- There was an error
  *
  * SEE ALSO:
  *    
  ******************************************************************************/
 bool Scripting_AddNewCMD(const char *NameSpace,const char *Name,
         struct ScriptDataType *ScriptArgs,uint32_t ArgCount,
-        e_ScriptDataArgType RetType,
+        int OptionalArgStart,e_ScriptDataArgType RetType,
         void *UserData,bool (*ExeFn)(class Connection *Con,void *UserData,
         const char *NameSpace,const char *Name,struct ScriptArgValue *Args,
         unsigned int ArgCount,char **RetValue))
@@ -3534,6 +3538,7 @@ bool Scripting_AddNewCMD(const char *NameSpace,const char *Name,
     NewSCommand.Name=Name;
     NewSCommand.ScriptArgs=ScriptArgs;
     NewSCommand.ArgCount=ArgCount;
+    NewSCommand.OptionalArgStart=OptionalArgStart;
     NewSCommand.RetType=RetType;
     NewSCommand.ExeFn=ExeFn;
     NewSCommand.UserData=UserData;
@@ -3560,20 +3565,3 @@ bool Scripting_AddNewCMD(const char *NameSpace,const char *Name,
 
     return true;
 }
-
-//static PG_BOOL FTPSPAI_AddScriptUploadCMD(t_FTPSystemData *SysHandle,
-//        const char *ProtocolName,struct ScriptDataType *ArgList,
-//        uint32_t ArgCount)
-//
-//
-//void Scripting_KeyPress(struct ScriptHandle *Handle,class Connection *Con,
-//        uint8_t Mods,e_UIKeys Key,const uint8_t *TextPtr,unsigned int TextLen);
-/* Things:
-    * Return code need
-    * On Startup:AddUpload->AddNewCMD(Namespace,Name,...,UserData)
-    * On new script:AddKeyword(args)
-    * On new keyword run:ExeRegisteredKeyword(Namespace,Name,args)->Find CMD->DoUpload(UserData,Connection,ScriptHandle)
-    * On exit:UploadFreeUserData(UserData)
-    * 
-    
-*/

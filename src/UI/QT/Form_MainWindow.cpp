@@ -132,6 +132,10 @@ Form_MainWindow::Form_MainWindow(QWidget *parent) :
 #if OFFICIAL_RELEASE==1
     /* Hide anything that shouldn't be in the release build */
     ui->menuDebug->menuAction()->setVisible(false);
+
+    /* Scripts are not going in the next release so we hide the menu */
+    ui->menuScript->menuAction()->setVisible(false);
+
 #endif
 }
 

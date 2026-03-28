@@ -489,8 +489,6 @@ TheMainWindow::TheMainWindow()
     SendBuffersPanel.Setup(this,UIWin);
     BridgePanel.Setup(this,UIWin);
     AuxControlsPanel.Setup(this,UIWin);
-
-    EarlyRestoreWindowSize();   // Must be at the end because it (may) call Init()
 }
 
 /*******************************************************************************
@@ -672,6 +670,8 @@ void TheMainWindow::Init(void)
             }
         }
     }
+
+    RestoreWindowSize();
 }
 
 /*******************************************************************************
@@ -701,18 +701,17 @@ void TheMainWindow::Shutdown(void)
 
 /*******************************************************************************
  * NAME:
- *    TheMainWindow::EarlyRestoreWindowSize
+ *    TheMainWindow::RestoreWindowSize
  *
  * SYNOPSIS:
- *    void TheMainWindow::EarlyRestoreWindowSize(void);
+ *    void TheMainWindow::RestoreWindowSize(void);
  *
  * PARAMETERS:
  *    NONE
  *
  * FUNCTION:
  *    This function trys to restore the window size and position from the
- *    settings and session.  It is for early startup before the window has
- *    been show so we can try to prevent flickering.
+ *    settings and session.
  *
  * RETURNS:
  *    NONE
@@ -720,7 +719,7 @@ void TheMainWindow::Shutdown(void)
  * SEE ALSO:
  *
  ******************************************************************************/
-void TheMainWindow::EarlyRestoreWindowSize(void)
+void TheMainWindow::RestoreWindowSize(void)
 {
     if(g_Settings.RestoreWindowPos==e_WindowStartupPos_RestoreFromSession)
     {

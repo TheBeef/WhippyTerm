@@ -94,7 +94,7 @@ void Scripting_RecvBytes(struct ScriptHandle *Handle,class Connection *Con,
 
 bool Scripting_AddNewCMD(const char *NameSpace,const char *Name,
         struct ScriptDataType *ScriptArgs,uint32_t ArgCount,
-        e_ScriptDataArgType RetType,
+        int OptionalArgStart,e_ScriptDataArgType RetType,
         void *UserData,bool (*ExeFn)(class Connection *Con,void *UserData,
         const char *NameSpace,const char *Name,struct ScriptArgValue *Args,
         unsigned int ArgCount,char **RetValue));

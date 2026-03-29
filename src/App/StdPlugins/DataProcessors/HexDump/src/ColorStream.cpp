@@ -79,6 +79,7 @@ static void BasicHexDecoder_FreeBPDSUserData(struct BPDSDef *Def);
 static void ResetStream2StartOfProtocol(struct ColorStreamData *CSD,bool DidStyling);
 static void ResetColorStream(struct ColorStreamData *CSD);
 static uint64_t FixEndianAndClip(struct ColorStreamData *CSD,uint64_t Value,unsigned int Bytes);
+void ColorStreamProcessIncomingByte_MoveToNextField(struct ColorStreamData *CSD);
 
 /*** VARIABLE DEFINITIONS     ***/
 
@@ -386,23 +387,75 @@ bool ColorStreamProcessIncomingByte(struct ColorStreamData *CSD,uint8_t Byte,boo
 
     if(Move2NextField)
     {
-        if(CSD->CurField==CSD->Def->FieldList)
-        {
-            /* We are at the start of the packet we need to use the
-               marks to back color it (before we move on to a new
-               field) */
-            CSD->MarkStartOfField=CSD->Def->FieldList;
-            CSD->MarkSize=CSD->Def->FieldList->Size;
-            if(CSD->CurField->StrValues!=NULL)
-                CSD->MarkSize=CSD->BytesCount;
-        }
-        else if(CSD->MatchAny)
-        {
-            CSD->MarkStartOfField=CSD->CurField;
-            CSD->MarkSize=CSD->Def->FieldList->Size;
-        }
+        ColorStreamProcessIncomingByte_MoveToNextField(CSD);
+    }
 
-        /* Move to next field */
+    return CSD->NewStyle;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    ColorStreamProcessIncomingByte_MoveToNextField
+ *
+ * SYNOPSIS:
+ *    void ColorStreamProcessIncomingByte_MoveToNextField(struct ColorStreamData *CSD);
+ *
+ * PARAMETERS:
+ *    CSD [I] -- The color stream to work on
+ *
+ * FUNCTION:
+ *    This a helper function for ColorStreamProcessIncomingByte().  It moves
+ *    to the next field.  This may reenter if the new field has a size of
+ *    0.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    ColorStreamProcessIncomingByte()
+ ******************************************************************************/
+void ColorStreamProcessIncomingByte_MoveToNextField(struct ColorStreamData *CSD)
+{
+    struct BPDSParsedData *ReadData;
+    struct BPDSStringValueSet *svs;
+
+    if(CSD->CurField==CSD->Def->FieldList)
+    {
+        /* We are at the start of the packet we need to use the
+           marks to back color it (before we move on to a new
+           field) */
+        CSD->MarkStartOfField=CSD->Def->FieldList;
+        CSD->MarkSize=CSD->Def->FieldList->Size;
+        if(CSD->CurField->StrValues!=NULL)
+            CSD->MarkSize=CSD->BytesCount;
+    }
+    else if(CSD->MatchAny)
+    {
+        CSD->MarkStartOfField=CSD->CurField;
+        CSD->MarkSize=CSD->Def->FieldList->Size;
+    }
+
+    /* Move to next field */
+    CSD->CurField=CSD->CurField->Next;
+    if(CSD->CurField==NULL)
+    {
+        CSD->CurField=CSD->Def->FieldList;
+        CSD->Reset2Start=true;
+    }
+
+//        strcpy(NextName,CurField->Name);
+    ReadData=(struct BPDSParsedData *)CSD->CurField->UserData;
+    CSD->NextStyle=ReadData->Style;
+    CSD->NewStyle=true;
+    CSD->MatchAny=false;
+
+    if(CSD->CurField->MatchAny && !CSD->Reset2Start)
+    {
+        /* Ok, we move to the next field here but set the MatchAny flag */
+
+        /* Apply this style before we change to the next field */
+//            strcpy(NextName,CurField->Name);
+
         CSD->CurField=CSD->CurField->Next;
         if(CSD->CurField==NULL)
         {
@@ -410,53 +463,38 @@ bool ColorStreamProcessIncomingByte(struct ColorStreamData *CSD,uint8_t Byte,boo
             CSD->Reset2Start=true;
         }
 
-//        strcpy(NextName,CurField->Name);
-        ReadData=(struct BPDSParsedData *)CSD->CurField->UserData;
-        CSD->NextStyle=ReadData->Style;
-        CSD->NewStyle=true;
-        CSD->MatchAny=false;
-
-        if(CSD->CurField->MatchAny && !CSD->Reset2Start)
-        {
-            /* Ok, we move to the next field here but set the MatchAny flag */
-
-            /* Apply this style before we change to the next field */
-//            strcpy(NextName,CurField->Name);
-
-            CSD->CurField=CSD->CurField->Next;
-            if(CSD->CurField==NULL)
-            {
-                CSD->CurField=CSD->Def->FieldList;
-                CSD->Reset2Start=true;
-            }
-
-            CSD->MatchAny=true;
-        }
-
-        /* Reset the parse matches (for strings) */
-        for(svs=CSD->CurField->StrValues;svs!=NULL;svs=svs->Next)
-            memset(&svs->UserData,0x00,sizeof(struct BPDSParsedValueSetData));
-
-        /* If we are back at the start, set match any again */
-        if(CSD->CurField==CSD->Def->FieldList)
-            CSD->MatchAny=true;
-
-        if(CSD->CurField->SizeLinkedTo!=NULL)
-        {
-            ReadData=(struct BPDSParsedData *)CSD->CurField->SizeLinkedTo->
-                    UserData;
-            CSD->Search4BytesCount=ReadData->Value;
-        }
-        else
-        {
-            CSD->Search4BytesCount=CSD->CurField->Size;
-        }
-
-        CSD->BytesCount=0;
-        CSD->CollectedValue=0;
+        CSD->MatchAny=true;
     }
 
-    return CSD->NewStyle;
+    /* Reset the parse matches (for strings) */
+    for(svs=CSD->CurField->StrValues;svs!=NULL;svs=svs->Next)
+        memset(&svs->UserData,0x00,sizeof(struct BPDSParsedValueSetData));
+
+    /* If we are back at the start, set match any again */
+    if(CSD->CurField==CSD->Def->FieldList)
+        CSD->MatchAny=true;
+
+    if(CSD->CurField->SizeLinkedTo!=NULL)
+    {
+        ReadData=(struct BPDSParsedData *)CSD->CurField->SizeLinkedTo->
+                UserData;
+        CSD->Search4BytesCount=ReadData->Value;
+
+        if(CSD->Search4BytesCount==0)
+        {
+            /* We already matched 0 bytes, move to the next field */
+            ReadData=(struct BPDSParsedData *)CSD->CurField->UserData;
+            ReadData->Value=0;
+            ColorStreamProcessIncomingByte_MoveToNextField(CSD);
+        }
+    }
+    else
+    {
+        CSD->Search4BytesCount=CSD->CurField->Size;
+    }
+
+    CSD->BytesCount=0;
+    CSD->CollectedValue=0;
 }
 
 void ColorStreamProcessIncomingByteFinish(struct ColorStreamData *CSD,uint8_t Byte,bool DidStyling)

@@ -120,6 +120,9 @@ void RunNewConnectionDialog(class TheMainWindow *MW,bool NewTab)
         if(!UIAlloc_NewConnection())
             throw("Failed to open window");
 
+        if(g_Settings.AutoRescanConnections)
+            IOS_ScanForConnections();
+
         FillInConnectionPullDown();
 
         if(UIShow_NewConnection())

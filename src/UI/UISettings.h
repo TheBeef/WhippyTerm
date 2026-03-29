@@ -73,6 +73,7 @@ enum e_UIS_Checkbox
     e_UIS_Checkbox_ConfirmQuit,
     e_UIS_Checkbox_OverrideHR,
     e_UIS_Checkbox_OutGoingHexDisplayEnabled,
+    e_UIS_Checkbox_AutoRescanOnNewConnection,
     e_UIS_CheckboxMAX
 };
 

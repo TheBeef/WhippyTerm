@@ -36,6 +36,14 @@ static struct ReleaseNote m_Notes_NEXT[]=
     {   NOTETYPE_FUNCTIONALLY_FIX,"Changed default bottom panel size",
             "The bottom panel was not showing the controls, so the default"
             " value has been updated to be 180 instead of 80."},
+    {   NOTETYPE_FUNCTIONALLY_FIX,"Changed how maximize window on startup works",
+            "On startup the windows was maximized before it was show the main"
+            " window.  It has been changed to opening the window then"
+            " maximized.  This is because on some systems it would not"
+            " actually maximize correctly."},
+    {   NOTETYPE_ENHANCEMENT,"Added new option for rescanning connections",
+            "Added new option for rescanning connections on opening the"
+            " new connection dialog."},
 };
 
 static struct ReleaseNote m_Notes_Rel2_2_1_0[]=

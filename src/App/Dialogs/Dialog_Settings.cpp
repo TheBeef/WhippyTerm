@@ -765,6 +765,9 @@ static void DS_SetSettingGUI(void)
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoReopen);
     UICheckCheckbox(CheckboxHandle,m_SettingConSettings->AutoReopen);
 
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoRescanOnNewConnection);
+    UICheckCheckbox(CheckboxHandle,g_Settings.AutoRescanConnections);
+
     NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_AutoReopenWaitTime);
     UISetNumberInputCtrlValue(NumberInputHandle,m_SettingConSettings->AutoReopenWaitTime);
 
@@ -1191,6 +1194,9 @@ static void DS_GetSettingsFromGUI(void)
         /********************/
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoConnectOnNewConnection);
         g_Settings.AutoConnectOnNewConnection=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoRescanOnNewConnection);
+        g_Settings.AutoRescanConnections=UIGetCheckboxCheckStatus(CheckboxHandle);
 
         /********************/
         /* Display          */
@@ -2860,6 +2866,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Checkbox_StartMax:
                 case e_UIS_Checkbox_AutoConnectOnNewConnection:
                 case e_UIS_Checkbox_AutoReopen:
+                case e_UIS_Checkbox_AutoRescanOnNewConnection:
                 case e_UIS_Checkbox_AlwaysShowTabs:
                 case e_UIS_Checkbox_CloseButtonOnTabs:
                 case e_UIS_Checkbox_CenterTextInWindow:

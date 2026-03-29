@@ -128,6 +128,8 @@ t_UICheckboxCtrl *UIS_GetCheckboxHandle(e_UIS_Checkbox UIObj)
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->HR_OverrideColor_checkBox;
         case e_UIS_Checkbox_OutGoingHexDisplayEnabled:
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->OutGoing_HexDisplay_Enable_checkBox;
+        case e_UIS_Checkbox_AutoRescanOnNewConnection:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->AutoRescan_checkBox;
         case e_UIS_CheckboxMAX:
         default:
         break;

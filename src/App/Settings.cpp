@@ -1135,6 +1135,7 @@ void Settings::RegisterAllMembers(class TinyCFG &cfg)
         cfg.Register("BottomPanelOpenOnStartup",BottomPanelOpenOnStartup);
         cfg.Register("AppMaximized",AppMaximized);
         cfg.Register("ReopenOnConnectionsOnStartup",ReopenOnConnectionsOnStartup);
+        cfg.Register("AutoRescanConnections",AutoRescanConnections);
         cfg.Register("WindowPosX",WindowPosX);
         cfg.Register("WindowPosY",WindowPosY);
         cfg.Register("WindowWidth",WindowWidth);
@@ -1407,6 +1408,7 @@ void Settings::DefaultSettings(void)
     BottomPanelOpenOnStartup=false;
     AppMaximized=true;
     ReopenOnConnectionsOnStartup=false;
+    AutoRescanConnections=true;
     WindowPosX=-1;
     WindowPosY=-1;
     WindowWidth=640;

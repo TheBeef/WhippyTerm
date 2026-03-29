@@ -262,7 +262,10 @@ class Settings
         int WindowPosY;
         int WindowWidth;
         int WindowHeight;
+
+        /* Connections */
         bool ReopenOnConnectionsOnStartup;
+        bool AutoRescanConnections;
 
         /* Connection settings defaults */
         class ConSettings DefaultConSettings;

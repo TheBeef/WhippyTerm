@@ -36,7 +36,7 @@
       <item>
        <widget class="QStackedWidget" name="Editing_stackedWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="page_Panel">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -703,6 +703,13 @@
                <widget class="QCheckBox" name="AutoConnectOnNewConnection_checkBox">
                 <property name="text">
                  <string>Automatically Open New Connections</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="AutoRescan_checkBox">
+                <property name="text">
+                 <string>Auto Rescan When New Conenction Dialog Opens</string>
                 </property>
                </widget>
               </item>

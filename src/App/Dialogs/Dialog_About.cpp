@@ -88,7 +88,7 @@ void RunAboutDialog(void)
     UISetAboutText(buff,e_UIAboutTab_Author);
 
     snprintf(buff,sizeof(buff)-1,
-            "Copyright 2025 Paul Hutchinson.<br/>"
+            "Copyright 2026 Paul Hutchinson.<br/>"
             ""
             "<p>This program is free software: you can redistribute it and/or modify it "
             "under the terms of the GNU General Public License as published by the "
@@ -113,6 +113,7 @@ void RunAboutDialog(void)
             "<tr><td>Silk icons</td><td>1.3</td><td><a href='http://www.famfamfam.com/lab/icons/silk/'>http://www.famfamfam.com/lab/icons/silk/</a></td>"
             "<tr><td>Computer Error Alert</td><td>1.0</td><td><a href='https://soundbible.com/1540-Computer-Error-Alert.html'>https://soundbible.com/1540-Computer-Error-Alert.html</a></td>"
             "<tr><td>Bell Icon designed by Pixel perfect from Flaticon</td><td>1.0</td><td><a href='https://www.flaticon.com/free-icon/bell_1827272'>https://www.flaticon.com/free-icon/bell_1827272</a></td>"
+            "<tr><td>MY-BASIC</td><td>1.2+</td><td><a href='https://github.com/paladin-t/my_basic'>https://github.com/paladin-t/my_basic</a></td>"
             "</table>",
             WHIPPYTERM_NAME,
             GetGUIEngineName(),

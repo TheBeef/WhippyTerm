@@ -107,6 +107,8 @@ private slots:
     
     void on_actionCopy_To_Send_Buffer_triggered();
     
+    void on_Jump2SendBuffers_pushButton_clicked();
+    
 private:
     void SendContextMenuEvent(e_UITD_ContextMenuType EventMenu);
 };

@@ -59,8 +59,37 @@
 /***  MACROS                           ***/
 
 /***  TYPE DEFINITIONS                 ***/
+/* Must match UI */
+typedef enum
+{
+    e_RightPanelTabIndexes_StopWatch=0,
+    e_RightPanelTabIndexesMAX
+} e_RightPanelTabIndexesType;
+
+/* Must match UI */
+typedef enum
+{
+    e_LeftPanelTabIndexes_Capture=0,
+    e_LeftPanelTabIndexes_Upload,
+    e_LeftPanelTabIndexes_Download,
+    e_LeftPanelTabIndexes_ConnectionOptions=0,
+    e_LeftPanelTabIndexes_AuxControls,
+    e_LeftPanelTabIndexes_Bridge,
+    e_LeftPanelTabIndexesMAX
+} e_LeftPanelTabIndexesType;
+
+/* Must match UI */
+typedef enum
+{
+    e_BottomPanelTabIndexes_Hex=0,
+    e_BottomPanelTabIndexes_Injection,
+    e_BottomPanelTabIndexes_Buffers,
+    e_BottomPanelTabIndexesMAX
+} e_BottomPanelTabIndexesType;
+
 typedef std::list<class Connection *> t_MainWindowConnectionList;
 typedef t_MainWindowConnectionList::iterator i_MainWindowConnectionList;
+
 
 /***  CLASS DEFINITIONS                ***/
 class TheMainWindow
@@ -100,6 +129,8 @@ void Debug6(void);
         bool IsThisYourUIWindow(t_UIMainWindow *GUIWin);
         void RebuildBookmarkMenu(void);
         void ShowPanel(e_MWPanelsType PanelID);
+        void HidePanel(e_MWPanelsType PanelID);
+        bool IsPanelVisible(e_MWPanelsType PanelID);
         void SetActiveConnection(class Connection *NewCon);
         void SetActiveTab(class Connection *Con);
         void RethinkActiveTabControls(void);
@@ -203,6 +234,7 @@ void Debug6(void);
         void RestoreSessionConnections(void);
         void HandleClearScreenOnSendBuffer(bool ClearScreenOnSendSetting);
         void GetMainWindowDisplayTitle(std::string &WindowTitle);
+        void FigureOutPanelAndTab(e_MWPanelsType PanelID,e_RightPanelTabIndexesType &RightPanelTab,e_LeftPanelTabIndexesType &LeftPanelTab,e_BottomPanelTabIndexesType &BottomPanelTab,t_UITabCtrl **PanelCtrl);
 
         /* Scripting */
         void StartManualScript(void);

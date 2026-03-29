@@ -51,6 +51,10 @@ static struct ReleaseNote m_Notes_NEXT[]=
             "  It has been fixed to handle 0 length fields."},
     {   NOTETYPE_ENHANCEMENT,"Added version number to window title",
             "The main window now includes the base version number."},
+    {   NOTETYPE_ENHANCEMENT,"Added quick jump button to send line inputs",
+            "In the main window below the text cavnas there is a line input"
+            " (for binary connections) that lets the user input a line / buffer"
+            " and send it.  A new jump to send buffer panel was added."},
 
 
 };

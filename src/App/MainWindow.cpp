@@ -80,34 +80,6 @@ typedef t_MainWindowsListType::iterator i_MainWindowsListType;
 typedef map<string,e_UISubMenuCtrl *> t_BookmarkMenuFolderLookup;
 typedef t_BookmarkMenuFolderLookup::iterator i_BookmarkMenuFolderLookup;
 
-/* Must match UI */
-typedef enum
-{
-    e_RightPanelTabIndexes_StopWatch=0,
-    e_RightPanelTabIndexesMAX
-} e_RightPanelTabIndexesType;
-
-/* Must match UI */
-typedef enum
-{
-    e_LeftPanelTabIndexes_Capture=0,
-    e_LeftPanelTabIndexes_Upload,
-    e_LeftPanelTabIndexes_Download,
-    e_LeftPanelTabIndexes_ConnectionOptions=0,
-    e_LeftPanelTabIndexes_AuxControls,
-    e_LeftPanelTabIndexes_Bridge,
-    e_LeftPanelTabIndexesMAX
-} e_LeftPanelTabIndexesType;
-
-/* Must match UI */
-typedef enum
-{
-    e_BottomPanelTabIndexes_Hex=0,
-    e_BottomPanelTabIndexes_Injection,
-    e_BottomPanelTabIndexes_Buffers,
-    e_BottomPanelTabIndexesMAX
-} e_BottomPanelTabIndexesType;
-
 /*** FUNCTION PROTOTYPES      ***/
 static bool MW_DoMainWindowClose(class TheMainWindow *win);
 
@@ -3372,7 +3344,7 @@ bool TheMainWindow::IsThisYourUIWindow(t_UIMainWindow *GUIWin)
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    IsPanelVisible(), HidePanel()
  ******************************************************************************/
 void TheMainWindow::ShowPanel(e_MWPanelsType PanelID)
 {
@@ -3382,6 +3354,184 @@ void TheMainWindow::ShowPanel(e_MWPanelsType PanelID)
     e_LeftPanelTabIndexesType LeftPanelTab;
     e_BottomPanelTabIndexesType BottomPanelTab;
 
+    FigureOutPanelAndTab(PanelID,RightPanelTab,LeftPanelTab,BottomPanelTab,
+            &PanelCtrl);
+    if(PanelCtrl==NULL)
+        return;
+
+    if(RightPanelTab!=e_RightPanelTabIndexesMAX)
+    {
+        Tab=UITabCtrlGetTabFromIndex(PanelCtrl,RightPanelTab);
+        UITabCtrlMakeTabActive(PanelCtrl,Tab);
+        UIMW_SetRightPanel(UIWin,g_Session.RightPanelSize,true);
+    }
+
+    if(LeftPanelTab!=e_LeftPanelTabIndexesMAX)
+    {
+        Tab=UITabCtrlGetTabFromIndex(PanelCtrl,LeftPanelTab);
+        UITabCtrlMakeTabActive(PanelCtrl,Tab);
+        UIMW_SetLeftPanel(UIWin,g_Session.LeftPanelSize,true);
+    }
+
+    if(BottomPanelTab!=e_BottomPanelTabIndexesMAX)
+    {
+        Tab=UITabCtrlGetTabFromIndex(PanelCtrl,BottomPanelTab);
+        UITabCtrlMakeTabActive(PanelCtrl,Tab);
+        UIMW_SetBottomPanel(UIWin,g_Session.BottomPanelSize,true);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::HidePanel
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::HidePanel(e_MWPanelsType PanelID);
+ *
+ * PARAMETERS:
+ *    PanelID [I] - The panel to make hide
+ *
+ * FUNCTION:
+ *    This function hides a panel that a requested panel lives in.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    ShowPanel()
+ ******************************************************************************/
+void TheMainWindow::HidePanel(e_MWPanelsType PanelID)
+{
+    t_UITabCtrl *PanelCtrl;
+    e_RightPanelTabIndexesType RightPanelTab;
+    e_LeftPanelTabIndexesType LeftPanelTab;
+    e_BottomPanelTabIndexesType BottomPanelTab;
+
+    RightPanelTab=e_RightPanelTabIndexesMAX;
+    LeftPanelTab=e_LeftPanelTabIndexesMAX;
+    BottomPanelTab=e_BottomPanelTabIndexesMAX;
+
+    FigureOutPanelAndTab(PanelID,RightPanelTab,LeftPanelTab,BottomPanelTab,
+            &PanelCtrl);
+    if(PanelCtrl==NULL)
+        return;
+
+    if(RightPanelTab!=e_RightPanelTabIndexesMAX)
+        UIMW_SetRightPanel(UIWin,g_Session.RightPanelSize,false);
+
+    if(LeftPanelTab!=e_LeftPanelTabIndexesMAX)
+        UIMW_SetLeftPanel(UIWin,g_Session.LeftPanelSize,false);
+
+    if(BottomPanelTab!=e_BottomPanelTabIndexesMAX)
+        UIMW_SetBottomPanel(UIWin,g_Session.BottomPanelSize,false);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::IsPanelVisible
+ *
+ * SYNOPSIS:
+ *    bool TheMainWindow::IsPanelVisible(e_MWPanelsType PanelID);
+ *
+ * PARAMETERS:
+ *    PanelID [I] -- The panel to lookup
+ *
+ * FUNCTION:
+ *    This function looks up if a panel and tab are selected for a requested
+ *    panel.
+ *
+ * RETURNS:
+ *    true -- Panel + tab visable
+ *    false -- Panel or tab hiden.
+ *
+ * SEE ALSO:
+ *    ShowPanel()
+ ******************************************************************************/
+bool TheMainWindow::IsPanelVisible(e_MWPanelsType PanelID)
+{
+    t_UITabCtrl *PanelCtrl;
+    e_RightPanelTabIndexesType RightPanelTab;
+    e_LeftPanelTabIndexesType LeftPanelTab;
+    e_BottomPanelTabIndexesType BottomPanelTab;
+
+    RightPanelTab=e_RightPanelTabIndexesMAX;
+    LeftPanelTab=e_LeftPanelTabIndexesMAX;
+    BottomPanelTab=e_BottomPanelTabIndexesMAX;
+
+    FigureOutPanelAndTab(PanelID,RightPanelTab,LeftPanelTab,BottomPanelTab,
+            &PanelCtrl);
+    if(PanelCtrl==NULL)
+        return false;
+
+    if(RightPanelTab!=e_RightPanelTabIndexesMAX)
+    {
+        /* See if the panel is open and the tab is selected */
+        if(g_Session.RightPanelOpen &&
+                UITabCtrlGetActiveTabIndex(PanelCtrl)==RightPanelTab)
+        {
+            return true;
+        }
+    }
+
+    if(LeftPanelTab!=e_LeftPanelTabIndexesMAX)
+    {
+        /* See if the panel is open and the tab is selected */
+        if(g_Session.LeftPanelOpen &&
+                UITabCtrlGetActiveTabIndex(PanelCtrl)==LeftPanelTab)
+        {
+            return true;
+        }
+    }
+
+    if(BottomPanelTab!=e_BottomPanelTabIndexesMAX)
+    {
+        /* See if the panel is open and the tab is selected */
+        if(g_Session.BottomPanelOpen &&
+                UITabCtrlGetActiveTabIndex(PanelCtrl)==BottomPanelTab)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::FigureOutPanelAndTab
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::FigureOutPanelAndTab(e_MWPanelsType PanelID,
+ *          e_RightPanelTabIndexesType &RightPanelTab,
+ *          e_LeftPanelTabIndexesType &LeftPanelTab,
+ *          e_BottomPanelTabIndexesType &BottomPanelTab,
+ *          t_UITabCtrl **PanelCtrl);
+ *
+ * PARAMETERS:
+ *    PanelID [I] -- The panel you are requesting info on
+ *    RightPanelTab [O] -- The tab index if this panel is in the right side
+ *                         panel.  This will be set to MAX if not in this panel.
+ *    LeftPanelTab [O] -- The tab index if this panel is in the left side
+ *                        panel.  This will be set to MAX if not in this panel.
+ *    BottomPanelTab [O] -- The tab index if this panel is in the bottom
+ *                          panel. This will be set to MAX if not in this panel.
+ *    PanelCtrl [O] -- The tab control that this requested panel lives in or
+ *                     set to NULL if not found.
+ *
+ * FUNCTION:
+ *    This is a helper function for the Panel control functions.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    ShowPanel()
+ ******************************************************************************/
+void TheMainWindow::FigureOutPanelAndTab(e_MWPanelsType PanelID,
+        e_RightPanelTabIndexesType &RightPanelTab,
+        e_LeftPanelTabIndexesType &LeftPanelTab,
+        e_BottomPanelTabIndexesType &BottomPanelTab,t_UITabCtrl **PanelCtrl)
+{
+    *PanelCtrl=NULL;
     RightPanelTab=e_RightPanelTabIndexesMAX;
     LeftPanelTab=e_LeftPanelTabIndexesMAX;
     BottomPanelTab=e_BottomPanelTabIndexesMAX;
@@ -3427,28 +3577,17 @@ void TheMainWindow::ShowPanel(e_MWPanelsType PanelID)
 
     if(RightPanelTab!=e_RightPanelTabIndexesMAX)
     {
-        PanelCtrl=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_RightPanel);
-        Tab=UITabCtrlGetTabFromIndex(PanelCtrl,RightPanelTab);
-        UITabCtrlMakeTabActive(PanelCtrl,Tab);
-        UIMW_SetRightPanel(UIWin,g_Session.RightPanelSize,true);
+        *PanelCtrl=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_RightPanel);
     }
 
     if(LeftPanelTab!=e_LeftPanelTabIndexesMAX)
     {
-        PanelCtrl=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_LeftPanel);
-        Tab=UITabCtrlGetTabFromIndex(PanelCtrl,LeftPanelTab);
-        UITabCtrlMakeTabActive(PanelCtrl,Tab);
-
-        UIMW_SetLeftPanel(UIWin,g_Session.LeftPanelSize,true);
+        *PanelCtrl=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_LeftPanel);
     }
 
     if(BottomPanelTab!=e_BottomPanelTabIndexesMAX)
     {
-        PanelCtrl=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_BottomPanel);
-        Tab=UITabCtrlGetTabFromIndex(PanelCtrl,BottomPanelTab);
-        UITabCtrlMakeTabActive(PanelCtrl,Tab);
-
-        UIMW_SetBottomPanel(UIWin,g_Session.BottomPanelSize,true);
+        *PanelCtrl=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_BottomPanel);
     }
 }
 

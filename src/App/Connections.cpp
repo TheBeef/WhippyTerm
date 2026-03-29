@@ -3278,6 +3278,19 @@ bool Connection::ProcessDisplayEvent(const struct DBEvent *Event)
                 break;
             }
         break;
+        case e_DBEvent_Jump2SendBuffersClicked:
+            if(MW!=NULL)
+            {
+                if(MW->IsPanelVisible(e_MWPanels_Buffers))
+                {
+                    MW->HidePanel(e_MWPanels_Buffers);
+                }
+                else
+                {
+                    MW->ShowPanel(e_MWPanels_Buffers);
+                }
+            }
+        break;
         case e_DBEventMAX:
         default:
         break;

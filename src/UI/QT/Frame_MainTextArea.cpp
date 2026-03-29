@@ -344,3 +344,18 @@ void Frame_MainTextArea::on_actionCopy_To_Send_Buffer_triggered()
     SendContextMenuEvent(e_UITD_ContextMenu_SendToSendBuffer);
 }
 
+
+void Frame_MainTextArea::on_Jump2SendBuffers_pushButton_clicked()
+{
+    struct TextDisplayEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_ButtonPress;
+    NewEvent.ID=ID;
+    NewEvent.Info.ButtonPress.Bttn=e_UITC_Bttn_Jump2SendBuffers;
+
+    EventHandler(&NewEvent);
+}
+

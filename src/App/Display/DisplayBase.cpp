@@ -1663,6 +1663,33 @@ void DisplayBase::DoBlock_RadioBttnChange(void)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayBase::DoBlock_Jump2SendBuffers
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::DoBlock_Jump2SendBuffers(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when the user presses the jump to send buffers
+ *    in the block send area at the bottom on the canvas.
+ *
+ *    It just opens the bottom panel and sets the tab to send buffers.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::DoBlock_Jump2SendBuffers(void)
+{
+    SendEvent(e_DBEvent_Jump2SendBuffersClicked,NULL);
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayBase::Block_SetHexOrTextMode
  *
  * SYNOPSIS:

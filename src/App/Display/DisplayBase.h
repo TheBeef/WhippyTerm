@@ -55,6 +55,7 @@ typedef enum
     e_DBEvent_FocusChange,
     e_DBEvent_MouseMouseWheel,
     e_DBEvent_ContextMenu,
+    e_DBEvent_Jump2SendBuffersClicked ,
     e_DBEventMAX
 } e_DBEventType;
 
@@ -226,6 +227,7 @@ class DisplayBase
         void DoBlock_Send(void);
         void DoBlock_EditHex(void);
         void DoBlock_RadioBttnChange(void);
+        void DoBlock_Jump2SendBuffers(void);
         void Block_SetHexOrTextMode(bool TextMode);
 
         class HexDisplayBuffer *HexInput;

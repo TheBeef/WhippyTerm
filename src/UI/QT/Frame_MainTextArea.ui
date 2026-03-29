@@ -307,6 +307,13 @@
              </spacer>
             </item>
             <item>
+             <widget class="QPushButton" name="Jump2SendBuffers_pushButton">
+              <property name="text">
+               <string>Send Buffers...</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="BlockSendSend_pushButton">
               <property name="text">
                <string>Send</string>

@@ -104,6 +104,7 @@ typedef enum
     e_UITC_Bttn_Send,
     e_UITC_Bttn_HexEdit,
     e_UITC_Bttn_Clear,
+    e_UITC_Bttn_Jump2SendBuffers,
     e_UITC_BttnMAX
 } e_UITC_BttnType;
 

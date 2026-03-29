@@ -496,6 +496,9 @@ break;
                 case e_UITC_Bttn_Clear:
                     DoBlock_ClearHexInput();
                 break;
+                case e_UITC_Bttn_Jump2SendBuffers:
+                    DoBlock_Jump2SendBuffers();
+                break;
                 case e_UITC_BttnMAX:
                 default:
                 break;

@@ -66,7 +66,7 @@
  ******************************************************************************/
 void RunAboutDialog(void)
 {
-    char buff[1000];
+    char buff[10000];
 
     if(!UIAlloc_About())
         return;

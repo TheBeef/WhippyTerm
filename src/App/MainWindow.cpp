@@ -456,6 +456,7 @@ TheMainWindow::TheMainWindow()
 {
     t_UITabCtrl *MainTabs;
     t_UIFrameContainerCtrl *ContainerFrame;
+    string WhippyTermName;
 
     UIWin=NULL;
     NoTabsConnection=NULL;
@@ -476,7 +477,9 @@ TheMainWindow::TheMainWindow()
     UISetFrameContainerVisible(ContainerFrame,false);
     UIShowHideTabCtrl(MainTabs,false);
 
-    UIMW_SetWindowTitle(UIWin,WHIPPYTERM_TITLE);
+    GetMainWindowDisplayTitle(WhippyTermName);
+    UIMW_SetWindowTitle(UIWin,WhippyTermName.c_str());
+
     UIMW_SwitchTabControlCloseBttnPos(UIWin,g_Settings.CloseButtonOnTabs);
 
     ConnectionOptionsPanel.Setup(this,UIWin);
@@ -697,6 +700,34 @@ void TheMainWindow::Init(void)
 void TheMainWindow::Shutdown(void)
 {
     CloseAllConnections();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::GetMainWindowDisplayTitle
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::GetMainWindowDisplayTitle(std::string &WindowTitle);
+ *
+ * PARAMETERS:
+ *    WindowTitle [O] -- The display title for the main window.  This doesn't
+ *                       include any modifications for the current connection,
+ *                       so it's the base name.
+ *
+ * FUNCTION:
+ *    This function gets the base whippyterm name for the main window.  This
+ *    is basicly the name of whippyterm with the version.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::GetMainWindowDisplayTitle(std::string &WindowTitle)
+{
+    WindowTitle=WHIPPYTERM_TITLE " " VER_STR(WHIPPYTERM_VERSION_MAJOR) "."
+            VER_STR(WHIPPYTERM_VERSION_MINOR);
 }
 
 /*******************************************************************************
@@ -1403,9 +1434,13 @@ void TheMainWindow::ConnectionStatusChange(class Connection *Con)
  ******************************************************************************/
 void TheMainWindow::AllTabsClosed(void)
 {
+    string WhippyTermName;
+
     SetURIText("");
     RemoveAllTabPanelControls();
-    UIMW_SetWindowTitle(UIWin,WHIPPYTERM_TITLE);
+
+    GetMainWindowDisplayTitle(WhippyTermName);
+    UIMW_SetWindowTitle(UIWin,WhippyTermName.c_str());
 
     ActiveCon=NULL;
     RethinkActiveConnectionUI();
@@ -3447,6 +3482,7 @@ void TheMainWindow::RethinkActiveTabControls(void)
     e_BottomPanelTabType BottomPanelTab;
     e_RightPanelTabType RightPanelTab;
     e_LeftPanelTabType LeftPanelTab;
+    string WhippyTermName;
 
     if(ActiveCon==NULL)
         return;
@@ -3458,7 +3494,8 @@ void TheMainWindow::RethinkActiveTabControls(void)
     /* Change the windows title */
     ActiveCon->GetDisplayName(WinTitle);
     WinTitle+=" - ";
-    WinTitle+=WHIPPYTERM_TITLE;
+    GetMainWindowDisplayTitle(WhippyTermName);
+    WinTitle+=WhippyTermName;
     UIMW_SetWindowTitle(UIWin,WinTitle.c_str());
 
     /* Tell the panels the connection has changed */

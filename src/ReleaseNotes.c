@@ -49,6 +49,10 @@ static struct ReleaseNote m_Notes_NEXT[]=
             " field for it's length and that worked out to be 0 the"
             " processor would mess up where it was in the definition."
             "  It has been fixed to handle 0 length fields."},
+    {   NOTETYPE_ENHANCEMENT,"Added version number to window title",
+            "The main window now includes the base version number."},
+
+
 };
 
 static struct ReleaseNote m_Notes_Rel2_2_1_0[]=

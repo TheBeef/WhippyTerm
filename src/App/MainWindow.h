@@ -51,6 +51,7 @@
 #include "UI/UIMainWindow.h"
 #include "PluginSDK/Plugin.h"
 #include <stdint.h>
+#include <string>
 #include <list>
 
 /***  DEFINES                          ***/
@@ -201,6 +202,7 @@ void Debug6(void);
         void ToggleConnectionUseGlobalSettings(void);
         void RestoreSessionConnections(void);
         void HandleClearScreenOnSendBuffer(bool ClearScreenOnSendSetting);
+        void GetMainWindowDisplayTitle(std::string &WindowTitle);
 
         /* Scripting */
         void StartManualScript(void);

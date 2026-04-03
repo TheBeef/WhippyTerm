@@ -101,10 +101,11 @@ typedef enum
 
 typedef enum
 {
-    e_UITC_Bttn_Send,
+    e_UITC_Bttn_SendBlockBuff,
     e_UITC_Bttn_HexEdit,
     e_UITC_Bttn_Clear,
     e_UITC_Bttn_Jump2SendBuffers,
+    e_UITC_Bttn_SendTextLine,
     e_UITC_BttnMAX
 } e_UITC_BttnType;
 
@@ -123,7 +124,9 @@ typedef enum
 
 typedef enum
 {
-    e_UITC_Combox_LineEnd,
+    e_UITC_Combox_BlockSend_LineEnd,
+    e_UITC_Combox_TextSend_LineEnd,
+    e_UITC_Combox_TextSend_Line,
     e_UITC_ComboxMAX
 } e_UITC_ComboxType;
 
@@ -157,6 +160,9 @@ typedef enum
     e_TextDisplayEvent_MouseDoubleClick,
     e_TextDisplayEvent_MouseTripleClick,
     e_TextDisplayEvent_HeadersRearranged,
+    e_TextDisplayEvent_SendText_Enter,
+    e_TextDisplayEvent_SendText_Up,
+    e_TextDisplayEvent_SendText_Down,
     e_TextDisplayEventMAX
 } e_TextDisplayEventType;
 
@@ -254,7 +260,8 @@ void UITC_FreeTextDisplay(t_UITextDisplayCtrl *ctrl);
 void UITC_Reparent(t_UITextDisplayCtrl *ctrl,void *NewParentWidget);
 
 /* Control */
-void UITC_ShowSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible);
+void UITC_ShowBlockSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible);
+void UITC_ShowTextLineSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible);
 void UITC_SendPanelShowHexOrTextInput(t_UITextDisplayCtrl *ctrl,bool ShowText);
 void UITC_SetCursorBlinking(t_UITextDisplayCtrl *ctrl,bool Blinking);
 void UITC_SetCursorPos(t_UITextDisplayCtrl *ctrl,unsigned int x,unsigned int y);

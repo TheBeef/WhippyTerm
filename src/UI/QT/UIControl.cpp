@@ -339,6 +339,31 @@ void UIAddList2ComboBox(t_UIComboBoxCtrl *ComboBox,
     box->blockSignals(false);
 }
 
+void UIGetComboBoxList(t_UIComboBoxCtrl *ComboBox,t_ComboBoxItemListType &List)
+{
+    QComboBox *box=(QComboBox *)ComboBox;
+    struct ComboBoxItem Item;
+    int i;
+
+    try
+    {
+        List.clear();
+
+        for(i=0;i<box->count();i++)
+        {
+            Item.Label=box->itemText(i).toStdString();
+            Item.ID=(uintptr_t)box->itemData(i).toLongLong();
+
+            List.push_back(Item);
+        }
+    }
+    catch(...)
+    {
+        List.clear();
+    }
+}
+
+
 void UIStyleComboBoxItem(t_UIComboBoxCtrl *ComboBox,uintptr_t ID,
         uint32_t Styles)
 {
@@ -394,6 +419,13 @@ uintptr_t UIGetComboBoxSelectedEntry(t_UIComboBoxCtrl *ComboBox)
     return (uintptr_t)box->itemData(CurrentIndex).toULongLong();
 }
 
+void UISetComboBoxSelectedIndex(t_UIComboBoxCtrl *ComboBox,int Index)
+{
+    QComboBox *box=(QComboBox *)ComboBox;
+
+    box->setCurrentIndex(Index);
+}
+
 int UIGetComboBoxSelectedIndex(t_UIComboBoxCtrl *ComboBox)
 {
     QComboBox *box=(QComboBox *)ComboBox;
@@ -402,6 +434,23 @@ int UIGetComboBoxSelectedIndex(t_UIComboBoxCtrl *ComboBox)
     CurrentIndex=box->currentIndex();
 
     return CurrentIndex;
+}
+
+int UIGetComboBoxEntryCount(t_UIComboBoxCtrl *ComboBox)
+{
+    QComboBox *box=(QComboBox *)ComboBox;
+
+    return box->count();
+}
+
+void UIGetComboBoxItemLabel(t_UIComboBoxCtrl *ComboBox,int Index,
+        std::string &Label)
+{
+    QComboBox *box=(QComboBox *)ComboBox;
+    QString QStr;
+
+    QStr=box->itemText(Index);
+    Label=QStr.toStdString();
 }
 
 void UISetComboBoxItemToolTip(t_UIComboBoxCtrl *ComboBox,uintptr_t ID,

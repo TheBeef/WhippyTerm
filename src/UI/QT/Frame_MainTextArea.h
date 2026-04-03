@@ -29,6 +29,10 @@ public:
 //    int WorkingLine;
 
 private slots:
+    void onComboBoxEnterPressed();
+    void onComboBoxUpPressed();
+    void onComboBoxDownPressed();
+
     void on_BlockSendSend_pushButton_clicked();
 
     void on_TextverticalScrollBar_valueChanged(int value);
@@ -108,6 +112,8 @@ private slots:
     void on_actionCopy_To_Send_Buffer_triggered();
     
     void on_Jump2SendBuffers_pushButton_clicked();
+    
+    void on_TextSendSend_pushButton_clicked();
     
 private:
     void SendContextMenuEvent(e_UITD_ContextMenuType EventMenu);

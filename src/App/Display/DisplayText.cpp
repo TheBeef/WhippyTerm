@@ -487,22 +487,30 @@ break;
         case e_TextDisplayEvent_ButtonPress:
             switch(Event->Info.ButtonPress.Bttn)
             {
-                case e_UITC_Bttn_Send:
-                    DoBlock_Send();
+                case e_UITC_Bttn_SendBlockBuff:
                 break;
                 case e_UITC_Bttn_HexEdit:
-                    DoBlock_EditHex();
                 break;
                 case e_UITC_Bttn_Clear:
-                    DoBlock_ClearHexInput();
                 break;
                 case e_UITC_Bttn_Jump2SendBuffers:
-                    DoBlock_Jump2SendBuffers();
+                break;
+                case e_UITC_Bttn_SendTextLine:
+                    DoBlock_SendTextBuffer(false);
                 break;
                 case e_UITC_BttnMAX:
                 default:
                 break;
             }
+        break;
+        case e_TextDisplayEvent_SendText_Enter:
+            DoBlock_SendTextBuffer(true);
+        break;
+        case e_TextDisplayEvent_SendText_Up:
+            DoBlock_TextBufferUpPressed();
+        break;
+        case e_TextDisplayEvent_SendText_Down:
+            DoBlock_TextBufferDownPressed();
         break;
         case e_TextDisplayEvent_RadioButtonPress:
             switch(Event->Info.RadioButton.BttnID)
@@ -890,7 +898,8 @@ void DisplayText::SetBlockDeviceMode(bool On)
     if(TextDisplayCtrl==NULL)
         return;
 
-    UITC_ShowSendPanel(TextDisplayCtrl,On);
+    UITC_ShowBlockSendPanel(TextDisplayCtrl,On);
+    UITC_ShowTextLineSendPanel(TextDisplayCtrl,!On);
 }
 
 /*******************************************************************************
@@ -6421,10 +6430,10 @@ t_UIRadioBttnCtrl *DisplayText::GetSendPanel_TextRadioBttn(void)
 
 /*******************************************************************************
  * NAME:
- *    DisplayText::GetSendPanel_TextInput
+ *    DisplayText::GetSendPanel_BlockBuffer_TextInput
  *
  * SYNOPSIS:
- *    t_UIMuliLineTextInputCtrl *DisplayText::GetSendPanel_TextInput(void);
+ *    t_UIMuliLineTextInputCtrl *DisplayText::GetSendPanel_BlockBuffer_TextInput(void);
  *
  * PARAMETERS:
  *    NONE
@@ -6439,17 +6448,42 @@ t_UIRadioBttnCtrl *DisplayText::GetSendPanel_TextRadioBttn(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIMuliLineTextInputCtrl *DisplayText::GetSendPanel_TextInput(void)
+t_UIMuliLineTextInputCtrl *DisplayText::GetSendPanel_BlockBuffer_TextInput(void)
 {
     return UITC_GetMuliLineTextInputHandle(TextDisplayCtrl,e_UITC_MuliTxt_TextInput);
 }
 
 /*******************************************************************************
  * NAME:
- *    DisplayText::GetSendPanel_LineEndInput
+ *    DisplayText::GetSendPanel_TextSend_TextInput
  *
  * SYNOPSIS:
- *    t_UIComboBoxCtrl *DisplayText::GetSendPanel_LineEndInput(void);
+ *    t_UIComboBoxCtrl *DisplayText::GetSendPanel_TextSend_TextInput(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the text send line input.
+ *
+ * RETURNS:
+ *    A handle to the widget or NULL if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIComboBoxCtrl *DisplayText::GetSendPanel_TextSend_TextInput(void)
+{
+    return UITC_GetComboBoxHandle(TextDisplayCtrl,e_UITC_Combox_TextSend_Line);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::GetDirectSendPanel_LineEndInput
+ *
+ * SYNOPSIS:
+ *    t_UIComboBoxCtrl *DisplayText::GetDirectSendPanel_LineEndInput(void);
  *
  * PARAMETERS:
  *    NONE
@@ -6464,9 +6498,10 @@ t_UIMuliLineTextInputCtrl *DisplayText::GetSendPanel_TextInput(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIComboBoxCtrl *DisplayText::GetSendPanel_LineEndInput(void)
+t_UIComboBoxCtrl *DisplayText::GetDirectSendPanel_LineEndInput(void)
 {
-    return UITC_GetComboBoxHandle(TextDisplayCtrl,e_UITC_Combox_LineEnd);
+    return UITC_GetComboBoxHandle(TextDisplayCtrl,
+            e_UITC_Combox_TextSend_LineEnd);
 }
 
 /*******************************************************************************

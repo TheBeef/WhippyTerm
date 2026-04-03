@@ -55,8 +55,19 @@ static struct ReleaseNote m_Notes_NEXT[]=
             "In the main window below the text cavnas there is a line input"
             " (for binary connections) that lets the user input a line / buffer"
             " and send it.  A new jump to send buffer panel was added."},
-
-
+    {   NOTETYPE_ENHANCEMENT,"Added new standard text input line to text mode",
+            "A new text input panel has been added to text mode.  This lets"
+            " you type in a string (and edit it) before sending it.  This"
+            " text input also supports a history of lines sent as well as"
+            " the line endings to send.\n"
+            "This is usefull if your device has a command prompt but doesn't"
+            " support editing or a command history."},
+    {   NOTETYPE_ENHANCEMENT,"Added direct panel selections to session",
+            "The direct send panel in the bottom of the text and binary"
+            " modes let you select line ending, hex/text mode and such but"
+            " this was not saved, when you restared WhippyTerm it was reset"
+            " to default.  It is now saved in session (all but the contents of"
+            " hex buffer)."},
 };
 
 static struct ReleaseNote m_Notes_Rel2_2_1_0[]=

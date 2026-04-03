@@ -38,6 +38,7 @@
 #include "UI/UIMainWindow.h"
 #include "App/Util/CRCSystem.h"
 #include "App/Util/KeyValue.h"
+#include "App/Util/StandardTypes.h"
 #include <string>
 #include <list>
 
@@ -54,6 +55,9 @@ struct SessionOpenConnection
     bool UseCustomSettings;
     class ConSettings CustomSettings;
     bool WasOpen;
+    t_StringList TextLineHistory;
+    e_DirectSendPanel_LineEndType DirectSendPanelLineEnd;
+    bool DirectSendPanel_InHexMode;
 };
 
 typedef std::list<struct SessionOpenConnection> t_SessionOpenConnectionList;

@@ -62,6 +62,8 @@ static void Session_RegisterAllMembers(struct Session &session,
 static void Session_DefaultSession(struct Session &session);
 static bool RegisterCRCType(class TinyCFG &cfg,const char *XmlName,
         e_CRCType &Data);
+static bool RegisterDirectSendPanelLineEndType(class TinyCFG &cfg,
+        const char *XmlName,e_DirectSendPanel_LineEndType &Data);
 
 /*** VARIABLE DEFINITIONS     ***/
 struct Session g_Session;
@@ -364,6 +366,10 @@ void ScanOpenConnections2Session(void)
 
             Con->GetDisplayName(NewOpenConInfo.Name);
             NewOpenConInfo.WasOpen=Con->GetConnectedStatus();
+            Con->GetDirectSendLineHistory(NewOpenConInfo.TextLineHistory);
+
+            NewOpenConInfo.DirectSendPanelLineEnd=Con->GetDirectPanelLineEnd();
+            NewOpenConInfo.DirectSendPanel_InHexMode=Con->GetDirectPanelInHexMode();
 
             if(!Con->GetConnectionOptions(NewOpenConInfo.Options))
                 throw(0);
@@ -399,12 +405,19 @@ bool SessionOpenConnections_TinyCFG::LoadElement(class TinyCFG *CFG)
     NewData.CustomSettings.RegisterAllMembers(SubCFG);
     SubCFG.EndBlock();
     SubCFG.Register("WasOpen",NewData.WasOpen);
+    SubCFG.Register("TextLineHistory",NewData.TextLineHistory);
+    RegisterDirectSendPanelLineEndType(SubCFG,"DirectSendPanelLineEnd",
+            NewData.DirectSendPanelLineEnd);
+    SubCFG.Register("DirectPanelInHexMode",NewData.DirectSendPanel_InHexMode);
 
     NewData.Name="";
     NewData.URI="";
     NewData.UseCustomSettings=false;
     NewData.CustomSettings.DefaultSettings();
     NewData.WasOpen=false;
+    NewData.DirectSendPanel_InHexMode=true;
+    NewData.TextLineHistory.clear();
+    NewData.DirectSendPanelLineEnd=e_DirectSendPanel_LineEnd_CRLF;
 
     SubCFG.ConnectToParentCFGForReading(CFG);
 
@@ -427,6 +440,9 @@ bool SessionOpenConnections_TinyCFG::SaveElement(class TinyCFG *CFG)
     class TinyCFG SubCFG("Connection");
     class ConSettings CustomSettings;
     bool UseCustomSettings;
+    t_StringList TextLineHistory;
+    e_DirectSendPanel_LineEndType DirectSendPanelLineEnd;
+    bool DirectSendPanel_InHexMode;
 
     SubCFG.Register("Name",Name);
     SubCFG.Register("URI",URI);
@@ -436,6 +452,10 @@ bool SessionOpenConnections_TinyCFG::SaveElement(class TinyCFG *CFG)
     CustomSettings.RegisterAllMembers(SubCFG);
     SubCFG.EndBlock();
     SubCFG.Register("WasOpen",WasOpen);
+    SubCFG.Register("TextLineHistory",TextLineHistory);
+    RegisterDirectSendPanelLineEndType(SubCFG,"DirectSendPanelLineEnd",
+            DirectSendPanelLineEnd);
+    SubCFG.Register("DirectPanelInHexMode",DirectSendPanel_InHexMode);
 
     for(i=Ptr->begin();i!=Ptr->end();i++)
     {
@@ -445,6 +465,9 @@ bool SessionOpenConnections_TinyCFG::SaveElement(class TinyCFG *CFG)
         UseCustomSettings=i->UseCustomSettings;
         CustomSettings=i->CustomSettings;
         WasOpen=i->WasOpen;
+        DirectSendPanel_InHexMode=i->DirectSendPanel_InHexMode;
+        TextLineHistory=i->TextLineHistory;
+        DirectSendPanelLineEnd=i->DirectSendPanelLineEnd;
 
         SubCFG.WriteCFGUsingParentCFG(CFG);
     }
@@ -765,6 +788,91 @@ static bool RegisterCRCType(class TinyCFG &cfg,const char *XmlName,
     try
     {
         NewDataClass=new CRCTypeCFG;
+    }
+    catch(std::bad_alloc const &)
+    {
+        return false;
+    }
+
+    /* Setup the data */
+    NewDataClass->Ptr=&Data;
+    NewDataClass->XmlName=XmlName;
+
+    return cfg.RegisterGeneric(NewDataClass);
+}
+///////////////////
+
+class DirectSendPanelLineEndTypeCFG : public TinyCFGBaseData
+{
+   public:
+      e_DirectSendPanel_LineEndType *Ptr;
+      bool LoadData(string &LoadedString);
+      bool SaveData(string &StoreString);
+};
+bool DirectSendPanelLineEndTypeCFG::LoadData(string &LoadedString)
+{
+    *Ptr=e_DirectSendPanel_LineEnd_CRLF;  /* Defaults to CRLF */
+
+    if(strcmp(LoadedString.c_str(),"CRLF")==0)
+        *Ptr=e_DirectSendPanel_LineEnd_CRLF;
+    if(strcmp(LoadedString.c_str(),"CR")==0)
+        *Ptr=e_DirectSendPanel_LineEnd_CR;
+    if(strcmp(LoadedString.c_str(),"LF")==0)
+        *Ptr=e_DirectSendPanel_LineEnd_LF;
+    if(strcmp(LoadedString.c_str(),"TAB")==0)
+        *Ptr=e_DirectSendPanel_LineEnd_TAB;
+    if(strcmp(LoadedString.c_str(),"ESC")==0)
+        *Ptr=e_DirectSendPanel_LineEnd_ESC;
+    if(strcmp(LoadedString.c_str(),"NULL")==0)
+        *Ptr=e_DirectSendPanel_LineEnd_NULL;
+    if(strcmp(LoadedString.c_str(),"None")==0)
+        *Ptr=e_DirectSendPanel_LineEnd_None;
+
+    return true;
+}
+
+bool DirectSendPanelLineEndTypeCFG::SaveData(string &StoreString)
+{
+    switch(*Ptr)
+    {
+        default:
+        case e_DirectSendPanel_LineEndMAX:
+            StoreString="CRLF";
+        break;
+        case e_DirectSendPanel_LineEnd_CRLF:
+            StoreString="CRLF";
+        break;
+        case e_DirectSendPanel_LineEnd_CR:
+            StoreString="CR";
+        break;
+        case e_DirectSendPanel_LineEnd_LF:
+            StoreString="LF";
+        break;
+        case e_DirectSendPanel_LineEnd_TAB:
+            StoreString="TAB";
+        break;
+        case e_DirectSendPanel_LineEnd_ESC:
+            StoreString="ESC";
+        break;
+        case e_DirectSendPanel_LineEnd_NULL:
+            StoreString="NULL";
+        break;
+        case e_DirectSendPanel_LineEnd_None:
+            StoreString="None";
+        break;
+    }
+    return true;
+}
+
+static bool RegisterDirectSendPanelLineEndType(class TinyCFG &cfg,
+        const char *XmlName,e_DirectSendPanel_LineEndType &Data)
+{
+    class DirectSendPanelLineEndTypeCFG *NewDataClass;
+
+    /* Make a new class to handle this new piece of data */
+    try
+    {
+        NewDataClass=new DirectSendPanelLineEndTypeCFG;
     }
     catch(std::bad_alloc const &)
     {

@@ -39,6 +39,7 @@
 #include "App/MaxSizes.h"
 #include "App/ScriptingSystem.h"
 #include "App/Settings.h"
+#include "App/Util/StandardTypes.h"
 #include "UI/UIClipboard.h"
 #include "UI/UITimers.h"
 #include "UI/UIMainWindow.h"
@@ -503,10 +504,6 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void SetTransmitDelayPerByte(unsigned int ms);
         void SetTransmitDelayPerLine(unsigned int ms);
 
-        bool IsConnectionBinary(void);
-        t_UIContextMenuCtrl *GetContextMenuHandle(e_UITD_ContextMenuType UIObj);
-        t_UIContextSubMenuCtrl *GetContextSubMenuHandle(e_UITD_ContextSubMenuType UIObj);
-
         /* Com Test */
         void SetupComTest(bool Sender,uint32_t PacketLen,uint32_t PacketsCount,uint32_t Delay,uint8_t *PacketData);
         bool StartComTest(void);
@@ -526,8 +523,19 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         struct ScriptHandle *GetScriptHandle(e_SysScriptType TypeOfScript);
         void SetScriptHandle(e_SysScriptType TypeOfScript,struct ScriptHandle *Script);
 
-        /* Conenction info */
+        /* Connection info */
         bool ConnectionBusy(void);
+        bool IsConnectionBinary(void);
+        t_UIContextMenuCtrl *GetContextMenuHandle(e_UITD_ContextMenuType UIObj);
+        t_UIContextSubMenuCtrl *GetContextSubMenuHandle(e_UITD_ContextSubMenuType UIObj);
+
+        /* Direct Send Panel (Text/Binary) */
+        void GetDirectSendLineHistory(t_StringList &RetList);
+        void SetDirectSendLineHistory(t_StringList &TextLineHistory);
+        e_DirectSendPanel_LineEndType GetDirectPanelLineEnd(void);
+        void SetDirectPanelLineEnd(e_DirectSendPanel_LineEndType LineEnd);
+        bool GetDirectPanelInHexMode(void);
+        void SetDirectPanelInHexMode(bool HexMode);
 
         /* Upload / Download */
         void FileTransSetTimeout(uint32_t MSec);

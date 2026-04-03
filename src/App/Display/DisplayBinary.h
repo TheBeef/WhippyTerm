@@ -180,6 +180,7 @@ class DisplayBinary : public DisplayBase
         void RethinkCursor(void);
         void HandleLeftMousePress(bool Down,int x,int y);
         void HandleMouseMove(int x,int y);
+        void SetBlockDeviceMode(bool On);
         void DoScrollTimerTimeout(void);
         void ScrollScreen(int dxpx,int dy);
         void BuildSelOutputAndAppendData(std::string &Dest,const uint8_t *Src,int Bytes,bool AscII);
@@ -187,8 +188,9 @@ class DisplayBinary : public DisplayBase
         t_UITextInputCtrl *GetSendPanel_HexPosInput(void);
         t_UIRadioBttnCtrl *GetSendPanel_HexRadioBttn(void);
         t_UIRadioBttnCtrl *GetSendPanel_TextRadioBttn(void);
-        t_UIMuliLineTextInputCtrl *GetSendPanel_TextInput(void);
-        t_UIComboBoxCtrl *GetSendPanel_LineEndInput(void);
+        t_UIMuliLineTextInputCtrl *GetSendPanel_BlockBuffer_TextInput(void);
+        t_UIComboBoxCtrl *GetDirectSendPanel_LineEndInput(void);
+        t_UIComboBoxCtrl *GetSendPanel_TextSend_TextInput(void);
         void SendPanel_ShowHexOrText(bool Text);
         struct CharStyling *GetColorPtrFromLinePtr(const uint8_t *Line);
         void FillAttrib(struct DisBin_Block *SelBlock,uint32_t Attribs,bool Set);

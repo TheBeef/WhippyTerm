@@ -3164,6 +3164,7 @@ bool Connection::ProcessDisplayEvent(const struct DBEvent *Event)
                     Event->Info->Key.TextPtr,Event->Info->Key.TextLen);
         break;
         case e_DBEvent_SendBlockData:
+        case e_DBEvent_SendTextLine:
             if(WriteData((uint8_t *)Event->Info->BlockSend.Buffer,
                     Event->Info->BlockSend.Len,e_ConWriteSource_BlockSend)!=
                     e_ConWrite_Success)
@@ -9025,4 +9026,169 @@ bool Connection::ConnectionBusy(void)
         return true;
     }
     return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::GetDirectSendLineHistory
+ *
+ * SYNOPSIS:
+ *    void Connection::GetDirectSendLineHistory(t_StringList &RetList);
+ *
+ * PARAMETERS:
+ *    RetList [O] -- This is a list of the command history for the text line
+ *                   input.
+ *
+ * FUNCTION:
+ *    This function gets the text line input history in the direct send panel.
+ *    This works even if the connection is a binary connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    SetDirectSendLineHistory
+ ******************************************************************************/
+void Connection::GetDirectSendLineHistory(t_StringList &RetList)
+{
+    RetList.clear();
+    if(Display!=NULL)
+    {
+        Display->GetTextLineHistory(RetList);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    SetDirectSendLineHistory
+ *
+ * SYNOPSIS:
+ *    void Connection::SetDirectSendLineHistory(t_StringList &TextLineHistory);
+ *
+ * PARAMETERS:
+ *    TextLineHistory [I] -- The new history
+ *
+ * FUNCTION:
+ *    This function sets the history for the text line combobox input in the
+ *    direct send panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    GetTextLineHistory()
+ ******************************************************************************/
+void Connection::SetDirectSendLineHistory(t_StringList &TextLineHistory)
+{
+    if(Display!=NULL)
+    {
+        Display->SetTextLineHistory(TextLineHistory);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::GetDirectPanelLineEnd
+ *
+ * SYNOPSIS:
+ *    e_DirectSendPanel_LineEndType Connection::GetDirectPanelLineEnd(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets what the line ending widget is set to in the direct
+ *    send panel.
+ *
+ * RETURNS:
+ *    The current setting of the widget.
+ *
+ * SEE ALSO:
+ *    SetDirectPanelLineEnd()
+ ******************************************************************************/
+e_DirectSendPanel_LineEndType Connection::GetDirectPanelLineEnd(void)
+{
+    if(Display==NULL)
+        return e_DirectSendPanel_LineEndMAX;
+
+    return Display->GetLineEndings();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::SetDirectPanelLineEnd
+ *
+ * SYNOPSIS:
+ *    void Connection::SetDirectPanelLineEnd(e_DirectSendPanel_LineEndType LineEnd);
+ *
+ * PARAMETERS:
+ *    LineEnd [I] -- What to set the line ending to
+ *
+ * FUNCTION:
+ *    This function sets the line end in the direct send panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::SetDirectPanelLineEnd(e_DirectSendPanel_LineEndType LineEnd)
+{
+    if(Display!=NULL)
+        Display->SetLineEndings(LineEnd);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::GetDirectPanelInHexMode
+ *
+ * SYNOPSIS:
+ *    bool Connection::GetDirectPanelInHexMode(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets what the hex/text mode that the direct send panel.
+ *    This only applies to the block mode (not text).
+ *
+ * RETURNS:
+ *    true -- In hex mode
+ *    false -- In text mode
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool Connection::GetDirectPanelInHexMode(void)
+{
+    if(Display==NULL)
+        return false;
+    return Display->GetBlockSendInHexMode();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::SetDirectPanelInHexMode
+ *
+ * SYNOPSIS:
+ *    void Connection::SetDirectPanelInHexMode(bool HexMode);
+ *
+ * PARAMETERS:
+ *    HexMode [I] -- Change to hex mode (true) or text mode (false).
+ *
+ * FUNCTION:
+ *    This function sets what the hex/text mode that the direct send panel is
+ *    in.  This only applies to the block mode (not text).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::SetDirectPanelInHexMode(bool HexMode)
+{
+    if(Display!=NULL)
+        Display->SetBlockSendInHexMode(HexMode);
 }

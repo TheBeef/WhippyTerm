@@ -371,8 +371,9 @@ class DisplayText : public DisplayBase
         t_UITextInputCtrl *GetSendPanel_HexPosInput(void);
         t_UIRadioBttnCtrl *GetSendPanel_HexRadioBttn(void);
         t_UIRadioBttnCtrl *GetSendPanel_TextRadioBttn(void);
-        t_UIMuliLineTextInputCtrl *GetSendPanel_TextInput(void);
-        t_UIComboBoxCtrl *GetSendPanel_LineEndInput(void);
+        t_UIMuliLineTextInputCtrl *GetSendPanel_BlockBuffer_TextInput(void);
+        t_UIComboBoxCtrl *GetDirectSendPanel_LineEndInput(void);
+        t_UIComboBoxCtrl *GetSendPanel_TextSend_TextInput(void);
         void SendPanel_ShowHexOrText(bool Text);
 
         /* Markers */

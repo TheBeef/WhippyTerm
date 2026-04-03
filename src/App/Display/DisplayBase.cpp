@@ -1312,10 +1312,10 @@ t_UIRadioBttnCtrl *DisplayBase::GetSendPanel_TextRadioBttn(void)
 
 /*******************************************************************************
  * NAME:
- *    DisplayBase::GetSendPanel_TextInput
+ *    DisplayBase::GetSendPanel_BlockBuffer_TextInput
  *
  * SYNOPSIS:
- *    t_UIMuliLineTextInputCtrl *DisplayBase::GetSendPanel_TextInput(void);
+ *    t_UIMuliLineTextInputCtrl *DisplayBase::GetSendPanel_BlockBuffer_TextInput(void);
  *
  * PARAMETERS:
  *    NONE
@@ -1330,17 +1330,42 @@ t_UIRadioBttnCtrl *DisplayBase::GetSendPanel_TextRadioBttn(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIMuliLineTextInputCtrl *DisplayBase::GetSendPanel_TextInput(void)
+t_UIMuliLineTextInputCtrl *DisplayBase::GetSendPanel_BlockBuffer_TextInput(void)
 {
     return NULL;
 }
 
 /*******************************************************************************
  * NAME:
- *    DisplayBase::GetSendPanel_LineEndInput
+ *    DisplayText::GetSendPanel_TextSend_TextInput
  *
  * SYNOPSIS:
- *    t_UIComboBoxCtrl *DisplayBase::GetSendPanel_LineEndInput(void);
+ *    t_UIComboBoxCtrl *DisplayText::GetSendPanel_TextSend_TextInput(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    You must override this function for use with the send panel below the
+ *    display input.  It gets the handle the text send line input.
+ *
+ * RETURNS:
+ *    A handle to the widget or NULL if it is not supported.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+t_UIComboBoxCtrl *DisplayBase::GetSendPanel_TextSend_TextInput(void)
+{
+    return NULL;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetDirectSendPanel_LineEndInput
+ *
+ * SYNOPSIS:
+ *    t_UIComboBoxCtrl *DisplayBase::GetDirectSendPanel_LineEndInput(void);
  *
  * PARAMETERS:
  *    NONE
@@ -1355,7 +1380,7 @@ t_UIMuliLineTextInputCtrl *DisplayBase::GetSendPanel_TextInput(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-t_UIComboBoxCtrl *DisplayBase::GetSendPanel_LineEndInput(void)
+t_UIComboBoxCtrl *DisplayBase::GetDirectSendPanel_LineEndInput(void)
 {
     return NULL;
 }
@@ -1470,10 +1495,10 @@ void DisplayBase::DoBlock_ClearHexInput(void)
 
 /*******************************************************************************
  * NAME:
- *    DisplayBase::DoBlock_Send
+ *    DisplayBase::DoBlock_SendBlockBuffer
  *
  * SYNOPSIS:
- *    void DisplayBase::DoBlock_Send(void);
+ *    void DisplayBase::DoBlock_SendBlockBuffer(void);
  *
  * PARAMETERS:
  *    NONE
@@ -1489,7 +1514,7 @@ void DisplayBase::DoBlock_ClearHexInput(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void DisplayBase::DoBlock_Send(void)
+void DisplayBase::DoBlock_SendBlockBuffer(void)
 {
     union DBEventData Info;
     t_UIRadioBttnCtrl *HexBttn;
@@ -1501,8 +1526,8 @@ void DisplayBase::DoBlock_Send(void)
     int BufferSize;
 
     HexBttn=GetSendPanel_HexRadioBttn();
-    Text2Send=GetSendPanel_TextInput();
-    LineEnd=GetSendPanel_LineEndInput();
+    Text2Send=GetSendPanel_BlockBuffer_TextInput();
+    LineEnd=GetDirectSendPanel_LineEndInput();
 
     if(HexBttn==NULL || Text2Send==NULL || LineEnd==NULL)
         return;
@@ -1523,27 +1548,27 @@ void DisplayBase::DoBlock_Send(void)
         UIGetMuliLineTextCtrlText(Text2Send,String2Send);
         switch(UIGetComboBoxSelectedIndex(LineEnd))
         {
-             case e_Block_LineEnd_CRLF:
+             case e_DirectSendPanel_LineEnd_CRLF:
                 EndOfLine="\r\n";
             break;
-            case e_Block_LineEnd_CR:
+            case e_DirectSendPanel_LineEnd_CR:
                 EndOfLine="\r";
             break;
-            case e_Block_LineEnd_LF:
+            case e_DirectSendPanel_LineEnd_LF:
                 EndOfLine="\n";
             break;
-            case e_Block_LineEnd_TAB:
+            case e_DirectSendPanel_LineEnd_TAB:
                 EndOfLine="\t";
             break;
-            case e_Block_LineEnd_ESC:
+            case e_DirectSendPanel_LineEnd_ESC:
                 EndOfLine="\033";
             break;
-            case e_Block_LineEnd_NULL:
+            case e_DirectSendPanel_LineEnd_NULL:
                 EndOfLine="";
                 EndOfLine.append(1,0);
             break;
-            case e_Block_LineEnd_None:
-            case e_Block_LineEndMAX:
+            case e_DirectSendPanel_LineEnd_None:
+            case e_DirectSendPanel_LineEndMAX:
             default:
                 EndOfLine="";
             break;
@@ -1690,6 +1715,218 @@ void DisplayBase::DoBlock_Jump2SendBuffers(void)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayBase::DoBlock_SendTextBuffer
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::DoBlock_SendTextBuffer(bool EnterMode);
+ *
+ * PARAMETERS:
+ *    EnterMode [I] -- Did the user press the send button (false) or press
+ *                     enter (true)
+ *
+ * FUNCTION:
+ *    This function is called when the user presses the send button in the
+ *    text area at the bottom of the canvas.  It sends the currently entered
+ *    data and the line ending.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::DoBlock_SendTextBuffer(bool EnterMode)
+{
+    union DBEventData Info;
+    t_UIComboBoxCtrl *Text2Send;
+    t_UIComboBoxCtrl *LineEnd;
+    string String2Send;
+    string EndOfLine;
+    string LastStringSent;
+    int HistoryCount;
+
+    Text2Send=GetSendPanel_TextSend_TextInput();
+    LineEnd=GetDirectSendPanel_LineEndInput();
+
+    if(Text2Send==NULL || LineEnd==NULL)
+        return;
+
+    /* We are sending the text */
+    UIGetComboBoxText(Text2Send,String2Send);
+
+    if(String2Send=="")
+        return;
+
+    /* Deal with history */
+    HistoryCount=UIGetComboBoxEntryCount(Text2Send);
+    LastStringSent="";
+    if(HistoryCount>0)
+        UIGetComboBoxItemLabel(Text2Send,HistoryCount-1,LastStringSent);
+
+    if(LastStringSent!=String2Send)
+        UIAddItem2ComboBox(Text2Send,String2Send,0);
+    if(EnterMode)
+    {
+        UISetComboBoxSelectedIndex(Text2Send,-1);
+        UISetComboBoxText(Text2Send,"");
+        TextLineInputPastBottom=true;
+    }
+    else
+    {
+        HistoryCount=UIGetComboBoxEntryCount(Text2Send);
+        UISetComboBoxSelectedIndex(Text2Send,HistoryCount-1);
+        TextLineInputPastBottom=false;
+    }
+
+    switch(UIGetComboBoxSelectedIndex(LineEnd))
+    {
+         case e_DirectSendPanel_LineEnd_CRLF:
+            EndOfLine="\r\n";
+        break;
+        case e_DirectSendPanel_LineEnd_CR:
+            EndOfLine="\r";
+        break;
+        case e_DirectSendPanel_LineEnd_LF:
+            EndOfLine="\n";
+        break;
+        case e_DirectSendPanel_LineEnd_TAB:
+            EndOfLine="\t";
+        break;
+        case e_DirectSendPanel_LineEnd_ESC:
+            EndOfLine="\033";
+        break;
+        case e_DirectSendPanel_LineEnd_NULL:
+            EndOfLine="";
+            EndOfLine.append(1,0);
+        break;
+        case e_DirectSendPanel_LineEnd_None:
+        case e_DirectSendPanel_LineEndMAX:
+        default:
+            EndOfLine="";
+        break;
+    }
+
+    String2Send+=EndOfLine;
+
+    Info.BlockSend.Buffer=(uint8_t *)String2Send.c_str();
+    Info.BlockSend.Len=String2Send.length();
+    SendEvent(e_DBEvent_SendTextLine,&Info);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::DoBlock_TextBufferUpPressed
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::DoBlock_TextBufferUpPressed(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when the up arrow is pressed in the text mode
+ *    line input.  It takes and selects the correct history entry.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DoBlock_TextBufferDownPressed()
+ ******************************************************************************/
+void DisplayBase::DoBlock_TextBufferUpPressed(void)
+{
+    t_UIComboBoxCtrl *Text2Send;
+    int HistoryCount;
+    int CurrentIndex;
+    int NextIndex;
+
+    Text2Send=GetSendPanel_TextSend_TextInput();
+
+    if(Text2Send==NULL)
+        return;
+
+    /* Select the next entry above the current entry */
+    HistoryCount=UIGetComboBoxEntryCount(Text2Send);
+    CurrentIndex=UIGetComboBoxSelectedIndex(Text2Send);
+
+    if(TextLineInputPastBottom)
+    {
+        /* Select the bottom */
+        NextIndex=HistoryCount-1;
+    }
+    else
+    {
+        NextIndex=CurrentIndex-1;
+    }
+    if(NextIndex>=0)
+        UISetComboBoxSelectedIndex(Text2Send,NextIndex);
+
+    TextLineInputPastBottom=false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::DoBlock_TextBufferDownPressed
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::DoBlock_TextBufferUpPressed(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when the up arrow is pressed in the text mode
+ *    line input.  It takes and selects the correct history entry.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    DoBlock_TextBufferUpPressed()
+ ******************************************************************************/
+void DisplayBase::DoBlock_TextBufferDownPressed(void)
+{
+    t_UIComboBoxCtrl *Text2Send;
+    int HistoryCount;
+    int CurrentIndex;
+    int NextIndex;
+    bool ClearInput;
+
+    Text2Send=GetSendPanel_TextSend_TextInput();
+
+    if(Text2Send==NULL)
+        return;
+
+    /* Select the next entry below the current entry */
+    HistoryCount=UIGetComboBoxEntryCount(Text2Send);
+    CurrentIndex=UIGetComboBoxSelectedIndex(Text2Send);
+
+    ClearInput=false;
+    if(TextLineInputPastBottom)
+    {
+        ClearInput=true;
+    }
+    else
+    {
+        NextIndex=CurrentIndex+1;
+        if(NextIndex>=HistoryCount)
+        {
+            NextIndex=-1;
+            ClearInput=true;
+        }
+        UISetComboBoxSelectedIndex(Text2Send,NextIndex);
+        TextLineInputPastBottom=false;
+    }
+
+    if(ClearInput)
+    {
+        UISetComboBoxText(Text2Send,"");
+        TextLineInputPastBottom=true;
+    }
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayBase::Block_SetHexOrTextMode
  *
  * SYNOPSIS:
@@ -1715,7 +1952,7 @@ void DisplayBase::Block_SetHexOrTextMode(bool TextMode)
 
     HexBttn=GetSendPanel_HexRadioBttn();
     TxtBttn=GetSendPanel_TextRadioBttn();
-    LineEndInput=GetSendPanel_LineEndInput();
+    LineEndInput=GetDirectSendPanel_LineEndInput();
 
     if(HexBttn==NULL || TxtBttn==NULL || LineEndInput==NULL)
         return;
@@ -1758,6 +1995,82 @@ void DisplayBase::Block_SetHexOrTextMode(bool TextMode)
  ******************************************************************************/
 void DisplayBase::SendPanel_ShowHexOrText(bool Text)
 {
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetTextLineHistory
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::GetTextLineHistory(t_StringList &RetList);
+ *
+ * PARAMETERS:
+ *    RetList [O] -- The list of history for the text line input.
+ *
+ * FUNCTION:
+ *    This function gets the text line input history.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    SetTextLineHistory()
+ ******************************************************************************/
+void DisplayBase::GetTextLineHistory(t_StringList &RetList)
+{
+    t_UIComboBoxCtrl *Text2Send;
+    t_ComboBoxItemListType List;
+    i_ComboBoxItemListType i;
+
+    Text2Send=GetSendPanel_TextSend_TextInput();
+
+    if(Text2Send==NULL)
+        return;
+
+    UIGetComboBoxList(Text2Send,List);
+
+    /* Replace the current history */
+    for(i=List.begin();i!=List.end();i++)
+        RetList.push_back(i->Label);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetTextLineHistory
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetTextLineHistory(t_StringList &List);
+ *
+ * PARAMETERS:
+ *    List [I] -- The list of history to replace the current history with
+ *
+ * FUNCTION:
+ *    This function changes the text line inputs history.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SetTextLineHistory(t_StringList &List)
+{
+    t_UIComboBoxCtrl *Text2Send;
+    i_StringList i;
+
+    Text2Send=GetSendPanel_TextSend_TextInput();
+
+    if(Text2Send==NULL)
+        return;
+
+    /* Replace the current history */
+    UIClearComboBox(Text2Send);
+    for(i=List.begin();i!=List.end();i++)
+        UIAddItem2ComboBox(Text2Send,*i,0);
+
+    UISetComboBoxSelectedIndex(Text2Send,-1);
+    UISetComboBoxText(Text2Send,"");
+    TextLineInputPastBottom=true;
 }
 
 /*******************************************************************************
@@ -2347,5 +2660,126 @@ void DisplayBase::GetScreenSize(uint32_t *Width,uint32_t *Height)
 {
     *Width=0;
     *Height=0;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetLineEndings
+ *
+ * SYNOPSIS:
+ *    e_DirectSendPanel_LineEndType DisplayBase::GetLineEndings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets what the current line endings setting is in the
+ *    direct panel.
+ *
+ * RETURNS:
+ *    The type of line ending that is being applied when a line is sent.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+e_DirectSendPanel_LineEndType DisplayBase::GetLineEndings(void)
+{
+    t_UIComboBoxCtrl *LineEnd;
+
+    LineEnd=GetDirectSendPanel_LineEndInput();
+
+    if(LineEnd==NULL)
+        return e_DirectSendPanel_LineEndMAX;
+
+    return (e_DirectSendPanel_LineEndType)UIGetComboBoxSelectedIndex(LineEnd);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetLineEndings
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetLineEndings(e_DirectSendPanel_LineEndType LineEnd);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets what the current line endings setting is in the
+ *    direct panel.
+ *
+ * RETURNS:
+ *    The type of line ending that is being applied when a line is sent.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SetLineEndings(e_DirectSendPanel_LineEndType LineEnd)
+{
+    t_UIComboBoxCtrl *LineEndCtrl;
+
+    LineEndCtrl=GetDirectSendPanel_LineEndInput();
+
+    if(LineEndCtrl==NULL)
+        return;
+
+    UISetComboBoxSelectedIndex(LineEndCtrl,(int)LineEnd);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetBlockSendInHexMode
+ *
+ * SYNOPSIS:
+ *    bool DisplayBase::GetBlockSendInHexMode(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function return if the direct send panel's block send hex/text
+ *    button is in hex mode.
+ *
+ * RETURNS:
+ *    true -- In hex mode
+ *    false -- In text mode
+ *
+ * SEE ALSO:
+ *    SetBlockSendInHexMode()
+ ******************************************************************************/
+bool DisplayBase::GetBlockSendInHexMode(void)
+{
+    t_UIRadioBttnCtrl *HexBttn;
+
+    HexBttn=GetSendPanel_HexRadioBttn();
+
+    if(HexBttn==NULL)
+        return false;
+
+    return UIIsRadioBttnSelected(HexBttn);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetBlockSendInHexMode
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetBlockSendInHexMode(bool HexMode);
+ *
+ * PARAMETERS:
+ *    HexMode [I] -- Switch to hex mode (true) or text mode (false)
+ *
+ * FUNCTION:
+ *    This function changes the current mode of the block send.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    GetBlockSendInHexMode()
+ ******************************************************************************/
+void DisplayBase::SetBlockSendInHexMode(bool HexMode)
+{
+    Block_SetHexOrTextMode(!HexMode);
 }
 

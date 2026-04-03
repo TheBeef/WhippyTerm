@@ -104,6 +104,7 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/UI/QT/VerPanelHandle.cpp \
     ../src/UI/QT/HozPanelHandle.cpp \
     ../src/UI/QT/Widget_HeaderQLabel.cpp \
+    ../src/UI/QT/Widget_MainTextArea_LineInput.cpp \
     ../src/UI/QT/Widget_MovableTabWidget.cpp \
     ../src/App/MainApp.cpp \
     ../src/UI/QT/Form_MainWindowAccess.cpp \
@@ -326,6 +327,7 @@ HEADERS  += ../src/UI/QT/Form_MainWindow.h \
     ../src/UI/QT/VerPanelHandle.h \
     ../src/UI/QT/HozPanelHandle.h \
     ../src/UI/QT/Widget_HeaderQLabel.h \
+    ../src/UI/QT/Widget_MainTextArea_LineInput.h \
     ../src/UI/QT/Widget_MovableTabWidget.h \
     ../src/UI/QT/main.h \
     ../src/UI/QT/Widget_CloseBttn.h \

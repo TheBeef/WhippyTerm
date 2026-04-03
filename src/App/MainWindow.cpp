@@ -3257,9 +3257,12 @@ void TheMainWindow::RestoreSessionConnections(void)
         /* Open this connection if it was open before */
         if(sc->WasOpen)
             NewCon->SetConnectedState(true);
+
+        NewCon->SetDirectSendLineHistory(sc->TextLineHistory);
+        NewCon->SetDirectPanelLineEnd(sc->DirectSendPanelLineEnd);
+        NewCon->SetDirectPanelInHexMode(sc->DirectSendPanel_InHexMode);
     }
 }
-
 
 /*******************************************************************************
  * NAME:

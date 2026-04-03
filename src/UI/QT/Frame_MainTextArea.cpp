@@ -51,11 +51,58 @@ Frame_MainTextArea::Frame_MainTextArea(QWidget *parent) :
     ContextMenu->addAction(ui->actionZoom_Out);
 
     ColorBGSubmenu->menuAction()->setVisible(false);
+
+    connect(ui->TextSend_Line_comboBox->lineEdit(), &QLineEdit::returnPressed,
+            this, &Frame_MainTextArea::onComboBoxEnterPressed);
+
+    connect(ui->TextSend_Line_comboBox, &Widget_MainTextArea_LineInput::upPressed,
+            this, &Frame_MainTextArea::onComboBoxUpPressed);
+    connect(ui->TextSend_Line_comboBox, &Widget_MainTextArea_LineInput::downPressed,
+            this, &Frame_MainTextArea::onComboBoxDownPressed);
 }
 
 Frame_MainTextArea::~Frame_MainTextArea()
 {
     delete ui;
+}
+
+void Frame_MainTextArea::onComboBoxEnterPressed()
+{
+    struct TextDisplayEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_SendText_Enter;
+    NewEvent.ID=ID;
+
+    EventHandler(&NewEvent);
+}
+
+void Frame_MainTextArea::onComboBoxUpPressed()
+{
+    struct TextDisplayEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_SendText_Up;
+    NewEvent.ID=ID;
+
+    EventHandler(&NewEvent);
+}
+
+void Frame_MainTextArea::onComboBoxDownPressed()
+{
+    struct TextDisplayEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_SendText_Down;
+    NewEvent.ID=ID;
+
+    EventHandler(&NewEvent);
 }
 
 void Frame_MainTextArea::on_BlockSendSend_pushButton_clicked()
@@ -67,7 +114,7 @@ void Frame_MainTextArea::on_BlockSendSend_pushButton_clicked()
 
     NewEvent.EventType=e_TextDisplayEvent_ButtonPress;
     NewEvent.ID=ID;
-    NewEvent.Info.ButtonPress.Bttn=e_UITC_Bttn_Send;
+    NewEvent.Info.ButtonPress.Bttn=e_UITC_Bttn_SendBlockBuff;
 
     EventHandler(&NewEvent);
 }
@@ -224,7 +271,7 @@ void Frame_MainTextArea::on_BlockSend_LineEnd_comboBox_activated(int index)
 
     ComboxID=ui->BlockSend_LineEnd_comboBox->itemData(index).toULongLong();
     NewEvent.Info.Combox.ID=ComboxID;
-    NewEvent.Info.Combox.BoxID=e_UITC_Combox_LineEnd;
+    NewEvent.Info.Combox.BoxID=e_UITC_Combox_BlockSend_LineEnd;
 
     EventHandler(&NewEvent);
 }
@@ -355,6 +402,21 @@ void Frame_MainTextArea::on_Jump2SendBuffers_pushButton_clicked()
     NewEvent.EventType=e_TextDisplayEvent_ButtonPress;
     NewEvent.ID=ID;
     NewEvent.Info.ButtonPress.Bttn=e_UITC_Bttn_Jump2SendBuffers;
+
+    EventHandler(&NewEvent);
+}
+
+
+void Frame_MainTextArea::on_TextSendSend_pushButton_clicked()
+{
+    struct TextDisplayEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_ButtonPress;
+    NewEvent.ID=ID;
+    NewEvent.Info.ButtonPress.Bttn=e_UITC_Bttn_SendTextLine;
 
     EventHandler(&NewEvent);
 }

@@ -377,12 +377,16 @@ t_UIButtonCtrl *UITC_GetButtonHandle(t_UITextDisplayCtrl *ctrl,e_UITC_BttnType B
 
     switch(Bttn)
     {
-        case e_UITC_Bttn_Send:
+        case e_UITC_Bttn_SendBlockBuff:
             return (t_UIButtonCtrl *)TextDisplay->ui->BlockSendSend_pushButton;
         case e_UITC_Bttn_HexEdit:
             return (t_UIButtonCtrl *)TextDisplay->ui->BlockSendHex_Edit_pushButton;
         case e_UITC_Bttn_Clear:
             return (t_UIButtonCtrl *)TextDisplay->ui->BlockSendHex_Clear_pushButton;
+        case e_UITC_Bttn_Jump2SendBuffers:
+            return (t_UIButtonCtrl *)TextDisplay->ui->Jump2SendBuffers_pushButton;
+        case e_UITC_Bttn_SendTextLine:
+            return (t_UIButtonCtrl *)TextDisplay->ui->TextSendSend_pushButton;
         case e_UITC_BttnMAX:
         default:
             break;
@@ -443,8 +447,12 @@ t_UIComboBoxCtrl *UITC_GetComboBoxHandle(t_UITextDisplayCtrl *ctrl,e_UITC_Combox
 
     switch(UIObj)
     {
-        case e_UITC_Combox_LineEnd:
+        case e_UITC_Combox_BlockSend_LineEnd:
             return (t_UIComboBoxCtrl *)TextDisplay->ui->BlockSend_LineEnd_comboBox;
+        case e_UITC_Combox_TextSend_LineEnd:
+            return (t_UIComboBoxCtrl *)TextDisplay->ui->TextSend_LineEnd_comboBox;
+        case e_UITC_Combox_TextSend_Line:
+            return (t_UIComboBoxCtrl *)TextDisplay->ui->TextSend_Line_comboBox;
         case e_UITC_ComboxMAX:
         default:
             break;
@@ -679,10 +687,10 @@ static bool UITC_MainTextAreaColumnEventHandler(const struct FMTCEvent *Event)
 
 /*******************************************************************************
  * NAME:
- *    UITC_ShowSendPanel
+ *    UITC_ShowBlockSendPanel
  *
  * SYNOPSIS:
- *    void UITC_ShowSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible);
+ *    void UITC_ShowBlockSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible);
  *
  * PARAMETERS:
  *    ctrl [I] -- What control to work on
@@ -690,7 +698,7 @@ static bool UITC_MainTextAreaColumnEventHandler(const struct FMTCEvent *Event)
  *
  * FUNCTION:
  *    This function shows/hides the send panel (the text input with the
- *    send button beside it).
+ *    send button beside it) for block sends.
  *
  * RETURNS:
  *    NONE
@@ -698,11 +706,39 @@ static bool UITC_MainTextAreaColumnEventHandler(const struct FMTCEvent *Event)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void UITC_ShowSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible)
+void UITC_ShowBlockSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
     TextDisplay->ui->BlockSend_GroupBox->setVisible(Visible);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_ShowTextLineSendPanel
+ *
+ * SYNOPSIS:
+ *    void UITC_ShowTextLineSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- What control to work on
+ *    Visible [I] -- true = show the panel, false = hide the panel.
+ *
+ * FUNCTION:
+ *    This function shows/hides the send panel (the text input with the
+ *    send button beside it) for text line sends.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void UITC_ShowTextLineSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    TextDisplay->ui->TextSend_GroupBox->setVisible(Visible);
 }
 
 /*******************************************************************************

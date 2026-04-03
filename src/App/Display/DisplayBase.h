@@ -33,6 +33,7 @@
 
 /***  HEADER FILES TO INCLUDE          ***/
 #include "App/Display/HexDisplayBuffers.h"
+#include "App/Util/StandardTypes.h"
 #include "UI/UIMainWindow.h"
 #include "UI/UITextMainArea.h"
 #include "UI/UITextDefs.h"
@@ -55,7 +56,8 @@ typedef enum
     e_DBEvent_FocusChange,
     e_DBEvent_MouseMouseWheel,
     e_DBEvent_ContextMenu,
-    e_DBEvent_Jump2SendBuffersClicked ,
+    e_DBEvent_Jump2SendBuffersClicked,
+    e_DBEvent_SendTextLine,
     e_DBEventMAX
 } e_DBEventType;
 
@@ -67,18 +69,6 @@ typedef enum
     e_ScreenClear_ScrollWithHR,
     e_ScreenClearMAX
 } e_ScreenClearType;
-
-typedef enum
-{
-    e_Block_LineEnd_CRLF,
-    e_Block_LineEnd_CR,
-    e_Block_LineEnd_LF,
-    e_Block_LineEnd_TAB,
-    e_Block_LineEnd_ESC,
-    e_Block_LineEnd_NULL,
-    e_Block_LineEnd_None,
-    e_Block_LineEndMAX
-} e_Block_LineEndType;
 
 struct DBEventKeyPress
 {
@@ -207,6 +197,12 @@ class DisplayBase
         void SetFont(const std::string &NewFontName,int NewFontSize,bool NewFontBold,bool NewFontItalic);
         void SetupHexInput(t_UIFrameContainerCtrl *ParentWid);
         void FreeHexInput(void);
+        void GetTextLineHistory(t_StringList &RetList);
+        void SetTextLineHistory(t_StringList &List);
+        e_DirectSendPanel_LineEndType GetLineEndings(void);
+        void SetLineEndings(e_DirectSendPanel_LineEndType LineEnd);
+        bool GetBlockSendInHexMode(void);
+        void SetBlockSendInHexMode(bool HexMode);
 
         struct CharStyling CurrentStyle;
 
@@ -219,12 +215,16 @@ class DisplayBase
         virtual t_UITextInputCtrl *GetSendPanel_HexPosInput(void);
         virtual t_UIRadioBttnCtrl *GetSendPanel_HexRadioBttn(void);
         virtual t_UIRadioBttnCtrl *GetSendPanel_TextRadioBttn(void);
-        virtual t_UIMuliLineTextInputCtrl *GetSendPanel_TextInput(void);
-        virtual t_UIComboBoxCtrl *GetSendPanel_LineEndInput(void);
+        virtual t_UIMuliLineTextInputCtrl *GetSendPanel_BlockBuffer_TextInput(void);
+        virtual t_UIComboBoxCtrl *GetDirectSendPanel_LineEndInput(void);
+        virtual t_UIComboBoxCtrl *GetSendPanel_TextSend_TextInput(void);
         virtual void SendPanel_ShowHexOrText(bool Text);
 
         void DoBlock_ClearHexInput(void);
-        void DoBlock_Send(void);
+        void DoBlock_SendBlockBuffer(void);
+        void DoBlock_SendTextBuffer(bool EnterMode);
+        void DoBlock_TextBufferUpPressed(void);
+        void DoBlock_TextBufferDownPressed(void);
         void DoBlock_EditHex(void);
         void DoBlock_RadioBttnChange(void);
         void DoBlock_Jump2SendBuffers(void);
@@ -240,6 +240,9 @@ class DisplayBase
         int FontSize;
         bool FontBold;
         bool FontItalic;
+
+        /* Up/down arrow tracking */
+        bool TextLineInputPastBottom;
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

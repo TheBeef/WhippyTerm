@@ -217,6 +217,9 @@ bool DisplayText::Init(void *ParentWidget,class ConSettings *SettingsPtr,
     {
         struct TextLine FirstLine;
 
+        TextPanelOpen=false;
+        BlockPanelOpen=false;
+
         if(!InitBase(EventCallback,UserData))
             throw(0);
 
@@ -525,6 +528,12 @@ break;
             }
         break;
         case e_TextDisplayEvent_HeadersRearranged:
+        break;
+        case e_TextDisplayEvent_TextCloseBttn:
+            SetTextPanelAvailable(false);
+        break;
+        case e_TextDisplayEvent_BlockCloseBttn:
+            SetBlockPanelAvailable(false);
         break;
         case e_TextDisplayEvent_ComboxChange:
         case e_TextDisplayEventMAX:
@@ -895,11 +904,24 @@ void DisplayText::HandleMouseMove(int x,int y)
  ******************************************************************************/
 void DisplayText::SetBlockDeviceMode(bool On)
 {
+    bool ShowTextPanel;
+    bool ShowBlockPanel;
+
     if(TextDisplayCtrl==NULL)
         return;
 
-    UITC_ShowBlockSendPanel(TextDisplayCtrl,On);
-    UITC_ShowTextLineSendPanel(TextDisplayCtrl,!On);
+    LastBlockDeviceSetToBlock=On;
+
+    ShowBlockPanel=On;
+    ShowTextPanel=!On;
+
+    if(!BlockPanelOpen)
+        ShowBlockPanel=false;
+    if(!TextPanelOpen)
+        ShowTextPanel=false;
+
+    UITC_ShowBlockSendPanel(TextDisplayCtrl,ShowBlockPanel);
+    UITC_ShowTextLineSendPanel(TextDisplayCtrl,ShowTextPanel);
 }
 
 /*******************************************************************************

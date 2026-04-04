@@ -2292,6 +2292,7 @@
     <addaction name="actionLeft_Side_Panel"/>
     <addaction name="actionRight_Side_Panel"/>
     <addaction name="actionBottom_Panel"/>
+    <addaction name="actionSend_Panel"/>
     <addaction name="separator"/>
     <addaction name="menuStop_Watch"/>
     <addaction name="separator"/>
@@ -3943,6 +3944,14 @@
   <action name="actionStop_Script">
    <property name="text">
     <string>Stop Script</string>
+   </property>
+  </action>
+  <action name="actionSend_Panel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Send Panel</string>
    </property>
   </action>
  </widget>

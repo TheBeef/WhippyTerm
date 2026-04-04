@@ -32,6 +32,8 @@ private slots:
     void onComboBoxEnterPressed();
     void onComboBoxUpPressed();
     void onComboBoxDownPressed();
+    void onTextSendCloseBttnClicked(void);
+    void onBlockSendCloseBttnClicked(void);
 
     void on_BlockSendSend_pushButton_clicked();
 

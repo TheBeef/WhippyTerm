@@ -206,6 +206,7 @@ typedef enum
     e_Cmd_SendBufferClearScreenOnSendToggle,
     e_Cmd_RunScript,
     e_Cmd_StopScript,
+    e_Cmd_ToggleSendPanel,
     e_CmdMAX
 } e_CmdType;
 

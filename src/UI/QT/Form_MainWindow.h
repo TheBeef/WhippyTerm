@@ -457,6 +457,8 @@ private slots:
     
     void on_actionStop_Script_triggered();
     
+    void on_actionSend_Panel_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

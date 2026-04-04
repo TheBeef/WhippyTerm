@@ -316,6 +316,8 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionRun_Script;
         case e_UIMWMenu_StopScript:
             return (e_UIMenuCtrl *)realwin->ui->actionStop_Script;
+        case e_UIMWMenu_SendPanel:
+            return (e_UIMenuCtrl *)realwin->ui->actionSend_Panel;
         case e_UIMWMenuMAX:
         default:
         break;

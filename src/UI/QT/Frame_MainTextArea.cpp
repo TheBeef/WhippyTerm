@@ -59,6 +59,12 @@ Frame_MainTextArea::Frame_MainTextArea(QWidget *parent) :
             this, &Frame_MainTextArea::onComboBoxUpPressed);
     connect(ui->TextSend_Line_comboBox, &Widget_MainTextArea_LineInput::downPressed,
             this, &Frame_MainTextArea::onComboBoxDownPressed);
+
+    connect(ui->TextSend_CloseBttn_widget, &MyCloseBttn::Clicked,
+            this, &Frame_MainTextArea::onTextSendCloseBttnClicked);
+
+    connect(ui->BlockSend_CloseBttn_widget, &MyCloseBttn::Clicked,
+            this, &Frame_MainTextArea::onBlockSendCloseBttnClicked);
 }
 
 Frame_MainTextArea::~Frame_MainTextArea()
@@ -421,3 +427,28 @@ void Frame_MainTextArea::on_TextSendSend_pushButton_clicked()
     EventHandler(&NewEvent);
 }
 
+void Frame_MainTextArea::onTextSendCloseBttnClicked(void)
+{
+    struct TextDisplayEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_TextCloseBttn;
+    NewEvent.ID=ID;
+
+    EventHandler(&NewEvent);
+}
+
+void Frame_MainTextArea::onBlockSendCloseBttnClicked(void)
+{
+    struct TextDisplayEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_BlockCloseBttn;
+    NewEvent.ID=ID;
+
+    EventHandler(&NewEvent);
+}

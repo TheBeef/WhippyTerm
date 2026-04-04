@@ -163,6 +163,8 @@ typedef enum
     e_TextDisplayEvent_SendText_Enter,
     e_TextDisplayEvent_SendText_Up,
     e_TextDisplayEvent_SendText_Down,
+    e_TextDisplayEvent_TextCloseBttn,
+    e_TextDisplayEvent_BlockCloseBttn,
     e_TextDisplayEventMAX
 } e_TextDisplayEventType;
 

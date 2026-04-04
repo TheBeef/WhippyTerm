@@ -370,6 +370,7 @@ void ScanOpenConnections2Session(void)
 
             NewOpenConInfo.DirectSendPanelLineEnd=Con->GetDirectPanelLineEnd();
             NewOpenConInfo.DirectSendPanel_InHexMode=Con->GetDirectPanelInHexMode();
+            NewOpenConInfo.DirectSendPanelOpen=Con->IsDirectSendPanelOpen();
 
             if(!Con->GetConnectionOptions(NewOpenConInfo.Options))
                 throw(0);
@@ -409,6 +410,7 @@ bool SessionOpenConnections_TinyCFG::LoadElement(class TinyCFG *CFG)
     RegisterDirectSendPanelLineEndType(SubCFG,"DirectSendPanelLineEnd",
             NewData.DirectSendPanelLineEnd);
     SubCFG.Register("DirectPanelInHexMode",NewData.DirectSendPanel_InHexMode);
+    SubCFG.Register("DirectSendPanelOpen",NewData.DirectSendPanelOpen);
 
     NewData.Name="";
     NewData.URI="";
@@ -416,6 +418,7 @@ bool SessionOpenConnections_TinyCFG::LoadElement(class TinyCFG *CFG)
     NewData.CustomSettings.DefaultSettings();
     NewData.WasOpen=false;
     NewData.DirectSendPanel_InHexMode=true;
+    NewData.DirectSendPanelOpen=false;
     NewData.TextLineHistory.clear();
     NewData.DirectSendPanelLineEnd=e_DirectSendPanel_LineEnd_CRLF;
 
@@ -443,6 +446,7 @@ bool SessionOpenConnections_TinyCFG::SaveElement(class TinyCFG *CFG)
     t_StringList TextLineHistory;
     e_DirectSendPanel_LineEndType DirectSendPanelLineEnd;
     bool DirectSendPanel_InHexMode;
+    bool DirectSendPanelOpen;
 
     SubCFG.Register("Name",Name);
     SubCFG.Register("URI",URI);
@@ -456,6 +460,7 @@ bool SessionOpenConnections_TinyCFG::SaveElement(class TinyCFG *CFG)
     RegisterDirectSendPanelLineEndType(SubCFG,"DirectSendPanelLineEnd",
             DirectSendPanelLineEnd);
     SubCFG.Register("DirectPanelInHexMode",DirectSendPanel_InHexMode);
+    SubCFG.Register("DirectSendPanelOpen",DirectSendPanelOpen);
 
     for(i=Ptr->begin();i!=Ptr->end();i++)
     {
@@ -466,6 +471,7 @@ bool SessionOpenConnections_TinyCFG::SaveElement(class TinyCFG *CFG)
         CustomSettings=i->CustomSettings;
         WasOpen=i->WasOpen;
         DirectSendPanel_InHexMode=i->DirectSendPanel_InHexMode;
+        DirectSendPanelOpen=i->DirectSendPanelOpen;
         TextLineHistory=i->TextLineHistory;
         DirectSendPanelLineEnd=i->DirectSendPanelLineEnd;
 

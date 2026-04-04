@@ -230,6 +230,9 @@ bool DisplayBinary::Init(void *ParentWidget,class ConSettings *SettingsPtr,
     TextDisplayCtrl=NULL;
     try
     {
+        TextPanelOpen=false;
+        BlockPanelOpen=true;
+
         if(!InitBase(EventCallback,UserData))
             throw(0);
 
@@ -692,6 +695,12 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
                 default:
                 break;
             }
+        break;
+        case e_TextDisplayEvent_TextCloseBttn:
+            SetTextPanelAvailable(false);
+        break;
+        case e_TextDisplayEvent_BlockCloseBttn:
+            SetBlockPanelAvailable(false);
         break;
         case e_TextDisplayEvent_HeadersRearranged:
         case e_TextDisplayEvent_ComboxChange:
@@ -1815,11 +1824,24 @@ void DisplayBinary::HandleMouseMove(int x,int y)
  ******************************************************************************/
 void DisplayBinary::SetBlockDeviceMode(bool On)
 {
+    bool ShowTextPanel;
+    bool ShowBlockPanel;
+
     if(TextDisplayCtrl==NULL)
         return;
 
-    UITC_ShowBlockSendPanel(TextDisplayCtrl,!On);
-    UITC_ShowTextLineSendPanel(TextDisplayCtrl,On);
+    LastBlockDeviceSetToBlock=On;
+
+    ShowBlockPanel=!On;
+    ShowTextPanel=On;
+
+    if(!BlockPanelOpen)
+        ShowBlockPanel=false;
+    if(!TextPanelOpen)
+        ShowTextPanel=false;
+
+    UITC_ShowBlockSendPanel(TextDisplayCtrl,ShowBlockPanel);
+    UITC_ShowTextLineSendPanel(TextDisplayCtrl,ShowTextPanel);
 }
 
 /*******************************************************************************

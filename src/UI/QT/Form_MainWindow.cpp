@@ -1929,3 +1929,9 @@ void Form_MainWindow::on_actionStop_Script_triggered()
     DoMenuTriggered(e_UIMWMenu_StopScript);
 }
 
+
+void Form_MainWindow::on_actionSend_Panel_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_SendPanel);
+}
+

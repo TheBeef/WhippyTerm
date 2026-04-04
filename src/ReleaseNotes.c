@@ -68,6 +68,9 @@ static struct ReleaseNote m_Notes_NEXT[]=
             " this was not saved, when you restared WhippyTerm it was reset"
             " to default.  It is now saved in session (all but the contents of"
             " hex buffer)."},
+    {   NOTETYPE_ENHANCEMENT,"Added a close button to the direct send panel",
+            "The direct send panel can be closed.  A close button has been"
+            " added and a menu item under View can open and close the panel."},
 };
 
 static struct ReleaseNote m_Notes_Rel2_2_1_0[]=

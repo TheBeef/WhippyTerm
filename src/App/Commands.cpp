@@ -215,6 +215,7 @@ const char *m_CmdNames[]=
     "SendBufferClearScreenOnSendToggle",    // e_Cmd_SendBufferClearScreenOnSendToggle
     "RunScript",                            // e_Cmd_RunScript
     "StopScript",                           // e_Cmd_StopScript
+    "ToggleSendPanel",                      // e_Cmd_ToggleSendPanel
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -335,6 +336,7 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_SendBufferClearScreenOnSendToggle,// e_UIMWMenu_ClearScreenOnSend
     e_Cmd_RunScript,                        // e_UIMWMenu_RunScript
     e_Cmd_StopScript,                       // e_UIMWMenu_StopScript
+    e_Cmd_ToggleSendPanel,                  // e_UIMWMenu_SendPanel
 };
 
 e_CmdType m_Cmd2SendBufferContextMenuMapping[]=
@@ -866,6 +868,7 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     // e_Cmd_SendBufferClearScreenOnSendToggle
     // e_Cmd_RunScript
     // e_Cmd_StopScript
+    // e_Cmd_ToggleSendPanel
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A

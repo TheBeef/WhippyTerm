@@ -108,6 +108,11 @@ DisplayBase::DisplayBase()
     Settings=&g_Settings.DefaultConSettings;
     HasFocus=false;
 
+    TextPanelOpen=true;
+    BlockPanelOpen=true;
+
+    LastBlockDeviceSetToBlock=false;
+
     HexInput=NULL;
 }
 
@@ -2781,5 +2786,107 @@ bool DisplayBase::GetBlockSendInHexMode(void)
 void DisplayBase::SetBlockSendInHexMode(bool HexMode)
 {
     Block_SetHexOrTextMode(!HexMode);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetTextPanelAvailable
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetTextPanelAvailable(bool Available);
+ *
+ * PARAMETERS:
+ *    Available [I] -- Is this panel visible
+ *
+ * FUNCTION:
+ *    This function sets if the text panel is shown or not.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SetTextPanelAvailable(bool Available)
+{
+    TextPanelOpen=Available;
+    SetBlockDeviceMode(LastBlockDeviceSetToBlock);
+    SendEvent(e_DBEvent_DirectPanelToggled,NULL);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetBlockPanelAvailable
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetBlockPanelAvailable(bool Available);
+ *
+ * PARAMETERS:
+ *    Available [I] -- Is this panel visible
+ *
+ * FUNCTION:
+ *    This function sets if the block panel is shown or not.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::SetBlockPanelAvailable(bool Available)
+{
+    BlockPanelOpen=Available;
+    SetBlockDeviceMode(LastBlockDeviceSetToBlock);
+    SendEvent(e_DBEvent_DirectPanelToggled,NULL);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetTextPanelAvailable
+ *
+ * SYNOPSIS:
+ *    bool DisplayBase::GetTextPanelAvailable(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets the current state of the direct text send panel.
+ *
+ * RETURNS:
+ *    true -- Panel is open
+ *    false -- Panel is closed
+ *
+ * SEE ALSO:
+ *    SetTextPanelAvailable(), GetBlockPanelAvailable()
+ ******************************************************************************/
+bool DisplayBase::GetTextPanelAvailable(void)
+{
+    return TextPanelOpen;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetBlockPanelAvailable
+ *
+ * SYNOPSIS:
+ *    bool DisplayBase::GetBlockPanelAvailable(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets the current state of the direct block send panel.
+ *
+ * RETURNS:
+ *    true -- Panel is open
+ *    false -- Panel is closed
+ *
+ * SEE ALSO:
+ *    SetBlockPanelAvailable(), GetBlockPanelAvailable()
+ ******************************************************************************/
+bool DisplayBase::GetBlockPanelAvailable(void)
+{
+    return BlockPanelOpen;
 }
 

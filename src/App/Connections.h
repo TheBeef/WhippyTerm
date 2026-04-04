@@ -536,6 +536,9 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void SetDirectPanelLineEnd(e_DirectSendPanel_LineEndType LineEnd);
         bool GetDirectPanelInHexMode(void);
         void SetDirectPanelInHexMode(bool HexMode);
+        void DirectSendPanelToggleOpenClosed(void);
+        bool IsDirectSendPanelOpen(void);
+        void SetDirectSendPanelOpen(bool PanelOpen);
 
         /* Upload / Download */
         void FileTransSetTimeout(uint32_t MSec);

@@ -58,6 +58,7 @@ typedef enum
     e_DBEvent_ContextMenu,
     e_DBEvent_Jump2SendBuffersClicked,
     e_DBEvent_SendTextLine,
+    e_DBEvent_DirectPanelToggled,
     e_DBEventMAX
 } e_DBEventType;
 
@@ -195,14 +196,20 @@ class DisplayBase
         class ConSettings *GetCustomSettings(void);
         void GetFont(std::string &CurFontName,int &CurFontSize,bool &CurFontBold,bool &CurFontItalic);
         void SetFont(const std::string &NewFontName,int NewFontSize,bool NewFontBold,bool NewFontItalic);
-        void SetupHexInput(t_UIFrameContainerCtrl *ParentWid);
-        void FreeHexInput(void);
+
+        /* Direct Panel */
         void GetTextLineHistory(t_StringList &RetList);
         void SetTextLineHistory(t_StringList &List);
         e_DirectSendPanel_LineEndType GetLineEndings(void);
         void SetLineEndings(e_DirectSendPanel_LineEndType LineEnd);
         bool GetBlockSendInHexMode(void);
         void SetBlockSendInHexMode(bool HexMode);
+        void SetupHexInput(t_UIFrameContainerCtrl *ParentWid);
+        void FreeHexInput(void);
+        void SetTextPanelAvailable(bool Available);
+        void SetBlockPanelAvailable(bool Available);
+        bool GetTextPanelAvailable(void);
+        bool GetBlockPanelAvailable(void);
 
         struct CharStyling CurrentStyle;
 
@@ -243,6 +250,11 @@ class DisplayBase
 
         /* Up/down arrow tracking */
         bool TextLineInputPastBottom;
+
+        /* Direct Panel */
+        bool TextPanelOpen;
+        bool BlockPanelOpen;
+        bool LastBlockDeviceSetToBlock;
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

@@ -199,6 +199,7 @@ typedef enum
     e_UIMWMenu_ClearScreenOnSend,
     e_UIMWMenu_RunScript,
     e_UIMWMenu_StopScript,
+    e_UIMWMenu_SendPanel,
     e_UIMWMenuMAX
 } e_UIMWMenuType;
 

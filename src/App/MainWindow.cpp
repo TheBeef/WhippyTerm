@@ -1604,6 +1604,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     t_UIContextMenuCtrl *ContextMenu_StyleBGColor_Yellow;
     t_UIContextMenuCtrl *ContextMenu_StyleBGColor_BrightWhite;
     t_UIContextSubMenuCtrl *ContextSubMenu_BGColor;
+    e_UIMenuCtrl *SendPanelToggleMenu;
 
     MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
     ConnectToggle=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_ConnectToggle);
@@ -1615,6 +1616,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     StyleUnderlineTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_StyleUnderline);
     StyleBGColorTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_StyleBGColor);
     StyleStrikeThroughTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_StyleStrikeThrough);
+    SendPanelToggleMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_SendPanel);
 
     CloseTabMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_CloseTab);
     CloseAllMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_CloseAll);
@@ -1755,6 +1757,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(StyleItalics,false);
         UIEnableMenu(StyleUnderline,false);
         UIEnableMenu(StyleStrikeThrough,false);
+        UIEnableMenu(SendPanelToggleMenu,false);
         UIEnableToolbar(ConnectToggle,false);
         UICheckToolbar(ConnectToggle,false);
         UIEnableToolbar(CopyTool,false);
@@ -1803,6 +1806,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(Send_Delete,true);
         UIEnableMenu(Send_Other,true);
         UIEnableMenu(AutoReconnectMenu,true);
+        UIEnableMenu(SendPanelToggleMenu,true);
 
         UIEnableToolbar(ConnectToggle,true);
         UIEnableToolbar(CopyTool,true);
@@ -1976,6 +1980,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
                 Con->IsThisAttribInSelection(TXT_ATTRIB_LINETHROUGHT));
 
         UICheckMenu(AutoReconnectMenu,Con->GetCurrentAutoReopenStatus());
+
+        UICheckMenu(SendPanelToggleMenu,Con->IsDirectSendPanelOpen());
 
         ActivatePanels=true;
     }
@@ -2175,10 +2181,10 @@ void TheMainWindow::ChangeConnectStatus(bool Connected)
 
 /*******************************************************************************
  * NAME:
- *    TheMainMenu::ToggleConnectStatus
+ *    TheMainWindow::ToggleConnectStatus
  *
  * SYNOPSIS:
- *    void TheMainMenu::ToggleConnectStatus(void);
+ *    void TheMainWindow::ToggleConnectStatus(void);
  *
  * PARAMETERS:
  *    NONE
@@ -2417,10 +2423,10 @@ void TheMainWindow::RemoveAllTabPanelControls(void)
 
 /*******************************************************************************
  * NAME:
- *    TheMainMenu::ChangeCurrentConnectionName
+ *    TheMainWindow::ChangeCurrentConnectionName
  *
  * SYNOPSIS:
- *    void TheMainMenu::ChangeCurrentConnectionName(void);
+ *    void TheMainWindow::ChangeCurrentConnectionName(void);
  *
  * PARAMETERS:
  *    NONE
@@ -2455,10 +2461,10 @@ void TheMainWindow::ChangeCurrentConnectionName(void)
 
 /*******************************************************************************
  * NAME:
- *    TheMainMenu::ShowConnectionOptions
+ *    TheMainWindow::ShowConnectionOptions
  *
  * SYNOPSIS:
- *    void TheMainMenu::ShowConnectionOptions(void);
+ *    void TheMainWindow::ShowConnectionOptions(void);
  *
  * PARAMETERS:
  *    NONE
@@ -2500,10 +2506,10 @@ void TheMainWindow::ShowConnectionOptions(void)
 
 /*******************************************************************************
  * NAME:
- *    TheMainMenu::ShowTransmitDelayDialog
+ *    TheMainWindow::ShowTransmitDelayDialog
  *
  * SYNOPSIS:
- *    void TheMainMenu::ShowTransmitDelayDialog(void);
+ *    void TheMainWindow::ShowTransmitDelayDialog(void);
  *
  * PARAMETERS:
  *    NONE
@@ -3261,6 +3267,7 @@ void TheMainWindow::RestoreSessionConnections(void)
         NewCon->SetDirectSendLineHistory(sc->TextLineHistory);
         NewCon->SetDirectPanelLineEnd(sc->DirectSendPanelLineEnd);
         NewCon->SetDirectPanelInHexMode(sc->DirectSendPanel_InHexMode);
+        NewCon->SetDirectSendPanelOpen(sc->DirectSendPanelOpen);
     }
 }
 
@@ -3496,6 +3503,36 @@ bool TheMainWindow::IsPanelVisible(e_MWPanelsType PanelID)
         }
     }
     return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::ToggleSendPanel
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::ToggleSendPanel(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function toggles the send panel on the active connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::ToggleSendPanel(void)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+        TabCon->DirectSendPanelToggleOpenClosed();
 }
 
 /*******************************************************************************
@@ -4025,10 +4062,10 @@ void TheMainWindow::RethinkBridgeMenu(void)
 
 /*******************************************************************************
  * NAME:
- *    TheMainMenu::ShowConnectionSettings
+ *    TheMainWindow::ShowConnectionSettings
  *
  * SYNOPSIS:
- *    void TheMainMenu::ShowConnectionSettings(void);
+ *    void TheMainWindow::ShowConnectionSettings(void);
  *
  * PARAMETERS:
  *    NONE
@@ -4463,6 +4500,8 @@ void TheMainWindow::ApplyTerminalEmulationMenuTriggered(uint64_t ID)
     ActiveCon->SetCustomSettings(ActiveCon->CustomSettings);
 
     SendBuffersPanel.ConnectionChanged();   // The connection may have changed (kinda, the type may have)
+
+    RethinkActiveConnectionUI();
 }
 
 /*******************************************************************************
@@ -5462,6 +5501,34 @@ void TheMainWindow::InformOf_DownloadSettingsChange(class Connection *Con)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::InformOf_SendPanelOpenClose
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::InformOf_SendPanelOpenClose(bool PanelOpen);
+ *
+ * PARAMETERS:
+ *    BufferIndex [I] -- The send buffer that was changed.
+ *
+ * FUNCTION:
+ *    This function is called when there is a change to a send buffer.
+ *    It updates the menu name for this send buffer.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::InformOf_SendPanelOpenClose(bool PanelOpen)
+{
+    e_UIMenuCtrl *SendPanelToggleMenu;
+
+    SendPanelToggleMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_SendPanel);
+    UICheckMenu(SendPanelToggleMenu,PanelOpen);
+}
+
+/*******************************************************************************
+ * NAME:
  *    MW_Event
  *
  * SYNOPSIS:
@@ -5836,6 +5903,7 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_ToggleLeftPanel -- Open or closes the left panel
  *                  e_Cmd_ToggleBottomPanel -- Open or closes the bottom panel
  *                  e_Cmd_ToggleRightPanel -- Open or closes the right panel
+ *                  e_Cmd_ToggleSendPanel -- Open or closes the send panel
  *
  * FUNCTION:
  *    This function executes a command.
@@ -6446,6 +6514,9 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_StopScript:
             StopManualScript();
+        break;
+        case e_Cmd_ToggleSendPanel:
+            ToggleSendPanel();
         break;
 
         case e_CmdMAX:

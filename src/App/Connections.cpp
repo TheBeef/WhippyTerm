@@ -3133,6 +3133,7 @@ bool Connection::GetURI(std::string &URI)
 bool Connection::ProcessDisplayEvent(const struct DBEvent *Event)
 {
     bool AcceptEvent;
+    bool PanelOpen;
 
     AcceptEvent=true;
     switch(Event->EventType)
@@ -3290,6 +3291,16 @@ bool Connection::ProcessDisplayEvent(const struct DBEvent *Event)
                 {
                     MW->ShowPanel(e_MWPanels_Buffers);
                 }
+            }
+        break;
+        case e_DBEvent_DirectPanelToggled:
+            if(MW!=NULL)
+            {
+                if(BinaryConnection)
+                    PanelOpen=Display->GetBlockPanelAvailable();
+                else
+                    PanelOpen=Display->GetTextPanelAvailable();
+                MW->InformOf_SendPanelOpenClose(PanelOpen);
             }
         break;
         case e_DBEventMAX:
@@ -9191,4 +9202,110 @@ void Connection::SetDirectPanelInHexMode(bool HexMode)
 {
     if(Display!=NULL)
         Display->SetBlockSendInHexMode(HexMode);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::DirectSendPanelToggleOpenClosed
+ *
+ * SYNOPSIS:
+ *    void Connection::DirectSendPanelToggleOpenClosed(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function toggles open/close the direct send panel at the bottom of
+ *    the text cavnas.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::DirectSendPanelToggleOpenClosed(void)
+{
+    if(Display==NULL)
+        return;
+
+    if(BinaryConnection)
+    {
+        Display->SetBlockPanelAvailable(!Display->GetBlockPanelAvailable());
+    }
+    else
+    {
+        Display->SetTextPanelAvailable(!Display->GetTextPanelAvailable());
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::SetDirectSendPanelOpen
+ *
+ * SYNOPSIS:
+ *    void Connection::SetDirectSendPanelOpen(bool PanelOpen);
+ *
+ * PARAMETERS:
+ *    PanelOpen [I] -- Is the direct send panel open (true) or closed (false)
+ *
+ * FUNCTION:
+ *    This function sets if the direct send panel is open (visble) or closed
+ *    (hidden).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    IsDirectSendPanelOpen()
+ ******************************************************************************/
+void Connection::SetDirectSendPanelOpen(bool PanelOpen)
+{
+    if(Display==NULL)
+        return;
+
+    if(BinaryConnection)
+    {
+        Display->SetBlockPanelAvailable(PanelOpen);
+    }
+    else
+    {
+        Display->SetTextPanelAvailable(PanelOpen);
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::IsDirectSendPanelOpen
+ *
+ * SYNOPSIS:
+ *    bool Connection::IsDirectSendPanelOpen(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets if the direct send panel is open (visble) or closed
+ *    (hidden).
+ *
+ * RETURNS:
+ *    true -- Panel is open
+ *    false -- Panel is closed
+ *
+ * SEE ALSO:
+ *    DirectSendPanelToggleOpenClosed()
+ ******************************************************************************/
+bool Connection::IsDirectSendPanelOpen(void)
+{
+    if(Display==NULL)
+        return false;
+
+    if(BinaryConnection)
+    {
+        return Display->GetBlockPanelAvailable();
+    }
+    else
+    {
+        return Display->GetTextPanelAvailable();
+    }
 }

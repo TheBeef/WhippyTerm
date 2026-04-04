@@ -58,6 +58,7 @@ struct SessionOpenConnection
     t_StringList TextLineHistory;
     e_DirectSendPanel_LineEndType DirectSendPanelLineEnd;
     bool DirectSendPanel_InHexMode;
+    bool DirectSendPanelOpen;
 };
 
 typedef std::list<struct SessionOpenConnection> t_SessionOpenConnectionList;

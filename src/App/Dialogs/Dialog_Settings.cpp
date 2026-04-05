@@ -523,6 +523,9 @@ bool RunSettingsDialog(class TheMainWindow *MW,
                 e_UIS_TabCtrl_Panel_Page_Capture,false);
         UITabCtrlSetTabVisibleByIndex(PanelTabCtrl,
                 e_UIS_TabCtrl_Panel_Page_HexDisplay,false);
+
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoRescanOnNewConnection);
+        UICheckboxVisible(CheckboxHandle,false);
     }
 
     IODriverList=UIS_GetListViewHandle(e_UIS_ListView_IODriverList);

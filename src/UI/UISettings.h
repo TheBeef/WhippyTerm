@@ -74,6 +74,8 @@ enum e_UIS_Checkbox
     e_UIS_Checkbox_OverrideHR,
     e_UIS_Checkbox_OutGoingHexDisplayEnabled,
     e_UIS_Checkbox_AutoRescanOnNewConnection,
+    e_UIS_Checkbox_SendPanel_ShowTextPanel,
+    e_UIS_Checkbox_SendPanel_ShowBlockPanel,
     e_UIS_CheckboxMAX
 };
 
@@ -164,7 +166,15 @@ enum e_UIS_GroupBox
     e_UIS_GroupBox_Display_ClearScreen,
     e_UIS_GroupBox_Display_MouseCursor,
     e_UIS_GroupBox_Keyboard_CursorKeyToggle,
+    e_UIS_GroupBox_Panel_Bottom,
+    e_UIS_GroupBox_Panel_SendPanel,
     e_UIS_GroupBoxMAX
+};
+
+enum e_UIS_BasicGroupBox
+{
+    e_UIS_BasicGroupBox_Panel_SendPanel,
+    e_UIS_BasicGroupBoxMAX
 };
 
 enum e_UIS_RadioBttns
@@ -278,6 +288,17 @@ enum e_UIS_TabCtrl_Display_Page
     e_UIS_TabCtrl_Display_PageMAX
 };
 
+/* Must match UI */
+enum e_UIS_TabCtrl_Panel_Page
+{
+    e_UIS_TabCtrl_Panel_Page_Panel,
+    e_UIS_TabCtrl_Panel_Page_StopWatch,
+    e_UIS_TabCtrl_Panel_Page_Capture,
+    e_UIS_TabCtrl_Panel_Page_HexDisplay,
+    e_UIS_TabCtrl_Panel_PageMAX
+};
+
+
 /* Events */
 typedef enum
 {
@@ -381,6 +402,7 @@ t_UITabCtrl *UIS_GetTabCtrlHandle(e_UIS_TabCtrl UIObj);
 t_UIComboBoxCtrl *UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox UIObj);
 t_UINumberInput *UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput UIObj);
 t_UIGroupBox *UIS_GetGroupBoxHandle(e_UIS_GroupBox UIObj);
+t_UIBasicGroupBox *UIS_GetBasicGroupBoxHandle(e_UIS_BasicGroupBox UIObj);
 t_UIRadioBttnCtrl *UIS_GetRadioBttnHandle(e_UIS_RadioBttns UIObj);
 t_UIScrollBarCtrl *UIS_GetScrollBarHandle(e_UIS_ScrollBar UIObj);
 t_UITextInputCtrl *UIS_GetTextInputHandle(e_UIS_TextInput UIObj);

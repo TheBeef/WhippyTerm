@@ -71,6 +71,10 @@ static struct ReleaseNote m_Notes_NEXT[]=
     {   NOTETYPE_ENHANCEMENT,"Added a close button to the direct send panel",
             "The direct send panel can be closed.  A close button has been"
             " added and a menu item under View can open and close the panel."},
+    {   NOTETYPE_ENHANCEMENT,"Added settings for if direct send panel should be open or closed",
+            "The settings can now be changed so the direct send panel"
+            " is open or closed for text and binary connections.\n"
+            "This is a per-connection setting."},
 };
 
 static struct ReleaseNote m_Notes_Rel2_2_1_0[]=

@@ -1284,6 +1284,11 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
         cfg.Register("UseCustomSound",UseCustomSound);
         cfg.Register("BeepSound",BeepFilename);
     cfg.EndBlock();
+
+    cfg.StartBlock("SendPanel");
+        cfg.Register("ShowTextPanel",SendPanel_ShowTextPanel);
+        cfg.Register("ShowBlockPanel",SendPanel_ShowBlockPanel);
+    cfg.EndBlock();
 }
 
 void PluginSettings::RegisterAllMembers(class TinyCFG &cfg)
@@ -1524,4 +1529,7 @@ void ConSettings::DefaultSettings(void)
     BeepMode=e_Beep_System;
     UseCustomSound=false;
     BeepFilename="";
+
+    SendPanel_ShowTextPanel=false;
+    SendPanel_ShowBlockPanel=true;
 }

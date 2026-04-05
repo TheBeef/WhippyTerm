@@ -253,10 +253,13 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     t_UIListViewCtrl *KeyBindingsCmdList;
     t_UITabCtrl *TerminalTabCtrl;
     t_UITabCtrl *DisplayTabCtrl;
+    t_UITabCtrl *PanelTabCtrl;
     t_UIGroupBox *Display_Tabs;
     t_UIGroupBox *Display_ClearScreen;
     t_UIGroupBox *Display_MouseCursor;
     t_UIGroupBox *Keyboard_CursorKeyToggle;
+    t_UIGroupBox *Panels_Bottom;
+    t_UIBasicGroupBox *Panels_LeftAndRight;
     e_DS_SettingsArea FirstSelectedArea;
     e_UIS_TabCtrl_Terminal_Page SelectTerminalPage;
     e_UIS_TabCtrl_Display_Page SelectDisplayPage;
@@ -302,9 +305,9 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     if(!m_SettingConSettingsOnly)
     {
         UIAddItem2ListView(AreaList,"IO Drivers",e_DS_SettingsArea_IODriver);
-        UIAddItem2ListView(AreaList,"Panels",e_DS_SettingsArea_Panels);
         UIAddItem2ListView(AreaList,"Startup",e_DS_SettingsArea_Startup);
     }
+    UIAddItem2ListView(AreaList,"Panels",e_DS_SettingsArea_Panels);
     UIAddItem2ListView(AreaList,"Terminal",e_DS_SettingsArea_Terminal);
 
     WindowStartupPos=UIS_GetComboBoxCtrlHandle(e_UIS_ComboBox_WindowStartupPos);
@@ -485,6 +488,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
 
     TerminalTabCtrl=UIS_GetTabCtrlHandle(e_UIS_TabCtrl_Terminal);
     DisplayTabCtrl=UIS_GetTabCtrlHandle(e_UIS_TabCtrl_Display);
+    PanelTabCtrl=UIS_GetTabCtrlHandle(e_UIS_TabCtrl_PanelTab);
 
     /* Hide anything we can't set if we are in Con Settings Only */
     if(m_SettingConSettingsOnly)
@@ -494,6 +498,8 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         Display_ClearScreen=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_ClearScreen);
         Display_MouseCursor=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Display_MouseCursor);
         Keyboard_CursorKeyToggle=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Keyboard_CursorKeyToggle);
+        Panels_Bottom=UIS_GetGroupBoxHandle(e_UIS_GroupBox_Panel_Bottom);
+        Panels_LeftAndRight=UIS_GetBasicGroupBoxHandle(e_UIS_BasicGroupBox_Panel_SendPanel);
 
         UITabCtrlSetTabVisibleByIndex(TerminalTabCtrl,
                 e_UIS_TabCtrl_Terminal_Page_KeyBinding,false);
@@ -507,6 +513,16 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         UIGroupBoxVisible(Display_ClearScreen,false);
         UIGroupBoxVisible(Display_MouseCursor,false);
         UIGroupBoxVisible(Keyboard_CursorKeyToggle,false);
+
+        UIGroupBoxVisible(Panels_Bottom,false);
+        UIBasicGroupBoxVisible(Panels_LeftAndRight,false);
+
+        UITabCtrlSetTabVisibleByIndex(PanelTabCtrl,
+                e_UIS_TabCtrl_Panel_Page_StopWatch,false);
+        UITabCtrlSetTabVisibleByIndex(PanelTabCtrl,
+                e_UIS_TabCtrl_Panel_Page_Capture,false);
+        UITabCtrlSetTabVisibleByIndex(PanelTabCtrl,
+                e_UIS_TabCtrl_Panel_Page_HexDisplay,false);
     }
 
     IODriverList=UIS_GetListViewHandle(e_UIS_ListView_IODriverList);
@@ -696,6 +712,13 @@ static void DS_SetSettingGUI(void)
     /* AutoHidePanel */
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_BottomPanel_AutoHidePanel);
     UICheckCheckbox(CheckboxHandle,g_Settings.BottomPanelAutoHide);
+
+    /* Send Panel */
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_SendPanel_ShowTextPanel);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->SendPanel_ShowTextPanel);
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_SendPanel_ShowBlockPanel);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->SendPanel_ShowBlockPanel);
 
     /* Stop Watch */
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_StopWatchAutoLap);
@@ -1407,6 +1430,17 @@ static void DS_GetSettingsFromGUI(void)
     memcpy(m_SettingConSettings->SysColors,m_DS_SysColors,sizeof(m_DS_SysColors));
     memcpy(m_SettingConSettings->DefaultColors,m_DS_DefaultColors,sizeof(m_DS_DefaultColors));
     memcpy(m_SettingConSettings->SelectionColors,m_DS_SelectionColors,sizeof(m_DS_SelectionColors));
+
+    /********************/
+    /* Panels           */
+    /********************/
+
+    /* Send Panel */
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_SendPanel_ShowTextPanel);
+    m_SettingConSettings->SendPanel_ShowTextPanel=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_SendPanel_ShowBlockPanel);
+    m_SettingConSettings->SendPanel_ShowBlockPanel=UIGetCheckboxCheckStatus(CheckboxHandle);
 }
 
 static void DS_RethinkGUI(void)

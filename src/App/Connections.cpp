@@ -587,9 +587,6 @@ Connection::Connection(const char *URI)
     ComTest.Stats.SendBusyErrors=0;
     ComTest.Stats.LastRxTimeStamp=0;
 
-    if(!ApplySettings())
-        throw("Failed to apply settings to the new connection");
-
     LeftPanelInfo=e_LeftPanelTabMAX;
     RightPanelInfo=e_RightPanelTabMAX;
     BottomPanelInfo=e_BottomPanelTabMAX;
@@ -842,6 +839,9 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
         ApplyTransmitDelayChange();
 
         ResetZoom();
+
+        if(!ApplySettings())
+            throw(0);
     }
     catch(...)
     {
@@ -1003,11 +1003,14 @@ bool Connection::ApplySettings(void)
     {
         /* We need to copy the global settings over our settings */
         CustomSettings=g_Settings.DefaultConSettings;
-        ApplyCustomSettings();
     }
 
+    ApplyCustomSettings();
+
     if(Display!=NULL)
+    {
         Display->ApplySettings();
+    }
 
     RoundedBufferSize=g_Settings.HexDisplayBufferSize;
     if(RoundedBufferSize<16)
@@ -1157,6 +1160,10 @@ void Connection::ApplyCustomSettings(void)
 
     if(Display==NULL)
         return;
+
+    /* Set if the direct send panel is shown */
+    Display->SetBlockPanelAvailable(CustomSettings.SendPanel_ShowBlockPanel);
+    Display->SetTextPanelAvailable(CustomSettings.SendPanel_ShowTextPanel);
 
     /* Switch processor data */
     if(!DPS_ReapplyProcessor2Connection(&ProcessorData,&CustomSettings))

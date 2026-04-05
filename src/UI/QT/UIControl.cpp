@@ -1411,6 +1411,16 @@ void UISetGroupBoxTitle(t_UIGroupBox *GroupBox,const char *Title)
 }
 
 /*************************************/
+/* BasicGroupBoxCtrl                 */
+/*************************************/
+void UIBasicGroupBoxVisible(t_UIBasicGroupBox *GroupBox,bool Show)
+{
+    QWidget *widget=(QWidget *)GroupBox;
+
+    widget->setVisible(Show);
+}
+
+/*************************************/
 /* RadioBttnCtrl                     */
 /*************************************/
 void UISelectRadioBttn(t_UIRadioBttnCtrl *RadioBttn)

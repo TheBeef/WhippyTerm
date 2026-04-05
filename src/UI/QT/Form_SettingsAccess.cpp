@@ -130,6 +130,10 @@ t_UICheckboxCtrl *UIS_GetCheckboxHandle(e_UIS_Checkbox UIObj)
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->OutGoing_HexDisplay_Enable_checkBox;
         case e_UIS_Checkbox_AutoRescanOnNewConnection:
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->AutoRescan_checkBox;
+        case e_UIS_Checkbox_SendPanel_ShowTextPanel:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->SendPanel_ShowText_checkBox;
+        case e_UIS_Checkbox_SendPanel_ShowBlockPanel:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->SendPanel_ShowBlock_checkBox;
         case e_UIS_CheckboxMAX:
         default:
         break;
@@ -320,8 +324,24 @@ t_UIGroupBox *UIS_GetGroupBoxHandle(e_UIS_GroupBox UIObj)
             return (t_UIGroupBox *)g_SettingsDialog->ui->MouseCursor_groupBox;
         case e_UIS_GroupBox_Keyboard_CursorKeyToggle:
             return (t_UIGroupBox *)g_SettingsDialog->ui->CursorKeyToggle_groupBox;
-
+        case e_UIS_GroupBox_Panel_Bottom:
+            return (t_UIGroupBox *)g_SettingsDialog->ui->BottomPanel_groupBox;
+        case e_UIS_GroupBox_Panel_SendPanel:
+            return (t_UIGroupBox *)g_SettingsDialog->ui->SendPanel_groupBox;
         case e_UIS_GroupBoxMAX:
+        default:
+        break;
+    }
+    return NULL;
+}
+
+t_UIBasicGroupBox *UIS_GetBasicGroupBoxHandle(e_UIS_BasicGroupBox UIObj)
+{
+    switch(UIObj)
+    {
+        case e_UIS_BasicGroupBox_Panel_SendPanel:
+            return (t_UIBasicGroupBox *)g_SettingsDialog->ui->LeftAndRightPanel_widget;
+        case e_UIS_BasicGroupBoxMAX:
         default:
         break;
     }

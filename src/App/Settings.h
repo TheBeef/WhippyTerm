@@ -176,6 +176,10 @@ class ConSettings
         /* Plugins */
         t_PluginSettings PluginsSettings;
 
+        /* Send Panel */
+        bool SendPanel_ShowTextPanel;
+        bool SendPanel_ShowBlockPanel;
+
         void RegisterAllMembers(class TinyCFG &cfg);
         void DefaultSettings(void);
         bool RegisterBackspaceKey(class TinyCFG &cfg,const char *XmlName,e_BackspaceKeyType &Data);

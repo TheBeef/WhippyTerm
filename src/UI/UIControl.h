@@ -122,6 +122,9 @@ typedef struct UIToolbarMenu t_UIToolbarMenuCtrl;
 struct UIGroupBox {int x;};
 typedef struct UIGroupBox t_UIGroupBox;
 
+struct UIBasicGroupBox {int x;};
+typedef struct UIBasicGroupBox t_UIBasicGroupBox;
+
 struct UITextInput {int x;};
 typedef struct UITextInputCtrl t_UITextInputCtrl;
 
@@ -316,6 +319,9 @@ bool UIGetToolbarMenuCheckStatus(t_UIToolbarCtrl *Toolbar,t_UIToolbarMenuCtrl *T
 void UIEnableGroupBox(t_UIGroupBox *GroupBox,bool Enable);
 void UIGroupBoxVisible(t_UIGroupBox *GroupBox,bool Show);
 void UISetGroupBoxTitle(t_UIGroupBox *GroupBox,const char *Title);
+
+/* BasicGroupBox */
+void UIBasicGroupBoxVisible(t_UIBasicGroupBox *GroupBox,bool Show);
 
 /* RadioBttnCtrl */
 void UISelectRadioBttn(t_UIRadioBttnCtrl *RadioBttn);

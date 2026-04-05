@@ -517,6 +517,8 @@ bool ScreenClearCFG::LoadData(string &LoadedString)
         *Ptr=e_ScreenClear_ScrollAll;
     if(strcmp(LoadedString.c_str(),"ScrollWithHR")==0)
         *Ptr=e_ScreenClear_ScrollWithHR;
+    if(strcmp(LoadedString.c_str(),"ClearAndBackBuffer")==0)
+        *Ptr=e_ScreenClear_ClearBackBuffer;
 
     return true;
 }
@@ -538,6 +540,9 @@ bool ScreenClearCFG::SaveData(string &StoreString)
         break;
         case e_ScreenClear_ScrollWithHR:
             StoreString="ScrollWithHR";
+        break;
+        case e_ScreenClear_ClearBackBuffer:
+            StoreString="ClearAndBackBuffer";
         break;
     }
     return true;
@@ -1204,6 +1209,8 @@ void Settings::RegisterAllMembers(class TinyCFG &cfg)
 
     cfg.StartBlock("Terminal");
         RegisterScreenClear(cfg,"ScreenClear",ScreenClear);
+        cfg.Register("ScreenClearDoubleClearsBackBuffer",ScreenClearDoubleClearsBackBuffer);
+        cfg.Register("ScreenClearHexPanels",ScreenClearHexPanels);
     cfg.EndBlock();
 
     cfg.StartBlock("IODriver");
@@ -1463,6 +1470,11 @@ void Settings::DefaultSettings(void)
 
     /* Keyboard */
     CursorKeyToggleMode=e_CursorKeyToggleMode_ScrollLock;
+
+    /* Term */
+    ScreenClear=e_ScreenClear_Clear;
+    ScreenClearDoubleClearsBackBuffer=false;
+    ScreenClearHexPanels=false;
 
     /* Default all the plugins */
     DefaultConSettings.PluginsSettings.clear();

@@ -6976,7 +6976,25 @@ void Connection::ClearScreen(void)
     if(Display==NULL)
         return;
 
+    if(g_Settings.ScreenClearDoubleClearsBackBuffer)
+    {
+        if(Display->IsScreenClear())
+        {
+            /* Ok, we need to clear the scroll back buffer as well */
+            Display->ClearScrollBackBuffer();
+        }
+    }
+
     Display->ClearScreen(g_Settings.ScreenClear);
+
+    if(g_Settings.ScreenClearHexPanels)
+    {
+        if(MW!=NULL)
+        {
+            MW->ExeCmd(e_Cmd_HexDisplay_Clear);
+            MW->ExeCmd(e_Cmd_OutGoingHexDisplay_Clear);
+        }
+    }
 }
 
 /*******************************************************************************

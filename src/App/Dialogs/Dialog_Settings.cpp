@@ -661,6 +661,7 @@ static void DS_SetSettingGUI(void)
     t_UIRadioBttnCtrl *ClearScreen_Scroll;
     t_UIRadioBttnCtrl *ClearScreen_ScrollAll;
     t_UIRadioBttnCtrl *ClearScreen_ScrollWithHr;
+    t_UIRadioBttnCtrl *ClearScreen_ScreenAndBackBuffer;
     t_UITextInputCtrl *TxtHandle;
     t_UIColorPreviewCtrl *ColorPreviewHandle;
     i_StringListType CurStr;
@@ -872,6 +873,7 @@ static void DS_SetSettingGUI(void)
     ClearScreen_Scroll=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Scroll);
     ClearScreen_ScrollAll=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollAll);
     ClearScreen_ScrollWithHr=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollWithHR);
+    ClearScreen_ScreenAndBackBuffer=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScreenAndBackBuffer);
     switch(g_Settings.ScreenClear)
     {
         case e_ScreenClear_Clear:
@@ -887,9 +889,18 @@ static void DS_SetSettingGUI(void)
         case e_ScreenClear_ScrollWithHR:
             UISelectRadioBttn(ClearScreen_ScrollWithHr);
         break;
+        case e_ScreenClear_ClearBackBuffer:
+            UISelectRadioBttn(ClearScreen_ScreenAndBackBuffer);
+        break;
         default:
         break;
     }
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ClearScreen_DoubleClear);
+    UICheckCheckbox(CheckboxHandle,g_Settings.ScreenClearDoubleClearsBackBuffer);
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ClearScreen_HexPanels);
+    UICheckCheckbox(CheckboxHandle,g_Settings.ScreenClearHexPanels);
 
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_AutoCROnLF);
     UICheckCheckbox(CheckboxHandle,m_SettingConSettings->AutoCROnLF);
@@ -1235,7 +1246,9 @@ static void DS_GetSettingsFromGUI(void)
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_MouseCursorUseIBeam);
         g_Settings.MouseCursorIBeam=UIGetCheckboxCheckStatus(CheckboxHandle);
 
-        /* Keyboard */
+        /********************/
+        /* Terminal         */
+        /********************/
         RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_Clear);
         if(UIIsRadioBttnSelected(RadioHandle))
             g_Settings.ScreenClear=e_ScreenClear_Clear;
@@ -1248,7 +1261,17 @@ static void DS_GetSettingsFromGUI(void)
         RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScrollWithHR);
         if(UIIsRadioBttnSelected(RadioHandle))
             g_Settings.ScreenClear=e_ScreenClear_ScrollWithHR;
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_Display_ClearScreen_ScreenAndBackBuffer);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.ScreenClear=e_ScreenClear_ClearBackBuffer;
 
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ClearScreen_DoubleClear);
+        g_Settings.ScreenClearDoubleClearsBackBuffer=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ClearScreen_HexPanels);
+        g_Settings.ScreenClearHexPanels=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        /* Keyboard */
         DS_GetSettingsFromGUI_GlobalKeyboardRadioBttns();
 
         /* KeyBindings */
@@ -2936,6 +2959,10 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Checkbox_ConfirmQuit:
                 case e_UIS_Checkbox_OverrideHR:
                 case e_UIS_Checkbox_OutGoingHexDisplayEnabled:
+                case e_UIS_Checkbox_SendPanel_ShowTextPanel:
+                case e_UIS_Checkbox_SendPanel_ShowBlockPanel:
+                case e_UIS_Checkbox_ClearScreen_DoubleClear:
+                case e_UIS_Checkbox_ClearScreen_HexPanels:
                 case e_UIS_CheckboxMAX:
                 default:
                 break;
@@ -2972,6 +2999,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_RadioBttn_Display_ClearScreen_Scroll:
                 case e_UIS_RadioBttn_Display_ClearScreen_ScrollAll:
                 case e_UIS_RadioBttn_Display_ClearScreen_ScrollWithHR:
+                case e_UIS_RadioBttn_Display_ClearScreen_ScreenAndBackBuffer:
                 case e_UIS_RadioBttn_Keyboard_Backspace_BS:
                 case e_UIS_RadioBttn_Keyboard_Backspace_DEL:
                 case e_UIS_RadioBttn_Keyboard_Enter_CR:

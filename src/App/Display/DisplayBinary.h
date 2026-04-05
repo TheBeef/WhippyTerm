@@ -85,10 +85,8 @@ class DisplayBinary : public DisplayBase
         bool Init(void *ParentWidget,class ConSettings *SettingsPtr,bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData);
         void Reparent(void *NewParentWidget);
         void WriteChar(uint8_t *Chr);
-        void ClearScreen(e_ScreenClearType Type);
         void SetCursorStyle(e_TextCursorStyleType Style);
         void SetInFocus(void);
-        void ClearScrollBackBuffer(void);
         void ResetTerm(void);
         t_UIContextMenuCtrl *GetContextMenuHandle(e_UITD_ContextMenuType UIObj);
         t_UIContextSubMenuCtrl *GetContextSubMenuHandle(e_UITD_ContextSubMenuType UIObj);
@@ -123,6 +121,10 @@ class DisplayBinary : public DisplayBase
         void MoveViewEnd(void);
         void MovePageUp(void);
         void MovePageDown(void);
+
+        void ClearScreen(e_ScreenClearType Type);
+        bool IsScreenClear(void);
+        void ClearScrollBackBuffer(void);
 
     private:
         bool InitCalled;

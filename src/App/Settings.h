@@ -235,6 +235,8 @@ class Settings
 
         /***** Terminal *****/
         e_ScreenClearType ScreenClear;
+        bool ScreenClearDoubleClearsBackBuffer;
+        bool ScreenClearHexPanels;
 
         /* Hex Displays */
         uint32_t HexDisplaysFGColor;

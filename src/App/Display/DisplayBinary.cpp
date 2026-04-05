@@ -1327,6 +1327,8 @@ bool DisplayBinary::ScrollBarAtBottom(void)
  *                  e_ScreenClear_ScrollWithHR -- Move any non blank lines to
  *                          the scroll back buffer and then add a marker to
  *                          show that's where the new screen starts.
+ *                  e_ScreenClear_ClearBackBuffer -- Clear the screen and
+ *                          also clear the back buffer.
  *
  * FUNCTION:
  *    This function clears the screen area.
@@ -1360,6 +1362,33 @@ void DisplayBinary::ClearScreen(e_ScreenClearType Type)
     RethinkCursor();
     RedrawScreen();
     UITC_RedrawScreen(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::IsScreenClear
+ *
+ * SYNOPSIS:
+ *    bool DisplayBinary::IsScreenClear(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function checks if the screen is clear or not.
+ *
+ * RETURNS:
+ *    true -- Screen is currently empty
+ *    false -- Screen has something on it
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayBinary::IsScreenClear(void)
+{
+    if(TopOfBufferLine==HexBuffer && BottomOfBufferLine==HexBuffer)
+        return true;
+    return false;
 }
 
 /*******************************************************************************

@@ -75,6 +75,17 @@ static struct ReleaseNote m_Notes_NEXT[]=
             "The settings can now be changed so the direct send panel"
             " is open or closed for text and binary connections.\n"
             "This is a per-connection setting."},
+    {   NOTETYPE_ENHANCEMENT,"Added new clear screen option to clear scroll buffer",
+            "A new clear screen option was added that lets you clear the"
+            " scroll buffer as well when the the screen is cleared."},
+    {   NOTETYPE_ENHANCEMENT,"Added new clear screen option to clear hex panels as well",
+            "When the main display is cleared an option has been added that"
+            " will also clear the incoming and outgoing hex displays."},
+    {   NOTETYPE_ENHANCEMENT,"Added an option to clear the scroll back buffer if clear screen double pressed",
+            "An option was added that will clear the scroll back buffer as well"
+            " as the screen if the clear is pressed 2 times (actually if the"
+            " main screen is already clear then the scroll back is also"
+            " cleared)"},
 };
 
 static struct ReleaseNote m_Notes_Rel2_2_1_0[]=

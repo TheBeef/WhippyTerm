@@ -134,6 +134,11 @@ t_UICheckboxCtrl *UIS_GetCheckboxHandle(e_UIS_Checkbox UIObj)
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->SendPanel_ShowText_checkBox;
         case e_UIS_Checkbox_SendPanel_ShowBlockPanel:
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->SendPanel_ShowBlock_checkBox;
+        case e_UIS_Checkbox_ClearScreen_DoubleClear:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->ClearScreen_DoubleClear_checkBox;
+        case e_UIS_Checkbox_ClearScreen_HexPanels:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->ClearScreen_HexPanels_checkBox;
+
         case e_UIS_CheckboxMAX:
         default:
         break;
@@ -386,6 +391,8 @@ t_UIRadioBttnCtrl *UIS_GetRadioBttnHandle(e_UIS_RadioBttns UIObj)
             return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->ClearScreen_ScrollAll_radioButton;
         case e_UIS_RadioBttn_Display_ClearScreen_ScrollWithHR:
             return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->ClearScreen_ScrollAndHR_radioButton;
+        case e_UIS_RadioBttn_Display_ClearScreen_ScreenAndBackBuffer:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->ClearScreen_ScreenAndBackBuffer_radioButton;
         case e_UIS_RadioBttn_Keyboard_Backspace_BS:
             return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->Backspace_SendBS_radioButton;
         case e_UIS_RadioBttn_Keyboard_Backspace_DEL:

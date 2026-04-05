@@ -4713,6 +4713,8 @@ void DisplayText::SetOverrideMessage(const char *Msg)
  *                  e_ScreenClear_ScrollWithHR -- Move any non blank lines to
  *                          the scroll back buffer and then add a marker to
  *                          show that's where the new screen starts.
+ *                  e_ScreenClear_ClearBackBuffer -- Clear the screen and
+ *                          also clear the back buffer.
  *
  * FUNCTION:
  *    This function clears the screen area.
@@ -4735,6 +4737,7 @@ void DisplayText::ClearScreen(e_ScreenClearType Type)
     {
         switch(Type)
         {
+            case e_ScreenClear_ClearBackBuffer:
             case e_ScreenClear_Clear:
             case e_ScreenClearMAX:
             default:
@@ -4748,6 +4751,8 @@ void DisplayText::ClearScreen(e_ScreenClearType Type)
                     CurLine->Frags.clear();
                     CurLine->EOLGuess=e_DTEOLGuess_Unknown;
                 }
+                if(Type==e_ScreenClear_ClearBackBuffer)
+                    ClearScrollBackBuffer();
             break;
             case e_ScreenClear_Scroll:
             case e_ScreenClear_ScrollWithHR:
@@ -4855,6 +4860,48 @@ void DisplayText::ClearScreen(e_ScreenClearType Type)
     catch(...)
     {
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::IsScreenClear
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::IsScreenClear(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function checks if the screen is clear or not.
+ *
+ * RETURNS:
+ *    true -- Screen is currently empty
+ *    false -- Screen has something on it
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayText::IsScreenClear(void)
+{
+    i_TextLines CurLine;
+    bool Blank;
+
+    Blank=true;
+    for(CurLine=ScreenFirstLine;CurLine!=Lines.end();CurLine++)
+    {
+        if(CurLine->LineBackgroundColor!=
+                Settings->DefaultColors[e_DefaultColors_BG] ||
+                CurLine->LineWidthPx!=0 ||
+                CurLine->EOL!=e_DTEOL_Hard ||
+                !CurLine->Frags.empty() ||
+                CurLine->EOLGuess!=e_DTEOLGuess_Unknown)
+        {
+            Blank=false;
+            break;
+        }
+    }
+    return Blank;
 }
 
 /*******************************************************************************

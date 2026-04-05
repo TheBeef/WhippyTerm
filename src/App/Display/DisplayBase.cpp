@@ -824,6 +824,8 @@ void DisplayBase::SetOverrideMessage(const char *Msg)
  *                  e_ScreenClear_ScrollWithHR -- Move any non blank lines to
  *                          the scroll back buffer and then add a marker to
  *                          show that's where the new screen starts.
+ *                  e_ScreenClear_ClearBackBuffer -- Clear the screen and
+ *                          also clear the back buffer.
  *
  * FUNCTION:
  *    This function clears the screen area.
@@ -837,6 +839,31 @@ void DisplayBase::SetOverrideMessage(const char *Msg)
 void DisplayBase::ClearScreen(e_ScreenClearType Type)
 {
     /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::IsScreenClear
+ *
+ * SYNOPSIS:
+ *    bool DisplayBase::IsScreenClear(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function checks if the screen is clear or not.
+ *
+ * RETURNS:
+ *    true -- Screen is currently empty
+ *    false -- Screen has something on it
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayBase::IsScreenClear(void)
+{
+    return false;
 }
 
 /*******************************************************************************

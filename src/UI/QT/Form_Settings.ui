@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>754</width>
-    <height>654</height>
+    <width>731</width>
+    <height>669</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,7 +36,7 @@
       <item>
        <widget class="QStackedWidget" name="Editing_stackedWidget">
         <property name="currentIndex">
-         <number>2</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="page_Panel">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -13629,6 +13629,13 @@ p, li { white-space: pre-wrap; }
                      </widget>
                     </item>
                     <item>
+                     <widget class="QRadioButton" name="ClearScreen_ScreenAndBackBuffer_radioButton">
+                      <property name="text">
+                       <string>Clear Screen and Scroll Buffer</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
                      <widget class="QRadioButton" name="ClearScreen_Scroll_radioButton">
                       <property name="toolTip">
                        <string>Moves all the non blank lines to the scroll buffer before clearing</string>
@@ -13657,6 +13664,51 @@ p, li { white-space: pre-wrap; }
                        <string>Scroll and Insert Hori&amp;zontal Rule</string>
                       </property>
                      </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QWidget" name="widget_2" native="true">
+                   <layout class="QVBoxLayout" name="verticalLayout_59">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QCheckBox" name="ClearScreen_DoubleClear_checkBox">
+                      <property name="text">
+                       <string>Double Clears Scroll Buffer</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QCheckBox" name="ClearScreen_HexPanels_checkBox">
+                      <property name="text">
+                       <string>Clear Incoming/Outgoing hex panels</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_25">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </spacer>
                     </item>
                    </layout>
                   </widget>

@@ -176,10 +176,7 @@ class DisplayText : public DisplayBase
         void SelectAll(void);
         void ClearSelection(void);
         void SetOverrideMessage(const char *Msg);
-        void ClearScreen(e_ScreenClearType Type);
-        void ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2);
         void ScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dx,int32_t dy);
-        void ClearScrollBackBuffer(void);
         void InsertHorizontalRule(void);
         void ResetTerm(void);
         void SetupCanvas(void);
@@ -214,6 +211,11 @@ class DisplayText : public DisplayBase
         void MoveViewEnd(void);
         void MovePageUp(void);
         void MovePageDown(void);
+
+        void ClearScreen(e_ScreenClearType Type);
+        bool IsScreenClear(void);
+        void ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2);
+        void ClearScrollBackBuffer(void);
 
     private:
         t_UITextDisplayCtrl *TextDisplayCtrl;

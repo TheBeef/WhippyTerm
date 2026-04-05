@@ -68,6 +68,7 @@ typedef enum
     e_ScreenClear_Scroll,
     e_ScreenClear_ScrollAll,
     e_ScreenClear_ScrollWithHR,
+    e_ScreenClear_ClearBackBuffer,
     e_ScreenClearMAX
 } e_ScreenClearType;
 
@@ -156,10 +157,7 @@ class DisplayBase
         virtual void SelectAll(void)=0;
         virtual void ClearSelection(void)=0;
         virtual void SetOverrideMessage(const char *Msg);
-        virtual void ClearScreen(e_ScreenClearType Type);
-        virtual void ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2);
         virtual void ScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dx,int32_t dy);
-        virtual void ClearScrollBackBuffer(void);
         virtual void InsertHorizontalRule(void);
         virtual void ResetTerm(void);
         virtual void SetupCanvas(void);
@@ -191,6 +189,11 @@ class DisplayBase
         virtual void MoveViewEnd(void);
         virtual void MovePageUp(void);
         virtual void MovePageDown(void);
+
+        virtual void ClearScreen(e_ScreenClearType Type);
+        virtual void ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2);
+        virtual void ClearScrollBackBuffer(void);
+        virtual bool IsScreenClear(void);
 
         void SetCustomSettings(class ConSettings *NewSettingsPtr);
         class ConSettings *GetCustomSettings(void);

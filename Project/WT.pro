@@ -239,6 +239,7 @@ win32 {
     ../src/OS/Windows/Directorys.cpp \
     ../src/OS/Windows/OSTime.cpp \
     ../src/OS/Windows/System.cpp \
+    ../src/OS/Windows/Thread.cpp \
     ../src/App/StdPlugins/IODrivers/Comport/OS/Win/Comport_OS_Serial.cpp \
     ../src/App/StdPlugins/IODrivers/TCPClient/src/OS/Win/TCPClient_OS_Socket.cpp \
     ../src/App/StdPlugins/IODrivers/TCPServer/src/OS/Win/TCPServer_OS_Socket.cpp \

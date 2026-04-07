@@ -2396,7 +2396,7 @@ t_IOSystemHandle *IOS_AllocIOSystemHandle(const char *UniqueID,uintptr_t ID)
                 throw(0);
         }
 
-        DrvHandle->DataEventMutex=AllocMutex();
+        DrvHandle->DataEventMutex=UIAllocMutex();
         if(DrvHandle->DataEventMutex==NULL)
             throw(0);
 
@@ -2424,7 +2424,7 @@ t_IOSystemHandle *IOS_AllocIOSystemHandle(const char *UniqueID,uintptr_t ID)
             if(DrvHandle->DataEventQueue!=NULL)
                 free(DrvHandle->DataEventQueue);
             if(DrvHandle->DataEventMutex!=NULL)
-                FreeMutex(DrvHandle->DataEventMutex);
+                UIFreeMutex(DrvHandle->DataEventMutex);
             if(DrvHandle->DriverData!=NULL)
                 drv->API.FreeHandle(DrvHandle->DriverData);
             delete DrvHandle;
@@ -2471,7 +2471,7 @@ void IOS_FreeIOSystemHandle(t_IOSystemHandle *Handle)
     free(DrvHandle->DataEventQueue);
     DrvHandle->DataEventQueue=NULL;
 
-    FreeMutex(DrvHandle->DataEventMutex);
+    UIFreeMutex(DrvHandle->DataEventMutex);
     DrvHandle->DataEventMutex=NULL;
 
     if(DrvHandle->IOdrv->API.FreeHandle!=NULL)
@@ -2858,7 +2858,7 @@ void IOS_DrvDataEvent(t_IOSystemHandle *IOHandle,int Code)
 
     /* Lock the mutex (to make sure the other does look at anything
        as we change the world) */
-    LockMutex(DrvHandle->DataEventMutex);
+    UILockMutex(DrvHandle->DataEventMutex);
 
     /* Bytes Available is special in that we don't queue it as we don't
        want more than 1 of these going at a time */
@@ -2866,7 +2866,7 @@ void IOS_DrvDataEvent(t_IOSystemHandle *IOHandle,int Code)
     {
         SavedDataAvailable=DrvHandle->DataAvailable;
         DrvHandle->DataAvailable=true;
-        UnLockMutex(DrvHandle->DataEventMutex);
+        UIUnLockMutex(DrvHandle->DataEventMutex);
 
         if(SavedDataAvailable==false)
         {
@@ -2884,7 +2884,7 @@ void IOS_DrvDataEvent(t_IOSystemHandle *IOHandle,int Code)
     if(NewHead==DrvHandle->DataEventTail)
     {
         /* Out of space, fail */
-        UnLockMutex(DrvHandle->DataEventMutex);
+        UIUnLockMutex(DrvHandle->DataEventMutex);
         return;
     }
 
@@ -2892,7 +2892,7 @@ void IOS_DrvDataEvent(t_IOSystemHandle *IOHandle,int Code)
             (e_DataEventCodeType)Code;
     DrvHandle->DataEventHead=NewHead;
 
-    UnLockMutex(DrvHandle->DataEventMutex);
+    UIUnLockMutex(DrvHandle->DataEventMutex);
 
     FlagDrvDataEvent(IOHandle);
 }
@@ -2958,7 +2958,7 @@ void IOS_InformOfNewDataEvent(t_IOSystemHandle *IOHandle)
 
         /* Lock the mutex (to make sure the other does look at anything
            as we change the world) */
-        LockMutex(DrvHandle->DataEventMutex);
+        UILockMutex(DrvHandle->DataEventMutex);
 
         DataAvailable=DrvHandle->DataAvailable;
         DrvHandle->DataAvailable=false;
@@ -2971,7 +2971,7 @@ void IOS_InformOfNewDataEvent(t_IOSystemHandle *IOHandle)
             if(DrvHandle->DataEventTail>=DATAEVENTQUEUE_SIZE)
                 DrvHandle->DataEventTail=0;
         }
-        UnLockMutex(DrvHandle->DataEventMutex);
+        UIUnLockMutex(DrvHandle->DataEventMutex);
 
         /* Ok, now process what we just pulled off */
         if(DataAvailable)

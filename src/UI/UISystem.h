@@ -58,10 +58,10 @@ struct UI_RPCData
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
 void FlagDrvDataEvent(t_IOSystemHandle *IOHandle);
 void UI_ProcessAllPendingUIEvents(void);
-t_UIMutex *AllocMutex(void);
-void FreeMutex(t_UIMutex *Mut);
-void LockMutex(t_UIMutex *Mut);
-void UnLockMutex(t_UIMutex *Mut);
+t_UIMutex *UIAllocMutex(void);
+void UIFreeMutex(t_UIMutex *Mut);
+void UILockMutex(t_UIMutex *Mut);
+void UIUnLockMutex(t_UIMutex *Mut);
 uint64_t GetMSCounter(void);
 void UI_GotoWebPage(const char *WebSite);
 int caseinsensitivestrcmp(const char *a,const char *b);

@@ -295,7 +295,7 @@ void UI_ProcessAllPendingUIEvents(void)
     g_MainApp->processEvents();
 }
 
-t_UIMutex *AllocMutex(void)
+t_UIMutex *UIAllocMutex(void)
 {
     QMutex *NewMutex;
     try
@@ -309,21 +309,21 @@ t_UIMutex *AllocMutex(void)
     return (t_UIMutex *)NewMutex;
 }
 
-void FreeMutex(t_UIMutex *Mut)
+void UIFreeMutex(t_UIMutex *Mut)
 {
     QMutex *TheMutex=(QMutex *)Mut;
 
     delete TheMutex;
 }
 
-void LockMutex(t_UIMutex *Mut)
+void UILockMutex(t_UIMutex *Mut)
 {
     QMutex *TheMutex=(QMutex *)Mut;
 
     TheMutex->lock();
 }
 
-void UnLockMutex(t_UIMutex *Mut)
+void UIUnLockMutex(t_UIMutex *Mut)
 {
     QMutex *TheMutex=(QMutex *)Mut;
 

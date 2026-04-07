@@ -41,6 +41,7 @@ Bugs:
 #include "App/ScriptingSystem.h"
 #include "App/Session.h"
 #include "OS/OSTime.h"
+#include "OS/Thread.h"
 #include "PluginSDK/ScriptingEngine.h"
 #include "UI/UIAsk.h"
 #include "UI/UISystem.h"
@@ -50,7 +51,6 @@ Bugs:
 #include <queue>
 #include <string.h>
 #include <stdio.h>
-#include <threads.h>
 
 using namespace std;
 
@@ -74,7 +74,7 @@ struct ScriptEngine
     string FileExt;
     struct ScriptingEngineAPI API;
     bool InitBeenCalled;
-    mtx_t UseCountMutex;
+    struct ThreadMutex *UseCountMutex;
     int UseCount;   // How many scripts are running (++ on start, -- on end)
 };
 typedef list<struct ScriptEngine> t_ScriptEngineType;
@@ -95,7 +95,7 @@ struct ScriptInComingQueue
 struct ScriptEngineInstance
 {
     /* Thread access only */
-    thrd_t Thread;
+    struct ThreadHandle *Thread;
     char *FileContents;
     char *StartOfScript;
     bool AbortedScript;
@@ -107,7 +107,7 @@ struct ScriptEngineInstance
     struct ScriptInComingQueue InComingQueue;
 
     /* Shared */
-    mtx_t SharedMutex;
+    struct ThreadMutex *SharedMutex;
     volatile bool MainThreadFreed;   // If both of these are set to true then we should free the instance (thread or main)
     volatile bool ThreadFreed;
     /* Non-Mutexed Shared */
@@ -338,7 +338,7 @@ static int Scripting_DisableKeyboardSendCB(struct UI_RPCData *RPCData);
 static int Scripting_DisableScreenDisplayCB(struct UI_RPCData *RPCData);
 static int Scripting_ExeRegisteredKeywordCB(struct UI_RPCData *RPCData);
 
-static int RunScriptThread(void *data);
+static void RunScriptThread(void *data);
 
 /*** VARIABLE DEFINITIONS     ***/
 struct ScriptingSystem_API g_ScriptingAPI=
@@ -380,7 +380,7 @@ struct ScriptingSystem_API g_ScriptingAPI=
 };
 static t_ScriptEngineType m_ScriptEngineList;
 t_ScriptCommandList m_ScriptCommandList;
-mtx_t m_ScriptCommandListMutex;
+struct ThreadMutex *m_ScriptCommandListMutex;
 
 /*******************************************************************************
  * NAME:
@@ -630,7 +630,8 @@ PG_BOOL Scripting_RegisterScriptingEngine(const struct ScriptingEngineInfo *Info
         NewEntry->FileExt=Info->FileExt;
 
         NewEntry->UseCount=0;
-        if(mtx_init(&NewEntry->UseCountMutex,mtx_plain)!=thrd_success)
+        NewEntry->UseCountMutex=AllocMutex();
+        if(NewEntry->UseCountMutex==NULL)
             throw(0);
         MutexAllocated=true;
 
@@ -644,7 +645,7 @@ PG_BOOL Scripting_RegisterScriptingEngine(const struct ScriptingEngineInfo *Info
     {
         if(MutexAllocated)
         {
-            mtx_destroy(&NewEntry->UseCountMutex);
+            FreeMutex(NewEntry->UseCountMutex);
         }
         if(NewEntry!=NULL)
         {
@@ -2002,7 +2003,8 @@ static void Scripting_FreeExeRegisteredKeywordRetStr(t_ScriptingEngineInstType *
  ******************************************************************************/
 bool Scripting_Init(void)
 {
-    if(mtx_init(&m_ScriptCommandListMutex,mtx_plain)!=thrd_success)
+    m_ScriptCommandListMutex=AllocMutex();
+    if(m_ScriptCommandListMutex==NULL)
     {
         UIAsk("Error","Failed to init mutex for scripting system",
                 e_AskBox_Error,e_AskBttns_Ok);
@@ -2085,7 +2087,7 @@ void Scripting_InitPlugins(void)
  ******************************************************************************/
 void Scripting_Shutdown(void)
 {
-    mtx_destroy(&m_ScriptCommandListMutex);
+    FreeMutex(m_ScriptCommandListMutex);
 }
 
 /*******************************************************************************
@@ -2121,9 +2123,9 @@ bool Scripting_CheckifPluginCanUninstall(const char *PluginIDStr)
     if(se!=m_ScriptEngineList.end())
     {
         /* Make sure we don't have any scripts running */
-        mtx_lock(&se->UseCountMutex);
+        LockMutex(se->UseCountMutex);
         UseCountCopy=se->UseCount;
-        mtx_unlock(&se->UseCountMutex);
+        UnLockMutex(se->UseCountMutex);
     }
     if(UseCountCopy>0)
         return false;
@@ -2191,13 +2193,13 @@ void Scripting_InformOfPluginUninstalled(const char *PluginIDStr)
     if(se!=m_ScriptEngineList.end())
     {
         /* Make sure we don't have any scripts running */
-        mtx_lock(&se->UseCountMutex);
+        LockMutex(se->UseCountMutex);
         UseCountCopy=se->UseCount;
-        mtx_unlock(&se->UseCountMutex);
+        UnLockMutex(se->UseCountMutex);
         if(UseCountCopy==0)
         {
             UnRegisterPluginWithSystem(PluginIDStr);
-            mtx_destroy(&se->UseCountMutex);
+            FreeMutex(se->UseCountMutex);
             m_ScriptEngineList.erase(se);
         }
     }
@@ -2388,7 +2390,9 @@ struct ScriptHandle *Scripting_LoadScript(const char *Filename)
 
         /* Shared setup */
         NewSEInstance->ScriptEngine=&*se;
-        if(mtx_init(&NewSEInstance->SharedMutex,mtx_plain)!=thrd_success)
+
+        NewSEInstance->SharedMutex=AllocMutex();
+        if(NewSEInstance->SharedMutex==NULL)
             throw(0);
         MutexAllocated=true;
         NewSEInstance->MainThreadFreed=false;
@@ -2398,29 +2402,28 @@ struct ScriptHandle *Scripting_LoadScript(const char *Filename)
         /* Start the thread for this instance and hand the instance over to
            it. */
         /* Up the UseCount, the thread will -- it */
-        mtx_lock(&se->UseCountMutex);
+        LockMutex(se->UseCountMutex);
         se->UseCount++;
-        mtx_unlock(&se->UseCountMutex);
+        UnLockMutex(se->UseCountMutex);
 
-        if(thrd_create(&NewSEInstance->Thread,RunScriptThread,
-                (void *)NewSEInstance))
+        NewSEInstance->Thread=StartThread(RunScriptThread,
+                (void *)NewSEInstance);
+        if(NewSEInstance->Thread==NULL)
         {
             /* Thread never started, so -- it our self */
-            mtx_lock(&se->UseCountMutex);
+            LockMutex(se->UseCountMutex);
             se->UseCount--;
-            mtx_unlock(&se->UseCountMutex);
+            UnLockMutex(se->UseCountMutex);
 
             throw("Failed to start scripting engine");
         }
-
-        thrd_detach(NewSEInstance->Thread);
 
         RetValue=(struct ScriptHandle *)NewSEInstance;
     }
     catch(const char *Msg)
     {
         if(MutexAllocated)
-            mtx_destroy(&NewSEInstance->SharedMutex);
+            FreeMutex(NewSEInstance->SharedMutex);
         if(NewSEInstance!=NULL)
         {
             if(NewSEInstance->InComingQueue.Queue!=NULL)
@@ -2545,10 +2548,10 @@ void Scripting_FreeScriptHandle(struct ScriptHandle *Handle)
     bool FreeInstance;
 
     /* Mark the instance as freed */
-    mtx_lock(&SEInstance->SharedMutex);
+    LockMutex(SEInstance->SharedMutex);
     FreeInstance=SEInstance->ThreadFreed;
     SEInstance->MainThreadFreed=true;
-    mtx_unlock(&SEInstance->SharedMutex);
+    UnLockMutex(SEInstance->SharedMutex);
 
     /* See if main thread is also free (if so free the memory) */
     if(FreeInstance)
@@ -3358,7 +3361,7 @@ int Scripting_ExeRegisteredKeywordCB(struct UI_RPCData *RPCData)
     ExeFn=NULL;
     UserData=NULL;
 
-    mtx_lock(&m_ScriptCommandListMutex);
+    LockMutex(m_ScriptCommandListMutex);
     /* Find this command */
     for(cmd=m_ScriptCommandList.begin();cmd!=m_ScriptCommandList.end();
             cmd++)
@@ -3374,7 +3377,7 @@ int Scripting_ExeRegisteredKeywordCB(struct UI_RPCData *RPCData)
         ExeFn=cmd->ExeFn;
         UserData=cmd->UserData;
     }
-    mtx_unlock(&m_ScriptCommandListMutex);
+    UnLockMutex(m_ScriptCommandListMutex);
 
     /* Call the callback for this command */
     if(ExeFn!=NULL)
@@ -3387,7 +3390,7 @@ int Scripting_ExeRegisteredKeywordCB(struct UI_RPCData *RPCData)
     return RetValue;
 }
 
-static int RunScriptThread(void *data)
+static void RunScriptThread(void *data)
 {
     struct ScriptEngineInstance *SEInstance=(struct ScriptEngineInstance *)data;
     struct ScriptingEngineAPI *API;
@@ -3407,7 +3410,7 @@ static int RunScriptThread(void *data)
             throw("Failed to allocate context for script");
 
         /* ` */
-        mtx_lock(&m_ScriptCommandListMutex);
+        LockMutex(m_ScriptCommandListMutex);
         for(cmd=m_ScriptCommandList.begin();cmd!=m_ScriptCommandList.end();
                 cmd++)
         {
@@ -3420,7 +3423,7 @@ static int RunScriptThread(void *data)
                         cmd->ScriptArgs,cmd->ArgCount);
             }
         }
-        mtx_unlock(&m_ScriptCommandListMutex);
+        UnLockMutex(m_ScriptCommandListMutex);
 
         if(!API->LoadScriptFromString(SEInstance->Context,
                 SEInstance->StartOfScript))
@@ -3467,18 +3470,18 @@ static int RunScriptThread(void *data)
     DoGenericRPC2MainThread(&RPCData);
 
     /* We are done, remove us from the use count */
-    mtx_lock(&SEInstance->ScriptEngine->UseCountMutex);
+    LockMutex(SEInstance->ScriptEngine->UseCountMutex);
     SEInstance->ScriptEngine->UseCount--;
-    mtx_unlock(&SEInstance->ScriptEngine->UseCountMutex);
+    UnLockMutex(SEInstance->ScriptEngine->UseCountMutex);
 
     if(SEInstance->Context!=NULL)
         API->FreeContext(SEInstance->Context);
 
     /* Mark the instance as freed */
-    mtx_lock(&SEInstance->SharedMutex);
+    LockMutex(SEInstance->SharedMutex);
     SEInstance->ThreadFreed=true;
     FreeInstance=SEInstance->MainThreadFreed;
-    mtx_unlock(&SEInstance->SharedMutex);
+    UnLockMutex(SEInstance->SharedMutex);
 
     /* See if main thread is also free (if so free the memory) */
     if(FreeInstance)
@@ -3486,8 +3489,6 @@ static int RunScriptThread(void *data)
         free(SEInstance->InComingQueue.Queue);
         delete SEInstance;
     }
-
-    return 0;
 }
 
 /*******************************************************************************
@@ -3543,7 +3544,7 @@ bool Scripting_AddNewCMD(const char *NameSpace,const char *Name,
     NewSCommand.ExeFn=ExeFn;
     NewSCommand.UserData=UserData;
 
-    mtx_lock(&m_ScriptCommandListMutex);
+    LockMutex(m_ScriptCommandListMutex);
     /* Make sure we don't already have a command registered under this name */
     for(cmd=m_ScriptCommandList.begin();cmd!=m_ScriptCommandList.end();
             cmd++)
@@ -3557,11 +3558,11 @@ bool Scripting_AddNewCMD(const char *NameSpace,const char *Name,
     if(cmd!=m_ScriptCommandList.end())
     {
         /* Already in use */
-        mtx_unlock(&m_ScriptCommandListMutex);
+        UnLockMutex(m_ScriptCommandListMutex);
         return false;
     }
     m_ScriptCommandList.push_back(NewSCommand);
-    mtx_unlock(&m_ScriptCommandListMutex);
+    UnLockMutex(m_ScriptCommandListMutex);
 
     return true;
 }

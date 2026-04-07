@@ -257,7 +257,7 @@ linux {
 # Linux
     contains(QMAKESPEC, .*aarch64.*):{
         message("Building RPI")
-        LIBS+=-ldl -lX11
+        LIBS+=-ldl -lX11 -lpthread
 
          SOURCES += \
         ../src/OS/RPI/FilePaths.cpp \
@@ -270,13 +270,14 @@ linux {
 
     }else{
         message("Building Linux")
-        LIBS+=-ldl -lX11
+        LIBS+=-ldl -lX11 -lpthread
 
          SOURCES += \
         ../src/OS/Linux/FilePaths.cpp \
         ../src/OS/Linux/Directorys.cpp \
         ../src/OS/Linux/OSTime.cpp \
         ../src/OS/Linux/System.cpp \
+        ../src/OS/Linux/Thread.cpp \
         ../src/App/StdPlugins/Scrips/WhippyTermBasic/src/OS/Linux/WTB_OSTime.cpp \
         ../src/App/StdPlugins/Scrips/WhippyTermBasic/src/OS/Linux/WTB_OSFile.cpp \
 

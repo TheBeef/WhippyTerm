@@ -38,6 +38,12 @@
 /*** MACROS                   ***/
 
 /*** TYPE DEFINITIONS         ***/
+struct OpenDirData
+{
+    WIN32_FIND_DATA FindFileData;
+    HANDLE hFind;
+    bool DataReady;
+};
 
 /*** FUNCTION PROTOTYPES      ***/
 
@@ -53,22 +59,17 @@ void WTB_Rmdir(const char *DirName)
     _rmdir(DirName);
 }
 
-struct OpenDirData
-{
-    WIN32_FIND_DATA FindFileData;
-    HANDLE hFind;
-    bool DataReady;
-};
-
 void *WTB_OpenDir(const char *Path)
 {
+    char searchPath[MAX_PATH];
     struct OpenDirData *dir;
+
+    // Windows requires a wildcard (e.g., "C:\Temp\*") to list contents
+    snprintf(searchPath, MAX_PATH, "%s\\*", Path);
 
     dir=(struct OpenDirData *)malloc(sizeof(struct OpenDirData));
     if(dir==NULL)
         return NULL;
-
-    dir->DataReady=true;
 
     dir->hFind=FindFirstFileA(Path,&dir->FindFileData);
     if(dir->hFind==INVALID_HANDLE_VALUE)
@@ -88,15 +89,14 @@ const char *WTB_NextDirEntry(void *DirHandle)
     if(dir->DataReady)
     {
         dir->DataReady=false;
+        return dir->FindFileData.cFileName;
     }
     else
     {
-        dir->hFind=FindNextFileA(dir->hFind,&dir->FindFileData);
-        if(dir->hFind==NULL)
-            return NULL;
-        dir->DataReady=true;
+        if(FindNextFileA(dir->hFind,&dir->FindFileData))
+            return dir->FindFileData.cFileName;
     }
-    return dir->FindFileData.cFileName;
+    return NULL;
 }
 
 void WTB_CloseDir(void *DirHandle)

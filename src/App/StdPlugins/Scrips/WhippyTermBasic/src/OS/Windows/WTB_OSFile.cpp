@@ -32,6 +32,7 @@
 #include "../WTB_OSFile.h"
 #include <windows.h>
 #include <direct.h>
+#include <stdio.h>
 
 /*** DEFINES                  ***/
 

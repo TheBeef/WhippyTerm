@@ -51,12 +51,12 @@ struct OpenDirData
 
 void WTB_Mkdir(const char *DirName)
 {
-    _mkdir(DirName);
+    CreateDirectoryA(DirName);
 }
 
 void WTB_Rmdir(const char *DirName)
 {
-    _rmdir(DirName);
+    RemoveDirectoryA(DirName);
 }
 
 void *WTB_OpenDir(const char *Path)
@@ -109,16 +109,8 @@ void WTB_CloseDir(void *DirHandle)
 
 bool WTB_IsDir(const char *FileName)
 {
-    DWORD Status = ERROR_SUCCESS;
-    FILE_STAT_INFORMATION FileStatInfo;
-
-    if (!GetFileInformationByName(FileName,
-                                  FileStatByNameInfo,
-                                  &FileStatInfo,
-                                  sizeof(FileStatInfo)))
-    {
+    DWORD attrs = GetFileAttributesA(FileName);
+    if(attrs == INVALID_FILE_ATTRIBUTES)
         return false;
-    }
-
-    return FileStatInfo.FileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+    return (attrs & FILE_ATTRIBUTE_DIRECTORY) != 0;
 }

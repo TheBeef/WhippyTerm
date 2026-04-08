@@ -51,7 +51,7 @@ struct OpenDirData
 
 void WTB_Mkdir(const char *DirName)
 {
-    CreateDirectoryA(DirName);
+    CreateDirectoryA(DirName,NULL);
 }
 
 void WTB_Rmdir(const char *DirName)

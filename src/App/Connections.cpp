@@ -8244,9 +8244,9 @@ bool Connection::FrozenQueueIfNeeded_Write(uint8_t *Str)
     if(Entry.Str==NULL)
         return false;
     memcpy(Entry.Str,Str,Len);
-    Add2FrozenQueue(&Entry);
 
-    FrozenQueueStrLen+=Len;
+    if(Add2FrozenQueue(&Entry))
+        FrozenQueueStrLen+=Len; // DEBUG PAUL: Len might be wrong here, should it be strlen()???, I think it is wrong but *Size=FrozenQueueStrLen return value is never actually used so we get away with it....
 
     return true;
 }
@@ -8604,7 +8604,7 @@ bool Connection::FrozenQueueIfNeeded_Bell(bool VisualOnly)
  *    Connection::Add2FrozenQueue
  *
  * SYNOPSIS:
- *    void Connection::Add2FrozenQueue(struct Connection_FrozenQueueEntry *Ent);
+ *    bool Connection::Add2FrozenQueue(struct Connection_FrozenQueueEntry *Ent);
  *
  * PARAMETERS:
  *    Ent [I] -- The new entry to make on the queue.  This will be copied
@@ -8618,14 +8618,14 @@ bool Connection::FrozenQueueIfNeeded_Bell(bool VisualOnly)
  * SEE ALSO:
  *    
  ******************************************************************************/
-void Connection::Add2FrozenQueue(struct Connection_FrozenQueueEntry *Ent)
+bool Connection::Add2FrozenQueue(struct Connection_FrozenQueueEntry *Ent)
 {
     struct Connection_FrozenQueueEntry *NewEntry;
 
     NewEntry=(struct Connection_FrozenQueueEntry *)
             malloc(sizeof(struct Connection_FrozenQueueEntry));
     if(NewEntry==NULL)
-        return;
+        return false;
 
     memcpy(NewEntry,Ent,sizeof(struct Connection_FrozenQueueEntry));
     NewEntry->Next=NULL;
@@ -8641,6 +8641,8 @@ void Connection::Add2FrozenQueue(struct Connection_FrozenQueueEntry *Ent)
         FrozenQueueEnd->Next=NewEntry;
     }
     FrozenQueueEnd=NewEntry;
+
+    return true;
 }
 
 /*******************************************************************************

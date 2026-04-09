@@ -657,7 +657,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         bool FrozenQueueIfNeeded_Function(e_ConFuncType Func,uintptr_t Arg1,uintptr_t Arg2,uintptr_t Arg3,uintptr_t Arg4,uintptr_t Arg5,uintptr_t Arg6);
         bool FrozenQueueIfNeeded_InsertStr(const uint8_t *Str,uint32_t Len);
         bool FrozenQueueIfNeeded_Bell(bool VisualOnly);
-        void Add2FrozenQueue(struct Connection_FrozenQueueEntry *Ent);
+        bool Add2FrozenQueue(struct Connection_FrozenQueueEntry *Ent);
         void FreeFrozenQueue(void);
         void PlayBackFrozenQueue(void);
 

@@ -86,6 +86,9 @@ static struct ReleaseNote m_Notes_NEXT[]=
             " as the screen if the clear is pressed 2 times (actually if the"
             " main screen is already clear then the scroll back is also"
             " cleared)"},
+    {   NOTETYPE_ENHANCEMENT,"Fixed a number of small bugs after a AI code lint",
+            "Code was run though Claude AI to check for bugs.  Some small"
+            " bugs where found and have been fixed."},
 };
 
 static struct ReleaseNote m_Notes_Rel2_2_1_0[]=

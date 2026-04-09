@@ -1102,8 +1102,11 @@ static PG_BOOL XModemUpload_RxData(t_FTPSystemData *SysHandle,
                 {
                     /* Ok, we are done tell the rx */
                     Block[0]=XMODEM_EOT;
-                    if(m_FTPS->ULSendData(SysHandle,Block,1)!=e_FTPS_SendDataRet_Success)
+                    if(m_FTPS->ULSendData(SysHandle,Block,1)!=
+                            e_FTPS_SendDataRet_Success)
+                    {
                         Data->DelayedError=e_XModemDelayedError_EOT;
+                    }
                     Data->Waiting4DoneAck=true;
                 }
                 else

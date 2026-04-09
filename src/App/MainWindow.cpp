@@ -1155,7 +1155,7 @@ class Connection *TheMainWindow::ReloadTabFromURI(const char *TabLabel,
         ActiveTab=UITabCtrlGetActiveTabHandle(MainTabs);
         ContainerFrame=UIMW_GetContainerFrameCtrlHandle(UIWin);
 
-        if(strlen(URI)>MAX_URI_LENGTH)
+        if(strlen(URI)>=MAX_URI_LENGTH)
             throw("URI string too long");
 
         /* Make a copy */

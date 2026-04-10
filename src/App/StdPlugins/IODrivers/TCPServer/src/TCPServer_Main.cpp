@@ -623,7 +623,7 @@ PG_BOOL TCPServer_Convert_Options_To_URI(const char *DeviceUniqueID,
     if(PortStr==NULL)
         return false;
 
-    if(strlen(TCPSERVER_URI_PREFIX)+strlen(PortStr)+1>=MaxURILen)
+    if(strlen(TCPSERVER_URI_PREFIX)+1+strlen(PortStr)+1>=MaxURILen)
         return false;
 
     strcpy(URI,TCPSERVER_URI_PREFIX);

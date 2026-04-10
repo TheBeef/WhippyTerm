@@ -4376,7 +4376,7 @@ void Connection::SetUploadOptions(t_KVList *NewList)
  ******************************************************************************/
 e_FileTransErrType Connection::StartUpload(void)
 {
-    uint64_t FileSize;
+    long FileSize;
     FILE *in;
 
     /* Collect some info about the file */
@@ -4386,6 +4386,8 @@ e_FileTransErrType Connection::StartUpload(void)
     fseek(in,0,SEEK_END);
     FileSize=ftell(in);
     fclose(in);
+    if(FileSize<0)
+        return e_FileTransErr_FileError;
     in=NULL;
 
     Upload.Stats.InProgress=true;   // Mark as started so if the upload file function sends the whole file it can clear the in progress

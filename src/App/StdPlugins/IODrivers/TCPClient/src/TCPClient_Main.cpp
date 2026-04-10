@@ -571,7 +571,7 @@ PG_BOOL TCPClient_Convert_Options_To_URI(const char *DeviceUniqueID,
     if(AddressStr==NULL || PortStr==NULL)
         return false;
 
-    if(strlen(TCPCLIENT_URI_PREFIX)+1+strlen(AddressStr)+1+strlen(PortStr)+1>=
+    if(strlen(TCPCLIENT_URI_PREFIX)+1+2+strlen(AddressStr)+1+strlen(PortStr)+1>=
             MaxURILen)
     {
         return false;

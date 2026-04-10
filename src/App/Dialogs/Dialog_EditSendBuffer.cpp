@@ -872,7 +872,7 @@ static void DESB_DoImportDataFromDisk(void)
     string File;
     string LoadFilename;
     FILE *in;
-    unsigned long FileSize;
+    long FileSize;
     uint8_t *NewBuffer;
 
     if(!UI_LoadFileReq("Import file into buffer",g_Session.SendBufferPath,
@@ -892,6 +892,13 @@ static void DESB_DoImportDataFromDisk(void)
     fseek(in,0,SEEK_END);
     FileSize=ftell(in);
     fseek(in,0,SEEK_SET);
+
+    if(FileSize<0)
+    {
+        UIAsk("Error","Error reading file",e_AskBox_Error,e_AskBttns_Ok);
+        fclose(in);
+        return;
+    }
 
     /* Clip at 1M */
     if(FileSize>1000000)
@@ -1032,6 +1039,13 @@ static void DESB_DoInsertFromDisk(void)
     fseek(in,0,SEEK_END);
     FileSize=ftell(in);
     fseek(in,0,SEEK_SET);
+
+    if(FileSize<0)
+    {
+        UIAsk("Error","Error reading file",e_AskBox_Error,e_AskBttns_Ok);
+        fclose(in);
+        return;
+    }
 
     /* Clip at 1M */
     if(FileSize>1000000)

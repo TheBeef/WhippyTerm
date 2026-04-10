@@ -2031,6 +2031,10 @@ void ANSIX364Decoder_ProcessCSIQuest(struct ANSIX364DecoderData *Data,
         break;
         case ':':   // Sub arg...
         case ';':   // Next arg
+            /* Next arg */
+            if(Data->CSIArgCount<sizeof(Data->CSIArg)/sizeof(int))
+                Data->CSIArg[Data->CSIArgCount++]=Data->CurrentNum;
+            Data->CurrentNum=0;
         break;
         default:
             /* This is the end of the command */

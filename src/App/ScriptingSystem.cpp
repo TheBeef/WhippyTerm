@@ -779,7 +779,7 @@ void Scripting_RecvBytes(struct ScriptHandle *Handle,class Connection *Con,
             else
             {
                 /* We need to move the tail to the end */
-                memcpy(&q->Queue[q->Tail+INCOMING_QUEUE_GROW_SIZE],
+                memmove(&q->Queue[q->Tail+INCOMING_QUEUE_GROW_SIZE],
                         &q->Queue[q->Tail],q->QueueSize-(q->Tail));
 
                 q->Tail+=INCOMING_QUEUE_GROW_SIZE;
@@ -2247,7 +2247,7 @@ struct ScriptHandle *Scripting_LoadScript(const char *Filename)
     char *FileContents;
     char *ScriptType;
     char *StartOfScript;
-    unsigned long FileSize;
+    long FileSize;
     struct ScriptHandle *RetValue;
     i_ScriptEngineType se;
     struct ScriptEngineInstance *NewSEInstance;
@@ -2272,6 +2272,9 @@ struct ScriptHandle *Scripting_LoadScript(const char *Filename)
         fseek(in,0,SEEK_END);
         FileSize=ftell(in);
         fseek(in,0,SEEK_SET);
+
+        if(FileSize<0)
+            throw("File read error");
 
         /* We limit the size of the script file */
         if(FileSize>MAX_SCRIPT_SIZE)

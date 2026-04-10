@@ -3214,15 +3214,15 @@ void DisplayText::MoveCursor(unsigned int x,unsigned y,bool CursorXPxPrecaled)
     UseX=x;
     UseY=y;
 
-    if(UseX<0)
-        UseX=0;
-    if(UseY<0)
-        UseY=0;
-
     if(UseX>=ScreenWidthChars)
         UseX=ScreenWidthChars-1;
     if(UseY>=ScreenHeightChars)
         UseY=ScreenHeightChars-1;
+
+    if(UseX<0)
+        UseX=0;
+    if(UseY<0)
+        UseY=0;
 
     CursorX=UseX;
     CursorY=UseY;

@@ -406,6 +406,9 @@ void HexDisplayBuffer::SetBufferSize(int Size)
 {
     int SavedBufferSize;
 
+    if(Size<0)
+        return;
+
     SavedBufferSize=BufferSize;
 
     if(!GrowBufferAsNeeded(Size))

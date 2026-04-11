@@ -210,7 +210,6 @@ PG_BOOL TCPServer_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
     bool ReusePortBool;
     uint16_t Port;
     int opt;
-    int SetOptions;
     const char *TmpStr;
 
     PortStr=g_TCPS_System->KVGetItem(Options,"Port");
@@ -234,19 +233,27 @@ PG_BOOL TCPServer_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
 
     if(ReuseAddressBool || ReusePortBool)
     {
-        SetOptions=0;
         if(ReuseAddressBool)
-            SetOptions|=SO_REUSEADDR;
-        if(ReusePortBool)
-            SetOptions|=SO_REUSEPORT;
-
-        opt=1;
-        if(setsockopt(OurData->ListeningSockFD,SOL_SOCKET,SetOptions,&opt,
-                sizeof(opt)))
         {
-            close(OurData->ListeningSockFD);
-            OurData->ListeningSockFD=-1;
-            return false;
+            opt=1;
+            if(setsockopt(OurData->ListeningSockFD,SOL_SOCKET,SO_REUSEADDR,&opt,
+                    sizeof(opt)))
+            {
+                close(OurData->ListeningSockFD);
+                OurData->ListeningSockFD=-1;
+                return false;
+            }
+        }
+        if(ReusePortBool)
+        {
+            opt=1;
+            if(setsockopt(OurData->ListeningSockFD,SOL_SOCKET,SO_REUSEPORT,&opt,
+                    sizeof(opt)))
+            {
+                close(OurData->ListeningSockFD);
+                OurData->ListeningSockFD=-1;
+                return false;
+            }
         }
     }
 

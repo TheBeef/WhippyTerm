@@ -341,10 +341,17 @@ bool ESB_Event(const struct ESBEvent *Event)
                     BufferSize=UIESB_GetTextInput(e_ESB_TextInput_BufferSize);
                     UIGetTextCtrlText(BufferSize,NewSizeTxt);
                     NewSize=strtol(NewSizeTxt.c_str(),NULL,0);
-
-                    m_DESB_HexDisplay->SetBufferSize(NewSize);
-                    sprintf(buff,"%d",NewSize);
-                    UISetTextCtrlText(BufferSize,buff);
+                    if(NewSize<0)
+                    {
+                        UIAsk("Error","Invalid value",e_AskBox_Error,
+                                e_AskBttns_Ok);
+                    }
+                    else
+                    {
+                        m_DESB_HexDisplay->SetBufferSize(NewSize);
+                        sprintf(buff,"%d",NewSize);
+                        UISetTextCtrlText(BufferSize,buff);
+                    }
                 break;
                 case e_ESB_TextInput_SelectedBytes:
                 case e_ESB_TextInput_Offset:

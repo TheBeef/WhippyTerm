@@ -609,7 +609,7 @@ bool KeyCommandsCFG::SaveElement(class TinyCFG *CFG)
 
     for(cmd=0;cmd<e_CmdMAX;cmd++)
     {
-        strncpy(buff,sizeof(buff),ConvertKeySeq2String(&(*Ptr)[cmd]));
+        strncpy(buff,ConvertKeySeq2String(&(*Ptr)[cmd]),sizeof(buff));
         buff[sizeof(buff)-1]=0;
         CFG->WriteDataElement(GetCmdName((e_CmdType)cmd),buff);
     }

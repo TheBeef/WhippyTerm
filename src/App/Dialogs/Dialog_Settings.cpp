@@ -614,6 +614,9 @@ bool RunSettingsDialog(class TheMainWindow *MW,
         }
     }
 
+    /* Clear any grabbing of key presses */
+    UI_CollectAllKeyPresses(NULL);
+
     if(m_DS_ConList!=NULL)
     {
         if(m_DS_ConOptions!=NULL)

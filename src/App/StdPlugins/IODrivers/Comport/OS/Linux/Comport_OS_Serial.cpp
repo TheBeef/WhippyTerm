@@ -79,6 +79,20 @@ struct OpenComportInfo
 typedef list<string> t_PossibleComPortList;
 typedef t_PossibleComPortList::iterator i_PossibleComPortList;
 
+/* From: #include <asm/termbits.h> but can't be used with normal termios.h so
+   we defined it directly.  Not great but seems to work... */
+struct termios2
+{
+    tcflag_t c_iflag;       /* input mode flags */
+    tcflag_t c_oflag;       /* output mode flags */
+    tcflag_t c_cflag;       /* control mode flags */
+    tcflag_t c_lflag;       /* local mode flags */
+    cc_t c_line;            /* line discipline */
+    cc_t c_cc[NCCS];        /* control characters */
+    speed_t c_ispeed;       /* input speed */
+    speed_t c_ospeed;       /* output speed */
+};
+
 /*** FUNCTION PROTOTYPES      ***/
 static bool Comport_ProcessUEventFile(const char *Filename,const char *Tag,
         char *Value,int MaxValueLen);
@@ -988,9 +1002,20 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
     uint32_t SetBitRate;
     struct termios tio;
     int ret;
+    bool CustomBaud;
 
     try
     {
+        ret=tcgetattr(ComInfo->fd,&tio);
+        if(ret<0)
+            throw(0);
+
+//        if(tcgetattr(ComInfo->fd,&tio)<0)
+//            throw(0);
+
+        cfmakeraw(&tio);
+
+        CustomBaud=false;
         switch(BitRate)
         {
             case 50:
@@ -1084,40 +1109,35 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
                 SetBitRate=B4000000;
             break;
             default:
-                throw(0);
+                CustomBaud=true;
+            break;
         }
 
-        ret=tcgetattr(ComInfo->fd,&tio);
-        if(ret<0)
-            throw(0);
+        if(!CustomBaud)
+        {
+            if(cfsetispeed(&tio,SetBitRate)<0)
+                throw(0);
 
-//        if(tcgetattr(ComInfo->fd,&tio)<0)
-//            throw(0);
-
-        cfmakeraw(&tio);
-
-        if(cfsetispeed(&tio,SetBitRate)<0)
-            throw(0);
-
-        if(cfsetospeed(&tio,SetBitRate)<0)
-            throw(0);
+            if(cfsetospeed(&tio,SetBitRate)<0)
+                throw(0);
+        }
 
         switch(FlowControl)
         {
             case e_ComportFlowControl_None:
                 tio.c_iflag&=~(IXON|IXOFF);
-                tio.c_iflag&=~CRTSCTS;
+                tio.c_cflag&=~CRTSCTS;
                 tio.c_cflag|=CLOCAL;
             break;
             case e_ComportFlowControl_XONXOFF:
                 tio.c_iflag|=IXON|IXOFF;
-                tio.c_iflag&=~CRTSCTS;
+                tio.c_cflag&=~CRTSCTS;
                 tio.c_cflag|=CLOCAL;
             break;
             case e_ComportFlowControl_Hardware:
                 tio.c_iflag&=~(IXON|IXOFF);
                 tio.c_cflag&=~CLOCAL;
-                tio.c_iflag|=CRTSCTS;
+                tio.c_cflag|=CRTSCTS;
             break;
             case e_ComportFlowControlMAX:
             default:
@@ -1193,6 +1213,23 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
 
         if(tcsetattr(ComInfo->fd,TCSANOW,&tio)<0)
             throw(0);
+
+        if(CustomBaud)
+        {
+            struct termios2 tio;
+
+            ioctl(ComInfo->fd, TCGETS2, &tio);
+
+            tio.c_cflag &= ~CBAUD;
+            tio.c_cflag |= CBAUDEX;
+            tio.c_ispeed = BitRate;
+            tio.c_ospeed = BitRate;
+
+            if(ioctl(ComInfo->fd, TCSETS2, &tio)!=0)
+            {
+                throw(0);
+            }
+        }
     }
     catch(...)
     {

@@ -89,6 +89,11 @@ static struct ReleaseNote m_Notes_NEXT[]=
     {   NOTETYPE_ENHANCEMENT,"Fixed a number of small bugs after a AI code lint",
             "Code was run though Claude AI to check for bugs.  Some small"
             " bugs where found and have been fixed."},
+    {   NOTETYPE_ENHANCEMENT,"RTS/CTS flow control broken on Linux",
+            "In the Linux version of the serial drivers the RTS/CTS flow"
+            " control was not actually being set (CRTSCTS was applied to"
+            " to the wrong field) and so hardware flow control should not"
+            " have worked.  This has been fixed."},
 };
 
 static struct ReleaseNote m_Notes_Rel2_2_1_0[]=

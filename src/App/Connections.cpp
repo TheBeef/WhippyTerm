@@ -6482,6 +6482,11 @@ void Connection::BridgeConnection(class Connection *Con)
     if(BridgedTo!=NULL)
         BridgedTo->SetBridgeFrom(NULL);
 
+    /* Lock out bridging to our selfs (should not happen, but maybe a script
+       could do it?) */
+    if(Con==this)
+        return;
+
     BridgedTo=Con;
     if(Con!=NULL)
         Con->SetBridgeFrom(this);

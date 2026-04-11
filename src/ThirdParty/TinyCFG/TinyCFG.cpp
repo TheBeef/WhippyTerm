@@ -1675,8 +1675,8 @@ bool TinyCFG::LoadCFGFile(const char *FileName,int MaxFileSize)
 
     /* NOTE:
         I was going to do this by using a floating read buffer, but decided
-        that the XML file is unlikely to be bigger than a meg (and that's
-        a big file).  A meg is small these days, so why go to the bother.
+        that the XML file is unlikely to be bigger than 1M (and that's
+        a big file).  1M is small these days, so why go to the bother.
         I know that means that there is now an edge case where it will
         be unusable, but that's an edge case that I am ignoring. */
 
@@ -1684,6 +1684,12 @@ bool TinyCFG::LoadCFGFile(const char *FileName,int MaxFileSize)
     fseek(fh,0,SEEK_END);
     ReadFileSize=ftell(fh);
     fseek(fh,0,SEEK_SET);
+
+    if(ReadFileSize<0)
+    {
+        fclose(fh);
+        return false;
+    }
 
     if(ReadFileSize+1>MaxFileSize)
     {

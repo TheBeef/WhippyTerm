@@ -33,6 +33,8 @@
 #include "App/PluginSupport/PluginSystem.h"
 #include "Version.h"
 #include <stdint.h>
+#include <time.h>
+#include <stdlib.h>
 #include <string>
 #include <list>
 
@@ -86,6 +88,8 @@ bool AppMain(int argc,char *argv[])
     int_fast32_t r;
 
     g_AppShuttingDown=false;
+
+    srand(time(NULL));
 
     /* Code checks (make sure enum's are correct) */
     CmdCheck();

@@ -4048,7 +4048,7 @@ void TheMainWindow::RethinkBridgeMenu(void)
         }
     }
 
-    if(BridgeAvail)
+    if(BridgeAvail && ActiveCon!=NULL)
     {
         if(ActiveCon->GetBridgedConnection()!=NULL)
             EnableRelease=true;

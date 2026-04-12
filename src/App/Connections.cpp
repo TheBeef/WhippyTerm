@@ -455,146 +455,158 @@ Connection::Connection(const char *URI)
 {
     unsigned int r;
 
-    IOHandle=NULL;
-    Display=NULL;
-    MW=NULL;
-    BridgedTo=NULL;
-    BridgedFrom=NULL;
-    FrozenQueue=NULL;
-    FrozenRetStr=NULL;
-    FrozenQueueEnd=NULL;
-    BinaryConnection=false;
-    FrozenRetStrBufferSize=0;
-    FrozenQueueStrLen=0;
-    AutoReopenEnabled=false;
+    try
+    {
+        IOHandle=NULL;
+        Display=NULL;
+        MW=NULL;
+        BridgedTo=NULL;
+        BridgedFrom=NULL;
+        FrozenQueue=NULL;
+        FrozenRetStr=NULL;
+        FrozenQueueEnd=NULL;
+        BinaryConnection=false;
+        FrozenRetStrBufferSize=0;
+        FrozenQueueStrLen=0;
+        AutoReopenEnabled=false;
 
-    Bookmark=0;
-    ZoomLevel=0;
+        Bookmark=0;
+        ZoomLevel=0;
 
-    for(r=0;r<(int)e_SysScriptMAX;r++)
-        RunningScripts[r]=NULL;
+        for(r=0;r<(int)e_SysScriptMAX;r++)
+            RunningScripts[r]=NULL;
 
-    /* Copy the default settings for this connection from settings */
-    UsingCustomSettings=false;
-    CustomSettings=g_Settings.DefaultConSettings;
+        /* Copy the default settings for this connection from settings */
+        UsingCustomSettings=false;
+        CustomSettings=g_Settings.DefaultConSettings;
 
-    FTPConData=FTPS_AllocFTPData();
-    if(FTPConData==NULL)
-        throw("Failed to allocate file transfer protocol data");
+        FTPConData=FTPS_AllocFTPData();
+        if(FTPConData==NULL)
+            throw("Failed to allocate file transfer protocol data");
 
-    TransmitDelayTimer=AllocUITimer();
-    if(TransmitDelayTimer==NULL)
-        throw("Failed to allocate delay timer");
+        TransmitDelayTimer=AllocUITimer();
+        if(TransmitDelayTimer==NULL)
+            throw("Failed to allocate delay timer");
 
-    SmartClipTimer=AllocUITimer();
-    if(SmartClipTimer==NULL)
-        throw("Failed to allocate smart clipboard timer");
+        SmartClipTimer=AllocUITimer();
+        if(SmartClipTimer==NULL)
+            throw("Failed to allocate smart clipboard timer");
 
-    AutoReopenTimer=AllocUITimer();
-    if(AutoReopenTimer==NULL)
-        throw("Failed to allocate auto reopen timer");
+        AutoReopenTimer=AllocUITimer();
+        if(AutoReopenTimer==NULL)
+            throw("Failed to allocate auto reopen timer");
 
-    if(!SetConnectionBasedOnURI(URI))
-        throw("Failed to setup the connection");
+        if(!SetConnectionBasedOnURI(URI))
+            throw("Failed to setup the connection");
 
-    SetupUITimer(TransmitDelayTimer,Con_DelayTransmitTimeout,(uintptr_t)this,
-            false);
-    SetupUITimer(SmartClipTimer,Con_SmartClipTimeout,(uintptr_t)this,false);
-    SetupUITimer(AutoReopenTimer,Con_AutoReopenTimeout,(uintptr_t)this,
-            false);
+        SetupUITimer(TransmitDelayTimer,Con_DelayTransmitTimeout,(uintptr_t)this,
+                false);
+        SetupUITimer(SmartClipTimer,Con_SmartClipTimeout,(uintptr_t)this,false);
+        SetupUITimer(AutoReopenTimer,Con_AutoReopenTimeout,(uintptr_t)this,
+                false);
 
-    IsConnected=false;
-    BlockSendDevice=false;
-    WhenBridgedLockoutConnection=false;
-    ConnectionLockedOut=false;
-    ShowNonPrintables=false;
-    ShowEndOfLines=false;
-    TxKeyboardEnabled=true;
-    DisplayWriteEnabled=true;
+        IsConnected=false;
+        BlockSendDevice=false;
+        WhenBridgedLockoutConnection=false;
+        ConnectionLockedOut=false;
+        ShowNonPrintables=false;
+        ShowEndOfLines=false;
+        TxKeyboardEnabled=true;
+        DisplayWriteEnabled=true;
 
-    DisplayName[0]=0;
+        DisplayName[0]=0;
 
-    TransmitDelayByte=0;
-    TransmitDelayLine=0;
-    LastSettingsTransmitDelayByte=0;
-    LastSettingsTransmitDelayLine=0;
-    TransmitDelayBuffer=NULL;
-    TransmitDelayBufferSize=0;
-    TransmitDelayBufferWritePos=0;
-    TransmitDelayBufferReadPos=0;
+        TransmitDelayByte=0;
+        TransmitDelayLine=0;
+        LastSettingsTransmitDelayByte=0;
+        LastSettingsTransmitDelayLine=0;
+        TransmitDelayBuffer=NULL;
+        TransmitDelayBufferSize=0;
+        TransmitDelayBufferWritePos=0;
+        TransmitDelayBufferReadPos=0;
 
-    CaptureToFile.WriteHandle=NULL;
-    CaptureToFile.Filename=g_Settings.CaptureDefaultFilename;
-    CaptureToFile.Options.Timestamp=g_Settings.CaptureTimestamp;
-    CaptureToFile.Options.Append=g_Settings.CaptureAppend;
-    CaptureToFile.Options.StripCtrl=g_Settings.CaptureStripCtrl;
-    CaptureToFile.Options.StripEsc=g_Settings.CaptureStripEsc;
-    CaptureToFile.Options.SaveAsHexDump=g_Settings.CaptureHexDump;
+        CaptureToFile.WriteHandle=NULL;
+        CaptureToFile.Filename=g_Settings.CaptureDefaultFilename;
+        CaptureToFile.Options.Timestamp=g_Settings.CaptureTimestamp;
+        CaptureToFile.Options.Append=g_Settings.CaptureAppend;
+        CaptureToFile.Options.StripCtrl=g_Settings.CaptureStripCtrl;
+        CaptureToFile.Options.StripEsc=g_Settings.CaptureStripEsc;
+        CaptureToFile.Options.SaveAsHexDump=g_Settings.CaptureHexDump;
 
-    StopWatch.StartTime=0;
-    StopWatch.StopTime=0;
-    StopWatch.LastLapTime=0;
-    StopWatch.Running=false;
-    StopWatch.AutoStartOnTx=g_Settings.StopWatchAutoStart;
-    StopWatch.AutoLap=g_Settings.StopWatchAutoLap;
+        StopWatch.StartTime=0;
+        StopWatch.StopTime=0;
+        StopWatch.LastLapTime=0;
+        StopWatch.Running=false;
+        StopWatch.AutoStartOnTx=g_Settings.StopWatchAutoStart;
+        StopWatch.AutoLap=g_Settings.StopWatchAutoLap;
 
-    Upload.Filename="";
-    Upload.ProtocolID="";
-    Upload.LastTimeoutTick=0;
-    Upload.Timeout=0;
-    Upload.Stats.InProgress=false;
-    Upload.Stats.BytesSent=0;
-    Upload.Stats.TotalFileSize=0;
+        Upload.Filename="";
+        Upload.ProtocolID="";
+        Upload.LastTimeoutTick=0;
+        Upload.Timeout=0;
+        Upload.Stats.InProgress=false;
+        Upload.Stats.BytesSent=0;
+        Upload.Stats.TotalFileSize=0;
 
-    Download.Filename="";
-    Download.FilenameSet=false;
-    Download.ProtocolID="";
-    Download.LastTimeoutTick=0;
-    Download.Timeout=0;
-    Download.Stats.InProgress=false;
-    Download.Stats.BytesRx=0;
-    Download.Stats.TotalFileSize=0;
+        Download.Filename="";
+        Download.FilenameSet=false;
+        Download.ProtocolID="";
+        Download.LastTimeoutTick=0;
+        Download.Timeout=0;
+        Download.Stats.InProgress=false;
+        Download.Stats.BytesRx=0;
+        Download.Stats.TotalFileSize=0;
 
-    HexDisplay.Paused=false;
-    HexDisplay.BufferSize=0;
-    HexDisplay.Buffer=NULL;
-    HexDisplay.InsertPos=NULL;
-    HexDisplay.BufferWrapped=false;
+        HexDisplay.Paused=false;
+        HexDisplay.BufferSize=0;
+        HexDisplay.Buffer=NULL;
+        HexDisplay.InsertPos=NULL;
+        HexDisplay.BufferWrapped=false;
 
-    OutGoingHexDisplay.Paused=false;
-    OutGoingHexDisplay.BufferSize=0;
-    OutGoingHexDisplay.Buffer=NULL;
-    OutGoingHexDisplay.InsertPos=NULL;
-    OutGoingHexDisplay.BufferWrapped=false;
+        OutGoingHexDisplay.Paused=false;
+        OutGoingHexDisplay.BufferSize=0;
+        OutGoingHexDisplay.Buffer=NULL;
+        OutGoingHexDisplay.InsertPos=NULL;
+        OutGoingHexDisplay.BufferWrapped=false;
 
-    ComTest.Sender=false;
-    ComTest.SendingPackets=false;
-    ComTest.PacketLen=1;
-    ComTest.PacketsCount=1;
-    ComTest.DelayBetweenPackets_mS=0;
-    ComTest.Timer=NULL;
-    ComTest.Packet=NULL;
-    ComTest.RxPatternIndex=0;
-    ComTest.UpdateFn=NULL;
-    ComTest.Syncing=false;
-    ComTest.Stats.InProgress=false;
-    ComTest.Stats.PacketsSent=0;
-    ComTest.Stats.BytesSent=0;
-    ComTest.Stats.PacketsRx=0;
-    ComTest.Stats.ErrorsDetected=0;
-    ComTest.Stats.BytesPerSec=0;
-    ComTest.Stats.SendErrors=0;
-    ComTest.Stats.SendBusyErrors=0;
-    ComTest.Stats.LastRxTimeStamp=0;
+        ComTest.Sender=false;
+        ComTest.SendingPackets=false;
+        ComTest.PacketLen=1;
+        ComTest.PacketsCount=1;
+        ComTest.DelayBetweenPackets_mS=0;
+        ComTest.Timer=NULL;
+        ComTest.Packet=NULL;
+        ComTest.RxPatternIndex=0;
+        ComTest.UpdateFn=NULL;
+        ComTest.Syncing=false;
+        ComTest.Stats.InProgress=false;
+        ComTest.Stats.PacketsSent=0;
+        ComTest.Stats.BytesSent=0;
+        ComTest.Stats.PacketsRx=0;
+        ComTest.Stats.ErrorsDetected=0;
+        ComTest.Stats.BytesPerSec=0;
+        ComTest.Stats.SendErrors=0;
+        ComTest.Stats.SendBusyErrors=0;
+        ComTest.Stats.LastRxTimeStamp=0;
 
-    LeftPanelInfo=e_LeftPanelTabMAX;
-    RightPanelInfo=e_RightPanelTabMAX;
-    BottomPanelInfo=e_BottomPanelTabMAX;
+        LeftPanelInfo=e_LeftPanelTabMAX;
+        RightPanelInfo=e_RightPanelTabMAX;
+        BottomPanelInfo=e_BottomPanelTabMAX;
 
-    InputFrozen=false;
-    SupressFrozen=false;
+        InputFrozen=false;
+        SupressFrozen=false;
 
-    DoingIncomingByteProcessing=false;
+        DoingIncomingByteProcessing=false;
+    }
+    catch(const char *Msg)
+    {
+        ConstructorFree();
+        throw(Msg);
+    }
+    catch(...)
+    {
+        throw("Out of memory");
+    }
 }
 
 /*******************************************************************************
@@ -617,6 +629,30 @@ Connection::Connection(const char *URI)
  *    
  ******************************************************************************/
 Connection::~Connection()
+{
+    ConstructorFree();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::ConstructorFree
+ *
+ * SYNOPSIS:
+ *    void Connection::ConstructorFree(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function frees everything that was allocated in the constructor.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::ConstructorFree(void)
 {
     if(BridgedFrom!=NULL)
         BridgedFrom->BridgeConnectionFreeing();

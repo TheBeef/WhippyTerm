@@ -3452,7 +3452,7 @@ static void RunScriptThread(void *data)
 
             /* Make sure we exit if the main thread frees */
             if(SEInstance->MainThreadFreed)
-                throw(NULL);
+                throw((const char *)NULL);
         }
 
         if(!API->RunLoadedScript(SEInstance->Context))

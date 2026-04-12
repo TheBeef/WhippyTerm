@@ -629,6 +629,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         /* Scripting */
         struct ScriptHandle *RunningScripts[e_SysScriptMAX];
 
+        void ConstructorFree(void);
         void FreeConnectionResources(bool FreeDB);
         void HandleCaptureIncomingData(const uint8_t *Inbuff,int bytes);
         void SendMWEvent(ConMWEventType Event,union ConMWInfo *ExtraInfo=NULL);

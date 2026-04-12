@@ -138,6 +138,7 @@ DisplayText::DisplayText()
     LongestLinePx=0;
     CharWidthPx=1;
     CharHeightPx=1;
+    LeftMouseDown=false;
 
     ShowNonPrintables=false;
     ShowEndOfLines=false;
@@ -4468,7 +4469,7 @@ void DisplayText::ScrollScreen2MakeCursorVisible(void)
         UISetScrollBarPos(HorzScroll,WindowXOffsetPx);
     }
 
-    if(LastTopLineY!=TopLineY || LastWindowXOffsetPx)
+    if(LastTopLineY!=TopLineY || LastWindowXOffsetPx!=WindowXOffsetPx)
     {
         UITC_SetCursorPos(TextDisplayCtrl,CursorX,CalcCorrectedCursorPos());
         RethinkCursorHidden();
@@ -5482,8 +5483,8 @@ void DisplayText::ScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,
         }
         else if(Use_dy<0)
         {
-            if(Use_dy<-ScreenWidthChars)
-                Use_dy=-ScreenWidthChars;
+            if(Use_dy<-ScreenHeightChars)
+                Use_dy=-ScreenHeightChars;
             if(Use_dy<-ScrollHeight)
                 Use_dy=-ScrollHeight;
         }

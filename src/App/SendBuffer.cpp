@@ -204,7 +204,7 @@ bool SendBuffer::LoadBuffers(const char *Filename)
                             BufferInfoFound=true;
                         }
                     }
-                    if(strcmp(ChunkID,"NAME")==0)
+                    else if(strcmp(ChunkID,"NAME")==0 && NewName==NULL)
                     {
                         NewName=(char *)malloc(ChunkSize+1);
                         if(NewName==NULL)

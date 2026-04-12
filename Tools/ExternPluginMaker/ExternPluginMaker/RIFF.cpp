@@ -160,7 +160,7 @@ const char *RIFF::Error2Str(e_RIFFErrorType err)
         case e_RIFFError_FileNotOpen:
             return "File not open";
         case e_RIFFError_ChunkToSmall:
-            return "Chunk to small";
+            return "Chunk too small";
         case e_RIFFError_BadFormat:
             return "Invalid RIFF / IFF";
         case e_RIFFError_FormTypeMismatch:

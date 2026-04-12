@@ -484,7 +484,7 @@ void MWHexDisplay::Clear(void)
  *
  * FUNCTION:
  *    This function is called when there have been changes to the hex buffer.
- *    It redraws the cavnas.
+ *    It redraws the canvas.
  *
  * RETURNS:
  *    NONE

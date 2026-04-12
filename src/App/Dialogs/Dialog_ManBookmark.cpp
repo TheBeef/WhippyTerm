@@ -614,7 +614,7 @@ void DMB_HandleDeleteItem(void)
     if(m_SelectedEntry->second==m_DMB_EditList->end())
     {
         /* Deleting a folder */
-        if(UIAsk("Warning","Delete this folder and it's contents?",
+        if(UIAsk("Warning","Delete this folder and its contents?",
                 e_AskBox_Warning,e_AskBttns_YesNo)==e_AskRet_Yes)
         {
             /* Delete all the bookmarks with this folder name */

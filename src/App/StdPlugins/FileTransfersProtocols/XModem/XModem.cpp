@@ -1141,7 +1141,7 @@ static PG_BOOL XModemUpload_RxData(t_FTPSystemData *SysHandle,
                         memset(Block,XMODEM_CAN,sizeof(Block));
                         if(m_FTPS->ULSendData(SysHandle,Block,sizeof(Block))!=e_FTPS_SendDataRet_Success)
                             Data->DelayedError=e_XModemDelayedError_Cancel;
-                        Data->ErrorStr="To many NAK's in a row";
+                        Data->ErrorStr="Too many NAKs in a row";
                         m_FTPS->ULFinish(SysHandle,true);
                         return true;    // 'Data' is no longer valid, so we are done
                     }

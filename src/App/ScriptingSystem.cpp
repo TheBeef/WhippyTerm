@@ -2352,13 +2352,13 @@ struct ScriptHandle *Scripting_LoadScript(const char *Filename)
         }
         else
         {
-            /* Use the extention */
+            /* Use the extension */
             Ext=&Filename[strlen(Filename)-1];
             while(Ext>Filename && *Ext!='.')
                 Ext--;
             if(*Ext!='.')
             {
-                throw("Filename does not have extention or #!.\n"
+                throw("Filename does not have extension or #!.\n"
                         "Unknown script language");
             }
             Ext++;
@@ -2368,7 +2368,7 @@ struct ScriptHandle *Scripting_LoadScript(const char *Filename)
                     break;
             if(se==m_ScriptEngineList.end())
             {
-                throw("Unknown script language (based on extention)");
+                throw("Unknown script language (based on extension)");
             }
             StartOfScript=FileContents;
         }

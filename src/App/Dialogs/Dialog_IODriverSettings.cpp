@@ -88,7 +88,7 @@ void RunIODriverSettingsDialog(t_PluginSettings *Settings,
             BaseURI,FirstTabContainer);
     if(m_DIODS_PluginPrivData==NULL)
     {
-        UIAsk("Error","Failed to have the IODriver add it's widgets.",
+        UIAsk("Error","Failed to have the IODriver add its widgets.",
                 e_AskBox_Error);
         UIFree_IODriverSettings();
         return;

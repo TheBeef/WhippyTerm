@@ -11,14 +11,14 @@ extending through plugins, and native support for binary protocols.
 It is primarily aimed at embedded developers that need to talk to their
 devices. It supports serial communication such as serial ports
 (RS232, RS485, RS422, TTL UART), TCP/IP, UDP. It also supports
-protocols such as I2C and SPI though plugins.
+protocols such as I2C and SPI through plugins.
 
 #### Terminal emulations
 Terminal emulations such as ANSI and others can be added (ANSI is builtin
 and always available) through plugins.
 
 #### Binary protocols
-WhippyTerm also support working with binary protocols, in both
+WhippyTerm also supports working with binary protocols, in both
 serial streams like RS232, and message block protocols like UDP.
 Support for sending blocks of binary or AscII data is included to
 better work with embedded devices and binary protocols.

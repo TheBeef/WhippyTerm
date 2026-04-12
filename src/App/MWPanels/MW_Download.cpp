@@ -683,7 +683,7 @@ void MWDownload::Start(void)
     }
     catch(...)
     {
-        UIAsk("File download error","Internal error tring start download",
+        UIAsk("File download error","Internal error trying to start download",
                 e_AskBox_Error,e_AskBttns_Ok);
     }
 }

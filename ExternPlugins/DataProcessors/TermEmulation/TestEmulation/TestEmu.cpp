@@ -76,7 +76,7 @@ struct DataProcessorAPI m_TestEmuCBs=
 struct DataProcessorInfo m_TestEmu_Info=
 {
     "Test Emulation",
-    "A test emulation for testing WhippyTerm emulations",
+    "A test other for testing WhippyTerm other data processors",
     "Used for testing emulation in WhippyTerm",
     e_DataProcessorType_Text,
     e_TextDataProcessorClass_TermEmulation,

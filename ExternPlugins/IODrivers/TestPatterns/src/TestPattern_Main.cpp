@@ -609,12 +609,12 @@ t_ConnectionWidgetsType *TP_ConnectionOptionsWidgets_AllocWidgets(t_WidgetSysHan
         m_TP_UIAPI->AddItem2ComboBox(WidgetHandle,ConWidgets->Pattern->Ctrl,"Dots",1);
         m_TP_UIAPI->AddItem2ComboBox(WidgetHandle,ConWidgets->Pattern->Ctrl,"abc",2);
         m_TP_UIAPI->AddItem2ComboBox(WidgetHandle,ConWidgets->Pattern->Ctrl,"Color ABC",3);
-        m_TP_UIAPI->AddItem2ComboBox(WidgetHandle,ConWidgets->Pattern->Ctrl,"To much color",4);
+        m_TP_UIAPI->AddItem2ComboBox(WidgetHandle,ConWidgets->Pattern->Ctrl,"Too much color",4);
         m_TP_UIAPI->AddItem2ComboBox(WidgetHandle,ConWidgets->Pattern->Ctrl,"Mixed ctrl codes",5);
         m_TP_UIAPI->AddItem2ComboBox(WidgetHandle,ConWidgets->Pattern->Ctrl,"Ctrl codes",6);
         m_TP_UIAPI->AddItem2ComboBox(WidgetHandle,ConWidgets->Pattern->Ctrl,"RND Unicode",7);
         m_TP_UIAPI->AddItem2ComboBox(WidgetHandle,ConWidgets->Pattern->Ctrl,"50 Lines",8);
-        m_TP_UIAPI->AddItem2ComboBox(WidgetHandle,ConWidgets->Pattern->Ctrl,"To much color 50 lines",9);
+        m_TP_UIAPI->AddItem2ComboBox(WidgetHandle,ConWidgets->Pattern->Ctrl,"Too much color 50 lines",9);
     }
     catch(...)
     {

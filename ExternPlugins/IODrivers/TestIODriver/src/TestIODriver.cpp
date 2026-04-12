@@ -720,7 +720,7 @@ t_ConnectionWidgetsType *TestIODriver_ConnectionAuxCtrlWidgets_AllocWidgets(t_Dr
             throw(0);
 
         ConAuxWidgets->TestComboxBox=m_TestIODriver_UIAPI->AddComboBox(WidgetHandle,
-                true,"Combox box",NULL,NULL);
+                true,"Combo box",NULL,NULL);
 
         ConAuxWidgets->TestNumberBox=m_TestIODriver_UIAPI->AddNumberInput(WidgetHandle,
                 "Number Input",NULL,NULL);

@@ -351,7 +351,7 @@ struct BPDSDef *BPDS_Parse(const char *BPDSStr)
                             }
                             if(SearchStr-Start>sizeof(SearchName)-1)
                             {
-                                BPDS_SetError(NewDef,Start,"Label to long");
+                                BPDS_SetError(NewDef,Start,"Label too long");
                                 cthrow();
                             }
                             memcpy(SearchName,Start,SearchStr-Start);
@@ -531,7 +531,7 @@ struct BPDSDef *BPDS_Parse(const char *BPDSStr)
                             SearchStr++;
                         if(SearchStr-TypeStart>sizeof(SearchName)-1)
                         {
-                            BPDS_SetError(NewDef,TypeStart,"type to long");
+                            BPDS_SetError(NewDef,TypeStart,"type too long");
                             cthrow();
                         }
                         memcpy(SearchName,TypeStart,SearchStr-TypeStart);

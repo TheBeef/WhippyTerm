@@ -167,7 +167,7 @@ void RegisterExternPlugins(void)
         if(LoadFilename==NULL)
         {
             snprintf(buff,sizeof(buff)-1,"Failed to load plugin.  "
-                    "\"%s\" failed to filename + path to long.",
+                    "\"%s\" failed to filename + path too long.",
                     Plugin->Filename.c_str());
             UIAsk("Error",buff,e_AskBox_Error);
             continue;
@@ -492,7 +492,7 @@ static bool CallRegisterExternPluginFn(struct DLLHandle *Plugin,
         /* Not a WhippyTerm plugin as the plugin must have a register plugin
            function */
         snprintf(buff,sizeof(buff)-1,"Failed to load plugin.  "
-                "\"%s\" is not a WhipyTerm plugin.",Name);
+                "\"%s\" is not a " WHIPPYTERM_NAME " plugin.",Name);
         UIAsk("Error",buff,e_AskBox_Error);
         return false;
     }
@@ -834,7 +834,7 @@ void UninstallExternPlugin(int Index)
     if(rmFilename==NULL)
     {
         UIAsk("Error","Failed to uninstall plugin.  "
-                "Filename + path to long.",e_AskBox_Error);
+                "Filename + path too long.",e_AskBox_Error);
         return;
     }
 
@@ -890,7 +890,7 @@ bool InstallNewExternPlugin(const char *Filename)
     {
         /* We did not find a valid dll for this platform. */
         UIAsk("Error","Failed to install plugin.\n\n"
-                "The plugin does have support for this OS.",e_AskBox_Error);
+                "The plugin does not have support for this OS.",e_AskBox_Error);
         return false;
     }
 
@@ -925,7 +925,7 @@ bool InstallNewExternPlugin(const char *Filename)
     if(LoadFilename==NULL)
     {
         snprintf(buff,sizeof(buff)-1,"Failed to install plugin.\n\n"
-                "\"%s\" failed filename + path to long.",
+                "\"%s\" failed filename + path too long.",
                 Info.Filename.c_str());
         UIAsk("Error",buff,e_AskBox_Error);
         return false;
@@ -1103,7 +1103,7 @@ bool LoadExternPluginDLL(struct ExternPluginInfo *Info)
     if(LoadFilename==NULL)
     {
         snprintf(buff,sizeof(buff)-1,"Failed to install plugin.\n\n"
-                "\"%s\" failed filename + path to long.",
+                "\"%s\" failed filename + path too long.",
                 Info->Filename.c_str());
         UIAsk("Error",buff,e_AskBox_Error);
         return false;
@@ -1443,7 +1443,7 @@ static void ExternPluginInstallDLL(class RIFF &PluginFile,
     PluginFilename+=DescFilename;
     SaveFilename=ConvertPath2Native(PluginFilename.c_str());
     if(SaveFilename==NULL)
-        throw("Install path to long");
+        throw("Install path too long");
 
     /* See if it already exists */
     in=fopen(SaveFilename,"rb");
@@ -1611,7 +1611,7 @@ void PromptAndUpgradePlugin(int Index)
         if(!InstallNewExternPlugin(PathFilename.c_str()))
         {
             UIAsk("Error","There was an error upgrading the plugin.  It has "
-                    "been remove and will need to be reinstalled manually",
+                    "been removed and will need to be reinstalled manually",
                     e_AskBox_Error,e_AskBttns_Ok);
             return;
         }

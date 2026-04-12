@@ -174,7 +174,7 @@ struct IODriverInfo m_RemoteSPIInfo=
     IODRVINFOFLAG_BLOCKDEV,
     "<URI>RSPI://[host]:[port]/[device]</URI>"
     "<ARG>host -- The remote server to connect to</ARG>"
-    "<ARG>port -- The remote servers port to connect to</ARG>"
+    "<ARG>port -- The remote server's port to connect to</ARG>"
     "<ARG>device -- The SPI channel to use</ARG>"
     "<Example>RSPI://localhost:2000/1</Example>"
 };

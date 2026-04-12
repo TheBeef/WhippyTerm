@@ -100,8 +100,8 @@ struct DataProcessorAPI m_CodePage437DecodeCBs=
 struct DataProcessorInfo m_CodePage437Decode_Info=
 {
     "DOS Characters (IBM CP437)",
-    "Original IBM PC (OEM) charactor set (code page 437)",
-    "The IBM PC used extended ASCII with extra charactors above 127.  This"
+    "Original IBM PC (OEM) character set (code page 437)",
+    "The IBM PC used extended ASCII with extra characters above 127.  This"
         " converts bytes in the extended range (128-255) to the symbols used"
         " by the IBM PC.",
     e_DataProcessorType_Text,

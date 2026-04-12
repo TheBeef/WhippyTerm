@@ -73,7 +73,7 @@ Basic commands:
  * FILE DESCRIPTION:
  *    This file has the WhippyTerm scripting language plugin it in.  This is
  *    based on MY-BASIC and uses the MY-BASIC parser
- *    (https://github.com/paladin-t/my_basic), but has WhippyTerm extentions
+ *    (https://github.com/paladin-t/my_basic), but has WhippyTerm extensions
  *    so it is called WTBasic.
  *
  * COPYRIGHT:

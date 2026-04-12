@@ -60,8 +60,8 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/StdPlugins/DataProcessors/HexDump/src/BPDS.c \
     ../src/App/StdPlugins/DataProcessors/HexDump/src/ColorStream.cpp \
     ../src/App/StdPlugins/DataProcessors/HexDump/src/HexDump.cpp \
-    ../src/App/StdPlugins/Scrips/WhippyTermBasic/src/ThirdParty/my_basic.c \
-    ../src/App/StdPlugins/Scrips/WhippyTermBasic/src/WTBasic_Main.cpp \
+    ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/ThirdParty/my_basic.c \
+    ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/WTBasic_Main.cpp \
     ../src/BuildOptions/BuildOptions.cpp \
     ../src/App/Dialogs/Dialog_NewConnectionFromURI.cpp \
     ../src/App/Dialogs/Dialog_SendBufferSelect.cpp \
@@ -245,8 +245,8 @@ win32 {
     ../src/App/StdPlugins/IODrivers/TCPServer/src/OS/Win/TCPServer_OS_Socket.cpp \
     ../src/App/StdPlugins/IODrivers/UDPClient/src/OS/Win/UDPClient_OS_Socket.cpp \
     ../src/App/StdPlugins/IODrivers/UDPServer/src/OS/Win/UDPServer_OS_Socket.cpp \
-    ../src/App/StdPlugins/Scrips/WhippyTermBasic/src/OS/Windows/WTB_OSTime.cpp \
-    ../src/App/StdPlugins/Scrips/WhippyTermBasic/src/OS/Windows/WTB_OSFile.cpp \
+    ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/OS/Windows/WTB_OSTime.cpp \
+    ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/OS/Windows/WTB_OSFile.cpp \
 
     CONFIG(debug, debug|release){
         SOURCES += \
@@ -266,8 +266,8 @@ linux {
         ../src/OS/RPI/OSTime.cpp \
         ../src/OS/RPI/System.cpp \
         ../src/OS/RPI/Threads.cpp \
-        ../src/App/StdPlugins/Scrips/WhippyTermBasic/src/OS/RPI/WTB_OSTime.cpp \
-        ../src/App/StdPlugins/Scrips/WhippyTermBasic/src/OS/RPI/WTB_OSFile.cpp \
+        ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/OS/RPI/WTB_OSTime.cpp \
+        ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/OS/RPI/WTB_OSFile.cpp \
 
     }else{
         message("Building Linux")
@@ -279,8 +279,8 @@ linux {
         ../src/OS/Linux/OSTime.cpp \
         ../src/OS/Linux/System.cpp \
         ../src/OS/Linux/Thread.cpp \
-        ../src/App/StdPlugins/Scrips/WhippyTermBasic/src/OS/Linux/WTB_OSTime.cpp \
-        ../src/App/StdPlugins/Scrips/WhippyTermBasic/src/OS/Linux/WTB_OSFile.cpp \
+        ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/OS/Linux/WTB_OSTime.cpp \
+        ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/OS/Linux/WTB_OSFile.cpp \
 
     }
 

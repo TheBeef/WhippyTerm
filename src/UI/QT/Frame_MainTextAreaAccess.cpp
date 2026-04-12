@@ -1105,7 +1105,7 @@ int UITC_GetFragWidth(t_UITextDisplayColumn *Handle,const struct TextCanvasFrag 
  *    This function gets the size of the text canvas in pixels.
  *
  * RETURNS:
- *    The width of the text cavnas widget
+ *    The width of the text canvas widget
  *
  * LIMITATIONS:
  *    This maybe 0 if the widget hasn't been drawen on the screen

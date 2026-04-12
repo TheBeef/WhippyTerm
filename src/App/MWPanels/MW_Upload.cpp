@@ -703,7 +703,7 @@ void MWUpload::Start(void)
     }
     catch(...)
     {
-        UIAsk("File upload error","Internal error tring start upload",
+        UIAsk("File upload error","Internal error trying to start upload",
                 e_AskBox_Error,e_AskBttns_Ok);
     }
 }

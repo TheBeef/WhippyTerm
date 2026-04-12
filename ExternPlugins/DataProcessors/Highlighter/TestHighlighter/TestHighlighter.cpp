@@ -76,7 +76,7 @@ struct DataProcessorAPI m_TestHighlighterCBs=
 struct DataProcessorInfo m_TestHighlighter_Info=
 {
     "Test Emulation",
-    "A test emulation for testing WhippyTerm emulations",
+    "A test highlighter for testing WhippyTerm highlighters",
     "Used for testing emulation in WhippyTerm",
     e_DataProcessorType_Text,
     e_TextDataProcessorClass_Highlighter,

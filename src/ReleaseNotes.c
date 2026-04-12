@@ -25,34 +25,34 @@ struct ReleaseInfo
 //static struct ReleaseNote m_Notes_NEXT[]=
 //{
 //    {   NOTETYPE_ENHANCEMENT,"Title",
-//            "Descrition"},
+//            "Description"},
 //};
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {   NOTETYPE_ENHANCEMENT,"Added new option to clear the screen on send buffer",
-            "An option has been added that will clear then screen when a send"
+            "An option has been added that will clear the screen when a send"
             " buffer is sent."},
     {   NOTETYPE_FUNCTIONALLY_FIX,"Changed default bottom panel size",
             "The bottom panel was not showing the controls, so the default"
             " value has been updated to be 180 instead of 80."},
     {   NOTETYPE_BUG_FIX,"Changed how maximize window on startup works",
-            "On startup the windows was maximized before it was show the main"
-            " window.  It has been changed to opening the window then"
-            " maximized.  This is because on some systems it would not"
+            "On startup the main window was maximized before it was shown"
+            "  It has been changed to opening the window then"
+            " maximizing.  This is because on some systems it would not"
             " actually maximize correctly."},
     {   NOTETYPE_ENHANCEMENT,"Added new option for rescanning connections",
             "Added new option for rescanning connections on opening the"
             " new connection dialog."},
     {   NOTETYPE_BUG_FIX,"Fixed the binary processor field lengths of 0",
             "When you had a definition where a field that used another"
-            " field for it's length and that worked out to be 0 the"
+            " field for its length and that worked out to be 0 the"
             " processor would mess up where it was in the definition."
             "  It has been fixed to handle 0 length fields."},
     {   NOTETYPE_ENHANCEMENT,"Added version number to window title",
             "The main window now includes the base version number."},
     {   NOTETYPE_ENHANCEMENT,"Added quick jump button to send line inputs",
-            "In the main window below the text cavnas there is a line input"
+            "In the main window below the text canvas there is a line input"
             " (for binary connections) that lets the user input a line / buffer"
             " and send it.  A new jump to send buffer panel was added."},
     {   NOTETYPE_ENHANCEMENT,"Added new standard text input line to text mode",
@@ -60,12 +60,12 @@ static struct ReleaseNote m_Notes_NEXT[]=
             " you type in a string (and edit it) before sending it.  This"
             " text input also supports a history of lines sent as well as"
             " the line endings to send.\n"
-            "This is usefull if your device has a command prompt but doesn't"
+            "This is useful if your device has a command prompt but doesn't"
             " support editing or a command history."},
     {   NOTETYPE_ENHANCEMENT,"Added direct panel selections to session",
             "The direct send panel in the bottom of the text and binary"
             " modes let you select line ending, hex/text mode and such but"
-            " this was not saved, when you restared WhippyTerm it was reset"
+            " this was not saved, when you restarted WhippyTerm it was reset"
             " to default.  It is now saved in session (all but the contents of"
             " hex buffer)."},
     {   NOTETYPE_ENHANCEMENT,"Added a close button to the direct send panel",
@@ -77,7 +77,7 @@ static struct ReleaseNote m_Notes_NEXT[]=
             "This is a per-connection setting."},
     {   NOTETYPE_ENHANCEMENT,"Added new clear screen option to clear scroll buffer",
             "A new clear screen option was added that lets you clear the"
-            " scroll buffer as well when the the screen is cleared."},
+            " scroll buffer as well when the screen is cleared."},
     {   NOTETYPE_ENHANCEMENT,"Added new clear screen option to clear hex panels as well",
             "When the main display is cleared an option has been added that"
             " will also clear the incoming and outgoing hex displays."},
@@ -86,28 +86,30 @@ static struct ReleaseNote m_Notes_NEXT[]=
             " as the screen if the clear is pressed 2 times (actually if the"
             " main screen is already clear then the scroll back is also"
             " cleared)"},
-    {   NOTETYPE_ENHANCEMENT,"Fixed a number of small bugs after a AI code lint",
-            "Code was run though Claude AI to check for bugs.  Some small"
-            " bugs where found and have been fixed."},
+    {   NOTETYPE_ENHANCEMENT,"Fixed a number of small bugs after an AI code lint",
+            "Code was run through Claude AI to check for bugs.  Some small"
+            " bugs were found and have been fixed."},
     {   NOTETYPE_ENHANCEMENT,"RTS/CTS flow control broken on Linux",
             "In the Linux version of the serial drivers the RTS/CTS flow"
             " control was not actually being set (CRTSCTS was applied to"
-            " to the wrong field) and so hardware flow control should not"
+            " the wrong field) and so hardware flow control should not"
             " have worked.  This has been fixed."},
+    {   NOTETYPE_POLISH,"Fixed spell errors",
+            "Ran code though a spell on the strings and fixed the errors."},
 };
 
 static struct ReleaseNote m_Notes_Rel2_2_1_0[]=
 {
     {
-        NOTETYPE_BUG_FIX,"Upload files that are to small crashes",
+        NOTETYPE_BUG_FIX,"Upload files that are too small crashes",
             "If you tried sending a small file it would crash WhippyTerm."
             "  If the file all fit in the first send buffer then the upload"
-            " system would close the connected before then try updating"
+            " system would close the connection before trying to update"
             " the current position on a closed file and would crash.  Fixed."},
     {
         NOTETYPE_BUG_FIX,"Pressing cancel on the send file file requester didn't abort upload",
-            "When you where uploading a RAW file from the menu, but select to"
-            " cancel the upload, WhippyTerm just went ahead an uploads the "
+            "When you were uploading a RAW file from the menu, but select to"
+            " cancel the upload, WhippyTerm just went ahead an uploaded the "
             "file anyway.  This has been fixed."},
 };
 
@@ -120,19 +122,19 @@ static struct ReleaseNote m_Notes_Rel2_2_0_0[]=
             " with the other controls."},
     {
         NOTETYPE_POLISH,"Fixed a number of issues with Dark Mode",
-            "Not all widgets where drawn correctly when in dark mode."},
+            "Not all widgets were drawn correctly when in dark mode."},
     {
         NOTETYPE_BUG_FIX,"Fixed a problem with the DPI not drawing the panels open/close bars correctly.",
             "When running with a high-DPI the dot pattern was being stretched"
-            " and making an odd pattern.  This has changed to diable"
+            " and making an odd pattern.  This has changed to disable"
             " stretching when drawing the panel open/close bars."},
     {
         NOTETYPE_ENHANCEMENT,"Added error messages to the upload/download",
             "The upload/download file transfer didn't show any errors, just"
             " quit the transfer.  There are now error messages."},
     {
-        NOTETYPE_ENHANCEMENT,"Added new options to xmodem tranfer",
-            "New options for start timeout, max NAK's before abort, and"
+        NOTETYPE_ENHANCEMENT,"Added new options to xmodem transfer",
+            "New options for start timeout, max NAKs before abort, and"
             " timeout between packets have been added."},
     {
         NOTETYPE_POLISH,"Changed file transfers to auto open side panel",
@@ -140,7 +142,7 @@ static struct ReleaseNote m_Notes_Rel2_2_0_0[]=
             " is now opened."},
     {
         NOTETYPE_ENHANCEMENT,"Complete rewrite on auto reconnect system",
-            "Count not find a problem with the auto reconnect but have"
+            "Could not find a problem with the auto reconnect but have"
             " a bug report.  Deleted and rewrote the auto reconnect"
             " to be a simpler system that uses less code (less code ="
             " less likely to mess up)"},
@@ -155,7 +157,7 @@ static struct ReleaseNote m_Notes_Rel2_2_0_0[]=
             "A new widget for showing http links the user can click on."},
     {
         NOTETYPE_BUG_FIX,"Reset term didn't reset colors in binary mode",
-            "When you where in the binary mode selecting reset terminal"
+            "When you were in the binary mode selecting reset terminal"
             " didn't reset the current styling.  It does now."},
     {
         NOTETYPE_ENHANCEMENT,"Added function to let plugins change a widgets label",
@@ -169,7 +171,7 @@ static struct ReleaseNote m_Notes_Rel2_2_0_0[]=
         NOTETYPE_ENHANCEMENT,"Added change property widget control",
             "Plugins can now change the properties of widgets with the"
             " new change property functions.  Currently only the"
-            " font type of text box's can be changed."},
+            " font type of text boxs can be changed."},
     {
         NOTETYPE_ENHANCEMENT,"Added new event for text input widgets",
             "A new event for text input widgets has been added.  The"
@@ -188,16 +190,16 @@ static struct ReleaseNote m_Notes_Rel2_2_0_0[]=
         NOTETYPE_BUG_FIX,"Fixed a bug where if a block of bytes came in it wouldn't add to hex panel",
             "When a block of bytes came in and it was bigger than the size of"
             " the hex buffer it would just clear the hex panel instead of"
-            " coping the last bytes."},
+            " copying the last bytes."},
     {
         NOTETYPE_NEW_FEATURE,"Added new out going hex panel",
-            "A new hex display was been added to the bottom panel.  This"
+            "A new hex display has been added to the bottom panel.  This"
             " new display shows the outgoing bytes in hex the same as the"
             " incoming hex panel does.  The Hex panel has also been renamed"
             " to incoming hex."},
     {
         NOTETYPE_ENHANCEMENT,"Added menu entries to open/close the panels",
-            "New menu options where added to the view menu to show the status"
+            "New menu options were added to the view menu to show the status"
             " and let you control if the panels are open or closed.  You can"
             " also bind the open/close to the a key press."},
     {
@@ -258,10 +260,10 @@ static struct ReleaseNote m_Notes_Rel2_1_0_0[]=
     {   NOTETYPE_ENHANCEMENT,"Added a \"are you sure\" popup on quit",
             "When you close WhippyTerm it will now prompt to make sure you"
             " are sure if there is one or more open connection tabs.\n"
-            "This function can be turn on/off in the settings."},
+            "This function can be turned on/off in the settings."},
     {   NOTETYPE_ENHANCEMENT,"Added a restore connection on startup option",
             "A new setting has been added that will reopen the connection tabs"
-            " that where open then WhippyTerm quits.  It will store this"
+            " that were open when WhippyTerm quits.  It will store this"
             " info in the session data, and includes any custom settings"
             " applied to the connection, if the connection was open or closed,"
             " any connection options."},
@@ -269,7 +271,7 @@ static struct ReleaseNote m_Notes_Rel2_1_0_0[]=
             "The ANSI decoder was not sending page up, page down, home, end,"
             " and insert.  It has been updated to send these."},
     {   NOTETYPE_ENHANCEMENT,"Added cursor key modes",
-            "A need mode was added called cursor key mode.  It sets how the"
+            "A new mode called cursor key mode.  It sets how the"
             " cursor and other movement keys (like the page up and down)"
             " work.  When cursor key mode is \"send\" then pressing the cursor"
             " keys sends out control codes on the connection (what control"
@@ -278,7 +280,7 @@ static struct ReleaseNote m_Notes_Rel2_1_0_0[]=
             " send anything out the connection.  This is by default connected"
             " to the state of the Scroll Lock key."},
     {   NOTETYPE_ENHANCEMENT,"Added new commands to move the view around",
-            "New commands where added that lets the user bind keys to"
+            "New commands were added that lets the user bind keys to"
             " functions to move the current view window around.  The"
             " user can now move the view up/down/left/right, goto the"
             " top/bottom of the buffer, and page up and down."},
@@ -324,9 +326,9 @@ static struct ReleaseNote m_Notes_Rel2_0_0_0[]=
     {
         NOTETYPE_BUG_FIX,"Fixed bug with selections in binary mode",
             "When in binary mode the selection was showing up and"
-            " disappearing randomly.  There is there is selection"
-            " was not be check so it was drawing random data as the "
-            " selection.  It has been fixed."},
+            " disappearing randomly.  There was no check for if a selection"
+            " existed, so it was drawing random data as the selection."
+            "  It has been fixed."},
     {
         NOTETYPE_BUG_FIX,"Added bookmark import/export",
             "You can now export your bookmarks to a file and you can replace"
@@ -347,7 +349,7 @@ static struct ReleaseNote m_Notes_Rel2_0_0_0[]=
         NOTETYPE_ENHANCEMENT,"A restart is no longer needed to uninstall a plugin",
             "The plugin system was made more dynamic so you can"
             " install / uninstall plugins without restarting WhippyTerm."
-            " This also effects enable/disable plugin."},
+            " This also affects enable/disable plugin."},
     {
         NOTETYPE_ENHANCEMENT,"Added upgrade plugin",
             "The only way to upgrade a plugin was to uninstall it and"
@@ -362,7 +364,7 @@ static struct ReleaseNote m_Notes_Rel2_0_0_0[]=
             " CRC there is a button to generate source code to calculate"
             " the selection CRC type."},
     {
-        NOTETYPE_ENHANCEMENT,"Added an select color button to the color settings",
+        NOTETYPE_ENHANCEMENT,"Added a select color button to the color settings",
             "In Settings->Display->Colors you can input colors by Web # and"
             " sliders. A new button was added that you can press to use"
             " the color picker the same as with Cursor"
@@ -381,8 +383,8 @@ static struct ReleaseNote m_Notes_Rel2_0_0_0[]=
         NOTETYPE_ENHANCEMENT,"Server style IO plugins now start with \"SRV_\"",
             "Server style IO plugins now should start their URI prefix with"
             " \"SRV_\" to show that they are a server.  A server is a plugin"
-            " that ways for a client to connect to it.  This has been"
-            " done to make things more consistant, so for example a TCP/IP"
+            " that waits for a client to connect to it.  This has been"
+            " done to make things more consistent, so for example a TCP/IP"
             " server would now be SRV_TCP://localhost and the client would"
             " be TCP://localhost"},
     {
@@ -400,7 +402,7 @@ static struct ReleaseNote m_Notes_Rel2_0_0_0[]=
             " wasn't stored anywhere.  A new setting has been"
             " added that lets you customize this for the system and"
             " have bookmarks store the setting.\n"
-            "You can also just temperately for the current connection"
+            "You can also just temporarily for the current connection"
             " as well without changing the settings."},
     {
         NOTETYPE_ENHANCEMENT,"Moved the QT6 for GUI",
@@ -431,9 +433,9 @@ static struct ReleaseNote m_Notes_Rel2_0_0_0[]=
     {
         NOTETYPE_BUG_FIX,"Fixed bug where selection would move if back buffer filled",
             "When the back buffer filled and a new line was added the selection"
-            " would change what lines where selected (the line would move up,"
-            " but the selection would say on the old line making it look like"
-            " the seleciton had moved)."},
+            " would change what lines were selected (the line would move up,"
+            " but the selection would stay on the old line making it look like"
+            " the selection had moved)."},
     {
         NOTETYPE_BUG_FIX,"Fixed bug where selection was being cleared when clipboard mode wasn't smart",
             "The selection was being cleared when the selection mode was not"
@@ -524,17 +526,17 @@ static struct ReleaseNote m_Notes_Rel1_1_0_0[]=
             "When you set the DPI something other than 96 (scale %) then"
             " selecting text did not work correctly.  This (hopefully)"
             " has been fixed."},
-    {   NOTETYPE_BUG_FIX,"Fixed a bug with binary displays not ignore attribs that are turned off",
+    {   NOTETYPE_BUG_FIX,"Fixed a bug with binary displays not ignoring attribs that are turned off",
             "You can suppress drawing of different attributes in the settings."
-            "  In text mode changing this hide that attribute, but in binary"
+            "  In text mode changing this hides that attribute, but in binary"
             " mode the attribute was still drawn.  This has been fixed."},
     {   NOTETYPE_ENHANCEMENT,"Added Lock window scroll when not on bottom line",
             "When the scroll bar is at the bottom the screen will be scrolled"
             " to the bottom when new text is added.  If the scroll bar is"
-            " not at the bottom it will say at it's current display."},
+            " not at the bottom it will stay at its current display."},
     {   NOTETYPE_ENHANCEMENT,"Improved open errors dialog with OS messages",
             "When an open connection fails the user is now prompted with"
-            " and error message.  This message can include more details from"
+            " an error message.  This message can include more details from"
             " the plugin."},
     {   NOTETYPE_ENHANCEMENT,"Added option to auto reconnect when a connection is closed",
             "A new feature was added that will auto retry opening a connection"
@@ -543,9 +545,9 @@ static struct ReleaseNote m_Notes_Rel1_1_0_0[]=
             " per-connection and toggled with a menu option under the"
             " connection menu."},
     {
-        NOTETYPE_ENHANCEMENT,"Extended plugin API so data processor plugin's can see bytes sent",
+        NOTETYPE_ENHANCEMENT,"Extended plugin API so data processor plugins can see bytes sent",
             "The data processors API has a new callback function that will"
-            " be called when data is send out of a connection."
+            " be called when data is sent out of a connection."
             "  See ProcessOutGoingData()."},
 };
 static struct ReleaseNote m_Notes_Rel1_0_4_0[]=
@@ -577,7 +579,7 @@ static struct ReleaseNote m_Notes_Rel1_0_2_0[]=
     {   NOTETYPE_BUG_FIX,"Fixed bug with open new connection from URI dialog",
             "Dialog was not setting up options which depending on the device would prevent connection from working."},
     {   NOTETYPE_BUG_FIX,"Fixed bug with importing settings does not apply the settings",
-            "When you imported new settings the settings where not being "
+            "When you imported new settings the settings were not being "
             "applied to connections, but new connections would get the "
             "settings."},
 };

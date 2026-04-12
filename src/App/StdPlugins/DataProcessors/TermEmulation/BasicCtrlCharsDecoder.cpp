@@ -73,10 +73,10 @@ struct DataProcessorAPI m_BasicCtrlCharsDecoderCBs=
 struct DataProcessorInfo m_BasicCtrlCharsDecoder_Info=
 {
     "Basic Control Characters",
-    "Basic ASCII control characters like new line, backspace, and cartridge return",
+    "Basic ASCII control characters like new line, backspace, and carriage return",
     "This processes the following bytes:\n"
         " * Line feed (0x0A)\n"
-        " * Cartridge return (0x0D)\n"
+        " * Carriage return (0x0D)\n"
         " * Tab (0x09)\n"
         " * Back space (0x08)\n"
         " * Form Feed (0x0C)\n",

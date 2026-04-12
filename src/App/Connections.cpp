@@ -1977,7 +1977,7 @@ e_ConWriteType Connection::InternalWriteBytes(const uint8_t *Data,int Bytes)
  *
  * FUNCTION:
  *    This function tells the driver to send any queued data.  This is only
- *    really usefull for block send style drivers as stream device always
+ *    really useful for block send style drivers as stream device always
  *    send their data.
  *
  * RETURNS:
@@ -9303,7 +9303,7 @@ void Connection::SetDirectPanelInHexMode(bool HexMode)
  *
  * FUNCTION:
  *    This function toggles open/close the direct send panel at the bottom of
- *    the text cavnas.
+ *    the text canvas.
  *
  * RETURNS:
  *    NONE

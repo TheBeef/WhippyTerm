@@ -2657,7 +2657,7 @@ void IOS_Close(t_IOSystemHandle *Handle)
  *    Handle [I] -- The IO handle to work on
  *
  * FUNCTION:
- *    This function sends any queued data.  This is really only usefull for
+ *    This function sends any queued data.  This is really only useful for
  *    block send devices (as you need to call this to have it send the packet)
  *
  * RETURNS:
@@ -5955,7 +5955,7 @@ static struct PluginSettings *IOS_FindPluginSetting(const char *BaseURI,
  *    Settings [I] -- The settings with the IO driver settings in it.
  *    BaseURI [I] -- The base URI string for this IO driver to lookup
  *    ContainerWidget [I] -- This is the GUI container that the plugin will
- *                           add it's widgets to.
+ *                           add its widgets to.
  *
  * FUNCTION:
  *    This function tells the IO driver to add it's settings widgets to a

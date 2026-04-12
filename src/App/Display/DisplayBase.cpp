@@ -643,7 +643,7 @@ void DisplayBase::DoBackspace(void)
  *    NONE
  *
  * FUNCTION:
- *    This function handles when a driver send a cartridge return command.
+ *    This function handles when a driver send a carriage return command.
  *
  * RETURNS:
  *    NONE

@@ -88,7 +88,7 @@ void RunDataProPluginSettingsDialog(class ConSettings *Settings,
             FirstTabContainer);
     if(m_DDPPS_PluginPrivData==NULL)
     {
-        UIAsk("Error","Failed to have the plugin add it's widgets.",e_AskBox_Error);
+        UIAsk("Error","Failed to have the plugin add its widgets.",e_AskBox_Error);
         UIFree_DataProPluginSettings();
         return;
     }

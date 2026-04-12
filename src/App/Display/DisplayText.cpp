@@ -3398,7 +3398,7 @@ void DisplayText::DoBackspace(void)
  *    NONE
  *
  * FUNCTION:
- *    This function handles the cartridge return.
+ *    This function handles the carriage return.
  *
  * RETURNS:
  *    NONE
@@ -3468,7 +3468,7 @@ void DisplayText::DoReturn(void)
  *    NONE
  *
  * FUNCTION:
- *    This function handles the cartridge return.
+ *    This function handles the carriage return.
  *
  * RETURNS:
  *    NONE

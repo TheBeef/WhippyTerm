@@ -1829,8 +1829,8 @@ void ANSIX364Decoder_ProcessESC(struct ANSIX364DecoderData *Data,
         case '6':   // Back Index (VT510)
         case '9':   // Forward Index (VT510)
         case '<':   // 
-        case '=':   // DECNKM  Numeric Keypad Mode (extention?)
-        case '>':   // DECNKM  Numeric Keypad Mode (extention?)
+        case '=':   // DECNKM  Numeric Keypad Mode (extension?)
+        case '>':   // DECNKM  Numeric Keypad Mode (extension?)
         case '@':   // Padding Character
         case 'A':   // High Octet Preset
         case 'B':   // BPH  Break Permitted Here

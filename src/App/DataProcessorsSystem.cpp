@@ -3082,7 +3082,7 @@ static const uint8_t *DPS_GetMarkString(t_DataProMark *Mark,uint32_t *Size,
  *    that would be added is queued instead.  When you release the
  *    freeze then all the chars are added to the display at that point.
  *
- *    This is usefull if you want to erase text from the incoming stream
+ *    This is useful if you want to erase text from the incoming stream
  *    but don't want the text to flash infront of the user (as it's drawn
  *    and then erased later).
  *

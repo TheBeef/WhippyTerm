@@ -416,6 +416,12 @@ void WTBasic_FreeContext(t_ScriptingEngineContextType *Context)
 {
     struct WTBasicContext *Data=(struct WTBasicContext *)Context;
 
+    if(Data->PrintBuff!=NULL)
+    {
+        free(Data->PrintBuff);
+        Data->PrintBuffSize=0;
+    }
+
     mb_close(&Data->bas);
     delete Data;
 }
@@ -592,8 +598,7 @@ static int GenericKeywordFn(struct mb_interpreter_t *bas, void **arg)
         keyword=Data->RegKeywords.find(fnname);
         if(keyword==Data->RegKeywords.end())
         {
-            mb_raise_error(bas,arg,SE_CM_FUNC_DOES_NOT_EXIST,MB_FUNC_ERR);
-            return MB_FUNC_ERR;
+            throw(SE_CM_FUNC_DOES_NOT_EXIST);
         }
 
         if(keyword->second.RetType!=e_ScriptDataArg_None)
@@ -684,8 +689,7 @@ static int GenericKeywordFn(struct mb_interpreter_t *bas, void **arg)
                 case e_ScriptDataArg_None:
                 case e_ScriptDataArgMAX:
                     /* Unknown arg type */
-                    mb_raise_error(bas,arg,SE_CM_NOT_SUPPORTED,MB_FUNC_ERR);
-                    return MB_FUNC_ERR;
+                    throw(SE_CM_NOT_SUPPORTED);
                 break;
             }
             ExeArgs[a].Value=new char[strlen(ValueStr)+1];
@@ -757,7 +761,6 @@ static int GenericKeywordFn(struct mb_interpreter_t *bas, void **arg)
 
     return RetValue;
 }
-
 
 void ConvertKey2String(struct PluginKeyPress *key,char *RetStr,int Size)
 {
@@ -1115,6 +1118,7 @@ int WriteStdOut(struct mb_interpreter_t *bas,const char *fmt,...)
     struct WTBasicContext *Data;
     char *p;
     char *Start;
+    char *NewPrintBuff;
 
     mb_get_userdata(bas,(void **)&Data);
 
@@ -1132,9 +1136,10 @@ int WriteStdOut(struct mb_interpreter_t *bas,const char *fmt,...)
     if(ret>(int)Data->PrintBuffSize)
     {
         /* Resize */
-        Data->PrintBuff=(char *)realloc(Data->PrintBuff,ret+1);
-        if(Data->PrintBuff==NULL)
+        NewPrintBuff=(char *)realloc(Data->PrintBuff,ret+1);
+        if(NewPrintBuff==NULL)
             return 0;
+        Data->PrintBuff=NewPrintBuff;
     }
     va_start(arg,fmt);
     ret=vsnprintf(Data->PrintBuff,Data->PrintBuffSize,fmt,arg);

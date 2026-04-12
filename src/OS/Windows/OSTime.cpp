@@ -33,10 +33,10 @@ uint32_t GetElapsedTime_ms(void)
 
     GetSystemTimeAsFileTime(&CurrentTime);
 
-    return CurrentTime.dwLowDateTime;
+    return CurrentTime.dwLowDateTime/10000;
 }
 
 void OS_Sleep(unsigned int ms)
 {
-    Sleep(ms*1000);
+    Sleep(ms);
 }

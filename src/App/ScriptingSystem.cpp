@@ -3419,11 +3419,21 @@ static void RunScriptThread(void *data)
         {
             if(API->RegisterKeyword!=NULL)
             {
-                API->RegisterKeyword(
-                        (t_ScriptingEngineContextType *)SEInstance->Context,
-                        cmd->NameSpace.c_str(),cmd->Name.c_str(),
-                        cmd->RetType,cmd->OptionalArgStart,
-                        cmd->ScriptArgs,cmd->ArgCount);
+                try
+                {
+                    API->RegisterKeyword(
+                            (t_ScriptingEngineContextType *)SEInstance->Context,
+                            cmd->NameSpace.c_str(),cmd->Name.c_str(),
+                            cmd->RetType,cmd->OptionalArgStart,
+                            cmd->ScriptArgs,cmd->ArgCount);
+                }
+                catch(...)
+                {
+                    /* We don't actually expect the plugin to throw, but
+                       we have this wrapper just incase */
+                    UnLockMutex(m_ScriptCommandListMutex);
+                    throw("Unhandled expection from plugin");
+                }
             }
         }
         UnLockMutex(m_ScriptCommandListMutex);
@@ -3442,7 +3452,7 @@ static void RunScriptThread(void *data)
 
             /* Make sure we exit if the main thread frees */
             if(SEInstance->MainThreadFreed)
-                throw(nullptr);
+                throw(NULL);
         }
 
         if(!API->RunLoadedScript(SEInstance->Context))

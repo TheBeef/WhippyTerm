@@ -690,6 +690,9 @@ void SendBuffer::SetBufferName(int BufferIndex,const char *NewName)
     free(BufferName[BufferIndex]);
 
     BufferName[BufferIndex]=(char *)malloc(strlen(NewName)+1);
+    if(BufferName[BufferIndex]==NULL)
+        return;
+
     strcpy(BufferName[BufferIndex],NewName);
 
     MW_InformOfSendBufferChange(BufferIndex);

@@ -58,13 +58,13 @@ class SendBuffer
                 uint8_t **Data,uint32_t *DataSize);
         void ClearAllBuffers(void);
 
-        void SetBuffer(int BufferIndex,const uint8_t *Memory,uint32_t BSize);
-        void SetBufferName(int BufferIndex,const char *NewName);
-        char *GetBufferName(int BufferIndex);
-        bool GetBufferInfo(int BufferIndex,const uint8_t **Memory,
+        void SetBuffer(unsigned int BufferIndex,const uint8_t *Memory,uint32_t BSize);
+        void SetBufferName(unsigned int BufferIndex,const char *NewName);
+        char *GetBufferName(unsigned int BufferIndex);
+        bool GetBufferInfo(unsigned int BufferIndex,const uint8_t **Memory,
                 uint32_t *BSize);
 
-        bool Send(class Connection *Con,int BufferIndex);
+        bool Send(class Connection *Con,unsigned int BufferIndex);
 
     private:
         uint8_t *Buffer[MAX_SEND_BUFFERS];

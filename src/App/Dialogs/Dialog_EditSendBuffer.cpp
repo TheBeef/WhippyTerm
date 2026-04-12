@@ -1024,7 +1024,7 @@ static void DESB_DoInsertFromDisk(void)
     string File;
     string LoadFilename;
     FILE *in;
-    unsigned long FileSize;
+    long FileSize;
     uint8_t *NewBuffer;
     int InsertPos;
 

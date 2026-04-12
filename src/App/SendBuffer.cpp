@@ -620,7 +620,7 @@ void SendBuffer::LoadBufferFromWTSBFile(class RIFF *Load,
  *    SendBuffer::SetBuffer
  *
  * SYNOPSIS:
- *    void SendBuffer::SetBuffer(int BufferIndex,const uint8_t *Memory,
+ *    void SendBuffer::SetBuffer(unsigned int BufferIndex,const uint8_t *Memory,
  *              uint32_t BSize);
  *
  * PARAMETERS:
@@ -638,7 +638,8 @@ void SendBuffer::LoadBufferFromWTSBFile(class RIFF *Load,
  * SEE ALSO:
  *    SendBuffer::SetBufferName()
  ******************************************************************************/
-void SendBuffer::SetBuffer(int BufferIndex,const uint8_t *Memory,uint32_t BSize)
+void SendBuffer::SetBuffer(unsigned int BufferIndex,const uint8_t *Memory,
+        uint32_t BSize)
 {
     if(BufferIndex>=MAX_SEND_BUFFERS)
         return;
@@ -667,7 +668,8 @@ void SendBuffer::SetBuffer(int BufferIndex,const uint8_t *Memory,uint32_t BSize)
  *    SendBuffer::SetBufferName
  *
  * SYNOPSIS:
- *    void SendBuffer::SetBufferName(int BufferIndex,const char *NewName);
+ *    void SendBuffer::SetBufferName(unsigned int BufferIndex,
+ *              const char *NewName);
  *
  * PARAMETERS:
  *    BufferIndex [I] -- The buffer to replace the data for
@@ -682,7 +684,7 @@ void SendBuffer::SetBuffer(int BufferIndex,const uint8_t *Memory,uint32_t BSize)
  * SEE ALSO:
  *    SendBuffer::SetBuffer(), SendBuffer::GetBufferName()
  ******************************************************************************/
-void SendBuffer::SetBufferName(int BufferIndex,const char *NewName)
+void SendBuffer::SetBufferName(unsigned int BufferIndex,const char *NewName)
 {
     if(BufferIndex>=MAX_SEND_BUFFERS)
         return;
@@ -703,7 +705,7 @@ void SendBuffer::SetBufferName(int BufferIndex,const char *NewName)
  *    SendBuffer::GetBufferName
  *
  * SYNOPSIS:
- *    char *SendBuffer::GetBufferName(int BufferIndex);
+ *    char *SendBuffer::GetBufferName(unsigned int BufferIndex);
  *
  * PARAMETERS:
  *    BufferIndex [I] -- The buffer to get the data for
@@ -722,7 +724,7 @@ void SendBuffer::SetBufferName(int BufferIndex,const char *NewName)
  * SEE ALSO:
  *    SendBuffer::SetBufferName()
  ******************************************************************************/
-char *SendBuffer::GetBufferName(int BufferIndex)
+char *SendBuffer::GetBufferName(unsigned int BufferIndex)
 {
     char buff[100];
 
@@ -743,8 +745,8 @@ char *SendBuffer::GetBufferName(int BufferIndex)
  *    SendBuffer::GetBufferInfo
  *
  * SYNOPSIS:
- *    bool SendBuffer::GetBufferInfo(int BufferIndex,const uint8_t **Memory,
- *              uint32_t *BSize);
+ *    bool SendBuffer::GetBufferInfo(unsigned int BufferIndex,
+ *              const uint8_t **Memory,uint32_t *BSize);
  *
  * PARAMETERS:
  *    BufferIndex [I] -- The buffer to get the data for
@@ -766,7 +768,7 @@ char *SendBuffer::GetBufferName(int BufferIndex)
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool SendBuffer::GetBufferInfo(int BufferIndex,const uint8_t **Memory,
+bool SendBuffer::GetBufferInfo(unsigned int BufferIndex,const uint8_t **Memory,
         uint32_t *BSize)
 {
     *Memory=NULL;
@@ -831,7 +833,7 @@ void SendBuffer::ClearAllBuffers(void)
  *    SendBuffer::Send
  *
  * SYNOPSIS:
- *    bool SendBuffer::Send(class Connection *Con,int BufferIndex);
+ *    bool SendBuffer::Send(class Connection *Con,unsigned int BufferIndex);
  *
  * PARAMETERS:
  *    Con [I] -- The connection to send the buffer out
@@ -847,7 +849,7 @@ void SendBuffer::ClearAllBuffers(void)
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool SendBuffer::Send(class Connection *Con,int BufferIndex)
+bool SendBuffer::Send(class Connection *Con,unsigned int BufferIndex)
 {
     class TheMainWindow *TheMW;
 

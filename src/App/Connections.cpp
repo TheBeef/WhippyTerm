@@ -393,7 +393,7 @@ void Con_ApplySettings2AllConnections(void)
     }
     if(HadAnError)
     {
-        UIAsk("Error","There was an error applying settinsg to a connection",
+        UIAsk("Error","There was an error applying settings to a connection",
                 e_AskBox_Error,e_AskBttns_Ok);
     }
 }
@@ -469,11 +469,13 @@ Connection::Connection(const char *URI)
         FrozenRetStrBufferSize=0;
         FrozenQueueStrLen=0;
         AutoReopenEnabled=false;
+        LastBellPlayed=0;
+        FontSize=8;
 
         Bookmark=0;
         ZoomLevel=0;
 
-        for(r=0;r<(int)e_SysScriptMAX;r++)
+        for(r=0;r<(unsigned int)e_SysScriptMAX;r++)
             RunningScripts[r]=NULL;
 
         /* Copy the default settings for this connection from settings */
@@ -3557,6 +3559,7 @@ bool Connection::StartCapture(void)
     const char *OpenMode;
     time_t curtime;
     char buff[100];
+    const char *TimeStr;
 
     if(CaptureToFile.WriteHandle!=NULL)
         fclose(CaptureToFile.WriteHandle);
@@ -3584,9 +3587,13 @@ bool Connection::StartCapture(void)
         {
             /* Now output a timestamp */
             time(&curtime);
-            strcpy(buff,ctime(&curtime));
-            buff[24]=':';
-            fwrite(buff,strlen(buff),1,CaptureToFile.WriteHandle);
+            TimeStr=ctime(&curtime);
+            if(TimeStr!=NULL)
+            {
+                strcpy(buff,TimeStr);
+                buff[24]=':';
+                fwrite(buff,strlen(buff),1,CaptureToFile.WriteHandle);
+            }
         }
     }
 
@@ -3738,6 +3745,7 @@ void Connection::HandleCaptureIncomingData(const uint8_t *Inbuff,int bytes)
     const uint8_t *LastStart;
     char buff[100];
     time_t curtime;
+    const char *TimeStr;
 
     /* Check if we are actively saving */
     if(CaptureToFile.WriteHandle==NULL)
@@ -3786,9 +3794,13 @@ void Connection::HandleCaptureIncomingData(const uint8_t *Inbuff,int bytes)
                             CaptureToFile.WriteHandle);
                     /* Now output a timestamp */
                     time(&curtime);
-                    strcpy(buff,ctime(&curtime));
-                    buff[24]=':';
-                    fwrite(buff,strlen(buff),1,CaptureToFile.WriteHandle);
+                    TimeStr=ctime(&curtime);
+                    if(TimeStr!=NULL)
+                    {
+                        strcpy(buff,TimeStr);
+                        buff[24]=':';
+                        fwrite(buff,strlen(buff),1,CaptureToFile.WriteHandle);
+                    }
                     LastStart=Pos+1;
                     continue;
                 }
@@ -9009,7 +9021,7 @@ void Connection::InformOfScriptDone(struct ScriptHandle *Script)
 
     /* We need to find this script */
     RunningScriptsCount=0;
-    for(r=0;r<(int)e_SysScriptMAX;r++)
+    for(r=0;r<(unsigned int)e_SysScriptMAX;r++)
     {
         if(RunningScripts[r]==Script)
         {

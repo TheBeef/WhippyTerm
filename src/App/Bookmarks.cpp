@@ -318,6 +318,26 @@ bool SaveBookmarks2File(t_BookmarkList &Bookmarks,const char *filename)
     return true;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    BookmarkConnection
+ *
+ * SYNOPSIS:
+ *    bool BookmarkConnection(class Connection *Con);
+ *
+ * PARAMETERS:
+ *    Con [I] -- The connection to bookmark
+ *
+ * FUNCTION:
+ *    This function bookmarks an open connection.
+ *
+ * RETURNS:
+ *    true -- Things worked out or were aborted.
+ *    false -- There was an error
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 bool BookmarkConnection(class Connection *Con)
 {
     struct Bookmark NewBookmark;
@@ -339,13 +359,13 @@ bool BookmarkConnection(class Connection *Con)
         if(!RunAddBookmarkDialog(NewBookmark))
             return true;
 
+        NewBookmark.BookmarkUID=g_BookmarkNextUID;
+        g_BookmarkNextUID++;
+
         /* Ok, find the insert position for this bookmark */
         if(NewBookmark.MenuName=="")
         {
             /* No menu just stick it on the end */
-            NewBookmark.BookmarkUID=g_BookmarkNextUID;
-            g_BookmarkNextUID++;
-
             g_BookmarkList.push_back(NewBookmark);
         }
         else
@@ -374,6 +394,9 @@ bool BookmarkConnection(class Connection *Con)
                 g_BookmarkList.push_back(NewBookmark);
             }
         }
+
+        /* Update this connection with it's new connection UID */
+        Con->Connect2Bookmark(NewBookmark.BookmarkUID);
     }
     catch(...)
     {

@@ -6431,6 +6431,9 @@ void Connection::RethinkLockOut(void)
 {
     const char *Message;
 
+    if(Display==NULL)
+        return;
+
     Message=NULL;
     if(Download.Stats.InProgress)
         Message="Downloading...";

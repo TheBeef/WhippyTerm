@@ -7341,7 +7341,7 @@ void DisplayText::AdvancePoint(int &PX,int &PY,int Amount,int MinX,
         {
             /* Forward */
             CharsOnLine=TextLine_FindLineLen(Point.Line);
-            if(PX+AmountLeft>=CharsOnLine)
+            if(PX+AmountLeft>CharsOnLine)
             {
                 /* We are moving more that the line has, wrap */
                 AmountLeft-=CharsOnLine-PX+1;   // +1 for the new line char

@@ -8732,8 +8732,10 @@ void Connection::FreeFrozenQueue(void)
         switch(FrozenQueue->Type)
         {
             case e_ConFrozenQueueEntry_WriteChar2Display:
-            case e_ConFrozenQueueEntry_InsertString:
                 free(FrozenQueue->Str);
+            break;
+            case e_ConFrozenQueueEntry_InsertString:
+                free(FrozenQueue->InsertStr.Str);
             break;
             case e_ConFrozenQueueEntry_SetFGColor:
             case e_ConFrozenQueueEntry_SetBGColor:

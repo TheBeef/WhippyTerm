@@ -1980,6 +1980,8 @@ static void Scripting_FreeExeRegisteredKeywordRetStr(t_ScriptingEngineInstType *
 {
     if(RetStr==NULL || *RetStr==NULL)
         return;
+
+    /* DEBUG PAUL: Finish this.... */
 }
 
 /*******************************************************************************

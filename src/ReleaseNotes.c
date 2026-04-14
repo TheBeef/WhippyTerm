@@ -100,7 +100,15 @@ static struct ReleaseNote m_Notes_NEXT[]=
             "Changing the terminal emulation using the terminal menu was"
             " kinda a mess and hard to use.  It has been changed to only"
             " be 1 level deep, includes a checkmark for what one is selected,"
-            " and now lets you change the settings directly."."},
+            " and now lets you change the settings directly."},
+
+    {   NOTETYPE_BUG_FIX,"Font rendering doesn't lineup with mouse clicks",
+            "The font rendering don't not work out the same as when"
+            " calculating char placement for the mouse.  As a result"
+            " selection do not always select the letter under the mouse"
+            " pointer.  A new font rendering option has been added to"
+            " hopefully fix this."},
+
 };
 
 static struct ReleaseNote m_Notes_Rel2_2_1_0[]=

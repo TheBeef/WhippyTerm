@@ -196,6 +196,7 @@ bool Widget_TextCanvas::SetFont(const char *FontName,int PointSize,bool Bold,
     RenderFont.setKerning(false);   // Doesn't actually work
     RenderFont.setLetterSpacing(QFont::AbsoluteSpacing,0);
     RenderFont.setWordSpacing(0);
+    RenderFont.setHintingPreference(QFont::PreferFullHinting);
 
     RenderFont.setBold(Bold);
     RenderFont.setItalic(Italic);

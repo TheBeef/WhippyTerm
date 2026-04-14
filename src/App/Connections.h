@@ -472,8 +472,6 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         e_RightPanelTabType GetRightPanelInfo(void);
         void SetBottomPanelInfo(e_BottomPanelTabType SelectedTab);
         e_BottomPanelTabType GetBottomPanelInfo(void);
-        void SetCustomSettings(class ConSettings &NewSettings);
-        void ApplyCustomSettings(void);
         void Connect2Bookmark(int BookmarkUID);
         int GetConnectionBookmark(void);
         void ClearScreen(void);
@@ -512,6 +510,11 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void ComTestFastTick(void);
         const struct ComTestStats *GetComTestStats(void);
         void RegisterComTestUpdateFn(void (*Update)(class Connection *));
+
+        /* Custom settings */
+        void SetCustomSettings(class ConSettings &NewSettings);
+        class ConSettings *GetCustomSettings(void);
+        void ApplyCustomSettings(void);
 
         void DisableTxKeyboard(bool Enabled);
         void DisableDisplayWrite(bool Enabled);
@@ -569,6 +572,8 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         struct DownloadStats const *DownloadGetStats(void);
         void SetDownloadFilenameSet(bool Set);
         bool IsDownloadFilenameSet(void);
+
+        const char *GetProcessorID(void);
 
     private:
         void *OurParentWidget;

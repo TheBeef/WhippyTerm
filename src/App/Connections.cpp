@@ -1153,7 +1153,7 @@ bool Connection::ApplySettings(void)
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    GetCustomSettings()
  ******************************************************************************/
 void Connection::SetCustomSettings(class ConSettings &NewSettings)
 {
@@ -1162,6 +1162,33 @@ void Connection::SetCustomSettings(class ConSettings &NewSettings)
     CustomSettings=NewSettings;
 
     ApplyCustomSettings();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::GetCustomSettings
+ *
+ * SYNOPSIS:
+ *    class ConSettings *Connection::GetCustomSettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets the custom settings being used.
+ *
+ * RETURNS:
+ *    A pointer to the custom settings or NULL if global settings are being
+ *    used.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+class ConSettings *Connection::GetCustomSettings(void)
+{
+    if(!UsingCustomSettings)
+        return NULL;
+    return &CustomSettings;
 }
 
 /*******************************************************************************
@@ -7380,6 +7407,53 @@ bool Connection::IsProcessorATextProcessor(struct ProcessorConData &PData)
         }
     }
     return RetValue;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::GetProcessorID
+ *
+ * SYNOPSIS:
+ *    const char *Connection::GetProcessorID(void);
+ *
+ * PARAMETERS:
+ *    ID [O] -- The ID string for the active processor
+ *
+ * FUNCTION:
+ *    This function gets the active processor for this connection.
+ *
+ * RETURNS:
+ *    A pointer to the processors ID string or NULL if not set.
+ *    This is static.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+const char *Connection::GetProcessorID(void)
+{
+    i_DPSDataProcessorsType CurProcessor;
+
+    /* Go though all the processors and find the first
+       'e_TextDataProcessorClass_TermEmulation' or
+       'e_BinaryDataProcessorClass_Decoder' we find */
+    for(CurProcessor=ProcessorData.DataProcessorsList.begin();
+            CurProcessor!=ProcessorData.DataProcessorsList.end();
+            CurProcessor++)
+    {
+        if(CurProcessor->Info.ProType==e_DataProcessorType_Text &&
+                CurProcessor->Info.TxtClass==e_TextDataProcessorClass_TermEmulation)
+        {
+            /* Found it */
+            return CurProcessor->ProID.c_str();
+        }
+        if(CurProcessor->Info.ProType==e_DataProcessorType_Binary &&
+                CurProcessor->Info.BinClass==e_BinaryDataProcessorClass_Decoder)
+        {
+            /* Found it */
+            return CurProcessor->ProID.c_str();
+        }
+    }
+    return NULL;
 }
 
 /*******************************************************************************

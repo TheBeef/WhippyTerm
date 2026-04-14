@@ -48,6 +48,7 @@
 #include "MWPanels/MW_SendBuffers.h"
 #include "MWPanels/MW_Bridge.h"
 #include "MWPanels/MW_AuxControls.h"
+#include "UI/UIControl.h"
 #include "UI/UIMainWindow.h"
 #include "PluginSDK/Plugin.h"
 #include <stdint.h>
@@ -90,6 +91,14 @@ typedef enum
 typedef std::list<class Connection *> t_MainWindowConnectionList;
 typedef t_MainWindowConnectionList::iterator i_MainWindowConnectionList;
 
+struct TermEmuMenu
+{
+    e_UIMenuCtrl *Menu;
+    const char *IDStr;
+};
+
+typedef std::list<struct TermEmuMenu> t_TermEmuMenuList;
+typedef t_TermEmuMenuList::iterator i_TermEmuMenuList;
 
 /***  CLASS DEFINITIONS                ***/
 class TheMainWindow
@@ -161,6 +170,7 @@ void Debug6(void);
         void InformOf_UploadSettingsChange(class Connection *Con);
         void InformOf_DownloadSettingsChange(class Connection *Con);
         void InformOf_SendPanelOpenClose(bool PanelOpen);
+        void ShowTermEmuSettingsDialog(void);
 
         /* Panel handlers */
         class MWConnectionOptions ConnectionOptionsPanel;
@@ -195,6 +205,8 @@ void Debug6(void);
         e_SysColShadeType CurrentBGStyleShade;
 
         class Connection *NoTabsConnection;
+
+        t_TermEmuMenuList TermEmuMenuContents;
 
         void CopyActiveTabSelectionToClipboard(void);
         void PasteFromClipboard(void);

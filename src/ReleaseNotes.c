@@ -96,6 +96,11 @@ static struct ReleaseNote m_Notes_NEXT[]=
             " have worked.  This has been fixed."},
     {   NOTETYPE_POLISH,"Fixed spell errors",
             "Ran code though a spell on the strings and fixed the errors."},
+    {   NOTETYPE_ENHANCEMENT,"Reworked the terminal emulation menu",
+            "Changing the terminal emulation using the terminal menu was"
+            " kinda a mess and hard to use.  It has been changed to only"
+            " be 1 level deep, includes a checkmark for what one is selected,"
+            " and now lets you change the settings directly."."},
 };
 
 static struct ReleaseNote m_Notes_Rel2_2_1_0[]=

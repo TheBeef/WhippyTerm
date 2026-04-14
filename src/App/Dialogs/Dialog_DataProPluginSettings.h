@@ -44,7 +44,7 @@
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
-void RunDataProPluginSettingsDialog(class ConSettings *Settings,
+bool RunDataProPluginSettingsDialog(class ConSettings *Settings,
         const char *DataProIDStr);
 
 #endif   /* end of "#ifndef __DIALOG_DATAPROPLUGINSETTINGS_H_" */

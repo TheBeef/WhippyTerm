@@ -459,6 +459,8 @@ private slots:
     
     void on_actionSend_Panel_triggered();
     
+    void on_actionTerminal_Settings_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

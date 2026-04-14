@@ -318,6 +318,8 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionStop_Script;
         case e_UIMWMenu_SendPanel:
             return (e_UIMenuCtrl *)realwin->ui->actionSend_Panel;
+        case e_UIMWMenu_TermEmuSettings:
+            return (e_UIMenuCtrl *)realwin->ui->actionTerminal_Settings;
         case e_UIMWMenuMAX:
         default:
         break;
@@ -1609,7 +1611,7 @@ void UIMW_EnableStopWatchTimer(t_UIMainWindow *win,bool Enable)
  * PARAMETERS:
  *    win [I] -- The main window to add to the menu for
  *    Title [I] -- The name of menu
- *    Binary [I] -- Is this is a binary emulation or text?
+ *    Binary [I] -- Is this is a binary emulation or text? (no longer used)
  *    ID [I] -- The ID that is send when the event is triggered.
  *
  * FUNCTION:
@@ -1621,22 +1623,33 @@ void UIMW_EnableStopWatchTimer(t_UIMainWindow *win,bool Enable)
  * SEE ALSO:
  *    
  ******************************************************************************/
-e_UIMenuCtrl *UIMW_Add2ApplyTerminalEmulationMenu(t_UIMainWindow *win,const char *Title,
-        bool Binary,uintptr_t ID)
+e_UIMenuCtrl *UIMW_Add2ApplyTerminalEmulationMenu(t_UIMainWindow *win,
+        const char *Title,bool Binary,uintptr_t ID)
 {
     Form_MainWindow *realwin=(Form_MainWindow *)win;
     QAction *NewAction;
     QMenu *UseParent;
+    QAction *FirstAction;
+    int MenuIndex;
 
     try
     {
         if(Binary)
-            UseParent=realwin->ui->menuBinary_Emulation;
+        {
+            UseParent=realwin->ui->menuApply_Terminal_Emulation;
+            FirstAction=realwin->ui->actionBinary_Emulations_InsertAbovePoint;
+        }
         else
-            UseParent=realwin->ui->menuText_Emulation;
+        {
+            UseParent=realwin->ui->menuApply_Terminal_Emulation;
+            FirstAction=realwin->ui->actionText_Emulations_InsertAbovePoint;
+        }
 
-        NewAction=UseParent->addAction(Title);
+        NewAction=new QAction(Title,UseParent);
         NewAction->setObjectName(QString::number(ID));
+        NewAction->setCheckable(true);
+
+        UseParent->insertAction(FirstAction,NewAction);
 
         realwin->connect(NewAction, SIGNAL(triggered()), realwin,
                 SLOT(actionApplyTerminalEmulationMenuItem_triggered()));
@@ -1649,6 +1662,7 @@ e_UIMenuCtrl *UIMW_Add2ApplyTerminalEmulationMenu(t_UIMainWindow *win,const char
     }
     return (e_UIMenuCtrl *)NewAction;
 }
+
 
 void UIMW_EnableApplyTerminalEmulationMenu(t_UIMainWindow *win,bool Enabled)
 {
@@ -1668,4 +1682,24 @@ void UIMW_ApplyTerminalEmulationMenuClearAll(t_UIMainWindow *win)
         delete *a;
     }
     realwin->ApplyTerminalEmulationMenuItems.clear();
+}
+
+e_UIMenuCtrl *UIMW_FindTerminalEmulationMenu(t_UIMainWindow *win,uintptr_t ID)
+{
+    Form_MainWindow *realwin=(Form_MainWindow *)win;
+    t_MWListOfActionsType::iterator a;
+    QString IDStr;
+
+    IDStr=QString::number(ID);
+
+    for(a=realwin->ApplyTerminalEmulationMenuItems.begin();
+            a!=realwin->ApplyTerminalEmulationMenuItems.end();a++)
+    {
+        if((*a)->objectName()==IDStr)
+            break;
+    }
+    if(a==realwin->ApplyTerminalEmulationMenuItems.end())
+        return NULL;
+
+    return (e_UIMenuCtrl *)*a;
 }

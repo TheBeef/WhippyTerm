@@ -51,7 +51,7 @@ static t_DataProSettingsWidgetsType *m_DDPPS_PluginPrivData;
  *    RunDataProPluginSettingsDialog
  *
  * SYNOPSIS:
- *    void RunDataProPluginSettingsDialog(class ConSettings *Settings,
+ *    bool RunDataProPluginSettingsDialog(class ConSettings *Settings,
  *              const char *DataProIDStr);
  *
  * PARAMETERS:
@@ -63,20 +63,22 @@ static t_DataProSettingsWidgetsType *m_DDPPS_PluginPrivData;
  *    This function shows the data pro plugin settings dialog.
  *
  * RETURNS:
- *    NONE
+ *    true -- User pressed ok
+ *    false -- User pressed cancel or there was an error.
  *
  * SEE ALSO:
  *    
  ******************************************************************************/
-void RunDataProPluginSettingsDialog(class ConSettings *Settings,
+bool RunDataProPluginSettingsDialog(class ConSettings *Settings,
         const char *DataProIDStr)
 {
     t_UITabCtrl *TabCtrl;
     t_UITab *FirstTab;
     t_UILayoutContainerCtrl *FirstTabContainer;
+    bool RetValue;
 
     if(!UIAlloc_DataProPluginSettings())
-        return;
+        return false;
 
     TabCtrl=UIDPPS_GetTabControl();
     FirstTab=UITabCtrlGetTabFromIndex(TabCtrl,0);
@@ -90,13 +92,15 @@ void RunDataProPluginSettingsDialog(class ConSettings *Settings,
     {
         UIAsk("Error","Failed to have the plugin add its widgets.",e_AskBox_Error);
         UIFree_DataProPluginSettings();
-        return;
+        return false;
     }
 
+    RetValue=false;
     if(UIShow_DataProPluginSettings())
     {
         DPS_PluginSettings_SetSettingsFromWidgets(Settings,DataProIDStr,
                 m_DDPPS_PluginPrivData);
+        RetValue=true;
     }
 
     DPS_PluginSettings_FreeWidgets(DataProIDStr,m_DDPPS_PluginPrivData);
@@ -104,6 +108,8 @@ void RunDataProPluginSettingsDialog(class ConSettings *Settings,
     DPS_PluginSettings_SetActiveCtrls(NULL);
 
     UIFree_DataProPluginSettings();
+
+    return RetValue;
 }
 
 /*******************************************************************************

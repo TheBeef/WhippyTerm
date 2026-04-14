@@ -200,6 +200,7 @@ typedef enum
     e_UIMWMenu_RunScript,
     e_UIMWMenu_StopScript,
     e_UIMWMenu_SendPanel,
+    e_UIMWMenu_TermEmuSettings,
     e_UIMWMenuMAX
 } e_UIMWMenuType;
 
@@ -572,6 +573,7 @@ void UIMW_AddFTPDownloadClearAllMenus(t_UIMainWindow *win);
 e_UIMenuCtrl *UIMW_Add2ApplyTerminalEmulationMenu(t_UIMainWindow *win,const char *Title,bool Binary,uintptr_t ID);
 void UIMW_ApplyTerminalEmulationMenuClearAll(t_UIMainWindow *win);
 void UIMW_EnableApplyTerminalEmulationMenu(t_UIMainWindow *win,bool Enabled);
+e_UIMenuCtrl *UIMW_FindTerminalEmulationMenu(t_UIMainWindow *win,uintptr_t ID);
 
 e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj);
 t_UIToolbarCtrl *UIMW_GetToolbarHandle(t_UIMainWindow *win,e_UIMWToolbarType UIObj);

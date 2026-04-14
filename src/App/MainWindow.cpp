@@ -45,6 +45,7 @@
 #include "App/Dialogs/Dialog_SendBufferSelect.h"
 #include "App/Dialogs/Dialog_CRCFinder.h"
 #include "App/Dialogs/Dialog_CalcCrc.h"
+#include "App/Dialogs/Dialog_DataProPluginSettings.h"
 #include "App/Bookmarks.h"
 #include "App/Connections.h"
 #include "App/MainApp.h"
@@ -1493,7 +1494,10 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     bool Checked;
     bool ScriptRunning;
     i_BookmarkList bm;
+    i_TermEmuMenuList temi;
     struct ScriptHandle *Script;
+    const char *ProIDStr;
+    bool TermEmuSettingsEnabled;
     t_UIToolbarCtrl *ConnectToggle;
     t_UIToolbarCtrl *CopyTool;
     t_UIToolbarCtrl *PasteTool;
@@ -1572,6 +1576,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *StyleStrikeThrough;
     e_UIMenuCtrl *CopySelectionToSendBuffer;
     e_UIMenuCtrl *StopScript;
+    e_UIMenuCtrl *TermEmuSettingsMenu;
     t_UIContextMenuCtrl *ContextMenu_SendBuffer;
     t_UIContextMenuCtrl *ContextMenu_FindCRCAlgorithm;
     t_UIContextMenuCtrl *ContextMenu_CalcCRC;
@@ -1617,6 +1622,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     StyleBGColorTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_StyleBGColor);
     StyleStrikeThroughTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_StyleStrikeThrough);
     SendPanelToggleMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_SendPanel);
+    TermEmuSettingsMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_TermEmuSettings);
 
     CloseTabMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_CloseTab);
     CloseAllMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_CloseAll);
@@ -1758,6 +1764,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(StyleUnderline,false);
         UIEnableMenu(StyleStrikeThrough,false);
         UIEnableMenu(SendPanelToggleMenu,false);
+        UIEnableMenu(TermEmuSettingsMenu,false);
         UIEnableToolbar(ConnectToggle,false);
         UICheckToolbar(ConnectToggle,false);
         UIEnableToolbar(CopyTool,false);
@@ -1812,8 +1819,6 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableToolbar(CopyTool,true);
         UIEnableToolbar(PasteTool,true);
         UIEnableToolbar(ClearScreenTool,true);
-
-        UIMW_EnableApplyTerminalEmulationMenu(UIWin,true);
 
         Con=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
         if(Con==NULL)
@@ -1982,6 +1987,41 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UICheckMenu(AutoReconnectMenu,Con->GetCurrentAutoReopenStatus());
 
         UICheckMenu(SendPanelToggleMenu,Con->IsDirectSendPanelOpen());
+
+        /* Handle the terminal emulation menu */
+        UIMW_EnableApplyTerminalEmulationMenu(UIWin,true);
+
+        TermEmuSettingsEnabled=false;
+        /* Go though all the terminal emulation entries setting the checked
+           value */
+        ProIDStr=Con->GetProcessorID();
+        if(ProIDStr!=NULL)
+        {
+            if(DPS_DoesPluginHaveSettings(ProIDStr))
+                TermEmuSettingsEnabled=true;
+            else
+                TermEmuSettingsEnabled=false;
+
+            for(temi=TermEmuMenuContents.begin();
+                    temi!=TermEmuMenuContents.end();temi++)
+            {
+                if(strcmp(ProIDStr,temi->IDStr)==0)
+                    Checked=true;
+                else
+                    Checked=false;
+                UICheckMenu(temi->Menu,Checked);
+            }
+        }
+        else
+        {
+            for(temi=TermEmuMenuContents.begin();
+                    temi!=TermEmuMenuContents.end();temi++)
+            {
+                UICheckMenu(temi->Menu,false);
+            }
+        }
+
+        UIEnableMenu(TermEmuSettingsMenu,TermEmuSettingsEnabled);
 
         ActivatePanels=true;
     }
@@ -4417,6 +4457,8 @@ void TheMainWindow::RebuildTerminalEmulationMenu(void)
     t_DPS_ProInfoType TxtTerms;
     t_DPS_ProInfoType BinTerms;
     unsigned int r;
+    string MenuName;
+    struct TermEmuMenu NewTermEmuMenuEntry;
 
     UIMW_ApplyTerminalEmulationMenuClearAll(UIWin);
 
@@ -4429,16 +4471,24 @@ void TheMainWindow::RebuildTerminalEmulationMenu(void)
             TermEmuSortCB());
     std::sort(BinTerms.begin(),BinTerms.end(),TermEmuSortCB());
 
+    TermEmuMenuContents.clear();
+
     for(r=0;r<TxtTerms.size();r++)
     {
-        UIMW_Add2ApplyTerminalEmulationMenu(UIWin,TxtTerms[r].DisplayName,false,
-                (uintptr_t)TxtTerms[r].IDStr);
+        MenuName=TxtTerms[r].DisplayName;
+        NewTermEmuMenuEntry.IDStr=TxtTerms[r].IDStr;
+        NewTermEmuMenuEntry.Menu=UIMW_Add2ApplyTerminalEmulationMenu(UIWin,
+                MenuName.c_str(),false,(uintptr_t)NewTermEmuMenuEntry.IDStr);
+        TermEmuMenuContents.push_back(NewTermEmuMenuEntry);
     }
 
     for(r=0;r<BinTerms.size();r++)
     {
-        UIMW_Add2ApplyTerminalEmulationMenu(UIWin,BinTerms[r].DisplayName,true,
-                (uintptr_t)BinTerms[r].IDStr);
+        MenuName=BinTerms[r].DisplayName;
+        NewTermEmuMenuEntry.IDStr=BinTerms[r].IDStr;
+        NewTermEmuMenuEntry.Menu=UIMW_Add2ApplyTerminalEmulationMenu(UIWin,
+                MenuName.c_str(),true,(uintptr_t)NewTermEmuMenuEntry.IDStr);
+        TermEmuMenuContents.push_back(NewTermEmuMenuEntry);
     }
 }
 
@@ -4451,7 +4501,7 @@ void TheMainWindow::RebuildTerminalEmulationMenu(void)
  *
  * PARAMETERS:
  *    ID [I] -- The ID of the menu that was triggered (this was added with
- *              UIMW_AddFTPUploadMenuItem()
+ *              UIMW_Add2ApplyTerminalEmulationMenu()
  *
  * FUNCTION:
  *    This function is called when the user selects an item in the apply
@@ -5529,6 +5579,64 @@ void TheMainWindow::InformOf_SendPanelOpenClose(bool PanelOpen)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::ShowTermEmuSettingsDialog
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::ShowTermEmuSettingsDialog(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function shows the terminal emulation settings dialog (if there
+ *    are settings that can be changed).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::ShowTermEmuSettingsDialog(void)
+{
+    const char *ProIDStr;
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+    class ConSettings *ConSet;
+    class ConSettings GlobalConSet;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+    if(TabCon!=NULL)
+    {
+        ProIDStr=TabCon->GetProcessorID();
+        if(ProIDStr!=NULL)
+        {
+            if(DPS_DoesPluginHaveSettings(ProIDStr))
+            {
+                ConSet=TabCon->GetCustomSettings();
+                if(ConSet!=NULL)
+                {
+                    RunDataProPluginSettingsDialog(ConSet,ProIDStr);
+                }
+                else
+                {
+                    /* This connection is using global settings, we need to
+                       convert it custom settings */
+                    GlobalConSet=g_Settings.DefaultConSettings;
+                    if(RunDataProPluginSettingsDialog(&GlobalConSet,ProIDStr))
+                    {
+                        TabCon->SetCustomSettings(GlobalConSet);
+                        RethinkActiveConnectionUI();
+                    }
+                }
+            }
+        }
+    }
+}
+
+/*******************************************************************************
+ * NAME:
  *    MW_Event
  *
  * SYNOPSIS:
@@ -5904,6 +6012,7 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_ToggleBottomPanel -- Open or closes the bottom panel
  *                  e_Cmd_ToggleRightPanel -- Open or closes the right panel
  *                  e_Cmd_ToggleSendPanel -- Open or closes the send panel
+ *                  e_Cmd_TermEmuSettings -- Open the terminal emulation settings dialog
  *
  * FUNCTION:
  *    This function executes a command.
@@ -6517,6 +6626,9 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_ToggleSendPanel:
             ToggleSendPanel();
+        break;
+        case e_Cmd_TermEmuSettings:
+            ShowTermEmuSettingsDialog();
         break;
 
         case e_CmdMAX:

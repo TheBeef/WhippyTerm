@@ -2372,18 +2372,13 @@
      <property name="title">
       <string>Change Terminal Emulation</string>
      </property>
-     <widget class="QMenu" name="menuText_Emulation">
-      <property name="title">
-       <string>Text Emulation</string>
-      </property>
-     </widget>
-     <widget class="QMenu" name="menuBinary_Emulation">
-      <property name="title">
-       <string>Binary Emulation</string>
-      </property>
-     </widget>
-     <addaction name="menuText_Emulation"/>
-     <addaction name="menuBinary_Emulation"/>
+     <addaction name="separator"/>
+     <addaction name="actionText_Emulations"/>
+     <addaction name="actionText_Emulations_InsertAbovePoint"/>
+     <addaction name="actionBinary_Emulations"/>
+     <addaction name="actionBinary_Emulations_InsertAbovePoint"/>
+     <addaction name="separator"/>
+     <addaction name="actionTerminal_Settings"/>
     </widget>
     <addaction name="menuApply_Terminal_Emulation"/>
     <addaction name="separator"/>
@@ -3952,6 +3947,57 @@
    </property>
    <property name="text">
     <string>Send Panel</string>
+   </property>
+  </action>
+  <action name="actionTerminal_Settings">
+   <property name="text">
+    <string>Terminal Settings...</string>
+   </property>
+  </action>
+  <action name="actionText_Emulations">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Text Emulations</string>
+   </property>
+   <property name="font">
+    <font>
+     <italic>true</italic>
+     <bold>true</bold>
+     <underline>true</underline>
+    </font>
+   </property>
+  </action>
+  <action name="actionBinary_Emulations">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Binary Emulations</string>
+   </property>
+   <property name="font">
+    <font>
+     <italic>true</italic>
+     <bold>true</bold>
+     <underline>true</underline>
+    </font>
+   </property>
+  </action>
+  <action name="actionText_Emulations_InsertAbovePoint">
+   <property name="text">
+    <string>Text_Emulations_InsertAbovePoint</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionBinary_Emulations_InsertAbovePoint">
+   <property name="text">
+    <string>Binary_Emulations_InsertAbovePoint</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
  </widget>

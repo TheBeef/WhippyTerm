@@ -1935,3 +1935,9 @@ void Form_MainWindow::on_actionSend_Panel_triggered()
     DoMenuTriggered(e_UIMWMenu_SendPanel);
 }
 
+
+void Form_MainWindow::on_actionTerminal_Settings_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_TermEmuSettings);
+}
+

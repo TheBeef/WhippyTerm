@@ -34,6 +34,8 @@
 /*** FUNCTION PROTOTYPES      ***/
 
 /*** VARIABLE DEFINITIONS     ***/
+static QSoundEffect *m_BuildInEffect=NULL;
+static QSoundEffect *m_PlayWavEffect=NULL;
 
 void UI_Beep(void)
 {
@@ -42,22 +44,45 @@ void UI_Beep(void)
 
 void UIPlayWav(const char *Filename)
 {
-    QSoundEffect effect;
-    effect.setSource(QUrl::fromLocalFile(Filename));
-//    effect.setLoopCount(QSoundEffect::Infinite);
-//    effect.setVolume(0.25f);
-    effect.play();
-    
-    //    QSoundEffect::play(Filename);
+    try
+    {
+        if(m_PlayWavEffect!=NULL)
+            delete m_PlayWavEffect;
+        m_PlayWavEffect=NULL;
+
+        m_PlayWavEffect=new QSoundEffect(NULL);
+        m_PlayWavEffect->setSource(QUrl::fromLocalFile(Filename));
+        m_PlayWavEffect->play();
+    }
+    catch(...)
+    {
+    }
 }
 
 void UIPlayBuiltInBeep(void)
 {
-    QSoundEffect effect;
-    effect.setSource(QUrl(":/S/Sounds/Computer_Error_Alert_Short.wav"));
-    //    effect.setLoopCount(QSoundEffect::Infinite);
-    //    effect.setVolume(0.25f);
-    effect.play();
-//    QSoundEffect::play(":/S/Sounds/Computer_Error_Alert_Short.wav");
+
+    try
+    {
+        if(m_BuildInEffect!=NULL)
+            delete m_BuildInEffect;
+        m_BuildInEffect=NULL;
+
+        m_BuildInEffect=new QSoundEffect(NULL);
+        m_BuildInEffect->setSource(QUrl("qrc:/S/Sounds/Computer_Error_Alert_Short.wav"));
+        m_BuildInEffect->play();
+    }
+    catch(...)
+    {
+    }
 }
 
+void FreeQTSoundSystem(void)
+{
+    if(m_PlayWavEffect!=NULL)
+        delete m_PlayWavEffect;
+    m_PlayWavEffect=NULL;
+    if(m_BuildInEffect!=NULL)
+        delete m_BuildInEffect;
+    m_BuildInEffect=NULL;
+}

@@ -35,5 +35,6 @@
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
+void FreeQTSoundSystem(void);
 
 #endif   /* end of "#ifndef __QTSOUND_H_" */

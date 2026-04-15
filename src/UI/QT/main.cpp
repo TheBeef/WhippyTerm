@@ -19,6 +19,7 @@
 #include "Form_MainWindow.h"
 #include "QTKeyMappings.h"
 #include "main.h"
+#include "QTSound.h"
 #include <stdint.h>
 #include <strings.h>
 
@@ -142,6 +143,9 @@ int main(int argc, char *argv[])
 
     RetValue=a.exec();
 //    free(m_DataEventQueue);
+
+    FreeQTSoundSystem();
+
     return RetValue;
 }
 

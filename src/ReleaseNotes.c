@@ -28,7 +28,7 @@ struct ReleaseInfo
 //            "Description"},
 //};
 
-static struct ReleaseNote m_Notes_NEXT[]=
+static struct ReleaseNote m_Notes_Rel2_3_0_0[]=
 {
     {   NOTETYPE_ENHANCEMENT,"Added new option to clear the screen on send buffer",
             "An option has been added that will clear the screen when a send"
@@ -94,8 +94,9 @@ static struct ReleaseNote m_Notes_NEXT[]=
             " control was not actually being set (CRTSCTS was applied to"
             " the wrong field) and so hardware flow control should not"
             " have worked.  This has been fixed."},
-    {   NOTETYPE_POLISH,"Fixed spell errors",
-            "Ran code though a spell on the strings and fixed the errors."},
+    {   NOTETYPE_POLISH,"Fixed spelling errors",
+            "Ran code though a spell check on the strings and fixed the"
+            " errors."},
     {   NOTETYPE_ENHANCEMENT,"Reworked the terminal emulation menu",
             "Changing the terminal emulation using the terminal menu was"
             " kinda a mess and hard to use.  It has been changed to only"
@@ -612,6 +613,7 @@ static struct ReleaseNote m_Notes_Rel1_0_0_0[]=
 const struct ReleaseInfo m_ReleaseNotes[]=
 {
 //    {RELEASE_NOTE("x.x.x.x","-- -- ----",NULL,m_Notes_NEXT)},
+    {RELEASE_NOTE("2.3.0.0","15 Apr 2026","Numerous small fixes and enhancements",m_Notes_Rel2_3_0_0)},
     {RELEASE_NOTE("2.2.1.0","26 Jan 2026","Bug fix",m_Notes_Rel2_2_1_0)},
     {RELEASE_NOTE("2.2.0.0","11 Jan 2026","Added support for the Binary Protocol Description Standard",m_Notes_Rel2_2_0_0)},
     {RELEASE_NOTE("2.1.0.0","29 Oct 2025","Scroll Lock cursor key mode",m_Notes_Rel2_1_0_0)},

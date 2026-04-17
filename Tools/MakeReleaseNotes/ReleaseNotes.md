@@ -1,5 +1,8 @@
 # Release Notes
 
+## Version 2.3.1.0 -- 16 Apr 2026
+ * [Bug fix] Fixed bug that wasn't applying settings
+   - When you used the new 2.3 term settings it did not apply your changes to the open connection.  Fixed
 ## Version 2.3.0.0 -- 15 Apr 2026
 ### Numerous small fixes and enhancements
  * [Enhancement] Added new option to clear the screen on send buffer

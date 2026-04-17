@@ -62,7 +62,7 @@ static struct ReleaseNote m_Notes_Rel2_3_0_0[]=
             "In the main window below the text canvas there is a line input"
             " (for binary connections) that lets the user input a line / buffer"
             " and send it.  A new jump to send buffer panel was added."},
-    {   NOTETYPE_ENHANCEMENT,"Added new standard text input line to text mode",
+    {   NOTETYPE_NEW_FEATURE,"Added new standard text input line to text mode",
             "A new text input panel has been added to text mode.  This lets"
             " you type in a string (and edit it) before sending it.  This"
             " text input also supports a history of lines sent as well as"

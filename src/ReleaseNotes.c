@@ -28,6 +28,13 @@ struct ReleaseInfo
 //            "Description"},
 //};
 
+static struct ReleaseNote m_Notes_Rel2_3_1_0[]=
+{
+    {   NOTETYPE_BUG_FIX,"Fixed bug that wasn't applying settings",
+            "When you used the new 2.3 term settings it did not apply"
+            " your changes to the open connection.  Fixed"},
+};
+
 static struct ReleaseNote m_Notes_Rel2_3_0_0[]=
 {
     {   NOTETYPE_ENHANCEMENT,"Added new option to clear the screen on send buffer",
@@ -613,6 +620,7 @@ static struct ReleaseNote m_Notes_Rel1_0_0_0[]=
 const struct ReleaseInfo m_ReleaseNotes[]=
 {
 //    {RELEASE_NOTE("x.x.x.x","-- -- ----",NULL,m_Notes_NEXT)},
+    {RELEASE_NOTE("2.3.1.0","16 Apr 2026",NULL,m_Notes_Rel2_3_1_0)},
     {RELEASE_NOTE("2.3.0.0","15 Apr 2026","Numerous small fixes and enhancements",m_Notes_Rel2_3_0_0)},
     {RELEASE_NOTE("2.2.1.0","26 Jan 2026","Bug fix",m_Notes_Rel2_2_1_0)},
     {RELEASE_NOTE("2.2.0.0","11 Jan 2026","Added support for the Binary Protocol Description Standard",m_Notes_Rel2_2_0_0)},

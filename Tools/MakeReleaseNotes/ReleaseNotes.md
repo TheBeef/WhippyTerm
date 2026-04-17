@@ -1,5 +1,133 @@
 # Release Notes
 
+## Version 2.3.0.0 -- 15 Apr 2026
+### Numerous small fixes and enhancements
+ * [Enhancement] Added new option to clear the screen on send buffer
+   - An option has been added that will clear the screen when a send buffer is sent.
+ * [Functionally fix] Changed default bottom panel size
+   - The bottom panel was not showing the controls, so the default value has been updated to be 180 instead of 80.
+ * [Bug fix] Changed how maximize window on startup works
+   - On startup the main window was maximized before it was shown  It has been changed to opening the window then maximizing.  This is because on some systems it would not actually maximize correctly.
+ * [Enhancement] Added new option for rescanning connections
+   - Added new option for rescanning connections on opening the new connection dialog.
+ * [Bug fix] Fixed the binary processor field lengths of 0
+   - When you had a definition where a field that used another field for its length and that worked out to be 0 the processor would mess up where it was in the definition.  It has been fixed to handle 0 length fields.
+ * [Enhancement] Added version number to window title
+   - The main window now includes the base version number.
+ * [Enhancement] Added quick jump button to send line inputs
+   - In the main window below the text canvas there is a line input (for binary connections) that lets the user input a line / buffer and send it.  A new jump to send buffer panel was added.
+ * [Enhancement] Added new standard text input line to text mode
+   - A new text input panel has been added to text mode.  This lets you type in a string (and edit it) before sending it.  This text input also supports a history of lines sent as well as the line endings to send.
+This is useful if your device has a command prompt but doesn't support editing or a command history.
+ * [Enhancement] Added direct panel selections to session
+   - The direct send panel in the bottom of the text and binary modes let you select line ending, hex/text mode and such but this was not saved, when you restarted WhippyTerm it was reset to default.  It is now saved in session (all but the contents of hex buffer).
+ * [Enhancement] Added a close button to the direct send panel
+   - The direct send panel can be closed.  A close button has been added and a menu item under View can open and close the panel.
+ * [Enhancement] Added settings for if direct send panel should be open or closed
+   - The settings can now be changed so the direct send panel is open or closed for text and binary connections.
+This is a per-connection setting.
+ * [Enhancement] Added new clear screen option to clear scroll buffer
+   - A new clear screen option was added that lets you clear the scroll buffer as well when the screen is cleared.
+ * [Enhancement] Added new clear screen option to clear hex panels as well
+   - When the main display is cleared an option has been added that will also clear the incoming and outgoing hex displays.
+ * [Enhancement] Added an option to clear the scroll back buffer if clear screen double pressed
+   - An option was added that will clear the scroll back buffer as well as the screen if the clear is pressed 2 times (actually if the main screen is already clear then the scroll back is also cleared)
+ * [Enhancement] Fixed a number of small bugs after an AI code lint
+   - Code was run through Claude AI to check for bugs.  Some small bugs were found and have been fixed.
+ * [Enhancement] RTS/CTS flow control broken on Linux
+   - In the Linux version of the serial drivers the RTS/CTS flow control was not actually being set (CRTSCTS was applied to the wrong field) and so hardware flow control should not have worked.  This has been fixed.
+ * [Polish] Fixed spelling errors
+   - Ran code though a spell check on the strings and fixed the errors.
+ * [Enhancement] Reworked the terminal emulation menu
+   - Changing the terminal emulation using the terminal menu was kinda a mess and hard to use.  It has been changed to only be 1 level deep, includes a checkmark for what one is selected, and now lets you change the settings directly.
+ * [Bug fix] Font rendering doesn't lineup with mouse clicks
+   - The font rendering don't not work out the same as when calculating char placement for the mouse.  As a result selection do not always select the letter under the mouse pointer.  A new font rendering option has been added to hopefully fix this.
+ * [Bug fix] Fixed sounds not playing.
+   - The sound playing system stoped working when moving to QT6. It's been reworked to work again.
+## Version 2.2.1.0 -- 26 Jan 2026
+### Bug fix
+ * [Bug fix] Upload files that are too small crashes
+   - If you tried sending a small file it would crash WhippyTerm.  If the file all fit in the first send buffer then the upload system would close the connection before trying to update the current position on a closed file and would crash.  Fixed.
+ * [Bug fix] Pressing cancel on the send file file requester didn't abort upload
+   - When you were uploading a RAW file from the menu, but select to cancel the upload, WhippyTerm just went ahead an uploaded the file anyway.  This has been fixed.
+## Version 2.2.0.0 -- 11 Jan 2026
+### Added support for the Binary Protocol Description Standard
+ * [Functionally fix] Changed side panels to have control together
+   - Moved the controls on the side panels so that the start / abort and other controls are not at the bottom but are now grouped with the other controls.
+ * [Polish] Fixed a number of issues with Dark Mode
+   - Not all widgets were drawn correctly when in dark mode.
+ * [Bug fix] Fixed a problem with the DPI not drawing the panels open/close bars correctly.
+   - When running with a high-DPI the dot pattern was being stretched and making an odd pattern.  This has changed to disable stretching when drawing the panel open/close bars.
+ * [Enhancement] Added error messages to the upload/download
+   - The upload/download file transfer didn't show any errors, just quit the transfer.  There are now error messages.
+ * [Enhancement] Added new options to xmodem transfer
+   - New options for start timeout, max NAKs before abort, and timeout between packets have been added.
+ * [Polish] Changed file transfers to auto open side panel
+   - When the user selects a file upload/download the side panel is now opened.
+ * [Enhancement] Complete rewrite on auto reconnect system
+   - Could not find a problem with the auto reconnect but have a bug report.  Deleted and rewrote the auto reconnect to be a simpler system that uses less code (less code = less likely to mess up)
+ * [New Feature] Updated Binary HexDump to support Binary Protocol Description Standard strings
+   - The settings for the binary hexdump data processor has been updated to let the user input a binary protocol documentation standard string that it will then use to color the incoming bytes.
+ * [Enhancement] Added new widget WebLink for plugins
+   - A new widget for showing http links the user can click on.
+ * [Bug fix] Reset term didn't reset colors in binary mode
+   - When you were in the binary mode selecting reset terminal didn't reset the current styling.  It does now.
+ * [Enhancement] Added function to let plugins change a widgets label
+   - Plugins can now change the label of a widget after it's been added to the display.
+ * [Enhancement] Added support code for columns
+   - Support code was added to make it easier to add columns to the text display.
+ * [Enhancement] Added change property widget control
+   - Plugins can now change the properties of widgets with the new change property functions.  Currently only the font type of text boxs can be changed.
+ * [Enhancement] Added new event for text input widgets
+   - A new event for text input widgets has been added.  The e_PIECB_TextInputEditFinished event is sent when the user moves out of text input (they are finished editing).
+ * [Enhancement] Added new style picker widget
+   - A new style picker widget has been added to available widgets plugins can select from.
+ * [Enhancement] Added a save button to the hex panels
+   - A new save button has been added to the incoming and outgoing bottom hex panels.  The just saves the contents of the panel to a file as RAW binary data.
+ * [Bug fix] Fixed a bug where if a block of bytes came in it wouldn't add to hex panel
+   - When a block of bytes came in and it was bigger than the size of the hex buffer it would just clear the hex panel instead of copying the last bytes.
+ * [New Feature] Added new out going hex panel
+   - A new hex display has been added to the bottom panel.  This new display shows the outgoing bytes in hex the same as the incoming hex panel does.  The Hex panel has also been renamed to incoming hex.
+ * [Enhancement] Added menu entries to open/close the panels
+   - New menu options were added to the view menu to show the status and let you control if the panels are open or closed.  You can also bind the open/close to the a key press.
+ * [Bug fix] Mouse over for panels wasn't working.  Fixed
+   - When you move the mouse in and out of a side panel the panel should highlight.  This was broken and has been fixed.
+ * [Enhancement] Added comport settings for user speeds
+   - Added settings for the comport to let the user add their own baud rates.
+ * [Enhancement] Added settings to IO Drivers
+   - A new settings area has been added where IO Driver plugins can now have settings like the Data Processors can.
+ * [Functionally fix] Added record button to bind keys
+   - Added a record button to the bind keys that will now record key presses and fill in the key seq.  Also fixed an error message if the key seq is not understood.  The list of commands is now sorted.
+ * [Functionally fix] Changed how insert horizontal rule works
+   - Horizontal Rule cleared the current line and then changed it to a horizontal rule.  Now it checks if the line is blank and if not moves to the next line and then inserts a horizontal rule.
+ * [Enhancement] Added setting for tab size
+   - You can now set the tab size to something other than 8 spaces.
+ * [Enhancement] Added new settings to the ANSI decoder
+   - Added settings to turn on/off bold,italic,underline, intensity, double underline, and overline
+ * [Enhancement] Added an option to add a line feed when a carriage return is received
+   - An option was added in settings so that the system will automatically add a new line (\n) when a carriage return (\r) is seen
+## Version 2.1.0.0 -- 29 Oct 2025
+### Scroll Lock cursor key mode
+ * [Functionally fix] Show line ends now show CR/LF
+   - Show end of lines now shows the marks + a CR,LF,CRLF,or LFCR at the end of the line.  This does not show the control chars that came in but instead shows a "guess" of what WhippyTerm things was the line ending.  This is because the cursor moves between the first control char coming in and the second control char, making it a mess if you put the chars where they came in.
+For this reason WhippyTerm now just tracks if CR/LF come in and adjusts a guess at what ended the line.  If the user moves the cursor up to an already existing line it will adjust the existing line ending on that line even if the cursor was in the middle of the line.
+ * [Polish] Added double-click a word in term window selects it, triple-click selects line
+   - The selection system was updated to support double click and triple click.  This does not apply to binary display.
+ * [Enhancement] Added a "are you sure" popup on quit
+   - When you close WhippyTerm it will now prompt to make sure you are sure if there is one or more open connection tabs.
+This function can be turned on/off in the settings.
+ * [Enhancement] Added a restore connection on startup option
+   - A new setting has been added that will reopen the connection tabs that were open when WhippyTerm quits.  It will store this info in the session data, and includes any custom settings applied to the connection, if the connection was open or closed, any connection options.
+ * [Functionally fix] Updated ANSI decoder to support Page Up/Down
+   - The ANSI decoder was not sending page up, page down, home, end, and insert.  It has been updated to send these.
+ * [Enhancement] Added cursor key modes
+   - A new mode called cursor key mode.  It sets how the cursor and other movement keys (like the page up and down) work.  When cursor key mode is "send" then pressing the cursor keys sends out control codes on the connection (what control codes depends on active data processor).  When switched to "local" mode then cursor moves the window around and doesn't send anything out the connection.  This is by default connected to the state of the Scroll Lock key.
+ * [Enhancement] Added new commands to move the view around
+   - New commands were added that lets the user bind keys to functions to move the current view window around.  The user can now move the view up/down/left/right, goto the top/bottom of the buffer, and page up and down.
+ * [Functionally fix] Changed bridging so you can bridge more than 2 connections
+   - The bridging code has been updated to let the user bridge more than 2 connections.  You make as many pairs as you would like.
+ * [Enhancement] Added new option for a destructive backspace
+   - There is a new setting to change how the backspace works.  If checked then instead of just moving the cursor, a space is placed over the cursor position.  This is helpful if you have a prompt that supports editing but doesn't output a space to erase the char when doing a backspace.
 ## Version 2.0.2.0 -- 03 Oct 2025
  * [Bug fix] Fixed bug with the com test crashing when used with serial ports
    - The serial port driver was setting aux controls even if they didn't exist.  New rules for drivers, do not assume that aux controls will exist (check if the handle is NULL before setting an aux control).
@@ -13,7 +141,7 @@
  * [Enhancement] Added a menu item to copy the current selection to a send buffer
    - The user can now select some text and copy that text to a send buffer.
  * [Bug fix] Fixed bug with selections in binary mode
-   - When in binary mode the selection was showing up and disappearing randomly.  There is there is selection was not be check so it was drawing random data as the  selection.  It has been fixed.
+   - When in binary mode the selection was showing up and disappearing randomly.  There was no check for if a selection existed, so it was drawing random data as the selection.  It has been fixed.
  * [Bug fix] Added bookmark import/export
    - You can now export your bookmarks to a file and you can replace your bookmarks with the bookmarks from a saved file.
  * [Bug fix] Added command line options
@@ -22,26 +150,26 @@ A new help menu was added to explain the command line options.
  * [Bug fix] Auto hide of panels made to work
    - The auto hide of panels was not implemented.  You could turn on the option but it didn't do anything.  Now when enabled clicking on the max text area or pressing select buttons in the panels will auto hide the panel and give focus to the text area.
  * [Enhancement] A restart is no longer needed to uninstall a plugin
-   - The plugin system was made more dynamic so you can install / uninstall plugins without restarting WhippyTerm. This also effects enable/disable plugin.
+   - The plugin system was made more dynamic so you can install / uninstall plugins without restarting WhippyTerm. This also affects enable/disable plugin.
  * [Enhancement] Added upgrade plugin
    - The only way to upgrade a plugin was to uninstall it and then reinstall it.  A new button was added to the manage plugins dialog so the user can upgrade an installed plugin.
  * [Enhancement] Added a calculate CRC dialog
    - A new calculate CRC dialog has been added.  This will let the user input some hex data and calculate the CRC (for a selection) for that data.  You can also select text in the main window and have it copied into the calculate CRC dialog.  As with all CRC there is a button to generate source code to calculate the selection CRC type.
- * [Enhancement] Added an select color button to the color settings
+ * [Enhancement] Added a select color button to the color settings
    - In Settings->Display->Colors you can input colors by Web # and sliders. A new button was added that you can press to use the color picker the same as with Cursor color.
  * [Enhancement] Added an option to make portable version
    - Added an option to pull the settings and other files from the same directory as the exe.  This will enable making a portable version that does not need to be installed (or needs admin rights).
  * [Enhancement] Installing a data processor plugin will now enable it
    - When you install a new data processor plugin it will enable it in settings.
  * [Enhancement] Server style IO plugins now start with "SRV_"
-   - Server style IO plugins now should start their URI prefix with "SRV_" to show that they are a server.  A server is a plugin that ways for a client to connect to it.  This has been done to make things more consistant, so for example a TCP/IP server would now be SRV_TCP://localhost and the client would be TCP://localhost
+   - Server style IO plugins now should start their URI prefix with "SRV_" to show that they are a server.  A server is a plugin that waits for a client to connect to it.  This has been done to make things more consistent, so for example a TCP/IP server would now be SRV_TCP://localhost and the client would be TCP://localhost
  * [Enhancement] Added an option to add a carriage return when a line feed is received
    - An option was added in settings so that the system will automatically add a carriage return (\r) when a new line (\n) is seen
  * [Enhancement] Added option to do local echo
    - A new settings option has been added to do a local echo when sending data for half duplex connections.
  * [Enhancement] Added the transmit delay to settings
    - You could set the send delay for a connection but it wasn't stored anywhere.  A new setting has been added that lets you customize this for the system and have bookmarks store the setting.
-You can also just temperately for the current connection as well without changing the settings.
+You can also just temporarily for the current connection as well without changing the settings.
  * [Enhancement] Moved the QT6 for GUI
    - Updated to QT6 for the GUI.  This should add better support for display scaling (DPI).
  * [Polish] Reworked custom connection settings menu work
@@ -53,7 +181,7 @@ You can also just temperately for the current connection as well without changin
  * [Enhancement] Added marks to data processors plugin API
    - Data processor plugins can now drop "markers" as data comes in.  The plugin can now color/style from the mark to the cursor.
  * [Bug fix] Fixed bug where selection would move if back buffer filled
-   - When the back buffer filled and a new line was added the selection would change what lines where selected (the line would move up, but the selection would say on the old line making it look like the seleciton had moved).
+   - When the back buffer filled and a new line was added the selection would change what lines were selected (the line would move up, but the selection would stay on the old line making it look like the selection had moved).
  * [Bug fix] Fixed bug where selection was being cleared when clipboard mode wasn't smart
    - The selection was being cleared when the selection mode was not set to smart clipboard.
  * [Enhancement] Added new misc type of binary plugins
@@ -100,16 +228,16 @@ You can also just temperately for the current connection as well without changin
 ### Added most requested features
  * [Bug fix] Fixed a bug with screen DPI settings on Windows
    - When you set the DPI something other than 96 (scale %) then selecting text did not work correctly.  This (hopefully) has been fixed.
- * [Bug fix] Fixed a bug with binary displays not ignore attribs that are turned off
-   - You can suppress drawing of different attributes in the settings.  In text mode changing this hide that attribute, but in binary mode the attribute was still drawn.  This has been fixed.
+ * [Bug fix] Fixed a bug with binary displays not ignoring attribs that are turned off
+   - You can suppress drawing of different attributes in the settings.  In text mode changing this hides that attribute, but in binary mode the attribute was still drawn.  This has been fixed.
  * [Enhancement] Added Lock window scroll when not on bottom line
-   - When the scroll bar is at the bottom the screen will be scrolled to the bottom when new text is added.  If the scroll bar is not at the bottom it will say at it's current display.
+   - When the scroll bar is at the bottom the screen will be scrolled to the bottom when new text is added.  If the scroll bar is not at the bottom it will stay at its current display.
  * [Enhancement] Improved open errors dialog with OS messages
-   - When an open connection fails the user is now prompted with and error message.  This message can include more details from the plugin.
+   - When an open connection fails the user is now prompted with an error message.  This message can include more details from the plugin.
  * [Enhancement] Added option to auto reconnect when a connection is closed
    - A new feature was added that will auto retry opening a connection if it fails to open.  A setting was added to say if this should be done and how long to wait between tries.  This can be set per-connection and toggled with a menu option under the connection menu.
- * [Enhancement] Extended plugin API so data processor plugin's can see bytes sent
-   - The data processors API has a new callback function that will be called when data is send out of a connection.  See ProcessOutGoingData().
+ * [Enhancement] Extended plugin API so data processor plugins can see bytes sent
+   - The data processors API has a new callback function that will be called when data is sent out of a connection.  See ProcessOutGoingData().
 ## Version 1.0.4.0 -- 31 May 2025
  * [Bug fix] Fixed a bug where the plugin IODriver Init() wasn't being called on install
    - When a new plugin was installed the system was not calling the IODriver Init() function.
@@ -128,7 +256,7 @@ You can also just temperately for the current connection as well without changin
  * [Bug fix] Fixed bug with open new connection from URI dialog
    - Dialog was not setting up options which depending on the device would prevent connection from working.
  * [Bug fix] Fixed bug with importing settings does not apply the settings
-   - When you imported new settings the settings where not being applied to connections, but new connections would get the settings.
+   - When you imported new settings the settings were not being applied to connections, but new connections would get the settings.
 ## Version 1.0.1.0 -- 16 Mar 2025
  * [Bug fix] Fixed bug with plugins with long descriptions
    - The wrong buffer was used when loading a plugin with a description longer than 99 bytes

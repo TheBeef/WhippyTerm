@@ -1,3 +1,81 @@
+whippyterm (2.3.0.0-1) unstable; urgency=low
+
+  * Numerous small fixes and enhancements
+    - Added new option to clear the screen on send buffer
+    - Changed default bottom panel size
+    - Changed how maximize window on startup works
+    - Added new option for rescanning connections
+    - Fixed the binary processor field lengths of 0
+    - Added version number to window title
+    - Added quick jump button to send line inputs
+    - Added new standard text input line to text mode
+    - Added direct panel selections to session
+    - Added a close button to the direct send panel
+    - Added settings for if direct send panel should be open or closed
+    - Added new clear screen option to clear scroll buffer
+    - Added new clear screen option to clear hex panels as well
+    - Added an option to clear the scroll back buffer if clear screen double pressed
+    - Fixed a number of small bugs after an AI code lint
+    - RTS/CTS flow control broken on Linux
+    - Fixed spelling errors
+    - Reworked the terminal emulation menu
+    - Font rendering doesn't lineup with mouse clicks
+    - Fixed sounds not playing.
+
+ -- Paul Hutchinson <paul@whippyterm.com>  Wed, 15 Apr 2026 00:00:00 +0000
+whippyterm (2.2.1.0-1) unstable; urgency=low
+
+  * Bug fix
+    - Upload files that are too small crashes
+    - Pressing cancel on the send file file requester didn't abort upload
+
+ -- Paul Hutchinson <paul@whippyterm.com>  Mon, 26 Jan 2026 00:00:00 +0000
+whippyterm (2.2.0.0-1) unstable; urgency=low
+
+  * Added support for the Binary Protocol Description Standard
+    - Changed side panels to have control together
+    - Fixed a number of issues with Dark Mode
+    - Fixed a problem with the DPI not drawing the panels open/close bars correctly.
+    - Added error messages to the upload/download
+    - Added new options to xmodem transfer
+    - Changed file transfers to auto open side panel
+    - Complete rewrite on auto reconnect system
+    - Updated Binary HexDump to support Binary Protocol Description Standard strings
+    - Added new widget WebLink for plugins
+    - Reset term didn't reset colors in binary mode
+    - Added function to let plugins change a widgets label
+    - Added support code for columns
+    - Added change property widget control
+    - Added new event for text input widgets
+    - Added new style picker widget
+    - Added a save button to the hex panels
+    - Fixed a bug where if a block of bytes came in it wouldn't add to hex panel
+    - Added new out going hex panel
+    - Added menu entries to open/close the panels
+    - Mouse over for panels wasn't working.  Fixed
+    - Added comport settings for user speeds
+    - Added settings to IO Drivers
+    - Added record button to bind keys
+    - Changed how insert horizontal rule works
+    - Added setting for tab size
+    - Added new settings to the ANSI decoder
+    - Added an option to add a line feed when a carriage return is received
+
+ -- Paul Hutchinson <paul@whippyterm.com>  Sun, 11 Jan 2026 00:00:00 +0000
+whippyterm (2.1.0.0-1) unstable; urgency=low
+
+  * Scroll Lock cursor key mode
+    - Show line ends now show CR/LF
+    - Added double-click a word in term window selects it, triple-click selects line
+    - Added a "are you sure" popup on quit
+    - Added a restore connection on startup option
+    - Updated ANSI decoder to support Page Up/Down
+    - Added cursor key modes
+    - Added new commands to move the view around
+    - Changed bridging so you can bridge more than 2 connections
+    - Added new option for a destructive backspace
+
+ -- Paul Hutchinson <paul@whippyterm.com>  Wed, 29 Oct 2025 00:00:00 +0000
 whippyterm (2.0.2.0-1) unstable; urgency=low
 
   * Updates to the plugin system - bug fix #2
@@ -26,7 +104,7 @@ whippyterm (2.0.0.0-1) unstable; urgency=low
     - A restart is no longer needed to uninstall a plugin
     - Added upgrade plugin
     - Added a calculate CRC dialog
-    - Added an select color button to the color settings
+    - Added a select color button to the color settings
     - Added an option to make portable version
     - Installing a data processor plugin will now enable it
     - Server style IO plugins now start with "SRV_"
@@ -62,11 +140,11 @@ whippyterm (1.1.0.0-1) unstable; urgency=low
 
   * Added most requested features
     - Fixed a bug with screen DPI settings on Windows
-    - Fixed a bug with binary displays not ignore attribs that are turned off
+    - Fixed a bug with binary displays not ignoring attribs that are turned off
     - Added Lock window scroll when not on bottom line
     - Improved open errors dialog with OS messages
     - Added option to auto reconnect when a connection is closed
-    - Extended plugin API so data processor plugin's can see bytes sent
+    - Extended plugin API so data processor plugins can see bytes sent
 
  -- Paul Hutchinson <paul@whippyterm.com>  Sun, 29 Jun 2025 00:00:00 +0000
 whippyterm (1.0.4.0-1) unstable; urgency=low

@@ -5617,7 +5617,11 @@ void TheMainWindow::ShowTermEmuSettingsDialog(void)
                 ConSet=TabCon->GetCustomSettings();
                 if(ConSet!=NULL)
                 {
-                    RunDataProPluginSettingsDialog(ConSet,ProIDStr);
+                    if(RunDataProPluginSettingsDialog(ConSet,ProIDStr))
+                    {
+                        TabCon->ApplySettings();
+                        RethinkActiveConnectionUI();
+                    }
                 }
                 else
                 {
@@ -5627,6 +5631,7 @@ void TheMainWindow::ShowTermEmuSettingsDialog(void)
                     if(RunDataProPluginSettingsDialog(&GlobalConSet,ProIDStr))
                     {
                         TabCon->SetCustomSettings(GlobalConSet);
+                        TabCon->ApplySettings();
                         RethinkActiveConnectionUI();
                     }
                 }

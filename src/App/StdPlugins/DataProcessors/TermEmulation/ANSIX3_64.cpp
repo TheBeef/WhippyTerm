@@ -1438,15 +1438,15 @@ void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
                     {
                         /* We can only clear rectangles so we have to do this
                            in 2 steps, part of the line and everything else */
-                        m_DPS->DoClearArea(CursorX,CursorY,-1,CursorY);
+                        m_DPS->DoClearArea(CursorX,CursorY,-1,CursorY+1);
                         m_DPS->DoClearArea(0,CursorY+1,-1,-1);
                     }
                 break;
                 case 1: // From the beginning of the display through the cursor
                     m_DPS->GetCursorXY(&CursorX,&CursorY);
                     if(CursorY!=0)
-                        m_DPS->DoClearArea(0,0,-1,CursorY-1);
-                    m_DPS->DoClearArea(0,CursorY,CursorX+1,CursorY);
+                        m_DPS->DoClearArea(0,0,-1,CursorY);
+                    m_DPS->DoClearArea(0,CursorY,CursorX+1,CursorY+1);
                 break;
                 case 2: // The complete display
                     m_DPS->GetCursorXY(&CursorX,&CursorY);
@@ -1468,13 +1468,13 @@ void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
             switch(p1)
             {
                 case 0: // Erase to end
-                    m_DPS->DoClearArea(CursorX,CursorY,-1,CursorY);
+                    m_DPS->DoClearArea(CursorX,CursorY,-1,CursorY+1);
                 break;
                 case 1: // Erase to start
-                    m_DPS->DoClearArea(0,CursorY,CursorX,CursorY);
+                    m_DPS->DoClearArea(0,CursorY,CursorX+1,CursorY+1);
                 break;
                 case 2: // Erase line
-                    m_DPS->DoClearArea(0,CursorY,-1,CursorY);
+                    m_DPS->DoClearArea(0,CursorY,-1,CursorY+1);
                 break;
                 default:
                 break;

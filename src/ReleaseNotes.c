@@ -30,8 +30,12 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
-    {   NOTETYPE_ENHANCEMENT,"Fixed a number of small bugs",
+    {   NOTETYPE_BUG_FIX,"Fixed a number of small bugs",
             "More scanning found a number of small bugs.  Fixed them."},
+    {   NOTETYPE_BUG_FIX,"Found a number of problems with the ANSI clearing",
+            "The ANSI processor was not handling the ESC[J and ESC[K commands"
+            " correctly.  It was trying to clear 0 size areas which resulted"
+            " in nothing changing."},
 };
 
 static struct ReleaseNote m_Notes_Rel2_3_1_0[]=

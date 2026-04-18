@@ -3551,6 +3551,7 @@ bool Scripting_AddNewCMD(const char *NameSpace,const char *Name,
 {
     struct ScriptCommand NewSCommand;
     i_ScriptCommandList cmd;
+    bool RetValue;
 
     NewSCommand.NameSpace=NameSpace;
     NewSCommand.Name=Name;
@@ -3561,24 +3562,32 @@ bool Scripting_AddNewCMD(const char *NameSpace,const char *Name,
     NewSCommand.ExeFn=ExeFn;
     NewSCommand.UserData=UserData;
 
+    RetValue=false;
     LockMutex(m_ScriptCommandListMutex);
-    /* Make sure we don't already have a command registered under this name */
-    for(cmd=m_ScriptCommandList.begin();cmd!=m_ScriptCommandList.end();
-            cmd++)
+    try
     {
-        if(strcasecmp(cmd->NameSpace.c_str(),NameSpace)==0 &&
-                strcasecmp(cmd->Name.c_str(),Name)==0)
+        /* Make sure we don't already have a command registered under this name */
+        for(cmd=m_ScriptCommandList.begin();cmd!=m_ScriptCommandList.end();
+                cmd++)
         {
-            break;
+            if(strcasecmp(cmd->NameSpace.c_str(),NameSpace)==0 &&
+                    strcasecmp(cmd->Name.c_str(),Name)==0)
+            {
+                break;
+            }
         }
+        if(cmd!=m_ScriptCommandList.end())
+        {
+            /* Already in use */
+            throw(0);
+        }
+        m_ScriptCommandList.push_back(NewSCommand);
+        RetValue=true;
     }
-    if(cmd!=m_ScriptCommandList.end())
+    catch(...)
     {
-        /* Already in use */
-        UnLockMutex(m_ScriptCommandListMutex);
-        return false;
+        RetValue=false;
     }
-    m_ScriptCommandList.push_back(NewSCommand);
     UnLockMutex(m_ScriptCommandListMutex);
 
     return true;

@@ -23,4 +23,4 @@ serial streams like RS232, and message block protocols like UDP.
 Support for sending blocks of binary or AscII data is included to
 better work with embedded devices and binary protocols.
 
-![Screen Shot](https://github.com/TheBeef/WhippyTerm/blob/main/Graphics/ScreenShot.gif?raw=true)
+![Screen Shot](https://github.com/TheBeef/WhippyTerm/blob/main/Graphics/WhippyTermAnimScreenShot.gif?raw=true)

@@ -126,9 +126,11 @@ struct FTPS_API     // WhippyTerm provides these, you call them
     const char *(*GetDownloadFilename)(t_FTPSystemData *SysHandle,const char *FileNameHint);
     /********* End of FTPS_API_VERSION_1 ********/
     /********* Start of FTPS_API_VERSION_2 *********/
+#ifdef INCLUDESCRIPTING
 // FUTURE...
-//    PG_BOOL (*AddScriptUploadCMD)(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount,int OptionalArgStart);
-//    PG_BOOL (*AddScriptDownloadCMD)(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount,int OptionalArgStart);
+    PG_BOOL (*AddScriptUploadCMD)(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount,int OptionalArgStart);
+    PG_BOOL (*AddScriptDownloadCMD)(t_FTPSystemData *SysHandle,const char *ProtocolName,struct ScriptDataType *ArgList,uint32_t ArgCount,int OptionalArgStart);
+#endif
     /********* End of FTPS_API_VERSION_2 *********/
 };
 

@@ -28,6 +28,12 @@ struct ReleaseInfo
 //            "Description"},
 //};
 
+static struct ReleaseNote m_Notes_NEXT[]=
+{
+    {   NOTETYPE_ENHANCEMENT,"Fixed a number of small bugs",
+            "More scanning found a number of small bugs.  Fixed them."},
+};
+
 static struct ReleaseNote m_Notes_Rel2_3_1_0[]=
 {
     {   NOTETYPE_BUG_FIX,"Fixed bug that wasn't applying settings",

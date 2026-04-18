@@ -510,19 +510,21 @@ void XModemUpload_FreeData(t_FTPHandlerDataType *DataHandle)
  ******************************************************************************/
 static PG_BOOL XModemUpload_Init(t_FTPSystemData *SysHandle)
 {
-//    static struct ScriptDataType UploadArgs[]=
-//    {
-//        {"Mode1K","Mode",e_ScriptDataArg_Bool},
-//        {"PadChar","Padding",e_ScriptDataArg_Int},
-//        {"StartTimeout","MAX_START_WAIT_TIME",e_ScriptDataArg_Int},
-//        {"MaxNaks","XMODEM_MAX_NAKS",e_ScriptDataArg_Int},
-//        {"PacketTimeout","MAX_PACKET_WAIT_TIME",e_ScriptDataArg_Int},
-//    };
-//
-//    return m_FTPS->AddScriptUploadCMD(SysHandle,"XModem",UploadArgs,
-//            sizeof(UploadArgs)/sizeof(struct ScriptDataType),0);
+#ifdef INCLUDESCRIPTING
+    static struct ScriptDataType UploadArgs[]=
+    {
+        {"Mode1K","Mode",e_ScriptDataArg_Bool},
+        {"PadChar","Padding",e_ScriptDataArg_Int},
+        {"StartTimeout","MAX_START_WAIT_TIME",e_ScriptDataArg_Int},
+        {"MaxNaks","XMODEM_MAX_NAKS",e_ScriptDataArg_Int},
+        {"PacketTimeout","MAX_PACKET_WAIT_TIME",e_ScriptDataArg_Int},
+    };
 
+    return m_FTPS->AddScriptUploadCMD(SysHandle,"XModem",UploadArgs,
+            sizeof(UploadArgs)/sizeof(struct ScriptDataType),0);
+#else
     return true;
+#endif
 }
 
 t_FTPOptionsWidgetsType *XModemUpload_AllocOptionsWidgets(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Options)
@@ -1378,17 +1380,19 @@ static const char *XModemUpload_GetLastErrorMsg(t_FTPSystemData *SysHandle,
  ******************************************************************************/
 static PG_BOOL XModemDownload_Init(t_FTPSystemData *SysHandle)
 {
-//    static struct ScriptDataType DownloadArgs[]=
-//    {
-//        {"Mode1K","Mode",e_ScriptDataArg_Bool},
-//        {"StartTimeout","MAX_START_WAIT_TIME",e_ScriptDataArg_Int},
-//        {"PacketTimeout","MAX_PACKET_WAIT_TIME",e_ScriptDataArg_Int},
-//    };
-//
-//    return m_FTPS->AddScriptDownloadCMD(SysHandle,"XModem",DownloadArgs,
-//            sizeof(DownloadArgs)/sizeof(struct ScriptDataType),0);
-//
+#ifdef INCLUDESCRIPTING
+    static struct ScriptDataType DownloadArgs[]=
+    {
+        {"Mode1K","Mode",e_ScriptDataArg_Bool},
+        {"StartTimeout","MAX_START_WAIT_TIME",e_ScriptDataArg_Int},
+        {"PacketTimeout","MAX_PACKET_WAIT_TIME",e_ScriptDataArg_Int},
+    };
+
+    return m_FTPS->AddScriptDownloadCMD(SysHandle,"XModem",DownloadArgs,
+            sizeof(DownloadArgs)/sizeof(struct ScriptDataType),0);
+#else
     return true;
+#endif
 }
 
 /*******************************************************************************

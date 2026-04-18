@@ -1037,7 +1037,7 @@ bool CheckExternPluginForInstall(const char *Filename)
         else if(Patch==0)
             sprintf(Verbuff,"%d.%d.%d",Maj,Min,Rev);
         else
-            sprintf(Verbuff,",%d.%d.%d%c",Maj,Min,Rev,Patch+'A'-1);
+            sprintf(Verbuff,"%d.%d.%d%c",Maj,Min,Rev,Patch+'A'-1);
 
         snprintf(buff,sizeof(buff),"Failed to install plugin.\n\n"
                 "This plugin requires a newer version of WhippyTerm.\n\n"

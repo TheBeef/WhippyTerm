@@ -139,8 +139,10 @@ struct FTPS_API g_FTPSAPI=
     FTPSPIA_GetDownloadFilename,
 
     /* V2 */
-//    FTPSPAI_AddScriptUploadCMD,
-//    FTPSPAI_AddScriptDownloadCMD,
+#ifdef INCLUDESCRIPTING
+    FTPSPAI_AddScriptUploadCMD,
+    FTPSPAI_AddScriptDownloadCMD,
+#endif
 
 };
 

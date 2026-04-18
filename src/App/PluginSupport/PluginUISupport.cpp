@@ -728,6 +728,7 @@ PG_BOOL PIUSDefault_FileReq(e_FileReqTypeType Req,const char *Title,char **Path,
     if(*Filename==NULL)
     {
         free(*Path);
+        *Path=NULL;
         return false;
     }
     strcpy(*Path,SelPath.c_str());

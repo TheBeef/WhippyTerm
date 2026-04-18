@@ -796,9 +796,11 @@ void Scripting_RecvBytes(struct ScriptHandle *Handle,class Connection *Con,
         BytesLeft--;
     }
 
-//    /* Now tell the script engine that there's a key */
-//    if(SEInstance->ScriptEngine->API.NewKeyPressDetected!=NULL)
-//        SEInstance->ScriptEngine->API.NewKeyPressDetected(SEInstance->Context);
+#ifdef INCLUDESCRIPTING
+    /* Now tell the script engine that there's a key */
+    if(SEInstance->ScriptEngine->API.NewKeyPressDetected!=NULL)
+        SEInstance->ScriptEngine->API.NewKeyPressDetected(SEInstance->Context);
+#endif
 }
 
 /*******************************************************************************

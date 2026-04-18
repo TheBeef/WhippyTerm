@@ -24,11 +24,11 @@ Basic commands:
     x WaitCom <- Wait for one of the provided strings
     * GetListOfUploadTypes
     * GetListOfDownloadTypes
-    * StartDownload
-    * StartUpload
+    x StartDownload
+    x StartUpload
     * AbortFileTransfer
-    * SendFile?
-    * RecvFile?
+    x SendFile?
+    x RecvFile?
     * FlushKeyboard
     * FlushCom
 

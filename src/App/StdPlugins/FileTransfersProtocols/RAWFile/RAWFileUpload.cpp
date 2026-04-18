@@ -245,8 +245,11 @@ void RAWFileUpload_FreeData(t_FTPHandlerDataType *DataHandle)
  ******************************************************************************/
 static PG_BOOL RAWFileUpload_Init(t_FTPSystemData *SysHandle)
 {
-//    return m_FTPS->AddScriptUploadCMD(SysHandle,"SendFile",NULL,0,-1);
+#ifdef INCLUDESCRIPTING
+    return m_FTPS->AddScriptUploadCMD(SysHandle,"SendFile",NULL,0,-1);
+#else
     return true;
+#endif
 }
 
 /*******************************************************************************

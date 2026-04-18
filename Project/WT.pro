@@ -22,6 +22,7 @@ QMAKE_CFLAGS += -Wno-unused-parameter -Wno-implicit-fallthrough-Wswitch-default 
 DEFINES -= UNICODE
 DEFINES += __STDC_LIMIT_MACROS
 DEFINES += BUILT_IN_PLUGINS=1
+DEFINES += INCLUDESCRIPTING
 
 QMAKE_CXXFLAGS += -Wall
 QMAKE_CFLAGS += -Wall

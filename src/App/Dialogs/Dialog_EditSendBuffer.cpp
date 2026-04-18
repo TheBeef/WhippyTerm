@@ -201,6 +201,7 @@ bool RunEditSendBufferDialog(int BufferNumber,uint8_t **CustomBuffer,
                 /* We are using a custom buffer, free the old one then
                    copy the data from the hex buffer before we free it */
                 free(*CustomBuffer);
+                *CustomBufferSize=0;
 
                 *CustomBuffer=(uint8_t *)malloc(BufferSize);
                 if(*CustomBuffer==NULL)

@@ -659,6 +659,10 @@ PG_BOOL TCPClient_Convert_URI_To_Options(const char *URI,t_PIKVList *Options,
     g_TCPC_System->KVAddItem(Options,"Address",ServerAddressBuffer);
     g_TCPC_System->KVAddItem(Options,"Port",PortStart);
 
+/* DEBUG PAUL:
+The check and the strcpy doesn't match up.  Need to check how Device Unique ID
+is used if it's ok for all the TCP clients to use the same ID
+*/
     if(strlen(ServerAddressBuffer)+strlen(PortStart)+1>=MaxDeviceUniqueIDLen)
         return false;
 

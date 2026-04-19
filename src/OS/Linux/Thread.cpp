@@ -152,13 +152,19 @@ void Wait4ThreadToExit(struct ThreadHandle *Thread)
 struct ThreadMutex *AllocMutex(void)
 {
     pthread_mutex_t *NewMutex;
+
+    NewMutex=NULL;
     try
     {
         NewMutex=new pthread_mutex_t;
+
+        if(pthread_mutex_init(NewMutex,NULL)!=0)
+            throw(0);
     }
     catch(...)
     {
-        NewMutex=NULL;
+        if(NewMutex!=NULL)
+            delete NewMutex;
     }
     return (struct ThreadMutex *)NewMutex;
 }

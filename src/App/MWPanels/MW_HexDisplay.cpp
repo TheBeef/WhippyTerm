@@ -692,7 +692,12 @@ void MWHexDisplay::Save(void)
         }
         else
         {
-            fwrite(HexBuff,Bytes,1,out);
+            if(fwrite(HexBuff,Bytes,1,out)!=1)
+            {
+                Error="Failed to write to ";
+                Error+=Filename;
+                UIAsk("Error",Error.c_str(),e_AskBox_Error,e_AskBttns_Ok);
+            }
             fclose(out);
         }
     }

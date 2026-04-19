@@ -691,13 +691,17 @@ void Scripting_KeyPress(struct ScriptHandle *Handle,class Connection *Con,
 {
     struct ScriptEngineInstance *SEInstance=(struct ScriptEngineInstance *)Handle;
     struct PluginKeyPress NewKeyEntry;
+    size_t MaxLen;
+
+    MaxLen=TextLen;
+    if(MaxLen>sizeof(NewKeyEntry.KeyChar)-1)
+        MaxLen=sizeof(NewKeyEntry.KeyChar);
 
     /* Queue the key press for this script */
     NewKeyEntry.Mod=Mods;
     NewKeyEntry.ExtendedKey=Key;
-    strncpy((char *)&NewKeyEntry.KeyChar,(char *)TextPtr,
-            sizeof(NewKeyEntry.KeyChar)-1);
-    NewKeyEntry.KeyChar[sizeof(NewKeyEntry.KeyChar)-1]=0;
+    strncpy((char *)&NewKeyEntry.KeyChar,(char *)TextPtr,MaxLen);
+    NewKeyEntry.KeyChar[MaxLen]=0;
 
     if(SEInstance->KeyboardQueue.size()<MAX_KEYPRESS_QUEUE_SIZE)
         SEInstance->KeyboardQueue.push(NewKeyEntry);
@@ -1200,7 +1204,7 @@ void Scripting_SetTitle(t_ScriptingEngineInstType *Inst,const char *Title)
  *    MaxLen [I] -- The max number of bytes that can be stored in 'Title'
  *
  * FUNCTION:
- *    This function changes the title of this connections title.
+ *    This function reads the title of this connection.
  *
  * RETURNS:
  *    NONE
@@ -3119,13 +3123,15 @@ int Scripting_GetTitleCB(struct UI_RPCData *RPCData)
     Data->RetLen=0;
 
     if(Data->MaxLen>0)
-        Data->Title[0]=0;
-    if(Data->SEInstance->ConnectedCon!=NULL)
     {
-        Data->SEInstance->ConnectedCon->GetDisplayName(TitleStr);
-        Data->RetLen=TitleStr.length();
-        strncpy(Data->Title,TitleStr.c_str(),Data->MaxLen-1);
-        Data->Title[Data->MaxLen-1]=0;
+        Data->Title[0]=0;
+        if(Data->SEInstance->ConnectedCon!=NULL)
+        {
+            Data->SEInstance->ConnectedCon->GetDisplayName(TitleStr);
+            Data->RetLen=TitleStr.length();
+            strncpy(Data->Title,TitleStr.c_str(),Data->MaxLen-1);
+            Data->Title[Data->MaxLen-1]=0;
+        }
     }
 
     return 0;

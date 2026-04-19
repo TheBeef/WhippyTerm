@@ -3589,7 +3589,10 @@ bool Connection::StartCapture(void)
     const char *TimeStr;
 
     if(CaptureToFile.WriteHandle!=NULL)
+    {
         fclose(CaptureToFile.WriteHandle);
+        CaptureToFile.WriteHandle=NULL;
+    }
 
     if(CaptureToFile.Filename=="")
         return false;

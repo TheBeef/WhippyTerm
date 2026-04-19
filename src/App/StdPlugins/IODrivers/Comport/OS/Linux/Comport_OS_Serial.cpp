@@ -437,6 +437,8 @@ void Comport_FreeHandle(t_DriverIOHandleType *DriverIO)
     while(!ComInfo->ThreadHasQuit)
         usleep(1000);   // Wait 1 ms
 
+    pthread_join(ComInfo->ThreadInfo,NULL);
+
     if(ComInfo->fd>=0)
         close(ComInfo->fd);
 
@@ -1288,19 +1290,20 @@ static void *Comport_OS_PollThread(void *arg)
         /* Check the DSR (Data Set Ready) (6) */
         /* Check the CTS (Clear to Send) (8) */
         /* Check the RI (Ring Indicator) (9) */
-        ioctl(ComInfo->fd,TIOCMGET,&ReadModemBits);
-
-        if(ReadModemBits!=LastModemBits)
+        if(ioctl(ComInfo->fd,TIOCMGET,&ReadModemBits)==0)
         {
-            pthread_mutex_lock(&ComInfo->UpdateMutex);
-            ComInfo->ModemBits=ReadModemBits;
-            pthread_mutex_unlock(&ComInfo->UpdateMutex);
+            if(ReadModemBits!=LastModemBits)
+            {
+                pthread_mutex_lock(&ComInfo->UpdateMutex);
+                ComInfo->ModemBits=ReadModemBits;
+                pthread_mutex_unlock(&ComInfo->UpdateMutex);
 
-            /* Data available */
-            g_CP_IOSystem->DrvDataEvent(ComInfo->DriverIO,
-                    e_DataEventCode_BytesAvailable);
+                /* Data available */
+                g_CP_IOSystem->DrvDataEvent(ComInfo->DriverIO,
+                        e_DataEventCode_BytesAvailable);
 
-            LastModemBits=ReadModemBits;
+                LastModemBits=ReadModemBits;
+            }
         }
         /* DEBUG PAUL: We need to set DTR (4) and RTS (7) (although not here) */
         /* DSR -> DTR */

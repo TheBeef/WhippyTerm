@@ -928,6 +928,7 @@ static void DESB_DoImportDataFromDisk(void)
     {
         UIAsk("Error","Error reading file",e_AskBox_Error,
                 e_AskBttns_Ok);
+        free(NewBuffer);
         fclose(in);
         return;
     }
@@ -1075,6 +1076,7 @@ static void DESB_DoInsertFromDisk(void)
     {
         UIAsk("Error","Error reading file",e_AskBox_Error,
                 e_AskBttns_Ok);
+        free(NewBuffer);
         fclose(in);
         return;
     }

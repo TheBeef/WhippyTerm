@@ -260,6 +260,9 @@ t_DriverIOHandleType *Comport_AllocateHandle(const char *DeviceUniqueID,
         if(NewComInfo==NULL)
             throw(0);
 
+        NewComInfo->ThreadMutex=NULL;
+        NewComInfo->ThreadHandle=NULL;
+
         NewComInfo->hComm=INVALID_HANDLE_VALUE;
         NewComInfo->DriverIO=IOHandle;
         NewComInfo->ThreadMutex=NULL;
@@ -296,6 +299,9 @@ t_DriverIOHandleType *Comport_AllocateHandle(const char *DeviceUniqueID,
         {
             if(NewComInfo->ThreadMutex!=NULL)
                 CloseHandle(NewComInfo->ThreadMutex);
+
+            if(NewComInfo->ThreadHandle!=NULL)
+                CloseHandle(NewComInfo->ThreadHandle);
 
             delete NewComInfo;
         }
@@ -340,6 +346,8 @@ void Comport_FreeHandle(t_DriverIOHandleType *DriverIO)
 
     if(ComInfo->hComm!=INVALID_HANDLE_VALUE)
         CloseHandle(ComInfo->hComm);
+
+    CloseHandle(ComInfo->ThreadHandle);
 
     delete ComInfo;
 }

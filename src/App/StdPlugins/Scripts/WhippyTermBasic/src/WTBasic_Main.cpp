@@ -747,10 +747,13 @@ static int GenericKeywordFn(struct mb_interpreter_t *bas, void **arg)
         RetValue=MB_FUNC_ERR;
     }
 
-    for(a=0;a<ExeArgsCount;a++)
+    if(ExeArgs!=NULL)
     {
-        if(ExeArgs[a].Value!=NULL)
-            delete[] ExeArgs[a].Value;
+        for(a=0;a<ExeArgsCount;a++)
+        {
+            if(ExeArgs[a].Value!=NULL)
+                delete[] ExeArgs[a].Value;
+        }
     }
 
     if(RetStr!=NULL)

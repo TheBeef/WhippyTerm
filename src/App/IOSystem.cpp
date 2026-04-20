@@ -1775,17 +1775,24 @@ static void IOS_UnEscUniqueID(string &EscUniqueID,string &UniqueID)
     /* Ok, escape the string */
     UniqueID="";
     UniqueID.reserve(EscUniqueID.length());
-    for(pos=EscUniqueID.begin();pos!=EscUniqueID.end();pos++)
+    for(pos=EscUniqueID.begin();pos!=EscUniqueID.end();)
     {
         c=*pos;
         if(c=='_')
         {
             pos++;  // Move past _
             InsertPos=buff;
-            while(*pos>='0' && *pos<='9' && InsertPos<buff+sizeof(buff)-1)
+            while(pos!=EscUniqueID.end() && *pos>='0' && *pos<='9' &&
+                    InsertPos<buff+sizeof(buff)-1)
+            {
                 *InsertPos++=*pos++;
+            }
             *InsertPos++=0;
             c=atoi(buff);
+        }
+        else
+        {
+            pos++;
         }
         UniqueID+=c;
     }

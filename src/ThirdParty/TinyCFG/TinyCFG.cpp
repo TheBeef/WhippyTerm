@@ -1723,7 +1723,7 @@ bool TinyCFG::LoadCFGFile(const char *FileName,int MaxFileSize)
     }
     catch(...)
     {
-printf("ERROR\n");
+//printf("ERROR\n");
         Failure=true;
     }
 
@@ -1751,7 +1751,7 @@ bool TinyCFG::ReadNextCFG(void)
     }
     catch(...)
     {
-printf("ERROR\n");
+//printf("ERROR\n");
         Failure=true;
         RetValue=false;
     }

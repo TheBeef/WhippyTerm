@@ -1,3 +1,19 @@
+/* DEBUG PAUL:
+Small problem (doesn't currently effect Linux, but likely something that should
+be looked at):
+The thread and the main thead both work on 'fd' most of the time this isn't
+an issue, however when the main thead closes the fd the thread might be waiting
+on the fd.  This works on Linux, but is just because of the way Linux works,
+it could change.
+The system need to be rethough (mostly because other plugin's tend to copy
+this file).
+Maybe there should be a cmd queue that goes to the thread where all file
+opts work???
+
+Give this some thought....
+
+*/
+
 /*******************************************************************************
  * FILENAME: Comport_OS_Serial.cpp
  *
@@ -1260,6 +1276,9 @@ static void *Comport_OS_PollThread(void *arg)
             continue;
         }
 
+        if(ComInfo->fd<0)
+            continue;
+
         FD_ZERO(&rfds);
         FD_SET(ComInfo->fd,&rfds);
 
@@ -1310,6 +1329,9 @@ static void *Comport_OS_PollThread(void *arg)
         /* CTS -> RTS */
 
     }
+
+    if(ComInfo->fd>=0)
+        close(ComInfo->fd);
 
     ComInfo->ThreadHasQuit=true;
 

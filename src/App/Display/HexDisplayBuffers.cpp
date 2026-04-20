@@ -3947,6 +3947,9 @@ bool HexDisplayBuffer::GrowBufferAsNeeded(int NewBufferSize)
 {
     uint8_t *NewBuffer;
 
+    if(WeAllocBuffer)
+        return false;
+
     if(NewBufferSize>BufferAllocatedSize)
     {
         /* Ok we need to allocate a new buffer */

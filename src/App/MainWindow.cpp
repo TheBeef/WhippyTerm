@@ -119,7 +119,7 @@ void MWDebug5(uintptr_t ID)
     {
         bool InDark;
         InDark=OS_IsSystemInDarkMode();
-        printf("%d\n",InDark);
+//        printf("%d\n",InDark);
     }
 
     if(Con!=NULL) return Con->Debug5();

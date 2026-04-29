@@ -248,3 +248,42 @@ int RunningExeBits(void)
 {
     return 64;
 }
+
+/*******************************************************************************
+ * NAME:
+ *    GetOS_IDStrings
+ *
+ * SYNOPSIS:
+ *    bool GetOS_IDStrings(std::string &OS_ID,std::string &Version);
+ *
+ * PARAMETERS:
+ *    OS_ID [O] -- The ID of the OS
+ *
+ * FUNCTION:
+ *    This function gets the ID string and version string for the running
+ *    os.
+ *
+ * RETURNS:
+ *    A number that relates to the current os version.  The meaning depends
+ *    on the OS being run.
+ *
+ * SEE ALSO:
+ *    RunningOS()
+ ******************************************************************************/
+bool GetOS_IDStrings(std::string &OS_ID,std::string &Version)
+{
+    OSVERSIONINFO osvi;
+    BOOL bIsWindowsXPorLater;
+
+
+    ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+
+    GetVersionEx(&osvi);
+
+    OS_ID="Windows";
+    sprintf(buff,"%d.%d",osvi.dwMajorVersion,osvi.dwMinorVersion);
+    Version=buff;
+
+    return true;
+}

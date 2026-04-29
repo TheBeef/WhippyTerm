@@ -67,6 +67,7 @@ static void Show_Error(const char *ErrorMsg);
 static void NVC_Move2NextStep(void);
 static void NVC_ExeCurrentStep(void);
 static void WorkerThread(void *Data);
+static bool CheckForAbort(void);
 
 /*** VARIABLE DEFINITIONS     ***/
 e_VersionCheckStepType m_CurrentStep;
@@ -483,7 +484,7 @@ void WorkerThread(void *Data)
             break;
             case e_ThreadCmd_OpenConnection:
                 m_AbortConnect=false;
-                if(!OpenConnection2WebSite(&m_AbortConnect))
+                if(!OpenConnection2WebSite(CheckForAbort))
                     HadError=true;
             break;
             case e_ThreadCmd_CloseConnection:
@@ -511,3 +512,30 @@ void WorkerThread(void *Data)
         UnLockMutex(m_ThreadMutex);
     }
 }
+
+/*******************************************************************************
+ * NAME:
+ *    CheckForAbort
+ *
+ * SYNOPSIS:
+ *    static bool CheckForAbort(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function checks if the user pressed abort while we where trying
+ *    to connect to the upgrade server.
+ *
+ * RETURNS:
+ *    true -- We are to abort
+ *    false -- Continue
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static bool CheckForAbort(void)
+{
+    return m_AbortConnect;
+}
+

@@ -48,7 +48,7 @@
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
-struct OSSocket *OpenSocket(const char *Dest,unsigned int Port,volatile bool *AbortFlag);
+struct OSSocket *OpenSocket(const char *Dest,unsigned int Port,bool (*AbortCheck)(void));
 bool SendSocket(struct OSSocket *Sock,const void *Buffer,unsigned int Bytes);
 int ReadSocket(struct OSSocket *Sock,void *Buffer,unsigned int MaxBytes);
 unsigned int AvailSocket(struct OSSocket *Sock);

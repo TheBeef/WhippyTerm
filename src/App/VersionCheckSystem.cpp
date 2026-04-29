@@ -120,15 +120,13 @@ void ShutDownVersionCheckSystem(void)
  *    OpenConnection2WebSite
  *
  * SYNOPSIS:
- *    bool OpenConnection2WebSite(volatile bool *AbortFlag);
+ *    bool OpenConnection2WebSite(bool (*AbortCallback)(void));
  *
  * PARAMETERS:
- *    AbortFlag [I] -- This is a pointer to a bool that is used to abort the
- *                     connect().  Set this to false before calling
- *                     this function.  This function will then check this
- *                     var while attempting to connent to the server.  If
- *                     it is set to true then this function is aborted
- *                     and returns fail.
+ *    AbortCallback [I] -- This function is called when trying to connect to
+ *                         the server.  It returns true if the caller of
+ *                         OpenSocket() wants to abort.  This will be call over
+ *                         and over while trying to connect.
  *
  * FUNCTION:
  *    This function opens the connection to the web site used to check the
@@ -145,9 +143,10 @@ void ShutDownVersionCheckSystem(void)
  *    ReadLatestVersionFromWebSite(), ReadLatestVersionFromWebSite(),
  *    CheckLatestVersionFromWebSite(), CloseConnection2WebSite()
  ******************************************************************************/
-bool OpenConnection2WebSite(volatile bool *AbortFlag)
+bool OpenConnection2WebSite(bool (*AbortCallback)(void))
 {
-    m_VCheckSocket=OpenSocket(SOURCE_WEB_SITE,SOURCE_WEB_SITE_PORT,AbortFlag);
+    m_VCheckSocket=OpenSocket(SOURCE_WEB_SITE,SOURCE_WEB_SITE_PORT,
+            AbortCallback);
     if(m_VCheckSocket==NULL)
         return false;
 

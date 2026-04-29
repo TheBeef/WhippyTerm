@@ -5,10 +5,10 @@
  *    Whippy Term
  *
  * FILE DESCRIPTION:
- *    This file has the linux version of the sockets interface in it.
+ *    This file has the Win32 version of the sockets interface in it.
  *
  * COPYRIGHT:
- *    Copyright 23 Apr 2026 Paul Hutchinson.
+ *    Copyright 28 Apr 2026 Paul Hutchinson.
  *
  *    This program is free software: you can redistribute it and/or modify it
  *    under the terms of the GNU General Public License as published by the
@@ -24,36 +24,64 @@
  *    with this program. If not, see https://www.gnu.org/licenses/.
  *
  * CREATED BY:
- *    Paul Hutchinson (23 Apr 2026)
+ *    Paul Hutchinson (28 Apr 2026)
  *
  ******************************************************************************/
 
 /*** HEADER FILES TO INCLUDE  ***/
 #include "OS/Sockets.h"
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <netdb.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <errno.h>
-#include <fcntl.h>
 
 /*** DEFINES                  ***/
 
 /*** MACROS                   ***/
 
 /*** TYPE DEFINITIONS         ***/
-struct LinuxSocket
+struct Win32Socket
 {
-    int fd;
+    SOCKET fd;
 };
 
 /*** FUNCTION PROTOTYPES      ***/
+static bool InitWinsock(void);
 
 /*** VARIABLE DEFINITIONS     ***/
+static bool m_WinsockInited=false;
+
+/*******************************************************************************
+ * NAME:
+ *    InitWinsock
+ *
+ * SYNOPSIS:
+ *    static bool InitWinsock(void);
+ *
+ * PARAMETERS:
+ *    None.
+ *
+ * FUNCTION:
+ *    Lazy-init for Winsock.  Calls WSAStartup() the first time we need it.
+ *    The matching WSACleanup() is left to process exit.
+ *
+ * RETURNS:
+ *    true if Winsock is ready to use, false if WSAStartup() failed.
+ ******************************************************************************/
+static bool InitWinsock(void)
+{
+    WSADATA wsaData;
+
+    if(m_WinsockInited)
+        return true;
+
+    if(WSAStartup(MAKEWORD(2,2),&wsaData)!=0)
+        return false;
+
+    m_WinsockInited=true;
+    return true;
+}
 
 /*******************************************************************************
  * NAME:
@@ -86,23 +114,26 @@ struct LinuxSocket
 struct OSSocket *OpenSocket(const char *Dest,unsigned int Port,
         bool (*AbortCheck)(void))
 {
-    struct LinuxSocket *NewSocket;
+    struct Win32Socket *NewSocket;
     char PortStr[100];
     struct addrinfo hints,*res,*p;
     int status;
-    int flags;
+    u_long nonblocking;
     fd_set writefds;
     struct timeval tv;
     int sel;
     int so_error;
-    socklen_t len;
+    int len;
 
     NewSocket=NULL;
     res=NULL;
     try
     {
-        NewSocket=new struct LinuxSocket;
-        NewSocket->fd=-1;
+        if(!InitWinsock())
+            throw(0);
+
+        NewSocket=new struct Win32Socket;
+        NewSocket->fd=INVALID_SOCKET;
 
         memset(&hints, 0, sizeof hints);
         hints.ai_family = AF_UNSPEC;     // Allow IPv4 or IPv6
@@ -116,7 +147,7 @@ struct OSSocket *OpenSocket(const char *Dest,unsigned int Port,
         for(p=res;p!=NULL;p=p->ai_next)
         {
             NewSocket->fd=socket(p->ai_family,p->ai_socktype,p->ai_protocol);
-            if(NewSocket->fd==-1)
+            if(NewSocket->fd==INVALID_SOCKET)
             {
                 /* Failed to get a socket of this type, move on */
                 continue;
@@ -124,12 +155,12 @@ struct OSSocket *OpenSocket(const char *Dest,unsigned int Port,
 
             /* Connect to this server with abort */
 
-            flags=fcntl(NewSocket->fd,F_GETFL,0);
-            if(flags==-1)
+            /* Set non-blocking */
+            nonblocking=1;
+            if(ioctlsocket(NewSocket->fd,FIONBIO,&nonblocking)!=0)
                 throw(0);
-            flags|=O_NONBLOCK;
-            fcntl(NewSocket->fd,F_SETFL,flags);
-            connect(NewSocket->fd,p->ai_addr,p->ai_addrlen);
+
+            connect(NewSocket->fd,p->ai_addr,(int)p->ai_addrlen);
 
             /* Wait for the connect or an abort */
             for(;;)
@@ -139,24 +170,25 @@ struct OSSocket *OpenSocket(const char *Dest,unsigned int Port,
                 tv.tv_sec=0;
                 tv.tv_usec=100000;
 
-                sel=select(NewSocket->fd+1,NULL,&writefds,NULL,&tv);
+                /* nfds is ignored on Windows */
+                sel=select(0,NULL,&writefds,NULL,&tv);
                 if(sel>0)
                 {
                     len=sizeof(so_error);
-                    getsockopt(NewSocket->fd,SOL_SOCKET,SO_ERROR,&so_error,
-                            &len);
+                    getsockopt(NewSocket->fd,SOL_SOCKET,SO_ERROR,
+                            (char *)&so_error,&len);
                     if(so_error!=0)
                     {
                         /* Connection failed */
-                        close(NewSocket->fd);
-                        NewSocket->fd=-1;
+                        closesocket(NewSocket->fd);
+                        NewSocket->fd=INVALID_SOCKET;
                     }
                     break;
                 }
                 if(AbortCheck!=NULL && AbortCheck())
                     throw(0);
             }
-            if(NewSocket->fd==-1)
+            if(NewSocket->fd==INVALID_SOCKET)
             {
                 /* Failed, move on */
                 continue;
@@ -165,25 +197,23 @@ struct OSSocket *OpenSocket(const char *Dest,unsigned int Port,
             /* Ok, we have an open connection */
             break;
         }
-        if(NewSocket->fd==-1)
+        if(NewSocket->fd==INVALID_SOCKET)
         {
             /* No connection */
             throw(0);
         }
 
         /* Clear the non-blocking */
-        flags=fcntl(NewSocket->fd,F_GETFL,0);
-        if(flags==-1)
+        nonblocking=0;
+        if(ioctlsocket(NewSocket->fd,FIONBIO,&nonblocking)!=0)
             throw(0);
-        flags&=~O_NONBLOCK;
-        fcntl(NewSocket->fd,F_SETFL,flags);
     }
     catch(...)
     {
         if(NewSocket!=NULL)
         {
-            if(NewSocket->fd>=0)
-                close(NewSocket->fd);
+            if(NewSocket->fd!=INVALID_SOCKET)
+                closesocket(NewSocket->fd);
             delete NewSocket;
         }
         return NULL;
@@ -191,14 +221,15 @@ struct OSSocket *OpenSocket(const char *Dest,unsigned int Port,
 
     if(res!=NULL)
         freeaddrinfo(res);
+
     return (struct OSSocket *)NewSocket;
 }
 
 bool SendSocket(struct OSSocket *Sock,const void *Buffer,unsigned int Bytes)
 {
-    struct LinuxSocket *TheSocket=(struct LinuxSocket *)Sock;
+    struct Win32Socket *TheSocket=(struct Win32Socket *)Sock;
 
-    if(send(TheSocket->fd,Buffer,Bytes,0)!=Bytes)
+    if(send(TheSocket->fd,(const char *)Buffer,(int)Bytes,0)!=(int)Bytes)
         return false;
     return true;
 }
@@ -231,22 +262,24 @@ bool SendSocket(struct OSSocket *Sock,const void *Buffer,unsigned int Bytes)
  ******************************************************************************/
 int ReadSocket(struct OSSocket *Sock,void *Buffer,unsigned int MaxBytes)
 {
-    struct LinuxSocket *TheSocket=(struct LinuxSocket *)Sock;
+    struct Win32Socket *TheSocket=(struct Win32Socket *)Sock;
     int Bytes;
-    struct timeval tv;
+    DWORD timeout;
+    int err;
 
-    tv.tv_sec = 1;
-    tv.tv_usec = 0;
+    /* On Windows SO_RCVTIMEO takes a DWORD of milliseconds, not a timeval */
+    timeout=1000;
+    setsockopt(TheSocket->fd,SOL_SOCKET,SO_RCVTIMEO,(const char*)&timeout,
+            sizeof(timeout));
 
-    setsockopt(TheSocket->fd,SOL_SOCKET,SO_RCVTIMEO,(const char*)&tv,sizeof(tv));
-
-    Bytes=recv(TheSocket->fd,Buffer,MaxBytes,0);
+    Bytes=recv(TheSocket->fd,(char *)Buffer,(int)MaxBytes,0);
     if(Bytes==0)
         return -1;
     if(Bytes<0)
     {
+        err=WSAGetLastError();
         /* Timeout errors = 0 */
-        if(errno == EAGAIN || errno == EWOULDBLOCK)
+        if(err==WSAETIMEDOUT || err==WSAEWOULDBLOCK)
             return 0;
 
         /* General error */
@@ -258,25 +291,21 @@ int ReadSocket(struct OSSocket *Sock,void *Buffer,unsigned int MaxBytes)
 
 unsigned int AvailSocket(struct OSSocket *Sock)
 {
-    struct LinuxSocket *TheSocket=(struct LinuxSocket *)Sock;
-    int Bytes;
+    struct Win32Socket *TheSocket=(struct Win32Socket *)Sock;
+    u_long Bytes;
 
-    if(ioctl(TheSocket->fd,FIONREAD,&Bytes)!=0)
+    if(ioctlsocket(TheSocket->fd,FIONREAD,&Bytes)!=0)
         return 0;
 
-    if(Bytes<0)
-        return 0;
-
-    return Bytes;
+    return (unsigned int)Bytes;
 }
 
 void CloseSocket(struct OSSocket *Sock)
 {
-    struct LinuxSocket *TheSocket=(struct LinuxSocket *)Sock;
+    struct Win32Socket *TheSocket=(struct Win32Socket *)Sock;
 
-    if(TheSocket->fd!=-1)
-        close(TheSocket->fd);
+    if(TheSocket->fd!=INVALID_SOCKET)
+        closesocket(TheSocket->fd);
 
     delete TheSocket;
 }
-

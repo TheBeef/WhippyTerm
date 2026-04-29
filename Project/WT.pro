@@ -74,7 +74,6 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/StdPlugins/IODrivers/TCPServer/src/TCPServer_Main.cpp \
     ../src/App/StdPlugins/IODrivers/UDPClient/src/UDPClient_Main.cpp \
     ../src/App/StdPlugins/IODrivers/UDPServer/src/UDPServer_Main.cpp \
-    ../src/OS/Linux/Sockets.cpp \
     ../src/UI/QT/ContextMenuHelper.cpp \
     ../src/UI/QT/Form_CRCFinder.cpp \
     ../src/UI/QT/Form_CRCFinderAccess.cpp \
@@ -246,6 +245,7 @@ win32 {
     ../src/OS/Windows/OSTime.cpp \
     ../src/OS/Windows/System.cpp \
     ../src/OS/Windows/Thread.cpp \
+    ../src/OS/Windows/Sockets.cpp \
     ../src/App/StdPlugins/IODrivers/Comport/OS/Win/Comport_OS_Serial.cpp \
     ../src/App/StdPlugins/IODrivers/TCPClient/src/OS/Win/TCPClient_OS_Socket.cpp \
     ../src/App/StdPlugins/IODrivers/TCPServer/src/OS/Win/TCPServer_OS_Socket.cpp \
@@ -272,6 +272,7 @@ linux {
         ../src/OS/RPI/OSTime.cpp \
         ../src/OS/RPI/System.cpp \
         ../src/OS/RPI/Threads.cpp \
+        ../src/OS/RPI/Sockets.cpp \
         ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/OS/RPI/WTB_OSTime.cpp \
         ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/OS/RPI/WTB_OSFile.cpp \
 
@@ -285,6 +286,7 @@ linux {
         ../src/OS/Linux/OSTime.cpp \
         ../src/OS/Linux/System.cpp \
         ../src/OS/Linux/Thread.cpp \
+        ../src/OS/Linux/Sockets.cpp \
         ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/OS/Linux/WTB_OSTime.cpp \
         ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/OS/Linux/WTB_OSFile.cpp \
 

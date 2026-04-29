@@ -274,7 +274,7 @@ bool GetOS_IDStrings(std::string &OS_ID,std::string &Version)
 {
     OSVERSIONINFO osvi;
     BOOL bIsWindowsXPorLater;
-
+    char buff[100];
 
     ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
     osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);

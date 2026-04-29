@@ -2417,7 +2417,7 @@ struct ScriptHandle *Scripting_LoadScript(const char *Filename)
         se->UseCount++;
         UnLockMutex(se->UseCountMutex);
 
-        NewSEInstance->Thread=StartThread(RunScriptThread,
+        NewSEInstance->Thread=StartThread(true,RunScriptThread,
                 (void *)NewSEInstance);
         if(NewSEInstance->Thread==NULL)
         {

@@ -47,9 +47,14 @@ static DWORD WINAPI ThreadLaunchFn(LPVOID TmpData);
  *    StartThread
  *
  * SYNOPSIS:
- *    struct ThreadHandle *StartThread(void (*ThreadFn)(void *),void *Arg);
+ *    struct ThreadHandle *StartThread(bool AutoEnd,void (*ThreadFn)(void *),
+ *              void *Arg);
  *
  * PARAMETERS:
+ *    AutoEnd [I] -- If this is true then the thread will free it's self and the
+ *                   parent thread doesn't have to do anything.  If this
+ *                   is false then the parent thread must call
+ *                   Wait4ThreadToExit() to free the thread.
  *    ThreadFn [I] -- The function to call as the threads main()
  *    Arg [I] -- The arg to send to 'ThreadFn'
  *
@@ -62,7 +67,8 @@ static DWORD WINAPI ThreadLaunchFn(LPVOID TmpData);
  * SEE ALSO:
  *    
  ******************************************************************************/
-struct ThreadHandle *StartThread(void (*ThreadFn)(void *), void *Arg)
+struct ThreadHandle *StartThread(bool AutoEnd,void (*ThreadFn)(void *),
+        void *Arg)
 {
     HANDLE hThread = NULL;
     struct ThreadLaunchData *NewLaunchData = NULL;
@@ -77,6 +83,9 @@ struct ThreadHandle *StartThread(void (*ThreadFn)(void *), void *Arg)
 
         if (hThread == NULL)
             throw(0);
+
+        if(AutoEnd)
+            CloseHandle(hThread);
     }
     catch (...)
     {

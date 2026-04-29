@@ -1,14 +1,14 @@
 /*******************************************************************************
- * FILENAME: Thread.h
+ * FILENAME: Dialog_NewVersionCheck.h
  * 
  * PROJECT:
  *    Whippy Term
  *
  * FILE DESCRIPTION:
- *    This file has the threads interface in it.
+ *    .h file, does .h file stuff
  *
  * COPYRIGHT:
- *    Copyright 06 Apr 2026 Paul Hutchinson.
+ *    Copyright 21 Apr 2026 Paul Hutchinson.
  *
  *    This program is free software: you can redistribute it and/or modify it
  *    under the terms of the GNU General Public License as published by the
@@ -24,12 +24,12 @@
  *    with this program. If not, see https://www.gnu.org/licenses/.
  *
  * HISTORY:
- *    Paul Hutchinson (06 Apr 2026)
+ *    Paul Hutchinson (21 Apr 2026)
  *       Created
  *
  *******************************************************************************/
-#ifndef __THREAD_H_
-#define __THREAD_H_
+#ifndef __DIALOG_NEWVERSIONCHECK_H_
+#define __DIALOG_NEWVERSIONCHECK_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
 
@@ -38,19 +38,12 @@
 /***  MACROS                           ***/
 
 /***  TYPE DEFINITIONS                 ***/
-struct ThreadMutex;
-struct ThreadHandle;
 
 /***  CLASS DEFINITIONS                ***/
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
-struct ThreadHandle *StartThread(bool AutoEnd,void (*ThreadFn)(void *),void *Arg);
-void Wait4ThreadToExit(struct ThreadHandle *Thread);
-struct ThreadMutex *AllocMutex(void);
-void FreeMutex(struct ThreadMutex *);
-void LockMutex(struct ThreadMutex *Mutex);
-void UnLockMutex(struct ThreadMutex *Mutex);
+void CheckForNewVersionDialog(bool ShowDialog);
 
-#endif   /* end of "#ifndef __THREAD_H_" */
+#endif   /* end of "#ifndef __DIALOG_NEWVERSIONCHECK_H_" */

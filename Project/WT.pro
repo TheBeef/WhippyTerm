@@ -52,6 +52,7 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/Dialogs/Dialog_DataProPluginSettings.cpp \
     ../src/App/Dialogs/Dialog_HelpCommandLineOptions.cpp \
     ../src/App/Dialogs/Dialog_IODriverSettings.cpp \
+    ../src/App/Dialogs/Dialog_NewVersionCheck.cpp \
     ../src/App/Dialogs/Dialog_StylePicker.cpp \
     ../src/App/MWPanels/MW_OutGoingHexDisplay.cpp \
     ../src/App/PluginSupport/PluginSystem.cpp \
@@ -63,6 +64,7 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/StdPlugins/DataProcessors/HexDump/src/HexDump.cpp \
     ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/ThirdParty/my_basic.c \
     ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/WTBasic_Main.cpp \
+    ../src/App/VersionCheckSystem.cpp \
     ../src/BuildOptions/BuildOptions.cpp \
     ../src/App/Dialogs/Dialog_NewConnectionFromURI.cpp \
     ../src/App/Dialogs/Dialog_SendBufferSelect.cpp \
@@ -72,6 +74,7 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/StdPlugins/IODrivers/TCPServer/src/TCPServer_Main.cpp \
     ../src/App/StdPlugins/IODrivers/UDPClient/src/UDPClient_Main.cpp \
     ../src/App/StdPlugins/IODrivers/UDPServer/src/UDPServer_Main.cpp \
+    ../src/OS/Linux/Sockets.cpp \
     ../src/UI/QT/ContextMenuHelper.cpp \
     ../src/UI/QT/Form_CRCFinder.cpp \
     ../src/UI/QT/Form_CRCFinderAccess.cpp \
@@ -88,6 +91,8 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/UI/QT/Form_MainWindow.cpp \
     ../src/UI/QT/Form_NewConnectionFromURI.cpp \
     ../src/UI/QT/Form_NewConnectionFromURIAccess.cpp \
+    ../src/UI/QT/Form_NewVersionCheck.cpp \
+    ../src/UI/QT/Form_NewVersionCheckAccess.cpp \
     ../src/UI/QT/Form_SendBufferSelect.cpp \
     ../src/UI/QT/Form_SendBufferSelectAccess.cpp \
     ../src/UI/QT/Form_SendByte.cpp \
@@ -319,6 +324,7 @@ HEADERS  += ../src/UI/QT/Form_MainWindow.h \
     ../src/UI/QT/Form_GenericTextDisplay.h \
     ../src/UI/QT/Form_IODriverSettings.h \
     ../src/UI/QT/Form_NewConnectionFromURI.h \
+    ../src/UI/QT/Form_NewVersionCheck.h \
     ../src/UI/QT/Form_SendBufferSelect.h \
     ../src/UI/QT/Form_SendByte.h \
     ../src/UI/QT/Form_StylePickerDialog.h \
@@ -370,6 +376,7 @@ FORMS    += ../src/UI/QT/Form_MainWindow.ui \
     ../src/UI/QT/Form_GenericTextDisplay.ui \
     ../src/UI/QT/Form_IODriverSettings.ui \
     ../src/UI/QT/Form_NewConnectionFromURI.ui \
+    ../src/UI/QT/Form_NewVersionCheck.ui \
     ../src/UI/QT/Form_SendBufferSelect.ui \
     ../src/UI/QT/Form_SendByte.ui \
     ../src/UI/QT/Form_Settings.ui \

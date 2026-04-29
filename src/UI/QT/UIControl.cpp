@@ -807,6 +807,13 @@ bool UIGetButtonChecked(t_UIButtonCtrl *Bttn)
     return PButton->isChecked();
 }
 
+void UIMakeButtonVisible(t_UIButtonCtrl *Bttn,bool Visible)
+{
+    QPushButton *PButton=(QPushButton *)Bttn;
+
+    PButton->setVisible(Visible);
+}
+
 /*************************************/
 /* TabCtrl                           */
 /*************************************/

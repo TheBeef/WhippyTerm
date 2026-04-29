@@ -39,6 +39,7 @@
 #include "App/Dialogs/Dialog_ManagePlugins.h"
 #include "App/Dialogs/Dialog_NewConnection.h"
 #include "App/Dialogs/Dialog_NewConnectionFromURI.h"
+#include "App/Dialogs/Dialog_NewVersionCheck.h"
 #include "App/Dialogs/Dialog_SendByte.h"
 #include "App/Dialogs/Dialog_Settings.h"
 #include "App/Dialogs/Dialog_TransmitDelay.h"
@@ -6018,6 +6019,7 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_ToggleRightPanel -- Open or closes the right panel
  *                  e_Cmd_ToggleSendPanel -- Open or closes the send panel
  *                  e_Cmd_TermEmuSettings -- Open the terminal emulation settings dialog
+ *                  e_Cmd_NewVersionCheck -- Run the check for new version dialog
  *
  * FUNCTION:
  *    This function executes a command.
@@ -6634,6 +6636,9 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_TermEmuSettings:
             ShowTermEmuSettingsDialog();
+        break;
+        case e_Cmd_NewVersionCheck:
+            CheckForNewVersionDialog(true);
         break;
 
         case e_CmdMAX:

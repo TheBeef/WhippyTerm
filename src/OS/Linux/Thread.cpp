@@ -53,9 +53,14 @@ static void *ThreadLaunchFn(void *TmpData);
  *    StartThread
  *
  * SYNOPSIS:
- *    struct ThreadHandle *StartThread(void (*ThreadFn)(void *),void *Arg);
+ *    struct ThreadHandle *StartThread(bool AutoEnd,void (*ThreadFn)(void *),
+ *              void *Arg);
  *
  * PARAMETERS:
+ *    AutoEnd [I] -- If this is true then the thread will free it's self and the
+ *                   parent thread doesn't have to do anything.  If this
+ *                   is false then the parent thread must call
+ *                   Wait4ThreadToExit() to free the thread.
  *    ThreadFn [I] -- The function to call as the threads main()
  *    Arg [I] -- The arg to send to 'ThreadFn'
  *
@@ -68,7 +73,7 @@ static void *ThreadLaunchFn(void *TmpData);
  * SEE ALSO:
  *    
  ******************************************************************************/
-struct ThreadHandle *StartThread(void (*ThreadFn)(void *),void *Arg)
+struct ThreadHandle *StartThread(bool AutoEnd,void (*ThreadFn)(void *),void *Arg)
 {
     pthread_t *NewThread;
     int ret;
@@ -88,7 +93,8 @@ struct ThreadHandle *StartThread(void (*ThreadFn)(void *),void *Arg)
         if(ret!=0)
             throw(0);
 
-        pthread_detach(*NewThread);
+        if(AutoEnd)
+            pthread_detach(*NewThread);
     }
     catch(...)
     {

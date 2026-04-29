@@ -32,6 +32,7 @@
 #define __SYSTEM_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
+#include <string>
 
 /***  DEFINES                          ***/
 
@@ -61,4 +62,6 @@ void CloseDLL(struct DLLHandle *Handle);
 const char *LastDLLError(void);
 e_OSType RunningOS(void);
 int RunningExeBits(void);
+bool GetOS_IDStrings(std::string &OS_ID,std::string &Version);
+
 #endif

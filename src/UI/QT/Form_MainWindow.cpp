@@ -1941,3 +1941,9 @@ void Form_MainWindow::on_actionTerminal_Settings_triggered()
     DoMenuTriggered(e_UIMWMenu_TermEmuSettings);
 }
 
+
+void Form_MainWindow::on_actionCheck_For_New_Version_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_NewVersionCheck);
+}
+

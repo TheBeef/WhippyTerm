@@ -201,6 +201,7 @@ typedef enum
     e_UIMWMenu_StopScript,
     e_UIMWMenu_SendPanel,
     e_UIMWMenu_TermEmuSettings,
+    e_UIMWMenu_NewVersionCheck,
     e_UIMWMenuMAX
 } e_UIMWMenuType;
 

@@ -461,6 +461,8 @@ private slots:
     
     void on_actionTerminal_Settings_triggered();
     
+    void on_actionCheck_For_New_Version_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

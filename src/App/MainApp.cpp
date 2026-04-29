@@ -25,6 +25,7 @@
 #include "App/Settings.h"
 #include "App/ScriptingSystem.h"
 #include "App/SendBuffer.h"
+#include "App/VersionCheckSystem.h"
 #include "App/Util/CRCSystem.h"
 #include "App/Dialogs/Dialog_EditSendBuffer.h"
 #include "OS/System.h"
@@ -137,6 +138,7 @@ bool AppMain(int argc,char *argv[])
     InitSessionSystem();
     InitBookmarks();
     g_SendBuffers.Init();
+    InitVersionCheckSystem();
 
     LoadSettings();
     LoadSession();
@@ -186,6 +188,8 @@ bool AppMain(int argc,char *argv[])
 void StartAppShutDown(void)
 {
     SaveSession();  // Always save the session data
+
+    ShutDownVersionCheckSystem();
 
     g_AppShuttingDown=true;
 }

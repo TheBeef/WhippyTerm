@@ -211,6 +211,7 @@ void UIEnableButton(t_UIButtonCtrl *Bttn,bool Enable);
 void UISetButtonLabel(t_UIButtonCtrl *Bttn,const char *Text);
 void UISetButtonChecked(t_UIButtonCtrl *Bttn,bool Checked);
 bool UIGetButtonChecked(t_UIButtonCtrl *Bttn);
+void UIMakeButtonVisible(t_UIButtonCtrl *Bttn,bool Visible);
 
 /* ComboBox */
 void UIEnableComboBox(t_UIComboBoxCtrl *ComboBox,bool Enable);

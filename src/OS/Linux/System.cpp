@@ -32,6 +32,9 @@
 #include "OS/System.h"
 #include <signal.h>
 #include <dlfcn.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /*** DEFINES                  ***/
 
@@ -201,7 +204,7 @@ const char *LastDLLError(void)
  *    e_OS_Linux -- We are running Linux
  *
  * SEE ALSO:
- *    
+ *    OSVersion()
  ******************************************************************************/
 e_OSType RunningOS(void)
 {
@@ -231,4 +234,135 @@ e_OSType RunningOS(void)
 int RunningExeBits(void)
 {
     return 64;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    GetOS_IDStrings
+ *
+ * SYNOPSIS:
+ *    bool GetOS_IDStrings(std::string &OS_ID,std::string &Version);
+ *
+ * PARAMETERS:
+ *    OS_ID [O] -- The ID of the OS
+ *
+ * FUNCTION:
+ *    This function gets the ID string and version string for the running
+ *    os.
+ *
+ * RETURNS:
+ *    A number that relates to the current os version.  The meaning depends
+ *    on the OS being run.
+ *
+ * SEE ALSO:
+ *    RunningOS()
+ ******************************************************************************/
+bool GetOS_IDStrings(std::string &OS_ID,std::string &Version)
+{
+    FILE *in;
+    char *ReadBuff;
+    int Size;
+    char *p;
+    char *Key;
+    char *Value;
+    bool InQuotes;
+    char *VersionID;
+    char *ID;
+    bool RetValue;
+
+    in=NULL;
+    ReadBuff=NULL;
+    try
+    {
+        in=fopen("/etc/os-release","rb");
+        if(in==NULL)
+            throw(0);
+
+        fseek(in,0,SEEK_END);
+        Size=ftell(in);
+        fseek(in,0,SEEK_SET);
+        if(Size<0)
+            throw(0);
+
+        ReadBuff=(char *)malloc(Size+1);
+        if(ReadBuff==NULL)
+            throw(0);
+
+        if(fread(ReadBuff,Size,1,in)!=1)
+            throw(0);
+
+        ReadBuff[Size]=0;
+
+        p=ReadBuff;
+        Key=p;
+        Value=NULL;
+        VersionID=NULL;
+        ID=NULL;
+        while(*p!=0)
+        {
+            /* Find the = */
+            while(*p!='=' && *p!=0)
+                p++;
+            if(*p==0)
+                break;
+
+            /* Doing VALUE */
+            *p++=0;
+            /* Skip spaces */
+            while(*p==' ')
+                p++;
+            /* Skip any quotes */
+            InQuotes=false;
+            if(*p=='\"')
+                InQuotes=true;
+            while(*p=='\"')
+                p++;
+            Value=p;
+
+            while(*p!=0 && *p!='\n' && (!InQuotes || *p!='\"'))
+                p++;
+            if(*p=='\"' || *p=='\n')
+            {
+                *p=0;
+                p++;
+            }
+            /* Move to the next line */
+            while(*p=='\n' || *p==' ')
+                p++;
+
+            /* See what we are looking at */
+            if(strcasecmp(Key,"ID")==0)
+            {
+                ID=Value;
+            }
+            else if(strcasecmp(Key,"VERSION_ID")==0)
+            {
+                VersionID=Value;
+            }
+            Key=p;
+            Value=NULL;
+        }
+        if(ID==NULL)
+            throw(0);
+
+        OS_ID=ID;
+        if(VersionID==NULL)
+            Version="";
+        else
+            Version=VersionID;
+
+        RetValue=true;
+    }
+    catch(...)
+    {
+        RetValue=false;
+    }
+
+    if(in!=NULL)
+        fclose(in);
+
+    if(ReadBuff!=NULL)
+        free(ReadBuff);
+
+    return RetValue;
 }

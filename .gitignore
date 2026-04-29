@@ -6,6 +6,8 @@ Tools/ExternPluginMaker/ExternPluginMaker/build
 Tools/ExternPluginMaker/ExternPluginMaker/ExternPluginMaker.pro.user
 Project/build
 Tools/ExternPluginMaker/build-ExternPluginMaker-Desktop5-Debug
+LinuxInstaller/build
+docs
 *.wtp
 *.deb
 LinuxInstaller/WhippyTerm_*

@@ -2229,6 +2229,7 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="actionCheck_For_New_Version"/>
     <addaction name="actionAbout_Whippy_Term"/>
     <addaction name="separator"/>
     <addaction name="actionCommand_Line_Options"/>
@@ -3998,6 +3999,11 @@
    </property>
    <property name="visible">
     <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionCheck_For_New_Version">
+   <property name="text">
+    <string>Check For New Version...</string>
    </property>
   </action>
  </widget>

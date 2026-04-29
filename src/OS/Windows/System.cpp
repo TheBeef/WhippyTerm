@@ -282,7 +282,7 @@ bool GetOS_IDStrings(std::string &OS_ID,std::string &Version)
     GetVersionEx(&osvi);
 
     OS_ID="Windows";
-    sprintf(buff,"%d.%d",osvi.dwMajorVersion,osvi.dwMinorVersion);
+    sprintf(buff,"%ld.%ld",osvi.dwMajorVersion,osvi.dwMinorVersion);
     Version=buff;
 
     return true;

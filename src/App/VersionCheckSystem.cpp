@@ -43,7 +43,8 @@
 //#define SOURCE_WEB_SITE                     "whippyterm.com"
 //#define SOURCE_WEB_SITE_PORT                80
 //#define SOURCE_WEB_SITE                     "localhost"
-#define SOURCE_WEB_SITE                     "example.com"
+#define SOURCE_WEB_SITE                     "192.168.1.99"
+//#define SOURCE_WEB_SITE                     "example.com"
 #define SOURCE_WEB_SITE_PORT                10008
 
 #define MAXREPLYBUFFSIZE                    16000   /* We expect the reply from the server to be less than 16k.  If it's longer then we can't check the version (a typical size is more like 500 bytes) */
@@ -231,13 +232,15 @@ bool ReadLatestVersionFromWebSite(void)
             Version="";
         }
 
-        snprintf(buff,sizeof(buff),"GET " SOURCE_WEB_URL "?osclass=%d&os=%s&v=%s&b=%d&cr=%d&wt=%s HTTP/1.1\r\n"
+        snprintf(buff,sizeof(buff),"GET " SOURCE_WEB_URL "?osclass=%d&os=%s&v=%s&b=%d&cr=%d&port=%d&wt=%s HTTP/1.1\r\n"
                 "Host: %s:%d\r\n"
                 "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
                 "Connection: close\r\n"
                 "\r\n"
                 "\r\n",OSClassID,OS_ID.c_str(),Version.c_str(),RunningExeBits(),
-                        0/* Current update poll rate from settings*/,WHIPPYTERM_VERSION_STR,
+                        0/* Current update poll rate from settings*/,
+                        0/* Portable mode */,
+                        WHIPPYTERM_VERSION_STR,
                         SOURCE_WEB_SITE,SOURCE_WEB_SITE_PORT);
 
         if(!SendSocket(m_VCheckSocket,buff,strlen(buff)))

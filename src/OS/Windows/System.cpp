@@ -272,18 +272,20 @@ int RunningExeBits(void)
  ******************************************************************************/
 bool GetOS_IDStrings(std::string &OS_ID,std::string &Version)
 {
-    OSVERSIONINFO osvi;
-    BOOL bIsWindowsXPorLater;
-    char buff[100];
-
-    ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
-    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-
-    GetVersionEx(&osvi);
+//    OSVERSIONINFO osvi;
+//    BOOL bIsWindowsXPorLater;
+//    char buff[100];
+//    ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+//    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+//    GetVersionEx(&osvi);
+//    sprintf(buff,"%ld.%ld",osvi.dwMajorVersion,osvi.dwMinorVersion);
+//    Version=buff;
 
     OS_ID="Windows";
-    sprintf(buff,"%ld.%ld",osvi.dwMajorVersion,osvi.dwMinorVersion);
-    Version=buff;
+
+    /* We don't actually care about what version of Windows so we always say
+       blank */
+    Version="";
 
     return true;
 }

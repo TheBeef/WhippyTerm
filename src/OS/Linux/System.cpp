@@ -274,6 +274,9 @@ bool GetOS_IDStrings(std::string &OS_ID,std::string &Version)
     ReadBuff=NULL;
     try
     {
+        OS_ID="Unknown";
+        Version="";
+
         in=fopen("/etc/os-release","rb");
         if(in==NULL)
             throw(0);

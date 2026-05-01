@@ -31,6 +31,7 @@
 
 /*** HEADER FILES TO INCLUDE  ***/
 #include "VersionCheckSystem.h"
+#include "App/Portable.h"
 #include "OS/Sockets.h"
 #include "OS/System.h"
 #include "Version.h"
@@ -40,12 +41,8 @@
 
 /*** DEFINES                  ***/
 #define SOURCE_WEB_URL                      "/VersionCheck/Read.php"
-//#define SOURCE_WEB_SITE                     "whippyterm.com"
-//#define SOURCE_WEB_SITE_PORT                80
-//#define SOURCE_WEB_SITE                     "localhost"
-#define SOURCE_WEB_SITE                     "192.168.1.99"
-//#define SOURCE_WEB_SITE                     "example.com"
-#define SOURCE_WEB_SITE_PORT                10008
+#define SOURCE_WEB_SITE                     "whippyterm.com"
+#define SOURCE_WEB_SITE_PORT                80
 
 #define MAXREPLYBUFFSIZE                    16000   /* We expect the reply from the server to be less than 16k.  If it's longer then we can't check the version (a typical size is more like 500 bytes) */
 #define MAX_WAIT_FOR_DATA_TIMEOUT           5       /* We wait up to 5 seconds to get a reply from the server */
@@ -239,7 +236,7 @@ bool ReadLatestVersionFromWebSite(void)
                 "\r\n"
                 "\r\n",OSClassID,OS_ID.c_str(),Version.c_str(),RunningExeBits(),
                         0/* Current update poll rate from settings*/,
-                        0/* Portable mode */,
+                        g_InPortableMode,
                         WHIPPYTERM_VERSION_STR,
                         SOURCE_WEB_SITE,SOURCE_WEB_SITE_PORT);
 

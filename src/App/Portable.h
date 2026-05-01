@@ -32,6 +32,7 @@
 #define __PORTABLE_H_
 
 /***  HEADER FILES TO INCLUDE          ***/
+#include <string>
 
 /***  DEFINES                          ***/
 

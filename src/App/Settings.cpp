@@ -36,6 +36,7 @@
 #include "App/Connections.h"
 #include "App/CursorKeyMode.h"
 #include "App/Portable.h"
+#include "App/VersionCheckSystem.h"
 #include "OS/Directorys.h"
 #include "UI/UIFontReq.h"
 #include "UI/UIKeyboard.h"
@@ -56,6 +57,14 @@ class WindowStartupPosCFG : public TinyCFGBaseData
 {
    public:
       e_WindowStartupPosType *Ptr;
+      bool LoadData(string &LoadedString);
+      bool SaveData(string &StoreString);
+};
+
+class NewVersionCheckTypeCFG : public TinyCFGBaseData
+{
+   public:
+      e_NewVersionCheckType *Ptr;
       bool LoadData(string &LoadedString);
       bool SaveData(string &StoreString);
 };
@@ -157,9 +166,11 @@ bool LoadSettings(const char *Filename)
     const char *UseFilename;
     string Path;
     string SettingsFilename;
+    bool ForceVersionCheck;
 
     try
     {
+        ForceVersionCheck=false;
         UseFilename=Filename;
         if(Filename==NULL)
         {
@@ -177,11 +188,21 @@ bool LoadSettings(const char *Filename)
             SettingsFilename=Path;
             SettingsFilename+=SETTINGS_FILE;
             UseFilename=SettingsFilename.c_str();
+            ForceVersionCheck=true;
         }
 
         g_Settings.RegisterAllMembers(cfg);
 
-        g_Settings.DefaultSettings();;
+        g_Settings.DefaultSettings();
+
+        if(ForceVersionCheck)
+        {
+            /* Ok, we have a special case where we want to detect if the file
+               has version check in it or not.  So we set the first check
+               to MAX and load the file, but only if we are loading the
+               default path version. */
+            g_Settings.NewVersionCheck=e_NewVersionCheckMAX;
+        }
         cfg.LoadCFGFile(UseFilename);
     }
     catch(...)
@@ -1088,6 +1109,72 @@ bool RegisterPluginSettingsList(class TinyCFG &cfg,const char *XmlName,
     return cfg.RegisterGeneric(NewDataClass);
 }
 ///////////////////
+bool NewVersionCheckTypeCFG::LoadData(string &LoadedString)
+{
+    *Ptr=e_NewVersionCheckMAX;  /* Defaults to not set */
+
+    if(strcmp(LoadedString.c_str(),"Manual")==0)
+        *Ptr=e_NewVersionCheck_Manual;
+    if(strcmp(LoadedString.c_str(),"OnStartup")==0)
+        *Ptr=e_NewVersionCheck_OnStartup;
+    if(strcmp(LoadedString.c_str(),"Day")==0)
+        *Ptr=e_NewVersionCheck_Day;
+    if(strcmp(LoadedString.c_str(),"Month")==0)
+        *Ptr=e_NewVersionCheck_Month;
+    if(strcmp(LoadedString.c_str(),"Year")==0)
+        *Ptr=e_NewVersionCheck_Year;
+
+    return true;
+}
+
+bool NewVersionCheckTypeCFG::SaveData(string &StoreString)
+{
+    switch(*Ptr)
+    {
+        default:
+        case e_NewVersionCheckMAX:
+        case e_NewVersionCheck_Manual:
+            StoreString="Manual";
+        break;
+        case e_NewVersionCheck_OnStartup:
+            StoreString="OnStartup";
+        break;
+        case e_NewVersionCheck_Day:
+            StoreString="Day";
+        break;
+        case e_NewVersionCheck_Month:
+            StoreString="Month";
+        break;
+        case e_NewVersionCheck_Year:
+            StoreString="Year";
+        break;
+    }
+
+    return true;
+}
+
+bool Settings::RegisterNewVersionCheck(class TinyCFG &cfg,const char *XmlName,
+      e_NewVersionCheckType &Data)
+{
+    class NewVersionCheckTypeCFG *NewDataClass;
+
+    /* Make a new class to handle this new piece of data */
+    try
+    {
+        NewDataClass=new NewVersionCheckTypeCFG;
+    }
+    catch(std::bad_alloc const &)
+    {
+        return false;
+    }
+
+    /* Setup the data */
+    NewDataClass->Ptr=&Data;
+    NewDataClass->XmlName=XmlName;
+
+    return cfg.RegisterGeneric(NewDataClass);
+}
+///////////////////
 
 /*******************************************************************************
  * NAME:
@@ -1121,6 +1208,8 @@ void ApplySettings(void)
     Con_ApplySettings2AllConnections();
 
     CursorKeyMode_ApplySettings();
+
+    NewVersionCheck_ApplySettings();
 }
 
 void Settings::RegisterAllMembers(class TinyCFG &cfg)
@@ -1195,6 +1284,7 @@ void Settings::RegisterAllMembers(class TinyCFG &cfg)
     cfg.StartBlock("Behaviour");
         cfg.Register("BookmarksOpenNewTabs",BookmarksOpenNewTabs);
         cfg.Register("ConfirmQuit",ConfirmQuit);
+        RegisterNewVersionCheck(cfg,"NewVersionCheck",NewVersionCheck);
     cfg.EndBlock();
 
     cfg.StartBlock("Keyboard");
@@ -1438,6 +1528,8 @@ void Settings::DefaultSettings(void)
     /**** Behaviour ****/
     BookmarksOpenNewTabs=true;
     ConfirmQuit=true;
+
+    NewVersionCheck=e_NewVersionCheck_Manual;
 
     /**** Panels ****/
     /* Stop watch */

@@ -131,6 +131,7 @@ enum e_UIS_Button
     e_UIS_Button_HRColorSelect,
     e_UIS_Button_KeyRecord,
     e_UIS_Button_IODriverSettings,
+    e_UIS_Button_NewVersionCheckNow,
     e_UIS_ButtonMAX
 };
 
@@ -220,6 +221,11 @@ enum e_UIS_RadioBttns
     e_UIS_RadioBttn_Keyboard_CursorKeyToggle_ScrollLock,
     e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Esc,
     e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Insert,
+    e_UIS_RadioBttn_NewVersion_Never,
+    e_UIS_RadioBttn_NewVersion_OnStartup,
+    e_UIS_RadioBttn_NewVersion_Daily,
+    e_UIS_RadioBttn_NewVersion_Monthly,
+    e_UIS_RadioBttn_NewVersion_Yearly,
     e_UIS_RadioBttnMAX
 };
 
@@ -301,6 +307,13 @@ enum e_UIS_TabCtrl_Panel_Page
     e_UIS_TabCtrl_Panel_PageMAX
 };
 
+/* Must match UI */
+enum e_UIS_TabCtrl_Behaviour_Page
+{
+    e_UIS_TabCtrl_Behaviour_Page_Behaviour,
+    e_UIS_TabCtrl_Behaviour_Page_NewVersion,
+    e_UIS_TabCtrl_Behaviour_PageMAX
+};
 
 /* Events */
 typedef enum

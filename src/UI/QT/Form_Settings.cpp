@@ -885,3 +885,12 @@ void Form_Settings::on_IODriver_Settings_pushButton_clicked()
     SendEvent(e_DSEvent_BttnTriggered,&EventData);
 }
 
+
+void Form_Settings::on_NewVersion_CheckNow_pushButton_clicked()
+{
+    union DSEventData EventData;
+
+    EventData.Bttn.InputID=e_UIS_Button_NewVersionCheckNow;
+    SendEvent(e_DSEvent_BttnTriggered,&EventData);
+}
+

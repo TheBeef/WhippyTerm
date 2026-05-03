@@ -19,9 +19,10 @@ public:
     Ui::Form_NewVersionCheck *ui;
     
 private slots:
-    void on_pushButton_clicked();
     void SimProgressTick_timeout();
-
+    
+    void on_OpenWebPage_pushButton_clicked();
+    
 private:
     bool DoingEvent;
     QTimer *SimProgressTick;

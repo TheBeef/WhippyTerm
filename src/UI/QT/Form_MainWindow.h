@@ -71,6 +71,7 @@ private slots:
     void StopWatchTimer_triggered();
     void DelayedThemeChangeTimer_triggered();
     void ContextMenu(const QPoint &pos);
+    void WindowVisible();
 
     void on_Main_tabWidget_TabMoved(int from,int to);
     void on_actionComPort_TEST_triggered();
@@ -462,6 +463,8 @@ private slots:
     void on_actionTerminal_Settings_triggered();
     
     void on_actionCheck_For_New_Version_triggered();
+    
+    void on_actionGoto_WhippyTerm_Web_Site_triggered();
     
 private:
     void resizeEvent(QResizeEvent *event);

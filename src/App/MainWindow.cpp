@@ -206,6 +206,36 @@ void MW_ApplySettings(void)
 
 /*******************************************************************************
  * NAME:
+ *    MW_GetFirstMainWindow
+ *
+ * SYNOPSIS:
+ *    class TheMainWindow *MW_GetFirstMainWindow(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets a handle to the first main window in the system.
+ *
+ * RETURNS:
+ *    A pointer to the first main window or NULL if there isn't one.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+class TheMainWindow *MW_GetFirstMainWindow(void)
+{
+    if(m_MainWindowsList.empty())
+    {
+        /* Hu? we should always have at least 1 window, otherwize we should
+           be closed */
+        return NULL;
+    }
+    return m_MainWindowsList.front();
+}
+
+/*******************************************************************************
+ * NAME:
  *    MW_InformOfNewPluginInstalled
  *
  * SYNOPSIS:
@@ -549,40 +579,6 @@ void TheMainWindow::Init(void)
     /* Restore the session data */
     RestoreFromSession();
     RestoreFromSettings();
-
-///* DEBUG PAUL: Move this (currently test code) */
-//{
-//int r;
-//t_UIFrameContainerCtrl *Hex;
-//t_UIDisplayFrameCtrl *DisplayFrame;
-//struct UITextCanvas *TextCanvas; // The text canvas we are connected to
-//struct ScreenLine AddLine;
-//struct CharStyling style[10];
-//
-//Hex=UIMW_GetHexDisplayContainerFrameCtrlHandle(UIWin);
-//DisplayFrame=UITC_AllocDisplayFrame(Hex,xxx,(uintptr_t)0);
-//TextCanvas=UITC_GetTextCanvasCtrlHandle(DisplayFrame);
-//UITC_SetCanvasSize(TextCanvas,100,100);
-//UITC_SetShowCursor(TextCanvas,true);
-//UITC_SetFont(TextCanvas,g_Settings.FontName.c_str(),g_Settings.FontSize,
-//            g_Settings.FontBold,g_Settings.FontItalic);
-//UITC_SetCursorColor(TextCanvas,g_Settings.CursorColor);
-//AddLine.BGFillColor=0x111111;
-//AddLine.Line=(uint8_t *)"1234567890";
-//AddLine.LineStyles=style;
-//AddLine.Next=NULL;
-//for(r=0;r<10;r++)
-//{
-//    style[r].FGColor=0xFFFFFF;
-//    style[r].BGColor=0xFF0000;
-//    style[r].ULineColor=0x00FF00;
-//    style[r].Attribs=0;
-//}
-//UITC_ClearTextCanvasLines(TextCanvas);
-//UITC_AppendTextCanvasLine_Screen(TextCanvas,&AddLine,0,10,1);
-///* DEBUG PAUL: Have to rework how the events from this work */
-//
-//}
 
     /* There are no tabs open so we deactivate the panels */
     ConnectionOptionsPanel.ActivateCtrls(false);
@@ -5759,7 +5755,10 @@ bool MW_Event(const struct MWEvent *Event)
             }
         break;
         case e_MWEvent_FirstShow:
+        break;
+        case e_MWEvent_WindowFirstVisible:
             Event->MW->Init();
+            MainApp_MainWindowFirstShow();
         break;
         case e_MWEvent_WindowResize:
             g_Session.WindowWidth=Event->Info.NewSize.Width;
@@ -6020,6 +6019,7 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_ToggleSendPanel -- Open or closes the send panel
  *                  e_Cmd_TermEmuSettings -- Open the terminal emulation settings dialog
  *                  e_Cmd_NewVersionCheck -- Run the check for new version dialog
+ *                  e_Cmd_GotoWebSite -- Goto the WhippyTerm web site
  *
  * FUNCTION:
  *    This function executes a command.
@@ -6638,7 +6638,10 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
             ShowTermEmuSettingsDialog();
         break;
         case e_Cmd_NewVersionCheck:
-            CheckForNewVersionDialog(true);
+            CheckForNewVersionDialog(true,false);
+        break;
+        case e_Cmd_GotoWebSite:
+            UI_GotoWebPage("https://whippyterm.com");
         break;
 
         case e_CmdMAX:

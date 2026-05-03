@@ -267,5 +267,6 @@ void MW_InformOfPluginUninstalled(const char *PluginIDStr);
 void MW_InformOfSendBufferChange(int BufferIndex);
 void MW_InformOfCursorKeyModeChange(void);
 void MW_HandleClearScreenOnSendBuffer(bool ClearScreenOnSendSetting);
+class TheMainWindow *MW_GetFirstMainWindow(void);
 
 #endif

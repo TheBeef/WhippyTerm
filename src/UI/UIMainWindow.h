@@ -202,6 +202,7 @@ typedef enum
     e_UIMWMenu_SendPanel,
     e_UIMWMenu_TermEmuSettings,
     e_UIMWMenu_NewVersionCheck,
+    e_UIMWMenu_GotoWebSite,
     e_UIMWMenuMAX
 } e_UIMWMenuType;
 
@@ -369,7 +370,7 @@ typedef enum
     e_MWEvent_CheckboxTriggered,
     e_MWEvent_TxtInputEditFinished,
     e_MWEvent_ComboBoxChanged,
-    e_MWEvent_FirstShow,
+    e_MWEvent_FirstShow,                        // When the window is shown, but MAYBE before it is drawn on the screen (sizes are valid, but is may still be hidden)
     e_MWEvent_WindowResize,
     e_MWEvent_LeftPanelSizeChange,
     e_MWEvent_RightPanelSizeChange,
@@ -391,6 +392,7 @@ typedef enum
     e_MWEvent_LeftPanelClicked,
     e_MWEvent_RightPanelClicked,
     e_MWEvent_BottomPanelClicked,
+    e_MWEvent_WindowFirstVisible,                    // Like show but after the window is visible.  Does not repeat if the window is later hidden and reshown
     e_MWEventMAX
 } e_MWEventType;
 

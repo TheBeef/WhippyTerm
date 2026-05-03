@@ -183,6 +183,8 @@ private slots:
     
     void on_IODriver_Settings_pushButton_clicked();
     
+    void on_NewVersion_CheckNow_pushButton_clicked();
+    
 private:
     bool DoingEvent;
 

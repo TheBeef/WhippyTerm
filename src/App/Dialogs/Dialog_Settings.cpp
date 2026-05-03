@@ -39,6 +39,7 @@ instead of in the GUI (window pos for example, and plugin settings)
 #include "App/Dialogs/Dialog_Settings.h"
 #include "App/Dialogs/Dialog_DataProPluginSettings.h"
 #include "App/Dialogs/Dialog_IODriverSettings.h"
+#include "App/Dialogs/Dialog_NewVersionCheck.h"
 #include "App/Display/DisplayColors.h"
 #include "App/DataProcessorsSystem.h"
 #include "App/Settings.h"
@@ -253,6 +254,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     t_UIListViewCtrl *KeyBindingsCmdList;
     t_UITabCtrl *TerminalTabCtrl;
     t_UITabCtrl *DisplayTabCtrl;
+    t_UITabCtrl *BehaviourTabCtrl;
     t_UITabCtrl *PanelTabCtrl;
     t_UIGroupBox *Display_Tabs;
     t_UIGroupBox *Display_ClearScreen;
@@ -263,6 +265,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     e_DS_SettingsArea FirstSelectedArea;
     e_UIS_TabCtrl_Terminal_Page SelectTerminalPage;
     e_UIS_TabCtrl_Display_Page SelectDisplayPage;
+    e_UIS_TabCtrl_Behaviour_Page SelectBehaviourPage;
     t_UICheckboxCtrl *CheckboxHandle;
     struct DriverInfoList *CurDrv;
     t_UIButtonCtrl *ButtonHandle;
@@ -489,6 +492,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     TerminalTabCtrl=UIS_GetTabCtrlHandle(e_UIS_TabCtrl_Terminal);
     DisplayTabCtrl=UIS_GetTabCtrlHandle(e_UIS_TabCtrl_Display);
     PanelTabCtrl=UIS_GetTabCtrlHandle(e_UIS_TabCtrl_PanelTab);
+    BehaviourTabCtrl=UIS_GetTabCtrlHandle(e_UIS_TabCtrl_Behaviour);
 
     /* Hide anything we can't set if we are in Con Settings Only */
     if(m_SettingConSettingsOnly)
@@ -549,6 +553,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
 
     SelectTerminalPage=e_UIS_TabCtrl_Terminal_Page_Terminal;
     SelectDisplayPage=e_UIS_TabCtrl_Display_Page_Display;
+    SelectBehaviourPage=e_UIS_TabCtrl_Behaviour_Page_Behaviour;
     switch(Jump2)
     {
         case e_SettingsJump2_TermSize:
@@ -571,6 +576,10 @@ bool RunSettingsDialog(class TheMainWindow *MW,
             FirstSelectedArea=e_DS_SettingsArea_Terminal;
             SelectTerminalPage=e_UIS_TabCtrl_Terminal_Page_Keyboard;
         break;
+        case e_SettingsJump2_VersionCheck:
+            FirstSelectedArea=e_DS_SettingsArea_Behaviour;
+            SelectBehaviourPage=e_UIS_TabCtrl_Behaviour_Page_NewVersion;
+        break;
         case e_SettingsJump2_Default:
         case e_SettingsJump2MAX:
         default:
@@ -583,6 +592,7 @@ bool RunSettingsDialog(class TheMainWindow *MW,
 
     UITabCtrlMakeTabActiveUsingIndex(TerminalTabCtrl,SelectTerminalPage);
     UITabCtrlMakeTabActiveUsingIndex(DisplayTabCtrl,SelectDisplayPage);
+    UITabCtrlMakeTabActiveUsingIndex(BehaviourTabCtrl,SelectBehaviourPage);
 
     UISetListViewSelectedEntry(AreaList,FirstSelectedArea);
     UIS_HandleAreaChanged(FirstSelectedArea);
@@ -673,6 +683,11 @@ static void DS_SetSettingGUI(void)
     t_UIRadioBttnCtrl *SysBell_BuiltIn;
     t_UIRadioBttnCtrl *SysBell_AudioOnly;
     t_UIRadioBttnCtrl *SysBell_VisualOnly;
+    t_UIRadioBttnCtrl *NewVersion_Never;
+    t_UIRadioBttnCtrl *NewVersion_OnStartup;
+    t_UIRadioBttnCtrl *NewVersion_Daily;
+    t_UIRadioBttnCtrl *NewVersion_Monthly;
+    t_UIRadioBttnCtrl *NewVersion_Yearly;
 
     /********************/
     /* Behaviour        */
@@ -682,6 +697,32 @@ static void DS_SetSettingGUI(void)
 
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ConfirmQuit);
     UICheckCheckbox(CheckboxHandle,g_Settings.ConfirmQuit);
+
+    NewVersion_Never=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_NewVersion_Never);
+    NewVersion_OnStartup=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_NewVersion_OnStartup);
+    NewVersion_Daily=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_NewVersion_Daily);
+    NewVersion_Monthly=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_NewVersion_Monthly);
+    NewVersion_Yearly=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_NewVersion_Yearly);
+    switch(g_Settings.NewVersionCheck)
+    {
+        case e_NewVersionCheck_OnStartup:
+            UISelectRadioBttn(NewVersion_OnStartup);
+        break;
+        case e_NewVersionCheck_Day:
+            UISelectRadioBttn(NewVersion_Daily);
+        break;
+        case e_NewVersionCheck_Month:
+            UISelectRadioBttn(NewVersion_Monthly);
+        break;
+        case e_NewVersionCheck_Year:
+            UISelectRadioBttn(NewVersion_Yearly);
+        break;
+        default:
+        case e_NewVersionCheck_Manual:
+        case e_NewVersionCheckMAX:
+            UISelectRadioBttn(NewVersion_Never);
+        break;
+    }
 
     /********************/
     /* Panels           */
@@ -1140,6 +1181,23 @@ static void DS_GetSettingsFromGUI(void)
 
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ConfirmQuit);
         g_Settings.ConfirmQuit=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        /* New Version */
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_NewVersion_Never);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.NewVersionCheck=e_NewVersionCheck_Manual;
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_NewVersion_OnStartup);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.NewVersionCheck=e_NewVersionCheck_OnStartup;
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_NewVersion_Daily);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.NewVersionCheck=e_NewVersionCheck_Day;
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_NewVersion_Monthly);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.NewVersionCheck=e_NewVersionCheck_Month;
+        RadioHandle=UIS_GetRadioBttnHandle(e_UIS_RadioBttn_NewVersion_Yearly);
+        if(UIIsRadioBttnSelected(RadioHandle))
+            g_Settings.NewVersionCheck=e_NewVersionCheck_Year;
 
         /********************/
         /* Panels           */
@@ -2895,6 +2953,10 @@ bool DS_Event(const struct DSEvent *Event)
                     }
                 break;
 
+                case e_UIS_Button_NewVersionCheckNow:
+                    CheckForNewVersionDialog(false,false);
+                break;
+
                 case e_UIS_ButtonMAX:
                 default:
                 break;
@@ -3017,6 +3079,11 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_RadioBttn_Keyboard_CursorKeyToggle_ScrollLock:
                 case e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Esc:
                 case e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Insert:
+                case e_UIS_RadioBttn_NewVersion_Never:
+                case e_UIS_RadioBttn_NewVersion_OnStartup:
+                case e_UIS_RadioBttn_NewVersion_Daily:
+                case e_UIS_RadioBttn_NewVersion_Monthly:
+                case e_UIS_RadioBttn_NewVersion_Yearly:
                 break;
                 case e_UIS_RadioBttn_SysBell_None:
                 case e_UIS_RadioBttn_SysBell_System:

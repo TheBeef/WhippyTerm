@@ -113,6 +113,9 @@ struct Session
 
     /* Scripts */
     std::string LastScriptPath;
+
+    /* New Version Check */
+    uint64_t NextCheckTime;
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

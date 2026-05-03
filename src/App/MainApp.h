@@ -51,5 +51,6 @@ void StartAppShutDown(void);
 void FinishAppShutdown(void);
 void App1SecTick(void);
 void AppInformOf_FileTransTimerTick(void);
+void MainApp_MainWindowFirstShow(void);
 
 #endif

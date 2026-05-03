@@ -2229,10 +2229,12 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="actionGoto_WhippyTerm_Web_Site"/>
+    <addaction name="separator"/>
     <addaction name="actionCheck_For_New_Version"/>
-    <addaction name="actionAbout_Whippy_Term"/>
     <addaction name="separator"/>
     <addaction name="actionCommand_Line_Options"/>
+    <addaction name="actionAbout_Whippy_Term"/>
    </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="title">
@@ -4004,6 +4006,15 @@
   <action name="actionCheck_For_New_Version">
    <property name="text">
     <string>Check For New Version...</string>
+   </property>
+  </action>
+  <action name="actionGoto_WhippyTerm_Web_Site">
+   <property name="icon">
+    <iconset resource="MainResource.qrc">
+     <normaloff>:/G/Graphics/WIcon.svg</normaloff>:/G/Graphics/WIcon.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Goto WhippyTerm Web Site...</string>
    </property>
   </action>
  </widget>

@@ -30,17 +30,19 @@
  ******************************************************************************/
 
 /*** HEADER FILES TO INCLUDE  ***/
+#include "App/VersionCheckSystem.h"
 #include "Dialog_NewVersionCheck.h"
 #include "UI/UINewVersionCheck.h"
 #include "UI/UIAsk.h"
+#include "UI/UISystem.h"
 #include "OS/Thread.h"
 #include "OS/OSTime.h"
-#include "App/VersionCheckSystem.h"
 #include <string>
 
 using namespace std;
 
 /*** DEFINES                  ***/
+#define     TIMEOUT_QUICK_CHECK_VERSION             1000 /* The system has 1000ms to check for a new version */
 
 /*** MACROS                   ***/
 
@@ -68,6 +70,7 @@ static void NVC_Move2NextStep(void);
 static void NVC_ExeCurrentStep(void);
 static void WorkerThread(void *Data);
 static bool CheckForAbort(void);
+static bool CheckForAbortWithTimeout(void);
 
 /*** VARIABLE DEFINITIONS     ***/
 e_VersionCheckStepType m_CurrentStep;
@@ -76,18 +79,22 @@ static struct ThreadMutex *m_ThreadMutex;
 static struct ThreadHandle *m_ThreadHandle;
 static volatile struct ThreadCmd m_ThreadCmd;
 volatile bool m_AbortConnect;
+static uint32_t m_AutoAbortTimeout;
 
 /*******************************************************************************
  * NAME:
  *    CheckForNewVersionDialog
  *
  * SYNOPSIS:
- *    void CheckForNewVersionDialog(bool ShowDialog);
+ *    void CheckForNewVersionDialog(bool ShowDialog,bool Quick);
  *
  * PARAMETERS:
  *    ShowDialog [I] -- Do we show the dialog then check for the new version,
  *                      or do we check and only show the dialog if there is
  *                      a new version.
+ *    Quick [I] -- If this is true then run the check with is dialog hidden
+ *                 and jump directly to the result (unless there's an error
+ *                 in which case do the normal dialog).
  *
  * FUNCTION:
  *    This function checks if there is a new version.  If there is a new
@@ -100,11 +107,15 @@ volatile bool m_AbortConnect;
  * SEE ALSO:
  *    
  ******************************************************************************/
-void CheckForNewVersionDialog(bool ShowDialog)
+void CheckForNewVersionDialog(bool ShowDialog,bool Quick)
 {
     bool AllocatedUI;
     bool OpenDialog;
     bool Busy;
+    uint8_t Major;
+    uint8_t Minor;
+    uint8_t Rev;
+    uint8_t Patch;
 
     m_ThreadMutex=NULL;
     m_ThreadHandle=NULL;
@@ -121,6 +132,30 @@ void CheckForNewVersionDialog(bool ShowDialog)
         if(!ShowDialog)
         {
             /* Do the actual check and only open dialog if new version exists */
+            m_AutoAbortTimeout=GetElapsedTime_ms();
+            if(!OpenConnection2WebSite(CheckForAbortWithTimeout))
+            {
+                /* Switch to the dialog */
+                OpenDialog=true;
+                Quick=false;
+            }
+            else
+            {
+                if(!ReadLatestVersionFromWebSite())
+                {
+                    /* Switch to the dialog */
+                    OpenDialog=true;
+                    Quick=false;
+                }
+                else
+                {
+                    if(CheckLatestVersionFromWebSite(&Major,&Minor,&Rev,&Patch))
+                    {
+                        OpenDialog=true;
+                    }
+                }
+                CloseConnection2WebSite();
+            }
         }
 
         if(OpenDialog)
@@ -146,7 +181,16 @@ void CheckForNewVersionDialog(bool ShowDialog)
             NVC_ShowHideNewVersionFound(false);
             NVC_EnableOkBttn(false);
 
-            /* Start first step */
+            if(Quick)
+            {
+                /* Skip to the check (MAX = done, just show result) */
+                m_CurrentStep=e_VersionCheckStepMAX;
+            }
+            else
+            {
+                /* Start first step */
+                m_CurrentStep=e_VersionCheckStep_Connect;
+            }
             NVC_ExeCurrentStep();
 
             if(UIShow_NewVersionCheck())
@@ -202,6 +246,15 @@ bool NVC_Event(const struct NVCEvent *Event)
     switch(Event->EventType)
     {
         case e_NVCEvent_BttnTriggered:
+            switch(Event->Info.Bttn.BttnID)
+            {
+                case e_NVC_Button_GotoWebPage:
+                    UI_GotoWebPage("https://whippyterm.com/Download.php");
+                break;
+                default:
+                case e_NVC_ButtonMAX:
+                break;
+            }
         break;
         case e_NVCEvent_Timer:
             if(m_CurrentStep<e_VersionCheckStepMAX)
@@ -536,6 +589,36 @@ void WorkerThread(void *Data)
  ******************************************************************************/
 static bool CheckForAbort(void)
 {
+    return m_AbortConnect;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    CheckForAbortWithTimeout
+ *
+ * SYNOPSIS:
+ *    static bool CheckForAbortWithTimeout(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function if opening the connection to the version check website
+ *    is taking too long.
+ *
+ * RETURNS:
+ *    true -- We are to abort
+ *    false -- Continue
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static bool CheckForAbortWithTimeout(void)
+{
+    if(GetElapsedTime_ms()-m_AutoAbortTimeout>TIMEOUT_QUICK_CHECK_VERSION)
+        return true;
+    return false;
+
     return m_AbortConnect;
 }
 

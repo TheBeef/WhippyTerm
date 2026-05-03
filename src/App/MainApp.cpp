@@ -28,6 +28,7 @@
 #include "App/VersionCheckSystem.h"
 #include "App/Util/CRCSystem.h"
 #include "App/Dialogs/Dialog_EditSendBuffer.h"
+#include "App/Dialogs/Dialog_Settings.h"
 #include "OS/System.h"
 #include "UI/UIAsk.h"
 #include "UI/UISystem.h"
@@ -56,6 +57,7 @@ bool g_CLI_FirstWindowOpen=false;
 bool g_AppShuttingDown=false;
 t_CLIArgList g_CLI_URIList;
 t_CLIArgList g_CLI_BookmarkList;
+bool MainApp_InitAfterMainWindowDone;
 
 /*******************************************************************************
  * NAME:
@@ -89,6 +91,7 @@ bool AppMain(int argc,char *argv[])
     int_fast32_t r;
 
     g_AppShuttingDown=false;
+    MainApp_InitAfterMainWindowDone=false;
 
     srand(time(NULL));
 
@@ -126,19 +129,12 @@ bool AppMain(int argc,char *argv[])
 
     InitOS();
 
-#if OFFICIAL_RELEASE!=1
-    UIAsk("This is a developer build.  The version number can not be trusted.\n\n"
-            "Look at build date in ABOUT to differentiate between builds.\n\n"
-            "Goto WhippyTerm.com for an official version.");
-#endif
-
     InitPortableSystem();
 
     /* Startup code */
     InitSessionSystem();
     InitBookmarks();
     g_SendBuffers.Init();
-    InitVersionCheckSystem();
 
     LoadSettings();
     LoadSession();
@@ -153,15 +149,12 @@ bool AppMain(int argc,char *argv[])
 
     InitPluginSystem();
 
+    /* Currently we only have 1 main window, but here is where we would open
+       them all */
     MW_AllocNewMainWindow();
 
     ApplySettings();
 
-//    /* Open any URI's that where requested */
-//    for(a=URIList.begin();a!=URIList.begin();a++)
-//    {
-//        
-//    }
     return true;
 }
 
@@ -253,6 +246,7 @@ void FinishAppShutdown(void)
 void App1SecTick(void)
 {
     AutoSaveSessionTick();
+    NewVersionCheckTick();
 }
 
 /*******************************************************************************
@@ -279,3 +273,69 @@ void AppInformOf_FileTransTimerTick(void)
 {
     Con_FileTransTick();
 }
+
+/*******************************************************************************
+ * NAME:
+ *    MainApp_MainWindowFirstShow
+ *
+ * SYNOPSIS:
+ *    void MainApp_MainWindowFirstShow(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called everytime a main window is first shown.  It
+ *    handles init'ing things that want to be done after the main window is
+ *    open.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MainApp_MainWindowFirstShow(void)
+{
+    class TheMainWindow *FirstMW;
+
+    /* DEBUG PAUL: We should check if this is the last main window to open,
+       for now there is only one */
+    if(MainApp_InitAfterMainWindowDone)
+        return;
+
+#if OFFICIAL_RELEASE!=1
+    UIAsk("This is a developer build.  The version number can not be trusted.\n\n"
+            "Look at build date in ABOUT to differentiate between builds.\n\n"
+            "Goto WhippyTerm.com for an official version.");
+#endif
+
+    InitVersionCheckSystem();
+
+    if(g_Settings.NewVersionCheck==e_NewVersionCheckMAX)
+    {
+        /* Never been set (not in the settings file */
+        if(UIAsk("New Version Check","Do you want WhippyTerm to check for new "
+                "versions automatically?",e_AskBox_Question,
+                e_AskBttns_YesNo)==e_AskRet_Yes)
+        {
+            /* User wants to auto check for version, open up the settings dialog
+               set to the check rate screen */
+            FirstMW=MW_GetFirstMainWindow();
+            if(FirstMW!=NULL)
+            {
+                RunSettingsDialog(FirstMW,NULL,e_SettingsJump2_VersionCheck);
+            }
+        }
+        /* If the setting hasn't changed from 'e_NewVersionCheckMAX' (not set)
+           then select manual and save the settings */
+        if(g_Settings.NewVersionCheck==e_NewVersionCheckMAX)
+        {
+            g_Settings.NewVersionCheck=e_NewVersionCheck_Manual;
+            SaveSettings();
+        }
+    }
+
+    MainApp_InitAfterMainWindowDone=true;
+}
+

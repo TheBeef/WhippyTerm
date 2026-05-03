@@ -322,6 +322,8 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionTerminal_Settings;
         case e_UIMWMenu_NewVersionCheck:
             return (e_UIMenuCtrl *)realwin->ui->actionCheck_For_New_Version;
+        case e_UIMWMenu_GotoWebSite:
+            return (e_UIMenuCtrl *)realwin->ui->actionGoto_WhippyTerm_Web_Site;
         case e_UIMWMenuMAX:
         default:
         break;

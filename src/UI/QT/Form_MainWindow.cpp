@@ -137,6 +137,8 @@ Form_MainWindow::Form_MainWindow(QWidget *parent) :
     ui->menuScript->menuAction()->setVisible(false);
 
 #endif
+
+    QTimer::singleShot(0, this, SLOT(WindowVisible()));
 }
 
 Form_MainWindow::~Form_MainWindow()
@@ -503,6 +505,11 @@ void Form_MainWindow::resizeEvent(QResizeEvent *event)
     EventData.NewSize.Width=event->size().width();
     EventData.NewSize.Height=event->size().height();
     SendEvent(e_MWEvent_WindowResize,&EventData);
+}
+
+void Form_MainWindow::WindowVisible()
+{
+    SendEvent(e_MWEvent_WindowFirstVisible);
 }
 
 void Form_MainWindow::showEvent(QShowEvent *event)
@@ -1945,5 +1952,11 @@ void Form_MainWindow::on_actionTerminal_Settings_triggered()
 void Form_MainWindow::on_actionCheck_For_New_Version_triggered()
 {
     DoMenuTriggered(e_UIMWMenu_NewVersionCheck);
+}
+
+
+void Form_MainWindow::on_actionGoto_WhippyTerm_Web_Site_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_GotoWebSite);
 }
 

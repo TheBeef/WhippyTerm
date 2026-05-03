@@ -51,5 +51,7 @@ bool OpenConnection2WebSite(bool (*AbortCallback)(void));
 bool ReadLatestVersionFromWebSite(void);
 bool CheckLatestVersionFromWebSite(uint8_t *Major,uint8_t *Minor,uint8_t *Rev,uint8_t *Patch);
 void CloseConnection2WebSite(void);
+void NewVersionCheckTick(void);
+void NewVersionCheck_ApplySettings(void);
 
 #endif   /* end of "#ifndef __VERSIONCHECKSYSTEM_H_" */

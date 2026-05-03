@@ -218,6 +218,7 @@ const char *m_CmdNames[]=
     "ToggleSendPanel",                      // e_Cmd_ToggleSendPanel
     "TermEmuSettings",                      // e_Cmd_TermEmuSettings
     "NewVersionCheck",                      // e_Cmd_NewVersionCheck
+    "GotoWebSite",                          // e_Cmd_GotoWebSite
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -341,6 +342,7 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_ToggleSendPanel,                  // e_UIMWMenu_SendPanel
     e_Cmd_TermEmuSettings,                  // e_UIMWMenu_TermEmuSettings
     e_Cmd_NewVersionCheck,                  // e_UIMWMenu_NewVersionCheck
+    e_Cmd_GotoWebSite,                      // e_UIMWMenu_GotoWebSite
 };
 
 e_CmdType m_Cmd2SendBufferContextMenuMapping[]=
@@ -875,6 +877,7 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     // e_Cmd_ToggleSendPanel
     // e_Cmd_TermEmuSettings
     // e_Cmd_NewVersionCheck
+    // e_Cmd_GotoWebSite
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A

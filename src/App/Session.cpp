@@ -943,6 +943,8 @@ static void Session_RegisterAllMembers(struct Session &session,
     cfg.StartBlock("Scripts");
     cfg.Register("LastScriptPath",session.LastScriptPath);
     cfg.EndBlock();
+
+    cfg.Register("NextCheckTime",session.NextCheckTime);
 }
 
 static void Session_DefaultSession(struct Session &session)
@@ -979,4 +981,7 @@ static void Session_DefaultSession(struct Session &session)
 
     /* Scripts */
     session.LastScriptPath="";
+
+    /* New Version Check */
+    session.NextCheckTime=0;
 }

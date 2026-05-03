@@ -32,9 +32,12 @@
 /*** HEADER FILES TO INCLUDE  ***/
 #include "VersionCheckSystem.h"
 #include "App/Portable.h"
+#include "App/Dialogs/Dialog_NewVersionCheck.h"
 #include "OS/Sockets.h"
 #include "OS/System.h"
+#include "OS/OSTime.h"
 #include "Version.h"
+#include "Session.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,10 +55,12 @@
 /*** TYPE DEFINITIONS         ***/
 
 /*** FUNCTION PROTOTYPES      ***/
+static void ResetNewVersionCheckTime(void);
 
 /*** VARIABLE DEFINITIONS     ***/
 struct OSSocket *m_VCheckSocket;
 static int8_t m_Maj,m_Min,m_Rev,m_Patch;
+static e_NewVersionCheckType m_LastNewVersionCheckSettingValue;
 
 /*******************************************************************************
  * NAME:
@@ -73,21 +78,21 @@ static int8_t m_Maj,m_Min,m_Rev,m_Patch;
  * RETURNS:
  *    NONE
  *
+ * NOTES:
+ *    Needs to be called after the settings have been loaded.
+ *
  * SEE ALSO:
  *    
  ******************************************************************************/
 void InitVersionCheckSystem(void)
 {
-//    uint8_t Major,Minor,Rev,Patch;
-//
-//    if(OpenConnection2WebSite())
-//    {
-//        if(ReadLatestVersionFromWebSite())
-//        {
-//            CheckLatestVersionFromWebSite(&Major,&Minor,&Rev,&Patch);
-//        }
-//        CloseConnection2WebSite();
-//    }
+    m_LastNewVersionCheckSettingValue=g_Settings.NewVersionCheck;
+
+    if(g_Settings.NewVersionCheck==e_NewVersionCheck_OnStartup)
+    {
+        /* Do the check */
+        CheckForNewVersionDialog(false,false);
+    }
 }
 
 /*******************************************************************************
@@ -460,5 +465,122 @@ void CloseConnection2WebSite(void)
     if(m_VCheckSocket!=NULL)
         CloseSocket(m_VCheckSocket);
     m_VCheckSocket=NULL;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    NewVersionCheckTick
+ *
+ * SYNOPSIS:
+ *    void NewVersionCheckTick(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called regularly.  It checks if the system should
+ *    do a new version check.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void NewVersionCheckTick(void)
+{
+    uint64_t CurTime;
+
+    if(g_Session.NextCheckTime==0)
+        return;
+
+    CurTime=GetCurrentTime();
+
+    /* See if it's time to check */
+    if((int64_t)(g_Session.NextCheckTime-CurTime)>0)
+        return;
+
+    /* Ok, it's time to check */
+    /* Reset the check time */
+    ResetNewVersionCheckTime();
+
+    /* Do the check */
+    CheckForNewVersionDialog(false,true);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    NewVersionCheck_ApplySettings
+ *
+ * SYNOPSIS:
+ *    void NewVersionCheck_ApplySettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    Applies any settings changes that relate to the new version check system.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void NewVersionCheck_ApplySettings(void)
+{
+    /* Ok, we are applying a change to the setting so we need to reset
+       next check time */
+    if(g_Settings.NewVersionCheck!=m_LastNewVersionCheckSettingValue)
+    {
+        m_LastNewVersionCheckSettingValue=g_Settings.NewVersionCheck;
+        ResetNewVersionCheckTime();
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    ResetNewVersionCheckTime
+ *
+ * SYNOPSIS:
+ *    static void ResetNewVersionCheckTime(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function resets the time in the session file that is used for when
+ *    to do the new version check.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void ResetNewVersionCheckTime(void)
+{
+    uint64_t CurTime;
+
+    CurTime=GetCurrentTime();
+
+    switch(g_Settings.NewVersionCheck)
+    {
+        case e_NewVersionCheck_Day:
+            g_Session.NextCheckTime=CurTime+60*60*24;
+        break;
+        case e_NewVersionCheck_Month:
+            g_Session.NextCheckTime=CurTime+60*60*24*30;
+        break;
+        case e_NewVersionCheck_Year:
+            g_Session.NextCheckTime=CurTime+60*60*24*365;
+        break;
+        default:
+        case e_NewVersionCheck_OnStartup:
+        case e_NewVersionCheck_Manual:
+        case e_NewVersionCheckMAX:
+            g_Session.NextCheckTime=0;
+        break;
+    }
 }
 

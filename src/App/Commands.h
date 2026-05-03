@@ -209,6 +209,7 @@ typedef enum
     e_Cmd_ToggleSendPanel,
     e_Cmd_TermEmuSettings,
     e_Cmd_NewVersionCheck,
+    e_Cmd_GotoWebSite,
     e_CmdMAX
 } e_CmdType;
 

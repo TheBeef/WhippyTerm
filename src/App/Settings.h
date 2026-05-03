@@ -51,6 +51,16 @@
 /***  TYPE DEFINITIONS                 ***/
 typedef enum
 {
+    e_NewVersionCheck_Manual,
+    e_NewVersionCheck_OnStartup,
+    e_NewVersionCheck_Day,
+    e_NewVersionCheck_Month,
+    e_NewVersionCheck_Year,
+    e_NewVersionCheckMAX
+} e_NewVersionCheckType;
+
+typedef enum
+{
     e_WindowStartupPos_OSDefault=0,
     e_WindowStartupPos_RestoreFromSession,
     e_WindowStartupPos_RestoreFromSettings,
@@ -261,6 +271,9 @@ class Settings
         bool BookmarksOpenNewTabs;
         bool ConfirmQuit;
 
+        /* New Version Check */
+        e_NewVersionCheckType NewVersionCheck;
+
         /***** Startup *****/
         e_WindowStartupPosType RestoreWindowPos;
         bool AppMaximized;
@@ -285,14 +298,11 @@ class Settings
         void DefaultSettings(void);
 
     private:
-        bool RegisterWindowStartupPos(class TinyCFG &cfg,const char *XmlName,
-              e_WindowStartupPosType &Data);
-        bool RegisterScreenClear(class TinyCFG &cfg,const char *XmlName,
-                e_ScreenClearType &Data);
-        bool RegisterKeyCommandType(class TinyCFG &cfg,const char *XmlName,
-                struct CommandKeySeq (*Data)[e_CmdMAX]);
-        bool RegisterCursorKeyToggleMode(class TinyCFG &cfg,const char *XmlName,
-                e_CursorKeyToggleModeType &Data);
+        bool RegisterWindowStartupPos(class TinyCFG &cfg,const char *XmlName,e_WindowStartupPosType &Data);
+        bool RegisterScreenClear(class TinyCFG &cfg,const char *XmlName,e_ScreenClearType &Data);
+        bool RegisterKeyCommandType(class TinyCFG &cfg,const char *XmlName,struct CommandKeySeq (*Data)[e_CmdMAX]);
+        bool RegisterCursorKeyToggleMode(class TinyCFG &cfg,const char *XmlName,e_CursorKeyToggleModeType &Data);
+        bool RegisterNewVersionCheck(class TinyCFG &cfg,const char *XmlName,e_NewVersionCheckType &Data);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

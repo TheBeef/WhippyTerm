@@ -55,3 +55,15 @@ uint32_t GetElapsedTime_ms(void)
 
     return MillSec;
 }
+
+void OS_Sleep(unsigned int ms)
+{
+    usleep(ms*1000);
+}
+
+uint64_t GetCurrentTime(void)
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    return (uint64_t)ts.tv_sec;
+}

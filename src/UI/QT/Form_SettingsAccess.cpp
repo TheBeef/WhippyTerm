@@ -224,6 +224,8 @@ t_UIButtonCtrl *UIS_GetButtonHandle(e_UIS_Button UIObj)
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->Record_pushButton;
         case e_UIS_Button_IODriverSettings:
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->IODriver_Settings_pushButton;
+        case e_UIS_Button_NewVersionCheckNow:
+            return (t_UIButtonCtrl *)g_SettingsDialog->ui->NewVersion_CheckNow_pushButton;
 
         case e_UIS_ButtonMAX:
         default:
@@ -435,6 +437,17 @@ t_UIRadioBttnCtrl *UIS_GetRadioBttnHandle(e_UIS_RadioBttns UIObj)
             return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->CursorKeyToggle_EscKey_radioButton;
         case e_UIS_RadioBttn_Keyboard_CursorKeyToggle_Insert:
             return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->CursorKeyToggle_InsertKey_radioButton;
+        case e_UIS_RadioBttn_NewVersion_Never:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->NewVersion_Never_radioButton;
+        case e_UIS_RadioBttn_NewVersion_OnStartup:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->NewVersion_OnStartup_radioButton;
+        case e_UIS_RadioBttn_NewVersion_Daily:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->NewVersion_Daily_radioButton;
+        case e_UIS_RadioBttn_NewVersion_Monthly:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->NewVersion_Monthly_radioButton;
+        case e_UIS_RadioBttn_NewVersion_Yearly:
+            return (t_UIRadioBttnCtrl *)g_SettingsDialog->ui->NewVersion_Yearly_radioButton;
+
         case e_UIS_RadioBttnMAX:
         default:
         break;

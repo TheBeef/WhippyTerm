@@ -44,6 +44,6 @@
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
 
 /***  EXTERNAL FUNCTION PROTOTYPES     ***/
-void CheckForNewVersionDialog(bool ShowDialog);
+void CheckForNewVersionDialog(bool ShowDialog,bool Quick);
 
 #endif   /* end of "#ifndef __DIALOG_NEWVERSIONCHECK_H_" */

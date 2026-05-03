@@ -76,15 +76,16 @@ bool Form_NewVersionCheck::SendEvent(e_NVCEventType EventType)
     return SendEvent(EventType,NULL,0);
 }
 
-void Form_NewVersionCheck::on_pushButton_clicked()
-{
-    union NVCEventData Info;
-
-    Info.Bttn.BttnID=e_NVC_Button_GotoWebPage;
-    SendEvent(e_NVCEvent_BttnTriggered,&Info);
-}
-
 void Form_NewVersionCheck::SimProgressTick_timeout()
 {
     SendEvent(e_NVCEvent_Timer);
 }
+
+void Form_NewVersionCheck::on_OpenWebPage_pushButton_clicked()
+{
+    union NVCEventData Info;
+    
+    Info.Bttn.BttnID=e_NVC_Button_GotoWebPage;
+    SendEvent(e_NVCEvent_BttnTriggered,&Info);
+}
+

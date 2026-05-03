@@ -46,6 +46,7 @@ typedef enum
     e_SettingsJump2_Font,
     e_SettingsJump2_Colors,
     e_SettingsJump2_ClipboardHandling,
+    e_SettingsJump2_VersionCheck,
     e_SettingsJump2MAX
 } e_SettingsJump2Type;
 

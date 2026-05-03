@@ -36,7 +36,7 @@
       <item>
        <widget class="QStackedWidget" name="Editing_stackedWidget">
         <property name="currentIndex">
-         <number>4</number>
+         <number>5</number>
         </property>
         <widget class="QWidget" name="page_Panel">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -14498,7 +14498,7 @@ p, li { white-space: pre-wrap; }
           <item>
            <widget class="QTabWidget" name="Behaviour_tabWidget">
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="behaviour_tab">
              <attribute name="title">
@@ -14527,6 +14527,108 @@ p, li { white-space: pre-wrap; }
               </item>
               <item>
                <spacer name="verticalSpacer_9">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="tab_VersionCheck">
+             <attribute name="title">
+              <string>New Version</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_61">
+              <item>
+               <widget class="QGroupBox" name="groupBox_2">
+                <property name="title">
+                 <string>Automatically Check For A New Version</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_60">
+                 <item>
+                  <widget class="QRadioButton" name="NewVersion_Never_radioButton">
+                   <property name="text">
+                    <string>Never</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="NewVersion_OnStartup_radioButton">
+                   <property name="text">
+                    <string>On Startup</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="NewVersion_Daily_radioButton">
+                   <property name="text">
+                    <string>Daily</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="NewVersion_Monthly_radioButton">
+                   <property name="text">
+                    <string>Monthly</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="NewVersion_Yearly_radioButton">
+                   <property name="text">
+                    <string>Yearly</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QWidget" name="widget_22" native="true">
+                <layout class="QHBoxLayout" name="horizontalLayout_38">
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <spacer name="horizontalSpacer_9">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="NewVersion_CheckNow_pushButton">
+                   <property name="text">
+                    <string>Check Now...</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_26">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>
                 </property>

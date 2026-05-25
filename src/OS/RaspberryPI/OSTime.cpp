@@ -61,7 +61,7 @@ void OS_Sleep(unsigned int ms)
     usleep(ms*1000);
 }
 
-uint64_t GetCurrentTime(void)
+uint64_t OS_GetCurrentTime(void)
 {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);

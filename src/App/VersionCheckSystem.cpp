@@ -494,7 +494,7 @@ void NewVersionCheckTick(void)
     if(g_Session.NextCheckTime==0)
         return;
 
-    CurTime=GetCurrentTime();
+    CurTime=OS_GetCurrentTime();
 
     /* See if it's time to check */
     if((int64_t)(g_Session.NextCheckTime-CurTime)>0)
@@ -562,7 +562,7 @@ static void ResetNewVersionCheckTime(void)
 {
     uint64_t CurTime;
 
-    CurTime=GetCurrentTime();
+    CurTime=OS_GetCurrentTime();
 
     switch(g_Settings.NewVersionCheck)
     {

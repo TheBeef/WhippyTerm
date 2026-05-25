@@ -50,7 +50,7 @@
  *    measure elapsed time across long intervals must account for this wrap.
  *
  * SEE ALSO:
- *    OS_Sleep(), GetCurrentTime()
+ *    OS_Sleep(), OS_GetCurrentTime()
  ******************************************************************************/
 uint32_t GetElapsedTime_ms(void)
 {
@@ -89,10 +89,10 @@ void OS_Sleep(unsigned int ms)
 
 /*******************************************************************************
  * NAME:
- *    GetCurrentTime
+ *    OS_GetCurrentTime
  *
  * SYNOPSIS:
- *    uint64_t GetCurrentTime(void);
+ *    uint64_t OS_GetCurrentTime(void);
  *
  * PARAMETERS:
  *    NONE
@@ -112,7 +112,7 @@ void OS_Sleep(unsigned int ms)
  * SEE ALSO:
  *    GetElapsedTime_ms()
  ******************************************************************************/
-uint64_t GetCurrentTime(void)
+uint64_t OS_GetCurrentTime(void)
 {
     FILETIME ft;
     ULARGE_INTEGER uli;

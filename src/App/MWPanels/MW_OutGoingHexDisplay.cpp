@@ -87,6 +87,25 @@ static bool MWOutGoingHexDisplay_HexDisplayBufferEvent(const struct HDEvent *Eve
     return MWHD->HexDisplayBufferEvent(Event);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    MWOutGoingHexDisplay::MWOutGoingHexDisplay
+ *
+ * SYNOPSIS:
+ *    MWOutGoingHexDisplay::MWOutGoingHexDisplay();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the constructor for the MWOutGoingHexDisplay class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWOutGoingHexDisplay::MWOutGoingHexDisplay()
 {
     UIWin=NULL;
@@ -97,6 +116,25 @@ MWOutGoingHexDisplay::MWOutGoingHexDisplay()
     PanelActive=false;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    MWOutGoingHexDisplay::~MWOutGoingHexDisplay
+ *
+ * SYNOPSIS:
+ *    MWOutGoingHexDisplay::~MWOutGoingHexDisplay();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the destructor for the MWOutGoingHexDisplay class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWOutGoingHexDisplay::~MWOutGoingHexDisplay()
 {
     delete OutGoingHistoryHexDisplay;

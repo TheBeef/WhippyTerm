@@ -42,6 +42,25 @@
 
 /*** VARIABLE DEFINITIONS     ***/
 
+/*******************************************************************************
+ * NAME:
+ *    WTB_Sleep
+ *
+ * SYNOPSIS:
+ *    void WTB_Sleep(unsigned int ms);
+ *
+ * PARAMETERS:
+ *    ms [I] -- A duration in milliseconds.
+ *
+ * FUNCTION:
+ *    Sleeps for the given duration.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void WTB_Sleep(unsigned int ms)
 {
     Sleep(ms*1000);

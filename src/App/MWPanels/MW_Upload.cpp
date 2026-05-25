@@ -56,6 +56,25 @@ using namespace std;
 
 /*** VARIABLE DEFINITIONS     ***/
 
+/*******************************************************************************
+ * NAME:
+ *    MWUpload::MWUpload
+ *
+ * SYNOPSIS:
+ *    MWUpload::MWUpload();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the constructor for the MWUpload class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWUpload::MWUpload()
 {
     UIWin=NULL;
@@ -66,6 +85,25 @@ MWUpload::MWUpload()
     PanelActive=false;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    MWUpload::~MWUpload
+ *
+ * SYNOPSIS:
+ *    MWUpload::~MWUpload();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the destructor for the MWUpload class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWUpload::~MWUpload()
 {
     if(OptionWidgets!=NULL)

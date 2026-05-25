@@ -45,6 +45,25 @@
 /*** FUNCTION PROTOTYPES      ***/
 
 /*** VARIABLE DEFINITIONS     ***/
+/*******************************************************************************
+ * NAME:
+ *    MWStopWatch::MWStopWatch
+ *
+ * SYNOPSIS:
+ *    MWStopWatch::MWStopWatch();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the constructor for the MWStopWatch class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWStopWatch::MWStopWatch()
 {
     UIWin=NULL;
@@ -53,6 +72,25 @@ MWStopWatch::MWStopWatch()
     PanelActive=false;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    MWStopWatch::~MWStopWatch
+ *
+ * SYNOPSIS:
+ *    MWStopWatch::~MWStopWatch();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the destructor for the MWStopWatch class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWStopWatch::~MWStopWatch()
 {
 }

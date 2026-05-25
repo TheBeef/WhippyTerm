@@ -87,6 +87,25 @@ static bool MWSendBuffers_SendBuffersBufferEvent(const struct HDEvent *Event)
     return MWHD->SendBuffersBufferEvent(Event);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    MWSendBuffers::MWSendBuffers
+ *
+ * SYNOPSIS:
+ *    MWSendBuffers::MWSendBuffers();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the constructor for the MWSendBuffers class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWSendBuffers::MWSendBuffers()
 {
     UIWin=NULL;
@@ -97,6 +116,25 @@ MWSendBuffers::MWSendBuffers()
     PanelActive=false;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    MWSendBuffers::~MWSendBuffers
+ *
+ * SYNOPSIS:
+ *    MWSendBuffers::~MWSendBuffers();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the destructor for the MWSendBuffers class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWSendBuffers::~MWSendBuffers()
 {
     delete Buffer2SendHexDisplay;

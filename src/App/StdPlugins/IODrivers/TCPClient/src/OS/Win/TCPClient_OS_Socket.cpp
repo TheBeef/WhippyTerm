@@ -455,6 +455,27 @@ PG_BOOL TCPClient_ChangeOptions(t_DriverIOHandleType *DriverIO,
     return true;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    TCPClient_OS_PollThread
+ *
+ * SYNOPSIS:
+ *    static DWORD WINAPI TCPClient_OS_PollThread(LPVOID lpParameter);
+ *
+ * PARAMETERS:
+ *    lpParameter [I] -- The Win32 thread parameter supplied at thread creation.
+ *
+ * FUNCTION:
+ *    This is the worker thread that polls the OS for incoming data and other
+ *    status changes. It runs for the lifetime of the driver and pushes events
+ *    back into the driver's main loop.
+ *
+ * RETURNS:
+ *    A value of type DWORD WINAPI.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static DWORD WINAPI TCPClient_OS_PollThread(LPVOID lpParameter)
 {
     struct TCPClient_OurData *OurData=(struct TCPClient_OurData *)lpParameter;

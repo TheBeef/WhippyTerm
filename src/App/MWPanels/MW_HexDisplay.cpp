@@ -87,6 +87,25 @@ static bool MWHexDisplay_HexDisplayBufferEvent(const struct HDEvent *Event)
     return MWHD->HexDisplayBufferEvent(Event);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    MWHexDisplay::MWHexDisplay
+ *
+ * SYNOPSIS:
+ *    MWHexDisplay::MWHexDisplay();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the constructor for the MWHexDisplay class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWHexDisplay::MWHexDisplay()
 {
     UIWin=NULL;
@@ -97,6 +116,25 @@ MWHexDisplay::MWHexDisplay()
     PanelActive=false;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    MWHexDisplay::~MWHexDisplay
+ *
+ * SYNOPSIS:
+ *    MWHexDisplay::~MWHexDisplay();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the destructor for the MWHexDisplay class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWHexDisplay::~MWHexDisplay()
 {
     delete IncomingHistoryHexDisplay;

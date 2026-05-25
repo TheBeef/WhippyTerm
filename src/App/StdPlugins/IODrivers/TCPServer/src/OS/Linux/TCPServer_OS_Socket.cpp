@@ -516,6 +516,27 @@ PG_BOOL TCPServer_ChangeOptions(t_DriverIOHandleType *DriverIO,
     return TCPServer_Open(DriverIO,Options);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    TCPServer_OS_PollThread
+ *
+ * SYNOPSIS:
+ *    static void *TCPServer_OS_PollThread(void *arg);
+ *
+ * PARAMETERS:
+ *    arg [I] -- The thread argument supplied at thread creation.
+ *
+ * FUNCTION:
+ *    This is the worker thread that polls the OS for incoming data and other
+ *    status changes. It runs for the lifetime of the driver and pushes events
+ *    back into the driver's main loop.
+ *
+ * RETURNS:
+ *    A value of type void *.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void *TCPServer_OS_PollThread(void *arg)
 {
     struct TCPServer_OurData *OurData=(struct TCPServer_OurData *)arg;

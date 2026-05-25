@@ -201,6 +201,38 @@ const struct PI_UIAPI *PIUSDefault_GetDefaultAPI(void)
     return &m_PIUSDefault_UIAPI;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AddComboBox
+ *
+ * SYNOPSIS:
+ *    struct PI_ComboBox *PIUSDefault_AddComboBox(t_WidgetSysHandle
+ *            *WidgetHandle,PG_BOOL UserEditable,const char *Label,
+ *            void (*EventCB)(const struct PICBEvent *Event,void *UserData),
+ *            void *UserData);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UserEditable [I] -- true to let the user type a free-form value in
+ *                        addition to selecting from the drop-down list;
+ *                        false to lock the selection to the listed items.
+ *    Label [I] -- The text label to display next to the widget.
+ *    EventCB [I] -- Callback that fires when the widget generates an event. The
+ *                   event structure is a 'struct PICBEvent'. May be NULL if
+ *                   events are not needed.
+ *    UserData [I] -- Pointer passed to 'EventCB'.
+ *
+ * FUNCTION:
+ *    Adds a new combo box (drop-down list) to the subsystem's container.
+ *
+ * RETURNS:
+ *    A handle to the new widget on success, or NULL if the widget could not be
+ *    allocated.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_FreeComboBox(), PIUSDefault_AddItem2ComboBox(),
+ *    PIUSDefault_ClearComboBox()
+ ******************************************************************************/
 struct PI_ComboBox *PIUSDefault_AddComboBox(t_WidgetSysHandle *WidgetHandle,
         PG_BOOL UserEditable,const char *Label,
         void (*EventCB)(const struct PICBEvent *Event,void *UserData),
@@ -210,44 +242,206 @@ struct PI_ComboBox *PIUSDefault_AddComboBox(t_WidgetSysHandle *WidgetHandle,
             UserEditable,Label,EventCB,UserData);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_FreeComboBox
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_FreeComboBox(t_WidgetSysHandle *WidgetHandle,
+ *            struct PI_ComboBox *UICtrl);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The combo box returned by PIUSDefault_AddComboBox().
+ *
+ * FUNCTION:
+ *    Destroys a combo box and releases every resource associated with it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddComboBox()
+ ******************************************************************************/
 void PIUSDefault_FreeComboBox(t_WidgetSysHandle *WidgetHandle,
         struct PI_ComboBox *UICtrl)
 {
     UIPI_FreeComboBox(UICtrl);
 }
 
-void PIUSDefault_ClearComboBox(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ClearComboBox
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_ClearComboBox(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUIComboBoxCtrl *ComboBox);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    ComboBox [I] -- The combo box whose items are being removed.
+ *
+ * FUNCTION:
+ *    Removes every entry from the combo box's drop-down list, leaving it empty.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddItem2ComboBox()
+ ******************************************************************************/
+void PIUSDefault_ClearComboBox(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIComboBoxCtrl *ComboBox)
 {
     t_UIComboBoxCtrl *RealComboBox=(t_UIComboBoxCtrl *)ComboBox;
     UIClearComboBox(RealComboBox);
 }
 
-void PIUSDefault_AddItem2ComboBox(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox,const char *Label,
-        uintptr_t ID)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AddItem2ComboBox
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_AddItem2ComboBox(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUIComboBoxCtrl *ComboBox,const char *Label,uintptr_t ID);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    ComboBox [I] -- The combo box to add the entry to.
+ *    Label [I] -- The text to display for the new entry.
+ *    ID [I] -- A caller-defined identifier for this entry.
+ *
+ * FUNCTION:
+ *    Appends a new entry to the bottom of the combo box's drop-down list.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_ClearComboBox(), PIUSDefault_SetComboBoxSelectedEntry(),
+ *    PIUSDefault_GetComboBoxSelectedEntry()
+ ******************************************************************************/
+void PIUSDefault_AddItem2ComboBox(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIComboBoxCtrl *ComboBox,const char *Label,uintptr_t ID)
 {
     t_UIComboBoxCtrl *RealComboBox=(t_UIComboBoxCtrl *)ComboBox;
     UIAddItem2ComboBox(RealComboBox,Label,ID);
 }
 
-void PIUSDefault_SetComboBoxSelectedEntry(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox,uintptr_t ID)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetComboBoxSelectedEntry
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetComboBoxSelectedEntry(t_WidgetSysHandle
+ *            *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox,uintptr_t ID);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    ComboBox [I] -- The combo box whose selection is being changed.
+ *    ID [I] -- The ID (as passed to AddItem2ComboBox()) of the entry to select.
+ *
+ * FUNCTION:
+ *    Makes the entry with the given ID the currently selected entry in the
+ *    combo box.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddItem2ComboBox(), PIUSDefault_GetComboBoxSelectedEntry()
+ ******************************************************************************/
+void PIUSDefault_SetComboBoxSelectedEntry(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIComboBoxCtrl *ComboBox,uintptr_t ID)
 {
     t_UIComboBoxCtrl *RealComboBox=(t_UIComboBoxCtrl *)ComboBox;
     UISetComboBoxSelectedEntry(RealComboBox,ID);
 }
 
-uintptr_t PIUSDefault_GetComboBoxSelectedEntry(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_GetComboBoxSelectedEntry
+ *
+ * SYNOPSIS:
+ *    uintptr_t PIUSDefault_GetComboBoxSelectedEntry(t_WidgetSysHandle
+ *            *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    ComboBox [I] -- The combo box being queried.
+ *
+ * FUNCTION:
+ *    Returns the ID of the entry that is currently selected in the combo box.
+ *
+ * RETURNS:
+ *    The ID of the selected entry, as supplied when the entry was added with
+ *    AddItem2ComboBox().
+ *
+ * SEE ALSO:
+ *    PIUSDefault_SetComboBoxSelectedEntry(), PIUSDefault_AddItem2ComboBox()
+ ******************************************************************************/
+uintptr_t PIUSDefault_GetComboBoxSelectedEntry(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIComboBoxCtrl *ComboBox)
 {
     t_UIComboBoxCtrl *RealComboBox=(t_UIComboBoxCtrl *)ComboBox;
     return UIGetComboBoxSelectedEntry(RealComboBox);
 }
 
-void PIUSDefault_EnableComboBox(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox,PG_BOOL Enabled)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_EnableComboBox
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_EnableComboBox(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUIComboBoxCtrl *ComboBox,PG_BOOL Enabled);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    ComboBox [I] -- The combo box being enabled or disabled.
+ *    Enabled [I] -- true to make the combo box respond to user input,
+ *                   false to grey it out and ignore input.
+ *
+ * FUNCTION:
+ *    Enables or disables user interaction with the combo box.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddComboBox()
+ ******************************************************************************/
+void PIUSDefault_EnableComboBox(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIComboBoxCtrl *ComboBox,PG_BOOL Enabled)
 {
     t_UIComboBoxCtrl *RealComboBox=(t_UIComboBoxCtrl *)ComboBox;
     UIEnableComboBox(RealComboBox,Enabled);
 }
 
-struct PI_RadioBttnGroup *PIUSDefault_AllocRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,const char *Label)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AllocRadioBttnGroup
+ *
+ * SYNOPSIS:
+ *    struct PI_RadioBttnGroup *PIUSDefault_AllocRadioBttnGroup(
+ *            t_WidgetSysHandle *WidgetHandle,const char *Label);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Label [I] -- The text label to display next to the widget.
+ *
+ * FUNCTION:
+ *    Allocates a new radio-button group.  A group is the container into which
+ *    individual radio buttons are added with PIUSDefault_AddRadioBttn().
+ *
+ * RETURNS:
+ *    A handle to the new widget on success, or NULL if the widget could not be
+ *    allocated.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_FreeRadioBttnGroup(), PIUSDefault_AddRadioBttn()
+ ******************************************************************************/
+struct PI_RadioBttnGroup *PIUSDefault_AllocRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,
+        const char *Label)
 {
     return UIPI_AllocRadioBttnGroup((t_UILayoutContainerCtrl *)WidgetHandle,
             Label);
@@ -262,50 +456,210 @@ struct PI_RadioBttnGroup *PIUSDefault_AllocRadioBttnGroup(t_WidgetSysHandle *Wid
  *              struct PI_RadioBttnGroup *UICtrl);
  *
  * PARAMETERS:
- *    WidgetHandle [I] -- The handle to the widget data we allocated in
- *                        IOS_AllocConnectionOptions()
+ *    WidgetHandle [I] -- The handle to the widget data.
  *    UICtrl [I] -- The widget to free.
  *
  * FUNCTION:
- *    This function frees a group box.
+ *    This function frees a group box of radio buttons.  You must free the
+ *    radio button BEFORE calling this function.
  *
  * RETURNS:
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    PIUSDefault_AllocRadioBttnGroup()
  ******************************************************************************/
-void PIUSDefault_FreeRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttnGroup *UICtrl)
+void PIUSDefault_FreeRadioBttnGroup(t_WidgetSysHandle *WidgetHandle,
+        struct PI_RadioBttnGroup *UICtrl)
 {
     UIPI_FreeRadioBttnGroup(UICtrl);
 }
 
-struct PI_RadioBttn *PIUSDefault_AddRadioBttn(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttnGroup *RBGroup,const char *Label,void (*EventCB)(const struct PIRBEvent *Event,void *UserData),void *UserData)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AddRadioBttn
+ *
+ * SYNOPSIS:
+ *    struct PI_RadioBttn *PIUSDefault_AddRadioBttn(t_WidgetSysHandle
+ *            *WidgetHandle,struct PI_RadioBttnGroup *RBGroup,
+ *            const char *Label,
+ *            void (*EventCB)(const struct PIRBEvent *Event,void *UserData),
+ *            void *UserData);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    RBGroup [I] -- The radio-button group (from
+ *                   PIUSDefault_AllocRadioBttnGroup()) that this button will
+ *                   belong to.
+ *    Label [I] -- The text label to display next to the widget.
+ *    EventCB [I] -- Callback that fires when the widget generates an event. The
+ *                   event structure is a 'struct PIRBEvent'. May be NULL if
+ *                   events are not needed.
+ *    UserData [I] -- Pointer passed through to 'EventCB'.
+ *
+ * FUNCTION:
+ *    Adds a new radio button to an existing radio-button group.
+ *
+ * RETURNS:
+ *    A handle to the new widget on success, or NULL if the widget could not be
+ *    allocated.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AllocRadioBttnGroup(), PIUSDefault_FreeRadioBttn(),
+ *    PIUSDefault_SetRadioBttnChecked(), PIUSDefault_IsRadioBttnChecked(),
+ *    PIUSDefault_SetRadioBttnChecked(), PIUSDefault_EnableRadioBttn()
+ ******************************************************************************/
+struct PI_RadioBttn *PIUSDefault_AddRadioBttn(t_WidgetSysHandle *WidgetHandle,
+        struct PI_RadioBttnGroup *RBGroup,const char *Label,
+        void (*EventCB)(const struct PIRBEvent *Event,void *UserData),
+        void *UserData)
 {
     return UIPI_AddRadioBttn(RBGroup,Label,EventCB,UserData);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_FreeRadioBttn
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_FreeRadioBttn(t_WidgetSysHandle *WidgetHandle,
+ *            struct PI_RadioBttn *UICtrl);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The radio button returned by PIUSDefault_AddRadioBttn().
+ *
+ * FUNCTION:
+ *    Destroys a radio button and releases every resource associated with it.
+ *    Does not free the containing group.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddRadioBttn(), PIUSDefault_FreeRadioBttnGroup()
+ ******************************************************************************/
 void PIUSDefault_FreeRadioBttn(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttn *UICtrl)
 {
     UIPI_FreeRadioBttn(UICtrl);
 }
 
-PG_BOOL PIUSDefault_IsRadioBttnChecked(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttn *Bttn)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_IsRadioBttnChecked
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_IsRadioBttnChecked(t_WidgetSysHandle
+ *            *WidgetHandle,struct PI_RadioBttn *Bttn);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Bttn [I] -- The radio button being queried.
+ *
+ * FUNCTION:
+ *    Returns whether the given radio button is the currently-checked one in its
+ *    group.
+ *
+ * RETURNS:
+ *    true -- The button is checked.
+ *    false -- The button is not checked.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_SetRadioBttnChecked(), PIUSDefault_AddRadioBttn()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_IsRadioBttnChecked(t_WidgetSysHandle *WidgetHandle,
+        struct PI_RadioBttn *Bttn)
 {
     return UIPI_IsRadioBttnChecked(Bttn);
 }
 
-void PIUSDefault_SetRadioBttnChecked(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttn *Bttn,PG_BOOL Checked)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetRadioBttnChecked
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetRadioBttnChecked(t_WidgetSysHandle *WidgetHandle,
+ *            struct PI_RadioBttn *Bttn,PG_BOOL Checked);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Bttn [I] -- The radio button being modified.
+ *    Checked [I] -- true to check this button, false to clear it.
+ *
+ * FUNCTION:
+ *    Sets the checked state of a radio button.  Because radio buttons are
+ *    mutually exclusive within a group, checking one button will normally
+ *    uncheck whichever other button in the group was previously checked.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_IsRadioBttnChecked(), PIUSDefault_AddRadioBttn()
+ ******************************************************************************/
+void PIUSDefault_SetRadioBttnChecked(t_WidgetSysHandle *WidgetHandle,
+        struct PI_RadioBttn *Bttn,PG_BOOL Checked)
 {
     UIPI_SetRadioBttnChecked(Bttn,Checked);
 }
 
-void PIUSDefault_EnableRadioBttn(t_WidgetSysHandle *WidgetHandle,struct PI_RadioBttn *Bttn,PG_BOOL Enabled)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_EnableRadioBttn
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_EnableRadioBttn(t_WidgetSysHandle *WidgetHandle,
+ *            struct PI_RadioBttn *Bttn,PG_BOOL Enabled);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Bttn [I] -- The radio button being enabled or disabled.
+ *    Enabled [I] -- true to make the button respond to user input; false
+ *                   to grey it out and ignore input.
+ *
+ * FUNCTION:
+ *    Enables or disables user interaction with a single radio button. The other
+ *    buttons in the same group are unaffected.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddRadioBttn()
+ ******************************************************************************/
+void PIUSDefault_EnableRadioBttn(t_WidgetSysHandle *WidgetHandle,
+        struct PI_RadioBttn *Bttn,PG_BOOL Enabled)
 {
     UIPI_EnableRadioBttn(Bttn,Enabled);
 }
 
-const char *PIUSDefault_GetComboBoxText(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_GetComboBoxText
+ *
+ * SYNOPSIS:
+ *    const char *PIUSDefault_GetComboBoxText(t_WidgetSysHandle
+ *            *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    ComboBox [I] -- The combo box being read.
+ *
+ * FUNCTION:
+ *    Returns the text currently shown in the combo box's edit area. For an
+ *    editable combo box this may be a value the user typed rather than one of
+ *    the listed entries.
+ *
+ * RETURNS:
+ *    A pointer to a NUL-terminated string holding the current text. The buffer
+ *    is owned by this function and is valid only until the next call to
+ *    PIUSDefault_GetComboBoxText().
+ *
+ * SEE ALSO:
+ *    PIUSDefault_SetComboBoxText(), PIUSDefault_AddComboBox()
+ ******************************************************************************/
+const char *PIUSDefault_GetComboBoxText(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIComboBoxCtrl *ComboBox)
 {
     t_UIComboBoxCtrl *RealComboBox=(t_UIComboBoxCtrl *)ComboBox;
     static string ReturnTxt;
@@ -315,30 +669,153 @@ const char *PIUSDefault_GetComboBoxText(t_WidgetSysHandle *WidgetHandle,t_PIUICo
     return ReturnTxt.c_str();
 }
 
-void PIUSDefault_SetComboBoxText(t_WidgetSysHandle *WidgetHandle,t_PIUIComboBoxCtrl *ComboBox,const char *Txt)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetComboBoxText
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetComboBoxText(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUIComboBoxCtrl *ComboBox,const char *Txt);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    ComboBox [I] -- The combo box whose text is being set.
+ *    Txt [I] -- The new text. Must be NUL-terminated.
+ *
+ * FUNCTION:
+ *    Replaces the text currently shown in the combo box's edit area. Useful for
+ *    editable combo boxes.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_GetComboBoxText()
+ ******************************************************************************/
+void PIUSDefault_SetComboBoxText(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIComboBoxCtrl *ComboBox,const char *Txt)
 {
     t_UIComboBoxCtrl *RealComboBox=(t_UIComboBoxCtrl *)ComboBox;
 
     UISetComboBoxText(RealComboBox,Txt);
 }
 
-struct PI_Checkbox *PIUSDefault_AddCheckbox(t_WidgetSysHandle *WidgetHandle,const char *Label,void (*EventCB)(const struct PICheckboxEvent *Event,void *UserData),void *UserData)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AddCheckbox
+ *
+ * SYNOPSIS:
+ *    struct PI_Checkbox *PIUSDefault_AddCheckbox(t_WidgetSysHandle
+ *            *WidgetHandle,const char *Label,
+ *            void (*EventCB)(const struct PICheckboxEvent *Event,
+ *                    void *UserData),
+ *            void *UserData);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Label [I] -- The text label to display next to the widget.
+ *    EventCB [I] -- Callback that fires when the widget generates an event. The
+ *                   event structure is a 'struct PICheckboxEvent'. May be NULL
+ *                   if events are not needed.
+ *    UserData [I] -- Pointer passed through to 'EventCB'
+ *
+ * FUNCTION:
+ *    Adds a new checkbox to the subsystem's container.
+ *
+ * RETURNS:
+ *    A handle to the new widget on success, or NULL if the widget could not be
+ *    allocated.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_FreeCheckbox(), PIUSDefault_IsCheckboxChecked(),
+ *    PIUSDefault_SetCheckboxChecked()
+ ******************************************************************************/
+struct PI_Checkbox *PIUSDefault_AddCheckbox(t_WidgetSysHandle *WidgetHandle,
+        const char *Label,void (*EventCB)(const struct PICheckboxEvent *Event,
+        void *UserData),void *UserData)
 {
     return UIPI_AddCheckbox((t_UILayoutContainerCtrl *)WidgetHandle,Label,EventCB,UserData);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_FreeCheckbox
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_FreeCheckbox(t_WidgetSysHandle *WidgetHandle,
+ *            struct PI_Checkbox *UICtrl);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The checkbox returned by AddCheckbox(). After this call the
+ *                  handle is no longer valid.
+ *
+ * FUNCTION:
+ *    Destroys a checkbox and releases every resource associated with it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddCheckbox()
+ ******************************************************************************/
 void PIUSDefault_FreeCheckbox(t_WidgetSysHandle *WidgetHandle,struct PI_Checkbox *UICtrl)
 {
     UIPI_FreeCheckbox(UICtrl);
 }
 
-PG_BOOL PIUSDefault_IsCheckboxChecked(t_WidgetSysHandle *WidgetHandle,t_PIUICheckboxCtrl *Bttn)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_IsCheckboxChecked
+ *
+ * SYNOPSIS:
+ *    PG_BOOL PIUSDefault_IsCheckboxChecked(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUICheckboxCtrl *Bttn);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Bttn [I] -- The checkbox being queried.
+ *
+ * FUNCTION:
+ *    Returns whether the checkbox is currently checked or not.
+ *
+ * RETURNS:
+ *    true -- The checkbox is checked.
+ *    false -- The checkbox is not checked.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_SetCheckboxChecked(), PIUSDefault_AddCheckbox()
+ ******************************************************************************/
+PG_BOOL PIUSDefault_IsCheckboxChecked(t_WidgetSysHandle *WidgetHandle,
+        t_PIUICheckboxCtrl *Bttn)
 {
     t_UICheckboxCtrl *RealCheckbox=(t_UICheckboxCtrl *)Bttn;
 
     return UIGetCheckboxCheckStatus(RealCheckbox);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetCheckboxChecked
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetCheckboxChecked(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUICheckboxCtrl *Bttn,PG_BOOL Checked);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Bttn [I] -- The checkbox being modified.
+ *    Checked [I] -- true to check the box, false to clear it.
+ *
+ * FUNCTION:
+ *    Sets the checked state of the checkbox.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_IsCheckboxChecked(), PIUSDefault_AddCheckbox()
+ ******************************************************************************/
 void PIUSDefault_SetCheckboxChecked(t_WidgetSysHandle *WidgetHandle,t_PIUICheckboxCtrl *Bttn,PG_BOOL Checked)
 {
     t_UICheckboxCtrl *RealCheckbox=(t_UICheckboxCtrl *)Bttn;
@@ -346,6 +823,29 @@ void PIUSDefault_SetCheckboxChecked(t_WidgetSysHandle *WidgetHandle,t_PIUICheckb
     UICheckCheckbox(RealCheckbox,Checked);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_EnableCheckbox
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_EnableCheckbox(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUICheckboxCtrl *Bttn,PG_BOOL Enabled);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Bttn [I] -- The checkbox being enabled or disabled.
+ *    Enabled [I] -- true to make the checkbox respond to user input;
+ *                   false to grey it out and ignore input.
+ *
+ * FUNCTION:
+ *    Enables or disables user interaction with the checkbox.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddCheckbox()
+ ******************************************************************************/
 void PIUSDefault_EnableCheckbox(t_WidgetSysHandle *WidgetHandle,t_PIUICheckboxCtrl *Bttn,PG_BOOL Enabled)
 {
     t_UICheckboxCtrl *RealCheckbox=(t_UICheckboxCtrl *)Bttn;
@@ -353,6 +853,35 @@ void PIUSDefault_EnableCheckbox(t_WidgetSysHandle *WidgetHandle,t_PIUICheckboxCt
     UIEnableCheckbox(RealCheckbox,Enabled);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AddTextInput
+ *
+ * SYNOPSIS:
+ *    struct PI_TextInput *PIUSDefault_AddTextInput(t_WidgetSysHandle
+ *            *WidgetHandle,const char *Label,
+ *            void (*EventCB)(const struct PICBEvent *Event,void *UserData),
+ *            void *UserData);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Label [I] -- The text label to display next to the widget.
+ *    EventCB [I] -- Callback that fires when the widget generates an event. The
+ *                   event structure is a 'struct PICBEvent'. May be NULL if
+ *                   events are not needed.
+ *    UserData [I] -- Pointer passed through to 'EventCB'
+ *
+ * FUNCTION:
+ *    Adds a new single-line text input field.
+ *
+ * RETURNS:
+ *    A handle to the new widget on success, or NULL if the widget could not be
+ *    allocated.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_FreeTextInput(), PIUSDefault_GetTextInputText(),
+ *    PIUSDefault_SetTextInputText()
+ ******************************************************************************/
 struct PI_TextInput *PIUSDefault_AddTextInput(t_WidgetSysHandle *WidgetHandle,
         const char *Label,
         void (*EventCB)(const struct PICBEvent *Event,void *UserData),
@@ -362,13 +891,61 @@ struct PI_TextInput *PIUSDefault_AddTextInput(t_WidgetSysHandle *WidgetHandle,
             Label,EventCB,UserData);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_FreeTextInput
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_FreeTextInput(t_WidgetSysHandle *WidgetHandle,
+ *            struct PI_TextInput *UICtrl);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The text input returned by AddTextInput(). After this call
+ *                  the handle is no longer valid.
+ *
+ * FUNCTION:
+ *    Destroys a text input field and releases every resource associated with
+ *    it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddTextInput()
+ ******************************************************************************/
 void PIUSDefault_FreeTextInput(t_WidgetSysHandle *WidgetHandle,
         struct PI_TextInput *UICtrl)
 {
     UIPI_FreeTextInput(UICtrl);
 }
 
-const char *PIUSDefault_GetTextInputText(t_WidgetSysHandle *WidgetHandle,t_PIUITextInputCtrl *TextInput)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_GetTextInputText
+ *
+ * SYNOPSIS:
+ *    const char *PIUSDefault_GetTextInputText(t_WidgetSysHandle
+ *            *WidgetHandle,t_PIUITextInputCtrl *TextInput);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    TextInput [I] -- The text input field being read.
+ *
+ * FUNCTION:
+ *    Returns the text the user has typed (or that was set with
+ *    PIUSDefault_GetTextInputText()) into a text input field.
+ *
+ * RETURNS:
+ *    A pointer to a NUL-terminated string holding the current text. The buffer
+ *    is owned by this function and is valid only until the next call to
+ *    PIUSDefault_GetTextInputText().
+ *
+ * SEE ALSO:
+ *    PIUSDefault_SetTextInputText()
+ ******************************************************************************/
+const char *PIUSDefault_GetTextInputText(t_WidgetSysHandle *WidgetHandle,
+        t_PIUITextInputCtrl *TextInput)
 {
     t_UITextInputCtrl *RealTextInput=(t_UITextInputCtrl *)TextInput;
     static string ReturnTxt;
@@ -378,20 +955,98 @@ const char *PIUSDefault_GetTextInputText(t_WidgetSysHandle *WidgetHandle,t_PIUIT
     return ReturnTxt.c_str();
 }
 
-void PIUSDefault_SetTextInputText(t_WidgetSysHandle *WidgetHandle,t_PIUITextInputCtrl *TextInput,const char *Txt)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetTextInputText
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetTextInputText(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUITextInputCtrl *TextInput,const char *Txt);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    TextInput [I] -- The text input field being modified.
+ *    Txt [I] -- The new text. Must be NUL-terminated.
+ *
+ * FUNCTION:
+ *    Replaces the text in a text input field.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_GetTextInputText()
+ ******************************************************************************/
+void PIUSDefault_SetTextInputText(t_WidgetSysHandle *WidgetHandle,
+        t_PIUITextInputCtrl *TextInput,const char *Txt)
 {
     t_UITextInputCtrl *RealTextInput=(t_UITextInputCtrl *)TextInput;
 
     UISetTextCtrlText(RealTextInput,Txt);
 }
 
-void PIUSDefault_EnableTextInput(t_WidgetSysHandle *WidgetHandle,t_PIUITextInputCtrl *TextInput,PG_BOOL Enabled)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_EnableTextInput
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_EnableTextInput(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUITextInputCtrl *TextInput,PG_BOOL Enabled);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    TextInput [I] -- The text input field being enabled or disabled.
+ *    Enabled [I] -- true to make the field respond to user input; false
+ *                   to grey it out and ignore input.
+ *
+ * FUNCTION:
+ *    Enables or disables user interaction with a text input field.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddTextInput()
+ ******************************************************************************/
+void PIUSDefault_EnableTextInput(t_WidgetSysHandle *WidgetHandle,
+        t_PIUITextInputCtrl *TextInput,PG_BOOL Enabled)
 {
     t_UITextInputCtrl *RealTextInput=(t_UITextInputCtrl *)TextInput;
 
     UIEnableTextCtrl(RealTextInput,Enabled);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AddNumberInput
+ *
+ * SYNOPSIS:
+ *    struct PI_NumberInput *PIUSDefault_AddNumberInput(t_WidgetSysHandle
+ *            *WidgetHandle,const char *Label,
+ *            void (*EventCB)(const struct PICBEvent *Event,void *UserData),
+ *            void *UserData);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Label [I] -- The text label to display next to the widget.
+ *    EventCB [I] -- Callback that fires when the widget generates an event. The
+ *                   event structure is a 'struct PICBEvent'. May be NULL if
+ *                   events are not needed.
+ *    UserData [I] -- Pointer passed through to 'EventCB'
+ *
+ * FUNCTION:
+ *    Adds a new integer-number input field (a spin box) to the subsystem's
+ *    container. Call PIUSDefault_SetNumberInputMinMax() afterwards to apply
+ *    value limits.
+ *
+ * RETURNS:
+ *    A handle to the new widget on success, or NULL if the widget could not be
+ *    allocated.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_FreeNumberInput(), PIUSDefault_GetNumberInputValue(),
+ *    PIUSDefault_SetNumberInputValue(), PIUSDefault_SetNumberInputMinMax()
+ ******************************************************************************/
 struct PI_NumberInput *PIUSDefault_AddNumberInput(t_WidgetSysHandle *WidgetHandle,
         const char *Label,
         void (*EventCB)(const struct PICBEvent *Event,void *UserData),
@@ -401,34 +1056,155 @@ struct PI_NumberInput *PIUSDefault_AddNumberInput(t_WidgetSysHandle *WidgetHandl
             EventCB,UserData);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_FreeNumberInput
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_FreeNumberInput(t_WidgetSysHandle *WidgetHandle,
+ *            struct PI_NumberInput *UICtrl);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The number input returned by AddNumberInput(). After this
+ *                  call the handle is no longer valid.
+ *
+ * FUNCTION:
+ *    Destroys a number input field and releases every resource associated with
+ *    it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddNumberInput()
+ ******************************************************************************/
 void PIUSDefault_FreeNumberInput(t_WidgetSysHandle *WidgetHandle,
         struct PI_NumberInput *UICtrl)
 {
     UIPI_FreeNumberInput(UICtrl);
 }
 
-uint64_t PIUSDefault_GetNumberInputValue(t_WidgetSysHandle *WidgetHandle,t_PIUINumberInputCtrl *NumberInput)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_GetNumberInputValue
+ *
+ * SYNOPSIS:
+ *    uint64_t PIUSDefault_GetNumberInputValue(t_WidgetSysHandle
+ *            *WidgetHandle,t_PIUINumberInputCtrl *NumberInput);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    NumberInput [I] -- The number input field being read.
+ *
+ * FUNCTION:
+ *    Returns the integer value currently shown in a number input field.
+ *
+ * RETURNS:
+ *    The current value as a 64-bit unsigned integer. The return type is
+ *    uint64_t for transport but the underlying value is signed; see
+ *    PIUSDefault_SetNumberInputValue().
+ *
+ * SEE ALSO:
+ *    PIUSDefault_SetNumberInputValue(), PIUSDefault_SetNumberInputMinMax()
+ ******************************************************************************/
+uint64_t PIUSDefault_GetNumberInputValue(t_WidgetSysHandle *WidgetHandle,
+        t_PIUINumberInputCtrl *NumberInput)
 {
     t_UINumberInput *RealNumberInput=(t_UINumberInput *)NumberInput;
 
     return UIGetNumberInputCtrlValue(RealNumberInput);
 }
 
-void PIUSDefault_SetNumberInputValue(t_WidgetSysHandle *WidgetHandle,t_PIUINumberInputCtrl *NumberInput,int64_t Value)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetNumberInputValue
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetNumberInputValue(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUINumberInputCtrl *NumberInput,int64_t Value);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    NumberInput [I] -- The number input field being modified.
+ *    Value [I] -- The new value. It will be clamped to the range previously set
+ *                 with SetNumberInputMinMax().
+ *
+ * FUNCTION:
+ *    Sets the integer value displayed in a number input field.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_GetNumberInputValue(), PIUSDefault_SetNumberInputMinMax()
+ ******************************************************************************/
+void PIUSDefault_SetNumberInputValue(t_WidgetSysHandle *WidgetHandle,
+        t_PIUINumberInputCtrl *NumberInput,int64_t Value)
 {
     t_UINumberInput *RealNumberInput=(t_UINumberInput *)NumberInput;
 
     UISetNumberInputCtrlValue(RealNumberInput,Value);
 }
 
-void PIUSDefault_EnableNumberInput(t_WidgetSysHandle *WidgetHandle,t_PIUINumberInputCtrl *NumberInput,PG_BOOL Enabled)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_EnableNumberInput
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_EnableNumberInput(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUINumberInputCtrl *NumberInput,PG_BOOL Enabled);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    NumberInput [I] -- The number input field being enabled or disabled.
+ *    Enabled [I] -- true to make the field respond to user input; false
+ *                   to grey it out and ignore input.
+ *
+ * FUNCTION:
+ *    Enables or disables user interaction with a number input field.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddNumberInput()
+ ******************************************************************************/
+void PIUSDefault_EnableNumberInput(t_WidgetSysHandle *WidgetHandle,
+        t_PIUINumberInputCtrl *NumberInput,PG_BOOL Enabled)
 {
     t_UINumberInput *RealNumberInput=(t_UINumberInput *)NumberInput;
 
     UIEnableNumberInputCtrl(RealNumberInput,Enabled);
 }
 
-void PIUSDefault_SetNumberInputMinMax(t_WidgetSysHandle *WidgetHandle,t_PIUINumberInputCtrl *NumberInput,int64_t Min,int64_t Max)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetNumberInputMinMax
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetNumberInputMinMax(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUINumberInputCtrl *NumberInput,int64_t Min,int64_t Max);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    NumberInput [I] -- The number input field being constrained.
+ *    Min [I] -- The smallest value the user is allowed to enter.
+ *    Max [I] -- The largest value the user is allowed to enter.
+ *
+ * FUNCTION:
+ *    Sets the inclusive minimum and maximum value the user is allowed to enter
+ *    into a number input field. Values typed or pasted outside this range are
+ *    clamped.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddNumberInput(), PIUSDefault_SetNumberInputValue()
+ ******************************************************************************/
+void PIUSDefault_SetNumberInputMinMax(t_WidgetSysHandle *WidgetHandle,
+        t_PIUINumberInputCtrl *NumberInput,int64_t Min,int64_t Max)
 {
     t_UINumberInput *RealNumberInput=(t_UINumberInput *)NumberInput;
 
@@ -436,6 +1212,39 @@ void PIUSDefault_SetNumberInputMinMax(t_WidgetSysHandle *WidgetHandle,t_PIUINumb
     UISetNumberInputCtrlMax(RealNumberInput,Max);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AddDoubleInput
+ *
+ * SYNOPSIS:
+ *    struct PI_DoubleInput *PIUSDefault_AddDoubleInput(t_WidgetSysHandle
+ *            *WidgetHandle,const char *Label,
+ *            void (*EventCB)(const struct PICBEvent *Event,void *UserData),
+ *            void *UserData);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Label [I] -- The text label to display next to the widget.
+ *    EventCB [I] -- Callback that fires when the widget generates an event. The
+ *                   event structure is a 'struct PICBEvent'. May be NULL if
+ *                   events are not needed.
+ *    UserData [I] -- Pointer passed through to 'EventCB'.
+ *
+ * FUNCTION:
+ *    Adds a new floating-point number input field to the subsystem's container.
+ *    Call PIUSDefault_SetDoubleInputMinMax() and
+ *    PIUSDefault_SetDoubleInputDecimals() afterwards to apply value limits
+ *    and choose the displayed precision.
+ *
+ * RETURNS:
+ *    A handle to the new widget on success, or NULL if the widget could not be
+ *    allocated.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_FreeDoubleInput(), PIUSDefault_GetDoubleInputValue(),
+ *    PIUSDefault_SetDoubleInputValue(), PIUSDefault_SetDoubleInputMinMax(),
+ *    PIUSDefault_SetDoubleInputDecimals()
+ ******************************************************************************/
 struct PI_DoubleInput *PIUSDefault_AddDoubleInput(t_WidgetSysHandle *WidgetHandle,
         const char *Label,
         void (*EventCB)(const struct PICBEvent *Event,void *UserData),
@@ -445,34 +1254,153 @@ struct PI_DoubleInput *PIUSDefault_AddDoubleInput(t_WidgetSysHandle *WidgetHandl
             EventCB,UserData);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_FreeDoubleInput
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_FreeDoubleInput(t_WidgetSysHandle *WidgetHandle,
+ *            struct PI_DoubleInput *UICtrl);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The double input returned by AddDoubleInput(). After this
+ *                  call the handle is no longer valid.
+ *
+ * FUNCTION:
+ *    Destroys a double input field and releases every resource associated with
+ *    it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddDoubleInput()
+ ******************************************************************************/
 void PIUSDefault_FreeDoubleInput(t_WidgetSysHandle *WidgetHandle,
         struct PI_DoubleInput *UICtrl)
 {
     UIPI_FreeDoubleInput(UICtrl);
 }
 
-double PIUSDefault_GetDoubleInputValue(t_WidgetSysHandle *WidgetHandle,t_PIUIDoubleInputCtrl *DoubleInput)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_GetDoubleInputValue
+ *
+ * SYNOPSIS:
+ *    double PIUSDefault_GetDoubleInputValue(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUIDoubleInputCtrl *DoubleInput);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    DoubleInput [I] -- The double input field being read.
+ *
+ * FUNCTION:
+ *    Returns the floating-point value currently shown in a double input field.
+ *
+ * RETURNS:
+ *    The current value as a double.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_SetDoubleInputValue()
+ ******************************************************************************/
+double PIUSDefault_GetDoubleInputValue(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIDoubleInputCtrl *DoubleInput)
 {
     t_UIDoubleInput *RealDoubleInput=(t_UIDoubleInput *)DoubleInput;
 
     return UIGetDoubleInputCtrlValue(RealDoubleInput);
 }
 
-void PIUSDefault_SetDoubleInputValue(t_WidgetSysHandle *WidgetHandle,t_PIUIDoubleInputCtrl *DoubleInput,double Value)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetDoubleInputValue
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetDoubleInputValue(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUIDoubleInputCtrl *DoubleInput,double Value);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    DoubleInput [I] -- The double input field being modified.
+ *    Value [I] -- The new value. It will be clamped to the range previously set
+ *                 with SetDoubleInputMinMax().
+ *
+ * FUNCTION:
+ *    Sets the floating-point value displayed in a double input field.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_GetDoubleInputValue(), PIUSDefault_SetDoubleInputMinMax(),
+ *    PIUSDefault_SetDoubleInputDecimals()
+ ******************************************************************************/
+void PIUSDefault_SetDoubleInputValue(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIDoubleInputCtrl *DoubleInput,double Value)
 {
     t_UIDoubleInput *RealDoubleInput=(t_UIDoubleInput *)DoubleInput;
 
     UISetDoubleInputCtrlValue(RealDoubleInput,Value);
 }
 
-void PIUSDefault_EnableDoubleInput(t_WidgetSysHandle *WidgetHandle,t_PIUIDoubleInputCtrl *DoubleInput,PG_BOOL Enabled)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_EnableDoubleInput
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_EnableDoubleInput(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUIDoubleInputCtrl *DoubleInput,PG_BOOL Enabled);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    DoubleInput [I] -- The double input field being enabled or disabled.
+ *    Enabled [I] -- true to make the field respond to user input; false
+ *                   to grey it out and ignore input.
+ *
+ * FUNCTION:
+ *    Enables or disables user interaction with a double input field.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddDoubleInput()
+ ******************************************************************************/
+void PIUSDefault_EnableDoubleInput(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIDoubleInputCtrl *DoubleInput,PG_BOOL Enabled)
 {
     t_UIDoubleInput *RealDoubleInput=(t_UIDoubleInput *)DoubleInput;
 
     UIEnableDoubleInputCtrl(RealDoubleInput,Enabled);
 }
 
-
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetDoubleInputMinMax
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetDoubleInputMinMax(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUIDoubleInputCtrl *DoubleInput,double Min,double Max);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    DoubleInput [I] -- The double input field being constrained.
+ *    Min [I] -- The smallest value the user is allowed to enter.
+ *    Max [I] -- The largest value the user is allowed to enter.
+ *
+ * FUNCTION:
+ *    Sets the inclusive minimum and maximum value the user is allowed to enter
+ *    into a double input field. Values typed or pasted outside this range are
+ *    clamped.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddDoubleInput(), PIUSDefault_SetDoubleInputValue(),
+ *    PIUSDefault_SetDoubleInputDecimals()
+ ******************************************************************************/
 void PIUSDefault_SetDoubleInputMinMax(t_WidgetSysHandle *WidgetHandle,t_PIUIDoubleInputCtrl *DoubleInput,double Min,double Max)
 {
     t_UIDoubleInput *RealDoubleInput=(t_UIDoubleInput *)DoubleInput;
@@ -481,13 +1409,73 @@ void PIUSDefault_SetDoubleInputMinMax(t_WidgetSysHandle *WidgetHandle,t_PIUIDoub
     UISetDoubleInputCtrlMax(RealDoubleInput,Max);
 }
 
-void PIUSDefault_SetDoubleInputDecimals(t_WidgetSysHandle *WidgetHandle,t_PIUIDoubleInputCtrl *DoubleInput,int Points)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetDoubleInputDecimals
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetDoubleInputDecimals(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUIDoubleInputCtrl *DoubleInput,int Points);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    DoubleInput [I] -- The double input field whose precision is being set.
+ *    Points [I] -- The number of digits to display after the decimal point.
+ *
+ * FUNCTION:
+ *    Sets how many digits after the decimal point are displayed in a double
+ *    input field. This affects only the display; the underlying value is not
+ *    rounded.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddDoubleInput(), PIUSDefault_SetDoubleInputValue()
+ ******************************************************************************/
+void PIUSDefault_SetDoubleInputDecimals(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIDoubleInputCtrl *DoubleInput,int Points)
 {
     t_UIDoubleInput *RealDoubleInput=(t_UIDoubleInput *)DoubleInput;
 
     UISetDoubleInputCtrlDecimals(RealDoubleInput,Points);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AddColumnViewInput
+ *
+ * SYNOPSIS:
+ *    struct PI_ColumnViewInput *PIUSDefault_AddColumnViewInput(
+ *            t_WidgetSysHandle *WidgetHandle,const char *Label,int Columns,
+ *            const char *ColumnNames[],
+ *            void (*EventCB)(const struct PICVEvent *Event,void *UserData),
+ *            void *UserData);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Label [I] -- The text label to display next to the widget.
+ *    Columns [I] -- The number of columns in the view. Must match the length of
+ *                   the 'ColumnNames' array.
+ *    ColumnNames [I] -- An array of 'Columns' used as the column headings.
+ *    EventCB [I] -- Callback that fires when the widget generates an event. The
+ *                   event structure is a 'struct PICVEvent'. May be NULL if
+ *                   events are not needed.
+ *    UserData [I] -- Pointer passed through to 'EventCB'
+ *
+ * FUNCTION:
+ *    Adds a new multi-column list view (similar to a spreadsheet, with named
+ *    column headings and selectable rows) to the subsystem's container.
+ *
+ * RETURNS:
+ *    A handle to the new widget on success, or NULL if the widget could not be
+ *    allocated.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_FreeColumnViewInput(), PIUSDefault_ColumnViewInputAddRow(),
+ *    PIUSDefault_ColumnViewInputSetColumnText(),
+ *    PIUSDefault_ColumnViewInputSelectRow()
+ ******************************************************************************/
 struct PI_ColumnViewInput *PIUSDefault_AddColumnViewInput(t_WidgetSysHandle *WidgetHandle,
         const char *Label,int Columns,const char *ColumnNames[],
         void (*EventCB)(const struct PICVEvent *Event,void *UserData),
@@ -497,54 +1485,252 @@ struct PI_ColumnViewInput *PIUSDefault_AddColumnViewInput(t_WidgetSysHandle *Wid
             Columns,ColumnNames,EventCB,UserData);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_FreeColumnViewInput
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_FreeColumnViewInput(t_WidgetSysHandle *WidgetHandle,
+ *            struct PI_ColumnViewInput *UICtrl);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The column view returned by AddColumnViewInput(). After this
+ *                  call the handle is no longer valid.
+ *
+ * FUNCTION:
+ *    Destroys a column view and releases every resource associated with it,
+ *    including the storage for every row and cell.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddColumnViewInput()
+ ******************************************************************************/
 void PIUSDefault_FreeColumnViewInput(t_WidgetSysHandle *WidgetHandle,
         struct PI_ColumnViewInput *UICtrl)
 {
     UIPI_FreeColumnViewInput(UICtrl);
 }
 
-void PIUSDefault_ColumnViewInputClear(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ColumnViewInputClear
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_ColumnViewInputClear(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUIColumnViewInputCtrl *UICtrl);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The column view whose rows are being removed.
+ *
+ * FUNCTION:
+ *    Removes every row from a column view, leaving it empty. The column
+ *    headings are not affected.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_ColumnViewInputAddRow(),
+ *    PIUSDefault_ColumnViewInputRemoveRow()
+ ******************************************************************************/
+void PIUSDefault_ColumnViewInputClear(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIColumnViewInputCtrl *UICtrl)
 {
     t_UIColumnView *RealColumnViewInput=(t_UIColumnView *)UICtrl;
 
     UIColumnViewClear(RealColumnViewInput);
 }
 
-void PIUSDefault_ColumnViewInputRemoveRow(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl,int Row)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ColumnViewInputRemoveRow
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_ColumnViewInputRemoveRow(t_WidgetSysHandle
+ *            *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl,int Row);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The column view being modified.
+ *    Row [I] -- The zero-based index of the row to remove. Rows with a higher
+ *               index shift down by one.
+ *
+ * FUNCTION:
+ *    Removes a single row from a column view.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_ColumnViewInputAddRow(), PIUSDefault_ColumnViewInputClear()
+ ******************************************************************************/
+void PIUSDefault_ColumnViewInputRemoveRow(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIColumnViewInputCtrl *UICtrl,int Row)
 {
     t_UIColumnView *RealColumnViewInput=(t_UIColumnView *)UICtrl;
 
     UIColumnViewRemoveRow(RealColumnViewInput,Row);
 }
 
-int PIUSDefault_ColumnViewInputAddRow(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ColumnViewInputAddRow
+ *
+ * SYNOPSIS:
+ *    int PIUSDefault_ColumnViewInputAddRow(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUIColumnViewInputCtrl *UICtrl);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The column view to add the row to.
+ *
+ * FUNCTION:
+ *    Appends a new, empty row to the bottom of a column view. The caller then
+ *    fills in the cells of the new row with
+ *    PIUSDefault_ColumnViewInputSetColumnText().
+ *
+ * RETURNS:
+ *    The zero-based index of the new row.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_ColumnViewInputSetColumnText(),
+ *    PIUSDefault_ColumnViewInputRemoveRow()
+ ******************************************************************************/
+int PIUSDefault_ColumnViewInputAddRow(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIColumnViewInputCtrl *UICtrl)
 {
     t_UIColumnView *RealColumnViewInput=(t_UIColumnView *)UICtrl;
 
     return UIColumnViewAddRow(RealColumnViewInput);
 }
 
-void PIUSDefault_ColumnViewInputSetColumnText(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl,int Column,int Row,const char *Str)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ColumnViewInputSetColumnText
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_ColumnViewInputSetColumnText(t_WidgetSysHandle
+ *            *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl,int Column,
+ *            int Row,const char *Str);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The column view being modified.
+ *    Column [I] -- The zero-based column index of the cell.
+ *    Row [I] -- The zero-based row index of the cell.
+ *    Str [I] -- The new text for the cell.
+ *
+ * FUNCTION:
+ *    Sets the text shown in a single cell of a column view.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_ColumnViewInputAddRow()
+ ******************************************************************************/
+void PIUSDefault_ColumnViewInputSetColumnText(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIColumnViewInputCtrl *UICtrl,int Column,int Row,const char *Str)
 {
     t_UIColumnView *RealColumnViewInput=(t_UIColumnView *)UICtrl;
 
     UIColumnViewSetColumnText(RealColumnViewInput,Column,Row,Str);
 }
 
-void PIUSDefault_ColumnViewInputSelectRow(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl,int Row)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ColumnViewInputSelectRow
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_ColumnViewInputSelectRow(t_WidgetSysHandle
+ *            *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl,int Row);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The column view being modified.
+ *    Row [I] -- The zero-based index of the row to select.
+ *
+ * FUNCTION:
+ *    Makes the given row the currently-selected row in a column view. Any
+ *    previously selected row becomes unselected.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_ColumnViewInputClearSelection()
+ ******************************************************************************/
+void PIUSDefault_ColumnViewInputSelectRow(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIColumnViewInputCtrl *UICtrl,int Row)
 {
     t_UIColumnView *RealColumnViewInput=(t_UIColumnView *)UICtrl;
 
     UIColumnViewSelectRow(RealColumnViewInput,Row);
 }
 
-void PIUSDefault_ColumnViewInputClearSelection(t_WidgetSysHandle *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl)
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_ColumnViewInputClearSelection
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_ColumnViewInputClearSelection(t_WidgetSysHandle
+ *            *WidgetHandle,t_PIUIColumnViewInputCtrl *UICtrl);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The column view being modified.
+ *
+ * FUNCTION:
+ *    Unselects whatever row was selected in a column view, leaving the view
+ *    with no row selected.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_ColumnViewInputSelectRow()
+ ******************************************************************************/
+void PIUSDefault_ColumnViewInputClearSelection(t_WidgetSysHandle *WidgetHandle,
+        t_PIUIColumnViewInputCtrl *UICtrl)
 {
     t_UIColumnView *RealColumnViewInput=(t_UIColumnView *)UICtrl;
 
     UIColumnViewClearSelection(RealColumnViewInput);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AddButtonInput
+ *
+ * SYNOPSIS:
+ *    struct PI_ButtonInput *PIUSDefault_AddButtonInput(t_WidgetSysHandle
+ *            *WidgetHandle,const char *Label,
+ *            void (*EventCB)(const struct PIButtonEvent *Event,
+ *                    void *UserData),
+ *            void *UserData);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Label [I] -- The text to display on the face of the button.
+ *    EventCB [I] -- Callback that fires when the widget generates an event. The
+ *                   event structure is a 'struct PIButtonEvent'. May be NULL if
+ *                   events are not needed.
+ *    UserData [I] -- Pointer passed through to 'EventCB'
+ *
+ * FUNCTION:
+ *    Adds a new push button to the subsystem's container.
+ *
+ * RETURNS:
+ *    A handle to the new widget on success, or NULL if the widget could not be
+ *    allocated.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_FreeButtonInput()
+ ******************************************************************************/
 struct PI_ButtonInput *PIUSDefault_AddButtonInput(t_WidgetSysHandle *WidgetHandle,
         const char *Label,
         void (*EventCB)(const struct PIButtonEvent *Event,void *UserData),
@@ -554,24 +1740,115 @@ struct PI_ButtonInput *PIUSDefault_AddButtonInput(t_WidgetSysHandle *WidgetHandl
             EventCB,UserData);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_FreeButtonInput
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_FreeButtonInput(t_WidgetSysHandle *WidgetHandle,
+ *            struct PI_ButtonInput *UICtrl);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The button returned by PIUSDefault_AddButtonInput().
+ *                  After this call the handle is no longer valid.
+ *
+ * FUNCTION:
+ *    Destroys a push button and releases every resource associated with it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddButtonInput()
+ ******************************************************************************/
 void PIUSDefault_FreeButtonInput(t_WidgetSysHandle *WidgetHandle,
         struct PI_ButtonInput *UICtrl)
 {
     UIPI_FreeButtonInput(UICtrl);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_AddIndicator
+ *
+ * SYNOPSIS:
+ *    struct PI_Indicator *PIUSDefault_AddIndicator(t_WidgetSysHandle
+ *            *WidgetHandle,const char *Label);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    Label [I] -- The text label to display next to the indicator.
+ *
+ * FUNCTION:
+ *    Adds a new on/off indicator (a 'lamp' or 'LED' control) to the subsystem's
+ *    container. Indicators are read-only -- they show a state to the user but
+ *    do not accept input.
+ *
+ * RETURNS:
+ *    A handle to the new widget on success, or NULL if the widget could not be
+ *    allocated.
+ *
+ * SEE ALSO:
+ *    PIUSDefault_FreeIndicator(), PIUSDefault_SetIndicator()
+ ******************************************************************************/
 struct PI_Indicator *PIUSDefault_AddIndicator(t_WidgetSysHandle *WidgetHandle,
         const char *Label)
 {
     return UIPI_AddIndicator((t_UILayoutContainerCtrl *)WidgetHandle,Label);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_FreeIndicator
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_FreeIndicator(t_WidgetSysHandle *WidgetHandle,
+ *            struct PI_Indicator *UICtrl);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The indicator returned by AddIndicator(). After this call
+ *                  the handle is no longer valid.
+ *
+ * FUNCTION:
+ *    Destroys an indicator and releases every resource associated with it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddIndicator()
+ ******************************************************************************/
 void PIUSDefault_FreeIndicator(t_WidgetSysHandle *WidgetHandle,
         struct PI_Indicator *UICtrl)
 {
     UIPI_FreeIndicator(UICtrl);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    PIUSDefault_SetIndicator
+ *
+ * SYNOPSIS:
+ *    void PIUSDefault_SetIndicator(t_WidgetSysHandle *WidgetHandle,
+ *            t_PIUIIndicatorCtrl *UICtrl,bool On);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to the widget data.
+ *    UICtrl [I] -- The indicator being modified.
+ *    On [I] -- true to turn the indicator on (illuminate it); false to turn it
+ *              off.
+ *
+ * FUNCTION:
+ *    Sets the on/off state of an indicator.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    PIUSDefault_AddIndicator()
+ ******************************************************************************/
 void PIUSDefault_SetIndicator(t_WidgetSysHandle *WidgetHandle,
         t_PIUIIndicatorCtrl *UICtrl,bool On)
 {
@@ -695,8 +1972,7 @@ int PIUSDefault_Ask(const char *Message,int Type)
  *    true.
  *
  * SEE ALSO:
- *    FreeFileReqPathAndFile()
-void PIUSDefault_FreeFileReqPathAndFile(char **Path,char **Filename)
+ *    PIUSDefault_FreeFileReqPathAndFile()
  ******************************************************************************/
 PG_BOOL PIUSDefault_FileReq(e_FileReqTypeType Req,const char *Title,char **Path,
         char **Filename,const char *Filters,int SelectedFilter)
@@ -912,7 +2188,8 @@ PG_BOOL PIUSDefault_ChangeTextBoxProp(t_WidgetSysHandle *WidgetHandle,
  * SEE ALSO:
  *    PIUSDefault_FreeGroupBox(), PIUSDefault_SetGroupBoxLabel()
  ******************************************************************************/
-struct PI_GroupBox *PIUSDefault_AddGroupBox(t_WidgetSysHandle *WidgetHandle,const char *Label)
+struct PI_GroupBox *PIUSDefault_AddGroupBox(t_WidgetSysHandle *WidgetHandle,
+        const char *Label)
 {
     return UIPI_AddGroupBox((t_UILayoutContainerCtrl *)WidgetHandle,Label);
 }
@@ -1786,7 +3063,8 @@ struct PI_WebLink *PIUSDefault_AddWebLink(t_WidgetSysHandle *WidgetHandle,
  * SEE ALSO:
  *    
  ******************************************************************************/
-void PIUSDefault_FreeWebLink(t_WidgetSysHandle *WidgetHandle,struct PI_WebLink *WebLinkHandle)
+void PIUSDefault_FreeWebLink(t_WidgetSysHandle *WidgetHandle,
+        struct PI_WebLink *WebLinkHandle)
 {
     UIPI_FreeWebLink(WebLinkHandle);
 }

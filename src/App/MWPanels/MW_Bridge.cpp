@@ -46,6 +46,25 @@
 
 /*** VARIABLE DEFINITIONS     ***/
 
+/*******************************************************************************
+ * NAME:
+ *    MWBridge::MWBridge
+ *
+ * SYNOPSIS:
+ *    MWBridge::MWBridge();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the constructor for the MWBridge class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWBridge::MWBridge()
 {
     UIWin=NULL;
@@ -54,6 +73,25 @@ MWBridge::MWBridge()
     PanelActive=false;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    MWBridge::~MWBridge
+ *
+ * SYNOPSIS:
+ *    MWBridge::~MWBridge();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the destructor for the MWBridge class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWBridge::~MWBridge()
 {
 }

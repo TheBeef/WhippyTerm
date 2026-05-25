@@ -228,6 +228,7 @@
 /*** HEADER FILES TO INCLUDE  ***/
 #include "ANSIX3_64.h"
 #include "PluginSDK/Plugin.h"
+#include "Version.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -242,6 +243,9 @@ using namespace std;
 
 #define MAX_SEARCH_ABORT_COUNT  128
 
+#ifndef OFFICIAL_RELEASE
+ #error "OFFICIAL_RELEASE not defined.  Did you include Version.h"
+#endif
 #if OFFICIAL_RELEASE==0             // Only unofficial builds can do the logging
  #define LOG_UNKNOWN_CODES                   // Write a log when we see an unknown code
 #endif
@@ -1089,6 +1093,31 @@ void ANSIX364Decoder_ProcessIncomingTextByte(t_DataProcessorHandleType *DataHand
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    ANSIX364Decoder_ProcessNormalChar
+ *
+ * SYNOPSIS:
+ *    void ANSIX364Decoder_ProcessNormalChar(struct ANSIX364DecoderData *Data,
+ *        const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+ *        PG_BOOL *Consumed);
+ *
+ * PARAMETERS:
+ *    Data [I] -- Caller-supplied data.
+ *    RawByte [I] -- The raw input byte from the data stream.
+ *    ProcessedChar [O] -- Receives the processed character (output).
+ *    CharLen [O] -- Receives the length of the processed character.
+ *    Consumed [O] -- Set to true if the byte was consumed by this processor.
+ *
+ * FUNCTION:
+ *    This function processes a char in normal mode as they come in.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void ANSIX364Decoder_ProcessNormalChar(struct ANSIX364DecoderData *Data,
         const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
         PG_BOOL *Consumed)
@@ -1246,6 +1275,31 @@ void ANSIX364Decoder_ProcessNormalChar(struct ANSIX364DecoderData *Data,
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    ANSIX364Decoder_ProcessCSI
+ *
+ * SYNOPSIS:
+ *    void ANSIX364Decoder_ProcessCSI(struct ANSIX364DecoderData *Data,
+ *        const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+ *        PG_BOOL *Consumed);
+ *
+ * PARAMETERS:
+ *    Data [I] -- Caller-supplied data.
+ *    RawByte [I] -- The raw input byte from the data stream.
+ *    ProcessedChar [O] -- Receives the processed character (output).
+ *    CharLen [O] -- Receives the length of the processed character.
+ *    Consumed [O] -- Set to true if the byte was consumed by this processor.
+ *
+ * FUNCTION:
+ *    This function processes a char in CSI mode as they come in.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void ANSIX364Decoder_ProcessCSI(struct ANSIX364DecoderData *Data,
         const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
         PG_BOOL *Consumed)
@@ -1299,6 +1353,31 @@ void ANSIX364Decoder_ProcessCSI(struct ANSIX364DecoderData *Data,
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    ANSIX364Decoder_DoCSICommand
+ *
+ * SYNOPSIS:
+ *    void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
+ *        const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+ *        PG_BOOL *Consumed);
+ *
+ * PARAMETERS:
+ *    Data [I] -- Caller-supplied data.
+ *    RawByte [I] -- The raw input byte from the data stream.
+ *    ProcessedChar [O] -- Receives the processed character (output).
+ *    CharLen [O] -- Receives the length of the processed character.
+ *    Consumed [O] -- Set to true if the byte was consumed by this processor.
+ *
+ * FUNCTION:
+ *    This function does a CSI command.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
         const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
         PG_BOOL *Consumed)
@@ -1568,6 +1647,25 @@ void ANSIX364Decoder_DoCSICommand(struct ANSIX364DecoderData *Data,
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    ANSIX364Decoder_HandleSGR
+ *
+ * SYNOPSIS:
+ *    void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data);
+ *
+ * PARAMETERS:
+ *    Data [I] -- Caller-supplied data.
+ *
+ * FUNCTION:
+ *    This function does a SGR command (\33[m type).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data)
 {
     unsigned int r;
@@ -1764,6 +1862,25 @@ void ANSIX364Decoder_HandleSGR(struct ANSIX364DecoderData *Data)
     m_DPS->SetULineColor(ULineColor);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    ANSIX364Decoder_ResetSGR
+ *
+ * SYNOPSIS:
+ *    void ANSIX364Decoder_ResetSGR(struct ANSIX364DecoderData *Data);
+ *
+ * PARAMETERS:
+ *    Data [I] -- Caller-supplied data.
+ *
+ * FUNCTION:
+ *    This function does a reset of the SGR modes.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void ANSIX364Decoder_ResetSGR(struct ANSIX364DecoderData *Data)
 {
     Data->DoingDim=false;
@@ -2048,6 +2165,31 @@ void ANSIX364Decoder_ProcessCSIQuest(struct ANSIX364DecoderData *Data,
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    ANSIX364Decoder_DoCSIQuestCommand
+ *
+ * SYNOPSIS:
+ *    void ANSIX364Decoder_DoCSIQuestCommand(struct ANSIX364DecoderData *Data,
+ *        const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
+ *        PG_BOOL *Consumed);
+ *
+ * PARAMETERS:
+ *    Data [I] -- Caller-supplied data.
+ *    RawByte [I] -- The raw input byte from the data stream.
+ *    ProcessedChar [O] -- Receives the processed character (output).
+ *    CharLen [O] -- Receives the length of the processed character.
+ *    Consumed [O] -- Set to true if the byte was consumed by this processor.
+ *
+ * FUNCTION:
+ *    This function does a CSI question mark command.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void ANSIX364Decoder_DoCSIQuestCommand(struct ANSIX364DecoderData *Data,
         const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
         PG_BOOL *Consumed)

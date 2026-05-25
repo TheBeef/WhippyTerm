@@ -194,6 +194,29 @@ struct OSSocket *OpenSocket(const char *Dest,unsigned int Port,
     return (struct OSSocket *)NewSocket;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    SendSocket
+ *
+ * SYNOPSIS:
+ *    bool SendSocket(struct OSSocket *Sock,const void *Buffer,
+ *        unsigned int Bytes);
+ *
+ * PARAMETERS:
+ *    Sock [I] -- The socket being operated on.
+ *    Buffer [I] -- The buffer to read from or write to.
+ *    Bytes [I] -- The number of bytes to operate on.
+ *
+ * FUNCTION:
+ *    Sends data over the given socket.
+ *
+ * RETURNS:
+ *    true -- Success.
+ *    false -- An error was detected.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 bool SendSocket(struct OSSocket *Sock,const void *Buffer,unsigned int Bytes)
 {
     struct LinuxSocket *TheSocket=(struct LinuxSocket *)Sock;
@@ -256,6 +279,27 @@ int ReadSocket(struct OSSocket *Sock,void *Buffer,unsigned int MaxBytes)
     return Bytes;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    AvailSocket
+ *
+ * SYNOPSIS:
+ *    unsigned int AvailSocket(struct OSSocket *Sock);
+ *
+ * PARAMETERS:
+ *    Sock [I] -- The socket being operated on.
+ *
+ * FUNCTION:
+ *    Returns the number of bytes that are available to read from the socket
+ *    without blocking.
+ *
+ * RETURNS:
+ *    The number of bytes waiting to be read or 0 if there is an error (or
+ *    there are no bytes available).
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 unsigned int AvailSocket(struct OSSocket *Sock)
 {
     struct LinuxSocket *TheSocket=(struct LinuxSocket *)Sock;
@@ -270,6 +314,25 @@ unsigned int AvailSocket(struct OSSocket *Sock)
     return Bytes;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    CloseSocket
+ *
+ * SYNOPSIS:
+ *    void CloseSocket(struct OSSocket *Sock);
+ *
+ * PARAMETERS:
+ *    Sock [I] -- The socket being operated on.
+ *
+ * FUNCTION:
+ *    Closes the socket and frees any resources associated with it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void CloseSocket(struct OSSocket *Sock)
 {
     struct LinuxSocket *TheSocket=(struct LinuxSocket *)Sock;

@@ -698,12 +698,32 @@ PG_BOOL HexDumpDecoder_ProcessKeyPress(t_DataProcessorHandleType *DataHandle,
     return true;
 }
 
-void HexDumpDecoder_ProcessIncomingByte(t_DataProcessorHandleType *DataHandle,
-        const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
-        PG_BOOL *Consumed)
-{
-}
-
+/*******************************************************************************
+ * NAME:
+ *    HexDumpDecoder_ProcessIncomingBinaryByte
+ *
+ * SYNOPSIS:
+ *    void HexDumpDecoder_ProcessIncomingBinaryByte(t_DataProcessorHandleType *DataHandle,
+ *          const uint8_t Byte);
+ *
+ * PARAMETERS:
+ *      DataHandle [I] -- The data handle to work on.  This is your internal
+ *                        data.
+ *      Byte [I] -- This is the byte that came in.
+ *
+ * FUNCTION:
+ *      This function is called for each byte that comes in if you are a
+ *      'e_DataProcessorType_Binary' type of processor.
+ *
+ *      You process this byte and call one of the add to screen functions (or
+ *      all of them if you like).  See BinaryAddText()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    BinaryAddText()
+ ******************************************************************************/
 void HexDumpDecoder_ProcessIncomingBinaryByte(t_DataProcessorHandleType *DataHandle,
         const uint8_t Byte)
 {
@@ -1133,6 +1153,26 @@ static void HexDumpDecoder_ApplySettings(t_DataProcessorHandleType *DataHandle,
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    BPDSDefStrEdit_EventCB
+ *
+ * SYNOPSIS:
+ *    void BPDSDefStrEdit_EventCB(const struct PICBEvent *Event,void *UserData);
+ *
+ * PARAMETERS:
+ *    Event [I] -- The event structure describing what happened.
+ *    UserData [I] -- User-supplied data that was registered with the callback.
+ *
+ * FUNCTION:
+ *    This is a callback.  It is invoked when the str edit event cb occurs.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void BPDSDefStrEdit_EventCB(const struct PICBEvent *Event,void *UserData)
 {
     struct HexDumpDecoder_BPDSDefCallbackInfo *Info=(struct HexDumpDecoder_BPDSDefCallbackInfo *)UserData;
@@ -1146,6 +1186,27 @@ void BPDSDefStrEdit_EventCB(const struct PICBEvent *Event,void *UserData)
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    HexDumpDecoder_CheckAllBPDSDefsForErrors
+ *
+ * SYNOPSIS:
+ *    static void HexDumpDecoder_CheckAllBPDSDefsForErrors(struct
+ *        HexDumpDecoder_SettingsWidgets *WData);
+ *
+ * PARAMETERS:
+ *    WData [I] -- The settings widgets associated with this dialog.
+ *
+ * FUNCTION:
+ *    This function checks for errors in the definition string and outputs
+ *    an error message if so.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void HexDumpDecoder_CheckAllBPDSDefsForErrors(struct HexDumpDecoder_SettingsWidgets *WData)
 {
     struct HexDumpDecoderSet *UseSet;
@@ -1185,6 +1246,30 @@ static void HexDumpDecoder_CheckAllBPDSDefsForErrors(struct HexDumpDecoder_Setti
             WData->ErrorsTextBox->Ctrl,ErrorMsgs.c_str());
 }
 
+/*******************************************************************************
+ * NAME:
+ *    HexDumpDecoder_AppendBPDSError
+ *
+ * SYNOPSIS:
+ *    static void HexDumpDecoder_AppendBPDSError(struct
+ *        HexDumpDecoder_SettingsWidgets *WData, string &Msg,
+ *        struct BPDSDef *BPDSDef,unsigned int SetNumber);
+ *
+ * PARAMETERS:
+ *    WData [I] -- The settings widgets associated with this dialog.
+ *    Msg [I] -- The message text.
+ *    BPDSDef [I] -- The BPDS definition record being operated on.
+ *    SetNumber [I] -- The set / group number.
+ *
+ * FUNCTION:
+ *    This function appends a new error message to the error input.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void HexDumpDecoder_AppendBPDSError(struct HexDumpDecoder_SettingsWidgets *WData,
         string &Msg,struct BPDSDef *BPDSDef,unsigned int SetNumber)
 {
@@ -1210,7 +1295,29 @@ static void HexDumpDecoder_AppendBPDSError(struct HexDumpDecoder_SettingsWidgets
     Msg+="\n";
 }
 
-static void HexDumpDecoder_RethinkFieldLabels(struct HexDumpDecoder_SettingsWidgets *WData,unsigned int Set)
+/*******************************************************************************
+ * NAME:
+ *    HexDumpDecoder_RethinkFieldLabels
+ *
+ * SYNOPSIS:
+ *    static void HexDumpDecoder_RethinkFieldLabels(struct
+ *        HexDumpDecoder_SettingsWidgets *WData,unsigned int Set);
+ *
+ * PARAMETERS:
+ *    WData [I] -- The settings widgets associated with this dialog.
+ *    Set [I] -- The set / group number.
+ *
+ * FUNCTION:
+ *    This function rethinks (recal) all the field labels.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void HexDumpDecoder_RethinkFieldLabels(struct HexDumpDecoder_SettingsWidgets *WData,
+        unsigned int Set)
 {
     char buff[100];
     struct BPDSDef *TmpBPDSDef;
@@ -1257,6 +1364,28 @@ static void HexDumpDecoder_RethinkFieldLabels(struct HexDumpDecoder_SettingsWidg
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    HexDumpDecoder_Reset2DefaultBttnCB
+ *
+ * SYNOPSIS:
+ *    static void HexDumpDecoder_Reset2DefaultBttnCB(const struct PIButtonEvent
+ *        *Event, void *UserData);
+ *
+ * PARAMETERS:
+ *    Event [I] -- The event structure describing what happened.
+ *    UserData [I] -- User-supplied data that was registered with the callback.
+ *
+ * FUNCTION:
+ *    This is a callback. It is invoked when the dump decoder reset to default
+ *    bttn is pressed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void HexDumpDecoder_Reset2DefaultBttnCB(const struct PIButtonEvent *Event,
         void *UserData)
 {

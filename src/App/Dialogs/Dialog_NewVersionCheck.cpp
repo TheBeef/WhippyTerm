@@ -238,6 +238,26 @@ void CheckForNewVersionDialog(bool ShowDialog,bool Quick)
         FreeMutex(m_ThreadMutex);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    NVC_Event
+ *
+ * SYNOPSIS:
+ *    bool NVC_Event(const struct NVCEvent *Event);
+ *
+ * PARAMETERS:
+ *    Event [I] -- The event structure describing what happened.
+ *
+ * FUNCTION:
+ *    This function is called from the GUI when an event for this dialog.
+ *
+ * RETURNS:
+ *    true -- Eat the event
+ *    false -- Let the event continue on it's way
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 bool NVC_Event(const struct NVCEvent *Event)
 {
     bool Busy;

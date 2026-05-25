@@ -133,6 +133,25 @@ bool DIP_Event(const struct DIPEvent *Event)
     return true;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DIP_FillInUI
+ *
+ * SYNOPSIS:
+ *    static void DIP_FillInUI(const struct ExternPluginInfo &PluginInfo);
+ *
+ * PARAMETERS:
+ *    PluginInfo [I] -- The plugin information record.
+ *
+ * FUNCTION:
+ *    Fills in the in ui.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void DIP_FillInUI(const struct ExternPluginInfo &PluginInfo)
 {
     t_UITextInputCtrl *Name;

@@ -116,6 +116,25 @@ void DisplayText_ScrollTimer_Timeout(uintptr_t UserData)
     DT->DoScrollTimerTimeout();
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::DisplayText
+ *
+ * SYNOPSIS:
+ *    DisplayText::DisplayText();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the constructor for the DisplayText class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 DisplayText::DisplayText()
 {
     TextDisplayCtrl=NULL;
@@ -161,6 +180,25 @@ DisplayText::DisplayText()
     LastSeenCR=false;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::~DisplayText
+ *
+ * SYNOPSIS:
+ *    DisplayText::~DisplayText();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the destructor for the DisplayText class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 DisplayText::~DisplayText()
 {
     struct TextPointMarker *Marker;

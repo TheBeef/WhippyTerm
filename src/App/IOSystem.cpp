@@ -1711,6 +1711,12 @@ bool IOS_MakeURIFromDetectedCon(struct ConnectionInfoList *CInfoEntry,
  * SEE ALSO:
  *    IOS_UnEscUniqueID
  ******************************************************************************/
+static void IOS_EscUniqueID(const char *UniqueID,string &EscUniqueID)
+{
+    string TmpStr;
+    TmpStr=UniqueID;
+    IOS_EscUniqueID(TmpStr,EscUniqueID);
+}
 static void IOS_EscUniqueID(string &UniqueID,string &EscUniqueID)
 {
     string::iterator pos;
@@ -1734,12 +1740,6 @@ static void IOS_EscUniqueID(string &UniqueID,string &EscUniqueID)
             EscUniqueID+=c;
         }
     }
-}
-static void IOS_EscUniqueID(const char *UniqueID,string &EscUniqueID)
-{
-    string TmpStr;
-    TmpStr=UniqueID;
-    IOS_EscUniqueID(TmpStr,EscUniqueID);
 }
 
 /*******************************************************************************

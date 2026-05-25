@@ -900,6 +900,29 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
 */
 }
 
+/*******************************************************************************
+ * NAME:
+ *    KeySeq2CmdID
+ *
+ * SYNOPSIS:
+ *    e_CmdType KeySeq2CmdID(uint8_t Mod,e_UIKeys Key,char Letter);
+ *
+ * PARAMETERS:
+ *    Mod [I] -- The keyboard modifier mask.
+ *    Key [I] -- The key code.
+ *    Letter [I] -- The letter associated with the key.
+ *
+ * FUNCTION:
+ *    This function converts a key sequence into a command id.  It looks
+ *    through the key mappings in settings and if it finds a match it returns
+ *    the command that it matches.
+ *
+ * RETURNS:
+ *    The command ID or 'e_CmdMAX' if there is no match.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 e_CmdType KeySeq2CmdID(uint8_t Mod,e_UIKeys Key,char Letter)
 {
     int r;

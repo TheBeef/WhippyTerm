@@ -235,6 +235,29 @@ static void BasicHexDecoder_FreeBPDSUserData(struct BPDSDef *Def)
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    SetColorStreamFieldStyling
+ *
+ * SYNOPSIS:
+ *    bool SetColorStreamFieldStyling(struct ColorStreamData *CSD,
+ *        unsigned int FieldNum,struct StyleData *SD);
+ *
+ * PARAMETERS:
+ *    CSD [I] -- The colour-stream descriptor being operated on.
+ *    FieldNum [I] -- The index of the field being operated on.
+ *    SD [I] -- The style data describing how to render the field.
+ *
+ * FUNCTION:
+ *    Sets a streams color/styling.
+ *
+ * RETURNS:
+ *    true -- Success.
+ *    false -- An error was detected.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 bool SetColorStreamFieldStyling(struct ColorStreamData *CSD,
         unsigned int FieldNum,struct StyleData *SD)
 {
@@ -260,11 +283,50 @@ bool SetColorStreamFieldStyling(struct ColorStreamData *CSD,
     return true;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    SetColorStreamEndian
+ *
+ * SYNOPSIS:
+ *    void SetColorStreamEndian(struct ColorStreamData *CSD,bool Big);
+ *
+ * PARAMETERS:
+ *    CSD [I] -- The colour-stream descriptor being operated on.
+ *    Big [I] -- true for big-endian, false for little-endian.
+ *
+ * FUNCTION:
+ *    Sets a streams endian.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void SetColorStreamEndian(struct ColorStreamData *CSD,bool Big)
 {
     CSD->BigEndian=Big;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    ResetColorStream
+ *
+ * SYNOPSIS:
+ *    void ResetColorStream(struct ColorStreamData *CSD);
+ *
+ * PARAMETERS:
+ *    CSD [I] -- The colour-stream descriptor being operated on.
+ *
+ * FUNCTION:
+ *    Resets a stream.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void ResetColorStream(struct ColorStreamData *CSD)
 {
     if(CSD->Def->HadError)
@@ -281,6 +343,30 @@ void ResetColorStream(struct ColorStreamData *CSD)
 }
 
 
+/*******************************************************************************
+ * NAME:
+ *    ColorStreamProcessIncomingByte
+ *
+ * SYNOPSIS:
+ *    bool ColorStreamProcessIncomingByte(struct ColorStreamData *CSD,
+ *        uint8_t Byte,bool DidStyling);
+ *
+ * PARAMETERS:
+ *    CSD [I] -- The colour-stream descriptor being operated on.
+ *    Byte [I] -- The byte to process.
+ *    DidStyling [I] -- true if styling has already been applied for this byte.
+ *
+ * FUNCTION:
+ *    This function processes an incoming byte and does the matching needed
+ *    for an definitions that are active.
+ *
+ * RETURNS:
+ *    true -- Success.
+ *    false -- An error was detected.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 bool ColorStreamProcessIncomingByte(struct ColorStreamData *CSD,uint8_t Byte,bool DidStyling)
 {
     bool Move2NextField;
@@ -497,6 +583,28 @@ void ColorStreamProcessIncomingByte_MoveToNextField(struct ColorStreamData *CSD)
     CSD->CollectedValue=0;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    ColorStreamProcessIncomingByteFinish
+ *
+ * SYNOPSIS:
+ *    void ColorStreamProcessIncomingByteFinish(struct ColorStreamData *CSD,
+ *        uint8_t Byte,bool DidStyling);
+ *
+ * PARAMETERS:
+ *    CSD [I] -- The colour-stream descriptor being operated on.
+ *    Byte [I] -- The byte to process.
+ *    DidStyling [I] -- true if styling has already been applied for this byte.
+ *
+ * FUNCTION:
+ *    This function is called to end a stream of matching bytes.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void ColorStreamProcessIncomingByteFinish(struct ColorStreamData *CSD,uint8_t Byte,bool DidStyling)
 {
     struct BPDSParsedData *ReadData;
@@ -536,6 +644,28 @@ void ColorStreamProcessIncomingByteFinish(struct ColorStreamData *CSD,uint8_t By
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    ResetStream2StartOfProtocol
+ *
+ * SYNOPSIS:
+ *    static void ResetStream2StartOfProtocol(struct ColorStreamData *CSD,
+ *        bool SkipApplyStyle);
+ *
+ * PARAMETERS:
+ *    CSD [I] -- The colour-stream descriptor being operated on.
+ *    SkipApplyStyle [I] -- true to skip applying the field style during the
+ *                          reset.
+ *
+ * FUNCTION:
+ *    Resets the stream to start of protocol.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void ResetStream2StartOfProtocol(struct ColorStreamData *CSD,bool SkipApplyStyle)
 {
     struct BPDSStringValueSet *svs;
@@ -578,6 +708,28 @@ static void ResetStream2StartOfProtocol(struct ColorStreamData *CSD,bool SkipApp
         memset(&svs->UserData,0x00,sizeof(struct BPDSParsedValueSetData));
 }
 
+/*******************************************************************************
+ * NAME:
+ *    FixEndianAndClip
+ *
+ * SYNOPSIS:
+ *    static uint64_t FixEndianAndClip(struct ColorStreamData *CSD,
+ *        uint64_t Value, unsigned int Bytes);
+ *
+ * PARAMETERS:
+ *    CSD [I] -- The colour-stream descriptor being operated on.
+ *    Value [I] -- The new value.
+ *    Bytes [I] -- The number of bytes to operate on.
+ *
+ * FUNCTION:
+ *    This corrects the endian to local endian.
+ *
+ * RETURNS:
+ *    A value of type uint64_t.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static uint64_t FixEndianAndClip(struct ColorStreamData *CSD,uint64_t Value,
         unsigned int Bytes)
 {

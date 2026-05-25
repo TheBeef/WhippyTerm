@@ -2608,6 +2608,30 @@ void Scripting_AbortRunningScript(struct ScriptHandle *Handle)
     SEInstance->ScriptEngine->API.AbortScript(SEInstance->Context);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Scripting_ThreadAsk
+ *
+ * SYNOPSIS:
+ *    e_AskRetType Scripting_ThreadAsk(const char *Title,const char *Msg,
+ *        e_AskBoxType BoxType,e_AskBttnsType Buttons);
+ *
+ * PARAMETERS:
+ *    Title [I] -- The title text.
+ *    Msg [I] -- The message text.
+ *    BoxType [I] -- The kind of dialog box to display.
+ *    Buttons [I] -- Which buttons the dialog should show.
+ *
+ * FUNCTION:
+ *    This function does UIAsk() message box in the main thread.  This is
+ *    to be used by the script thread to do message boxes.
+ *
+ * RETURNS:
+ *    The same as UIAsk()
+ *
+ * SEE ALSO:
+ *    UIAsk()
+ ******************************************************************************/
 e_AskRetType Scripting_ThreadAsk(const char *Title,const char *Msg,
         e_AskBoxType BoxType,e_AskBttnsType Buttons)
 {
@@ -2625,6 +2649,26 @@ e_AskRetType Scripting_ThreadAsk(const char *Title,const char *Msg,
     return (e_AskRetType)RPCData.RetValue;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Scripting_MainThreadAskCB
+ *
+ * SYNOPSIS:
+ *    int Scripting_MainThreadAskCB(struct UI_RPCData *RPCData);
+ *
+ * PARAMETERS:
+ *    RPCData [I] -- The RPC data describing the cross-thread request.
+ *
+ * FUNCTION:
+ *    This function is called from the thread to the main thread from the
+ *    Scripting_ThreadAsk() function.  It does it's function.
+ *
+ * RETURNS:
+ *    A value of type int.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 int Scripting_MainThreadAskCB(struct UI_RPCData *RPCData)
 {
     struct RPCAskData *AskData;
@@ -3403,6 +3447,25 @@ int Scripting_ExeRegisteredKeywordCB(struct UI_RPCData *RPCData)
     return RetValue;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    RunScriptThread
+ *
+ * SYNOPSIS:
+ *    static void RunScriptThread(void *data);
+ *
+ * PARAMETERS:
+ *    data [I] -- Caller-supplied data.
+ *
+ * FUNCTION:
+ *    Runs the script in a thread.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void RunScriptThread(void *data)
 {
     struct ScriptEngineInstance *SEInstance=(struct ScriptEngineInstance *)data;

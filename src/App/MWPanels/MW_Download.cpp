@@ -59,6 +59,25 @@ static bool SortFTPsList(const struct FTPS_ProtocolInfo &A,const struct FTPS_Pro
 
 /*** VARIABLE DEFINITIONS     ***/
 
+/*******************************************************************************
+ * NAME:
+ *    MWDownload::MWDownload
+ *
+ * SYNOPSIS:
+ *    MWDownload::MWDownload();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the constructor for the MWDownload class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWDownload::MWDownload()
 {
     UIWin=NULL;
@@ -69,6 +88,25 @@ MWDownload::MWDownload()
     PanelActive=false;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    MWDownload::~MWDownload
+ *
+ * SYNOPSIS:
+ *    MWDownload::~MWDownload();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the destructor for the MWDownload class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWDownload::~MWDownload()
 {
     if(OptionWidgets!=NULL)

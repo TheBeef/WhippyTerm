@@ -278,6 +278,32 @@ static void DNCFU_UpdateInfoPanel(void)
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DNCFU_PullApartHelpStr
+ *
+ * SYNOPSIS:
+ *    static void DNCFU_PullApartHelpStr(const char *Help);
+ *
+ * PARAMETERS:
+ *    Help [I] -- The help string to be parsed.
+ *
+ * FUNCTION:
+ *    Pulls apart the apart help str.  It break it up based on
+ *    tags in the <xxx> format.  Supported tags:
+ *      <URI> -- The fields of the URI input.  For example:
+ *               COM[Port]:[Bit Rate],[Data Bits],[Parity],[Stop Bits]
+ *      <ARG> -- There is one of these tags for each arg in the URI 
+ *               (ie. Port,Bit Rate, Data Bits,...).  This is in the format:
+ *                  ARG -- Descrition
+ *      <Example> -- An example of the URI.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void DNCFU_PullApartHelpStr(const char *Help)
 {
     const char *Pos;

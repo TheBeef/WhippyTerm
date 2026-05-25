@@ -45,6 +45,25 @@ static void MWConnectionOptionEvent(void *UserData);
 
 /*** VARIABLE DEFINITIONS     ***/
 
+/*******************************************************************************
+ * NAME:
+ *    MWConnectionOptions::MWConnectionOptions
+ *
+ * SYNOPSIS:
+ *    MWConnectionOptions::MWConnectionOptions();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the constructor for the MWConnectionOptions class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWConnectionOptions::MWConnectionOptions()
 {
     ConnectionOptionsWidgets=NULL;
@@ -52,6 +71,25 @@ MWConnectionOptions::MWConnectionOptions()
     MW=NULL;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    MWConnectionOptions::~MWConnectionOptions
+ *
+ * SYNOPSIS:
+ *    MWConnectionOptions::~MWConnectionOptions();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the destructor for the MWConnectionOptions class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWConnectionOptions::~MWConnectionOptions()
 {
     if(ConnectionOptionsWidgets!=NULL)

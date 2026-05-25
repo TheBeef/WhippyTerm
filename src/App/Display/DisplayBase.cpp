@@ -1032,10 +1032,10 @@ void DisplayBase::SetupCanvas(void)
 
 /*******************************************************************************
  * NAME:
- *    DisplayBase::SetupCanvas
+ *    DisplayBase::SetDrawMask
  *
  * SYNOPSIS:
- *    void DisplayBase::SetupCanvas(uint16_t Mask);
+ *    void DisplayBase::SetDrawMask(uint16_t Mask);
  *
  * PARAMETERS:
  *    Mask [I] -- What mask to apply to drawing attributes.  If the bit is

@@ -476,6 +476,27 @@ PG_BOOL UDPServer_ChangeOptions(t_DriverIOHandleType *DriverIO,
     return UDPServer_Open(DriverIO,Options);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    UDPServer_OS_PollThread
+ *
+ * SYNOPSIS:
+ *    static void *UDPServer_OS_PollThread(void *arg);
+ *
+ * PARAMETERS:
+ *    arg [I] -- The thread argument supplied at thread creation.
+ *
+ * FUNCTION:
+ *    This is the worker thread that polls the OS for incoming data and other
+ *    status changes. It runs for the lifetime of the driver and pushes events
+ *    back into the driver's main loop.
+ *
+ * RETURNS:
+ *    A value of type void *.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void *UDPServer_OS_PollThread(void *arg)
 {
     struct UDPServer_OurData *OurData=(struct UDPServer_OurData *)arg;

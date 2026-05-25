@@ -527,6 +527,37 @@ static PG_BOOL XModemUpload_Init(t_FTPSystemData *SysHandle)
 #endif
 }
 
+/*******************************************************************************
+ * NAME:
+ *    XModemUpload_AllocOptionsWidgets
+ *
+ * SYNOPSIS:
+ *    t_FTPOptionsWidgetsType *XModemUpload_AllocOptionsWidgets(
+ *          t_WidgetSysHandle *WidgetHandle,t_PIKVList *Options);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to send to the widgets
+ *    Options [I] -- The options to add widgets for
+ *
+ * FUNCTION:
+ *    This function adds options widgets to a container widget.  These are
+ *    options for this file transfer protocol.
+ *
+ * RETURNS:
+ *    The private options data that you want to use.  This is a private
+ *    structure that you allocate and then cast to
+ *    (t_FTPOptionsWidgetsType *) when you return.  It's up to you what
+ *    you want to do with this data (if you do not want to use it return
+ *    a fixed int set to 1, and ignore it in FreeOptionsWidgets).  If you
+ *    return NULL it is considered an error.
+ *
+ * NOTES:
+ *    This function must be reentrant.  The system may allocate many sets
+ *    of option widgets and free them in any order.
+ *
+ * SEE ALSO:
+ *    FreeOptionsWidgets(), StoreOptions()
+ ******************************************************************************/
 t_FTPOptionsWidgetsType *XModemUpload_AllocOptionsWidgets(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Options)
 {
     const char *Value;
@@ -622,6 +653,29 @@ t_FTPOptionsWidgetsType *XModemUpload_AllocOptionsWidgets(t_WidgetSysHandle *Wid
     return (t_FTPOptionsWidgetsType *)Widgets;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    XModem_AllocCommonWidgets
+ *
+ * SYNOPSIS:
+ *    static bool XModem_AllocCommonWidgets(struct XModem_Widgets *Widgets,
+ *        t_WidgetSysHandle *WidgetHandle,t_PIKVList *Options);
+ *
+ * PARAMETERS:
+ *    Widgets [I] -- The widget set being operated on.
+ *    WidgetHandle [I] -- The widget system handle that owns the widget.
+ *    Options [I] -- The options key/value list.
+ *
+ * FUNCTION:
+ *    This function allocates the common to upload/download widgets.
+ *
+ * RETURNS:
+ *    true -- Success.
+ *    false -- An error was detected.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static bool XModem_AllocCommonWidgets(struct XModem_Widgets *Widgets,
         t_WidgetSysHandle *WidgetHandle,t_PIKVList *Options)
 {
@@ -722,6 +776,26 @@ static bool XModem_AllocCommonWidgets(struct XModem_Widgets *Widgets,
     return true;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    XModemUpload_FreeOptionsWidgets
+ *
+ * SYNOPSIS:
+ *    void XModemUpload_FreeOptionsWidgets(t_FTPOptionsWidgetsType *FTPOptions);
+ *
+ * PARAMETERS:
+ *    FTPOptions [I] -- The options data that was allocated with
+ *          AllocOptionsWidgets().
+ *
+ * FUNCTION:
+ *    Frees the widgets added with AllocOptionsWidgets()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    AllocOptionsWidgets()
+ ******************************************************************************/
 void XModemUpload_FreeOptionsWidgets(t_FTPOptionsWidgetsType *FTPOptions)
 {
     struct XModem_Widgets *Widgets=(struct XModem_Widgets *)FTPOptions;
@@ -741,6 +815,25 @@ void XModemUpload_FreeOptionsWidgets(t_FTPOptionsWidgetsType *FTPOptions)
     delete Widgets;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    XModem_FreeCommonWidgets
+ *
+ * SYNOPSIS:
+ *    static void XModem_FreeCommonWidgets(struct XModem_Widgets *Widgets);
+ *
+ * PARAMETERS:
+ *    Widgets [I] -- The widget set being operated on.
+ *
+ * FUNCTION:
+ *    This function frees widgets that are common to upload and download.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void XModem_FreeCommonWidgets(struct XModem_Widgets *Widgets)
 {
     if(Widgets->PacketTimeOut!=NULL)
@@ -772,6 +865,29 @@ static void XModem_FreeCommonWidgets(struct XModem_Widgets *Widgets)
     Widgets->ModeGroup=NULL;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    XModemUpload_StoreOptions
+ *
+ * SYNOPSIS:
+ *    void XModemUpload_StoreOptions(t_FTPOptionsWidgetsType *FTPOptions,
+ *          t_PIKVList *Options);
+ *
+ * PARAMETERS:
+ *    FTPOptions [I] -- The options data that was allocated with
+ *          AllocOptionsWidgets().
+ *    Options [O] -- The options for this protocol.
+ *
+ * FUNCTION:
+ *    This function takes the widgets added with AllocOptionsWidgets() and
+ *    stores them is a key/value pair list in 'Options'.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    AllocOptionsWidgets()
+ ******************************************************************************/
 void XModemUpload_StoreOptions(t_FTPOptionsWidgetsType *FTPOptions,t_PIKVList *Options)
 {
     struct XModem_Widgets *Widgets=(struct XModem_Widgets *)FTPOptions;
@@ -800,6 +916,29 @@ void XModemUpload_StoreOptions(t_FTPOptionsWidgetsType *FTPOptions,t_PIKVList *O
 
 }
 
+/*******************************************************************************
+ * NAME:
+ *    XModem_StoreCommonWidgetsOptions
+ *
+ * SYNOPSIS:
+ *    static bool XModem_StoreCommonWidgetsOptions(struct XModem_Widgets
+ *        *Widgets,t_PIKVList *Options);
+ *
+ * PARAMETERS:
+ *    Widgets [I] -- The widget set being operated on.
+ *    Options [I] -- The options key/value list.
+ *
+ * FUNCTION:
+ *    This function stores all the values from common widgets to both upload
+ *    and download.
+ *
+ * RETURNS:
+ *    true -- Success.
+ *    false -- An error was detected.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static bool XModem_StoreCommonWidgetsOptions(struct XModem_Widgets *Widgets,t_PIKVList *Options)
 {
     uintptr_t Value;
@@ -1462,6 +1601,37 @@ void XModemDownload_FreeData(t_FTPHandlerDataType *DataHandle)
     delete Data;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    XModemDownload_AllocOptionsWidgets
+ *
+ * SYNOPSIS:
+ *    t_FTPOptionsWidgetsType *XModemDownload_AllocOptionsWidgets(
+ *          t_WidgetSysHandle *WidgetHandle,t_PIKVList *Options);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The handle to send to the widgets
+ *    Options [I] -- The options to add widgets for
+ *
+ * FUNCTION:
+ *    This function adds options widgets to a container widget.  These are
+ *    options for this file transfer protocol.
+ *
+ * RETURNS:
+ *    The private options data that you want to use.  This is a private
+ *    structure that you allocate and then cast to
+ *    (t_FTPOptionsWidgetsType *) when you return.  It's up to you what
+ *    you want to do with this data (if you do not want to use it return
+ *    a fixed int set to 1, and ignore it in FreeOptionsWidgets).  If you
+ *    return NULL it is considered an error.
+ *
+ * NOTES:
+ *    This function must be reentrant.  The system may allocate many sets
+ *    of option widgets and free them in any order.
+ *
+ * SEE ALSO:
+ *    FreeOptionsWidgets(), StoreOptions()
+ ******************************************************************************/
 t_FTPOptionsWidgetsType *XModemDownload_AllocOptionsWidgets(t_WidgetSysHandle *WidgetHandle,t_PIKVList *Options)
 {
     struct XModem_Widgets *Widgets;
@@ -1490,6 +1660,26 @@ t_FTPOptionsWidgetsType *XModemDownload_AllocOptionsWidgets(t_WidgetSysHandle *W
     return (t_FTPOptionsWidgetsType *)Widgets;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    XModemDownload_FreeOptionsWidgets
+ *
+ * SYNOPSIS:
+ *    void XModemDownload_FreeOptionsWidgets(t_FTPOptionsWidgetsType *FTPOptions);
+ *
+ * PARAMETERS:
+ *    FTPOptions [I] -- The options data that was allocated with
+ *          AllocOptionsWidgets().
+ *
+ * FUNCTION:
+ *    Frees the widgets added with AllocOptionsWidgets()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    AllocOptionsWidgets()
+ ******************************************************************************/
 void XModemDownload_FreeOptionsWidgets(t_FTPOptionsWidgetsType *FTPOptions)
 {
     struct XModem_Widgets *Widgets=(struct XModem_Widgets *)FTPOptions;
@@ -1499,6 +1689,29 @@ void XModemDownload_FreeOptionsWidgets(t_FTPOptionsWidgetsType *FTPOptions)
     delete Widgets;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    XModemDownload_StoreOptions
+ *
+ * SYNOPSIS:
+ *    void XModemDownload_StoreOptions(t_FTPOptionsWidgetsType *FTPOptions,
+ *          t_PIKVList *Options);
+ *
+ * PARAMETERS:
+ *    FTPOptions [I] -- The options data that was allocated with
+ *          AllocOptionsWidgets().
+ *    Options [O] -- The options for this protocol.
+ *
+ * FUNCTION:
+ *    This function takes the widgets added with AllocOptionsWidgets() and
+ *    stores them is a key/value pair list in 'Options'.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    AllocOptionsWidgets()
+ ******************************************************************************/
 void XModemDownload_StoreOptions(t_FTPOptionsWidgetsType *FTPOptions,t_PIKVList *Options)
 {
     struct XModem_Widgets *Widgets=(struct XModem_Widgets *)FTPOptions;
@@ -2018,6 +2231,27 @@ static const char *XModemDownload_GetLastErrorMsg(t_FTPSystemData *SysHandle,
     return Data->ErrorStr.c_str();
 }
 
+/*******************************************************************************
+ * NAME:
+ *    XModemDownload_Setup4NextPacket
+ *
+ * SYNOPSIS:
+ *    static void XModemDownload_Setup4NextPacket(struct XModemDownloadData
+ *        *Data);
+ *
+ * PARAMETERS:
+ *    Data [I] -- Caller-supplied data.
+ *
+ * FUNCTION:
+ *    This function resets the download system to be ready to started getting
+ *    the next packet.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void XModemDownload_Setup4NextPacket(struct XModemDownloadData *Data)
 {
     Data->DownloadState=e_XModemDownload_StartOfHeader;

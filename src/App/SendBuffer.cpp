@@ -72,6 +72,25 @@ struct LoadBufferDiskData
 /*** VARIABLE DEFINITIONS     ***/
 class SendBuffer g_SendBuffers;
 
+/*******************************************************************************
+ * NAME:
+ *    SendBuffer::SendBuffer
+ *
+ * SYNOPSIS:
+ *    SendBuffer::SendBuffer();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the constructor for the SendBuffer class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 SendBuffer::SendBuffer()
 {
     int r;
@@ -84,6 +103,25 @@ SendBuffer::SendBuffer()
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    SendBuffer::~SendBuffer
+ *
+ * SYNOPSIS:
+ *    SendBuffer::~SendBuffer();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the destructor for the SendBuffer class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 SendBuffer::~SendBuffer()
 {
     int r;

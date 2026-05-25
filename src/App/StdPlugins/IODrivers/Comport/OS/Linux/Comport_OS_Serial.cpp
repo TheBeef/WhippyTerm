@@ -120,6 +120,26 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
 
 /*** VARIABLE DEFINITIONS     ***/
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_OS_GetSerialPortList
+ *
+ * SYNOPSIS:
+ *    bool Comport_OS_GetSerialPortList(t_OSComportListType &List);
+ *
+ * PARAMETERS:
+ *    List [I] -- The list to populate.
+ *
+ * FUNCTION:
+ *    This function scans the system for a list of available serial ports.
+ *
+ * RETURNS:
+ *    true -- Success.
+ *    false -- An error was detected.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 bool Comport_OS_GetSerialPortList(t_OSComportListType &List)
 {
     DIR *d;
@@ -256,6 +276,30 @@ bool Comport_OS_GetSerialPortList(t_OSComportListType &List)
     return true;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_ProcessUEventFile
+ *
+ * SYNOPSIS:
+ *    static bool Comport_ProcessUEventFile(const char *Filename,
+ *        const char *Tag, char *Value,int MaxValueLen);
+ *
+ * PARAMETERS:
+ *    Filename [I] -- The path of the file to operate on.
+ *    Tag [I] -- The tag name to look up.
+ *    Value [I] -- The new value.
+ *    MaxValueLen [I] -- The size of the value buffer, in bytes.
+ *
+ * FUNCTION:
+ *    This function opens a UEvent file and parses it.
+ *
+ * RETURNS:
+ *    true -- Success.
+ *    false -- An error was detected.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static bool Comport_ProcessUEventFile(const char *Filename,const char *Tag,
         char *Value,int MaxValueLen)
 {
@@ -320,6 +364,26 @@ static bool Comport_ProcessUEventFile(const char *Filename,const char *Tag,
     return false;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_OS_SerialPortBusy
+ *
+ * SYNOPSIS:
+ *    bool Comport_OS_SerialPortBusy(const std::string &DriverName);
+ *
+ * PARAMETERS:
+ *    DriverName [I] -- The name of the driver / port.
+ *
+ * FUNCTION:
+ *    This function checks if a serial port is currently busy (in use)
+ *
+ * RETURNS:
+ *    true -- Success.
+ *    false -- An error was detected.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 bool Comport_OS_SerialPortBusy(const std::string &DriverName)
 {
     /* Not sure how to detect if someone has the serial port in linux so for
@@ -938,6 +1002,26 @@ void Comport_ConnectionAuxCtrlWidgets_FreeWidgets(t_DriverIOHandleType *DriverIO
     ComInfo->AuxWidgets=NULL;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_UpdateDTR
+ *
+ * SYNOPSIS:
+ *    void Comport_UpdateDTR(t_DriverIOHandleType *DriverIO,bool DTR);
+ *
+ * PARAMETERS:
+ *    DriverIO [I] -- The driver IO handle for this connection.
+ *    DTR [I] -- The new state of the DTR signal.
+ *
+ * FUNCTION:
+ *    Changes the dtr line.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void Comport_UpdateDTR(t_DriverIOHandleType *DriverIO,bool DTR)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
@@ -955,6 +1039,26 @@ void Comport_UpdateDTR(t_DriverIOHandleType *DriverIO,bool DTR)
     ioctl(ComInfo->fd,TIOCMSET,&ComInfo->SetModemBits);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_UpdateRTS
+ *
+ * SYNOPSIS:
+ *    void Comport_UpdateRTS(t_DriverIOHandleType *DriverIO,bool RTS);
+ *
+ * PARAMETERS:
+ *    DriverIO [I] -- The driver IO handle for this connection.
+ *    RTS [I] -- The new state of the RTS signal.
+ *
+ * FUNCTION:
+ *    Changes the rts line.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void Comport_UpdateRTS(t_DriverIOHandleType *DriverIO,bool RTS)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
@@ -972,6 +1076,25 @@ void Comport_UpdateRTS(t_DriverIOHandleType *DriverIO,bool RTS)
     ioctl(ComInfo->fd,TIOCMSET,&ComInfo->SetModemBits);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_SendBreak
+ *
+ * SYNOPSIS:
+ *    void Comport_SendBreak(t_DriverIOHandleType *DriverIO);
+ *
+ * PARAMETERS:
+ *    DriverIO [I] -- The driver IO handle for this connection.
+ *
+ * FUNCTION:
+ *    Sends a break.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void Comport_SendBreak(t_DriverIOHandleType *DriverIO)
 {
     struct OpenComportInfo *ComInfo=(struct OpenComportInfo *)DriverIO;
@@ -1257,6 +1380,27 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
     return true;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_OS_PollThread
+ *
+ * SYNOPSIS:
+ *    static void *Comport_OS_PollThread(void *arg);
+ *
+ * PARAMETERS:
+ *    arg [I] -- The thread argument supplied at thread creation.
+ *
+ * FUNCTION:
+ *    This is the worker thread that polls the OS for incoming data and other
+ *    status changes. It runs for the lifetime of the driver and pushes events
+ *    back into the driver's main loop.
+ *
+ * RETURNS:
+ *    A value of type void *.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void *Comport_OS_PollThread(void *arg)
 {
     struct OpenComportInfo *ComInfo;

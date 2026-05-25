@@ -392,7 +392,7 @@ void DPS_Init(void)
  *    NAME:
  *      ProcessKeyPress
  *
- *    SYNKPPSIS:
+ *    SYNOPSIS:
  *      bool ProcessKeyPress(t_DataProcessorHandleType *DataHandle,
  *          const uint8_t *KeyChar,int KeyCharLen,e_UIKeys ExtendedKey,
  *          uint8_t Mod);
@@ -2365,6 +2365,26 @@ void DPS_InsertString(uint8_t *Str,uint32_t Len)
     Con_InsertString(Str,Len);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DPS_GetScreenSize
+ *
+ * SYNOPSIS:
+ *    void DPS_GetScreenSize(int32_t *RetRows,int32_t *RetColumns);
+ *
+ * PARAMETERS:
+ *    RetRows [O] -- Set to the number of rows in the screen.
+ *    RetColumns [O] -- Set to the number of columns in the screen.
+ *
+ * FUNCTION:
+ *    Gets the screen size.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void DPS_GetScreenSize(int32_t *RetRows,int32_t *RetColumns)
 {
     Con_GetScreenSize(RetRows,RetColumns);

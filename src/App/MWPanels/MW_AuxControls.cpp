@@ -46,6 +46,25 @@ using namespace std;
 
 /*** VARIABLE DEFINITIONS     ***/
 
+/*******************************************************************************
+ * NAME:
+ *    MWAuxControls::MWAuxControls
+ *
+ * SYNOPSIS:
+ *    MWAuxControls::MWAuxControls();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the constructor for the MWAuxControls class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWAuxControls::MWAuxControls()
 {
 //    AuxControlsWidgets=NULL;
@@ -53,6 +72,25 @@ MWAuxControls::MWAuxControls()
     MW=NULL;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    MWAuxControls::~MWAuxControls
+ *
+ * SYNOPSIS:
+ *    MWAuxControls::~MWAuxControls();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the destructor for the MWAuxControls class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWAuxControls::~MWAuxControls()
 {
 //    if(AuxControlsWidgets!=NULL)

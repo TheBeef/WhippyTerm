@@ -294,6 +294,26 @@ extern "C"
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    WTBasic_Init
+ *
+ * SYNOPSIS:
+ *    PG_BOOL WTBasic_Init(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function performs the 'basic init' operation.
+ *
+ * RETURNS:
+ *    true -- Success.
+ *    false -- An error was detected.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 PG_BOOL WTBasic_Init(void)
 {
     mb_init();
@@ -1439,6 +1459,26 @@ int ClsFn(struct mb_interpreter_t *bas, void **arg)
 
     mb_get_userdata(bas,(void **)&Data);
 
+    char *x;
+    mb_peek_string(bas,arg,&x);
+
+    if(x==NULL)
+    {
+        /* Default */
+    }
+    else if(strcmp(x,"FN")==0)
+    {
+        mb_check(mb_advance_token(bas,arg));
+    }
+    else if(strcmp(x,"FULL")==0)
+    {
+        mb_check(mb_advance_token(bas,arg));
+    }
+    else
+    {
+        return MB_FUNC_ERR;
+    }
+
     mb_check(mb_attempt_func_begin(bas,arg));
     mb_check(mb_attempt_func_end(bas,arg));
 
@@ -1706,7 +1746,8 @@ int SendFn(struct mb_interpreter_t *bas, void **arg)
     int RetValue;
     char buff[100];
     struct WTBasicContext *Data;
-    const char *p;
+//    const char *p;
+    unsigned int r;
 
     mb_get_userdata(bas,(void **)&Data);
 
@@ -1727,12 +1768,9 @@ int SendFn(struct mb_interpreter_t *bas, void **arg)
                 BuildStr+=buff;
             break;
             case MB_DT_STRING:
-                p=val.value.string;
-                while(*p!=0)
-                {
-                    BuildStr+=*p;
-                    p++;
-                }
+//                p=val.value.string;
+                for(r=0;r<val.value.string_z.length;r++)
+                    BuildStr+=val.value.string_z.data[r];
             break;
             case MB_DT_NIL:
             case MB_DT_UNKNOWN:
@@ -2358,7 +2396,7 @@ static int WaitFnCommon(struct mb_interpreter_t *bas, void **arg,bool ForceCom)
                 /* We can only wait on strings */
                 throw(SE_RN_STRING_EXPECTED);
             }
-            ListOfStrings.push_back(val.value.string);
+//            ListOfStrings.push_back(val.value.string);
             MatchCounts.push_back(0);
         }
         mb_check(mb_attempt_func_end(bas,arg));

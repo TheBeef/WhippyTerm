@@ -367,6 +367,25 @@ void Comport_FreeDetectedDevices(const struct IODriverDetectedInfo *Devices)
 }
 
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_DefaultPortOptions
+ *
+ * SYNOPSIS:
+ *    void Comport_DefaultPortOptions(struct ComportPortOptions *Options);
+ *
+ * PARAMETERS:
+ *    Options [I] -- The options key/value list.
+ *
+ * FUNCTION:
+ *    Sets the port options to default values.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void Comport_DefaultPortOptions(struct ComportPortOptions *Options)
 {
     Options->BitRate=9600;
@@ -376,6 +395,32 @@ void Comport_DefaultPortOptions(struct ComportPortOptions *Options)
     Options->FlowControl=e_ComportFlowControl_None;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_ConvertFromKVList
+ *
+ * SYNOPSIS:
+ *    void Comport_ConvertFromKVList(struct ComportPortOptions *Options,
+ *        const t_PIKVList *KVList);
+ *
+ * PARAMETERS:
+ *    Options [O] -- The struct to fill in.
+ *    KVList [I] -- The key/value list to read settings from.
+ *
+ * FUNCTION:
+ *    Populates a ComportPortOptions struct from a key/value list of the
+ *    kind that the plugin host hands the driver when a connection is
+ *    opened or reconfigured.  The function first calls
+ *    Comport_DefaultPortOptions() to default every field,
+ *    then overrides each field for which 'KVList' supplies a recognised
+ *    value.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    Comport_Convert2KVList(), Comport_DefaultPortOptions()
+ ******************************************************************************/
 void Comport_ConvertFromKVList(struct ComportPortOptions *Options,const t_PIKVList *KVList)
 {
     const char *BitRateValue;
@@ -436,6 +481,36 @@ void Comport_ConvertFromKVList(struct ComportPortOptions *Options,const t_PIKVLi
     }
 }
 
+/*******************************************************************************
+c
+
+/*******************************************************************************
+ * NAME:
+ *    Comport_Convert2KVList
+ *
+ * SYNOPSIS:
+ *    void Comport_Convert2KVList(const struct ComportPortOptions *Options,
+ *        t_PIKVList *KVList);
+ *
+ * PARAMETERS:
+ *    Options [I] -- The struct to read settings from.
+ *    KVList [O] -- The key/value list to write into. The list is cleared
+ *                  via KVClear() on entry, so any prior contents are
+ *                  discarded.
+ *
+ * FUNCTION:
+ *    Serialises a ComportPortOptions struct into a key/value list of the
+ *    kind the plugin host stores in connection configuration files. This
+ *    is the inverse of Comport_ConvertFromKVList(): converting a struct
+ *    out with this function and then back in with that one yields the
+ *    same struct.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    Comport_ConvertFromKVList(), Comport_DefaultPortOptions()
+ ******************************************************************************/
 void Comport_Convert2KVList(const struct ComportPortOptions *Options,
         t_PIKVList *KVList)
 {
@@ -681,7 +756,30 @@ struct Comport_ConAuxWidgets *Comport_AllocAuxWidgets(t_DriverIOHandleType *IOHa
     return ConAuxWidgets;
 }
 
-void Comport_FreeAuxWidgets(t_WidgetSysHandle *WidgetHandle,struct Comport_ConAuxWidgets *ConAuxWidgets)
+/*******************************************************************************
+ * NAME:
+ *    Comport_FreeAuxWidgets
+ *
+ * SYNOPSIS:
+ *    void Comport_FreeAuxWidgets(t_WidgetSysHandle *WidgetHandle,
+ *        struct Comport_ConAuxWidgets *ConAuxWidgets);
+ *
+ * PARAMETERS:
+ *    WidgetHandle [I] -- The widget system handle that owns the widget.
+ *    ConAuxWidgets [I] -- The connection's auxiliary-controls widget set.
+ *
+ * FUNCTION:
+ *    Frees the aux widgets and any resources it owns.  This is used by all
+ *    the different OS versions.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Comport_FreeAuxWidgets(t_WidgetSysHandle *WidgetHandle,
+        struct Comport_ConAuxWidgets *ConAuxWidgets)
 {
     if(ConAuxWidgets->DTR_Checkbox!=NULL)
         g_CP_UI->FreeCheckbox(WidgetHandle,ConAuxWidgets->DTR_Checkbox);
@@ -705,6 +803,31 @@ void Comport_FreeAuxWidgets(t_WidgetSysHandle *WidgetHandle,struct Comport_ConAu
     delete ConAuxWidgets;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_NotifyOfModemBitsChange
+ *
+ * SYNOPSIS:
+ *    void Comport_NotifyOfModemBitsChange(struct Comport_ConAuxWidgets
+ *        *ConAuxWidgets,bool CD, bool RI, bool DSR, bool CTS);
+ *
+ * PARAMETERS:
+ *    ConAuxWidgets [I] -- The connection's auxiliary-controls widget set.
+ *    CD [I] -- The new state of the CD modem-status line.
+ *    RI [I] -- The new state of the RI modem-status line.
+ *    DSR [I] -- The new state of the DSR modem-status line.
+ *    CTS [I] -- The new state of the CTS modem-status line.
+ *
+ * FUNCTION:
+ *    Notifies of the of modem bits change.  This is called by the OS versions
+ *    when there is a change in the modem bits.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void Comport_NotifyOfModemBitsChange(struct Comport_ConAuxWidgets *ConAuxWidgets,bool CD, bool RI, bool DSR, bool CTS)
 {
     /* Update the UI here */
@@ -714,6 +837,28 @@ void Comport_NotifyOfModemBitsChange(struct Comport_ConAuxWidgets *ConAuxWidgets
     g_CP_UI->SetIndicator(ConAuxWidgets->WidgetHandle,ConAuxWidgets->CTS_Indicator->Ctrl,CTS);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_DTRCheckboxCallBack
+ *
+ * SYNOPSIS:
+ *    void Comport_DTRCheckboxCallBack(const struct PICheckboxEvent *Event,
+ *        void *UserData);
+ *
+ * PARAMETERS:
+ *    Event [I] -- The event structure describing what happened.
+ *    UserData [I] -- User-supplied data that was registered with the callback.
+ *
+ * FUNCTION:
+ *    This function is called when the DTR checkbox is changed.  It calls
+ *    the Comport_UpdateDTR() to update the current state.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void Comport_DTRCheckboxCallBack(const struct PICheckboxEvent *Event,void *UserData)
 {
     struct Comport_ConAuxWidgets *ConAuxWidgets=(struct Comport_ConAuxWidgets *)UserData;
@@ -729,6 +874,28 @@ void Comport_DTRCheckboxCallBack(const struct PICheckboxEvent *Event,void *UserD
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_RTSCheckboxCallBack
+ *
+ * SYNOPSIS:
+ *    void Comport_RTSCheckboxCallBack(const struct PICheckboxEvent *Event,
+ *        void *UserData);
+ *
+ * PARAMETERS:
+ *    Event [I] -- The event structure describing what happened.
+ *    UserData [I] -- User-supplied data that was registered with the callback.
+ *
+ * FUNCTION:
+ *    This function is called when the RTS checkbox is changed.  It calls
+ *    the Comport_UpdateRTS() of the OS version.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void Comport_RTSCheckboxCallBack(const struct PICheckboxEvent *Event,void *UserData)
 {
     struct Comport_ConAuxWidgets *ConAuxWidgets=(struct Comport_ConAuxWidgets *)UserData;
@@ -744,6 +911,28 @@ void Comport_RTSCheckboxCallBack(const struct PICheckboxEvent *Event,void *UserD
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_SendBreakButton
+ *
+ * SYNOPSIS:
+ *    void Comport_SendBreakButton(const struct PIButtonEvent *Event,
+ *        void *UserData);
+ *
+ * PARAMETERS:
+ *    Event [I] -- The event structure describing what happened.
+ *    UserData [I] -- User-supplied data that was registered with the callback.
+ *
+ * FUNCTION:
+ *    This function is called when the send break button is clicked.  It calls
+ *    the OS version.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void Comport_SendBreakButton(const struct PIButtonEvent *Event,void *UserData)
 {
     struct Comport_ConAuxWidgets *ConAuxWidgets=(struct Comport_ConAuxWidgets *)UserData;
@@ -759,6 +948,27 @@ void Comport_SendBreakButton(const struct PIButtonEvent *Event,void *UserData)
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_InfoClearButton
+ *
+ * SYNOPSIS:
+ *    void Comport_InfoClearButton(const struct PIButtonEvent *Event,
+ *        void *UserData);
+ *
+ * PARAMETERS:
+ *    Event [I] -- The event structure describing what happened.
+ *    UserData [I] -- User-supplied data that was registered with the callback.
+ *
+ * FUNCTION:
+ *    This function is called when the clear button is pressed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void Comport_InfoClearButton(const struct PIButtonEvent *Event,void *UserData)
 {
     struct Comport_ConAuxWidgets *ConAuxWidgets=(struct Comport_ConAuxWidgets *)UserData;
@@ -775,16 +985,79 @@ void Comport_InfoClearButton(const struct PIButtonEvent *Event,void *UserData)
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_ReadAuxDTRCheckbox
+ *
+ * SYNOPSIS:
+ *    bool Comport_ReadAuxDTRCheckbox(struct Comport_ConAuxWidgets
+ *        *ConAuxWidgets);
+ *
+ * PARAMETERS:
+ *    ConAuxWidgets [I] -- The connection's auxiliary-controls widget set.
+ *
+ * FUNCTION:
+ *    Reads the aux dtr checkbox.
+ *
+ * RETURNS:
+ *    true -- Success.
+ *    false -- An error was detected.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 bool Comport_ReadAuxDTRCheckbox(struct Comport_ConAuxWidgets *ConAuxWidgets)
 {
     return g_CP_UI->IsCheckboxChecked(ConAuxWidgets->WidgetHandle,ConAuxWidgets->DTR_Checkbox->Ctrl);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_ReadAuxRTSCheckbox
+ *
+ * SYNOPSIS:
+ *    bool Comport_ReadAuxRTSCheckbox(struct Comport_ConAuxWidgets
+ *        *ConAuxWidgets);
+ *
+ * PARAMETERS:
+ *    ConAuxWidgets [I] -- The connection's auxiliary-controls widget set.
+ *
+ * FUNCTION:
+ *    Reads the aux rts checkbox.
+ *
+ * RETURNS:
+ *    true -- Success.
+ *    false -- An error was detected.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 bool Comport_ReadAuxRTSCheckbox(struct Comport_ConAuxWidgets *ConAuxWidgets)
 {
     return g_CP_UI->IsCheckboxChecked(ConAuxWidgets->WidgetHandle,ConAuxWidgets->RTS_Checkbox->Ctrl);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Comport_AddLogMsg
+ *
+ * SYNOPSIS:
+ *    void Comport_AddLogMsg(struct Comport_ConAuxWidgets *ConAuxWidgets,
+ *        const char *Msg);
+ *
+ * PARAMETERS:
+ *    ConAuxWidgets [I] -- The connection's auxiliary-controls widget set.
+ *    Msg [I] -- The message text.
+ *
+ * FUNCTION:
+ *    Adds a log msg to list of log messages.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void Comport_AddLogMsg(struct Comport_ConAuxWidgets *ConAuxWidgets,const char *Msg)
 {
     int NewRow;

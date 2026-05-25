@@ -57,6 +57,25 @@ using namespace std;
 static bool HexDisplayBuffer_EventHandler(const struct UICTWEvent *Event);
 
 /*** VARIABLE DEFINITIONS     ***/
+/*******************************************************************************
+ * NAME:
+ *    HexDisplayBuffer::HexDisplayBuffer
+ *
+ * SYNOPSIS:
+ *    HexDisplayBuffer::HexDisplayBuffer();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the constructor for the HexDisplayBuffer class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 HexDisplayBuffer::HexDisplayBuffer()
 {
     TextDisplayCtrl=NULL;
@@ -118,6 +137,25 @@ HexDisplayBuffer::HexDisplayBuffer()
     NibCycleValue=0;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    HexDisplayBuffer::~HexDisplayBuffer
+ *
+ * SYNOPSIS:
+ *    HexDisplayBuffer::~HexDisplayBuffer();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the destructor for the HexDisplayBuffer class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 HexDisplayBuffer::~HexDisplayBuffer()
 {
     if(WeAllocBuffer)
@@ -823,6 +861,27 @@ void HexDisplayBuffer::RebuildDisplay(void)
     UICTW_RedrawScreen(TextDisplayCtrl);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    HexDisplayBuffer::RebuildDisplay_ClearStyleHelper
+ *
+ * SYNOPSIS:
+ *    void HexDisplayBuffer::RebuildDisplay_ClearStyleHelper(struct CharStyling
+ *        *style);
+ *
+ * PARAMETERS:
+ *    style [I] -- The style.
+ *
+ * FUNCTION:
+ *    This function takes the current settings for the style and copies
+ *    it into 'style'
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void HexDisplayBuffer::RebuildDisplay_ClearStyleHelper(struct CharStyling *style)
 {
     int b;
@@ -844,10 +903,49 @@ void HexDisplayBuffer::RebuildDisplay_ClearStyleHelper(struct CharStyling *style
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    HexDisplayBuffer::ApplySettingsChange
+ *
+ * SYNOPSIS:
+ *    void HexDisplayBuffer::ApplySettingsChange(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is called when new settings are applied.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void HexDisplayBuffer::ApplySettingsChange(void)
 {
 }
 
+/*******************************************************************************
+ * NAME:
+ *    HexDisplayBuffer::SetupCanvas
+ *
+ * SYNOPSIS:
+ *    void HexDisplayBuffer::SetupCanvas(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function sets up the display canvas with the correct font and
+ *    other settings.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void HexDisplayBuffer::SetupCanvas(void)
 {
     t_UIContextMenuCtrl *ContextMenu_ZoomIn;
@@ -919,6 +1017,29 @@ void HexDisplayBuffer::RethinkCursorLook(void)
     UICTW_SetCursorStyle(TextDisplayCtrl,CursorStyle);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    HexDisplayBuffer::SetFont
+ *
+ * SYNOPSIS:
+ *    void HexDisplayBuffer::SetFont(const char *NewFontName,int NewSize,
+ *        bool NewBold, bool NewItalic);
+ *
+ * PARAMETERS:
+ *    NewFontName [I] -- The new font name.
+ *    NewSize [I] -- The new size.
+ *    NewBold [I] -- true to make the font bold.
+ *    NewItalic [I] -- true to make the font italic.
+ *
+ * FUNCTION:
+ *    Sets the font for this hex display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void HexDisplayBuffer::SetFont(const char *NewFontName,int NewSize,bool NewBold,
         bool NewItalic)
 {
@@ -936,6 +1057,29 @@ void HexDisplayBuffer::SetFont(const char *NewFontName,int NewSize,bool NewBold,
     RethinkXScrollBar();
 }
 
+/*******************************************************************************
+ * NAME:
+ *    HexDisplayBuffer::SetColors
+ *
+ * SYNOPSIS:
+ *    void HexDisplayBuffer::SetColors(uint32_t NewFGColor,uint32_t NewBGColor,
+ *        uint32_t NewSelBGColor);
+ *
+ * PARAMETERS:
+ *    NewFGColor [I] -- The new foreground colour, in 0xRRGGBB form.
+ *    NewBGColor [I] -- The new background colour, in 0xRRGGBB form.
+ *    NewSelBGColor [I] -- The new selection-background colour, in 0xRRGGBB
+ *                         form.
+ *
+ * FUNCTION:
+ *    Sets the colors for this hex display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void HexDisplayBuffer::SetColors(uint32_t NewFGColor,uint32_t NewBGColor,
         uint32_t NewSelBGColor)
 {
@@ -1071,12 +1215,52 @@ void HexDisplayBuffer::SetDisplayParms(const uint8_t *NewInsertPos,
     SetDisplayParms((uint8_t *)NewInsertPos,NewBufferIsCircular);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    HexDisplayBuffer::Enable
+ *
+ * SYNOPSIS:
+ *    void HexDisplayBuffer::Enable(bool Enable);
+ *
+ * PARAMETERS:
+ *    Enable [I] -- true to enable this hex display buffer
+ *
+ * FUNCTION:
+ *    Enables or disables this hex display buffer.  A disabled hex buffer
+ *    will not draw the cursor or any of the buffers contents.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void HexDisplayBuffer::Enable(bool Enable)
 {
     DisplayEnabled=Enable;
     RebuildDisplay();
 }
 
+/*******************************************************************************
+ * NAME:
+ *    HexDisplayBuffer::IsYScrollBarAtBottom
+ *
+ * SYNOPSIS:
+ *    bool HexDisplayBuffer::IsYScrollBarAtBottom(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    Tests whether the y scroll bar at bottom.
+ *
+ * RETURNS:
+ *    true -- Success.
+ *    false -- An error was detected.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 bool HexDisplayBuffer::IsYScrollBarAtBottom(void)
 {
     t_UIScrollBarCtrl *ScrollY;
@@ -1090,11 +1274,49 @@ bool HexDisplayBuffer::IsYScrollBarAtBottom(void)
     return false;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    HexDisplayBuffer::ScrollToBottom
+ *
+ * SYNOPSIS:
+ *    void HexDisplayBuffer::ScrollToBottom(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    Scrolls the to bottom of the display data.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void HexDisplayBuffer::ScrollToBottom(void)
 {
     MakeOffsetVisable(BufferBytes2Draw,false,false);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    HexDisplayBuffer::RethinkYScrollBar
+ *
+ * SYNOPSIS:
+ *    void HexDisplayBuffer::RethinkYScrollBar(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    Re-evaluates and updates the y scroll bar.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void HexDisplayBuffer::RethinkYScrollBar(void)
 {
     t_UIScrollBarCtrl *ScrollY;

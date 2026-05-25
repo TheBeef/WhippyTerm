@@ -17,7 +17,8 @@ CONFIG += depend_includepath
 
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter -Wno-nonnull-compare
 QMAKE_CXXFLAGS += -Wno-unused-parameter -Wno-implicit-fallthrough -Wswitch-enum
-QMAKE_CFLAGS += -Wno-unused-parameter -Wno-implicit-fallthrough-Wswitch-default -Wswitch-enum
+QMAKE_CFLAGS += -Wno-unused-parameter -Wno-implicit-fallthrough -Wswitch-default 
+#-Wswitch-enum
 
 DEFINES -= UNICODE
 DEFINES += __STDC_LIMIT_MACROS

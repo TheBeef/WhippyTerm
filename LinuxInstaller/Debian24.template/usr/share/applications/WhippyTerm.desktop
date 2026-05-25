@@ -7,5 +7,6 @@ Categories=Development
 Terminal=false
 Type=Application
 Keywords=Term;Serial;Serial Terminal;Whippy Term;
+StartupWMClass=whippyterm
 
 Name[en_CA]=WhippyTerm

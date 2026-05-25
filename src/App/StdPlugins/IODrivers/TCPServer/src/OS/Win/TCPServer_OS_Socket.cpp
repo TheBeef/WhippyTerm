@@ -511,6 +511,27 @@ PG_BOOL TCPServer_ChangeOptions(t_DriverIOHandleType *DriverIO,
     return TCPServer_Open(DriverIO,Options);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    TCPServer_OS_PollThread
+ *
+ * SYNOPSIS:
+ *    static DWORD WINAPI TCPServer_OS_PollThread(LPVOID lpParameter);
+ *
+ * PARAMETERS:
+ *    lpParameter [I] -- The Win32 thread parameter supplied at thread creation.
+ *
+ * FUNCTION:
+ *    This is the worker thread that polls the OS for incoming data and other
+ *    status changes. It runs for the lifetime of the driver and pushes events
+ *    back into the driver's main loop.
+ *
+ * RETURNS:
+ *    A value of type DWORD WINAPI.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static DWORD WINAPI TCPServer_OS_PollThread(LPVOID lpParameter)
 {
     struct TCPServer_OurData *OurData=(struct TCPServer_OurData *)lpParameter;
@@ -589,6 +610,26 @@ static DWORD WINAPI TCPServer_OS_PollThread(LPVOID lpParameter)
     return 0;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    TCPServer_OSSupports_ReusePort
+ *
+ * SYNOPSIS:
+ *    bool TCPServer_OSSupports_ReusePort(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function returns if the OS supports port reuse or not
+ *
+ * RETURNS:
+ *    true -- OS supports port reuse.
+ *    false -- OS does not support port reuse.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 bool TCPServer_OSSupports_ReusePort(void)
 {
     return false;

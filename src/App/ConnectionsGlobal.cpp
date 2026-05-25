@@ -551,6 +551,26 @@ void Con_DoFunction(e_ConFuncType Fn,uintptr_t Arg1,uintptr_t Arg2,
     m_ActiveConnection->DoFunction(Fn,Arg1,Arg2,Arg3,Arg4,Arg5,Arg6);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Con_GetCursorXY
+ *
+ * SYNOPSIS:
+ *    void Con_GetCursorXY(int32_t *RetCursorX,int32_t *RetCursorY);
+ *
+ * PARAMETERS:
+ *    RetCursorX [O] -- Set to the X (column) coordinate of the cursor.
+ *    RetCursorY [O] -- Set to the Y (row) coordinate of the cursor.
+ *
+ * FUNCTION:
+ *    Gets the cursor xy from the active connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void Con_GetCursorXY(int32_t *RetCursorX,int32_t *RetCursorY)
 {
     if(m_ActiveConnection==NULL)
@@ -563,6 +583,26 @@ void Con_GetCursorXY(int32_t *RetCursorX,int32_t *RetCursorY)
     m_ActiveConnection->GetCursorXY(RetCursorX,RetCursorY);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Con_InsertString
+ *
+ * SYNOPSIS:
+ *    void Con_InsertString(const uint8_t *Str,uint32_t Len);
+ *
+ * PARAMETERS:
+ *    Str [I] -- The string to operate on.
+ *    Len [I] -- The length, in bytes, of the string.
+ *
+ * FUNCTION:
+ *    Inserts a string on the active connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void Con_InsertString(const uint8_t *Str,uint32_t Len)
 {
     if(m_ActiveConnection==NULL)
@@ -571,6 +611,26 @@ void Con_InsertString(const uint8_t *Str,uint32_t Len)
     m_ActiveConnection->InsertString(Str,Len);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    Con_GetScreenSize
+ *
+ * SYNOPSIS:
+ *    void Con_GetScreenSize(int32_t *RetRows,int32_t *RetColumns);
+ *
+ * PARAMETERS:
+ *    RetRows [O] -- Set to the number of rows in the screen.
+ *    RetColumns [O] -- Set to the number of columns in the screen.
+ *
+ * FUNCTION:
+ *    Gets the screen size from the active connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void Con_GetScreenSize(int32_t *RetRows,int32_t *RetColumns)
 {
     if(m_ActiveConnection==NULL)

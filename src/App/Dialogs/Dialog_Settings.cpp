@@ -1090,6 +1090,25 @@ static void DS_SetSettingGUI(void)
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DS_RethinkTerminalDisplay
+ *
+ * SYNOPSIS:
+ *    static void DS_RethinkTerminalDisplay(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    Re-evaluates and updates the terminal GUI.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void DS_RethinkTerminalDisplay(void)
 {
     t_UICheckboxCtrl *FixedWidthHandle;
@@ -1125,6 +1144,25 @@ static void DS_RethinkTerminalDisplay(void)
     UIEnableNumberInputCtrl(Height,Enable);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DS_RethinkDisplayDisplay
+ *
+ * SYNOPSIS:
+ *    static void DS_RethinkDisplayDisplay(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    Re-evaluates and updates the display GUI.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void DS_RethinkDisplayDisplay(void)
 {
     t_UILabelCtrl *FontLabelCtrl;
@@ -1142,6 +1180,25 @@ static void DS_RethinkDisplayDisplay(void)
     DS_CopySysColors2GUI();
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DS_RethinkHexDisplayDisplay
+ *
+ * SYNOPSIS:
+ *    static void DS_RethinkHexDisplayDisplay(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    Re-evaluates and updates the hex display GUI.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void DS_RethinkHexDisplayDisplay(void)
 {
     t_UILabelCtrl *FontLabelCtrl;
@@ -1159,6 +1216,26 @@ static void DS_RethinkHexDisplayDisplay(void)
     DS_CopySysColors2GUI();
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DS_GetSettingsFromGUI
+ *
+ * SYNOPSIS:
+ *    static void DS_GetSettingsFromGUI(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    Gets the settings from gui and sets 'g_Settings' and
+ *    'm_SettingConSettings'.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void DS_GetSettingsFromGUI(void)
 {
     t_UICheckboxCtrl *CheckboxHandle;
@@ -1530,6 +1607,25 @@ static void DS_GetSettingsFromGUI(void)
     m_SettingConSettings->SendPanel_ShowBlockPanel=UIGetCheckboxCheckStatus(CheckboxHandle);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DS_RethinkGUI
+ *
+ * SYNOPSIS:
+ *    static void DS_RethinkGUI(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    Re-evaluates and updates the gui enabling / disabling widgets
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void DS_RethinkGUI(void)
 {
     t_UIButtonCtrl *ButtonHandle;
@@ -2370,6 +2466,25 @@ void DS_DoSysColApply(void)
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DS_CopySysColors2GUI
+ *
+ * SYNOPSIS:
+ *    static void DS_CopySysColors2GUI(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    Copies the sys colors to gui.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void DS_CopySysColors2GUI(void)
 {
     int r;
@@ -2403,6 +2518,25 @@ static void DS_CopySysColors2GUI(void)
         UIS_SetSelectionPreviewColor((e_ColorType)r,m_DS_SelectionColors[r]);
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DS_SetCurrentColor
+ *
+ * SYNOPSIS:
+ *    void DS_SetCurrentColor(uint32_t RGB);
+ *
+ * PARAMETERS:
+ *    RGB [I] -- The colour, in 0xRRGGBB form.
+ *
+ * FUNCTION:
+ *    Sets the current color in the GUI (in the edit colors panel).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void DS_SetCurrentColor(uint32_t RGB)
 {
     int Color;
@@ -2446,6 +2580,25 @@ void DS_SetCurrentColor(uint32_t RGB)
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DS_GetCurrentColor
+ *
+ * SYNOPSIS:
+ *    uint32_t DS_GetCurrentColor(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    Gets the current color from the GUI (in the edit colors panel).
+ *
+ * RETURNS:
+ *    The current color in 0xRRGGBB format
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 uint32_t DS_GetCurrentColor(void)
 {
     int Color;
@@ -2488,6 +2641,25 @@ uint32_t DS_GetCurrentColor(void)
     }
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DS_UpdateColorPreview
+ *
+ * SYNOPSIS:
+ *    void DS_UpdateColorPreview(bool UpdateWeb);
+ *
+ * PARAMETERS:
+ *    UpdateWeb [I] -- true to also update the web/RGB hex preview.
+ *
+ * FUNCTION:
+ *    Updates the color preview (in the edit colors panel).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void DS_UpdateColorPreview(bool UpdateWeb)
 {
     int Color;

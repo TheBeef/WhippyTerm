@@ -49,6 +49,25 @@ using namespace std;
 
 /*** VARIABLE DEFINITIONS     ***/
 
+/*******************************************************************************
+ * NAME:
+ *    MWCapture::MWCapture
+ *
+ * SYNOPSIS:
+ *    MWCapture::MWCapture();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the constructor for the MWCapture class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWCapture::MWCapture()
 {
     UIWin=NULL;
@@ -57,6 +76,25 @@ MWCapture::MWCapture()
     PanelActive=false;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    MWCapture::~MWCapture
+ *
+ * SYNOPSIS:
+ *    MWCapture::~MWCapture();
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This is the destructor for the MWCapture class.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 MWCapture::~MWCapture()
 {
 }

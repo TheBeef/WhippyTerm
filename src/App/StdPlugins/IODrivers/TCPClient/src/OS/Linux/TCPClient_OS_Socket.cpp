@@ -455,6 +455,27 @@ PG_BOOL TCPClient_ChangeOptions(t_DriverIOHandleType *DriverIO,
     return true;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    TCPClient_OS_PollThread
+ *
+ * SYNOPSIS:
+ *    static void *TCPClient_OS_PollThread(void *arg);
+ *
+ * PARAMETERS:
+ *    arg [I] -- The thread argument supplied at thread creation.
+ *
+ * FUNCTION:
+ *    This is the worker thread that polls the OS for incoming data and other
+ *    status changes. It runs for the lifetime of the driver and pushes events
+ *    back into the driver's main loop.
+ *
+ * RETURNS:
+ *    A value of type void *.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 static void *TCPClient_OS_PollThread(void *arg)
 {
     struct TCPClient_OurData *OurData=(struct TCPClient_OurData *)arg;

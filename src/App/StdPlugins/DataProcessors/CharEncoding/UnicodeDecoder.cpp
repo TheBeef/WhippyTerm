@@ -50,7 +50,7 @@ struct UnicodeData
 };
 
 /*** FUNCTION PROTOTYPES      ***/
-void UnicodeDecoder_Error(uint8_t *ProcessedChar,int &CharLen);
+static void UnicodeDecoder_Error(uint8_t *ProcessedChar,int &CharLen);
 t_DataProcessorHandleType *UnicodeDecoder_AllocateData(void);
 void UnicodeDecoder_FreeData(t_DataProcessorHandleType *DataHandle);
 const struct DataProcessorInfo *UnicodeDecoder_GetProcessorInfo(unsigned int *SizeOfInfo);
@@ -354,6 +354,27 @@ void UnicodeDecoder_ProcessByte(t_DataProcessorHandleType *DataHandle,
     *Consumed=true;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    UnicodeDecoder_Error
+ *
+ * SYNOPSIS:
+ *    void UnicodeDecoder_Error(uint8_t *ProcessedChar,int &CharLen);
+ *
+ * PARAMETERS:
+ *    ProcessedChar [O] -- Receives the processed character (output).
+ *    CharLen [O] -- Receives the length of the processed character.
+ *
+ * FUNCTION:
+ *    This function handles when there is an error processing the unicode char.
+ *    It fills the 'ProcessedChar' buffer with an error char.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
 void UnicodeDecoder_Error(uint8_t *ProcessedChar,int &CharLen)
 {
 //    /* Replacement character */

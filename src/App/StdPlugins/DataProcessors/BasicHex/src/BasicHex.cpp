@@ -581,12 +581,32 @@ PG_BOOL BasicHexDecoder_ProcessKeyPress(t_DataProcessorHandleType *DataHandle,
     return true;
 }
 
-void BasicHexDecoder_ProcessIncomingByte(t_DataProcessorHandleType *DataHandle,
-        const uint8_t RawByte,uint8_t *ProcessedChar,int *CharLen,
-        PG_BOOL *Consumed)
-{
-}
-
+/*******************************************************************************
+ * NAME:
+ *    BasicHexDecoder_ProcessIncomingBinaryByte
+ *
+ * SYNOPSIS:
+ *    void BasicHexDecoder_ProcessIncomingBinaryByte(t_DataProcessorHandleType *DataHandle,
+ *          const uint8_t Byte);
+ *
+ * PARAMETERS:
+ *      DataHandle [I] -- The data handle to work on.  This is your internal
+ *                        data.
+ *      Byte [I] -- This is the byte that came in.
+ *
+ * FUNCTION:
+ *      This function is called for each byte that comes in if you are a
+ *      'e_DataProcessorType_Binary' type of processor.
+ *
+ *      You process this byte and call one of the add to screen functions (or
+ *      all of them if you like).  See BinaryAddText()
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    BinaryAddText()
+ ******************************************************************************/
 void BasicHexDecoder_ProcessIncomingBinaryByte(t_DataProcessorHandleType *DataHandle,
         const uint8_t Byte)
 {

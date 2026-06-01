@@ -42,6 +42,7 @@
 #include "App/Dialogs/Dialog_NewVersionCheck.h"
 #include "App/Dialogs/Dialog_SendByte.h"
 #include "App/Dialogs/Dialog_Settings.h"
+#include "App/Dialogs/Dialog_SettingsSelectEditType.h"
 #include "App/Dialogs/Dialog_TransmitDelay.h"
 #include "App/Dialogs/Dialog_SendBufferSelect.h"
 #include "App/Dialogs/Dialog_CRCFinder.h"
@@ -2184,6 +2185,54 @@ void TheMainWindow::CloseAllConnections(void)
         if(TabCon!=NULL)
             CloseConnection(TabCon);
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::DoSettingsDialog
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::DoSettingsDialog(e_SettingsJump2Type Jump2);
+ *
+ * PARAMETERS:
+ *    Jump2 [I] -- Where to jump to.  This is just passed to RunSettingsDialog()
+ *
+ * FUNCTION:
+ *    This function shows the settings dialog in global mode.  It checks
+ *    if the active connection has settings and prompts the user if it does.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    RunSettingsDialog()
+ ******************************************************************************/
+void TheMainWindow::DoSettingsDialog(e_SettingsJump2Type Jump2)
+{
+    class ConSettings *SettingsConnection;
+
+    SettingsConnection=NULL;
+    if(ActiveCon!=NULL && ActiveCon->UsingCustomSettings)
+    {
+        /* Check if the active connection has custom settings.  If it does then
+           do a popup telling the user.  It confusing if you have custom
+           settings and open the settings to change something and it doesn't
+           get applied. */
+        switch(RunSettingSelectEditTypeDialog())
+        {
+            case e_USSET_UserSelected_Global:
+            break;
+            case e_USSET_UserSelected_Connection:
+                SettingsConnection=&ActiveCon->CustomSettings;
+            break;
+            case e_USSET_UserSelected_Cancel:
+            case e_USSET_UserSelectedMAX:
+                return;
+            break;
+        }
+    }
+
+    RunSettingsDialog(this,SettingsConnection,Jump2);
 }
 
 /*******************************************************************************
@@ -6091,7 +6140,7 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
             RunAboutDialog();
         break;
         case e_Cmd_Settings:
-            RunSettingsDialog(this,NULL,e_SettingsJump2_Default);
+            DoSettingsDialog(e_SettingsJump2_Default);
         break;
         case e_Cmd_ImportSettings:
             g_Settings.GetDefaultSettingsPathAndName(path,file);
@@ -6417,19 +6466,19 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
             RunSendByteDialog(this);
         break;
         case e_Cmd_SettingsQuickJump_TermSize:
-            RunSettingsDialog(this,NULL,e_SettingsJump2_TermSize);
+            DoSettingsDialog(e_SettingsJump2_TermSize);
         break;
         case e_Cmd_SettingsQuickJump_TermEmu:
-            RunSettingsDialog(this,NULL,e_SettingsJump2_TermEmu);
+            DoSettingsDialog(e_SettingsJump2_TermEmu);
         break;
         case e_Cmd_SettingsQuickJump_Font:
-            RunSettingsDialog(this,NULL,e_SettingsJump2_Font);
+            DoSettingsDialog(e_SettingsJump2_Font);
         break;
         case e_Cmd_SettingsQuickJump_Colors:
-            RunSettingsDialog(this,NULL,e_SettingsJump2_Colors);
+            DoSettingsDialog(e_SettingsJump2_Colors);
         break;
         case e_Cmd_SettingsQuickJump_CtrlCHandling:
-            RunSettingsDialog(this,NULL,e_SettingsJump2_ClipboardHandling);
+            DoSettingsDialog(e_SettingsJump2_ClipboardHandling);
         break;
         case e_Cmd_NextConnectionTab:
             MoveToNextTab();

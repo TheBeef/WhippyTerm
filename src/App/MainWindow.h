@@ -33,6 +33,7 @@
 
 /***  HEADER FILES TO INCLUDE          ***/
 #include "App/Commands.h"
+#include "App/Dialogs/Dialog_Settings.h"
 #include "App/Display/HexDisplayBuffers.h"
 #include "App/IOSystem.h"
 #include "App/Util/KeyValue.h"
@@ -125,6 +126,7 @@ void Debug6(void);
         void RethinkActiveConnectionUI(void);
         void CloseActiveConnection(void);
         void CloseAllConnections(void);
+        void DoSettingsDialog(e_SettingsJump2Type Jump2);
         void ChangeConnectStatus(bool Connected);
         void Timer_CursorTimer(void);
         void ExeCmd(e_CmdType Cmd);

@@ -41,6 +41,15 @@ static struct ReleaseNote m_Notes_NEXT[]=
             "The ANSI processor was not handling the ESC[J and ESC[K commands"
             " correctly.  It was trying to clear 0 size areas which resulted"
             " in nothing changing."},
+    {   NOTETYPE_FUNCTIONALLY_FIX,"Custom connection settings where confusing",
+            "When a connection was using custom settings and the user selected"
+            " to change the settings (global) the changes would not get"
+            " applied (because it was setting the global, but the custom"
+            " settings override it).\n"
+            "A new dialog has been added to warn the user they are using"
+            " custom settings when they select the global settings.  The"
+            " user can select to edit the global settings or the connection"
+            " settings."},
 };
 
 static struct ReleaseNote m_Notes_Rel2_3_1_0[]=

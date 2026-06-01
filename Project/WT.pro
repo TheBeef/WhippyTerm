@@ -54,6 +54,7 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/Dialogs/Dialog_HelpCommandLineOptions.cpp \
     ../src/App/Dialogs/Dialog_IODriverSettings.cpp \
     ../src/App/Dialogs/Dialog_NewVersionCheck.cpp \
+    ../src/App/Dialogs/Dialog_SettingsSelectEditType.cpp \
     ../src/App/Dialogs/Dialog_StylePicker.cpp \
     ../src/App/MWPanels/MW_OutGoingHexDisplay.cpp \
     ../src/App/PluginSupport/PluginSystem.cpp \
@@ -97,6 +98,8 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/UI/QT/Form_SendBufferSelectAccess.cpp \
     ../src/UI/QT/Form_SendByte.cpp \
     ../src/UI/QT/Form_SendByteAccess.cpp \
+    ../src/UI/QT/Form_SettingsSelectType.cpp \
+    ../src/UI/QT/Form_SettingsSelectTypeAccess.cpp \
     ../src/UI/QT/Form_StylePickerDialog.cpp \
     ../src/UI/QT/Form_StylePickerDialogAccess.cpp \
     ../src/UI/QT/Frame_ColorPickerWidget.cpp \
@@ -330,6 +333,7 @@ HEADERS  += ../src/UI/QT/Form_MainWindow.h \
     ../src/UI/QT/Form_NewVersionCheck.h \
     ../src/UI/QT/Form_SendBufferSelect.h \
     ../src/UI/QT/Form_SendByte.h \
+    ../src/UI/QT/Form_SettingsSelectType.h \
     ../src/UI/QT/Form_StylePickerDialog.h \
     ../src/UI/QT/Frame_ColorPickerWidget.h \
     ../src/UI/QT/Frame_CustomTextWidget.h \
@@ -396,6 +400,7 @@ FORMS    += ../src/UI/QT/Form_MainWindow.ui \
     ../src/UI/QT/Form_ESB_Fill.ui \
     ../src/UI/QT/Form_ConnectionOptions.ui \
     ../src/UI/QT/Form_ComTest.ui \
+    ../src/UI/QT/Form_SettingsSelectType.ui \
     ../src/UI/QT/Form_StylePickerDialog.ui \
     ../src/UI/QT/Form_TransmitDelay.ui \
     ../src/UI/QT/Form_ManagePlugins.ui \

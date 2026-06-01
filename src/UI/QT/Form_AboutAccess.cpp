@@ -120,7 +120,7 @@ void UIShow_About(void)
  *    NONE
  *
  * FUNCTION:
- *    This function frees the current new connection dialog.
+ *    This function frees the about dialog.
  *
  * RETURNS:
  *    NONE

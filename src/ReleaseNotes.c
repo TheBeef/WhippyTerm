@@ -31,7 +31,7 @@ struct ReleaseInfo
 static struct ReleaseNote m_Notes_NEXT[]=
 {
     {   NOTETYPE_NEW_FEATURE,"Added check for new version system",
-            "Added a new menu option (help->Check for new version) to go"
+            "Added a new menu op#86FFACtion (help->Check for new version) to go"
             " out to the WhippyTerm web site and check for a new version.\n"
             "This can also added settings to be able to auto check for"
             " new versions on startup/daily/monthly/yearly."},

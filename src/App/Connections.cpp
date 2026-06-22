@@ -2267,6 +2267,7 @@ bool Connection::InformOfDataAvaiable(void)
 void Connection::InformOfCursorKeyModeChange(void)
 {
     RethinkCursor();
+    RethinkCursorKeyModeInfoBox();
 }
 
 /*******************************************************************************
@@ -3270,6 +3271,7 @@ bool Connection::ProcessDisplayEvent(const struct DBEvent *Event)
         break;
         case e_DBEvent_FocusChange:
             RethinkCursor();
+            RethinkCursorKeyModeInfoBox();
         break;
         case e_DBEvent_ContextMenu:
             if(MW==NULL)
@@ -7058,6 +7060,42 @@ void Connection::RethinkCursor(void)
     }
     Display->SetCursorBlinking(CursorBlinking);
     Display->SetCursorStyle(CursorStyle);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::RethinkCursorKeyModeInfoBox
+ *
+ * SYNOPSIS:
+ *    void Connection::RethinkCursorKeyModeInfoBox(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function rethinks what should be displayed in the cursor key mode
+ *    info box (or hide it).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::RethinkCursorKeyModeInfoBox(void)
+{
+    if(Display==NULL)
+        return;
+
+    if(GetCurrentCursorKeyModeIsLocal())
+    {
+        Display->SetInfoMessage("SCROLL",0xFFA500,0x000000,
+                e_UITCIM_Pos_TopRight);
+    }
+    else
+    {
+        Display->SetInfoMessage(NULL,0,0,e_UITCIM_PosMAX);
+    }
 }
 
 /*******************************************************************************

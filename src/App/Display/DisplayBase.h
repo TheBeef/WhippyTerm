@@ -157,6 +157,7 @@ class DisplayBase
         virtual void SelectAll(void)=0;
         virtual void ClearSelection(void)=0;
         virtual void SetOverrideMessage(const char *Msg);
+        virtual void SetInfoMessage(const char *Msg,uint32_t BG,uint32_t FG,e_UITCIM_PosType Pos);
         virtual void ScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dx,int32_t dy);
         virtual void InsertHorizontalRule(void);
         virtual void ResetTerm(void);

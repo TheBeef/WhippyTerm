@@ -1459,7 +1459,7 @@ void UITC_SetBorderBackgroundColor(t_UITextDisplayColumn *Handle,
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    UITC_SetInfoMsg()
  ******************************************************************************/
 void UITC_SetOverrideMsg(t_UITextDisplayCtrl *ctrl,const char *Msg,bool OnOff)
 {
@@ -1467,6 +1467,41 @@ void UITC_SetOverrideMsg(t_UITextDisplayCtrl *ctrl,const char *Msg,bool OnOff)
 
     TextDisplay->ui->PrimaryTextArea->ui->TextDisplayBox->
             SetOverrideMsg(Msg,OnOff);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_SetInfoMsg
+ *
+ * SYNOPSIS:
+ *    void UITC_SetInfoMsg(t_UITextDisplayCtrl *ctrl,const char *Msg,
+ *              uint32_t BG,uint32_t FG,e_UITCIM_PosType Pos,bool OnOff);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- The control to work on
+ *    Msg [I] -- The message to display.
+ *    BG [I] -- The background color
+ *    FG [I] -- The forground color (text color)
+ *    Pos [I] -- Where to draw the info box
+ *    OnOff [I] -- True = Show the override box, false = Hide the orverride box
+ *
+ * FUNCTION:
+ *    This function sets the text / attribs for the info box that is applied
+ *    over the text canvas.  This is ment to be info box that stays up.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    UITC_SetOverrideMsg()
+ ******************************************************************************/
+void UITC_SetInfoMsg(t_UITextDisplayCtrl *ctrl,const char *Msg,uint32_t BG,
+        uint32_t FG,e_UITCIM_PosType Pos,bool OnOff)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    TextDisplay->ui->PrimaryTextArea->ui->TextDisplayBox->
+            SetInfoMsg(Msg,BG,FG,Pos,OnOff);
 }
 
 /*******************************************************************************

@@ -616,6 +616,61 @@ void Widget_TextCanvas::paintEvent(QPaintEvent *event)
 
     painter.setClipRegion(OldRegion);
     painter.setClipping(OldClippingOn);
+
+    /* We overlay the info box over the text (and everything else) */
+    if(InfoMsgActive)
+    {
+        int x,y;
+        int infowidth,infoheight;
+        int TextWidth;
+        QFontMetrics fm(RenderFont,this);
+
+        /* Use a fixed width */
+        infowidth=200;
+        infoheight=32;
+
+        switch(InfoMsgPos)
+        {
+            case e_UITCIM_Pos_TopLeft:
+                x=0;
+                y=0;
+            break;
+            case e_UITCIM_Pos_TopRight:
+                x=width()-infowidth;
+                y=0;
+            break;
+            case e_UITCIM_Pos_BottomLeft:
+                x=0;
+                y=height()-infoheight;
+            break;
+            case e_UITCIM_Pos_BottomRight:
+                x=width()-infowidth;
+                y=height()-infoheight;
+            break;
+            case e_UITCIM_PosMAX:
+            default:
+                break;
+        }
+
+        painter.setClipRegion(QRegion(x,y,infowidth,infoheight));
+        painter.setClipping(true);
+
+        painter.fillRect(x,y,infowidth,infoheight,QColor(QRgb(InfoMsgBGColor)));
+
+        painter.setFont(RenderFont);
+
+        /* See what the width of the drawen text will be */
+        TextWidth=fm.horizontalAdvance(InfoMsg);
+
+        x+=infowidth/2-TextWidth/2;
+        y+=infoheight/2-fm.height()/2;
+
+        painter.setPen(QColor(QRgb(InfoMsgTextColor)));
+        painter.drawText(x,y+fm.ascent(),InfoMsg);
+
+        painter.setClipRegion(OldRegion);
+        painter.setClipping(OldClippingOn);
+    }
 }
 
 int Widget_TextCanvas::DrawFrag(QPainter *painter,QFontMetrics *fm,
@@ -1685,6 +1740,19 @@ void Widget_TextCanvas::SetOverrideMsg(const char *Msg,bool OnOff)
         OverrideWidget->ui->label->setText(Msg);
         ResizeOverrideWidget();
     }
+}
+
+void Widget_TextCanvas::SetInfoMsg(const char *Msg,uint32_t BG,
+        uint32_t FG,e_UITCIM_PosType Pos,bool OnOff)
+{
+    InfoMsgActive=OnOff;
+    InfoMsg=Msg;
+    InfoMsgBGColor=BG;
+    InfoMsgTextColor=FG;
+    InfoMsgPos=Pos;
+
+    /* Redraw so show/hide the info box */
+    update();
 }
 
 void Widget_TextCanvas::ResizeOverrideWidget(void)

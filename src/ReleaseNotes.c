@@ -30,8 +30,18 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_POLISH,"More work on the scroll lock button",
+            "More work has been added to trying to get the scroll lock"
+            " key to behave correcly."},
+    {   NOTETYPE_NEW_FEATURE,"Added a better indictor of cursor keys mode",
+            "When you toggle the cursor keys mode (scrolllock/insert/etc)"
+            " the system would change the shape of the cursor in the"
+            " window.  However if the cursor was off the bottom there was"
+            " no way to see what mode you where in.\n"
+            " A new indicator box has been added to show it's state in the"
+            " top right corner of the display."},
     {   NOTETYPE_NEW_FEATURE,"Added check for new version system",
-            "Added a new menu op#86FFACtion (help->Check for new version) to go"
+            "Added a new menu option (help->Check for new version) to go"
             " out to the WhippyTerm web site and check for a new version.\n"
             "This can also added settings to be able to auto check for"
             " new versions on startup/daily/monthly/yearly."},

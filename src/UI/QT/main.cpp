@@ -78,7 +78,10 @@ bool MainApp::notify(QObject * receiver, QEvent * event)
         QKeyEvent *Key;
         Key=(QKeyEvent *)event;
         if(Key->key()==Qt::Key_ScrollLock)
+        {
             QTInformOfScrollLockPressed();
+            return true;
+        }
     }
 
     if(m_KeyCallback!=NULL)

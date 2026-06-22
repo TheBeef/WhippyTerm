@@ -249,6 +249,15 @@ typedef enum
     e_UITCSetFocusMAX
 } e_UITCSetFocusType;
 
+typedef enum
+{
+    e_UITCIM_Pos_TopLeft,
+    e_UITCIM_Pos_TopRight,
+    e_UITCIM_Pos_BottomLeft,
+    e_UITCIM_Pos_BottomRight,
+    e_UITCIM_PosMAX
+} e_UITCIM_PosType;
+
 /***  CLASS DEFINITIONS                ***/
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/
@@ -300,6 +309,7 @@ void UITC_SetTextAreaBackgroundColor(t_UITextDisplayColumn *Handle,uint32_t BgCo
 void UITC_SetTextDefaultColor(t_UITextDisplayColumn *Handle,uint32_t FgColor);
 void UITC_SetBorderBackgroundColor(t_UITextDisplayColumn *Handle,uint32_t BgColor,bool Fill);
 void UITC_SetOverrideMsg(t_UITextDisplayCtrl *ctrl,const char *Msg,bool OnOff);
+void UITC_SetInfoMsg(t_UITextDisplayCtrl *ctrl,const char *Msg,uint32_t BG,uint32_t FG,e_UITCIM_PosType Pos,bool OnOff);
 
 /* Rendering */
 void UITC_ClearAllLines(t_UITextDisplayColumn *Handle);

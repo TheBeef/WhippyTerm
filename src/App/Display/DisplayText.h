@@ -176,6 +176,7 @@ class DisplayText : public DisplayBase
         void SelectAll(void);
         void ClearSelection(void);
         void SetOverrideMessage(const char *Msg);
+        void SetInfoMessage(const char *Msg,uint32_t BG,uint32_t FG,e_UITCIM_PosType Pos);
         void ScrollArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dx,int32_t dy);
         void InsertHorizontalRule(void);
         void ResetTerm(void);

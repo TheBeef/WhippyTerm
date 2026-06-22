@@ -799,9 +799,38 @@ void DisplayBase::DoLineFeed(void)
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    SetInfoMessage()
  ******************************************************************************/
 void DisplayBase::SetOverrideMessage(const char *Msg)
+{
+    /* Do nothing */
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetInfoMessage
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetInfoMessage(const char *Msg,uint32_t BG,
+ *              uint32_t FG,e_UITCIM_PosType Pos);
+ *
+ * PARAMETERS:
+ *    Msg [I] -- The message to display or NULL to clear it.
+ *    BG [I] -- The background color
+ *    FG [I] -- The forground color (text color)
+ *    Pos [I] -- Where to draw the info box
+ *
+ * FUNCTION:
+ *    This function draws an info box in the corner of the main text area.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    SetOverrideMessage()
+ ******************************************************************************/
+void DisplayBase::SetInfoMessage(const char *Msg,uint32_t BG,uint32_t FG,
+        e_UITCIM_PosType Pos)
 {
     /* Do nothing */
 }

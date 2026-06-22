@@ -109,6 +109,7 @@ bool m_RunTheScrollLockKey=false;
 bool m_ScrollLockOn=false;
 static e_LEDCtrlSystemType m_LEDCtrlSystem;
 static Display *m_X11_dpy;
+static bool m_ScrollLockManualTracking=false;
 
 void QTInitScrollLockHandler(void)
 {
@@ -121,6 +122,9 @@ void QTInitScrollLockHandler(void)
     {
         m_LEDCtrlSystem=e_LEDCtrlSystem_X11;
         m_X11_dpy=XOpenDisplay(NULL);
+
+        /* Assume we can just read the LED */
+        m_ScrollLockManualTracking=false;
     }
     else if(platform == "wayland")
     {
@@ -151,7 +155,7 @@ bool IsScrollLockOn(void)
         default:
             return m_ScrollLockOn;
         case e_LEDCtrlSystem_X11:
-            if(m_X11_dpy!=NULL)
+            if(m_X11_dpy!=NULL && !m_ScrollLockManualTracking)
             {
                 if(XkbGetIndicatorState(m_X11_dpy,XkbUseCoreKbd,&state)==Success)
                 {
@@ -174,6 +178,8 @@ void QTInformOfScrollLockPressed(void)
 void SetScrollLockLED(bool On)
 {
     XKeyboardControl values;
+    unsigned state;
+    bool ReadLED;
 
     switch(m_LEDCtrlSystem)
     {
@@ -191,6 +197,22 @@ void SetScrollLockLED(bool On)
                 values.led = 3;
 
                 XChangeKeyboardControl(m_X11_dpy, KBLed | KBLedMode, &values);
+                XFlush(m_X11_dpy);
+
+                /* Check if it actually changed, if not we manually track */
+                if(XkbGetIndicatorState(m_X11_dpy,XkbUseCoreKbd,&state)==Success)
+                {
+                    if(state&0x04)
+                        ReadLED=true;
+                    else
+                        ReadLED=false;
+
+                    if(ReadLED!=On)
+                    {
+                        /* It failed, switch to manual tracking */
+                        m_ScrollLockManualTracking=true;
+                    }
+                }
             }
         break;
     }

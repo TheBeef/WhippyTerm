@@ -139,6 +139,7 @@ public:
     void SetTextAreaBackgroundColor(uint32_t BgColor);
     void SetTextDefaultColor(uint32_t FgColor);
     void SetOverrideMsg(const char *Msg,bool OnOff);
+    void SetInfoMsg(const char *Msg,uint32_t BG,uint32_t FG,e_UITCIM_PosType Pos,bool OnOff);
 
     int GetWidgetWidth(void);
     int GetWidgetHeight(void);
@@ -188,8 +189,6 @@ private:
     QTimer *TripleClickTimer;
     int TripleClickCount;
     QLabel *BellLabel;
-    Frame_TextCavnasOverrideBox *OverrideWidget;
-    bool OverrideActive;
 
     QFont RenderFont;
     QColor TextAreaDefaultColor;
@@ -209,6 +208,16 @@ private:
     QColor UseDisplayBackgroundColor;
     bool FillDisplayBackground;
     uint16_t DrawAttribMask;
+
+    bool OverrideActive;
+    Frame_TextCavnasOverrideBox *OverrideWidget;
+
+    /* Info message box */
+    bool InfoMsgActive;
+    QString InfoMsg;
+    uint32_t InfoMsgBGColor;
+    uint32_t InfoMsgTextColor;
+    e_UITCIM_PosType InfoMsgPos;
 
     QGraphicsOpacityEffect *BellAnimEffect;
     QPropertyAnimation *BellAnim;

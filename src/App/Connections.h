@@ -648,6 +648,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void FreeTransmitDelayBuffer(void);
         void RethinkLockOut(void);
         void RethinkCursor(void);
+        void RethinkCursorKeyModeInfoBox(void);
         void HandleMouseWheelZoom(int Steps);
         e_CmdType HandleSmartClipboard(char key);
         bool IsProcessorATextProcessor(struct ProcessorConData &PData);

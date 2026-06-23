@@ -1487,6 +1487,7 @@ void DisplayText::RedrawFullScreen(void)
     bool LineLenChanged;
     int LineLenPx;
     int y;
+    uint32_t AreaBGColor;
 
     if(ActiveLine==NULL || TextDisplayCtrl==NULL)
         return;
@@ -1502,6 +1503,14 @@ void DisplayText::RedrawFullScreen(void)
             CurLine->LineWidthPx=LineLenPx;
         }
     }
+
+    /* Set the bottom color to the last line */
+    if(CurLine!=Lines.end())
+        AreaBGColor=CurLine->LineBackgroundColor;
+    else
+        AreaBGColor=CurrentStyle.BGColor;
+    UITC_SetTextAreaBackgroundColor(UITC_GetTextDisplayPrimaryColumn(
+                TextDisplayCtrl),AreaBGColor);
 
     UITC_SetMaxLines(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),y,
             Settings->DefaultColors[e_DefaultColors_BG]);
@@ -2729,7 +2738,14 @@ void DisplayText::AdjustCursorAfterWriteChar(uint8_t *Chr)
             /* Redraw any changes to the current line before we move on */
             RedrawActiveLine();
 
-            MoveToNextLine(NewCursorY);
+            if(MoveToNextLine(NewCursorY))
+            {
+                /* We just scrolled, set the fill background color to
+                   what ever the current bg is */
+                UITC_SetTextAreaBackgroundColor(
+                        UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                        CurrentStyle.BGColor);
+            }
             CursorXPx=0;
         }
         else
@@ -3539,7 +3555,14 @@ void DisplayText::DoLineFeed(void)
 
     NewCursorY=CursorY;
 
-    MoveToNextLine(NewCursorY);
+    if(MoveToNextLine(NewCursorY))
+    {
+        /* We just scrolled, set the fill background color to
+           what ever the current bg is */
+        UITC_SetTextAreaBackgroundColor(
+                UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                CurrentStyle.BGColor);
+    }
 
     MoveCursor(CursorX,NewCursorY,false);
 }
@@ -3811,7 +3834,7 @@ void DisplayText::RethinkCursorHidden(void)
  *    DisplayText::MoveToNextLine
  *
  * SYNOPSIS:
- *    void DisplayText::MoveToNextLine(int &NewCursorY);
+ *    bool DisplayText::MoveToNextLine(int &NewCursorY);
  *
  * PARAMETERS:
  *    NewCursorY [I/O] -- The new CursorY you are going move from to
@@ -3820,15 +3843,19 @@ void DisplayText::RethinkCursorHidden(void)
  *    This function moves to the next line and scrolls the screen if needed.
  *
  * RETURNS:
- *    NONE
+ *    true -- We scrolled the screen
+ *    false -- We just moved the cursor
  *
  * SEE ALSO:
  *    
  ******************************************************************************/
-void DisplayText::MoveToNextLine(int &NewCursorY)
+bool DisplayText::MoveToNextLine(int &NewCursorY)
 {
     int CursorGlobalY;
     int BottomLineY;
+    bool RetValue;
+
+    RetValue=false;
 
     NewCursorY++;
 
@@ -3852,7 +3879,10 @@ void DisplayText::MoveToNextLine(int &NewCursorY)
     {
         NewCursorY=ScreenHeightChars-1;
         ScrollScreenByXLines(1);
+        RetValue=true;
     }
+
+    return RetValue;
 }
 
 /*******************************************************************************
@@ -5069,7 +5099,14 @@ void DisplayText::InsertHorizontalRule(void)
             /* We are not on a blank line, move to the next line */
             /* Move to the start of the next line */
             NewCursorY=CursorY;
-            MoveToNextLine(NewCursorY);
+            if(MoveToNextLine(NewCursorY))
+            {
+                /* We just scrolled, set the fill background color to
+                   what ever the current bg is */
+                UITC_SetTextAreaBackgroundColor(
+                        UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                        CurrentStyle.BGColor);
+            }
             MoveCursor(0,NewCursorY,false);
         }
 
@@ -5087,7 +5124,14 @@ void DisplayText::InsertHorizontalRule(void)
 
         /* Move to the start of the next line */
         NewCursorY=CursorY;
-        MoveToNextLine(NewCursorY);
+        if(MoveToNextLine(NewCursorY))
+        {
+            /* We just scrolled, set the fill background color to
+               what ever the current bg is */
+            UITC_SetTextAreaBackgroundColor(
+                    UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                    CurrentStyle.BGColor);
+        }
         MoveCursor(0,NewCursorY,false);
         InvalidateAllMarks();
     }
@@ -5170,6 +5214,9 @@ void DisplayText::ResetTerm(void)
         Selection_Y=0;
         Selection_AnchorX=0;
         Selection_AnchorY=0;
+
+        UITC_SetTextAreaBackgroundColor(UITC_GetTextDisplayPrimaryColumn(
+                TextDisplayCtrl),Settings->DefaultColors[e_DefaultColors_BG]);
     }
     catch(...)
     {

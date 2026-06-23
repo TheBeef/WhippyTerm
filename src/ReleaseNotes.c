@@ -30,6 +30,11 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_POLISH,"Fixed color below text area",
+            "When a full line doesn't fit below the text area, that area needs"
+            " to be filled with something.  It was always being filled with"
+            " the default background color.  It is now filled with the"
+            " active background color or the color of the last line drawn."},
     {   NOTETYPE_POLISH,"More work on the scroll lock button",
             "More work has been added to trying to get the scroll lock"
             " key to behave correcly."},

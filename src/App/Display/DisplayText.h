@@ -310,7 +310,7 @@ class DisplayText : public DisplayBase
 
         void RethinkCursorHidden(void);
         int CalcCorrectedCursorPos(void);
-        void MoveToNextLine(int &NewCursorY);
+        bool MoveToNextLine(int &NewCursorY);
         void HandleLeftMousePress(bool Down,int x,int y);
         void HandleLeftMouseDoublePress(int x,int y);
         void HandleLeftMouseTriplePress(int x,int y);

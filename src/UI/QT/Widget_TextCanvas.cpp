@@ -1720,6 +1720,7 @@ void Widget_TextCanvas::SetTextAreaBackgroundColor(uint32_t BgColor)
     TextAreaBackgroundColor=QColor(QRgb(BgColor));
     RethinkColors();
     RethinkCursor();
+    update();
 }
 
 void Widget_TextCanvas::SetTextDefaultColor(uint32_t FgColor)

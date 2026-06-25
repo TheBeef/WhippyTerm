@@ -30,6 +30,12 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_POLISH,"Fixed a number background color issues",
+            "The background color would act odd when starting from a new"
+            " connection/reset term/clear screen.  It has all been cleaned up."},
+    {   NOTETYPE_POLISH,"Newline now fills the line with the background color",
+            "When you do a newline it will fill the rest of the line with"
+            " the current background color."},
     {   NOTETYPE_POLISH,"Fixed color below text area",
             "When a full line doesn't fit below the text area, that area needs"
             " to be filled with something.  It was always being filled with"

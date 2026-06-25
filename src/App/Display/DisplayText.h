@@ -295,7 +295,6 @@ class DisplayText : public DisplayBase
         void DoOverwriteInsertPos(uint8_t *Chr);
         void PadOutCurrentLine2Cursor(void);
         void PadOutLine(struct TextLine *Line,int Pos);
-        void PadOutScreen(int Y);
         void AdjustCursorAfterWriteChar(uint8_t *Chr);
         void RethinkTextAreaSize(void);
         void RethinkWindowSize(void);
@@ -321,6 +320,8 @@ class DisplayText : public DisplayBase
         void DEBUG_ForceRedrawOfScreen(void);
         int CalcCursorXPx(void);
         bool CheckWordBreak(std::string &Letter);
+
+        bool IsCursorAtEnd(void);
 
         /* NOTE PAUL: These comment headings where added long after so they might
            be missing functions from the grouping */

@@ -503,6 +503,7 @@ break;
             RethinkTextAreaSize();
             RethinkWindowSize();
             RethinkScrollBars();
+            PadOutScreenWithBlankLines();
             RedrawFullScreen();
         break;
         case e_TextDisplayEvent_LostFocus:
@@ -1506,9 +1507,16 @@ void DisplayText::RedrawFullScreen(void)
 
     /* Set the bottom color to the last line */
     if(CurLine!=Lines.end())
+    {
         AreaBGColor=CurLine->LineBackgroundColor;
+    }
     else
-        AreaBGColor=CurrentStyle.BGColor;
+    {
+        if(!Lines.empty())
+            AreaBGColor=Lines.back().LineBackgroundColor;
+        else
+            AreaBGColor=CurrentStyle.BGColor;
+    }
     UITC_SetTextAreaBackgroundColor(UITC_GetTextDisplayPrimaryColumn(
                 TextDisplayCtrl),AreaBGColor);
 
@@ -2161,8 +2169,7 @@ bool DisplayText::RethinkInsertFrag(void)
         if(CurLine==Lines.end())
         {
             /* We didn't have enough lines, add blank lines */
-            BlankLine.LineBackgroundColor=
-                    Settings->DefaultColors[e_DefaultColors_BG];
+            BlankLine.LineBackgroundColor=CurrentStyle.BGColor;
             BlankLine.LineWidthPx=0;
             BlankLine.EOL=e_DTEOL_Hard;
             BlankLine.EOLGuess=e_DTEOLGuess_Unknown;
@@ -3550,6 +3557,13 @@ void DisplayText::DoLineFeed(void)
     }
     LastSeenCR=false;
 
+    PadOutScreenWithBlankLines();
+
+    /* If we adding to the last line in the buffer (or we have an empty buffer)
+       then we want to set the background color of the line as well */
+    if(IsCursorAtEnd())
+        ActiveLine->LineBackgroundColor=CurrentStyle.BGColor;
+
     /* Redraw any changes to the current line before we move on */
     RedrawActiveLine();
 
@@ -4848,8 +4862,7 @@ void DisplayText::ClearScreen(e_ScreenClearType Type)
                 /* Just set all the lines to blank */
                 for(CurLine=ScreenFirstLine;CurLine!=Lines.end();CurLine++)
                 {
-                    CurLine->LineBackgroundColor=Settings->
-                            DefaultColors[e_DefaultColors_BG];
+                    CurLine->LineBackgroundColor=CurrentStyle.BGColor;
                     CurLine->LineWidthPx=0;
                     CurLine->EOL=e_DTEOL_Hard;
                     CurLine->Frags.clear();
@@ -4994,9 +5007,57 @@ bool DisplayText::IsScreenClear(void)
     Blank=true;
     for(CurLine=ScreenFirstLine;CurLine!=Lines.end();CurLine++)
     {
-        if(CurLine->LineBackgroundColor!=
-                Settings->DefaultColors[e_DefaultColors_BG] ||
+        if(CurLine->LineBackgroundColor!=CurrentStyle.BGColor ||
                 CurLine->LineWidthPx!=0 ||
+                CurLine->EOL!=e_DTEOL_Hard ||
+                !CurLine->Frags.empty() ||
+                CurLine->EOLGuess!=e_DTEOLGuess_Unknown)
+        {
+            Blank=false;
+            break;
+        }
+    }
+    return Blank;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::IsCursorAtEnd
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::IsCursorAtEnd(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function checks to see if the cursor is at the end of the buffer
+ *    (that is also considered true if there is only blank lines after the
+ *    cursor).
+ *
+ * RETURNS:
+ *    true -- Cursor is at or past the end of the lines.
+ *    false -- Cursor is in the main text
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayText::IsCursorAtEnd(void)
+{
+    i_TextLines CurLine;
+    bool Blank;
+    int y;
+
+    if(Lines.empty() || ActiveLine==&Lines.back())
+        return true;
+
+    Blank=true;
+    for(CurLine=ScreenFirstLine,y=0;CurLine!=Lines.end();CurLine++,y++)
+    {
+        if(y<=ActiveLineY)
+            continue;
+
+        if(CurLine->LineWidthPx!=0 ||
                 CurLine->EOL!=e_DTEOL_Hard ||
                 !CurLine->Frags.empty() ||
                 CurLine->EOLGuess!=e_DTEOLGuess_Unknown)
@@ -5251,8 +5312,7 @@ void DisplayText::PadOutScreenWithBlankLines(void)
     if(LinesCount<ScreenHeightChars)
     {
         /* We didn't have enough lines, add blank lines */
-        BlankLine.LineBackgroundColor=Settings->
-                DefaultColors[e_DefaultColors_BG];
+        BlankLine.LineBackgroundColor=CurrentStyle.BGColor;
         BlankLine.LineWidthPx=0;
         BlankLine.EOL=e_DTEOL_Hard;
         BlankLine.EOLGuess=e_DTEOLGuess_Unknown;
@@ -6623,7 +6683,8 @@ t_UIRadioBttnCtrl *DisplayText::GetSendPanel_TextRadioBttn(void)
  *    DisplayText::GetSendPanel_BlockBuffer_TextInput
  *
  * SYNOPSIS:
- *    t_UIMuliLineTextInputCtrl *DisplayText::GetSendPanel_BlockBuffer_TextInput(void);
+ *    t_UIMuliLineTextInputCtrl *DisplayText::
+ *              GetSendPanel_BlockBuffer_TextInput(void);
  *
  * PARAMETERS:
  *    NONE
@@ -6640,7 +6701,8 @@ t_UIRadioBttnCtrl *DisplayText::GetSendPanel_TextRadioBttn(void)
  ******************************************************************************/
 t_UIMuliLineTextInputCtrl *DisplayText::GetSendPanel_BlockBuffer_TextInput(void)
 {
-    return UITC_GetMuliLineTextInputHandle(TextDisplayCtrl,e_UITC_MuliTxt_TextInput);
+    return UITC_GetMuliLineTextInputHandle(TextDisplayCtrl,
+            e_UITC_MuliTxt_TextInput);
 }
 
 /*******************************************************************************

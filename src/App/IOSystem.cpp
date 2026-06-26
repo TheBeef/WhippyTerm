@@ -1789,6 +1789,13 @@ static void IOS_UnEscUniqueID(string &EscUniqueID,string &UniqueID)
             }
             *InsertPos++=0;
             c=atoi(buff);
+            if(*pos!='_')
+            {
+                /* Error, should have been a second _ */
+                UniqueID="";
+                return;
+            }
+            pos++;  // Move past the second _
         }
         else
         {

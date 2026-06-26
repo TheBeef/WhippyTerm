@@ -1,0 +1,93 @@
+name: Windows (Manual Build)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version string (the part that would normally follow "Rel_", e.g. 1.0.0.0)'
+        required: true
+        default: '0.0.0.0'
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    name: Build Windows
+    runs-on: windows-latest
+
+    steps:
+    - name: Set version
+      id: RelVer
+      shell: bash
+      run: echo "substring=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        aqtversion: '==3.1.*'
+        version: '6.4.2'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_mingw'
+        modules: 'qtmultimedia'
+
+    - uses: actions/checkout@v4
+
+    - name: Fix qt install (gcc)
+      run: |
+        Rename-Item -Path "D:\a\WhippyTerm\Qt\6.4.2\mingw_64\bin\libgcc_s_seh-1.dll" -NewName "D:\a\WhippyTerm\Qt\6.4.2\mingw_64\bin\libgcc_s_seh-1.xxx"
+        Rename-Item -Path "D:\a\WhippyTerm\Qt\6.4.2\mingw_64\bin\libstdc++-6.dll" -NewName "D:\a\WhippyTerm\Qt\6.4.2\mingw_64\bin\libstdc++-6.xxx"
+        Rename-Item -Path "D:\a\WhippyTerm\Qt\6.4.2\mingw_64\bin\libwinpthread-1.dll" -NewName "D:\a\WhippyTerm\Qt\6.4.2\mingw_64\bin\libwinpthread-1.xxx"
+
+    - name: Build
+      working-directory: ./Project
+      run: |
+        qmake WT.pro
+        make -s
+
+    - name: Collect files
+      working-directory: ./WindowsInstaller
+      run: |
+        copy ../../Qt/6.4.2/mingw_64/bin/Qt6Core.dll InstallFiles6
+        copy ../../Qt/6.4.2/mingw_64/bin/Qt6Gui.dll InstallFiles6
+        copy ../../Qt/6.4.2/mingw_64/bin/Qt6Multimedia.dll InstallFiles6
+        copy ../../Qt/6.4.2/mingw_64/bin/Qt6Network.dll InstallFiles6
+        copy ../../Qt/6.4.2/mingw_64/bin/Qt6Widgets.dll InstallFiles6
+        copy ../../Qt/6.4.2/mingw_64/plugins/platforms/qwindows.dll InstallFiles6/platforms
+        copy ../../Qt/6.4.2/mingw_64/plugins/styles/qwindowsvistastyle.dll InstallFiles6/styles
+        copy C:/mingw64/bin/"libstdc++-6.dll" InstallFiles6
+        copy C:/mingw64/bin/"libgcc_s_seh-1.dll" InstallFiles6
+        copy C:/mingw64/bin/"libwinpthread-1.dll" InstallFiles6
+        copy ../Project/release/WhippyTerm.exe InstallFiles6
+
+    - name: Compile .ISS to .EXE Installer
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+      with:
+        path: WindowsInstaller/WhippyTermInstaller.iss
+        options: /O+
+      env:
+        RELEASE_VER: ${{ steps.RelVer.outputs.substring }}
+
+    - name: Rename installer
+      working-directory: ./WindowsInstaller
+      run: |
+        Rename-Item -Path "D:\a\WhippyTerm\WhippyTerm\WindowsInstaller\Installer\WhippyTermSetup.exe" -NewName "D:\a\WhippyTerm\WhippyTerm\WindowsInstaller\Installer\WhippyTermSetup_${{steps.RelVer.outputs.substring}}.exe"
+
+    - name: Portable Version
+      working-directory: ./WindowsInstaller
+      run: |
+        xcopy InstallFiles6\\* Portable /E /S /Y
+        7z a -r WhippyTermPortable_${{steps.RelVer.outputs.substring}}.zip Portable
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: WhippyTerm-Windows-${{ steps.RelVer.outputs.substring }}
+        path: |
+          WindowsInstaller/Installer/WhippyTermSetup_${{steps.RelVer.outputs.substring}}.exe
+          WindowsInstaller/WhippyTermPortable_${{steps.RelVer.outputs.substring}}.zip
+        if-no-files-found: error

@@ -144,6 +144,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    InitQTSoundSystem();
+
     RetValue=a.exec();
 //    free(m_DataEventQueue);
 

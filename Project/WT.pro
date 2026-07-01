@@ -109,7 +109,6 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/UI/QT/Frame_StylePickerWidget.cpp \
     ../src/UI/QT/Frame_TextCavnasOverrideBox.cpp \
     ../src/UI/QT/QTKeyHandleScrollLock.cpp \
-    ../src/UI/QT/QTSound.cpp \
     ../src/UI/QT/VerPanelHandle.cpp \
     ../src/UI/QT/HozPanelHandle.cpp \
     ../src/UI/QT/Widget_HeaderQLabel.cpp \
@@ -257,6 +256,7 @@ win32 {
     ../src/App/StdPlugins/IODrivers/UDPServer/src/OS/Win/UDPServer_OS_Socket.cpp \
     ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/OS/Windows/WTB_OSTime.cpp \
     ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/OS/Windows/WTB_OSFile.cpp \
+    ../src/UI/QT/Windows/QTSound.cpp \
 
     CONFIG(debug, debug|release){
         SOURCES += \
@@ -278,6 +278,7 @@ linux {
         ../src/OS/RPI/Threads.cpp \
         ../src/OS/RPI/Sockets.cpp \
         ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/OS/RPI/WTB_OSTime.cpp \
+        ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/OS/RPI/WTB_OSFile.cpp \
         ../src/App/StdPlugins/Scripts/WhippyTermBasic/src/OS/RPI/WTB_OSFile.cpp \
 
     }else{
@@ -302,11 +303,14 @@ linux {
         ../src/App/StdPlugins/IODrivers/TCPServer/src/OS/Linux/TCPServer_OS_Socket.cpp \
         ../src/App/StdPlugins/IODrivers/UDPClient/src/OS/Linux/UDPClient_OS_Socket.cpp \
         ../src/App/StdPlugins/IODrivers/UDPServer/src/OS/Linux/UDPServer_OS_Socket.cpp \
+        ../src/UI/QT/Linux/QTSound.cpp \
 
     CONFIG(debug, debug|release){
         SOURCES += \
             ../ExternPlugins/IODrivers/TestLoopback/src/LB2_Main.cpp \
 
+    CONFIG += link_pkgconfig
+    PKGCONFIG += libpipewire-0.3
     }
 }
 

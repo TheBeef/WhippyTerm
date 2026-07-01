@@ -30,6 +30,10 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_BUG_FIX,"Rewrote sound playback system",
+            "Was using the Qt sound playback system but this turned out"
+            " to be unreliable and inconsistent between platforms.  It has"
+            " been rewritten to use platform API calls instead."},
     {   NOTETYPE_POLISH,"Fixed a number background color issues",
             "The background color would act odd when starting from a new"
             " connection/reset term/clear screen.  It has all been cleaned up."},

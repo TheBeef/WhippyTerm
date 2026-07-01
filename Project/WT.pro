@@ -241,6 +241,7 @@ win32 {
     message("Building Windows")
     LIBS+=-lSetupApi
     LIBS+=-lws2_32
+    LIBS+=-lxaudio2_8 -lole32
 
     SOURCES += \
     ../src/OS/Windows/FilePaths.cpp \

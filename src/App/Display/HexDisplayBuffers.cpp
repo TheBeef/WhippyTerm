@@ -4159,7 +4159,7 @@ void HexDisplayBuffer::RethinkCursorPos(void)
  *    'BufferSize' and others will to updated if successful.
  *
  * RETURNS:
- *    true -- Things worked out
+ *    true -- Things worked out (or there was nothing to do)
  *    false -- Could not resize the buffer.  'Buffer' is still valid.
  *
  * SEE ALSO:
@@ -4169,8 +4169,8 @@ bool HexDisplayBuffer::GrowBufferAsNeeded(int NewBufferSize)
 {
     uint8_t *NewBuffer;
 
-    if(WeAllocBuffer)
-        return false;
+    if(!WeAllocBuffer)
+        return true;
 
     if(NewBufferSize>BufferAllocatedSize)
     {

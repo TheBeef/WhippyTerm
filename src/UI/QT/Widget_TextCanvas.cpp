@@ -25,6 +25,7 @@ Widget_TextCanvas::Widget_TextCanvas(QWidget *parent) : QWidget(parent)
     CursorX=0;
     CursorY=0;
 
+    InfoMsgActive=false;
     CursorSet2BeBlinking=true;
     CursorHiddenByBlink=false;
     DrawFocusBox=false;

@@ -185,6 +185,10 @@ private slots:
     
     void on_NewVersion_CheckNow_pushButton_clicked();
     
+    void on_Binary_SetHexDumpAppearance_pushButton_clicked();
+    
+    void on_HexDisplay_SelectDivLineColor_pushButton_clicked();
+    
 private:
     bool DoingEvent;
 

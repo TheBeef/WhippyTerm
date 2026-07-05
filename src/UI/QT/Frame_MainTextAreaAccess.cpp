@@ -912,6 +912,105 @@ void UITC_AddFragment(t_UITextDisplayColumn *Handle,const struct TextCanvasFrag 
 
 /*******************************************************************************
  * NAME:
+ *    UITC_ClearGraphics
+ *
+ * SYNOPSIS:
+ *    void UITC_ClearGraphics(t_UITextDisplayColumn *Handle,bool TopLayer);
+ *
+ * PARAMETERS:
+ *    Handle [I] -- What column to work on
+ *
+ * FUNCTION:
+ *    This function clears all graphics.  Normally the main text area is for
+ *    text, but you can draw graphics as well.  Because modern displays are
+ *    graphic displays this works.  However if a text mode only UI was build
+ *    then these graphics don't do anything.
+ *
+ *    You can clear and set the graphics independent of text layers (clearing
+ *    the text layer has no effect on the graphics and vice versa).
+ *
+ *    This function also reset the graphic attributes.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    UITC_AddGraphicLine()
+ ******************************************************************************/
+void UITC_ClearGraphics(t_UITextDisplayColumn *Handle)
+{
+    Frame_MainTextColumn *Column=(Frame_MainTextColumn *)Handle;
+
+    Column->ui->TextDisplayBox->GraphicsClear();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_AddGraphicLine
+ *
+ * SYNOPSIS:
+ *    void UITC_AddGraphicLine(t_UITextDisplayColumn *Handle,int x,int y,
+ *          int x2,int y2,uint32_t Color);
+ *
+ * PARAMETERS:
+ *    Handle [I] -- What column to work on
+ *    x [I] -- The x pos for the end of the line (relative to the unscrolled
+ *             display, scroll offset is ignored)
+ *    y [I] -- The y pos for the end of the line
+ *    x2 [I] -- The x pos for the other end of the line
+ *    y2 [I] -- The y pos for the other end of the line
+ *    Width [I] -- The width of the line (in pixels)
+ *    Color [I] -- The color of this line
+ *
+ * FUNCTION:
+ *    This function adds a line to the graphics layer.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    UITC_ClearGraphics()
+ ******************************************************************************/
+void UITC_AddGraphicLine(t_UITextDisplayColumn *Handle,int x,int y,
+        int x2,int y2,uint32_t Color)
+{
+    Frame_MainTextColumn *Column=(Frame_MainTextColumn *)Handle;
+
+    Column->ui->TextDisplayBox->GraphicsLine(x,y,x2,y2,Color);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_SetLineWidth
+ *
+ * SYNOPSIS:
+ *    void UITC_SetLineWidth(t_UITextDisplayColumn *Handle,
+ *              unsigned int LineWidth);
+ *
+ * PARAMETERS:
+ *    Handle [I] -- What column to work on
+ *    LineWidth [I] -- The new line width to be used for all graphics command
+ *                     added from this point.
+ *
+ * FUNCTION:
+ *    This function sets the line width for new graphic commands that are added
+ *    from this point.  The line width only applies to some objects.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    UITC_ClearGraphics()
+ ******************************************************************************/
+void UITC_SetLineWidth(t_UITextDisplayColumn *Handle,unsigned int LineWidth)
+{
+    Frame_MainTextColumn *Column=(Frame_MainTextColumn *)Handle;
+
+    Column->ui->TextDisplayBox->GraphicsSetLineWidth(LineWidth);
+}
+
+/*******************************************************************************
+ * NAME:
  *    UITC_SetCursorColor
  *
  * SYNOPSIS:

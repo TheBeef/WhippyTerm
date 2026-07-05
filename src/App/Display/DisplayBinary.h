@@ -138,6 +138,9 @@ class DisplayBinary : public DisplayBase
         int HexBufferSize;
         struct CharStyling *ColorBuffer;    // This is a circular buffer with the styling info for 'HexBuffer' in it
 
+        uint16_t DisplayBytesPerLine;
+        uint16_t LastDisplayBytesPerLine;
+
         struct CharStyling *ColorBottomOfBufferLine;
         struct CharStyling *ColorTopOfBufferLine;
         struct CharStyling *ColorTopLine;
@@ -152,6 +155,8 @@ class DisplayBinary : public DisplayBase
         int CharHeightPx;
         int DisplayLines;
         int WindowXOffsetPx;
+        int DisplayLeftEdge;
+        int DisplayTopEdge;
 
         /* Selection */
         bool SelectionActive;       // Is there an active selection
@@ -197,6 +202,7 @@ class DisplayBinary : public DisplayBase
         struct CharStyling *GetColorPtrFromLinePtr(const uint8_t *Line);
         void FillAttrib(struct DisBin_Block *SelBlock,uint32_t Attribs,bool Set);
         bool CheckIfAttribSet(struct DisBin_Block *SelBlock,uint32_t Attribs);
+        void RethinkHexBuffer(void);
 
         /* Selection */
         bool GetNormalizedSelectionBlocks(struct DisBin_Block *Blocks);

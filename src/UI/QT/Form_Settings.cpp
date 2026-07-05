@@ -894,3 +894,21 @@ void Form_Settings::on_NewVersion_CheckNow_pushButton_clicked()
     SendEvent(e_DSEvent_BttnTriggered,&EventData);
 }
 
+
+void Form_Settings::on_Binary_SetHexDumpAppearance_pushButton_clicked()
+{
+    union DSEventData EventData;
+    
+    EventData.Bttn.InputID=e_UIS_Button_BinarySetHexDumpAppearance;
+    SendEvent(e_DSEvent_BttnTriggered,&EventData);
+}
+
+
+void Form_Settings::on_HexDisplay_SelectDivLineColor_pushButton_clicked()
+{
+    union DSEventData EventData;
+    
+    EventData.Bttn.InputID=e_UIS_Button_HexDisplaySelectDivLineColor;
+    SendEvent(e_DSEvent_BttnTriggered,&EventData);
+}
+

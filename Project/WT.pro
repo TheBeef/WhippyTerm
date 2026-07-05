@@ -54,6 +54,7 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/App/Dialogs/Dialog_HelpCommandLineOptions.cpp \
     ../src/App/Dialogs/Dialog_IODriverSettings.cpp \
     ../src/App/Dialogs/Dialog_NewVersionCheck.cpp \
+    ../src/App/Dialogs/Dialog_SettingsHexDumpAppearance.cpp \
     ../src/App/Dialogs/Dialog_SettingsSelectEditType.cpp \
     ../src/App/Dialogs/Dialog_StylePicker.cpp \
     ../src/App/MWPanels/MW_OutGoingHexDisplay.cpp \
@@ -100,6 +101,8 @@ SOURCES += ../src/UI/QT/main.cpp\
     ../src/UI/QT/Form_SendByteAccess.cpp \
     ../src/UI/QT/Form_SettingsSelectType.cpp \
     ../src/UI/QT/Form_SettingsSelectTypeAccess.cpp \
+    ../src/UI/QT/Form_Settings_HexDumpAppearance.cpp \
+    ../src/UI/QT/Form_Settings_HexDumpAppearanceAccess.cpp \
     ../src/UI/QT/Form_StylePickerDialog.cpp \
     ../src/UI/QT/Form_StylePickerDialogAccess.cpp \
     ../src/UI/QT/Frame_ColorPickerWidget.cpp \
@@ -339,6 +342,7 @@ HEADERS  += ../src/UI/QT/Form_MainWindow.h \
     ../src/UI/QT/Form_SendBufferSelect.h \
     ../src/UI/QT/Form_SendByte.h \
     ../src/UI/QT/Form_SettingsSelectType.h \
+    ../src/UI/QT/Form_Settings_HexDumpAppearance.h \
     ../src/UI/QT/Form_StylePickerDialog.h \
     ../src/UI/QT/Frame_ColorPickerWidget.h \
     ../src/UI/QT/Frame_CustomTextWidget.h \
@@ -406,6 +410,7 @@ FORMS    += ../src/UI/QT/Form_MainWindow.ui \
     ../src/UI/QT/Form_ConnectionOptions.ui \
     ../src/UI/QT/Form_ComTest.ui \
     ../src/UI/QT/Form_SettingsSelectType.ui \
+    ../src/UI/QT/Form_Settings_HexDumpAppearance.ui \
     ../src/UI/QT/Form_StylePickerDialog.ui \
     ../src/UI/QT/Form_TransmitDelay.ui \
     ../src/UI/QT/Form_ManagePlugins.ui \

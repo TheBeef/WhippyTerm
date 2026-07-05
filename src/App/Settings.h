@@ -162,6 +162,12 @@ class ConSettings
         t_StringListType EnabledTermEmuDataProcessors;
         t_StringListType EnabledBinaryDataProcessors;
 
+        /* Binary Hex Dump Appearance */
+        unsigned int BinaryHexBytesPerLine;
+        unsigned int BinaryHexDivEvery;
+        unsigned int BinaryHexDivWidth;
+        uint32_t BinaryHexDivColor;
+
         /* Sounds */
         e_BeepType BeepMode;
         bool UseCustomSound;
@@ -256,6 +262,10 @@ class Settings
         int HexDisplaysFontSize;
         bool HexDisplaysFontBold;
         bool HexDisplaysFontItalic;
+        unsigned int HexDisplaysBytesPerLine;
+        unsigned int HexDisplaysDivEvery;
+        unsigned int HexDisplaysDivWidth;
+        uint32_t HexDisplaysDivColor;
 
         /***** Connections *****/
         bool AutoConnectOnNewConnection;

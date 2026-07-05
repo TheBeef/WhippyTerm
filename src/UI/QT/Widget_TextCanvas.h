@@ -103,6 +103,31 @@ struct WTCLine
 
 typedef std::vector<struct WTCLine> t_WTCLines;
 
+typedef enum
+{
+    e_GraphicDrawCmd_Line,
+    e_GraphicDrawCmdMAX
+} e_GraphicDrawCmdType;
+
+struct GraphicsAttribs
+{
+    unsigned int LineWidth;
+};
+
+struct GraphicDrawCmd
+{
+    e_GraphicDrawCmdType Cmd;
+    int x;
+    int y;
+    int x2;
+    int y2;
+    uint32_t Color;
+    struct GraphicsAttribs Attrib;
+};
+
+typedef std::list<struct GraphicDrawCmd> t_GDrawCmdList;
+typedef t_GDrawCmdList::iterator i_GDrawCmdList;
+
 class Widget_TextCanvas : public QWidget
 {
     Q_OBJECT
@@ -145,6 +170,11 @@ public:
     int GetWidgetHeight(void);
     int GetCharPxWidth(void);
     int GetCharPxHeight(void);
+
+    /* Graphics overlay */
+    void GraphicsClear(void);
+    void GraphicsLine(int x,int y,int x2,int y2,uint32_t Color);
+    void GraphicsSetLineWidth(unsigned int LineWidth);
 
     QColor CursorColor;
 
@@ -212,6 +242,10 @@ private:
     bool OverrideActive;
     Frame_TextCavnasOverrideBox *OverrideWidget;
 
+    /* Graphics overlay */
+    t_GDrawCmdList GraphicsOverlay;
+    struct GraphicsAttribs CurrentGAttiribs;
+
     /* Info message box */
     bool InfoMsgActive;
     QString InfoMsg;
@@ -241,6 +275,8 @@ private:
     void GetCorrectedWidgetSize(int &Width,int &Height);
     void ResizeOverrideWidget(void);
     void RethinkColors(void);
+
+    void DrawGraphicsLayer(QPainter &painter,t_GDrawCmdList &Graphics);
 };
 
 #endif // MYCANVAS_H

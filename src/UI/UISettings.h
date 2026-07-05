@@ -132,6 +132,8 @@ enum e_UIS_Button
     e_UIS_Button_KeyRecord,
     e_UIS_Button_IODriverSettings,
     e_UIS_Button_NewVersionCheckNow,
+    e_UIS_Button_HexDisplaySelectDivLineColor,
+    e_UIS_Button_BinarySetHexDumpAppearance,
     e_UIS_ButtonMAX
 };
 
@@ -159,6 +161,9 @@ enum e_UIS_NumberInput
     e_UIS_NumberInput_DelayAfterNewLineSent,
     e_UIS_NumberInput_TabSize,
     e_UIS_NumberInput_OutGoingHexDisplay_BufferSize,
+    e_UIS_NumberInput_HexDisplay_BytesPerLine,
+    e_UIS_NumberInput_HexDisplay_DividerEvery,
+    e_UIS_NumberInput_HexDisplay_DivLineWidth,
     e_UIS_NumberInputMAX
 };
 
@@ -253,6 +258,7 @@ enum e_UIS_ColorPreview
     e_UIS_ColorPreview_HexDisplay_BGDisplay,
     e_UIS_ColorPreview_HexDisplay_SelBGDisplay,
     e_UIS_ColorPreview_HROverrideColor,
+    e_UIS_ColorPreview_HexDisplay_DivColor,
     e_UIS_ColorPreviewMAX
 };
 

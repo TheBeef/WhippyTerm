@@ -40,6 +40,7 @@ instead of in the GUI (window pos for example, and plugin settings)
 #include "App/Dialogs/Dialog_DataProPluginSettings.h"
 #include "App/Dialogs/Dialog_IODriverSettings.h"
 #include "App/Dialogs/Dialog_NewVersionCheck.h"
+#include "App/Dialogs/Dialog_SettingsHexDumpAppearance.h"
 #include "App/Display/DisplayColors.h"
 #include "App/DataProcessorsSystem.h"
 #include "App/Settings.h"
@@ -166,6 +167,7 @@ uint32_t m_CursorColor;
 uint32_t m_HexDisplaysFGColor;
 uint32_t m_HexDisplaysBGColor;
 uint32_t m_HexDisplaysSelBGColor;
+uint32_t m_HexDisplaysDivColor;
 struct CommandKeySeq m_CopyOfKeyMapping[e_CmdMAX];
 class ConSettings *m_SettingConSettings;
 bool m_SettingConSettingsOnly;
@@ -174,6 +176,10 @@ struct CommandKeySeq m_LastRecordingKeyPressed;
 static struct DriverInfoList *m_DS_IODriverList;
 t_PluginSettings m_CopyOfIODriverPluginsSettings;
 t_PluginSettings m_CopyOfDataProcessorsPluginSettings;
+unsigned int m_CopyOfBinaryHexBytesPerLine;
+unsigned int m_CopyOfBinaryHexDivEvery;
+unsigned int m_CopyOfBinaryHexDivWidth;
+uint32_t m_CopyOfBinaryHexDivColor;
 
 struct ProInfoSortCB
 {
@@ -295,6 +301,12 @@ bool RunSettingsDialog(class TheMainWindow *MW,
     memcpy(&m_CopyOfKeyMapping,&g_Settings.KeyMapping,
             sizeof(m_CopyOfKeyMapping));
     m_CopyOfIODriverPluginsSettings=g_Settings.IODriverPluginsSettings;
+
+    /* Copy the binary hex dump appearance */
+    m_CopyOfBinaryHexBytesPerLine=m_SettingConSettings->BinaryHexBytesPerLine;
+    m_CopyOfBinaryHexDivEvery=m_SettingConSettings->BinaryHexDivEvery;
+    m_CopyOfBinaryHexDivWidth=m_SettingConSettings->BinaryHexDivWidth;
+    m_CopyOfBinaryHexDivColor=m_SettingConSettings->BinaryHexDivColor;
 
     /* Setup the UI */
     AreaList=UIS_GetListViewHandle(e_UIS_ListView_AreaList);
@@ -620,8 +632,8 @@ bool RunSettingsDialog(class TheMainWindow *MW,
                     break;
                 }
             }
-            ApplySettings();
         }
+        ApplySettings();
     }
 
     /* Clear any grabbing of key presses */
@@ -814,6 +826,19 @@ static void DS_SetSettingGUI(void)
     m_HexDisplaysSelBGColor=g_Settings.HexDisplaysSelBGColor;
     ColorPreviewHandle=UIS_GetColorPreviewHandle(e_UIS_ColorPreview_HexDisplay_SelBGDisplay);
     UISetColorPreviewColor(ColorPreviewHandle,m_HexDisplaysSelBGColor);
+
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_HexDisplay_BytesPerLine);
+    UISetNumberInputCtrlValue(NumberInputHandle,g_Settings.HexDisplaysBytesPerLine);
+
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_HexDisplay_DividerEvery);
+    UISetNumberInputCtrlValue(NumberInputHandle,g_Settings.HexDisplaysDivEvery);
+
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_HexDisplay_DivLineWidth);
+    UISetNumberInputCtrlValue(NumberInputHandle,g_Settings.HexDisplaysDivWidth);
+
+    m_HexDisplaysDivColor=g_Settings.HexDisplaysDivColor;
+    ColorPreviewHandle=UIS_GetColorPreviewHandle(e_UIS_ColorPreview_HexDisplay_DivColor);
+    UISetColorPreviewColor(ColorPreviewHandle,m_HexDisplaysDivColor);
 
     /********************/
     /* Startup          */
@@ -1351,6 +1376,17 @@ static void DS_GetSettingsFromGUI(void)
         g_Settings.HexDisplaysBGColor=m_HexDisplaysBGColor;
         g_Settings.HexDisplaysSelBGColor=m_HexDisplaysSelBGColor;
 
+        NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_HexDisplay_BytesPerLine);
+        g_Settings.HexDisplaysBytesPerLine=UIGetNumberInputCtrlValue(NumberInputHandle);
+
+        NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_HexDisplay_DividerEvery);
+        g_Settings.HexDisplaysDivEvery=UIGetNumberInputCtrlValue(NumberInputHandle);
+
+        NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_HexDisplay_DivLineWidth);
+        g_Settings.HexDisplaysDivWidth=UIGetNumberInputCtrlValue(NumberInputHandle);
+
+        g_Settings.HexDisplaysDivColor=m_HexDisplaysDivColor;
+
         /********************/
         /* Startup          */
         /********************/
@@ -1587,6 +1623,12 @@ static void DS_GetSettingsFromGUI(void)
                     push_back(m_BinaryOtherDecoders[ID].IDStr);
         }
     }
+
+    /* UnCopy the binary hex dump appearance */
+    m_SettingConSettings->BinaryHexBytesPerLine=m_CopyOfBinaryHexBytesPerLine;
+    m_SettingConSettings->BinaryHexDivEvery=m_CopyOfBinaryHexDivEvery;
+    m_SettingConSettings->BinaryHexDivWidth=m_CopyOfBinaryHexDivWidth;
+    m_SettingConSettings->BinaryHexDivColor=m_CopyOfBinaryHexDivColor;
 
     /********************/
     /* Colors           */
@@ -3129,6 +3171,26 @@ bool DS_Event(const struct DSEvent *Event)
                     CheckForNewVersionDialog(false,false);
                 break;
 
+                case e_UIS_Button_HexDisplaySelectDivLineColor:
+                    SelColor=UIGetColor(m_HexDisplaysDivColor);
+                    if(SelColor!=0xFFFFFFFF)
+                    {
+                        m_HexDisplaysDivColor=SelColor;
+                        ColorPreviewHandle=UIS_GetColorPreviewHandle(
+                                e_UIS_ColorPreview_HexDisplay_DivColor);
+                        UISetColorPreviewColor(ColorPreviewHandle,
+                                m_HexDisplaysDivColor);
+                    }
+                break;
+
+                case e_UIS_Button_BinarySetHexDumpAppearance:
+                    RunSettingsHexDumpAppearanceDialog(
+                            &m_CopyOfBinaryHexBytesPerLine,
+                            &m_CopyOfBinaryHexDivEvery,
+                            &m_CopyOfBinaryHexDivWidth,
+                            &m_CopyOfBinaryHexDivColor);
+                break;
+
                 case e_UIS_ButtonMAX:
                 default:
                 break;
@@ -3349,6 +3411,9 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_NumberInput_DelayAfterNewLineSent:
                 case e_UIS_NumberInput_TabSize:
                 case e_UIS_NumberInput_OutGoingHexDisplay_BufferSize:
+                case e_UIS_NumberInput_HexDisplay_BytesPerLine:
+                case e_UIS_NumberInput_HexDisplay_DividerEvery:
+                case e_UIS_NumberInput_HexDisplay_DivLineWidth:
                 case e_UIS_NumberInputMAX:
                 default:
                 break;

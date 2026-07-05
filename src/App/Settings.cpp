@@ -1274,6 +1274,10 @@ void Settings::RegisterAllMembers(class TinyCFG &cfg)
             cfg.Register("HexDisplaysFontSize",HexDisplaysFontSize);
             cfg.Register("HexDisplaysFontBold",HexDisplaysFontBold);
             cfg.Register("HexDisplaysFontItalic",HexDisplaysFontItalic);
+            cfg.Register("HexDisplaysBytesPerLine",HexDisplaysBytesPerLine);
+            cfg.Register("HexDisplaysDivEvery",HexDisplaysDivEvery);
+            cfg.Register("HexDisplaysDivWidth",HexDisplaysDivWidth);
+            cfg.Register("HexDisplaysDivColor",HexDisplaysDivColor);
         cfg.EndBlock();
     cfg.EndBlock();
 
@@ -1348,6 +1352,13 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
     cfg.Register("EnabledTermEmuDataProcessors",EnabledTermEmuDataProcessors);
     cfg.Register("EnabledBinaryDataProcessors",EnabledBinaryDataProcessors);
     RegisterPluginSettingsList(cfg,"PlugsinSettings",PluginsSettings);
+    cfg.EndBlock();
+
+    cfg.StartBlock("HexDumpAppearance");
+    cfg.Register("BytesPerLine",BinaryHexBytesPerLine);
+    cfg.Register("DivEvery",BinaryHexDivEvery);
+    cfg.Register("DivWidth",BinaryHexDivWidth);
+    cfg.Register("DivColor",BinaryHexDivColor);
     cfg.EndBlock();
 
     cfg.StartBlock("KeyPressProcessors");
@@ -1453,6 +1464,16 @@ bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
         return false;
     if(Con1.DataProcessorType!=Con2.DataProcessorType)
         return false;
+
+    if(Con1.BinaryHexBytesPerLine!=Con2.BinaryHexBytesPerLine)
+        return false;
+    if(Con1.BinaryHexDivEvery!=Con2.BinaryHexDivEvery)
+        return false;
+    if(Con1.BinaryHexDivWidth!=Con2.BinaryHexDivWidth)
+        return false;
+    if(Con1.BinaryHexDivColor!=Con2.BinaryHexDivColor)
+        return false;
+
     if(Con1.BackspaceKeyMode!=Con2.BackspaceKeyMode)
         return false;
     if(Con1.DestructiveBackspace!=Con2.DestructiveBackspace)
@@ -1558,6 +1579,10 @@ void Settings::DefaultSettings(void)
     HexDisplaysFontSize=12;
     HexDisplaysFontBold=false;
     HexDisplaysFontItalic=false;
+    HexDisplaysBytesPerLine=16;
+    HexDisplaysDivEvery=8;
+    HexDisplaysDivWidth=1;
+    HexDisplaysDivColor=0xCCCCCC;
 
     DefaultConSettings.DefaultSettings();
 
@@ -1602,6 +1627,10 @@ void ConSettings::DefaultSettings(void)
     LocalEcho=false;
     AutoCROnLF=true;
     AutoLFOnCR=false;
+    BinaryHexBytesPerLine=16;
+    BinaryHexDivEvery=8;
+    BinaryHexDivWidth=1;
+    BinaryHexDivColor=0xFFFFFF;
 
     BackspaceKeyMode=e_BackspaceKey_BS;
     DestructiveBackspace=true;

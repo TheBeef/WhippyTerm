@@ -15,8 +15,6 @@
 
 #define FOCUS_BOX_SIZE          1
 
-#define BELL_TIME               1000    // 1000ms
-
 Widget_TextCanvas::Widget_TextCanvas(QWidget *parent) : QWidget(parent)
 {
     WTCEventHandler=NULL;
@@ -518,6 +516,33 @@ void Widget_TextCanvas::RedrawLine(unsigned int Line)
             DisplayWidth,GUICharHeight);
 }
 
+void Widget_TextCanvas::GraphicsClear(void)
+{
+    GraphicsOverlay.clear();
+
+    CurrentGAttiribs.LineWidth=1;
+}
+
+void Widget_TextCanvas::GraphicsLine(int x,int y,int x2,int y2,uint32_t Color)
+{
+    struct GraphicDrawCmd NewCmd;
+
+    NewCmd.Cmd=e_GraphicDrawCmd_Line;
+    NewCmd.x=x;
+    NewCmd.y=y;
+    NewCmd.x2=x2;
+    NewCmd.y2=y2;
+    NewCmd.Attrib=CurrentGAttiribs;
+    NewCmd.Color=Color;
+
+    GraphicsOverlay.push_back(NewCmd);
+}
+
+void Widget_TextCanvas::GraphicsSetLineWidth(unsigned int LineWidth)
+{
+    CurrentGAttiribs.LineWidth=LineWidth;
+}
+
 void Widget_TextCanvas::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
@@ -612,6 +637,9 @@ void Widget_TextCanvas::paintEvent(QPaintEvent *event)
     ScreenY=line*GUICharHeight;
     painter.fillRect(DisplayLeftEdgePx,DisplayTopEdgePx+ScreenY,
             DisplayWidth,DisplayHeight,UseTextAreaBackgroundColor);
+
+    /* Draw the graphics overlay */
+    DrawGraphicsLayer(painter,GraphicsOverlay);
 
     DrawCursor(&painter,&fm);
 
@@ -734,6 +762,34 @@ int Widget_TextCanvas::CalcFragWidth(QFontMetrics *fm,struct WTCFrag *Frag)
         break;
     }
     return px;
+}
+
+void Widget_TextCanvas::DrawGraphicsLayer(QPainter &painter,
+        t_GDrawCmdList &Graphics)
+{
+    i_GDrawCmdList g;
+    QPen DrawPen;
+    int LeftEdge;
+    int TopEdge;
+
+    LeftEdge=DisplayLeftEdgePx-ScrollOffsetX;
+    TopEdge=DisplayTopEdgePx;
+
+    for(g=Graphics.begin();g!=Graphics.end();g++)
+    {
+        switch(g->Cmd)
+        {
+            case e_GraphicDrawCmd_Line:
+                DrawPen.setWidth(g->Attrib.LineWidth);
+                DrawPen.setColor(QColor(g->Color));
+                painter.setPen(DrawPen);
+                painter.drawLine(LeftEdge+g->x,TopEdge+g->y,
+                        LeftEdge+g->x2,TopEdge+g->y2);
+            break;
+            case e_GraphicDrawCmdMAX:
+            break;
+        }
+    }
 }
 
 void Widget_TextCanvas::RethinkCursor(void)

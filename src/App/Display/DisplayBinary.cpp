@@ -42,17 +42,17 @@ using namespace std;
 /*** DEFINES                  ***/
 //#define DEBUG_SHOW_BUFFER_POS               1       // Show the pointers to parts of the screen
 
-#define HEX_BYTES_PER_LINE                      16
+//#define HEX_BYTES_PER_LINE                      (Settings->BinaryHexBytesPerLine)
 #define HEX_MIN_LINES                           24
 #define HEX_SPACE_BETWEEN_HEX_AND_ASCII         3
 
-#define END_OF_HEX_PX           (HEX_BYTES_PER_LINE*3*CharWidthPx)
+#define END_OF_HEX_PX           (DisplayBytesPerLine*3*CharWidthPx)
 #define START_OF_ASCII_PX       (END_OF_HEX_PX+HEX_SPACE_BETWEEN_HEX_AND_ASCII*CharWidthPx)
-#define END_OF_ASCII_PX         (START_OF_ASCII_PX+HEX_BYTES_PER_LINE*CharWidthPx)
+#define END_OF_ASCII_PX         (START_OF_ASCII_PX+DisplayBytesPerLine*CharWidthPx)
 
-#define END_OF_HEX_CHAR         (HEX_BYTES_PER_LINE*3)
-#define START_OF_ASCII_CHAR     (END_OF_HEX_CHAR+HEX_SPACE_BETWEEN_HEX_AND_ASCII)
-#define END_OF_ASCII_CHAR       (START_OF_ASCII_CHAR+HEX_BYTES_PER_LINE)
+#define END_OF_HEX_CHAR         (DisplayBytesPerLine*3)
+#define START_OF_ASCII_CHAR     (END_OF_HEX_CHAR+((unsigned int)HEX_SPACE_BETWEEN_HEX_AND_ASCII))
+#define END_OF_ASCII_CHAR       (START_OF_ASCII_CHAR+DisplayBytesPerLine)
 
 #define SELECTION_SCROLL_SPEED_TIMER            50 // ms
 
@@ -187,11 +187,16 @@ DisplayBinary::DisplayBinary()
     CharWidthPx=1;
     CharHeightPx=1;
     WindowXOffsetPx=0;
+    DisplayLeftEdge=0;
+    DisplayTopEdge=0;
 
     SelectionActive=false;
     SelectionInAscII=false;
     SelectionLine=NULL;
     SelectionAnchorLine=NULL;
+
+    DisplayBytesPerLine=16;
+    LastDisplayBytesPerLine=0;
 
     CursorStyle=e_TextCursorStyle_Block;
 
@@ -251,13 +256,15 @@ bool DisplayBinary::Init(void *ParentWidget,class ConSettings *SettingsPtr,
         /* We show hex input because we are binary */
         Block_SetHexOrTextMode(false);
 
-        HexBufferSize=Settings->ScrollBufferLines*HEX_BYTES_PER_LINE;
-        if(HexBufferSize<HEX_MIN_LINES*HEX_BYTES_PER_LINE)
-            HexBufferSize=HEX_MIN_LINES*HEX_BYTES_PER_LINE;
+        DisplayBytesPerLine=Settings->BinaryHexBytesPerLine;
+
+        HexBufferSize=Settings->ScrollBufferLines*DisplayBytesPerLine;
+        if(HexBufferSize<HEX_MIN_LINES*DisplayBytesPerLine)
+            HexBufferSize=HEX_MIN_LINES*DisplayBytesPerLine;
 
         /* Hex buffer can't handle part lines, all lines must be full */
-        if(HexBufferSize%HEX_BYTES_PER_LINE!=0)
-            HexBufferSize+=HEX_BYTES_PER_LINE-HexBufferSize%HEX_BYTES_PER_LINE;
+        if(HexBufferSize%DisplayBytesPerLine!=0)
+            HexBufferSize+=DisplayBytesPerLine-HexBufferSize%DisplayBytesPerLine;
 
         HexBuffer=(uint8_t *)malloc(HexBufferSize);
         if(HexBuffer==NULL)
@@ -431,7 +438,7 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
 
     RedrawCurrentLine();
 
-    if(InsertPoint>=HEX_BYTES_PER_LINE)
+    if(InsertPoint>=DisplayBytesPerLine)
     {
         NeedRedraw=false;
 
@@ -441,8 +448,8 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
         WasAtBottom=ScrollBarAtBottom();
 
         /* Shift the buffer */
-        BottomOfBufferLine+=HEX_BYTES_PER_LINE;
-        ColorBottomOfBufferLine+=HEX_BYTES_PER_LINE;
+        BottomOfBufferLine+=DisplayBytesPerLine;
+        ColorBottomOfBufferLine+=DisplayBytesPerLine;
         if(BottomOfBufferLine>=EndOfHexBuffer)
         {
             BottomOfBufferLine=HexBuffer;
@@ -461,9 +468,9 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
             }
 
             if(SelectionLine==TopOfBufferLine)
-                SelectionLine+=HEX_BYTES_PER_LINE;
+                SelectionLine+=DisplayBytesPerLine;
             if(SelectionAnchorLine==TopOfBufferLine)
-                SelectionAnchorLine+=HEX_BYTES_PER_LINE;
+                SelectionAnchorLine+=DisplayBytesPerLine;
 
             /* Handle marks */
             InvalidateMarksOnScroll();
@@ -472,8 +479,8 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
             if(TopLine==TopOfBufferLine || WasAtBottom)
             {
                 /* Ok, we ran out of data, move topline too */
-                TopLine+=HEX_BYTES_PER_LINE;
-                ColorTopLine+=HEX_BYTES_PER_LINE;
+                TopLine+=DisplayBytesPerLine;
+                ColorTopLine+=DisplayBytesPerLine;
                 if(TopLine>=EndOfHexBuffer)
                 {
                     TopLine=HexBuffer;
@@ -483,8 +490,8 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
             }
 
             /* Move the start of the buffer */
-            TopOfBufferLine+=HEX_BYTES_PER_LINE;
-            ColorTopOfBufferLine+=HEX_BYTES_PER_LINE;
+            TopOfBufferLine+=DisplayBytesPerLine;
+            ColorTopOfBufferLine+=DisplayBytesPerLine;
             if(TopOfBufferLine>=EndOfHexBuffer)
             {
                 TopOfBufferLine=HexBuffer;
@@ -559,9 +566,9 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
             UITC_RedrawScreen(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
         break;
         case e_TextDisplayEvent_DisplayFrameScrollY:
-            TopLine=TopOfBufferLine+Event->Info.Scroll.Amount*HEX_BYTES_PER_LINE;
+            TopLine=TopOfBufferLine+Event->Info.Scroll.Amount*DisplayBytesPerLine;
             ColorTopLine=ColorTopOfBufferLine+
-                    (Event->Info.Scroll.Amount*HEX_BYTES_PER_LINE);
+                    (Event->Info.Scroll.Amount*DisplayBytesPerLine);
             if(TopLine>EndOfHexBuffer)
             {
                 Offset=TopLine-EndOfHexBuffer;
@@ -751,7 +758,10 @@ void DisplayBinary::ScreenResize(void)
 
     /* Horizontal */
     ScreenChars=ScreenWidthPx/CharWidthPx;
+    if(Settings->TermSizeFixedWidth)
+        ScreenChars=Settings->TermSizeWidth;
     TotalChars=END_OF_ASCII_CHAR;
+
     UISetScrollBarPageSizeAndMax(HozScroll,ScreenChars,TotalChars);
 }
 
@@ -789,7 +799,7 @@ void DisplayBinary::RethinkYScrollBar(void)
         Bytes=(EndOfHexBuffer-TopOfBufferLine)+(BottomOfBufferLine-HexBuffer);
     else
         Bytes=BottomOfBufferLine-TopOfBufferLine;
-    TotalLines=Bytes/HEX_BYTES_PER_LINE;
+    TotalLines=Bytes/DisplayBytesPerLine;
     TotalLines++;
 
     /* Figure out the current topline in lines */
@@ -797,7 +807,7 @@ void DisplayBinary::RethinkYScrollBar(void)
         Bytes=TopLine-TopOfBufferLine;
     else
         Bytes=(EndOfHexBuffer-TopOfBufferLine)+(TopLine-HexBuffer);
-    TopLineY=(Bytes+HEX_BYTES_PER_LINE-1)/HEX_BYTES_PER_LINE;
+    TopLineY=(Bytes+DisplayBytesPerLine-1)/DisplayBytesPerLine;
 
     /* Vert */
     VertScroll=UITC_GetVertSlider(TextDisplayCtrl);
@@ -826,8 +836,8 @@ void DisplayBinary::RethinkYScrollBar(void)
  ******************************************************************************/
 void DisplayBinary::RethinkWindowSize(void)
 {
-    int LeftEdge;
-    int TopEdge;
+//    int LeftEdge;
+//    int TopEdge;
     int Width;
     int Height;
 
@@ -835,34 +845,34 @@ void DisplayBinary::RethinkWindowSize(void)
     if(TextDisplayCtrl==NULL)
         return;
 
-    LeftEdge=0;
-    TopEdge=0;
+    DisplayLeftEdge=0;
+    DisplayTopEdge=0;
     Width=ScreenWidthPx;
     Height=ScreenHeightPx;
 
     if(Settings->TermSizeFixedWidth)
     {
         Width=Settings->TermSizeWidth*CharWidthPx;
-        LeftEdge=ScreenWidthPx/2-Width/2;
-        if(LeftEdge<0)
-            LeftEdge=0;
+        DisplayLeftEdge=ScreenWidthPx/2-Width/2;
+        if(DisplayLeftEdge<0)
+            DisplayLeftEdge=0;
 
         if(!Settings->CenterTextInWindow)
-            LeftEdge=0;
+            DisplayLeftEdge=0;
     }
 
     if(Settings->TermSizeFixedHeight)
     {
         Height=Settings->TermSizeHeight*CharHeightPx;
-        TopEdge=ScreenHeightPx/2-Height/2;
-        if(TopEdge<0)
-            TopEdge=0;
+        DisplayTopEdge=ScreenHeightPx/2-Height/2;
+        if(DisplayTopEdge<0)
+            DisplayTopEdge=0;
 
         if(!Settings->CenterTextInWindow)
-            TopEdge=0;
+            DisplayTopEdge=0;
     }
 
-    UITC_SetClippingWindow(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),LeftEdge,TopEdge,Width,Height);
+    UITC_SetClippingWindow(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),DisplayLeftEdge,DisplayTopEdge,Width,Height);
     UITC_SetMaxLines(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),DisplayLines,
             Settings->DefaultColors[e_DefaultColors_BG]);
 }
@@ -943,7 +953,7 @@ void DisplayBinary::RedrawCurrentLine(void)
         Bytes=(EndOfHexBuffer-TopLine)+(BottomOfBufferLine-HexBuffer);
     else
         Bytes=BottomOfBufferLine-TopLine;
-    y=Bytes/HEX_BYTES_PER_LINE;
+    y=Bytes/DisplayBytesPerLine;
 
     /* Don't do anything if the insert line is not on the screen */
     if(y>=DisplayLines)
@@ -975,8 +985,11 @@ void DisplayBinary::RedrawScreen(void)
 {
     const uint8_t *StartOfLine;
     const struct CharStyling *ColorStartOfLine;
+    int x;
     int y;
     int Bytes2Draw;
+    unsigned int r;
+    unsigned int Lines;
 
     StartOfLine=TopLine;
     ColorStartOfLine=ColorTopLine;
@@ -987,16 +1000,33 @@ void DisplayBinary::RedrawScreen(void)
             StartOfLine=HexBuffer;
             ColorStartOfLine=ColorBuffer;
         }
-        Bytes2Draw=HEX_BYTES_PER_LINE;
+        Bytes2Draw=DisplayBytesPerLine;
         if(StartOfLine==BottomOfBufferLine)
             Bytes2Draw=InsertPoint;
 
         DrawLine(StartOfLine,ColorStartOfLine,y,Bytes2Draw);
-        if(Bytes2Draw!=HEX_BYTES_PER_LINE)
+        if(Bytes2Draw!=DisplayBytesPerLine)
             break;
 
-        StartOfLine+=HEX_BYTES_PER_LINE;
-        ColorStartOfLine+=HEX_BYTES_PER_LINE;
+        StartOfLine+=DisplayBytesPerLine;
+        ColorStartOfLine+=DisplayBytesPerLine;
+    }
+
+    /* Add the divider lines */
+    UITC_ClearGraphics(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
+    if(Settings->BinaryHexDivEvery>0)
+    {
+        UITC_SetLineWidth(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                Settings->BinaryHexDivWidth);
+
+        Lines=(DisplayBytesPerLine+Settings->BinaryHexDivEvery-1)/
+                Settings->BinaryHexDivEvery;
+        for(r=1;r<Lines;r++)
+        {
+            x=(r*Settings->BinaryHexDivEvery*CharWidthPx*3)-(CharWidthPx/2);
+            UITC_AddGraphicLine(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                    x,0,x,ScreenHeightPx,Settings->BinaryHexDivColor);
+        }
     }
 }
 
@@ -1113,8 +1143,8 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
     if(x>0)
         ColorBuff[x*3-1]=SpaceStyle;
 
-    memset(&LineBuff[START_OF_ASCII_CHAR+x],' ',HEX_BYTES_PER_LINE-x);
-    for(r=0;r<HEX_BYTES_PER_LINE-x;r++)
+    memset(&LineBuff[START_OF_ASCII_CHAR+x],' ',DisplayBytesPerLine-x);
+    for(r=0;r<DisplayBytesPerLine-x;r++)
         ColorBuff[START_OF_ASCII_CHAR+x+r]=SpaceStyle;
 
     LineBuff[END_OF_ASCII_CHAR]=0;
@@ -1131,7 +1161,7 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
                     Offset=START_OF_ASCII_CHAR;
                     HighLightStart=SelBlocks[s].Start.Offset;
                     HighLightEnd=SelBlocks[s].End.Offset+1;
-                    HighLightMaxSize=HEX_BYTES_PER_LINE;
+                    HighLightMaxSize=DisplayBytesPerLine;
                     HighLightLineSize=SelBlocks[s].End.Offset-
                             SelBlocks[s].Start.Offset+1;
                 }
@@ -1142,7 +1172,7 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
                     Offset=0;
                     HighLightStart=SelBlocks[s].Start.Offset*3;
                     HighLightEnd=(SelBlocks[s].End.Offset+1)*3-1;
-                    HighLightMaxSize=HEX_BYTES_PER_LINE*3-1;
+                    HighLightMaxSize=DisplayBytesPerLine*3-1;
                     HighLightLineSize=(SelBlocks[s].End.Offset-
                             SelBlocks[s].Start.Offset+1)*3-1;
                 }
@@ -1199,33 +1229,33 @@ void DisplayBinary::DrawLine(const uint8_t *Line,
 #ifdef DEBUG_SHOW_BUFFER_POS
     if(Line==TopOfBufferLine)
     {
-        ColorBuff[HEX_BYTES_PER_LINE*3+1].BGColor=0xFF0000; // Red
-        LineBuff[HEX_BYTES_PER_LINE*3+1]='^';
+        ColorBuff[DisplayBytesPerLine*3+1].BGColor=0xFF0000; // Red
+        LineBuff[DisplayBytesPerLine*3+1]='^';
     }
     if(Line==BottomOfBufferLine)
     {
-        ColorBuff[HEX_BYTES_PER_LINE*3+1].BGColor=0x00FF00; // Green
-        LineBuff[HEX_BYTES_PER_LINE*3+1]='B';
+        ColorBuff[DisplayBytesPerLine*3+1].BGColor=0x00FF00; // Green
+        LineBuff[DisplayBytesPerLine*3+1]='B';
     }
     if(Line==TopLine)
     {
-        ColorBuff[HEX_BYTES_PER_LINE*3+0].BGColor=0x0000FF; // Blue
-        LineBuff[HEX_BYTES_PER_LINE*3+0]='T';
+        ColorBuff[DisplayBytesPerLine*3+0].BGColor=0x0000FF; // Blue
+        LineBuff[DisplayBytesPerLine*3+0]='T';
     }
     if(Line==HexBuffer)
     {
-        ColorBuff[HEX_BYTES_PER_LINE*3+1].BGColor=0xFFFF00; // Yellow
-        LineBuff[HEX_BYTES_PER_LINE*3+1]='H';
+        ColorBuff[DisplayBytesPerLine*3+1].BGColor=0xFFFF00; // Yellow
+        LineBuff[DisplayBytesPerLine*3+1]='H';
     }
     if(Line==SelectionAnchorLine)
     {
-        ColorBuff[HEX_BYTES_PER_LINE*3+2].BGColor=0xFFFFFF; // White
-        LineBuff[HEX_BYTES_PER_LINE*3+2]='A';
+        ColorBuff[DisplayBytesPerLine*3+2].BGColor=0xFFFFFF; // White
+        LineBuff[DisplayBytesPerLine*3+2]='A';
     }
     if(Line==SelectionLine)
     {
-        ColorBuff[HEX_BYTES_PER_LINE*3+2].BGColor=0xFF00FF; // Perp
-        LineBuff[HEX_BYTES_PER_LINE*3+2]='S';
+        ColorBuff[DisplayBytesPerLine*3+2].BGColor=0xFF00FF; // Perp
+        LineBuff[DisplayBytesPerLine*3+2]='S';
     }
 
     /* Add the address to the end of the buffer */
@@ -1426,7 +1456,7 @@ void DisplayBinary::RethinkCursor(void)
         Bytes=(EndOfHexBuffer-TopOfBufferLine)+(BottomOfBufferLine-HexBuffer);
     else
         Bytes=BottomOfBufferLine-TopOfBufferLine;
-    TotalLines=Bytes/HEX_BYTES_PER_LINE;
+    TotalLines=Bytes/DisplayBytesPerLine;
     TotalLines++;
 
     /* Figure out the current topline in lines */
@@ -1434,13 +1464,14 @@ void DisplayBinary::RethinkCursor(void)
         Bytes=TopLine-TopOfBufferLine;
     else
         Bytes=(EndOfHexBuffer-TopOfBufferLine)+(TopLine-HexBuffer);
-    TopLineY=Bytes/HEX_BYTES_PER_LINE;
+    TopLineY=Bytes/DisplayBytesPerLine;
     TopLineY++;
 
     if(TotalLines<DisplayLines)
     {
         /* Simple cal's all line are visible */
-        y=(BottomOfBufferLine-TopOfBufferLine)/HEX_BYTES_PER_LINE;
+        y=TotalLines-TopLineY;
+//        y=(BottomOfBufferLine-TopOfBufferLine)/DisplayBytesPerLine;
     }
     else
     {
@@ -1910,18 +1941,19 @@ bool DisplayBinary::ConvertScreenXY2BufferLinePtr(int x,int y,uint8_t **Ptr,
     *Ptr=NULL;
     *Offset=0;
 
+    /* Add the offset */
+    x+=WindowXOffsetPx-DisplayLeftEdge;
+    y-=DisplayTopEdge;
+
     if(x<0 || y<0)
         return false;
-
-    /* Add the offset */
-    x+=WindowXOffsetPx;
 
     /* Check if we are clicking a "dead" space */
     if((x>=END_OF_HEX_PX && x<START_OF_ASCII_PX) || x>=END_OF_ASCII_PX)
         return false;
 
     YOffset=y/CharHeightPx;
-    SelLine=TopLine+YOffset*HEX_BYTES_PER_LINE;
+    SelLine=TopLine+YOffset*DisplayBytesPerLine;
     if(SelLine>=EndOfHexBuffer)
     {
         /* Wrap */
@@ -1948,7 +1980,7 @@ bool DisplayBinary::ConvertScreenXY2BufferLinePtr(int x,int y,uint8_t **Ptr,
     *Ptr=SelLine;
     *Offset=XOffset;
 
-    return false;
+    return true;
 }
 
 /*******************************************************************************
@@ -2011,13 +2043,13 @@ void DisplayBinary::ConvertOffset2Point(uint32_t Offset,
     uint32_t Lines;
     uint8_t *Ptr;
 
-    Lines=Offset/HEX_BYTES_PER_LINE;
-    Ptr=TopOfBufferLine+Lines*HEX_BYTES_PER_LINE;
+    Lines=Offset/DisplayBytesPerLine;
+    Ptr=TopOfBufferLine+Lines*DisplayBytesPerLine;
     if(Ptr>=EndOfHexBuffer)
         Ptr-=HexBufferSize;
 
     Point->Line=Ptr;
-    Point->Offset=Offset%HEX_BYTES_PER_LINE;
+    Point->Offset=Offset%DisplayBytesPerLine;
 }
 
 /*******************************************************************************
@@ -2139,15 +2171,15 @@ bool DisplayBinary::GetSelectionString(std::string &Clip)
         {
             /* The first line (partal line) */
             BuildSelOutputAndAppendData(Clip,&Line[StartOffset],
-                    HEX_BYTES_PER_LINE-StartOffset,SelectionInAscII);
-            Line+=HEX_BYTES_PER_LINE;
+                    DisplayBytesPerLine-StartOffset,SelectionInAscII);
+            Line+=DisplayBytesPerLine;
 
             /* Full lines */
             while(Line!=End)
             {
-                BuildSelOutputAndAppendData(Clip,Line,HEX_BYTES_PER_LINE,
+                BuildSelOutputAndAppendData(Clip,Line,DisplayBytesPerLine,
                         SelectionInAscII);
-                Line+=HEX_BYTES_PER_LINE;
+                Line+=DisplayBytesPerLine;
             }
 
             /* The last line (partal line) */
@@ -2204,7 +2236,7 @@ void DisplayBinary::BuildSelOutputAndAppendData(std::string &Dest,
         const uint8_t *Src,int Bytes,bool AscII)
 {
     int r;
-    char buff[HEX_BYTES_PER_LINE*3+1];
+    char buff[MAX_BINARY_HEX_BYTES_PER_LINE*3+1];
 
     if((unsigned)Bytes*3>=sizeof(buff))
         return;
@@ -2449,8 +2481,8 @@ void DisplayBinary::GetNormalizedPoints(struct DisBin_PointPair *P1,
         {
             Blocks[0].Start.Line=P1->Line;
             Blocks[0].Start.Offset=P1->Offset;
-            Blocks[0].End.Line=EndOfHexBuffer-HEX_BYTES_PER_LINE;
-            Blocks[0].End.Offset=HEX_BYTES_PER_LINE-1;
+            Blocks[0].End.Line=EndOfHexBuffer-DisplayBytesPerLine;
+            Blocks[0].End.Offset=DisplayBytesPerLine-1;
 
             Blocks[1].Start.Line=HexBuffer;
             Blocks[1].Start.Offset=0;
@@ -2461,8 +2493,8 @@ void DisplayBinary::GetNormalizedPoints(struct DisBin_PointPair *P1,
         {
             Blocks[0].Start.Line=P2->Line;
             Blocks[0].Start.Offset=P2->Offset;
-            Blocks[0].End.Line=EndOfHexBuffer-HEX_BYTES_PER_LINE;
-            Blocks[0].End.Offset=HEX_BYTES_PER_LINE-1;
+            Blocks[0].End.Line=EndOfHexBuffer-DisplayBytesPerLine;
+            Blocks[0].End.Offset=DisplayBytesPerLine-1;
 
             Blocks[1].Start.Line=HexBuffer;
             Blocks[1].Start.Offset=0;
@@ -2496,13 +2528,302 @@ void DisplayBinary::GetNormalizedPoints(struct DisBin_PointPair *P1,
  ******************************************************************************/
 void DisplayBinary::ApplySettings(void)
 {
+    int NewSize;            // The new size of 'HexBuffer'
+
     if(TextDisplayCtrl==NULL)
         return;
 
+    if(HexBuffer==NULL || ColorBuffer==NULL)
+        return;
+
+    DisplayBytesPerLine=Settings->BinaryHexBytesPerLine;
+    if(DisplayBytesPerLine<1)
+        DisplayBytesPerLine=1;
+    if(DisplayBytesPerLine>MAX_BINARY_HEX_BYTES_PER_LINE)
+        DisplayBytesPerLine=MAX_BINARY_HEX_BYTES_PER_LINE;
+
     if(g_Settings.MouseCursorIBeam)
-        UITC_SetMouseCursor(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),e_UIMouse_Cursor_IBeam);
+    {
+        UITC_SetMouseCursor(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                e_UIMouse_Cursor_IBeam);
+    }
     else
-        UITC_SetMouseCursor(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),e_UIMouse_Cursor_Default);
+    {
+        UITC_SetMouseCursor(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+                e_UIMouse_Cursor_Default);
+    }
+
+    /* Figure out how big the buffer should be with the current settings */
+    NewSize=Settings->ScrollBufferLines*DisplayBytesPerLine;
+    if(NewSize<HEX_MIN_LINES*DisplayBytesPerLine)
+        NewSize=HEX_MIN_LINES*DisplayBytesPerLine;
+
+    /* Hex buffer can't handle part lines, all lines must be full */
+    if(NewSize%DisplayBytesPerLine!=0)
+        NewSize+=DisplayBytesPerLine-NewSize%DisplayBytesPerLine;
+
+    if(DisplayBytesPerLine!=LastDisplayBytesPerLine || NewSize!=HexBufferSize)
+        RethinkHexBuffer();
+
+    LastDisplayBytesPerLine=DisplayBytesPerLine;
+
+    /* Redraw screen */
+    UITC_ClearAllLines(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
+    ScreenResize();
+    RethinkWindowSize();
+    RethinkYScrollBar();
+    RethinkCursor();
+    RedrawScreen();
+    UITC_RedrawScreen(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::RethinkHexBuffer
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::RethinkHexBuffer(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function rethinks all the things that depend on the HexBuffer.
+ *    This includes things that come from settings and other sources (for
+ *    example Settings->BinaryHexBytesPerLine need to recal a bunch of things
+ *    if it changes).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::RethinkHexBuffer(void)
+{
+    int StreamBytes;        // The number of bytes of data in 'HexBuffer'
+    int KeepBytes;          // The number of bytes of data we are keeping
+    int TopLineOffset;      // 'TopLine' as a byte offset from the oldest byte
+    int SelOffset;          // The selection point as a byte offset
+    int SelAnchorOffset;    // The selection anchor as a byte offset
+    bool ConvertSelection;  // Do we have a selection to rebuild
+    int NewSize;            // The new size of 'HexBuffer'
+    int DropBytes;          // The number of (oldest) bytes we have to drop
+    int TotalLines;         // The number of lines in the buffer after the change
+    int MaxTopLineOffset;   // The lowest 'TopLine' the scroll bar can get back to
+    int Offset;             // Scratch byte offset
+    int Chunk1;             // Bytes to copy before the old buffer wraps
+    int Chunk2;             // Bytes to copy after the old buffer wraps
+    uint8_t *NewHexBuffer;
+    struct CharStyling *NewColorBuffer;
+    uint8_t *Src;
+    struct BinaryPointMarker *Marker;
+
+    /* Figure out how big the buffer should be with the current settings */
+    NewSize=Settings->ScrollBufferLines*DisplayBytesPerLine;
+    if(NewSize<HEX_MIN_LINES*DisplayBytesPerLine)
+        NewSize=HEX_MIN_LINES*DisplayBytesPerLine;
+
+    /* Hex buffer can't handle part lines, all lines must be full */
+    if(NewSize%DisplayBytesPerLine!=0)
+        NewSize+=DisplayBytesPerLine-NewSize%DisplayBytesPerLine;
+
+    /**** Recalculate 'HexBuffer' and all the pointers into it ****/
+
+    /* Step 1: Get the new buffers.  We use malloc()+copy+free() instead
+       of realloc() because realloc() throws away the end of the old
+       block when it shrinks (which can be the newest data because the
+       buffer is circular) and we have to unwrap (copy) the data anyway */
+    NewHexBuffer=(uint8_t *)malloc(NewSize);
+    NewColorBuffer=(struct CharStyling *)malloc(NewSize*
+            sizeof(struct CharStyling));
+    if(NewHexBuffer==NULL || NewColorBuffer==NULL)
+    {
+        /* Out of memory.  Abandon the change and leave things as they
+           are (put the old width back) */
+        free(NewHexBuffer);
+        free(NewColorBuffer);
+        DisplayBytesPerLine=LastDisplayBytesPerLine;
+        return;
+    }
+
+    /* Step 2: Convert everything to byte offsets from the oldest byte. */
+    if(TopOfBufferLine>BottomOfBufferLine)
+    {
+        StreamBytes=(EndOfHexBuffer-TopOfBufferLine)+
+                (BottomOfBufferLine-HexBuffer);
+    }
+    else
+    {
+        StreamBytes=BottomOfBufferLine-TopOfBufferLine;
+    }
+    StreamBytes+=InsertPoint;
+
+    if(TopLine>=TopOfBufferLine)
+        TopLineOffset=TopLine-TopOfBufferLine;
+    else
+        TopLineOffset=(EndOfHexBuffer-TopOfBufferLine)+(TopLine-HexBuffer);
+
+    ConvertSelection=false;
+    SelOffset=0;
+    SelAnchorOffset=0;
+    if(SelectionActive && SelectionLine!=NULL && SelectionAnchorLine!=NULL)
+    {
+        if(SelectionLine>=TopOfBufferLine)
+        {
+            SelOffset=SelectionLine-TopOfBufferLine;
+        }
+        else
+        {
+            SelOffset=(EndOfHexBuffer-TopOfBufferLine)+
+                    (SelectionLine-HexBuffer);
+        }
+        SelOffset+=SelectionLineOffset;
+
+        if(SelectionAnchorLine>=TopOfBufferLine)
+        {
+            SelAnchorOffset=SelectionAnchorLine-TopOfBufferLine;
+        }
+        else
+        {
+            SelAnchorOffset=(EndOfHexBuffer-TopOfBufferLine)+
+                    (SelectionAnchorLine-HexBuffer);
+        }
+        SelAnchorOffset+=SelectionLineAnchorOffset;
+
+        ConvertSelection=true;
+    }
+
+    /* Marks: park the byte offset in 'Offset' until we rebuild below */
+    for(Marker=MarkerList;Marker!=NULL;Marker=Marker->Next)
+    {
+        if(!Marker->Valid)
+            continue;
+
+        if(Marker->Line>=TopOfBufferLine)
+            Offset=Marker->Line-TopOfBufferLine;
+        else
+            Offset=(EndOfHexBuffer-TopOfBufferLine)+(Marker->Line-HexBuffer);
+
+        Marker->Offset=Offset+Marker->Offset;
+        Marker->Line=NULL;
+    }
+
+    /* Step 3: Figure out if we have to drop any of the oldest bytes.
+       The bottom (insert) line must always fully fit inside the buffer
+       so the most we can hold is 'NewSize'-1 bytes.  We drop whole lines
+       so that if the width didn't change the surviving data stays on the
+       same lines (this is also what happens when the buffer overflows
+       normally) */
+    DropBytes=0;
+    if(StreamBytes>NewSize-1)
+    {
+        DropBytes=StreamBytes-(NewSize-1);
+        if(DropBytes%DisplayBytesPerLine!=0)
+            DropBytes+=DisplayBytesPerLine-DropBytes%DisplayBytesPerLine;
+    }
+    KeepBytes=StreamBytes-DropBytes;
+
+    /* Step 4: Copy the data we are keeping into the new buffers.  The
+       data starts 'DropBytes' in from the oldest byte and can wrap in
+       the old buffer.  The copy unwraps it (the new buffer starts out
+       not wrapped) */
+    Src=TopOfBufferLine+DropBytes;
+    if(Src>=EndOfHexBuffer)
+        Src=HexBuffer+(Src-EndOfHexBuffer);
+
+    Chunk1=EndOfHexBuffer-Src;
+    if(Chunk1>KeepBytes)
+        Chunk1=KeepBytes;
+    Chunk2=KeepBytes-Chunk1;
+
+    memcpy(NewHexBuffer,Src,Chunk1);
+    memcpy(&NewHexBuffer[Chunk1],HexBuffer,Chunk2);
+
+    memcpy(NewColorBuffer,&ColorBuffer[Src-HexBuffer],
+            Chunk1*sizeof(struct CharStyling));
+    memcpy(&NewColorBuffer[Chunk1],ColorBuffer,
+            Chunk2*sizeof(struct CharStyling));
+
+    free(HexBuffer);
+    free(ColorBuffer);
+    HexBuffer=NewHexBuffer;
+    ColorBuffer=NewColorBuffer;
+    HexBufferSize=NewSize;
+    EndOfHexBuffer=HexBuffer+HexBufferSize;
+
+    /* Step 5: Rebuild the pointers for the new width */
+    TopOfBufferLine=HexBuffer;
+    ColorTopOfBufferLine=ColorBuffer;
+
+    Offset=(KeepBytes/DisplayBytesPerLine)*DisplayBytesPerLine;
+    BottomOfBufferLine=HexBuffer+Offset;
+    ColorBottomOfBufferLine=ColorBuffer+Offset;
+    InsertPoint=KeepBytes%DisplayBytesPerLine;
+
+    /* Step 6: Put 'TopLine' back on the nearest byte that meets its
+       alignment needs (it must be on a multiple of 'DisplayBytesPerLine'
+       from the start of the data and it can't be below the lowest valid
+       scroll position) */
+    TopLineOffset-=DropBytes;
+    if(TopLineOffset<0)
+        TopLineOffset=0;
+    TopLineOffset=((TopLineOffset+DisplayBytesPerLine/2)/DisplayBytesPerLine)*
+            DisplayBytesPerLine;
+
+    TotalLines=KeepBytes/DisplayBytesPerLine+1;   // +1 for the insert line
+    MaxTopLineOffset=0;
+    if(TotalLines>DisplayLines)
+        MaxTopLineOffset=(TotalLines-DisplayLines)*DisplayBytesPerLine;
+    if(TopLineOffset>MaxTopLineOffset)
+        TopLineOffset=MaxTopLineOffset;
+
+    if(TopLineOffset>BottomOfBufferLine-HexBuffer)
+        TopLineOffset=BottomOfBufferLine-HexBuffer;
+    TopLine=HexBuffer+TopLineOffset;
+    ColorTopLine=ColorBuffer+TopLineOffset;
+
+    /* Step 7: Rebuild the selection */
+    if(ConvertSelection)
+    {
+        SelOffset-=DropBytes;
+        SelAnchorOffset-=DropBytes;
+        if(SelOffset<0 || SelAnchorOffset<0)
+        {
+            /* Part of the selection was dropped, kill the selection */
+            SelectionActive=false;
+            SelectionLine=NULL;
+            SelectionAnchorLine=NULL;
+        }
+        else
+        {
+            SelectionLine=HexBuffer+
+                    (SelOffset/DisplayBytesPerLine)*DisplayBytesPerLine;
+            SelectionLineOffset=SelOffset%DisplayBytesPerLine;
+            SelectionAnchorLine=HexBuffer+
+                    (SelAnchorOffset/DisplayBytesPerLine)*DisplayBytesPerLine;
+            SelectionLineAnchorOffset=SelAnchorOffset%DisplayBytesPerLine;
+        }
+    }
+
+    /* Step 8: Rebuild the marks */
+    for(Marker=MarkerList;Marker!=NULL;Marker=Marker->Next)
+    {
+        if(!Marker->Valid)
+            continue;
+
+        Marker->Offset-=DropBytes;
+        if(Marker->Offset<0)
+        {
+            /* The data this mark was pointing at was dropped */
+            Marker->Valid=false;
+            continue;
+        }
+
+        Marker->Line=HexBuffer+
+                (Marker->Offset/DisplayBytesPerLine)*DisplayBytesPerLine;
+        Marker->Offset=Marker->Offset%DisplayBytesPerLine;
+    }
 }
 
 /*******************************************************************************
@@ -3032,8 +3353,8 @@ uint8_t *DisplayBinary::GetSelectionRAW(unsigned int *Bytes)
         if(Start!=End)
         {
             /* The first line (partal line) */
-            TotalBytes+=HEX_BYTES_PER_LINE-StartOffset;
-            Line+=HEX_BYTES_PER_LINE;
+            TotalBytes+=DisplayBytesPerLine-StartOffset;
+            Line+=DisplayBytesPerLine;
 
             /* Full lines */
             TotalBytes+=End-Line;
@@ -3080,9 +3401,9 @@ uint8_t *DisplayBinary::GetSelectionRAW(unsigned int *Bytes)
         {
             /* The first line (partal line) */
             memcpy(RetBuffInsertPos,&Line[StartOffset],
-                    HEX_BYTES_PER_LINE-StartOffset);
-            RetBuffInsertPos+=HEX_BYTES_PER_LINE-StartOffset;
-            Line+=HEX_BYTES_PER_LINE;
+                    DisplayBytesPerLine-StartOffset);
+            RetBuffInsertPos+=DisplayBytesPerLine-StartOffset;
+            Line+=DisplayBytesPerLine;
 
             /* Full lines */
             memcpy(RetBuffInsertPos,Line,End-Line);
@@ -3913,6 +4234,8 @@ void DisplayBinary::MoveViewBottom(void)
     /* Vert */
     TotalLines=UIGetScrollBarTotalSize(VertScroll);
     MaxPos=TotalLines-DisplayLines;
+    if(MaxPos<0)
+        MaxPos=0;
 
     UISetScrollBarPos(VertScroll,MaxPos);
 }

@@ -322,6 +322,10 @@ void UITC_SetMaxLines(t_UITextDisplayColumn *Handle,int MaxLines,uint32_t BGColo
 void UITC_RedrawScreen(t_UITextDisplayColumn *Handle);
 void UITC_SetDrawMask(t_UITextDisplayColumn *Handle,uint16_t Mask);
 
+void UITC_ClearGraphics(t_UITextDisplayColumn *Handle);
+void UITC_AddGraphicLine(t_UITextDisplayColumn *Handle,int x,int y,int x2,int y2,uint32_t Color);
+void UITC_SetLineWidth(t_UITextDisplayColumn *Handle,unsigned int LineWidth);
+
 /* Columns */
 t_UITextDisplayColumn *UITC_AddColumn(t_UITextDisplayCtrl *ctrl,const char *Name,bool Add2Right);
 void UITC_DeleteColumn(t_UITextDisplayCtrl *ctrl,t_UITextDisplayColumn *Handle);

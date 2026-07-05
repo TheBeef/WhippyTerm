@@ -226,7 +226,10 @@ t_UIButtonCtrl *UIS_GetButtonHandle(e_UIS_Button UIObj)
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->IODriver_Settings_pushButton;
         case e_UIS_Button_NewVersionCheckNow:
             return (t_UIButtonCtrl *)g_SettingsDialog->ui->NewVersion_CheckNow_pushButton;
-
+        case e_UIS_Button_HexDisplaySelectDivLineColor:
+            return (t_UIButtonCtrl *)g_SettingsDialog->ui->HexDisplay_SelectDivLineColor_pushButton;
+        case e_UIS_Button_BinarySetHexDumpAppearance:
+            return (t_UIButtonCtrl *)g_SettingsDialog->ui->Binary_SetHexDumpAppearance_pushButton;
         case e_UIS_ButtonMAX:
         default:
         break;
@@ -310,6 +313,12 @@ t_UINumberInput *UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput UIObj)
             return (t_UINumberInput *)g_SettingsDialog->ui->TabSize_spinBox;
         case e_UIS_NumberInput_OutGoingHexDisplay_BufferSize:
             return (t_UINumberInput *)g_SettingsDialog->ui->OutGoing_HexDisplay_BufferSize_spinBox;
+        case e_UIS_NumberInput_HexDisplay_BytesPerLine:
+            return (t_UINumberInput *)g_SettingsDialog->ui->HexDisplay_BytesPerLine_spinBox;
+        case e_UIS_NumberInput_HexDisplay_DividerEvery:
+            return (t_UINumberInput *)g_SettingsDialog->ui->HexDisplay_DividerEvery_spinBox;
+        case e_UIS_NumberInput_HexDisplay_DivLineWidth:
+            return (t_UINumberInput *)g_SettingsDialog->ui->HexDisplay_DivLineWidth_spinBox;
         case e_UIS_NumberInputMAX:
         default:
         break;
@@ -507,6 +516,8 @@ t_UIColorPreviewCtrl *UIS_GetColorPreviewHandle(e_UIS_ColorPreview UIObj)
             return (t_UIColorPreviewCtrl *)g_SettingsDialog->ui->HexDisplay_SelBGDisplay_frame;
         case e_UIS_ColorPreview_HROverrideColor:
             return (t_UIColorPreviewCtrl *)g_SettingsDialog->ui->HR_ColorDisplay_frame;
+        case e_UIS_ColorPreview_HexDisplay_DivColor:
+            return (t_UIColorPreviewCtrl *)g_SettingsDialog->ui->HexDisplay_DivLineColor_frame;
 
         case e_UIS_ColorPreviewMAX:
         default:

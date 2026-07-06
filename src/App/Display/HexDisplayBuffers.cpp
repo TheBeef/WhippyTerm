@@ -43,11 +43,11 @@
 using namespace std;
 
 /*** DEFINES                  ***/
-#define BYTESPERLINE                    16  // Number bytes per line to display
+#define MAX_BYTESPERLINE                128 // The max number of bytes per line we support
 #define HEX_DIG_SIZE                    3
 #define SPACE_BETWEEN_HEX_AND_ASCII     3
-#define MAX_DISPLAY_COLUMNS             (BYTESPERLINE*HEX_DIG_SIZE+SPACE_BETWEEN_HEX_AND_ASCII+BYTESPERLINE)+1     // The max number of columns we can draw per line
-#define ASCIILEFTEDGE                   (BYTESPERLINE*HEX_DIG_SIZE+SPACE_BETWEEN_HEX_AND_ASCII)
+#define MAX_DISPLAY_COLUMNS             (MAX_BYTESPERLINE*HEX_DIG_SIZE+SPACE_BETWEEN_HEX_AND_ASCII+MAX_BYTESPERLINE)+1     // The max number of columns we can draw per line
+#define ASCIILEFTEDGE                   (BytesPerLine*HEX_DIG_SIZE+SPACE_BETWEEN_HEX_AND_ASCII)
 
 /*** MACROS                   ***/
 
@@ -57,6 +57,7 @@ using namespace std;
 static bool HexDisplayBuffer_EventHandler(const struct UICTWEvent *Event);
 
 /*** VARIABLE DEFINITIONS     ***/
+
 /*******************************************************************************
  * NAME:
  *    HexDisplayBuffer::HexDisplayBuffer
@@ -114,6 +115,11 @@ HexDisplayBuffer::HexDisplayBuffer()
     View_CharsX=0;
     View_CharsY=0;
     BufferBytes2Draw=0;
+
+    BytesPerLine=16;
+    DivEvery=0; // Off
+    DivWidth=1;
+    DivColor=0xFFFFFF;
 
     CharWidthPx=0;
     CharHeightPx=0;
@@ -564,6 +570,8 @@ void HexDisplayBuffer::RebuildDisplay(void)
     bool UseStyle;
     unsigned int i;
     unsigned int e;
+    unsigned int x;
+    unsigned int Lines;
 
     if(TextDisplayCtrl==NULL)
         return;
@@ -597,14 +605,14 @@ void HexDisplayBuffer::RebuildDisplay(void)
     EndOfBuffPos=Buffer+BufferSize;
 
     /* Skip until we get to the top line */
-    CurPos+=TopLine*BYTESPERLINE;
+    CurPos+=TopLine*BytesPerLine;
     if(CurPos>EndOfBuffPos)
     {
         /* Wrapped */
         CurPos-=BufferSize;
     }
 
-    BytesDrawen=TopLine*BYTESPERLINE;
+    BytesDrawen=TopLine*BytesPerLine;
 
     if(Cursor_Pos<Selection_Anchor)
     {
@@ -645,7 +653,7 @@ void HexDisplayBuffer::RebuildDisplay(void)
 
         StartOfLine=BytesDrawen;
         FirstUseOfStyle=true;
-        for(i=0;i<BYTESPERLINE && BytesDrawen<BufferBytes2Draw;i++)
+        for(i=0;i<(unsigned int)BytesPerLine && BytesDrawen<BufferBytes2Draw;i++)
         {
             c=*CurPos;
             sprintf(&Line[i*HEX_DIG_SIZE],"%02X ",c);
@@ -662,21 +670,21 @@ void HexDisplayBuffer::RebuildDisplay(void)
         }
 
         /* Finish off any half lines */
-        if(i!=BYTESPERLINE)
+        if(i!=(unsigned int)BytesPerLine)
         {
-            memset(&Line[i*HEX_DIG_SIZE],' ',(BYTESPERLINE*HEX_DIG_SIZE-i*HEX_DIG_SIZE+1));
-            memset(&Line[ASCIILEFTEDGE+i],' ',BYTESPERLINE-i);
+            memset(&Line[i*HEX_DIG_SIZE],' ',(BytesPerLine*HEX_DIG_SIZE-i*HEX_DIG_SIZE+1));
+            memset(&Line[ASCIILEFTEDGE+i],' ',BytesPerLine-i);
         }
         else
         {
             /* Fix the \0 that the sprintf() added to the last hex value */
-            Line[BYTESPERLINE*HEX_DIG_SIZE]=' ';
+            Line[BytesPerLine*HEX_DIG_SIZE]=' ';
         }
 
         if(InEditMode)
         {
             /* Is the cursor on this line? */
-            if(Cursor_Pos>=StartOfLine && Cursor_Pos<StartOfLine+BYTESPERLINE)
+            if(Cursor_Pos>=StartOfLine && Cursor_Pos<StartOfLine+BytesPerLine)
             {
                 i=(Cursor_Pos-StartOfLine)*HEX_DIG_SIZE;
                 switch(EditMode)
@@ -705,7 +713,7 @@ void HexDisplayBuffer::RebuildDisplay(void)
         if(SelectionValid)
         {
             if(SelectionStart>=StartOfLine &&
-                    SelectionStart<StartOfLine+BYTESPERLINE)
+                    SelectionStart<StartOfLine+BytesPerLine)
             {
                 /* Start of selection on this line */
                 if(FirstUseOfStyle)
@@ -713,8 +721,8 @@ void HexDisplayBuffer::RebuildDisplay(void)
                     RebuildDisplay_ClearStyleHelper(LineStyling);
                     FirstUseOfStyle=false;
                 }
-                e=BYTESPERLINE-1;
-                if(SelectionEnd<StartOfLine+BYTESPERLINE)
+                e=BytesPerLine-1;
+                if(SelectionEnd<StartOfLine+BytesPerLine)
                     e=SelectionEnd-StartOfLine;
                 for(i=SelectionStart-StartOfLine;i<=e;i++)
                 {
@@ -727,7 +735,7 @@ void HexDisplayBuffer::RebuildDisplay(void)
                 UseStyle=true;
             }
             else if(SelectionEnd>=StartOfLine &&
-                    SelectionEnd<StartOfLine+BYTESPERLINE)
+                    SelectionEnd<StartOfLine+BytesPerLine)
             {
                 if(FirstUseOfStyle)
                 {
@@ -753,10 +761,10 @@ void HexDisplayBuffer::RebuildDisplay(void)
                     FirstUseOfStyle=false;
                 }
 
-                for(i=0;i<BYTESPERLINE*HEX_DIG_SIZE-1;i++)
+                for(i=0;i<(unsigned int)BytesPerLine*HEX_DIG_SIZE-1;i++)
                     LineStyling[i].BGColor=SelBGColor;
 
-                for(i=0;i<BYTESPERLINE;i++)
+                for(i=0;i<(unsigned int)BytesPerLine;i++)
                     LineStyling[ASCIILEFTEDGE+i].BGColor=SelBGColor;
 
                 UseStyle=true;
@@ -766,7 +774,7 @@ void HexDisplayBuffer::RebuildDisplay(void)
         if(InEditMode)
         {
             /* Is the cursor on this line? */
-            if(Cursor_Pos>=StartOfLine && Cursor_Pos<StartOfLine+BYTESPERLINE)
+            if(Cursor_Pos>=StartOfLine && Cursor_Pos<StartOfLine+BytesPerLine)
             {
                 if(FirstUseOfStyle)
                 {
@@ -796,7 +804,7 @@ void HexDisplayBuffer::RebuildDisplay(void)
                fragments */
             StyledFrag.Styling=LineStyling[0];
             StyledFrag.Text=Line;
-            for(i=1;i<ASCIILEFTEDGE+BYTESPERLINE;i++)
+            for(i=1;i<ASCIILEFTEDGE+(unsigned int)BytesPerLine;i++)
             {
                 if(!CmpCharStyle(&StyledFrag.Styling,&LineStyling[i]))
                 {
@@ -824,7 +832,7 @@ void HexDisplayBuffer::RebuildDisplay(void)
     /* We have an edge case where if we are 1 pass the end of the data and
        we have an nothing but full lines then we wouldn't draw the last line
        with a blank and the underline, so we handle that here */
-    if(InEditMode && BufferBytes2Draw%BYTESPERLINE==0)
+    if(InEditMode && BufferBytes2Draw%BytesPerLine==0)
     {
         /* Is the cursor past the end of the data */
         if(Cursor_Pos>=BufferBytes2Draw)
@@ -845,7 +853,7 @@ void HexDisplayBuffer::RebuildDisplay(void)
 
             /* The blank between hex and AscII */
             Line[2]=' ';
-            Line[BYTESPERLINE*HEX_DIG_SIZE+SPACE_BETWEEN_HEX_AND_ASCII-2]=0;
+            Line[BytesPerLine*HEX_DIG_SIZE+SPACE_BETWEEN_HEX_AND_ASCII-2]=0;
             StyledFrag.Styling.Attribs=0;
             UICTW_AddFragment(TextDisplayCtrl,&StyledFrag);
 
@@ -855,6 +863,20 @@ void HexDisplayBuffer::RebuildDisplay(void)
             UICTW_AddFragment(TextDisplayCtrl,&StyledFrag);
 
             UICTW_End(TextDisplayCtrl);
+        }
+    }
+
+    /* Add the divider lines */
+    UICTW_ClearGraphics(TextDisplayCtrl);
+    if(DivEvery>0)
+    {
+        UICTW_SetLineWidth(TextDisplayCtrl,DivWidth);
+
+        Lines=(BytesPerLine+DivEvery-1)/DivEvery;
+        for(r=1;r<Lines;r++)
+        {
+            x=(r*DivEvery*CharWidthPx*3)-(CharWidthPx/2);
+            UICTW_AddGraphicLine(TextDisplayCtrl,x,0,x,View_HeightPx,DivColor);
         }
     }
 
@@ -887,14 +909,14 @@ void HexDisplayBuffer::RebuildDisplay_ClearStyleHelper(struct CharStyling *style
     int b;
 
     /* Clear the styling for this line */
-    for(b=0;b<BYTESPERLINE*HEX_DIG_SIZE;b++)
+    for(b=0;b<BytesPerLine*HEX_DIG_SIZE;b++)
     {
         style[b].FGColor=FGColor;
         style[b].BGColor=BGColor;
         style[b].ULineColor=FGColor;
         style[b].Attribs=0;
     }
-    for(b=0;b<BYTESPERLINE;b++)
+    for(b=0;b<BytesPerLine;b++)
     {
         style[b+ASCIILEFTEDGE].FGColor=FGColor;
         style[b+ASCIILEFTEDGE].BGColor=BGColor;
@@ -1019,6 +1041,131 @@ void HexDisplayBuffer::RethinkCursorLook(void)
 
 /*******************************************************************************
  * NAME:
+ *    HexDisplayBuffer::SetBytePerLine
+ *
+ * SYNOPSIS:
+ *    void HexDisplayBuffer::SetBytePerLine(unsigned int NewBytesPerLine);
+ *
+ * PARAMETERS:
+ *    NewBytesPerLine [I] -- The number of bytes to display per line
+ *
+ * FUNCTION:
+ *    This function sets the number of bytes that are displayed on each line.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    SetFont(), SetColors(), SetDivAttribs()
+ ******************************************************************************/
+void HexDisplayBuffer::SetBytePerLine(unsigned int NewBytesPerLine)
+{
+    uint8_t *TopBytePtr;    // The byte that was at the top of the display
+    int TopByteOffset;
+    int TotalLines;
+    t_UIScrollBarCtrl *ScrollY;
+
+    /* Grab (and clamp) the new bytes per line from the settings */
+    if(NewBytesPerLine<1)
+        NewBytesPerLine=1;
+    if(NewBytesPerLine>MAX_BYTESPERLINE)
+        NewBytesPerLine=MAX_BYTESPERLINE;
+
+    if((int)NewBytesPerLine==BytesPerLine)
+        return;
+
+    /* Note what byte is at the top of the display so we can put it back
+       at the top when we are done */
+    TopBytePtr=NULL;
+    if(Buffer!=NULL && StartOfData!=NULL)
+    {
+        TopBytePtr=StartOfData+TopLine*BytesPerLine;
+        if(TopBytePtr>=Buffer+BufferSize)
+        {
+            /* Wrapped (circular buffer) */
+            TopBytePtr-=BufferSize;
+        }
+    }
+
+    BytesPerLine=NewBytesPerLine;
+
+    /* Recalculate the pointers into the buffer ('StartOfData', the
+       selection, and the cursor) for the new 'BytesPerLine'.  This only
+       moves the pointers, the data in the buffer is not touched. */
+    if(!InEditMode && InsertPos!=NULL)
+        SetDisplayParms(InsertPos,BufferIsCircular);
+
+    /* Move 'TopLine' so it points at the line with the nearest byte (that
+       meets the new alignment needs) to the byte that was at the top */
+    if(TopBytePtr!=NULL)
+    {
+        TopByteOffset=TopBytePtr-StartOfData;
+        if(TopByteOffset<0)
+        {
+            /* Wrapped (circular buffer) */
+            TopByteOffset+=BufferSize;
+        }
+
+        TopLine=(TopByteOffset+BytesPerLine/2)/BytesPerLine;
+
+        TotalLines=(BufferBytes2Draw+BytesPerLine-1)/BytesPerLine;
+        if(TopLine>TotalLines-1)
+            TopLine=TotalLines-1;
+        if(TopLine<0)
+            TopLine=0;
+    }
+
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    /* Rethink the scroll bars for the new number of lines / line width
+       and move the scroll bar to the new 'TopLine' */
+    RethinkYScrollBar();
+    RethinkXScrollBar();
+
+    ScrollY=UICTW_GetVertSlider(TextDisplayCtrl);
+    UISetScrollBarPos(ScrollY,TopLine);
+
+    RebuildDisplay();
+    RethinkCursorPos();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    HexDisplayBuffer::SetDivAttribs
+ *
+ * SYNOPSIS:
+ *    void HexDisplayBuffer::SetDivAttribs(unsigned int NewDivEvery,
+ *          unsigned int NewDivWidth,uint32_t NewDivColor);
+ *
+ * PARAMETERS:
+ *    NewDivEvery [I] -- Draw a div every x bytes (0=none)
+ *    NewDivWidth [I] -- The width of the div line
+ *    NewDivColor [I] -- The color of the div line
+ *
+ * FUNCTION:
+ *    This function changes the divider lines between every x bytes on the
+ *    display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void HexDisplayBuffer::SetDivAttribs(unsigned int NewDivEvery,
+        unsigned int NewDivWidth,uint32_t NewDivColor)
+{
+    DivEvery=NewDivEvery;
+    DivWidth=NewDivWidth;
+    DivColor=NewDivColor;
+
+    RebuildDisplay();
+    RethinkCursorPos();
+}
+
+/*******************************************************************************
+ * NAME:
  *    HexDisplayBuffer::SetFont
  *
  * SYNOPSIS:
@@ -1038,7 +1185,7 @@ void HexDisplayBuffer::RethinkCursorLook(void)
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    SetBytePerLine()
  ******************************************************************************/
 void HexDisplayBuffer::SetFont(const char *NewFontName,int NewSize,bool NewBold,
         bool NewItalic)
@@ -1078,7 +1225,7 @@ void HexDisplayBuffer::SetFont(const char *NewFontName,int NewSize,bool NewBold,
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    SetBytePerLine()
  ******************************************************************************/
 void HexDisplayBuffer::SetColors(uint32_t NewFGColor,uint32_t NewBGColor,
         uint32_t NewSelBGColor)
@@ -1147,8 +1294,8 @@ void HexDisplayBuffer::SetDisplayParms(uint8_t *NewInsertPos,
         OffsetFromStart=NewInsertPos-Buffer;
 
         /* Round to the start of the next line */
-        OffsetFromStartRounded=((OffsetFromStart+BYTESPERLINE-1)/BYTESPERLINE)*
-                BYTESPERLINE;
+        OffsetFromStartRounded=((OffsetFromStart+BytesPerLine-1)/BytesPerLine)*
+                BytesPerLine;
 
         BufferBytes2Draw=BufferSize-(OffsetFromStartRounded-OffsetFromStart);
 
@@ -1329,7 +1476,7 @@ void HexDisplayBuffer::RethinkYScrollBar(void)
        full lines (if we have 15 bytes then we want to say there are 1 line,
        if we have 16 bytes then we want to say there are 2 lines, and if
        we have 17 bytes then we want to say there are 2 lines) */
-    TotalLines=(BufferBytes2Draw+BYTESPERLINE)/BYTESPERLINE;
+    TotalLines=(BufferBytes2Draw+BytesPerLine)/BytesPerLine;
 
     if(TotalLines!=LastTotalLines || View_CharsY!=LastView_CharsY)
     {
@@ -1370,9 +1517,9 @@ void HexDisplayBuffer::RethinkXScrollBar(void)
     t_UIScrollBarCtrl *ScrollX;
     int TotalWidth;
 
-    TotalWidth=BYTESPERLINE*HEX_DIG_SIZE;  // BYTESPERLINE's bytes * 2 for the hex and 1 for the space
+    TotalWidth=BytesPerLine*HEX_DIG_SIZE;  // BytesPerLine's bytes * 2 for the hex and 1 for the space
     TotalWidth+=SPACE_BETWEEN_HEX_AND_ASCII;    // spaces between hex and ASCII preview
-    TotalWidth+=BYTESPERLINE;   // Add the BYTESPERLINE's for the ASCII preview
+    TotalWidth+=BytesPerLine;   // Add the BytesPerLine's for the ASCII preview
     TotalWidth*=CharWidthPx;
 
     ScrollX=UICTW_GetHorzSlider(TextDisplayCtrl);
@@ -1441,19 +1588,19 @@ bool HexDisplayBuffer::KeyPress(uint8_t Mods,e_UIKeys Key,
             break;
             case e_UIKeys_Home:
                 AbortEdit();
-                Cursor_Pos=Cursor_Pos/BYTESPERLINE*BYTESPERLINE;
+                Cursor_Pos=Cursor_Pos/BytesPerLine*BytesPerLine;
             break;
             case e_UIKeys_End:
                 AbortEdit();
-                Cursor_Pos=Cursor_Pos/BYTESPERLINE*BYTESPERLINE+BYTESPERLINE-1;
+                Cursor_Pos=Cursor_Pos/BytesPerLine*BytesPerLine+BytesPerLine-1;
             break;
             case e_UIKeys_Up:
                 AbortEdit();
-                Cursor_Pos-=BYTESPERLINE;
+                Cursor_Pos-=BytesPerLine;
             break;
             case e_UIKeys_Down:
                 AbortEdit();
-                Cursor_Pos+=BYTESPERLINE;
+                Cursor_Pos+=BytesPerLine;
             break;
             case e_UIKeys_Left:
                 AbortEdit();
@@ -1465,11 +1612,11 @@ bool HexDisplayBuffer::KeyPress(uint8_t Mods,e_UIKeys Key,
             break;
             case e_UIKeys_PageUp:
                 AbortEdit();
-                Cursor_Pos-=View_CharsY*BYTESPERLINE;
+                Cursor_Pos-=View_CharsY*BytesPerLine;
             break;
             case e_UIKeys_PageDown:
                 AbortEdit();
-                Cursor_Pos+=View_CharsY*BYTESPERLINE;
+                Cursor_Pos+=View_CharsY*BytesPerLine;
             break;
 
             case e_UIKeys_Escape:
@@ -1833,13 +1980,13 @@ bool HexDisplayBuffer::KeyPress(uint8_t Mods,e_UIKeys Key,
             case e_UIKeys_Up:
                 AbortDotInput();
                 AbortEdit();
-                if(Cursor_Pos-BYTESPERLINE>=0)
-                    Cursor_Pos-=BYTESPERLINE;
+                if(Cursor_Pos-BytesPerLine>=0)
+                    Cursor_Pos-=BytesPerLine;
             break;
             case e_UIKeys_Down:
                 AbortDotInput();
                 AbortEdit();
-                Cursor_Pos+=BYTESPERLINE;
+                Cursor_Pos+=BytesPerLine;
             break;
             case e_UIKeys_Left:
                 AbortDotInput();
@@ -1860,22 +2007,22 @@ bool HexDisplayBuffer::KeyPress(uint8_t Mods,e_UIKeys Key,
             case e_UIKeys_Home:
                 AbortDotInput();
                 AbortEdit();
-                Cursor_Pos=Cursor_Pos/BYTESPERLINE*BYTESPERLINE;
+                Cursor_Pos=Cursor_Pos/BytesPerLine*BytesPerLine;
             break;
             case e_UIKeys_End:
                 AbortDotInput();
                 AbortEdit();
-                Cursor_Pos=Cursor_Pos/BYTESPERLINE*BYTESPERLINE+BYTESPERLINE-1;
+                Cursor_Pos=Cursor_Pos/BytesPerLine*BytesPerLine+BytesPerLine-1;
             break;
             case e_UIKeys_PageUp:
                 AbortDotInput();
                 AbortEdit();
-                Cursor_Pos-=View_CharsY*BYTESPERLINE;
+                Cursor_Pos-=View_CharsY*BytesPerLine;
             break;
             case e_UIKeys_PageDown:
                 AbortDotInput();
                 AbortEdit();
-                Cursor_Pos+=View_CharsY*BYTESPERLINE;
+                Cursor_Pos+=View_CharsY*BytesPerLine;
             break;
 
             case e_UIKeys_Tab:
@@ -3047,7 +3194,7 @@ int HexDisplayBuffer::CalSelectionFromMouse(int x,int y,bool &InAscII,
        full lines (if we have 15 bytes then we want to say there are 1 line,
        if we have 16 bytes then we want to say there are 2 lines, and if
        we have 17 bytes then we want to say there are 2 lines) */
-    TotalLines=(BufferBytes2Draw+BYTESPERLINE)/BYTESPERLINE;
+    TotalLines=(BufferBytes2Draw+BytesPerLine)/BytesPerLine;
     if(chary>=TotalLines)
     {
         OutOfBounds=true;
@@ -3055,7 +3202,7 @@ int HexDisplayBuffer::CalSelectionFromMouse(int x,int y,bool &InAscII,
     }
 
     /* See if we are in the dead space */
-    if(charx>=BYTESPERLINE*HEX_DIG_SIZE && charx<ASCIILEFTEDGE)
+    if(charx>=BytesPerLine*HEX_DIG_SIZE && charx<ASCIILEFTEDGE)
     {
         /* We are in the dead space between Hex and AscII */
         OutOfBounds=true;
@@ -3065,7 +3212,7 @@ int HexDisplayBuffer::CalSelectionFromMouse(int x,int y,bool &InAscII,
     OutOfBounds=false;
 
     /* See if we are in the AscII or not */
-    if(charx>BYTESPERLINE*HEX_DIG_SIZE)
+    if(charx>BytesPerLine*HEX_DIG_SIZE)
         InAscII=true;
     else
         InAscII=false;
@@ -3073,16 +3220,16 @@ int HexDisplayBuffer::CalSelectionFromMouse(int x,int y,bool &InAscII,
     if(InAscII)
     {
         charx-=ASCIILEFTEDGE;
-        RetValue=chary*BYTESPERLINE+charx;
+        RetValue=chary*BytesPerLine+charx;
     }
     else
     {
         charx/=HEX_DIG_SIZE;   // We use 3 bytes per byte
-        RetValue=chary*BYTESPERLINE+charx;
+        RetValue=chary*BytesPerLine+charx;
     }
 
     /* We need to take the top line into account */
-    RetValue+=TopLine*BYTESPERLINE;
+    RetValue+=TopLine*BytesPerLine;
 
     if(RetValue>=BufferBytes2Draw)
         RetValue=BufferBytes2Draw;
@@ -3129,7 +3276,7 @@ void HexDisplayBuffer::HandleSelectionScrollFromMouse(int x,int y,
     ScrollX=UICTW_GetHorzSlider(TextDisplayCtrl);
 
     SetY=false;
-    TotalLines=(BufferBytes2Draw+BYTESPERLINE-1)/BYTESPERLINE;
+    TotalLines=(BufferBytes2Draw+BytesPerLine-1)/BytesPerLine;
     if(y<0 && TopLine>0)
     {
         TopLine--;
@@ -3143,9 +3290,9 @@ void HexDisplayBuffer::HandleSelectionScrollFromMouse(int x,int y,
 
     /* Handle scrolling left<->right */
     SetX=false;
-    TotalWidth=BYTESPERLINE*HEX_DIG_SIZE;  // BYTESPERLINE's bytes * 2 for the hex and 1 for the space
+    TotalWidth=BytesPerLine*HEX_DIG_SIZE;  // BytesPerLine's bytes * 2 for the hex and 1 for the space
     TotalWidth+=SPACE_BETWEEN_HEX_AND_ASCII;    // spaces between hex and ASCII preview
-    TotalWidth+=BYTESPERLINE;   // Add the BYTESPERLINE's for the ASCII preview
+    TotalWidth+=BytesPerLine;   // Add the BytesPerLine's for the ASCII preview
     TotalWidth*=CharWidthPx;
 
     if(x<0 && WindowXOffsetPx>0)
@@ -3239,7 +3386,7 @@ void HexDisplayBuffer::MakeOffsetVisable(int Offset,bool ShowInAscII,
     ScrollX=UICTW_GetHorzSlider(TextDisplayCtrl);
 
     /* Fix Y */
-    OffsetLine=Offset/BYTESPERLINE;
+    OffsetLine=Offset/BytesPerLine;
     SetY=false;
     if(OffsetLine<TopLine)
     {
@@ -3253,7 +3400,7 @@ void HexDisplayBuffer::MakeOffsetVisable(int Offset,bool ShowInAscII,
     }
 
     /* Fix X */
-    OffsetChar=(Offset%BYTESPERLINE);
+    OffsetChar=(Offset%BytesPerLine);
     SetX=false;
     if(ShowInAscII)
     {
@@ -3648,10 +3795,10 @@ int HexDisplayBuffer::GetSizeOfSelection(e_HDBCFormatType ClipFormat)
     {
         case e_HDBCFormat_HexDump:
             /* Make sure we have a full last line */
-            ByteNeeded=(SelectionBytes+BYTESPERLINE-1)/BYTESPERLINE*BYTESPERLINE;
+            ByteNeeded=(SelectionBytes+BytesPerLine-1)/BytesPerLine*BytesPerLine;
             RetValue=ByteNeeded*HEX_DIG_SIZE;  // Every byte will be converted to 3 digits
             RetValue+=ByteNeeded;   // + the AscII preview
-            RetValue+=(ByteNeeded/BYTESPERLINE)*(SPACE_BETWEEN_HEX_AND_ASCII+1); // + 4 bytes per line (3 between the hex and preview, 1 for newline)
+            RetValue+=(ByteNeeded/BytesPerLine)*(SPACE_BETWEEN_HEX_AND_ASCII+1); // + 4 bytes per line (3 between the hex and preview, 1 for newline)
             RetValue+=1;    // + a \0 at the end
         break;
         case e_HDBCFormat_Hex:
@@ -3763,15 +3910,15 @@ void HexDisplayBuffer::CopySelection2Buffer(uint8_t *OutBuff,
                 Dest[ASCIILEFTEDGE+ByteCount]=c;
 
                 ByteCount++;
-                if(ByteCount==BYTESPERLINE)
+                if(ByteCount==BytesPerLine)
                 {
                     /* End of the line */
-                    Dest[ASCIILEFTEDGE+BYTESPERLINE]='\n';
+                    Dest[ASCIILEFTEDGE+BytesPerLine]='\n';
 
                     /* 3 space between the hex and Asc II */
-                    memset(&Dest[BYTESPERLINE*HEX_DIG_SIZE],' ',
+                    memset(&Dest[BytesPerLine*HEX_DIG_SIZE],' ',
                             SPACE_BETWEEN_HEX_AND_ASCII);
-                    Dest+=ASCIILEFTEDGE+BYTESPERLINE+1;  // 1 newline char
+                    Dest+=ASCIILEFTEDGE+BytesPerLine+1;  // 1 newline char
                     *Dest=0;    // Make it a string
                     ByteCount=0;
                 }
@@ -3784,7 +3931,7 @@ void HexDisplayBuffer::CopySelection2Buffer(uint8_t *OutBuff,
                 /* We have to finish this line */
 
                 /* Padd with spaces */
-                for(;ByteCount<BYTESPERLINE;ByteCount++)
+                for(;ByteCount<BytesPerLine;ByteCount++)
                 {
                     /* Space for AscII */
                     Dest[ASCIILEFTEDGE+ByteCount]=' ';
@@ -3796,10 +3943,10 @@ void HexDisplayBuffer::CopySelection2Buffer(uint8_t *OutBuff,
                 }
 
                 /* 3 spaces for between hex and AscII */
-                memset(&Dest[BYTESPERLINE*HEX_DIG_SIZE],' ',SPACE_BETWEEN_HEX_AND_ASCII);
+                memset(&Dest[BytesPerLine*HEX_DIG_SIZE],' ',SPACE_BETWEEN_HEX_AND_ASCII);
 
-                Dest[ASCIILEFTEDGE+BYTESPERLINE]='\n';
-                Dest[ASCIILEFTEDGE+BYTESPERLINE+1]=0; // String
+                Dest[ASCIILEFTEDGE+BytesPerLine]='\n';
+                Dest[ASCIILEFTEDGE+BytesPerLine+1]=0; // String
             }
         break;
         case e_HDBCFormat_Hex:
@@ -4096,8 +4243,8 @@ void HexDisplayBuffer::RethinkCursorPos(void)
 
     TopEdge=UIGetScrollBarPos(ScrollY);
 
-    CursorX=Cursor_Pos%BYTESPERLINE;
-    CursorY=Cursor_Pos/BYTESPERLINE;
+    CursorX=Cursor_Pos%BytesPerLine;
+    CursorY=Cursor_Pos/BytesPerLine;
 
     if(InAscIIArea)
     {

@@ -56,6 +56,7 @@ class MWSendBuffers
         void ConnectionChanged(void);
         void ConnectionAbout2Changed(void);
         void NewConnectionAllocated(class Connection *NewCon);
+        void ApplySettings(void);
         bool HexDisplayBufferEvent(const struct HDEvent *Event);
         void Copy2Clip(void);
         bool SendBuffersBufferEvent(const struct HDEvent *Event);

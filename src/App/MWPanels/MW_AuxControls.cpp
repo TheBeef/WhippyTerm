@@ -332,3 +332,26 @@ void MWAuxControls::ConnectionChanged(void)
 void MWAuxControls::ConnectionAbout2Changed(void)
 {
 }
+
+/*******************************************************************************
+ * NAME:
+ *    MWAuxControls::ApplySettings
+ *
+ * SYNOPSIS:
+ *    void MWAuxControls::ApplySettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when settings are changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWAuxControls::ApplySettings(void)
+{
+}

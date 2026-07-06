@@ -174,6 +174,8 @@ void MWHexDisplay::Setup(class TheMainWindow *Parent,t_UIMainWindow *Win)
                 e_AskBttns_Ok);
     }
 
+    ApplySettings();
+
     IncomingHistoryHexDisplay->SetLossOfFocusBehavior(false);
     IncomingHistoryHexDisplay->SetFont(g_Settings.HexDisplaysFontName.c_str(),
             g_Settings.HexDisplaysFontSize,g_Settings.HexDisplaysFontBold,
@@ -320,6 +322,34 @@ void MWHexDisplay::NewConnectionAllocated(class Connection *NewCon)
 {
     /* Update the GUI */
     ConnectionChanged();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWAuxControls::ApplySettings
+ *
+ * SYNOPSIS:
+ *    void MWAuxControls::ApplySettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when settings are changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWHexDisplay::ApplySettings(void)
+{
+    IncomingHistoryHexDisplay->SetBytePerLine(g_Settings.
+            HexDisplaysBytesPerLine);
+    IncomingHistoryHexDisplay->SetDivAttribs(
+            g_Settings.HexDisplaysDivEvery,g_Settings.HexDisplaysDivWidth,
+            g_Settings.HexDisplaysDivColor);
 }
 
 /*******************************************************************************

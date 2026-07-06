@@ -784,3 +784,26 @@ void MWStopWatch::ConnectionChanged(void)
 
     UpdateDisplayedTime();
 }
+
+/*******************************************************************************
+ * NAME:
+ *    MWStopWatch::ApplySettings
+ *
+ * SYNOPSIS:
+ *    void MWStopWatch::ApplySettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when settings are changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWStopWatch::ApplySettings(void)
+{
+}

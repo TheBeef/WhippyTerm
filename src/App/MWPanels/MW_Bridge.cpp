@@ -637,3 +637,26 @@ void MWBridge::RethinkLockNames(void)
     NewLabel+=ConName;
     UISetCheckboxLabel(Lock2Checkbox,NewLabel.c_str());
 }
+
+/*******************************************************************************
+ * NAME:
+ *    MWBridge::ApplySettings
+ *
+ * SYNOPSIS:
+ *    void MWBridge::ApplySettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when settings are changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWBridge::ApplySettings(void)
+{
+}

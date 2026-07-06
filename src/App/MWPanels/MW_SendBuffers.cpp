@@ -338,6 +338,29 @@ void MWSendBuffers::NewConnectionAllocated(class Connection *NewCon)
 
 /*******************************************************************************
  * NAME:
+ *    MWSendBuffers::ApplySettings
+ *
+ * SYNOPSIS:
+ *    void MWSendBuffers::ApplySettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when settings are changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWSendBuffers::ApplySettings(void)
+{
+}
+
+/*******************************************************************************
+ * NAME:
  *    MWSendBuffers::RethinkUI
  *
  * SYNOPSIS:

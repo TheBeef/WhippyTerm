@@ -56,6 +56,7 @@ class MWOutGoingHexDisplay
         void ConnectionChanged(void);
         void ConnectionAbout2Changed(void);
         void NewConnectionAllocated(class Connection *NewCon);
+        void ApplySettings(void);
         void TogglePause(void);
         void InformOfUpdate(class Connection *EffectedCon,const struct ConMWHexDisplayData *UpdateInfo);
         void InformOfBufferChange(class Connection *EffectedCon,const struct ConMWHexDisplayData *UpdateInfo);

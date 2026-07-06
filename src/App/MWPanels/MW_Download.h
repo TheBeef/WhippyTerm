@@ -59,6 +59,7 @@ class MWDownload
         void ConnectionChanged(void);
         void ConnectionAbout2Changed(void);
         void NewConnectionAllocated(class Connection *NewCon);
+        void ApplySettings(void);
         void Start(void);
         void Abort(void);
         void DownloadProtocolChange(int Index);

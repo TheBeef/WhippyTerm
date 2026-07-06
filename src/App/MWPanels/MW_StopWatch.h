@@ -51,6 +51,7 @@ class MWStopWatch
         void ActivateCtrls(bool Active);
         void ConnectionChanged(void);
         void ConnectionAbout2Changed(void);
+        void ApplySettings(void);
         void ToggleStartStop(void);
         void StartTimer(void);
         void StopTimer(void);

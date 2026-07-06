@@ -1064,6 +1064,105 @@ void UICTW_SetDrawMask(t_UICustomTextWidgetCtrl *ctrl,uint16_t Mask)
 
 /*******************************************************************************
  * NAME:
+ *    UICTW_ClearGraphics
+ *
+ * SYNOPSIS:
+ *    void UICTW_ClearGraphics(t_UICustomTextWidgetCtrl *ctrl,bool TopLayer);
+ *
+ * PARAMETERS:
+ *    Handle [I] -- What column to work on
+ *
+ * FUNCTION:
+ *    This function clears all graphics.  Normally the main text area is for
+ *    text, but you can draw graphics as well.  Because modern displays are
+ *    graphic displays this works.  However if a text mode only UI was build
+ *    then these graphics don't do anything.
+ *
+ *    You can clear and set the graphics independent of text layers (clearing
+ *    the text layer has no effect on the graphics and vice versa).
+ *
+ *    This function also reset the graphic attributes.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    UICTW_AddGraphicLine()
+ ******************************************************************************/
+void UICTW_ClearGraphics(t_UICustomTextWidgetCtrl *ctrl)
+{
+    Frame_CustomTextWidget *TextDisplay=(Frame_CustomTextWidget *)ctrl;
+
+    TextDisplay->ui->TextDisplay->GraphicsClear();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UICTW_AddGraphicLine
+ *
+ * SYNOPSIS:
+ *    void UICTW_AddGraphicLine(t_UICustomTextWidgetCtrl *ctrl,int x,int y,
+ *          int x2,int y2,uint32_t Color);
+ *
+ * PARAMETERS:
+ *    Handle [I] -- What column to work on
+ *    x [I] -- The x pos for the end of the line (relative to the unscrolled
+ *             display, scroll offset is ignored)
+ *    y [I] -- The y pos for the end of the line
+ *    x2 [I] -- The x pos for the other end of the line
+ *    y2 [I] -- The y pos for the other end of the line
+ *    Width [I] -- The width of the line (in pixels)
+ *    Color [I] -- The color of this line
+ *
+ * FUNCTION:
+ *    This function adds a line to the graphics layer.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    UICTW_ClearGraphics()
+ ******************************************************************************/
+void UICTW_AddGraphicLine(t_UICustomTextWidgetCtrl *ctrl,int x,int y,
+        int x2,int y2,uint32_t Color)
+{
+    Frame_CustomTextWidget *TextDisplay=(Frame_CustomTextWidget *)ctrl;
+
+    TextDisplay->ui->TextDisplay->GraphicsLine(x,y,x2,y2,Color);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UICTW_SetLineWidth
+ *
+ * SYNOPSIS:
+ *    void UICTW_SetLineWidth(t_UICustomTextWidgetCtrl *ctrl,
+ *              unsigned int LineWidth);
+ *
+ * PARAMETERS:
+ *    Handle [I] -- What column to work on
+ *    LineWidth [I] -- The new line width to be used for all graphics command
+ *                     added from this point.
+ *
+ * FUNCTION:
+ *    This function sets the line width for new graphic commands that are added
+ *    from this point.  The line width only applies to some objects.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    UICTW_ClearGraphics()
+ ******************************************************************************/
+void UICTW_SetLineWidth(t_UICustomTextWidgetCtrl *ctrl,unsigned int LineWidth)
+{
+    Frame_CustomTextWidget *TextDisplay=(Frame_CustomTextWidget *)ctrl;
+
+    TextDisplay->ui->TextDisplay->GraphicsSetLineWidth(LineWidth);
+}
+
+/*******************************************************************************
+ * NAME:
  *    UICTW_ShowBellIcon
  *
  * SYNOPSIS:

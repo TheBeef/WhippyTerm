@@ -511,6 +511,29 @@ void MWDownload::NewConnectionAllocated(class Connection *NewCon)
 
 /*******************************************************************************
  * NAME:
+ *    MWDownload::ApplySettings
+ *
+ * SYNOPSIS:
+ *    void MWDownload::ApplySettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when settings are changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWDownload::ApplySettings(void)
+{
+}
+
+/*******************************************************************************
+ * NAME:
  *    MWDownload::RethinkUI
  *
  * SYNOPSIS:

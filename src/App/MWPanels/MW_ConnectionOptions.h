@@ -57,6 +57,7 @@ class MWConnectionOptions
         bool SetupConnectionOptionsPanel(const std::string &UniqueID,t_KVList &Options);
         void ConnectionChanged(void);
         void ConnectionAbout2Changed(void);
+        void ApplySettings(void);
 
         void OptionChanged(void);
 

@@ -911,6 +911,17 @@ void TheMainWindow::ApplySettings(void)
 
         UISetMenuKeySeq(MenuHandle,Mod,Key,Letter);
     }
+
+    ConnectionOptionsPanel.ApplySettings();
+    StopWatchPanel.ApplySettings();
+    CapturePanel.ApplySettings();
+    UploadPanel.ApplySettings();
+    DownloadPanel.ApplySettings();
+    HexDisplayPanel.ApplySettings();
+    OutGoingHexDisplayPanel.ApplySettings();
+    SendBuffersPanel.ApplySettings();
+    BridgePanel.ApplySettings();
+    AuxControlsPanel.ApplySettings();
 }
 
 /*******************************************************************************

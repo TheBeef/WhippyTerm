@@ -174,6 +174,8 @@ void MWOutGoingHexDisplay::Setup(class TheMainWindow *Parent,t_UIMainWindow *Win
                 e_AskBttns_Ok);
     }
 
+    ApplySettings();
+
     OutGoingHistoryHexDisplay->SetLossOfFocusBehavior(false);
     OutGoingHistoryHexDisplay->SetFont(g_Settings.HexDisplaysFontName.c_str(),
             g_Settings.HexDisplaysFontSize,g_Settings.HexDisplaysFontBold,
@@ -320,6 +322,34 @@ void MWOutGoingHexDisplay::NewConnectionAllocated(class Connection *NewCon)
 {
     /* Update the GUI */
     ConnectionChanged();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    MWOutGoingHexDisplay::ApplySettings
+ *
+ * SYNOPSIS:
+ *    void MWOutGoingHexDisplay::ApplySettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when settings are changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWOutGoingHexDisplay::ApplySettings(void)
+{
+    OutGoingHistoryHexDisplay->SetBytePerLine(g_Settings.
+            HexDisplaysBytesPerLine);
+    OutGoingHistoryHexDisplay->SetDivAttribs(
+            g_Settings.HexDisplaysDivEvery,g_Settings.HexDisplaysDivWidth,
+            g_Settings.HexDisplaysDivColor);
 }
 
 /*******************************************************************************

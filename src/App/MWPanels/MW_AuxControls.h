@@ -60,6 +60,7 @@ class MWAuxControls
         void RemoveConnection(class Connection *Con);
         void ConnectionChanged(void);
         void ConnectionAbout2Changed(void);
+        void ApplySettings(void);
 
     private:
         t_MWAuxControlsConWidgets ConWidgets;

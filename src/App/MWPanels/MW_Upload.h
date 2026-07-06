@@ -58,6 +58,7 @@ class MWUpload
         void ConnectionChanged(void);
         void ConnectionAbout2Changed(void);
         void NewConnectionAllocated(class Connection *NewCon);
+        void ApplySettings(void);
         bool SelectFilename(void);
         void Start(void);
         void Abort(void);

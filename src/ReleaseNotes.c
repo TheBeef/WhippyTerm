@@ -35,7 +35,8 @@ static struct ReleaseNote m_Notes_NEXT[]=
             " bytes are displayed on a line.  A divider line can all be set"
             " to group bytes together (all the same size).  The color and"
             " thickness of these divider lines and also be set."
-            "  This can be found under: Settings->Display->Hex Dumps"},
+            "  This can be found under:"
+            " Settings->Panels->Hex Display->Hex Dumps"},
     {   NOTETYPE_NEW_FEATURE,"In binary mode now includes divider lines",
             "In binary mode settings you can set a divider line every x bytes."
             "  A line will be drawn in the selected color grouping the bytes"

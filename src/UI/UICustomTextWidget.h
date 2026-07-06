@@ -187,6 +187,10 @@ void UICTW_SetMaxLines(t_UICustomTextWidgetCtrl *ctrl,int MaxLines,uint32_t BGCo
 void UICTW_RedrawScreen(t_UICustomTextWidgetCtrl *ctrl);
 void UICTW_SetDrawMask(t_UICustomTextWidgetCtrl *ctrl,uint16_t Mask);
 
+void UICTW_ClearGraphics(t_UICustomTextWidgetCtrl *ctrl);
+void UICTW_AddGraphicLine(t_UICustomTextWidgetCtrl *ctrl,int x,int y,int x2,int y2,uint32_t Color);
+void UICTW_SetLineWidth(t_UICustomTextWidgetCtrl *ctrl,unsigned int LineWidth);
+
 void UICTW_SetMouseCursor(t_UICustomTextWidgetCtrl *ctrl,e_UIMouse_CursorType Cursor);
 
 #endif   /* end of "#ifndef __UICUSTOMTEXTWIDGET_H_" */

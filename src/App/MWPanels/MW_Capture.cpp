@@ -831,3 +831,26 @@ void MWCapture::ConnectionChanged(void)
 
     RethinkUI();
 }
+
+/*******************************************************************************
+ * NAME:
+ *    MWCapture::ApplySettings
+ *
+ * SYNOPSIS:
+ *    void MWCapture::ApplySettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when settings are changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWCapture::ApplySettings(void)
+{
+}

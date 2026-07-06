@@ -35,6 +35,7 @@
 #include "App/Display/DisplayBase.h"
 #include "UI/UICustomTextWidget.h"
 #include "UI/UIClipboard.h"
+#include <stdint.h>
 #include <string>
 
 /***  DEFINES                          ***/
@@ -136,9 +137,13 @@ class HexDisplayBuffer
         void GiveFocus(void);
         void SetCanvasSize(int Width,int Height);
         void ApplySettingsChange(void);
-        bool EventHandler(const struct UICTWEvent *Event);
+
+        void SetBytePerLine(unsigned int NewBytesPerLine);
+        void SetDivAttribs(unsigned int NewDivEvery,unsigned int NewDivWidth,uint32_t NewDivColor);
         void SetFont(const char *FontName,int Size,bool Bold,bool Italic);
         void SetColors(uint32_t NewFGColor,uint32_t NewBGColor,uint32_t NewSelBGColor);
+
+        bool EventHandler(const struct UICTWEvent *Event);
         void SetDisplayParms(uint8_t *InsertPos,bool BufferIsCircular);
         void SetDisplayParms(const uint8_t *InsertPos,bool BufferIsCircular);
         void Enable(bool Enable);
@@ -199,6 +204,12 @@ class HexDisplayBuffer
         bool SelectionMouseDown;
         bool SelectionValid;
         e_HDB_EditStateType EditMode;
+
+        /* Appearance */
+        int BytesPerLine;
+        unsigned int DivEvery;
+        unsigned int DivWidth;
+        uint32_t DivColor;
 
         /* Edit vars */
         bool WeAllocBuffer;

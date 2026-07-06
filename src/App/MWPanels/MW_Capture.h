@@ -52,6 +52,7 @@ class MWCapture
         void ActivateCtrls(bool Active);
         void ConnectionChanged(void);
         void ConnectionAbout2Changed(void);
+        void ApplySettings(void);
         void Prompt4FileAndStart(void);
         bool SelectFilename(void);
         void Start(void);

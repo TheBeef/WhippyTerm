@@ -51,6 +51,7 @@ class MWBridge
         void ActivateCtrls(bool Active);
         void ConnectionChanged(void);
         void ConnectionAbout2Changed(void);
+        void ApplySettings(void);
         void BridgeConnections(void);
         void ReleaseConnections(void);
         void ConnectionsChanged(void);

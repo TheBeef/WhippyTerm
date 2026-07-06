@@ -513,6 +513,29 @@ void MWUpload::NewConnectionAllocated(class Connection *NewCon)
 
 /*******************************************************************************
  * NAME:
+ *    MWUpload::ApplySettings
+ *
+ * SYNOPSIS:
+ *    void MWUpload::ApplySettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when settings are changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWUpload::ApplySettings(void)
+{
+}
+
+/*******************************************************************************
+ * NAME:
  *    MWUpload::RethinkUI
  *
  * SYNOPSIS:

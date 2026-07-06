@@ -365,3 +365,26 @@ void MWConnectionOptions::ConnectionChanged(void)
 void MWConnectionOptions::ConnectionAbout2Changed(void)
 {
 }
+
+/*******************************************************************************
+ * NAME:
+ *    MWConnectionOptions::ApplySettings
+ *
+ * SYNOPSIS:
+ *    void MWConnectionOptions::ApplySettings(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function is called when settings are changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void MWConnectionOptions::ApplySettings(void)
+{
+}

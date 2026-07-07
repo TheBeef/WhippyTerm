@@ -149,12 +149,12 @@ struct DataProcessorAPI m_HexDumpDecoderAPI=
 
 struct DataProcessorInfo m_HexDumpDecoder_Info=
 {
-    "Hexdump",
-    "Hexdump of binary data",
-    "Prints out hex values of incoming data",
-    e_DataProcessorType_Binary,
+    .DisplayName="Hexdump",
+    .Tip="Hexdump of binary data",
+    .Help="Prints out hex values of incoming data",
+    .ProType=e_DataProcessorType_Binary,
     .BinClass=e_BinaryDataProcessorClass_Decoder,
-    e_BinaryDataProcessorMode_Hex,
+    .BinMode=e_BinaryDataProcessorMode_Hex,
 };
 
 static struct StyleData m_DefaultStyleData[MAX_NUMBER_OF_FIELDS]=

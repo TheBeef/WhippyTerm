@@ -105,7 +105,7 @@ struct PlaybackSample m_UsrSelSample;
 
 static const struct pw_stream_events m_StreamEvents=
 {
-    PW_VERSION_STREAM_EVENTS,
+    .version=PW_VERSION_STREAM_EVENTS,
     .destroy=NULL,
     .state_changed=WavPlayStateChangedCb,
     .control_info=NULL,

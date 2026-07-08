@@ -4195,8 +4195,6 @@ bool HexDisplayBuffer::SetEditMode(void)
             Buffer=NewBuffer;   // Switch to our copy
             StartOfData=NewBuffer;
             InsertPos=NewBuffer+BufferSize;
-
-            WeAllocBuffer=true;
         }
         else
         {
@@ -4204,6 +4202,8 @@ bool HexDisplayBuffer::SetEditMode(void)
             SetNewBufferSize(0);
             BufferAllocatedSize=0;
         }
+
+        WeAllocBuffer=true;
     }
 
     RethinkCursorLook();

@@ -781,35 +781,35 @@ void UIScrollListViewToBottom(t_UIListViewCtrl *ListView)
 /*************************************/
 void UIEnableButton(t_UIButtonCtrl *Bttn,bool Enable)
 {
-    QPushButton *PButton=(QPushButton *)Bttn;
+    QAbstractButton *PButton=(QAbstractButton *)Bttn;
 
     PButton->setEnabled(Enable);
 }
 
 void UISetButtonLabel(t_UIButtonCtrl *Bttn,const char *Text)
 {
-    QPushButton *PButton=(QPushButton *)Bttn;
+    QAbstractButton *PButton=(QAbstractButton *)Bttn;
 
     PButton->setText(Text);
 }
 
 void UISetButtonChecked(t_UIButtonCtrl *Bttn,bool Checked)
 {
-    QPushButton *PButton=(QPushButton *)Bttn;
+    QAbstractButton *PButton=(QAbstractButton *)Bttn;
 
     PButton->setChecked(Checked);
 }
 
 bool UIGetButtonChecked(t_UIButtonCtrl *Bttn)
 {
-    QPushButton *PButton=(QPushButton *)Bttn;
+    QAbstractButton *PButton=(QAbstractButton *)Bttn;
 
     return PButton->isChecked();
 }
 
 void UIMakeButtonVisible(t_UIButtonCtrl *Bttn,bool Visible)
 {
-    QPushButton *PButton=(QPushButton *)Bttn;
+    QAbstractButton *PButton=(QAbstractButton *)Bttn;
 
     PButton->setVisible(Visible);
 }

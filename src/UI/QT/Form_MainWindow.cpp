@@ -1960,3 +1960,13 @@ void Form_MainWindow::on_actionGoto_WhippyTerm_Web_Site_triggered()
     DoMenuTriggered(e_UIMWMenu_GotoWebSite);
 }
 
+void Form_MainWindow::on_actionFind_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_Find);
+}
+
+void Form_MainWindow::on_actionFind_Next_triggered()
+{
+    DoMenuTriggered(e_UIMWMenu_FindNext);
+}
+

@@ -324,6 +324,10 @@ e_UIMenuCtrl *UIMW_GetMenuHandle(t_UIMainWindow *win,e_UIMWMenuType UIObj)
             return (e_UIMenuCtrl *)realwin->ui->actionCheck_For_New_Version;
         case e_UIMWMenu_GotoWebSite:
             return (e_UIMenuCtrl *)realwin->ui->actionGoto_WhippyTerm_Web_Site;
+        case e_UIMWMenu_Find:
+            return (e_UIMenuCtrl *)realwin->ui->actionFind;
+        case e_UIMWMenu_FindNext:
+            return (e_UIMenuCtrl *)realwin->ui->actionFind_Next;
         case e_UIMWMenuMAX:
         default:
         break;

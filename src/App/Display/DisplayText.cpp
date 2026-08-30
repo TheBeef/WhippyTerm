@@ -39,8 +39,10 @@
 #include "ThirdParty/utf8.h"
 #include <string.h>
 #include <string>
+#include <vector>
 #include <limits.h>
 #include <stdio.h>
+#include <ctype.h>
 
 using namespace std;
 
@@ -174,6 +176,13 @@ DisplayText::DisplayText()
     Selection_AnchorY=0;
     SelectMode=e_DTSelectModeMAX;
 
+    /* Search */
+    SearchFound=false;
+    Search_X=0;
+    Search_Y=0;
+    Search_EndX=0;
+    Search_EndY=0;
+
     ScrollTimer=NULL;
 
     LastSeenLF=false;
@@ -251,6 +260,8 @@ DisplayText::~DisplayText()
 bool DisplayText::Init(void *ParentWidget,class ConSettings *SettingsPtr,
         bool (*EventCallback)(const struct DBEvent *Event),uintptr_t UserData)
 {
+    t_UICheckboxCtrl *Checkbox;
+
     TextDisplayCtrl=NULL;
     try
     {
@@ -272,7 +283,8 @@ bool DisplayText::Init(void *ParentWidget,class ConSettings *SettingsPtr,
         if(TextDisplayCtrl==NULL)
             throw(0);
 
-        SetupHexInput(UITC_GetSendHexDisplayContainerFrameCtrlHandle(TextDisplayCtrl));
+        SetupHexInput(UITC_GetSendHexDisplayContainerFrameCtrlHandle(
+                TextDisplayCtrl));
 
         /* We show hex input because we are text */
         Block_SetHexOrTextMode(true);
@@ -314,6 +326,12 @@ bool DisplayText::Init(void *ParentWidget,class ConSettings *SettingsPtr,
                 (uintptr_t)this,true);
 
         UITimerSetTimeout(ScrollTimer,SELECTION_SCROLL_SPEED_TIMER);
+
+        /* We do not support binary search in the panel */
+        Checkbox=UITC_GetCheckboxHandle(TextDisplayCtrl,
+                e_UITC_Checkbox_HexMode);
+        UIEnableCheckbox(Checkbox,false);
+        UICheckCheckbox(Checkbox,false);
 
         ApplySettings();
 
@@ -387,6 +405,8 @@ bool DisplayText::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
     union DBEventData Info;
     int Delta;
     int r;
+    t_UIComboBoxCtrl *ComboBox;
+    string TmpText;
 
     if(!InitCalled)
         return false;
@@ -429,7 +449,7 @@ bool DisplayText::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
                 RethinkCursorHidden();
                 RedrawFullScreen();
             }
-break;
+        break;
         case e_TextDisplayEvent_MouseDown:
             Info.Mouse.x=Event->Info.Mouse.x;
             Info.Mouse.y=Event->Info.Mouse.y;
@@ -541,6 +561,14 @@ break;
                 case e_UITC_Bttn_SendTextLine:
                     DoBlock_SendTextBuffer(false);
                 break;
+                case e_UITC_Bttn_FindNextArrow:
+                    Info.Find.SubType=e_DBFind_NextClicked;
+                    SendEvent(e_DBEvent_FindTextEvent,&Info);
+                break;
+                case e_UITC_Bttn_FindPrevArrow:
+                    Info.Find.SubType=e_DBFind_PrevClicked;
+                    SendEvent(e_DBEvent_FindTextEvent,&Info);
+                break;
                 case e_UITC_BttnMAX:
                 default:
                 break;
@@ -574,6 +602,20 @@ break;
         break;
         case e_TextDisplayEvent_BlockCloseBttn:
             SetBlockPanelAvailable(false);
+        break;
+        case e_TextDisplayEvent_FindCloseBttn:
+            Info.Find.SubType=e_DBFind_CloseClicked;
+            SendEvent(e_DBEvent_FindTextEvent,&Info);
+        break;
+        case e_TextDisplayEvent_FindTextReturnPressed:
+            ComboBox=UITC_GetComboBoxHandle(TextDisplayCtrl,
+                    e_UITC_Combox_FindPanel_Text);
+            UIGetComboBoxText(ComboBox,TmpText);
+
+            Info.Find.SubType=e_DBFind_ReturnPressed;
+            Info.Find.SearchStr=TmpText.c_str();
+            SendEvent(e_DBEvent_FindTextEvent,&Info);
+            TmpText=""; // No longer valid
         break;
         case e_TextDisplayEvent_ComboxChange:
         case e_TextDisplayEventMAX:
@@ -621,6 +663,7 @@ void DisplayText::HandleLeftMousePress(bool Down,int x,int y)
 //SelectMode=e_DTSelectMode_Word;
 
         SelectionActive=false;
+        SearchFound=false;
 
         if(x<CharWidthPx)
         {
@@ -3710,6 +3753,26 @@ void DisplayText::ScrollScreenByXLines(int Lines2Scroll)
                     }
                 }
 
+                /* Adjust the search (if there is one) */
+                if(SearchFound)
+                {
+                    if(Search_Y!=Search_EndY || Search_X!=Search_EndX)
+                    {
+                        /* Ok, we have a valid selection, adjust it */
+                        Search_Y--;
+                        Search_EndY--;
+                        if(Search_Y<0 && Search_EndY<0)
+                        {
+                            /* Ok, we are killing the selection */
+                            SearchFound=false;
+                        }
+                        if(Search_Y<0)
+                            Search_Y=0;
+                        if(Search_EndY<0)
+                            Search_EndY=0;
+                    }
+                }
+
                 /* Adjust all the markers */
                 for(Marker=MarkerList;Marker!=NULL;Marker=Marker->Next)
                 {
@@ -4494,6 +4557,9 @@ void DisplayText::ScrollScreen2MakeCursorVisible(void)
     int LastWindowXOffsetPx;
     int CharUnderCursorPx;
 
+    /* Why not use ScrollScreen2ShowPoint()?  Because this is a little faster.
+       This is the cursor so we kinda want the extra speed */
+
     if(TextDisplayCtrl==NULL)
         return;
 
@@ -4561,6 +4627,111 @@ void DisplayText::ScrollScreen2MakeCursorVisible(void)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayText::ScrollScreen2ShowArea
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::ScrollScreen2ShowArea(int PX,int PY,int PX2,int PY2)
+ *
+ * PARAMETERS:
+ *    PX [I] -- The top left point
+ *    PY [I] -- The top left point
+ *    PX2 [I] -- The bottom right point
+ *    PY2 [I] -- The bottom right point
+ *
+ * FUNCTION:
+ *    This function scroll the screen to make an area visible.
+ *
+ * RETURNS:
+ *    true -- Needed to redraw screen
+ *    false -- Point was already visible
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayText::ScrollScreen2ShowPoint(int PX,int PY,int PX2,int PY2)
+{
+    t_UIScrollBarCtrl *HorzScroll;
+    int BottomLineY;
+    int LastTopLineY;
+    int LastWindowXOffsetPx;
+    int XPx;
+    struct DTPoint Pos;
+
+    if(TextDisplayCtrl==NULL)
+        return false;
+
+    LastTopLineY=TopLineY;
+    LastWindowXOffsetPx=WindowXOffsetPx;
+
+    /* Deal with Y */
+
+    /* Scroll us into view if we the point is below the bottom of the screen */
+    BottomLineY=TopLineY+WindowHeightChars;
+    while(PY2>=BottomLineY)
+    {
+        TopLineY++;
+        TopLine++;
+        if(TopLine==Lines.end())
+        {
+            /* Shouldn't have happended */
+            TopLine--;
+            TopLineY--;
+            break;
+        }
+        BottomLineY=TopLineY+WindowHeightChars;
+    }
+
+    /* Scroll us into view if the point is above the topline */
+    while(PY<TopLineY)
+    {
+        TopLineY--;
+        TopLine--;
+        if(TopLine==Lines.begin())
+        {
+            /* Shouldn't happen */
+            break;
+        }
+    }
+
+    /* Deal with X */
+    HorzScroll=UITC_GetHorzSlider(UITC_GetTextDisplayPrimaryColumn(
+            TextDisplayCtrl));
+
+    /* Make sure right side is visible */
+    if(FindPoint(0,PY2,Pos,TopLine,TopLineY))
+    {
+        XPx=CalcPixelPointForX(PX2+1,&*Pos.Line);   // +1 so we see the char
+        if(XPx>WindowXOffsetPx+TextAreaWidthPx)
+        {
+            WindowXOffsetPx=(XPx)-TextAreaWidthPx;
+            UISetScrollBarPos(HorzScroll,WindowXOffsetPx);
+        }
+    }
+
+    /* Make sure left side is visible */
+    if(FindPoint(0,PY,Pos,TopLine,TopLineY))
+    {
+        XPx=CalcPixelPointForX(PX,&*Pos.Line);
+
+        if(XPx<WindowXOffsetPx)
+        {
+            WindowXOffsetPx=XPx;
+            UISetScrollBarPos(HorzScroll,WindowXOffsetPx);
+        }
+    }
+
+    if(LastTopLineY!=TopLineY || LastWindowXOffsetPx!=WindowXOffsetPx)
+    {
+        RethinkCursorHidden();
+        RedrawFullScreen();
+        return true;
+    }
+
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayText::CalcCursorXPx
  *
  * SYNOPSIS:
@@ -4585,8 +4756,105 @@ void DisplayText::ScrollScreen2MakeCursorVisible(void)
  ******************************************************************************/
 int DisplayText::CalcCursorXPx(void)
 {
+    return CalcPixelPointForX(CursorX,ActiveLine);
+//
+//    int CalX;
+//    i_TextLines Line;
+//    i_TextLineFrags CurFrag;
+//    int Pixels;
+//    struct TextCanvasFrag DisplayFrag;
+//    string::iterator StartPos;
+//    string::iterator EndPos;
+//    int Chars;
+//
+//    if(TextDisplayCtrl==NULL || ActiveLine==NULL)
+//        return 0;
+//
+//    /* We need to walk this line looking for the px point */
+//    CalX=0;
+//    Pixels=0;
+//    for(CurFrag=ActiveLine->Frags.begin();CurFrag!=ActiveLine->Frags.end();
+//            CurFrag++)
+//    {
+//        Chars=utf8::unchecked::distance(CurFrag->Text.begin(),
+//                CurFrag->Text.end());
+//        if(CursorX>=CalX && CursorX<CalX+Chars)
+//            break;
+//
+//        if(CurFrag->FragType==e_TextCanvasFrag_String)
+//            CalX+=Chars;
+//        Pixels+=CurFrag->WidthPx;
+//    }
+//
+//    /* Ok, 'CursorX' is somewhere in this frag */
+//    if(CurFrag!=ActiveLine->Frags.end() &&
+//            CurFrag->FragType==e_TextCanvasFrag_String)
+//    {
+//        DisplayFrag.FragType=e_TextCanvasFrag_String;
+//        DisplayFrag.Text=CurFrag->Text.c_str();
+//        DisplayFrag.Styling=CurFrag->Styling;
+//        DisplayFrag.Value=CurFrag->Value;
+//        DisplayFrag.Data=CurFrag->Data;
+//
+//        StartPos=CurFrag->Text.begin();
+//        EndPos=StartPos;
+//        while(StartPos!=CurFrag->Text.end())
+//        {
+//            if(CalX>=CursorX)
+//            {
+//                /* Ok, add in the first part of this fragment */
+//                TmpStr.assign(StartPos,EndPos);
+//                DisplayFrag.Text=TmpStr.c_str();
+//                Pixels+=UITC_GetFragWidth(
+//                        UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl),
+//                        &DisplayFrag);
+//                break;
+//            }
+//
+//            /* Move up by 1 char */
+//            utf8::unchecked::next(EndPos);
+//
+//            CalX++;
+//        }
+//    }
+//
+//    if(CalX<CursorX)
+//    {
+//        /* Cursor in virtual space */
+//        Pixels+=(CursorX-CalX)*CharWidthPx;
+//    }
+//
+//    return Pixels;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::CalcPixelPointForX
+ *
+ * SYNOPSIS:
+ *    int DisplayText::CalcPixelPointForX(int X,struct TextLine *Line);
+ *
+ * PARAMETERS:
+ *    X [I] -- The char point to convert
+ *    Line [I] -- The line that 'X' is on
+ *
+ * FUNCTION:
+ *    This function takes 'X' position and walks 'Line' to find the px
+ *    position.
+ *
+ * RETURNS:
+ *    The number of pixels that 'X' is over.  It does not take
+ *    'WindowXOffsetPx' into account.
+ *
+ * LIMITATIONS:
+ *    This is slow.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+int DisplayText::CalcPixelPointForX(int X,struct TextLine *Line)
+{
     int CalX;
-    i_TextLines Line;
     i_TextLineFrags CurFrag;
     int Pixels;
     struct TextCanvasFrag DisplayFrag;
@@ -4594,18 +4862,17 @@ int DisplayText::CalcCursorXPx(void)
     string::iterator EndPos;
     int Chars;
 
-    if(TextDisplayCtrl==NULL || ActiveLine==NULL)
+    if(TextDisplayCtrl==NULL || Line==NULL)
         return 0;
 
     /* We need to walk this line looking for the px point */
     CalX=0;
     Pixels=0;
-    for(CurFrag=ActiveLine->Frags.begin();CurFrag!=ActiveLine->Frags.end();
-            CurFrag++)
+    for(CurFrag=Line->Frags.begin();CurFrag!=Line->Frags.end();CurFrag++)
     {
         Chars=utf8::unchecked::distance(CurFrag->Text.begin(),
                 CurFrag->Text.end());
-        if(CursorX>=CalX && CursorX<CalX+Chars)
+        if(X>=CalX && X<CalX+Chars)
             break;
 
         if(CurFrag->FragType==e_TextCanvasFrag_String)
@@ -4613,8 +4880,8 @@ int DisplayText::CalcCursorXPx(void)
         Pixels+=CurFrag->WidthPx;
     }
 
-    /* Ok, 'CursorX' is somewhere in this frag */
-    if(CurFrag!=ActiveLine->Frags.end() &&
+    /* Ok, 'X' is somewhere in this frag */
+    if(CurFrag!=Line->Frags.end() &&
             CurFrag->FragType==e_TextCanvasFrag_String)
     {
         DisplayFrag.FragType=e_TextCanvasFrag_String;
@@ -4627,7 +4894,7 @@ int DisplayText::CalcCursorXPx(void)
         EndPos=StartPos;
         while(StartPos!=CurFrag->Text.end())
         {
-            if(CalX>=CursorX)
+            if(CalX>=X)
             {
                 /* Ok, add in the first part of this fragment */
                 TmpStr.assign(StartPos,EndPos);
@@ -4645,10 +4912,10 @@ int DisplayText::CalcCursorXPx(void)
         }
     }
 
-    if(CalX<CursorX)
+    if(CalX<X)
     {
-        /* Cursor in virtual space */
-        Pixels+=(CursorX-CalX)*CharWidthPx;
+        /* X is in virtual space */
+        Pixels+=(X-CalX)*CharWidthPx;
     }
 
     return Pixels;
@@ -5103,6 +5370,7 @@ void DisplayText::ClearScrollBackBuffer(void)
     TopLine=Lines.begin();
     TopLineY=0;
     SelectionActive=false;
+    SearchFound=false;
 
     RethinkLineLengths();
     RethinkScrollBars();
@@ -5271,6 +5539,7 @@ void DisplayText::ResetTerm(void)
         ClearScreen(e_ScreenClear_Clear);
 
         SelectionActive=false;
+        SearchFound=false;
         Selection_X=0;
         Selection_Y=0;
         Selection_AnchorX=0;
@@ -6910,7 +7179,7 @@ void DisplayText::ChangeAttribsBetweenPoints(int P1X,int P1Y,int P2X,int P2Y,
 
 /*******************************************************************************
  * NAME:
- *    DisplayText::GetSelectionString
+ *    DisplayText::GetStringBetweenPoints
  *
  * SYNOPSIS:
  *    bool DisplayText::GetStringBetweenPoints(int P1X,int P1Y,int P2X,int P2Y,
@@ -7243,7 +7512,7 @@ int DisplayText::CmpXYPositions(int X1,int Y1,int X2,int Y2)
  * PARAMETERS:
  *    PX [I] -- The X pos to look up
  *    PY [I] -- The Y pos to look up
- *    End [O] -- Where in the buffer that this X,Y points.
+ *    Pos [O] -- Where in the buffer that this X,Y points.
  *               Because the point can be off the end of a line you have
  *               to handle where some parts are invalid.
  *                      Line -- Always valid
@@ -7270,16 +7539,14 @@ int DisplayText::CmpXYPositions(int X1,int Y1,int X2,int Y2)
  *    case 'Pos.Frag' will be set to 'Pos.Line->Frags.end()'
  *
  * SEE ALSO:
- *    FindPointsOfSelection()
+ *    ConvertPoint2XY(), FindPointsOfSelection()
  ******************************************************************************/
 bool DisplayText::FindPoint(int PX,int PY,struct DTPoint &Pos,
         i_TextLines HintLine,int HintStartY)
 {
-    i_TextLines CurLine;
     int Delta;
     unsigned int MinDelta;
     unsigned int TmpStart;
-    i_TextLineFrags CurFrag;
     int r;
     int StartingY;
     i_TextLines StartLine;
@@ -7310,13 +7577,20 @@ bool DisplayText::FindPoint(int PX,int PY,struct DTPoint &Pos,
         TmpStart=LinesCount-ScreenHeightChars;
     else
         TmpStart=0;
-    FindPointHelper_FindDelta(PY,ScreenFirstLine,TmpStart,&MinDelta,&StartLine,&StartingY);
+    FindPointHelper_FindDelta(PY,ScreenFirstLine,TmpStart,&MinDelta,&StartLine,
+            &StartingY);
+
     /* TopLine */
-    FindPointHelper_FindDelta(PY,TopLine,TopLineY,&MinDelta,&StartLine,&StartingY);
+    FindPointHelper_FindDelta(PY,TopLine,TopLineY,&MinDelta,&StartLine,
+            &StartingY);
+
     /* Top */
-    FindPointHelper_FindDelta(PY,Lines.begin(),0,&MinDelta,&StartLine,&StartingY);
+    FindPointHelper_FindDelta(PY,Lines.begin(),0,&MinDelta,&StartLine,
+            &StartingY);
+
     /* Bottom */
-    FindPointHelper_FindDelta(PY,Lines.end(),LinesCount,&MinDelta,&StartLine,&StartingY);
+    FindPointHelper_FindDelta(PY,Lines.end(),LinesCount,&MinDelta,&StartLine,
+            &StartingY);
 
     if(StartingY<PY)
     {
@@ -7350,6 +7624,326 @@ bool DisplayText::FindPoint(int PX,int PY,struct DTPoint &Pos,
     Pos.LineY=TargetLineY;
     Pos.Frag=StartFrag;
     Pos.StrPos=StartOfStr;
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ConvertPoint2XY
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ConvertPoint2XY(const struct DTPoint &Point,int &PX,
+ *              int &PY);
+ *
+ * PARAMETERS:
+ *    Point [I] -- The point to convert.
+ *    PX [O] -- The X pos (in chars) that 'Point' maps to.
+ *    PY [O] -- The Y pos (in lines from the start of the buffer) that 'Point'
+ *              maps to.
+ *
+ * FUNCTION:
+ *    This function takes a point in the data buffer and converts it into an
+ *    X,Y position (in chars).  It is the reverse of FindPoint().
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    FindPoint()
+ ******************************************************************************/
+void DisplayText::ConvertPoint2XY(const struct DTPoint &Point,int &PX,int &PY)
+{
+    i_TextLineFrags CurFrag;
+    int CharX;
+
+    /* The Y is just how many lines from the start of the buffer we are */
+    PY=Point.LineY;
+
+    /* Add up the char width of each frag before the one 'Point' is in */
+    CharX=0;
+    for(CurFrag=Point.Line->Frags.begin();CurFrag!=Point.Line->Frags.end();
+            CurFrag++)
+    {
+        if(CurFrag==Point.Frag)
+            break;
+
+        if(CurFrag->FragType==e_TextCanvasFrag_String)
+        {
+            CharX+=utf8::unchecked::distance(CurFrag->Text.begin(),
+                    CurFrag->Text.end());
+        }
+    }
+
+    /* If we landed on a real frag then add the chars up to 'StrPos' */
+    if(CurFrag!=Point.Line->Frags.end() &&
+            CurFrag->FragType==e_TextCanvasFrag_String)
+    {
+        CharX+=utf8::unchecked::distance(CurFrag->Text.begin(),
+                CurFrag->Text.begin()+Point.StrPos);
+    }
+
+    PX=CharX;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::MovePointToPrevPos
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::MovePointToPrevPos(struct DTPoint &Pos);
+ *
+ * PARAMETERS:
+ *    Pos [I/O] -- The point to move
+ *
+ * FUNCTION:
+ *    This function moves the point to the prev pos (string pos, frag or line)
+ *
+ * RETURNS:
+ *    true -- We moved to the next pos
+ *    false -- We are past the start of data
+ *
+ * NOTES:
+ *    This is different than AdvancePoint() is that it moves to the prev thing
+ *    not the next char (it will move to a frag that is not
+ *    e_TextCanvasFrag_String).
+ *
+ * SEE ALSO:
+ *    MovePointToNextPos(), AdvancePoint()
+ ******************************************************************************/
+bool DisplayText::MovePointToPrevPos(struct DTPoint &Pos)
+{
+    const char *StartOfFragTxt;     // The start of the target frag's string
+    const char *StrPtr;             // A walking pointer into the frag string
+
+    /* If we are inside a string frag and not already on its first char then
+       just step back one char and we are done. */
+    if(Pos.Frag!=Pos.Line->Frags.end() &&
+            Pos.Frag->FragType==e_TextCanvasFrag_String && Pos.StrPos>0)
+    {
+        StartOfFragTxt=Pos.Frag->Text.c_str();
+        StrPtr=StartOfFragTxt+Pos.StrPos;
+
+        /* Step back over 1 char (UTF-8 aware) */
+        utf8::unchecked::prior(StrPtr);
+
+        Pos.StrPos=StrPtr-StartOfFragTxt;
+        return true;
+    }
+
+    /* We are at the start of the current frag (or on a non-string frag, or on
+       the end-of-line marker).  Drop back to the previous frag. */
+    if(Pos.Frag!=Pos.Line->Frags.begin())
+    {
+        /* There is a previous frag on this line */
+        Pos.Frag--;
+    }
+    else
+    {
+        /* First frag of the line, move back to the previous line */
+        if(Pos.Line==Lines.begin())
+        {
+            /* Already at the very start of the buffer, cannot go back */
+            return false;
+        }
+        Pos.Line--;
+        Pos.LineY--;
+
+        if(Pos.Line->Frags.empty())
+        {
+            /* Degenerate empty line, leave at the end-of-line marker */
+            Pos.Frag=Pos.Line->Frags.end();
+            Pos.StrPos=0;
+            return true;
+        }
+
+        /* Point at the last frag of the previous line */
+        Pos.Frag=Pos.Line->Frags.end();
+        Pos.Frag--;
+    }
+
+    /* 'Pos.Frag' now points at the frag we are dropping back into.  Land on
+       its last position: the last char of a string frag, else the frag
+       itself. */
+    Pos.StrPos=0;
+    if(Pos.Frag->FragType==e_TextCanvasFrag_String &&
+            !Pos.Frag->Text.empty())
+    {
+        StartOfFragTxt=Pos.Frag->Text.c_str();
+        StrPtr=StartOfFragTxt+Pos.Frag->Text.length();
+        utf8::unchecked::prior(StrPtr);
+        Pos.StrPos=StrPtr-StartOfFragTxt;
+    }
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::MovePointToNextPos
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::MovePointToNextPos(struct DTPoint &Pos);
+ *
+ * PARAMETERS:
+ *    Pos [I/O] -- The point to move
+ *
+ * FUNCTION:
+ *    This function moves the point to the next pos (string pos, frag or line)
+ *
+ * RETURNS:
+ *    true -- We moved to the next pos
+ *    false -- We are past the end of the data
+ *
+ * NOTES:
+ *    This is different than AdvancePoint() is that it moves to the next thing
+ *    not the next char (it will move to a frag that is not
+ *    e_TextCanvasFrag_String).
+ *
+ * SEE ALSO:
+ *    MovePointToPrevPos(), AdvancePoint()
+ ******************************************************************************/
+bool DisplayText::MovePointToNextPos(struct DTPoint &Pos)
+{
+    const char *StartOfFragTxt;     // The start of the current frag's string
+    const char *StrPtr;             // A walking pointer into the frag string
+    i_TextLines NextLine;           // Used to peek at the next line
+
+    /* Are we sitting inside a string frag?  If so try to move to the next
+       char before we move off the frag. */
+    if(Pos.Frag!=Pos.Line->Frags.end() &&
+            Pos.Frag->FragType==e_TextCanvasFrag_String)
+    {
+        StartOfFragTxt=Pos.Frag->Text.c_str();
+        StrPtr=StartOfFragTxt+Pos.StrPos;
+
+        /* Step over the char that 'StrPos' is currently on */
+        if(*StrPtr!=0)
+            utf8::unchecked::next(StrPtr);
+
+        Pos.StrPos=StrPtr-StartOfFragTxt;
+
+        /* If there are still chars left in this frag then we are done */
+        if(*StrPtr!=0)
+            return true;
+    }
+
+    /* We have run off the end of the current frag (or it was not a string
+       frag, or we where already at the end of the line).  Move to the next
+       frag on this line. */
+    if(Pos.Frag!=Pos.Line->Frags.end())
+        Pos.Frag++;
+    Pos.StrPos=0;
+
+    /* If there is another frag on this line then we are done */
+    if(Pos.Frag!=Pos.Line->Frags.end())
+        return true;
+
+    /* Out of frags on this line, move to the start of the next line */
+    NextLine=Pos.Line;
+    NextLine++;
+    if(NextLine==Lines.end())
+    {
+        /* End of the buffer.  Leave the point at the end of the last line so
+           'Line' stays valid ('Frag' is left at Frags.end()). */
+        return false;
+    }
+    Pos.Line=NextLine;
+    Pos.LineY++;
+    Pos.Frag=Pos.Line->Frags.begin();
+    Pos.StrPos=0;
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::IsWholeWord
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::IsWholeWord(struct DTPoint StartPoint,
+ *          struct DTPoint EndPoint);
+ *
+ * PARAMETERS:
+ *    StartPoint [I] -- The point of the first char of the match.
+ *    EndPoint [I] -- The point of the last char of the match (inclusive).
+ *
+ * FUNCTION:
+ *    This function checks if the the two points provided make up a whole word.
+ *    It does not check the chars between the points, only whats beside the
+ *    points.
+ *
+ *    Soft returns are transparent so a word may span a soft return.  Every
+ *    other non-char frag (hard returns, non-printable chars, etc) is treated
+ *    as white space and so counts as a word break.
+ *
+ * RETURNS:
+ *    true -- The match is a whole word.
+ *    false -- The match is only part of a larger word.
+ *
+ * SEE ALSO:
+ *    CheckWordBreak()
+ ******************************************************************************/
+bool DisplayText::IsWholeWord(struct DTPoint StartPoint,struct DTPoint EndPoint)
+{
+    /* Check the position just before the start of the word */
+    for(;;)
+    {
+        if(!MovePointToPrevPos(StartPoint))
+        {
+            /* Start of the buffer, nothing before us, this is a boundary */
+            break;
+        }
+        if(StartPoint.Frag==StartPoint.Line->Frags.end())
+        {
+            /* No frag (empty line), treat as white space */
+            break;
+        }
+        if(StartPoint.Frag->FragType==e_TextCanvasFrag_String)
+        {
+            /* A real char, it must be a word break for this to be a word */
+            if(!CheckWordBreak(StartPoint.Frag->Text.c_str()+
+                    StartPoint.StrPos))
+            {
+                return false;
+            }
+            break;
+        }
+        if(StartPoint.Frag->FragType==e_TextCanvasFrag_SoftRet)
+        {
+            /* Soft returns are transparent, keep looking back */
+            continue;
+        }
+        /* Any other non-char frag counts as white space (a boundary) */
+        break;
+    }
+
+    /* Check the position just after the end of the word */
+    for(;;)
+    {
+        if(!MovePointToNextPos(EndPoint))
+        {
+            /* End of the buffer, nothing after us, this is a boundary */
+            break;
+        }
+        if(EndPoint.Frag==EndPoint.Line->Frags.end())
+        {
+            /* No frag (empty line), treat as white space */
+            break;
+        }
+        if(EndPoint.Frag->FragType==e_TextCanvasFrag_String)
+        {
+            if(!CheckWordBreak(EndPoint.Frag->Text.c_str()+EndPoint.StrPos))
+                return false;
+            break;
+        }
+        if(EndPoint.Frag->FragType==e_TextCanvasFrag_SoftRet)
+        {
+            /* Soft returns are transparent, keep looking forward */
+            continue;
+        }
+        /* Any other non-char frag counts as white space (a boundary) */
+        break;
+    }
 
     return true;
 }
@@ -7469,11 +8063,15 @@ i_TextLineFrags DisplayText::FindLastTextFragOnLine(const i_TextLines &Line)
  *    This function moves a point backward or forward on the line, moving to
  *    the next / prev line as needed.
  *
+ *    This function ignores non e_TextCanvasFrag_String fragments (so
+ *    when moving it will jump over any non string fragments counting that
+ *    move as 1 'Amount').
+ *
  * RETURNS:
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    MovePointToNextPos()
  ******************************************************************************/
 void DisplayText::AdvancePoint(int &PX,int &PY,int Amount,int MinX,
         int MinY,int MaxX,int MaxY)
@@ -7671,7 +8269,8 @@ void DisplayText::FindWordStartEndPoints(int &PX,int &PY,int &PX2,int &PY2)
  *    DisplayText::CheckWordBreak
  *
  * SYNOPSIS:
- *    bool DisplayText::CheckWordBreak(string &Letter);
+ *    bool DisplayText::CheckWordBreak(const char *Letter);
+ *    bool DisplayText::CheckWordBreak(std::string &Letter);
  *
  * PARAMETERS:
  *    Letter [I] -- The letter to check
@@ -7686,20 +8285,24 @@ void DisplayText::FindWordStartEndPoints(int &PX,int &PY,int &PX2,int &PY2)
  * SEE ALSO:
  *    
  ******************************************************************************/
-bool DisplayText::CheckWordBreak(string &Letter)
+bool DisplayText::CheckWordBreak(const char *Letter)
 {
-    if(Letter==" " || Letter==":" || Letter==";" || Letter=="\"" ||
-            Letter=="\'" || Letter=="," || Letter=="." || Letter=="?" ||
-            Letter=="\\" || Letter=="/" || Letter=="`" || Letter=="~" ||
-            Letter=="|" || Letter=="(" || Letter==")" || Letter=="[" ||
-            Letter=="]" || Letter=="!" || Letter=="@" || Letter=="#" ||
-            Letter=="$" || Letter=="%" || Letter=="^" || Letter=="&" ||
-            Letter=="*" || Letter=="-" || Letter=="+" || Letter=="=" ||
-            Letter=="<" || Letter==">")
+    if(*Letter==' ' || *Letter==':' || *Letter==';' || *Letter=='\'' ||
+            *Letter=='\'' || *Letter==',' || *Letter=='.' || *Letter=='?' ||
+            *Letter=='\\' || *Letter=='/' || *Letter=='`' || *Letter=='~' ||
+            *Letter=='|' || *Letter=='(' || *Letter==')' || *Letter=='[' ||
+            *Letter==']' || *Letter=='!' || *Letter=='@' || *Letter=='#' ||
+            *Letter=='$' || *Letter=='%' || *Letter=='^' || *Letter=='&' ||
+            *Letter=='*' || *Letter=='-' || *Letter=='+' || *Letter=='=' ||
+            *Letter=='<' || *Letter=='>')
     {
         return true;
     }
     return false;
+}
+bool DisplayText::CheckWordBreak(std::string &Letter)
+{
+    return CheckWordBreak(Letter.c_str());
 }
 
 /*******************************************************************************
@@ -8568,4 +9171,668 @@ void DisplayText::MovePageUp(void)
 void DisplayText::MovePageDown(void)
 {
     ScrollScreen(0,WindowHeightChars);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::TextSearch
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::TextSearch(const char *SearchStr,int StartLineY,
+ *          int_fast32_t StartOffset,uint32_t Options,i_TextLines HintLine,
+ *          int HintStartY,struct DTPoint &LeftPoint,
+ *          struct DTPoint &RightPoint);
+ *
+ * PARAMETERS:
+ *    SearchStr [I] -- The text to search for.
+ *    StartLineY [I] -- The line to start the search on.  This is the number
+ *                      of lines from the start of the buffer.
+ *    StartOffset [I] -- The char (not byte) on 'StartLineY' to start the
+ *                       search at.  Only chars in string frags are counted
+ *                       (the same as TextLine_FindFragAndPos()).  Offsets
+ *                       past the ends of the line are clipped to the line.
+ *    Options [I] -- Supported options:
+ *                      DBTXT_SEARCH_BACKWARD -- Search from the start point
+ *                          toward the start of the buffer.  The match that
+ *                          starts closest to (but not after) the start
+ *                          point is found.  Without this option the search
+ *                          moves from the start point toward the end of
+ *                          the buffer.
+ *                      DBTXT_SEARCH_CASE_INSENSITIVE -- Ignore the case of
+ *                          letters when matching ('A' matches 'a').
+ *                      DBTXT_SEARCH_WHOLE_WORD -- Only match if the found
+ *                          text has a word break char (or the start / end
+ *                          of the line) on both sides of it.
+ *    HintLine [I] -- A hint of where to start searching from.  Normally
+ *                    you want to set this to the thing that is closest
+ *                    to where the X,Y point will be found (just speeds things
+ *                    up).  Set to Lines.end() to ignore.
+ *    HintStartY [I] -- Used with 'HintLine'.
+ *    LeftPoint [O] -- The left (start) point that the string was found.
+ *                     If there is no match, then this is not valid.
+ *    RightPoint [O] -- The right (end) point that the string was found.
+ *                      If there is no match, then this is not valid.
+ *
+ * FUNCTION:
+ *    This function searches the text in the buffer for a string.  The
+ *    search starts at the point provided and moves forward (or backward)
+ *    until a match is found or the end (start) of the buffer is hit.
+ *
+ *    Lines that have been word wrapped (soft end of lines) are joined back
+ *    together and searched as one long line so a match can span wrapped
+ *    lines.  The point returned is where the match starts, the match may
+ *    continue on the wrapped lines below it.
+ *
+ *    Only the normal text of a line is searched.  Non printable chars that
+ *    are being shown as symbols and the end of line markers are skipped.
+ *
+ *    A match that starts at the start point is found by both a forward and
+ *    a backward search.
+ *
+ * RETURNS:
+ *    true -- A match was found.  'FoundLineY' and 'FoundOffset' have been
+ *            set to where the match starts.
+ *    false -- No match was found (or there was an error).
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayText::TextSearch(const char *SearchStr,int StartLineY,
+        int_fast32_t StartOffset,uint32_t Options,
+        i_TextLines HintLine,int HintStartY,
+        struct DTPoint &LeftPoint,struct DTPoint &RightPoint)
+{
+    string FindStr;
+    struct DTPoint CurPoint;
+    struct DTPoint TmpPoint;
+    int_fast32_t MatchCount;
+    int_fast32_t TotalMatchCount;
+    const char *cstr;
+    const char *StartOfFragTxt;
+    const char *StartOfMatch;
+    unsigned char c;
+    uint_fast32_t r;
+
+    if(StartLineY<0 || StartLineY>=LinesCount)
+        return false;
+
+    try
+    {
+        FindStr=SearchStr;
+        if(Options&DBTXT_SEARCH_CASE_INSENSITIVE)
+        {
+            /* Convert to lower case */
+            for(r=0;r<FindStr.length();r++)
+            {
+                if(FindStr[r]>='A' && FindStr[r]<='Z')
+                    FindStr[r]+='a'-'A';
+            }
+        }
+
+        TotalMatchCount=FindStr.length();
+
+        /* Find the line the search starts on */
+        if(!FindPoint(StartOffset,StartLineY,LeftPoint,HintLine,HintStartY))
+            return false;
+
+        CurPoint.LineY=LeftPoint.LineY;
+
+        CurPoint.Line=LeftPoint.Line;
+        if(LeftPoint.Frag==LeftPoint.Line->Frags.end())
+        {
+            /* Move to the next line */
+            CurPoint.Line++;
+            CurPoint.LineY++;
+            CurPoint.Frag=CurPoint.Line->Frags.begin();
+            CurPoint.StrPos=0;
+        }
+        else
+        {
+            CurPoint.Frag=LeftPoint.Frag;
+            CurPoint.StrPos=LeftPoint.StrPos;
+        }
+
+        /* Start the search */
+        if(Options&DBTXT_SEARCH_BACKWARD)
+        {
+            /* Backward search.  Walk the candidate starting positions
+               backwards from the start point and return the first (closest)
+               place where the whole search string matches going forwards. */
+            CurPoint=LeftPoint;
+            while(MovePointToPrevPos(CurPoint))
+            {
+                if(SearchMatchAt(CurPoint,FindStr,Options,LeftPoint,
+                        RightPoint))
+                {
+                    /* Match, LeftPoint and RightPoint are filled in */
+                    return true;
+                }
+            }
+            /* Nothing found before the start point */
+        }
+        else
+        {
+            /* Forward search */
+            MatchCount=0;
+            while(CurPoint.Line!=Lines.end())
+            {
+                /* Walk the fragments */
+                while(CurPoint.Frag!=CurPoint.Line->Frags.end())
+                {
+                    /* Walk the strings in this frag */
+                    switch(CurPoint.Frag->FragType)
+                    {
+                        case e_TextCanvasFrag_String:
+                            StartOfFragTxt=CurPoint.Frag->Text.c_str();
+//                            cstr=StartOfFragTxt;
+//                            StartOfMatch=cstr;
+                            cstr=&StartOfFragTxt[CurPoint.StrPos];
+                            StartOfMatch=cstr;
+                            while(*cstr!=0)
+                            {
+                                c=*cstr;
+                                if(Options&DBTXT_SEARCH_CASE_INSENSITIVE)
+                                    c=tolower(c);
+                                if(c==(unsigned char)FindStr[MatchCount])
+                                {
+                                    if(MatchCount==0)
+                                    {
+                                        StartOfMatch=cstr;
+                                        LeftPoint.Line=CurPoint.Line;
+                                        LeftPoint.LineY=CurPoint.LineY;
+                                        LeftPoint.Frag=CurPoint.Frag;
+                                        LeftPoint.StrPos=
+                                                StartOfMatch-StartOfFragTxt;
+                                    }
+                                    MatchCount++;
+                                    if(MatchCount==TotalMatchCount)
+                                    {
+                                        /* We have a match (maybe) */
+                                        CurPoint.StrPos=cstr-StartOfFragTxt;
+                                        RightPoint=CurPoint;
+
+                                        if(!(Options&DBTXT_SEARCH_WHOLE_WORD))
+                                        {
+                                            /* Match */
+                                            return true;
+                                        }
+                                        if(IsWholeWord(LeftPoint,RightPoint))
+                                        {
+                                            /* Match */
+                                            return true;
+                                        }
+
+                                        /* Don't count, keep searching */
+                                    }
+                                }
+                                else
+                                {
+                                    if(MatchCount>0)
+                                    {
+                                        /* Reset to the first char (which
+                                           will be ignored) */
+                                        MatchCount=0;
+                                        CurPoint.Line=LeftPoint.Line;
+                                        CurPoint.LineY=LeftPoint.LineY;
+                                        CurPoint.Frag=LeftPoint.Frag;
+                                        StartOfFragTxt=
+                                                CurPoint.Frag->Text.c_str();
+                                        cstr=StartOfFragTxt+LeftPoint.StrPos;
+                                    }
+                                }
+                                cstr++;
+                            }
+                        break;
+                        case e_TextCanvasFrag_SoftRet:
+                            /* Soft Returns, continue matching */
+                        break;
+                        case e_TextCanvasFrag_NonPrintableChar:
+                        case e_TextCanvasFrag_HardRet:
+                        case e_TextCanvasFrag_RetText:
+                        case e_TextCanvasFrag_HR:
+                        case e_TextCanvasFragMAX:
+                        default:
+                            /* Everything else is a non match */
+                            MatchCount=0;
+                            /* No need to back track because we can't search
+                               for anything that has a non text block in it */
+                        break;
+                    }
+
+                    CurPoint.Frag++;
+                }
+                if(CurPoint.Line->EOL!=e_DTEOL_Soft)
+                {
+                    /* Lines that are not soft reset the search */
+                    MatchCount=0;
+                }
+                /* Move to the next line */
+                CurPoint.Line++;
+                CurPoint.LineY++;
+                CurPoint.Frag=CurPoint.Line->Frags.begin();
+                CurPoint.StrPos=0;
+            }
+        }
+    }
+    catch(...)
+    {
+    }
+
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::SearchMatchAt
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::SearchMatchAt(struct DTPoint StartPt,
+ *          const std::string &FindStr,uint32_t Options,
+ *          struct DTPoint &LeftPoint,struct DTPoint &RightPoint);
+ *
+ * PARAMETERS:
+ *    StartPt [I] -- The point the match must start at.
+ *    FindStr [I] -- The string to look for.
+ *    Options [I] -- The search options (see TextSearch()).
+ *    LeftPoint [O] -- Set to the first char of the match.
+ *    RightPoint [O] -- Set to the last char of the match.
+ *
+ * FUNCTION:
+ *    This function checks if 'FindStr' matches the text starting exactly at
+ *    'StartPt'.  The match may run across soft returns (they are transparent)
+ *    but any other non-char frag or a hard end of line stops it.
+ *
+ * RETURNS:
+ *    true -- 'FindStr' matches starting at 'StartPt'
+ *    false -- There is no match
+ *
+ * SEE ALSO:
+ *    TextSearch()
+ ******************************************************************************/
+bool DisplayText::SearchMatchAt(struct DTPoint StartPt,
+        const std::string &FindStr,uint32_t Options,struct DTPoint &LeftPoint,
+        struct DTPoint &RightPoint)
+{
+    struct DTPoint CurPoint;
+    struct DTPoint MatchRight;
+    const char *StartOfFragTxt;
+    const char *cstr;
+    unsigned char c;
+    int_fast32_t MatchCount;
+    int_fast32_t TotalMatchCount;
+    bool FirstFrag;
+
+    TotalMatchCount=FindStr.length();
+    if(TotalMatchCount==0)
+        return false;
+
+    /* A match can only start on a real char */
+    if(StartPt.Frag==StartPt.Line->Frags.end())
+        return false;
+    if(StartPt.Frag->FragType!=e_TextCanvasFrag_String)
+        return false;
+
+    MatchCount=0;
+    FirstFrag=true;
+    CurPoint=StartPt;
+
+    while(CurPoint.Line!=Lines.end())
+    {
+        /* Walk the frags */
+        while(CurPoint.Frag!=CurPoint.Line->Frags.end())
+        {
+            switch(CurPoint.Frag->FragType)
+            {
+                case e_TextCanvasFrag_String:
+                    StartOfFragTxt=CurPoint.Frag->Text.c_str();
+                    if(FirstFrag)
+                        cstr=StartOfFragTxt+StartPt.StrPos;
+                    else
+                        cstr=StartOfFragTxt;
+                    while(*cstr!=0)
+                    {
+                        c=*cstr;
+                        if(Options&DBTXT_SEARCH_CASE_INSENSITIVE)
+                            c=tolower(c);
+                        if(c!=(unsigned char)FindStr[MatchCount])
+                        {
+                            /* The match must start exactly at 'StartPt' so
+                               any mismatch means there is no match here */
+                            return false;
+                        }
+                        MatchCount++;
+                        if(MatchCount==TotalMatchCount)
+                        {
+                            /* We have a match */
+                            MatchRight=CurPoint;
+                            MatchRight.StrPos=cstr-StartOfFragTxt;
+                            if(Options&DBTXT_SEARCH_WHOLE_WORD)
+                            {
+                                if(!IsWholeWord(StartPt,MatchRight))
+                                    return false;
+                            }
+                            LeftPoint=StartPt;
+                            RightPoint=MatchRight;
+                            return true;
+                        }
+                        cstr++;
+                    }
+                    FirstFrag=false;
+                break;
+                case e_TextCanvasFrag_SoftRet:
+                    /* Soft returns are transparent, keep matching */
+                break;
+                case e_TextCanvasFrag_NonPrintableChar:
+                case e_TextCanvasFrag_HardRet:
+                case e_TextCanvasFrag_RetText:
+                case e_TextCanvasFrag_HR:
+                case e_TextCanvasFragMAX:
+                default:
+                    /* A non char frag can not be part of a match */
+                    return false;
+            }
+            CurPoint.Frag++;
+        }
+        if(CurPoint.Line->EOL!=e_DTEOL_Soft)
+        {
+            /* A hard end of line stops the match */
+            return false;
+        }
+        /* Move to the next line */
+        CurPoint.Line++;
+        CurPoint.LineY++;
+        CurPoint.Frag=CurPoint.Line->Frags.begin();
+    }
+
+    /* Ran off the end of the buffer before completing the match */
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::FindPanel_ShowPanel
+ *
+ * SYNOPSIS:
+ *    void DisplayText::SendPanel_ShowHexOrText(bool Visible);
+ *
+ * PARAMETERS:
+ *    Visible [I] -- Show the find panel or hide it
+ *
+ * FUNCTION:
+ *    This function tells the GUI to show or hide the find panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::FindPanel_ShowPanel(bool Visible)
+{
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    UITC_ShowFindPanel(TextDisplayCtrl,Visible);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::GiveFindFocus
+ *
+ * SYNOPSIS:
+ *    void DisplayText::GiveFindFocus(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gives focus to the find panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::GiveFindFocus(void)
+{
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    UITC_SetFocus(TextDisplayCtrl,e_UITCSetFocus_FindPanel);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::Find
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::Find(const char *Txt,unsigned int TxtLenBytes,
+ *          bool ContinueSearch,uint32_t Options);
+ *
+ * PARAMETERS:
+ *    Txt [I] -- The text or byte buffer to search for
+ *    TxtLenBytes [I] -- Number of bytes in 'Txt'
+ *    ContinueSearch [I] -- If this is true then we search from the last match.
+ *                          If there isn't a prev match then use 'From'
+ *    Options [I] -- Supported options:
+ *                      DBTXT_SEARCH_BACKWARD -- Search from the start point
+ *                          toward the start of the buffer.  The match that
+ *                          starts closest to (but not after) the start
+ *                          point is found.  Without this option the search
+ *                          moves from the start point toward the end of
+ *                          the buffer.
+ *                      DBTXT_SEARCH_CASE_INSENSITIVE -- Ignore the case of
+ *                          letters when matching ('A' matches 'a').
+ *                      DBTXT_SEARCH_WHOLE_WORD -- Only match if the found
+ *                          text has a word break char (or the start / end
+ *                          of the line) on both sides of it.
+ *                      DBTXT_SEARCH_FROM_TOP -- Search from the top of the
+ *                          scroll back buffer (else top of screen).
+ *
+ * FUNCTION:
+ *    This function does a text search.
+ *
+ * RETURNS:
+ *    true -- String was found
+ *    false -- String was not found
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayText::Find(const char *Txt,unsigned int TxtLenBytes,
+                bool ContinueSearch,uint32_t Options)
+{
+    int StartLineY;
+    int_fast32_t StartOffset;
+    i_TextLines HintLine;
+    struct DTPoint StartPoint;
+    struct DTPoint EndPoint;
+    bool Found;
+
+    /* No lines = no match */
+    if(LinesCount==0)
+        return false;
+
+    /* If we already have a search result continue from there */
+    if(SearchFound && ContinueSearch)
+    {
+        /* Continue the search */
+        if(Options&DBTXT_SEARCH_BACKWARD)
+        {
+            /* Move back by 1 and search from there */
+            AdvancePoint(Search_X,Search_Y,-1,0,0,ScreenWidthChars,LinesCount);
+        }
+        else
+        {
+            /* Move forward by 1 and search from there */
+            AdvancePoint(Search_X,Search_Y,1,0,0,ScreenWidthChars,LinesCount);
+        }
+        StartLineY=Search_Y;
+        StartOffset=Search_X;
+        HintLine=Lines.end();
+    }
+    else
+    {
+        /* Start a new search */
+        if(Options&DBTXT_SEARCH_BACKWARD)
+        {
+            StartLineY=LinesCount-1;
+            HintLine=Lines.end();
+            HintLine--;
+            StartOffset=TextLine_FindLineLen(HintLine);
+        }
+        else
+        {
+            if(Options&DBTXT_SEARCH_FROM_TOP)
+            {
+                StartLineY=0;
+                StartOffset=0;
+                HintLine=Lines.begin();
+            }
+            else
+            {
+                StartLineY=TopLineY;
+                StartOffset=0;
+                HintLine=TopLine;
+            }
+        }
+    }
+
+    Found=TextSearch(Txt,StartLineY,StartOffset,Options,HintLine,StartLineY,
+            StartPoint,EndPoint);
+    if(Found)
+    {
+        ConvertPoint2XY(StartPoint,Search_X,Search_Y);
+        ConvertPoint2XY(EndPoint,Search_EndX,Search_EndY);
+
+        SelectionActive=true;
+        Selection_X=Search_X;
+        Selection_Y=Search_Y;
+        Selection_AnchorX=Search_EndX+1;
+        Selection_AnchorY=Search_EndY;
+    }
+    else
+    {
+        SelectionActive=false;
+    }
+    SearchFound=Found;
+
+    if(Found)
+    {
+        if(!ScrollScreen2ShowPoint(Search_X,Search_Y,Search_EndX,Search_EndY))
+            RedrawFullScreen();
+    }
+    else
+    {
+        /* Redraw to clear the selection (because we don't have a match) */
+        RedrawFullScreen();
+    }
+
+    return Found;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::GetFindText
+ *
+ * SYNOPSIS:
+ *    void DisplayText::GetFindText(std::string &RetStr);
+ *
+ * PARAMETERS:
+ *    RetStr [O] -- Where the search string is placed.
+ *
+ * FUNCTION:
+ *    This function gets the string the user has input into the find text
+ *    input.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::GetFindText(std::string &RetStr)
+{
+    t_UIComboBoxCtrl *ComboBox;
+
+    RetStr="";
+
+    ComboBox=UITC_GetComboBoxHandle(TextDisplayCtrl,
+            e_UITC_Combox_FindPanel_Text);
+    UIGetComboBoxText(ComboBox,RetStr);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::GetFindTextSelectedOptions
+ *
+ * SYNOPSIS:
+ *    void DisplayText::GetFindTextSelectedOptions(uint32_t &Options);
+ *
+ * PARAMETERS:
+ *    Options [I/O] -- This options selected.  This will have the bits
+ *                     cleared/set only for the options that are stored
+ *                     in the GUI.
+ *
+ * FUNCTION:
+ *    This function gets the options for the find panel.  It only changes
+ *    the options that have inputs in the panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::GetFindTextSelectedOptions(uint32_t &Options)
+{
+    t_UIComboBoxCtrl *ComboBox;
+    t_UICheckboxCtrl *Checkbox;
+
+    Options&=~DBTXT_SEARCH_CASE_INSENSITIVE;
+    Options&=~DBTXT_SEARCH_WHOLE_WORD;
+    Options&=~DBTXT_SEARCH_FROM_TOP;
+
+    ComboBox=UITC_GetComboBoxHandle(TextDisplayCtrl,
+            e_UITC_Combox_FindPanel_SearchFrom);
+
+    if(UIGetComboBoxSelectedIndex(ComboBox)==1)
+        Options|=DBTXT_SEARCH_FROM_TOP;
+
+    Checkbox=UITC_GetCheckboxHandle(TextDisplayCtrl,
+            e_UITC_Checkbox_FindMatchCase);
+    if(!UIGetCheckboxCheckStatus(Checkbox))
+        Options|=DBTXT_SEARCH_CASE_INSENSITIVE;
+
+    Checkbox=UITC_GetCheckboxHandle(TextDisplayCtrl,
+            e_UITC_Checkbox_FindWholeWords);
+    if(UIGetCheckboxCheckStatus(Checkbox))
+        Options|=DBTXT_SEARCH_WHOLE_WORD;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::IsThereASearchResult
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::IsThereASearchResult(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function returns if the last search found something and the user
+ *    hasn't cleared it (or something else hasn't cleared it)
+ *
+ * RETURNS:
+ *    true -- There is a search match
+ *    false -- There is no search match
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayText::IsThereASearchResult(void)
+{
+    return SearchFound;
 }

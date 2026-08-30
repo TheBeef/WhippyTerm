@@ -41,6 +41,10 @@
 #include <string>
 
 /***  DEFINES                          ***/
+#define DBTXT_SEARCH_BACKWARD           0x0001
+#define DBTXT_SEARCH_CASE_INSENSITIVE   0x0002
+#define DBTXT_SEARCH_WHOLE_WORD         0x0004
+#define DBTXT_SEARCH_FROM_TOP           0x0008  // Search from the top of the scroll back buffer (else top of screen)
 
 /***  MACROS                           ***/
 
@@ -59,6 +63,7 @@ typedef enum
     e_DBEvent_Jump2SendBuffersClicked,
     e_DBEvent_SendTextLine,
     e_DBEvent_DirectPanelToggled,
+    e_DBEvent_FindTextEvent,
     e_DBEventMAX
 } e_DBEventType;
 
@@ -108,6 +113,21 @@ struct DBEventContextMenu
     e_UITD_ContextMenuType Menu;
 };
 
+typedef enum
+{
+    e_DBFind_CloseClicked,
+    e_DBFind_ReturnPressed,
+    e_DBFind_PrevClicked,
+    e_DBFind_NextClicked,
+    e_DBFindMAX
+} e_DBFindType;
+
+struct DBEventFind
+{
+    e_DBFindType SubType;
+    const char *SearchStr;
+};
+
 union DBEventData
 {
     struct DBEventKeyPress Key;
@@ -116,6 +136,7 @@ union DBEventData
     struct DBEventFocusInfo Focus;
     struct DBEventMouseWheel MouseWheel;
     struct DBEventContextMenu Context;
+    struct DBEventFind Find;
 };
 
 struct DBEvent
@@ -215,6 +236,16 @@ class DisplayBase
         bool GetTextPanelAvailable(void);
         bool GetBlockPanelAvailable(void);
 
+        /* Find Panel */
+        virtual void FindPanel_ShowPanel(bool Visible);
+        virtual void GiveFindFocus(void);
+        virtual bool Find(const char *Txt,unsigned int TxtLenBytes,
+                bool ContinueSearch,uint32_t Options);
+        virtual void GetFindTextSelectedOptions(uint32_t &Options);
+        virtual void GetFindText(std::string &RetStr);
+        virtual bool IsThereASearchResult(void);
+
+        /* Public vars */
         struct CharStyling CurrentStyle;
 
     protected:

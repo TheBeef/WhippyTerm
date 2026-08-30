@@ -2330,11 +2330,11 @@
     </widget>
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
-    <addaction name="actionFind"/>
-    <addaction name="actionFind_Next"/>
-    <addaction name="actionFind_First"/>
     <addaction name="separator"/>
     <addaction name="actionCopy_Selection_To_Send_Buffer"/>
+    <addaction name="separator"/>
+    <addaction name="actionFind"/>
+    <addaction name="actionFind_Next"/>
     <addaction name="separator"/>
     <addaction name="actionBold"/>
     <addaction name="actionItalics"/>
@@ -2385,7 +2385,6 @@
     </widget>
     <addaction name="menuApply_Terminal_Emulation"/>
     <addaction name="separator"/>
-    <addaction name="actionInsert_Time_Stamp"/>
     <addaction name="actionSend_NULL"/>
     <addaction name="actionSend_Backspace"/>
     <addaction name="actionSend_Tab"/>
@@ -2716,9 +2715,6 @@
    </property>
   </action>
   <action name="actionFind">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="icon">
     <iconset resource="MainResource.qrc">
      <normaloff>:/G/Graphics/find.png</normaloff>:/G/Graphics/find.png</iconset>
@@ -2726,34 +2722,14 @@
    <property name="text">
     <string>&amp;Find...</string>
    </property>
-   <property name="visible">
-    <bool>false</bool>
-   </property>
   </action>
   <action name="actionFind_Next">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="icon">
     <iconset resource="MainResource.qrc">
      <normaloff>:/G/Graphics/find_again.png</normaloff>:/G/Graphics/find_again.png</iconset>
    </property>
    <property name="text">
     <string>Find &amp;Next</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
-   </property>
-  </action>
-  <action name="actionFind_First">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>F&amp;ind First...</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
    </property>
   </action>
   <action name="actionGoto_Column">
@@ -2934,14 +2910,6 @@
   <action name="actionClear_Scroll_Buffer">
    <property name="text">
     <string>Clear &amp;Scroll Buffer</string>
-   </property>
-  </action>
-  <action name="actionInsert_Time_Stamp">
-   <property name="text">
-    <string>I&amp;nsert Time Stamp</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
    </property>
   </action>
   <action name="actionNew_Window">

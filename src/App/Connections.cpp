@@ -1,3 +1,12 @@
+/* 
+
+TBD:
+    * Search history
+    * Binary search
+    * Hex search
+
+*/
+
 /*******************************************************************************
  * FILENAME: Connections.cpp
  *
@@ -858,6 +867,9 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
             {
                 throw(0);
             }
+
+            /* We always hide the find panel on init */
+            Display->FindPanel_ShowPanel(false);
         }
 
         /* IOHandle was allocated in the constructor */
@@ -3395,6 +3407,38 @@ bool Connection::ProcessDisplayEvent(const struct DBEvent *Event)
                 else
                     PanelOpen=Display->GetTextPanelAvailable();
                 MW->InformOf_SendPanelOpenClose(PanelOpen);
+            }
+        break;
+        case e_DBEvent_FindTextEvent:
+            switch(Event->Info->Find.SubType)
+            {
+                case e_DBFind_CloseClicked:
+                    if(Display!=NULL)
+                        Display->FindPanel_ShowPanel(false);
+                break;
+                case e_DBFind_ReturnPressed:
+                    if(MW!=NULL)
+                        MW->ExeCmd(e_Cmd_FindInText);
+
+                    /* Give the focus back to the main display */
+                    GiveFocus();
+                break;
+                case e_DBFind_PrevClicked:
+                    if(MW!=NULL)
+                        MW->ExeCmd(e_Cmd_FindInTextPrev);
+
+                    /* Give the focus back to the main display */
+                    GiveFocus();
+                break;
+                case e_DBFind_NextClicked:
+                    if(MW!=NULL)
+                        MW->ExeCmd(e_Cmd_FindInTextNext);
+
+                    /* Give the focus back to the main display */
+                    GiveFocus();
+                break;
+                case e_DBFindMAX:
+                break;
             }
         break;
         case e_DBEventMAX:
@@ -9530,4 +9574,220 @@ bool Connection::IsDirectSendPanelOpen(void)
     {
         return Display->GetTextPanelAvailable();
     }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::ShowFindText
+ *
+ * SYNOPSIS:
+ *    void Connection::ShowFindText(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function shows the find panel.  It is ment to be used when the user
+ *    selects find in text.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::ShowFindText(void)
+{
+    if(Display==NULL)
+        return;
+
+    Display->FindPanel_ShowPanel(true);
+    Display->GiveFindFocus();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::DoFindText
+ *
+ * SYNOPSIS:
+ *    void Connection::DoFindText(const char *Text,uint32_t Options,
+ *              bool Restart);
+ *
+ * PARAMETERS:
+ *    Text [I] -- The text to search for
+ *    Options [I] -- Supported options:
+ *                      DBTXT_SEARCH_BACKWARD -- Search from the start point
+ *                          toward the start of the buffer.  The match that
+ *                          starts closest to (but not after) the start
+ *                          point is found.  Without this option the search
+ *                          moves from the start point toward the end of
+ *                          the buffer.
+ *                      DBTXT_SEARCH_CASE_INSENSITIVE -- Ignore the case of
+ *                          letters when matching ('A' matches 'a').
+ *                      DBTXT_SEARCH_WHOLE_WORD -- Only match if the found
+ *                          text has a word break char (or the start / end
+ *                          of the line) on both sides of it.
+ *    Restart [I] -- If this is true then act as if it's a new search, false
+ *                   will continue the prev search.
+ *
+ * FUNCTION:
+ *    This function does a text search on a connection.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::DoFindText(const char *Text,uint32_t Options,bool Restart)
+{
+    if(Display==NULL)
+        return;
+
+    Display->Find(Text,strlen(Text),!Restart,Options);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::FindTextFromUI
+ *
+ * SYNOPSIS:
+ *    void Connection::FindTextFromUI(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function does a new search from the UI settings and string.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::FindTextFromUI(void)
+{
+    std::string SearchText;
+
+    if(Display==NULL)
+        return;
+
+    Display->GetFindText(SearchText);
+    if(SearchText=="")
+        return;
+
+    LastSearchOptions=0;
+    Display->GetFindTextSelectedOptions(LastSearchOptions);
+
+    DoFindText(SearchText.c_str(),LastSearchOptions,true);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::FindTextNext
+ *
+ * SYNOPSIS:
+ *    void Connection::FindTextNext(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function does a forward search from the last match (if there was one)
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::FindTextNext(void)
+{
+    std::string SearchText;
+
+    if(Display==NULL)
+        return;
+
+    Display->GetFindText(SearchText);
+    if(SearchText=="")
+        return;
+
+    LastSearchOptions=0;
+    Display->GetFindTextSelectedOptions(LastSearchOptions);
+
+    DoFindText(SearchText.c_str(),LastSearchOptions,false);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::FindTextPrev
+ *
+ * SYNOPSIS:
+ *    void Connection::FindTextPrev(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function does a backward search from the last match (if there was
+ *    one)
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::FindTextPrev(void)
+{
+    std::string SearchText;
+
+    if(Display==NULL)
+        return;
+
+    Display->GetFindText(SearchText);
+    if(SearchText=="")
+        return;
+
+    LastSearchOptions=0;
+    Display->GetFindTextSelectedOptions(LastSearchOptions);
+    LastSearchOptions|=DBTXT_SEARCH_BACKWARD;
+
+    DoFindText(SearchText.c_str(),LastSearchOptions,false);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::FindTextAgain
+ *
+ * SYNOPSIS:
+ *    void Connection::FindTextAgain(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function continues the last search.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void Connection::FindTextAgain(void)
+{
+    std::string SearchText;
+
+    if(Display==NULL)
+        return;
+
+    Display->GetFindText(SearchText);
+    if(SearchText=="")
+        return;
+
+    Display->GetFindTextSelectedOptions(LastSearchOptions);
+
+    DoFindText(SearchText.c_str(),LastSearchOptions,false);
 }

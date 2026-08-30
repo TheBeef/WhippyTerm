@@ -38,6 +38,7 @@
 #include <stdint.h>
 #include <string>
 #include <list>
+#include <vector>
 
 /***  DEFINES                          ***/
 #define DTXT_APPLY_SET_ATTRIB   0x0001
@@ -45,6 +46,8 @@
 #define DTXT_APPLY_FOREGROUND   0x0004
 #define DTXT_APPLY_BACKGROUND   0x0008
 #define DTXT_APPLY_ULINE_COLOR  0x0010
+
+/***  MACROS                           ***/
 
 /***  MACROS                           ***/
 
@@ -190,6 +193,7 @@ class DisplayText : public DisplayBase
         bool IsAttribSetInSelection(uint32_t Attribs);
         uint8_t *GetSelectionRAW(unsigned int *Bytes);
         void GetScreenSize(uint32_t *Width,uint32_t *Height);
+        bool TextSearch(const char *SearchStr,int StartLineY,int_fast32_t StartOffset,uint32_t Options,i_TextLines HintLine,int HintStartY,struct DTPoint &LeftPoint,struct DTPoint &RightPoint);
 
         t_DataProMark *AllocateMark(void);
         void FreeMark(t_DataProMark *Mark);
@@ -217,6 +221,15 @@ class DisplayText : public DisplayBase
         bool IsScreenClear(void);
         void ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2);
         void ClearScrollBackBuffer(void);
+
+        /* Find Panel */
+        void FindPanel_ShowPanel(bool Visible);
+        void GiveFindFocus(void);
+        bool Find(const char *Txt,unsigned int TxtLenBytes,bool ContinueSearch,
+                uint32_t Options);
+        void GetFindText(std::string &RetStr);
+        void GetFindTextSelectedOptions(uint32_t &Options);
+        bool IsThereASearchResult(void);
 
     private:
         t_UITextDisplayCtrl *TextDisplayCtrl;
@@ -288,6 +301,17 @@ class DisplayText : public DisplayBase
         struct TextPointMarker *MarkerList;
         std::string GetMarkTextBuffer;
 
+        /* Search */
+        bool SearchFound;               // Did we have a match last search
+        int Search_X;                   // The search left pos (in chars)
+        int Search_Y;                   // The search top pos (in lines)
+        int Search_EndX;                // The search end left pos (in chars)
+        int Search_EndY;                // The search end top pos (in lines)
+
+
+
+
+
         bool DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event);
         void DoScrollTimerTimeout(void);
         void RedrawActiveLine(void);
@@ -319,7 +343,10 @@ class DisplayText : public DisplayBase
         void ScrollVertAreaUp(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2,int32_t dy);
         void DEBUG_ForceRedrawOfScreen(void);
         int CalcCursorXPx(void);
+        bool CheckWordBreak(const char *Letter);
         bool CheckWordBreak(std::string &Letter);
+        bool IsWholeWord(struct DTPoint StartPoint,struct DTPoint EndPoint);
+        bool SearchMatchAt(struct DTPoint StartPt,const std::string &FindStr,uint32_t Options,struct DTPoint &LeftPoint,struct DTPoint &RightPoint);
 
         bool IsCursorAtEnd(void);
 
@@ -335,6 +362,7 @@ class DisplayText : public DisplayBase
         void PadOutScreenWithBlankLines(void);
         void ScrollScreenByXLines(int Lines2Scroll);
         void RedrawFullScreen(void);
+        bool ScrollScreen2ShowPoint(int PX,int PY,int PX2,int PY2);
 
         /* Selection handling */
         void GetNormalizedSelection(int &X1,int &Y1,int &X2,int &Y2);
@@ -342,10 +370,14 @@ class DisplayText : public DisplayBase
 
         /* Points (X,Y stuff) */
         bool FindPoint(int PX,int PY,struct DTPoint &Pos,i_TextLines HintLine,int HintStartY);
+        void ConvertPoint2XY(const struct DTPoint &Point,int &PX,int &PY);
         void FindPointHelper_FindDelta(int PY,i_TextLines StartLine,int StartingY,unsigned int *LastMinDelta,i_TextLines *RetStartLine,int *RetStartingY);
         void AdvancePoint(int &PX,int &PY,int Amount,int MinX,int MinY,int MaxX,int MaxY);
         void FindWordStartEndPoints(int &PX,int &PY,int &PX2,int &PY2);
         int CmpXYPositions(int X1,int Y1,int X2,int Y2);
+        bool MovePointToPrevPos(struct DTPoint &Pos);
+        bool MovePointToNextPos(struct DTPoint &Pos);
+        int CalcPixelPointForX(int X,struct TextLine *Line);
 
         /* Line handling */
         bool IsLineBlank(i_TextLines Line);

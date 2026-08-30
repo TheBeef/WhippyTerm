@@ -126,6 +126,9 @@ class DisplayBinary : public DisplayBase
         bool IsScreenClear(void);
         void ClearScrollBackBuffer(void);
 
+        void FindPanel_ShowPanel(bool Visible);
+        void GiveFindFocus(void);
+
     private:
         bool InitCalled;
         e_TextCursorStyleType CursorStyle;

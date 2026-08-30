@@ -106,8 +106,18 @@ typedef enum
     e_UITC_Bttn_Clear,
     e_UITC_Bttn_Jump2SendBuffers,
     e_UITC_Bttn_SendTextLine,
+    e_UITC_Bttn_FindNextArrow,
+    e_UITC_Bttn_FindPrevArrow,
     e_UITC_BttnMAX
 } e_UITC_BttnType;
+
+typedef enum
+{
+    e_UITC_Checkbox_FindMatchCase,
+    e_UITC_Checkbox_FindWholeWords,
+    e_UITC_Checkbox_HexMode,
+    e_UITC_CheckboxMAX
+} e_UITC_CheckboxType;
 
 typedef enum
 {
@@ -127,6 +137,8 @@ typedef enum
     e_UITC_Combox_BlockSend_LineEnd,
     e_UITC_Combox_TextSend_LineEnd,
     e_UITC_Combox_TextSend_Line,
+    e_UITC_Combox_FindPanel_Text,
+    e_UITC_Combox_FindPanel_SearchFrom,
     e_UITC_ComboxMAX
 } e_UITC_ComboxType;
 
@@ -165,6 +177,8 @@ typedef enum
     e_TextDisplayEvent_SendText_Down,
     e_TextDisplayEvent_TextCloseBttn,
     e_TextDisplayEvent_BlockCloseBttn,
+    e_TextDisplayEvent_FindCloseBttn,
+    e_TextDisplayEvent_FindTextReturnPressed,
     e_TextDisplayEventMAX
 } e_TextDisplayEventType;
 
@@ -246,6 +260,7 @@ typedef enum
 {
     e_UITCSetFocus_Main,
     e_UITCSetFocus_SendPanel,
+    e_UITCSetFocus_FindPanel,
     e_UITCSetFocusMAX
 } e_UITCSetFocusType;
 
@@ -273,6 +288,7 @@ void UITC_Reparent(t_UITextDisplayCtrl *ctrl,void *NewParentWidget);
 /* Control */
 void UITC_ShowBlockSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible);
 void UITC_ShowTextLineSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible);
+void UITC_ShowFindPanel(t_UITextDisplayCtrl *ctrl,bool Visible);
 void UITC_SendPanelShowHexOrTextInput(t_UITextDisplayCtrl *ctrl,bool ShowText);
 void UITC_SetCursorBlinking(t_UITextDisplayCtrl *ctrl,bool Blinking);
 void UITC_SetCursorPos(t_UITextDisplayCtrl *ctrl,unsigned int x,unsigned int y);
@@ -292,6 +308,7 @@ t_UIRadioBttnCtrl *UITC_GetRadioButton(t_UITextDisplayCtrl *ctrl,e_UITC_RadioBut
 t_UIComboBoxCtrl *UITC_GetComboBoxHandle(t_UITextDisplayCtrl *ctrl,e_UITC_ComboxType UIObj);
 t_UIMuliLineTextInputCtrl *UITC_GetMuliLineTextInputHandle(t_UITextDisplayCtrl *ctrl,e_UITC_MuliTxtType Txt);
 t_UITextDisplayColumn *UITC_GetTextDisplayPrimaryColumn(t_UITextDisplayCtrl *ctrl);
+t_UICheckboxCtrl *UITC_GetCheckboxHandle(t_UITextDisplayCtrl *ctrl,e_UITC_CheckboxType CBox);
 
 /* Info */
 int UITC_GetFragWidth(t_UITextDisplayColumn *Handle,const struct TextCanvasFrag *Frag);

@@ -466,6 +466,10 @@ private slots:
     
     void on_actionGoto_WhippyTerm_Web_Site_triggered();
     
+    void on_actionFind_triggered();
+    
+    void on_actionFind_Next_triggered();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

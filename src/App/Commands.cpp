@@ -219,6 +219,11 @@ const char *m_CmdNames[]=
     "TermEmuSettings",                      // e_Cmd_TermEmuSettings
     "NewVersionCheck",                      // e_Cmd_NewVersionCheck
     "GotoWebSite",                          // e_Cmd_GotoWebSite
+    "ShowFindInText",                       // e_Cmd_ShowFindInText
+    "FindInTextNext",                       // e_Cmd_FindInTextNext
+    "FindInTextPrev",                       // e_Cmd_FindInTextPrev
+    "FindInText",                           // e_Cmd_FindInText
+    "FindAgain",                            // e_Cmd_FindInTextAgain
 };
 
 e_CmdType m_Cmd2MenuMapping[]=
@@ -343,6 +348,8 @@ e_CmdType m_Cmd2MenuMapping[]=
     e_Cmd_TermEmuSettings,                  // e_UIMWMenu_TermEmuSettings
     e_Cmd_NewVersionCheck,                  // e_UIMWMenu_NewVersionCheck
     e_Cmd_GotoWebSite,                      // e_UIMWMenu_GotoWebSite
+    e_Cmd_ShowFindInText,                   // e_UIMWMenu_Find
+    e_Cmd_FindInTextAgain,                  // e_UIMWMenu_FindNext
 };
 
 e_CmdType m_Cmd2SendBufferContextMenuMapping[]=
@@ -878,6 +885,8 @@ void DefaultCmdKeyMapping(struct CommandKeySeq *KeyMapping)
     // e_Cmd_TermEmuSettings
     // e_Cmd_NewVersionCheck
     // e_Cmd_GotoWebSite
+    SetKeySeq(&KeyMapping[e_Cmd_ShowFindInText],KEYMOD_SHIFT|KEYMOD_CONTROL,e_UIKeysMAX,'F');
+    SetKeySeq(&KeyMapping[e_Cmd_FindInTextAgain],KEYMOD_SHIFT|KEYMOD_CONTROL,e_UIKeysMAX,'G');
 
 /* Other commands / key seq do to:
  * Select All???    Shift+Ctrl+A

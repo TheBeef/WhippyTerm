@@ -387,7 +387,30 @@ t_UIButtonCtrl *UITC_GetButtonHandle(t_UITextDisplayCtrl *ctrl,e_UITC_BttnType B
             return (t_UIButtonCtrl *)TextDisplay->ui->Jump2SendBuffers_pushButton;
         case e_UITC_Bttn_SendTextLine:
             return (t_UIButtonCtrl *)TextDisplay->ui->TextSendSend_pushButton;
+        case e_UITC_Bttn_FindNextArrow:
+            return (t_UIButtonCtrl *)TextDisplay->ui->Find_Next_toolButton;
+        case e_UITC_Bttn_FindPrevArrow:
+            return (t_UIButtonCtrl *)TextDisplay->ui->Find_Prev_toolButton;
         case e_UITC_BttnMAX:
+        default:
+            break;
+    }
+    return NULL;
+}
+
+t_UICheckboxCtrl *UITC_GetCheckboxHandle(t_UITextDisplayCtrl *ctrl,e_UITC_CheckboxType CBox)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    switch(CBox)
+    {
+        case e_UITC_Checkbox_FindMatchCase:
+            return (t_UICheckboxCtrl *)TextDisplay->ui->Find_MatchCase_checkBox;
+        case e_UITC_Checkbox_FindWholeWords:
+            return (t_UICheckboxCtrl *)TextDisplay->ui->Find_WholeWords_checkBox;
+        case e_UITC_Checkbox_HexMode:
+            return (t_UICheckboxCtrl *)TextDisplay->ui->Find_Hex_checkBox;
+        case e_UITC_CheckboxMAX:
         default:
             break;
     }
@@ -453,6 +476,10 @@ t_UIComboBoxCtrl *UITC_GetComboBoxHandle(t_UITextDisplayCtrl *ctrl,e_UITC_Combox
             return (t_UIComboBoxCtrl *)TextDisplay->ui->TextSend_LineEnd_comboBox;
         case e_UITC_Combox_TextSend_Line:
             return (t_UIComboBoxCtrl *)TextDisplay->ui->TextSend_Line_comboBox;
+        case e_UITC_Combox_FindPanel_Text:
+            return (t_UIComboBoxCtrl *)TextDisplay->ui->Find_Text_comboBox;
+        case e_UITC_Combox_FindPanel_SearchFrom:
+            return (t_UIComboBoxCtrl *)TextDisplay->ui->Find_SearchFrom_comboBox;
         case e_UITC_ComboxMAX:
         default:
             break;
@@ -732,13 +759,40 @@ void UITC_ShowBlockSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible)
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    UITC_ShowBlockSendPanel()
  ******************************************************************************/
 void UITC_ShowTextLineSendPanel(t_UITextDisplayCtrl *ctrl,bool Visible)
 {
     Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
 
     TextDisplay->ui->TextSend_GroupBox->setVisible(Visible);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    UITC_ShowFindPanel
+ *
+ * SYNOPSIS:
+ *    void UITC_ShowFindPanel(t_UITextDisplayCtrl *ctrl,bool Visible);
+ *
+ * PARAMETERS:
+ *    ctrl [I] -- What control to work on
+ *    Visible [I] -- true = show the panel, false = hide the panel.
+ *
+ * FUNCTION:
+ *    This function shows/hides the find panel (the search for a string panel).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    UITC_ShowTextLineSendPanel()
+ ******************************************************************************/
+void UITC_ShowFindPanel(t_UITextDisplayCtrl *ctrl,bool Visible)
+{
+    Frame_MainTextArea *TextDisplay=(Frame_MainTextArea *)ctrl;
+
+    TextDisplay->ui->Find_ContainerWidget->setVisible(Visible);
 }
 
 /*******************************************************************************
@@ -1155,6 +1209,12 @@ void UITC_SetFocus(t_UITextDisplayCtrl *ctrl,e_UITCSetFocusType What)
         break;
         case e_UITCSetFocus_SendPanel:
             TextDisplay->ui->BlockSend_textEdit->setFocus(Qt::OtherFocusReason);
+        break;
+        case e_UITCSetFocus_FindPanel:
+            TextDisplay->ui->Find_Text_comboBox->setFocus(Qt::OtherFocusReason);
+
+            /* Select all the text */
+            TextDisplay->ui->Find_Text_comboBox->lineEdit()->selectAll();
         break;
         case e_UITCSetFocusMAX:
         default:

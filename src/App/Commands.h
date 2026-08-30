@@ -210,6 +210,11 @@ typedef enum
     e_Cmd_TermEmuSettings,
     e_Cmd_NewVersionCheck,
     e_Cmd_GotoWebSite,
+    e_Cmd_ShowFindInText,
+    e_Cmd_FindInTextNext,
+    e_Cmd_FindInTextPrev,
+    e_Cmd_FindInText,
+    e_Cmd_FindInTextAgain,
     e_CmdMAX
 } e_CmdType;
 

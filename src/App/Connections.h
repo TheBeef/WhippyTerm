@@ -573,6 +573,14 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void SetDownloadFilenameSet(bool Set);
         bool IsDownloadFilenameSet(void);
 
+        /* Find */
+        void ShowFindText(void);
+        void DoFindText(const char *Text,uint32_t Options,bool Restart);
+        void FindTextFromUI(void);
+        void FindTextNext(void);
+        void FindTextPrev(void);
+        void FindTextAgain(void);
+
         const char *GetProcessorID(void);
 
     private:
@@ -667,6 +675,9 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         bool Add2FrozenQueue(struct Connection_FrozenQueueEntry *Ent);
         void FreeFrozenQueue(void);
         void PlayBackFrozenQueue(void);
+
+        /* Find */
+        uint32_t LastSearchOptions;
 
         /* Things that can be enabled / disabled */
         bool TxKeyboardEnabled;     // Currently can only be set from scripts, because when a script ends it reenables this

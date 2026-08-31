@@ -65,6 +65,12 @@ Frame_MainTextArea::Frame_MainTextArea(QWidget *parent) :
 
     connect(ui->BlockSend_CloseBttn_widget, &MyCloseBttn::Clicked,
             this, &Frame_MainTextArea::onBlockSendCloseBttnClicked);
+
+    connect(ui->Find_CloseBttn_widget, &MyCloseBttn::Clicked,
+            this, &Frame_MainTextArea::onFindCloseBttnClicked);
+
+    connect(ui->Find_Text_comboBox->lineEdit(),&QLineEdit::returnPressed,
+            this, &Frame_MainTextArea::onFindTextReturnPressed);
 }
 
 Frame_MainTextArea::~Frame_MainTextArea()
@@ -452,3 +458,59 @@ void Frame_MainTextArea::onBlockSendCloseBttnClicked(void)
 
     EventHandler(&NewEvent);
 }
+
+void Frame_MainTextArea::onFindCloseBttnClicked(void)
+{
+    struct TextDisplayEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_FindCloseBttn;
+    NewEvent.ID=ID;
+
+    EventHandler(&NewEvent);
+}
+
+void Frame_MainTextArea::on_Find_Prev_toolButton_clicked()
+{
+    struct TextDisplayEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_ButtonPress;
+    NewEvent.ID=ID;
+    NewEvent.Info.ButtonPress.Bttn=e_UITC_Bttn_FindPrevArrow;
+
+    EventHandler(&NewEvent);
+}
+
+
+void Frame_MainTextArea::on_Find_Next_toolButton_clicked()
+{
+    struct TextDisplayEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_ButtonPress;
+    NewEvent.ID=ID;
+    NewEvent.Info.ButtonPress.Bttn=e_UITC_Bttn_FindNextArrow;
+
+    EventHandler(&NewEvent);
+}
+
+void Frame_MainTextArea::onFindTextReturnPressed()
+{
+    struct TextDisplayEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_FindTextReturnPressed;
+    NewEvent.ID=ID;
+
+    EventHandler(&NewEvent);
+}
+

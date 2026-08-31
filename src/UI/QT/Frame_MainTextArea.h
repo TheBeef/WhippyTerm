@@ -34,6 +34,8 @@ private slots:
     void onComboBoxDownPressed();
     void onTextSendCloseBttnClicked(void);
     void onBlockSendCloseBttnClicked(void);
+    void onFindCloseBttnClicked(void);
+    void onFindTextReturnPressed();
 
     void on_BlockSendSend_pushButton_clicked();
 
@@ -117,6 +119,10 @@ private slots:
     
     void on_TextSendSend_pushButton_clicked();
     
+    void on_Find_Prev_toolButton_clicked();
+
+    void on_Find_Next_toolButton_clicked();
+
 private:
     void SendContextMenuEvent(e_UITD_ContextMenuType EventMenu);
 };

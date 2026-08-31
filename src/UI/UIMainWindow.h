@@ -203,6 +203,8 @@ typedef enum
     e_UIMWMenu_TermEmuSettings,
     e_UIMWMenu_NewVersionCheck,
     e_UIMWMenu_GotoWebSite,
+    e_UIMWMenu_Find,
+    e_UIMWMenu_FindNext,
     e_UIMWMenuMAX
 } e_UIMWMenuType;
 

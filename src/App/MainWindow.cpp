@@ -1586,6 +1586,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     e_UIMenuCtrl *CopySelectionToSendBuffer;
     e_UIMenuCtrl *StopScript;
     e_UIMenuCtrl *TermEmuSettingsMenu;
+    e_UIMenuCtrl *FindInText;
+    e_UIMenuCtrl *FindInTextNext;
     t_UIContextMenuCtrl *ContextMenu_SendBuffer;
     t_UIContextMenuCtrl *ContextMenu_FindCRCAlgorithm;
     t_UIContextMenuCtrl *ContextMenu_CalcCRC;
@@ -1632,6 +1634,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     StyleStrikeThroughTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_StyleStrikeThrough);
     SendPanelToggleMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_SendPanel);
     TermEmuSettingsMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_TermEmuSettings);
+    FindInText=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_Find);
+    FindInTextNext=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_FindNext);
 
     CloseTabMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_CloseTab);
     CloseAllMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_CloseAll);
@@ -1774,6 +1778,8 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(StyleStrikeThrough,false);
         UIEnableMenu(SendPanelToggleMenu,false);
         UIEnableMenu(TermEmuSettingsMenu,false);
+        UIEnableMenu(FindInText,false);
+        UIEnableMenu(FindInTextNext,false);
         UIEnableToolbar(ConnectToggle,false);
         UICheckToolbar(ConnectToggle,false);
         UIEnableToolbar(CopyTool,false);
@@ -1823,6 +1829,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableMenu(Send_Other,true);
         UIEnableMenu(AutoReconnectMenu,true);
         UIEnableMenu(SendPanelToggleMenu,true);
+        UIEnableMenu(FindInText,true);
 
         UIEnableToolbar(ConnectToggle,true);
         UIEnableToolbar(CopyTool,true);
@@ -2031,6 +2038,10 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         }
 
         UIEnableMenu(TermEmuSettingsMenu,TermEmuSettingsEnabled);
+
+/* TODO: Only true if we have already done a search (maybe if search text != "") */
+        UIEnableMenu(FindInTextNext,true);
+
 
         ActivatePanels=true;
     }
@@ -6080,6 +6091,11 @@ bool MW_Event(const struct MWEvent *Event)
  *                  e_Cmd_TermEmuSettings -- Open the terminal emulation settings dialog
  *                  e_Cmd_NewVersionCheck -- Run the check for new version dialog
  *                  e_Cmd_GotoWebSite -- Goto the WhippyTerm web site
+ *                  e_Cmd_ShowFindInText -- Open the find text panel
+ *                  e_Cmd_FindInTextNext -- Search forward for the next inst
+ *                  e_Cmd_FindInTextPrev -- Search backward for the next inst
+ *                  e_Cmd_FindInText -- Actually do the search (new search)
+ *                  e_Cmd_FindInTextAgain -- Do the last search again
  *
  * FUNCTION:
  *    This function executes a command.
@@ -6702,6 +6718,26 @@ void TheMainWindow::ExeCmd(e_CmdType Cmd)
         break;
         case e_Cmd_GotoWebSite:
             UI_GotoWebPage("https://whippyterm.com");
+        break;
+        case e_Cmd_ShowFindInText:
+            if(ActiveCon!=NULL)
+                ActiveCon->ShowFindText();
+        break;
+        case e_Cmd_FindInTextNext:
+            if(ActiveCon!=NULL)
+                ActiveCon->FindTextNext();
+        break;
+        case e_Cmd_FindInTextPrev:
+            if(ActiveCon!=NULL)
+                ActiveCon->FindTextPrev();
+        break;
+        case e_Cmd_FindInTextAgain:
+            if(ActiveCon!=NULL)
+                ActiveCon->FindTextAgain();
+        break;
+        case e_Cmd_FindInText:
+            if(ActiveCon!=NULL)
+                ActiveCon->FindTextFromUI();
         break;
 
         case e_CmdMAX:

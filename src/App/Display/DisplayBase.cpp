@@ -2946,3 +2946,171 @@ bool DisplayBase::GetBlockPanelAvailable(void)
     return BlockPanelOpen;
 }
 
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::FindPanel_ShowPanel
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SendPanel_ShowHexOrText(bool Visible);
+ *
+ * PARAMETERS:
+ *    Visible [I] -- Show the find panel or hide it
+ *
+ * FUNCTION:
+ *    This function tells the GUI to show or hide the find panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::FindPanel_ShowPanel(bool Visible)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GiveFindFocus
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::GiveFindFocus(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gives focus to the find panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::GiveFindFocus(void)
+{
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::Find
+ *
+ * SYNOPSIS:
+ *    bool DisplayBase::Find(const char *Txt,unsigned int TxtLenBytes,
+ *          bool ContinueSearch,uint32_t Options);
+ *
+ * PARAMETERS:
+ *    Txt [I] -- The text or byte buffer to search for
+ *    TxtLenBytes [I] -- Number of bytes in 'Txt'
+ *    ContinueSearch [I] -- If this is true then we search from the last match.
+ *                          If there isn't a prev match then use 'From'
+ *    Options [I] -- Supported options:
+ *                      DBTXT_SEARCH_BACKWARD -- Search from the start point
+ *                          toward the start of the buffer.  The match that
+ *                          starts closest to (but not after) the start
+ *                          point is found.  Without this option the search
+ *                          moves from the start point toward the end of
+ *                          the buffer.
+ *                      DBTXT_SEARCH_CASE_INSENSITIVE -- Ignore the case of
+ *                          letters when matching ('A' matches 'a').
+ *                      DBTXT_SEARCH_WHOLE_WORD -- Only match if the found
+ *                          text has a word break char (or the start / end
+ *                          of the line) on both sides of it.
+ *                      DBTXT_SEARCH_FROM_TOP -- Search from the top of the
+ *                          scroll back buffer (else top of screen).
+ *
+ * FUNCTION:
+ *    This function does a text search.
+ *
+ * RETURNS:
+ *    true -- String was found
+ *    false -- String was not found
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayBase::Find(const char *Txt,unsigned int TxtLenBytes,
+        bool ContinueSearch,uint32_t Options)
+{
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetFindText
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::GetFindText(std::string &RetStr);
+ *
+ * PARAMETERS:
+ *    RetStr [O] -- Where the search string is placed.
+ *
+ * FUNCTION:
+ *    This function gets the string the user has input into the find text
+ *    input.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::GetFindText(std::string &RetStr)
+{
+    RetStr="";
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetFindTextSelectedOptions
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::GetFindTextSelectedOptions(uint32_t &Options);
+ *
+ * PARAMETERS:
+ *    Options [I/O] -- This options selected.  This will have the bits
+ *                     cleared/set only for the options that are stored
+ *                     in the GUI.
+ *
+ * FUNCTION:
+ *    This function gets the options for the find panel.  It only changes
+ *    the options that have inputs in the panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::GetFindTextSelectedOptions(uint32_t &Options)
+{
+    Options&=~DBTXT_SEARCH_CASE_INSENSITIVE;
+    Options&=~DBTXT_SEARCH_WHOLE_WORD;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::IsThereASearchResult
+ *
+ * SYNOPSIS:
+ *    bool DisplayBase::IsThereASearchResult(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function returns if the last search found something and the user
+ *    hasn't cleared it (or something else hasn't cleared it)
+ *
+ * RETURNS:
+ *    true -- There is a search match
+ *    false -- There is no search match
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayBase::IsThereASearchResult(void)
+{
+    return false;
+}

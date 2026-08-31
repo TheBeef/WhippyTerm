@@ -552,6 +552,8 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
     int Offset;
     int TotalLines;
     int Delta;
+    t_UIComboBoxCtrl *ComboBox;
+    string TmpText;
 
     if(!InitCalled)
         return false;
@@ -679,6 +681,10 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
                 break;
                 case e_UITC_Bttn_SendTextLine:
                 break;
+                case e_UITC_Bttn_FindNextArrow:
+                case e_UITC_Bttn_FindPrevArrow:
+                    /* TODO: Make these do things */
+                break;
                 case e_UITC_BttnMAX:
                 default:
                 break;
@@ -708,6 +714,20 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
         break;
         case e_TextDisplayEvent_BlockCloseBttn:
             SetBlockPanelAvailable(false);
+        break;
+        case e_TextDisplayEvent_FindCloseBttn:
+            Info.Find.SubType=e_DBFind_CloseClicked;
+            SendEvent(e_DBEvent_FindTextEvent,&Info);
+        break;
+        case e_TextDisplayEvent_FindTextReturnPressed:
+            ComboBox=UITC_GetComboBoxHandle(TextDisplayCtrl,
+                    e_UITC_Combox_FindPanel_Text);
+            UIGetComboBoxText(ComboBox,TmpText);
+
+            Info.Find.SubType=e_DBFind_ReturnPressed;
+            Info.Find.SearchStr=TmpText.c_str();
+            SendEvent(e_DBEvent_FindTextEvent,&Info);
+            TmpText=""; // No longer valid
         break;
         case e_TextDisplayEvent_HeadersRearranged:
         case e_TextDisplayEvent_ComboxChange:
@@ -4420,4 +4440,58 @@ void DisplayBinary::GetScreenSize(uint32_t *Width,uint32_t *Height)
 
     *Width=ScreenWidthPx/width;
     *Height=ScreenHeightPx/height;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::FindPanel_ShowPanel
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::SendPanel_ShowHexOrText(bool Visible);
+ *
+ * PARAMETERS:
+ *    Visible [I] -- Show the find panel or hide it
+ *
+ * FUNCTION:
+ *    This function tells the GUI to show or hide the find panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::FindPanel_ShowPanel(bool Visible)
+{
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    UITC_ShowFindPanel(TextDisplayCtrl,Visible);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GiveFindFocus
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::GiveFindFocus(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gives focus to the find panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::GiveFindFocus(void)
+{
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    UITC_SetFocus(TextDisplayCtrl,e_UITCSetFocus_FindPanel);
 }

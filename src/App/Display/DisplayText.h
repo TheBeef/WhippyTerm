@@ -230,6 +230,7 @@ class DisplayText : public DisplayBase
         void GetFindText(std::string &RetStr);
         void GetFindTextSelectedOptions(uint32_t &Options);
         bool IsThereASearchResult(void);
+        void ReplaceFindHistoryFromSession(void);
 
     private:
         t_UITextDisplayCtrl *TextDisplayCtrl;

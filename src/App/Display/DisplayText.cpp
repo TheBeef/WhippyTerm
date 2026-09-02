@@ -37,6 +37,7 @@
 #include "UI/UISystem.h"
 #include "UI/UITimers.h"
 #include "ThirdParty/utf8.h"
+#include "App/Session.h"
 #include <string.h>
 #include <string>
 #include <vector>
@@ -9836,3 +9837,40 @@ bool DisplayText::IsThereASearchResult(void)
 {
     return SearchFound;
 }
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::ReplaceFindHistoryFromSession
+ *
+ * SYNOPSIS:
+ *    void DisplayText::ReplaceFindHistoryFromSession(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function replaes the history of the find in text input with a new
+ *    history.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayText::ReplaceFindHistoryFromSession(void)
+{
+    t_UIComboBoxCtrl *ComboBox;
+    i_FindTextHistory i;
+
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    ComboBox=UITC_GetComboBoxHandle(TextDisplayCtrl,
+            e_UITC_Combox_FindPanel_Text);
+    UIClearComboBox(ComboBox);
+    for(i=g_Session.FindHistory.begin();i!=g_Session.FindHistory.end();i++)
+        UIAddItem2ComboBox(ComboBox,*i,0);
+}
+
+

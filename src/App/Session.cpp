@@ -945,6 +945,8 @@ static void Session_RegisterAllMembers(struct Session &session,
     cfg.EndBlock();
 
     cfg.Register("NextCheckTime",session.NextCheckTime);
+
+    cfg.Register("FindHistory",session.FindHistory);
 }
 
 static void Session_DefaultSession(struct Session &session)
@@ -984,4 +986,6 @@ static void Session_DefaultSession(struct Session &session)
 
     /* New Version Check */
     session.NextCheckTime=0;
+
+    session.FindHistory.clear();
 }

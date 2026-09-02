@@ -86,6 +86,8 @@ using namespace std;
 
 #define MAX_BELL_RATE                   100     // We have to have at least this many ms between bell sounds
 
+#define MAX_FIND_HISTORY                10
+
 /*** MACROS                   ***/
 
 /*** TYPE DEFINITIONS         ***/
@@ -870,6 +872,7 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
 
             /* We always hide the find panel on init */
             Display->FindPanel_ShowPanel(false);
+            Display->ReplaceFindHistoryFromSession();
         }
 
         /* IOHandle was allocated in the constructor */
@@ -1279,6 +1282,7 @@ void Connection::ApplyCustomSettings(void)
         }
 
         Display->SetBlockDeviceMode(BlockSendDevice);
+        Display->ReplaceFindHistoryFromSession();
     }
 
     /* Apply the zoom */
@@ -9643,6 +9647,15 @@ void Connection::DoFindText(const char *Text,uint32_t Options,bool Restart)
 {
     if(Display==NULL)
         return;
+
+    if(g_Session.FindHistory.empty() || g_Session.FindHistory.front()!=Text)
+    {
+        /* Add to history */
+        g_Session.FindHistory.push_front(Text);
+        if(g_Session.FindHistory.size()>MAX_FIND_HISTORY)
+            g_Session.FindHistory.pop_back();
+        Display->ReplaceFindHistoryFromSession();
+    }
 
     Display->Find(Text,strlen(Text),!Restart,Options);
 }

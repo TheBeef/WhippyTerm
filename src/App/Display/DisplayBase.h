@@ -244,6 +244,7 @@ class DisplayBase
         virtual void GetFindTextSelectedOptions(uint32_t &Options);
         virtual void GetFindText(std::string &RetStr);
         virtual bool IsThereASearchResult(void);
+        virtual void ReplaceFindHistoryFromSession(void);
 
         /* Public vars */
         struct CharStyling CurrentStyle;

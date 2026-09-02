@@ -64,6 +64,9 @@ struct SessionOpenConnection
 typedef std::list<struct SessionOpenConnection> t_SessionOpenConnectionList;
 typedef t_SessionOpenConnectionList::iterator i_SessionOpenConnectionList;
 
+typedef std::list<std::string> t_FindTextHistory;
+typedef t_FindTextHistory::iterator i_FindTextHistory;
+
 /***  CLASS DEFINITIONS                ***/
 /* Adding to session:
     * Add to 'struct Session'
@@ -116,6 +119,9 @@ struct Session
 
     /* New Version Check */
     uint64_t NextCheckTime;
+
+    /* Find text history */
+    t_FindTextHistory FindHistory;
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

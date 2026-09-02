@@ -3114,3 +3114,27 @@ bool DisplayBase::IsThereASearchResult(void)
 {
     return false;
 }
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::ReplaceFindHistoryFromSession
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::ReplaceFindHistoryFromSession(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function replaes the history of the find in text input with a new
+ *    history.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBase::ReplaceFindHistoryFromSession(void)
+{
+}

@@ -3126,7 +3126,7 @@ bool DisplayBase::IsThereASearchResult(void)
  *    NONE
  *
  * FUNCTION:
- *    This function replaes the history of the find in text input with a new
+ *    This function replaces the history of the find in text input with a new
  *    history.
  *
  * RETURNS:

@@ -1,7 +1,6 @@
 /* 
 
 TBD:
-    * Search history
     * Binary search
     * Hex search
 

@@ -9630,6 +9630,10 @@ void DisplayText::GiveFindFocus(void)
  *                          of the line) on both sides of it.
  *                      DBTXT_SEARCH_FROM_TOP -- Search from the top of the
  *                          scroll back buffer (else top of screen).
+ *                      DBTXT_SEARCH_HEX_MODE -- 'Txt' is a list of hex
+ *                          values (as text) instead of the bytes to look
+ *                          for.  Displays that do not support this ignore
+ *                          it.
  *
  * FUNCTION:
  *    This function does a text search.
@@ -9719,6 +9723,8 @@ bool DisplayText::Find(const char *Txt,unsigned int TxtLenBytes,
     }
     SearchFound=Found;
 
+    SendEvent(e_DBEvent_SelectionChanged,NULL);
+
     if(Found)
     {
         if(!ScrollScreen2ShowPoint(Search_X,Search_Y,Search_EndX,Search_EndY))
@@ -9794,6 +9800,7 @@ void DisplayText::GetFindTextSelectedOptions(uint32_t &Options)
     Options&=~DBTXT_SEARCH_CASE_INSENSITIVE;
     Options&=~DBTXT_SEARCH_WHOLE_WORD;
     Options&=~DBTXT_SEARCH_FROM_TOP;
+    Options&=~DBTXT_SEARCH_HEX_MODE;
 
     ComboBox=UITC_GetComboBoxHandle(TextDisplayCtrl,
             e_UITC_Combox_FindPanel_SearchFrom);

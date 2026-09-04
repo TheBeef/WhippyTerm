@@ -30,9 +30,11 @@
  ******************************************************************************/
 
 /*** HEADER FILES TO INCLUDE  ***/
+#include "App/Session.h"
 #include "App/Settings.h"
 #include "DisplayBinary.h"
 #include "UI/UIDebug.h"
+#include <ctype.h>
 #include <stdint.h>
 #include <string.h>
 #include <string>
@@ -194,6 +196,10 @@ DisplayBinary::DisplayBinary()
     SelectionInAscII=false;
     SelectionLine=NULL;
     SelectionAnchorLine=NULL;
+
+    SearchFound=false;
+    Search_StartOffset=0;
+    Search_EndOffset=0;
 
     DisplayBytesPerLine=16;
     LastDisplayBytesPerLine=0;
@@ -475,6 +481,9 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
             /* Handle marks */
             InvalidateMarksOnScroll();
 
+            /* Handle the search result */
+            MoveSearchOnScroll(DisplayBytesPerLine);
+
             /* Handle topline */
             if(TopLine==TopOfBufferLine || WasAtBottom)
             {
@@ -682,8 +691,12 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
                 case e_UITC_Bttn_SendTextLine:
                 break;
                 case e_UITC_Bttn_FindNextArrow:
+                    Info.Find.SubType=e_DBFind_NextClicked;
+                    SendEvent(e_DBEvent_FindTextEvent,&Info);
+                break;
                 case e_UITC_Bttn_FindPrevArrow:
-                    /* TODO: Make these do things */
+                    Info.Find.SubType=e_DBFind_PrevClicked;
+                    SendEvent(e_DBEvent_FindTextEvent,&Info);
                 break;
                 case e_UITC_BttnMAX:
                 default:
@@ -1405,6 +1418,8 @@ void DisplayBinary::ClearScreen(e_ScreenClearType Type)
     SelectionLine=NULL;
     SelectionAnchorLine=NULL;
 
+    SearchFound=false;
+
     InvalidateAllMarks();
 
     UITC_ClearAllLines(UITC_GetTextDisplayPrimaryColumn(TextDisplayCtrl));
@@ -1777,6 +1792,8 @@ void DisplayBinary::HandleLeftMousePress(bool Down,int x,int y)
         SelectionActive=false;
         SelectionLine=NULL;
         SelectionAnchorLine=NULL;
+
+        SearchFound=false;
 
         ConvertScreenXY2BufferLinePtr(x,y,&SelectionAnchorLine,
                 &SelectionLineAnchorOffset,&SelectionInAscII);
@@ -2332,6 +2349,8 @@ void DisplayBinary::SelectAll(void)
     SelectionAnchorLine=BottomOfBufferLine;
     SelectionLineAnchorOffset=InsertPoint;
 
+    SearchFound=false;
+
     RedrawScreen();
 
     SendEvent(e_DBEvent_SelectionChanged,NULL);
@@ -2364,6 +2383,8 @@ void DisplayBinary::ClearSelection(void)
     SelectionLineOffset=0;
     SelectionAnchorLine=NULL;
     SelectionLineAnchorOffset=0;
+
+    SearchFound=false;
 
     RedrawScreen();
 
@@ -2826,7 +2847,10 @@ void DisplayBinary::RethinkHexBuffer(void)
         }
     }
 
-    /* Step 8: Rebuild the marks */
+    /* Step 8: Move the search result over the bytes we dropped */
+    MoveSearchOnScroll(DropBytes);
+
+    /* Step 9: Rebuild the marks */
     for(Marker=MarkerList;Marker!=NULL;Marker=Marker->Next)
     {
         if(!Marker->Valid)
@@ -4494,4 +4518,819 @@ void DisplayBinary::GiveFindFocus(void)
         return;
 
     UITC_SetFocus(TextDisplayCtrl,e_UITCSetFocus_FindPanel);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetBytesInBuffer
+ *
+ * SYNOPSIS:
+ *    uint32_t DisplayBinary::GetBytesInBuffer(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets the number of bytes of data that are currently in
+ *    the buffer.  This is everything from the oldest byte up to (but not
+ *    including) the insert point.
+ *
+ * RETURNS:
+ *    The number of bytes of data in the buffer.
+ *
+ * SEE ALSO:
+ *    GetByteAtOffset(), GetTopLineOffset()
+ ******************************************************************************/
+uint32_t DisplayBinary::GetBytesInBuffer(void)
+{
+    uint32_t Bytes;
+
+    if(HexBuffer==NULL || TopOfBufferLine==NULL || BottomOfBufferLine==NULL)
+        return 0;
+
+    if(TopOfBufferLine>BottomOfBufferLine)
+        Bytes=(EndOfHexBuffer-TopOfBufferLine)+(BottomOfBufferLine-HexBuffer);
+    else
+        Bytes=BottomOfBufferLine-TopOfBufferLine;
+
+    Bytes+=InsertPoint;
+
+    return Bytes;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetTopLineOffset
+ *
+ * SYNOPSIS:
+ *    uint32_t DisplayBinary::GetTopLineOffset(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets the first byte that is on the screen as an offset
+ *    from the oldest byte in the buffer.
+ *
+ * RETURNS:
+ *    The offset of the first byte of the top line of the display.
+ *
+ * SEE ALSO:
+ *    GetBytesInBuffer(), GetByteAtOffset()
+ ******************************************************************************/
+uint32_t DisplayBinary::GetTopLineOffset(void)
+{
+    uint32_t Bytes;
+
+    if(HexBuffer==NULL || TopOfBufferLine==NULL || TopLine==NULL)
+        return 0;
+
+    if(TopLine>=TopOfBufferLine)
+        Bytes=TopLine-TopOfBufferLine;
+    else
+        Bytes=(EndOfHexBuffer-TopOfBufferLine)+(TopLine-HexBuffer);
+
+    return Bytes;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetByteAtOffset
+ *
+ * SYNOPSIS:
+ *    uint8_t DisplayBinary::GetByteAtOffset(uint32_t Offset);
+ *
+ * PARAMETERS:
+ *    Offset [I] -- The offset (from the oldest byte in the buffer) of the
+ *                  byte to get.  This must be less than the value returned
+ *                  from GetBytesInBuffer().
+ *
+ * FUNCTION:
+ *    This function gets one byte of the data in the buffer.
+ *
+ * RETURNS:
+ *    The byte that is stored at 'Offset'.
+ *
+ * SEE ALSO:
+ *    GetBytesInBuffer()
+ ******************************************************************************/
+uint8_t DisplayBinary::GetByteAtOffset(uint32_t Offset)
+{
+    uint8_t *Ptr;
+
+    /* The buffer is circular so we may have to wrap back to the start */
+    Ptr=TopOfBufferLine+Offset;
+    if(Ptr>=EndOfHexBuffer)
+        Ptr-=HexBufferSize;
+
+    return *Ptr;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ConvertFindStr2Bytes
+ *
+ * SYNOPSIS:
+ *    bool DisplayBinary::ConvertFindStr2Bytes(const char *Txt,
+ *          unsigned int TxtLenBytes,uint32_t Options,std::string &Bytes);
+ *
+ * PARAMETERS:
+ *    Txt [I] -- The string the user input into the find panel.
+ *    TxtLenBytes [I] -- The number of bytes in 'Txt'.
+ *    Options [I] -- The search options (see Find()).  Only
+ *                   DBTXT_SEARCH_HEX_MODE is used.
+ *    Bytes [O] -- The bytes that we are going to look for in the buffer.
+ *
+ * FUNCTION:
+ *    This function converts the string the user input into the bytes that
+ *    are going to be searched for.
+ *
+ *    In hex mode the input is a list of hex values.  The values can be
+ *    separated with white space, a comma, a semicolon, a colon, or a dash,
+ *    and each value may have a "0x" in front of it.  Values do not have to
+ *    be separated at all ("DEAD" is the same as "DE AD").
+ *
+ *    When we are not in hex mode the bytes to look for are the bytes of the
+ *    string as it was input.
+ *
+ * RETURNS:
+ *    true -- 'Bytes' has been filled in with something to search for.
+ *    false -- The input can not be searched for (it has something in it
+ *             that isn't a hex value, or there is nothing in it).
+ *
+ * SEE ALSO:
+ *    Find()
+ ******************************************************************************/
+bool DisplayBinary::ConvertFindStr2Bytes(const char *Txt,
+        unsigned int TxtLenBytes,uint32_t Options,std::string &Bytes)
+{
+    unsigned int r;
+    unsigned int Digits;
+    uint8_t Byte;
+    char c;
+
+    Bytes="";
+
+    if(!(Options&DBTXT_SEARCH_HEX_MODE))
+    {
+        /* Search for the string exactly as it was input */
+        Bytes.assign(Txt,TxtLenBytes);
+        if(Bytes=="")
+            return false;
+        return true;
+    }
+
+    r=0;
+    while(r<TxtLenBytes)
+    {
+        c=Txt[r];
+
+        /* Skip anything that is between the values */
+        if(c==' ' || c=='\t' || c=='\r' || c=='\n' || c==',' || c==';' ||
+                c==':' || c=='-')
+        {
+            r++;
+            continue;
+        }
+
+        /* Skip the "0x" in front of this value */
+        if(c=='0' && r+1<TxtLenBytes && (Txt[r+1]=='x' || Txt[r+1]=='X'))
+            r+=2;
+
+        /* Take up to 2 hex digits as one byte */
+        Byte=0;
+        for(Digits=0;Digits<2 && r<TxtLenBytes;Digits++)
+        {
+            c=Txt[r];
+            if(c>='0' && c<='9')
+                Byte=Byte*16+(c-'0');
+            else if(c>='a' && c<='f')
+                Byte=Byte*16+(c-'a'+10);
+            else if(c>='A' && c<='F')
+                Byte=Byte*16+(c-'A'+10);
+            else
+                break;
+            r++;
+        }
+
+        if(Digits==0)
+        {
+            /* This isn't a hex value, we have no idea what to search for */
+            Bytes="";
+            return false;
+        }
+
+        Bytes+=(char)Byte;
+    }
+
+    if(Bytes=="")
+        return false;
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::IsWholeWordMatch
+ *
+ * SYNOPSIS:
+ *    bool DisplayBinary::IsWholeWordMatch(uint32_t Offset,
+ *          uint32_t MatchBytes,uint32_t BufferBytes);
+ *
+ * PARAMETERS:
+ *    Offset [I] -- The offset of the first byte of the match.
+ *    MatchBytes [I] -- The number of bytes in the match.
+ *    BufferBytes [I] -- The number of bytes of data in the buffer.
+ *
+ * FUNCTION:
+ *    This function checks if a match has a word break (or the start / end of
+ *    the data) on both sides of it.  A byte is part of a word if it is a
+ *    letter, a number, or an underscore.
+ *
+ * RETURNS:
+ *    true -- The match is a whole word.
+ *    false -- The match has part of a word on one (or both) of its sides.
+ *
+ * SEE ALSO:
+ *    Find()
+ ******************************************************************************/
+bool DisplayBinary::IsWholeWordMatch(uint32_t Offset,uint32_t MatchBytes,
+        uint32_t BufferBytes)
+{
+    uint8_t c;
+
+    if(Offset>0)
+    {
+        c=GetByteAtOffset(Offset-1);
+        if(isalnum(c) || c=='_')
+            return false;
+    }
+
+    if(Offset+MatchBytes<BufferBytes)
+    {
+        c=GetByteAtOffset(Offset+MatchBytes);
+        if(isalnum(c) || c=='_')
+            return false;
+    }
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::SearchMatchAtOffset
+ *
+ * SYNOPSIS:
+ *    bool DisplayBinary::SearchMatchAtOffset(uint32_t Offset,
+ *          const std::string &SearchBytes,uint32_t Options,
+ *          uint32_t BufferBytes);
+ *
+ * PARAMETERS:
+ *    Offset [I] -- The offset the match must start at.
+ *    SearchBytes [I] -- The bytes to look for.
+ *    Options [I] -- The search options (see Find()).
+ *    BufferBytes [I] -- The number of bytes of data in the buffer.
+ *
+ * FUNCTION:
+ *    This function checks if 'SearchBytes' matches the data starting exactly
+ *    at 'Offset'.
+ *
+ * RETURNS:
+ *    true -- The data at 'Offset' matches.
+ *    false -- There is no match at 'Offset' (or the match would run off the
+ *             end of the data).
+ *
+ * SEE ALSO:
+ *    Find()
+ ******************************************************************************/
+bool DisplayBinary::SearchMatchAtOffset(uint32_t Offset,
+        const std::string &SearchBytes,uint32_t Options,uint32_t BufferBytes)
+{
+    uint32_t MatchBytes;
+    uint32_t r;
+    uint8_t c;
+    uint8_t m;
+
+    MatchBytes=SearchBytes.length();
+
+    if(Offset+MatchBytes>BufferBytes)
+        return false;
+
+    for(r=0;r<MatchBytes;r++)
+    {
+        c=GetByteAtOffset(Offset+r);
+        m=(uint8_t)SearchBytes[r];
+        if(Options&DBTXT_SEARCH_CASE_INSENSITIVE)
+        {
+            c=tolower(c);
+            m=tolower(m);
+        }
+        if(c!=m)
+            return false;
+    }
+
+    if(Options&DBTXT_SEARCH_WHOLE_WORD)
+    {
+        if(!IsWholeWordMatch(Offset,MatchBytes,BufferBytes))
+            return false;
+    }
+
+    return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::Select4SearchMatch
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::Select4SearchMatch(bool InAscII);
+ *
+ * PARAMETERS:
+ *    InAscII [I] -- Highlight the match in the AscII part of the display
+ *                   (true) or in the hex part (false).
+ *
+ * FUNCTION:
+ *    This function moves the selection on to the bytes of the last search
+ *    match so the user can see (and copy) what was found.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    Find()
+ ******************************************************************************/
+void DisplayBinary::Select4SearchMatch(bool InAscII)
+{
+    struct DisBin_PointPair StartPoint;
+    struct DisBin_PointPair EndPoint;
+
+    ConvertOffset2Point(Search_StartOffset,&StartPoint);
+    ConvertOffset2Point(Search_EndOffset,&EndPoint);
+
+    SelectionInAscII=InAscII;
+    SelectionActive=true;
+    SelectionLine=StartPoint.Line;
+    SelectionLineOffset=StartPoint.Offset;
+    SelectionAnchorLine=EndPoint.Line;
+    SelectionLineAnchorOffset=EndPoint.Offset;
+
+    SendEvent(e_DBEvent_SelectionChanged,NULL);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ScrollScreen2ShowSearchMatch
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::ScrollScreen2ShowSearchMatch(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function scrolls the display so the last search match is on the
+ *    screen.  If the match is bigger than the screen then the start of the
+ *    match is what is shown.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    Find()
+ ******************************************************************************/
+void DisplayBinary::ScrollScreen2ShowSearchMatch(void)
+{
+    t_UIScrollBarCtrl *VertScroll;
+    int StartLineY;
+    int EndLineY;
+    int TopLineY;
+    int NewTopLineY;
+    int TotalLines;
+    int MaxPos;
+    int LeftPx;
+    int RightPx;
+
+    if(TextDisplayCtrl==NULL || DisplayBytesPerLine==0)
+        return;
+
+    /* Vert */
+    StartLineY=Search_StartOffset/DisplayBytesPerLine;
+    EndLineY=Search_EndOffset/DisplayBytesPerLine;
+    TopLineY=GetTopLineOffset()/DisplayBytesPerLine;
+
+    NewTopLineY=TopLineY;
+
+    /* Scroll down until the end of the match is on the screen */
+    if(EndLineY>=NewTopLineY+DisplayLines)
+        NewTopLineY=EndLineY-DisplayLines+1;
+
+    /* Scroll up until the start of the match is on the screen.  The start
+       wins if the match is taller than the screen */
+    if(StartLineY<NewTopLineY)
+        NewTopLineY=StartLineY;
+
+    if(NewTopLineY!=TopLineY)
+    {
+        VertScroll=UITC_GetVertSlider(TextDisplayCtrl);
+        TotalLines=UIGetScrollBarTotalSize(VertScroll);
+        MaxPos=TotalLines-DisplayLines;
+        if(MaxPos<0)
+            MaxPos=0;
+        if(NewTopLineY>MaxPos)
+            NewTopLineY=MaxPos;
+        if(NewTopLineY<0)
+            NewTopLineY=0;
+
+        UISetScrollBarPos(VertScroll,NewTopLineY);
+    }
+
+    /* Horz.  Make sure the column the match starts in is on the screen */
+    if(SelectionInAscII)
+    {
+        LeftPx=START_OF_ASCII_PX+
+                (Search_StartOffset%DisplayBytesPerLine)*CharWidthPx;
+        RightPx=LeftPx+CharWidthPx;
+    }
+    else
+    {
+        LeftPx=(Search_StartOffset%DisplayBytesPerLine)*3*CharWidthPx;
+        RightPx=LeftPx+3*CharWidthPx;
+    }
+
+    if(RightPx>WindowXOffsetPx+ScreenWidthPx)
+        ScrollScreen(RightPx-(WindowXOffsetPx+ScreenWidthPx),0);
+    if(LeftPx<WindowXOffsetPx)
+        ScrollScreen(LeftPx-WindowXOffsetPx,0);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::MoveSearchOnScroll
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::MoveSearchOnScroll(uint32_t DroppedBytes);
+ *
+ * PARAMETERS:
+ *    DroppedBytes [I] -- The number of bytes that have been dropped off the
+ *                        top (oldest end) of the buffer.
+ *
+ * FUNCTION:
+ *    This function moves the last search match to keep it pointing at the
+ *    same data after the oldest bytes in the buffer have been thrown away.
+ *
+ *    If the match was part of the data that was dropped then the search
+ *    result is thrown away as well.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    Find()
+ ******************************************************************************/
+void DisplayBinary::MoveSearchOnScroll(uint32_t DroppedBytes)
+{
+    if(!SearchFound)
+        return;
+
+    if(Search_StartOffset<DroppedBytes)
+    {
+        /* The match was in the data that was dropped */
+        SearchFound=false;
+        Search_StartOffset=0;
+        Search_EndOffset=0;
+        return;
+    }
+
+    Search_StartOffset-=DroppedBytes;
+    Search_EndOffset-=DroppedBytes;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::Find
+ *
+ * SYNOPSIS:
+ *    bool DisplayBinary::Find(const char *Txt,unsigned int TxtLenBytes,
+ *          bool ContinueSearch,uint32_t Options);
+ *
+ * PARAMETERS:
+ *    Txt [I] -- The text or byte buffer to search for
+ *    TxtLenBytes [I] -- Number of bytes in 'Txt'
+ *    ContinueSearch [I] -- If this is true then we search from the last match.
+ *                          If there isn't a prev match then use 'From'
+ *    Options [I] -- Supported options:
+ *                      DBTXT_SEARCH_BACKWARD -- Search from the start point
+ *                          toward the start of the buffer.  The match that
+ *                          starts closest to (but not after) the start
+ *                          point is found.  Without this option the search
+ *                          moves from the start point toward the end of
+ *                          the buffer.
+ *                      DBTXT_SEARCH_CASE_INSENSITIVE -- Ignore the case of
+ *                          letters when matching ('A' matches 'a').
+ *                      DBTXT_SEARCH_WHOLE_WORD -- Only match if the found
+ *                          text has a word break char (or the start / end
+ *                          of the line) on both sides of it.
+ *                      DBTXT_SEARCH_FROM_TOP -- Search from the top of the
+ *                          scroll back buffer (else top of screen).
+ *                      DBTXT_SEARCH_HEX_MODE -- 'Txt' is a list of hex
+ *                          values (as text) instead of the bytes to look
+ *                          for.  Displays that do not support this ignore
+ *                          it.
+ *
+ * FUNCTION:
+ *    This function does a text search.
+ *
+ * RETURNS:
+ *    true -- String was found
+ *    false -- String was not found
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayBinary::Find(const char *Txt,unsigned int TxtLenBytes,
+        bool ContinueSearch,uint32_t Options)
+{
+    string SearchBytes;
+    uint32_t BufferBytes;
+    uint32_t SearchLen;
+    uint32_t LastStartOffset;    // The last offset a match can start at
+    uint32_t StartOffset;        // Where we start looking from
+    uint32_t Offset;
+    bool Found;
+
+    Found=false;
+    Offset=0;
+
+    if(HexBuffer==NULL || TopOfBufferLine==NULL || DisplayBytesPerLine==0)
+        return false;
+
+    if(Options&DBTXT_SEARCH_HEX_MODE)
+    {
+        /* Hex values are byte values, upper/lower case has no meaning, nor
+           does whole word */
+        Options&=~DBTXT_SEARCH_CASE_INSENSITIVE;
+        Options&=~DBTXT_SEARCH_WHOLE_WORD;
+    }
+
+    BufferBytes=GetBytesInBuffer();
+
+    if(ConvertFindStr2Bytes(Txt,TxtLenBytes,Options,SearchBytes))
+    {
+        SearchLen=SearchBytes.length();
+        if(SearchLen<=BufferBytes)
+        {
+            /* The last place a match can start and still fit in the data */
+            LastStartOffset=BufferBytes-SearchLen;
+
+            StartOffset=0;
+            Found=true;     // Until we find out we have nowhere to look
+            if(SearchFound && ContinueSearch)
+            {
+                /* Continue from the last match */
+                if(Options&DBTXT_SEARCH_BACKWARD)
+                {
+                    if(Search_StartOffset==0)
+                    {
+                        /* We are on the oldest byte, there is nothing
+                           before it */
+                        Found=false;
+                    }
+                    else
+                    {
+                        StartOffset=Search_StartOffset-1;
+                    }
+                }
+                else
+                {
+                    StartOffset=Search_StartOffset+1;
+                }
+            }
+            else
+            {
+                /* Start a new search */
+                if(Options&DBTXT_SEARCH_BACKWARD)
+                {
+                    StartOffset=LastStartOffset;
+                }
+                else
+                {
+                    if(Options&DBTXT_SEARCH_FROM_TOP)
+                        StartOffset=0;
+                    else
+                        StartOffset=GetTopLineOffset();
+                }
+            }
+
+            if(Found)
+            {
+                Found=false;
+                if(Options&DBTXT_SEARCH_BACKWARD)
+                {
+                    if(StartOffset>LastStartOffset)
+                        StartOffset=LastStartOffset;
+
+                    Offset=StartOffset;
+                    for(;;)
+                    {
+                        if(SearchMatchAtOffset(Offset,SearchBytes,Options,
+                                BufferBytes))
+                        {
+                            Found=true;
+                            break;
+                        }
+                        if(Offset==0)
+                            break;
+                        Offset--;
+                    }
+                }
+                else
+                {
+                    for(Offset=StartOffset;Offset<=LastStartOffset;Offset++)
+                    {
+                        if(SearchMatchAtOffset(Offset,SearchBytes,Options,
+                                BufferBytes))
+                        {
+                            Found=true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if(Found)
+            {
+                Search_StartOffset=Offset;
+                Search_EndOffset=Offset+SearchLen-1;
+            }
+        }
+    }
+
+    SearchFound=Found;
+
+    if(Found)
+    {
+        /* Show the match on the side of the display the user was searching */
+        Select4SearchMatch(!(Options&DBTXT_SEARCH_HEX_MODE));
+        ScrollScreen2ShowSearchMatch();
+        RedrawScreen();
+    }
+    else
+    {
+        /* Drop the selection (it was the last match) */
+        ClearSelection();
+    }
+
+    return Found;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetFindText
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::GetFindText(std::string &RetStr);
+ *
+ * PARAMETERS:
+ *    RetStr [O] -- Where the search string is placed.
+ *
+ * FUNCTION:
+ *    This function gets the string the user has input into the find text
+ *    input.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::GetFindText(std::string &RetStr)
+{
+    t_UIComboBoxCtrl *ComboBox;
+
+    RetStr="";
+
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    ComboBox=UITC_GetComboBoxHandle(TextDisplayCtrl,
+            e_UITC_Combox_FindPanel_Text);
+    UIGetComboBoxText(ComboBox,RetStr);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::GetFindTextSelectedOptions
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::GetFindTextSelectedOptions(uint32_t &Options);
+ *
+ * PARAMETERS:
+ *    Options [I/O] -- This options selected.  This will have the bits
+ *                     cleared/set only for the options that are stored
+ *                     in the GUI.
+ *
+ * FUNCTION:
+ *    This function gets the options for the find panel.  It only changes
+ *    the options that have inputs in the panel.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::GetFindTextSelectedOptions(uint32_t &Options)
+{
+    t_UIComboBoxCtrl *ComboBox;
+    t_UICheckboxCtrl *Checkbox;
+
+    Options&=~DBTXT_SEARCH_CASE_INSENSITIVE;
+    Options&=~DBTXT_SEARCH_WHOLE_WORD;
+    Options&=~DBTXT_SEARCH_FROM_TOP;
+    Options&=~DBTXT_SEARCH_HEX_MODE;
+
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    ComboBox=UITC_GetComboBoxHandle(TextDisplayCtrl,
+            e_UITC_Combox_FindPanel_SearchFrom);
+
+    if(UIGetComboBoxSelectedIndex(ComboBox)==1)
+        Options|=DBTXT_SEARCH_FROM_TOP;
+
+    Checkbox=UITC_GetCheckboxHandle(TextDisplayCtrl,
+            e_UITC_Checkbox_FindMatchCase);
+    if(!UIGetCheckboxCheckStatus(Checkbox))
+        Options|=DBTXT_SEARCH_CASE_INSENSITIVE;
+
+    Checkbox=UITC_GetCheckboxHandle(TextDisplayCtrl,
+            e_UITC_Checkbox_FindWholeWords);
+    if(UIGetCheckboxCheckStatus(Checkbox))
+        Options|=DBTXT_SEARCH_WHOLE_WORD;
+
+    Checkbox=UITC_GetCheckboxHandle(TextDisplayCtrl,
+            e_UITC_Checkbox_HexMode);
+    if(UIGetCheckboxCheckStatus(Checkbox))
+        Options|=DBTXT_SEARCH_HEX_MODE;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::IsThereASearchResult
+ *
+ * SYNOPSIS:
+ *    bool DisplayBinary::IsThereASearchResult(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function returns if the last search found something and the user
+ *    hasn't cleared it (or something else hasn't cleared it)
+ *
+ * RETURNS:
+ *    true -- There is a search match
+ *    false -- There is no search match
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+bool DisplayBinary::IsThereASearchResult(void)
+{
+    return SearchFound;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::ReplaceFindHistoryFromSession
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::ReplaceFindHistoryFromSession(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function replaces the history of the find in text input with a new
+ *    history.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::ReplaceFindHistoryFromSession(void)
+{
+    t_UIComboBoxCtrl *ComboBox;
+    i_FindTextHistory i;
+
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    ComboBox=UITC_GetComboBoxHandle(TextDisplayCtrl,
+            e_UITC_Combox_FindPanel_Text);
+    UIClearComboBox(ComboBox);
+    for(i=g_Session.FindHistory.begin();i!=g_Session.FindHistory.end();i++)
+        UIAddItem2ComboBox(ComboBox,*i,0);
 }

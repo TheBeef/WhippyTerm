@@ -3019,6 +3019,10 @@ void DisplayBase::GiveFindFocus(void)
  *                          of the line) on both sides of it.
  *                      DBTXT_SEARCH_FROM_TOP -- Search from the top of the
  *                          scroll back buffer (else top of screen).
+ *                      DBTXT_SEARCH_HEX_MODE -- 'Txt' is a list of hex
+ *                          values (as text) instead of the bytes to look
+ *                          for.  Displays that do not support this ignore
+ *                          it.
  *
  * FUNCTION:
  *    This function does a text search.

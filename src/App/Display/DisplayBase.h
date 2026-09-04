@@ -45,6 +45,7 @@
 #define DBTXT_SEARCH_CASE_INSENSITIVE   0x0002
 #define DBTXT_SEARCH_WHOLE_WORD         0x0004
 #define DBTXT_SEARCH_FROM_TOP           0x0008  // Search from the top of the scroll back buffer (else top of screen)
+#define DBTXT_SEARCH_HEX_MODE           0x0010  // The search string is a list of hex values instead of text
 
 /***  MACROS                           ***/
 

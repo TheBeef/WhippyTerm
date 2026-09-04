@@ -128,6 +128,12 @@ class DisplayBinary : public DisplayBase
 
         void FindPanel_ShowPanel(bool Visible);
         void GiveFindFocus(void);
+        bool Find(const char *Txt,unsigned int TxtLenBytes,bool ContinueSearch,
+                uint32_t Options);
+        void GetFindText(std::string &RetStr);
+        void GetFindTextSelectedOptions(uint32_t &Options);
+        bool IsThereASearchResult(void);
+        void ReplaceFindHistoryFromSession(void);
 
     private:
         bool InitCalled;
@@ -176,6 +182,11 @@ class DisplayBinary : public DisplayBase
         uint8_t *MarkerGetStrBuffer;
         uint32_t MarkerGetStrBufferSize;
 
+        /* Search */
+        bool SearchFound;               // Did the last search find a match
+        uint32_t Search_StartOffset;    // The first byte of the match (offset from the oldest byte)
+        uint32_t Search_EndOffset;      // The last byte of the match (offset from the oldest byte)
+
         /* Big list that hasn't been grouped (was before started grouping) */
         bool DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event);
         void RedrawCurrentLine(void);
@@ -209,6 +220,17 @@ class DisplayBinary : public DisplayBase
 
         /* Selection */
         bool GetNormalizedSelectionBlocks(struct DisBin_Block *Blocks);
+
+        /* Search */
+        uint32_t GetBytesInBuffer(void);
+        uint32_t GetTopLineOffset(void);
+        uint8_t GetByteAtOffset(uint32_t Offset);
+        bool ConvertFindStr2Bytes(const char *Txt,unsigned int TxtLenBytes,uint32_t Options,std::string &Bytes);
+        bool SearchMatchAtOffset(uint32_t Offset,const std::string &SearchBytes,uint32_t Options,uint32_t BufferBytes);
+        bool IsWholeWordMatch(uint32_t Offset,uint32_t MatchBytes,uint32_t BufferBytes);
+        void Select4SearchMatch(bool InAscII);
+        void ScrollScreen2ShowSearchMatch(void);
+        void MoveSearchOnScroll(uint32_t DroppedBytes);
 
         /* Marks */
         void InvalidateMarksOnScroll(void);

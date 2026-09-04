@@ -222,9 +222,6 @@ class DisplayBinary : public DisplayBase
         bool GetNormalizedSelectionBlocks(struct DisBin_Block *Blocks);
 
         /* Search */
-        uint32_t GetBytesInBuffer(void);
-        uint32_t GetTopLineOffset(void);
-        uint8_t GetByteAtOffset(uint32_t Offset);
         bool ConvertFindStr2Bytes(const char *Txt,unsigned int TxtLenBytes,uint32_t Options,std::string &Bytes);
         bool SearchMatchAtOffset(uint32_t Offset,const std::string &SearchBytes,uint32_t Options,uint32_t BufferBytes);
         bool IsWholeWordMatch(uint32_t Offset,uint32_t MatchBytes,uint32_t BufferBytes);
@@ -242,6 +239,11 @@ class DisplayBinary : public DisplayBase
         uint32_t ConvertPoint2Offset(struct DisBin_PointPair *Point);
         void ConvertOffset2Point(uint32_t Offset,struct DisBin_PointPair *Point);
         void AdvancePoint(struct DisBin_PointPair *Point,int Amount);
+
+        /* Info */
+        uint32_t GetBytesInBuffer(void);
+        uint32_t GetTopLineOffset(void);
+        uint8_t GetByteAtOffset(uint32_t Offset);
 };
 
 /***  GLOBAL VARIABLE DEFINITIONS      ***/

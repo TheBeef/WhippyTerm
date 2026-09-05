@@ -676,6 +676,9 @@ Connection::~Connection()
  ******************************************************************************/
 void Connection::ConstructorFree(void)
 {
+    if(BridgedTo!=NULL)
+        BridgedTo->SetBridgeFrom(NULL);
+
     if(BridgedFrom!=NULL)
         BridgedFrom->BridgeConnectionFreeing();
 
@@ -1104,6 +1107,7 @@ bool Connection::ApplySettings(bool SuppressErrorAsk)
             HexDisplay.BufferSize=0;
         }
         HexDisplay.InsertPos=HexDisplay.Buffer;
+        HexDisplay.BufferWrapped=false;
 
         /* Update the HEX UI */
         EventData.HexDis.Buffer=HexDisplay.Buffer;
@@ -1147,6 +1151,7 @@ bool Connection::ApplySettings(bool SuppressErrorAsk)
             OutGoingHexDisplay.BufferSize=0;
         }
         OutGoingHexDisplay.InsertPos=OutGoingHexDisplay.Buffer;
+        OutGoingHexDisplay.BufferWrapped=false;
 
         /* Update the HEX UI */
         EventData.HexDis.Buffer=OutGoingHexDisplay.Buffer;

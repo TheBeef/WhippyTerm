@@ -2184,13 +2184,11 @@ bool Connection::InformOfDataAvaiable(void)
                             bytes);
                 }
             }
-        }
-
-        if(BridgedTo!=NULL)
-        {
-            /* Send this into the bridged connection */
-            BridgedTo->WriteData(inbuff,bytes,e_ConWriteSource_Bridge);
-        }
+            if(BridgedTo!=NULL)
+            {
+                /* Send this into the bridged connection */
+                BridgedTo->WriteData(inbuff,bytes,e_ConWriteSource_Bridge);
+            }
 
 //        if(TotalBytes>=MAX_BYTES_PROCESSED_AT_1_TIME)
 //        {
@@ -2198,8 +2196,6 @@ bool Connection::InformOfDataAvaiable(void)
 //            TotalBytes=0;
 //        }
 
-        if(bytes>0)
-        {
             if(ComTest.Stats.InProgress)
             {
                 /* We are doing the com test */

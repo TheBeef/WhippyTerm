@@ -364,7 +364,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
                 class ConSettings *SourceSettings);
         void FinalizeNewConnection(bool IgnoreAutoConnect);
         void ReParentWidget(void *NewParentWidget);
-        bool ApplySettings(void);
+        bool ApplySettings(bool SuppressErrorAsk);
         bool SetConnection(const std::string &UniqueID);
         bool SetConnectionBasedOnURI(const char *URI);
         bool SetConnectionOptions(const t_KVList &Options);
@@ -512,9 +512,9 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void RegisterComTestUpdateFn(void (*Update)(class Connection *));
 
         /* Custom settings */
-        void SetCustomSettings(class ConSettings &NewSettings);
+        bool SetCustomSettings(class ConSettings &NewSettings);
         class ConSettings *GetCustomSettings(void);
-        void ApplyCustomSettings(void);
+        bool ApplyCustomSettings(bool SuppressErrorAsk);
 
         void DisableTxKeyboard(bool Enabled);
         void DisableDisplayWrite(bool Enabled);

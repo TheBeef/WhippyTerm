@@ -3299,7 +3299,13 @@ void TheMainWindow::GotoBookmark(uintptr_t ID,bool ForceNewTab)
 
         /* Apply custom settings */
         if(bm->UseCustomSettings)
-            NewCon->SetCustomSettings(bm->CustomSettings);
+        {
+            if(!NewCon->SetCustomSettings(bm->CustomSettings))
+            {
+                CloseTab(NewCon);
+                return;
+            }
+        }
     }
 
     /* Apply options */
@@ -4201,9 +4207,6 @@ void TheMainWindow::ShowConnectionSettings(void)
         /* Mark that we are using custom settings */
         ActiveCon->UsingCustomSettings=true;
 
-        /* Apply these custom settings */
-        ActiveCon->ApplyCustomSettings();
-
         /* Find this bookmark */
         bm=FindBookmarkByUID(ActiveCon->GetConnectionBookmark());
         if(bm!=g_BookmarkList.end())
@@ -4217,6 +4220,14 @@ void TheMainWindow::ShowConnectionSettings(void)
                 SaveBookmarks();
             }
         }
+
+        /* Apply these custom settings */
+        if(!ActiveCon->ApplyCustomSettings(false))
+        {
+            CloseTab(ActiveCon);
+            return;
+        }
+
         RethinkActiveConnectionUI();
     }
 }
@@ -4296,7 +4307,11 @@ void TheMainWindow::ToggleConnectionUseGlobalSettings(void)
         }
     }
 
-    ActiveCon->ApplyCustomSettings();
+    if(!ActiveCon->ApplyCustomSettings(false))
+    {
+        CloseTab(ActiveCon);
+        return;
+    }
     RethinkActiveConnectionUI();
 }
 
@@ -4615,7 +4630,11 @@ void TheMainWindow::ApplyTerminalEmulationMenuTriggered(uint64_t ID)
     }
 
     /* Now apply this change */
-    ActiveCon->SetCustomSettings(ActiveCon->CustomSettings);
+    if(!ActiveCon->SetCustomSettings(ActiveCon->CustomSettings))
+    {
+        CloseTab(ActiveCon);
+        return;
+    }
 
     SendBuffersPanel.ConnectionChanged();   // The connection may have changed (kinda, the type may have)
 
@@ -5687,7 +5706,11 @@ void TheMainWindow::ShowTermEmuSettingsDialog(void)
                 {
                     if(RunDataProPluginSettingsDialog(ConSet,ProIDStr))
                     {
-                        TabCon->ApplySettings();
+                        if(!TabCon->ApplySettings(false))
+                        {
+                            CloseTab(TabCon);
+                            return;
+                        }
                         RethinkActiveConnectionUI();
                     }
                 }
@@ -5699,7 +5722,11 @@ void TheMainWindow::ShowTermEmuSettingsDialog(void)
                     if(RunDataProPluginSettingsDialog(&GlobalConSet,ProIDStr))
                     {
                         TabCon->SetCustomSettings(GlobalConSet);
-                        TabCon->ApplySettings();
+                        if(!TabCon->ApplySettings(false))
+                        {
+                            CloseTab(TabCon);
+                            return;
+                        }
                         RethinkActiveConnectionUI();
                     }
                 }

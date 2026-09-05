@@ -384,19 +384,37 @@ void Con_ApplySettings2AllConnections(void)
 {
     i_ConnectionListType Con;
     class Connection *ConPtr;
+    t_ConnectionListType ErrorList;
+    class TheMainWindow *MW;
     bool HadAnError;
 
     HadAnError=false;
     for(Con=m_Connections.begin();Con!=m_Connections.end();Con++)
     {
         ConPtr=*Con;
-        if(!ConPtr->ApplySettings())
+        if(!ConPtr->ApplySettings(true))
+        {
+            ErrorList.push_back(ConPtr);
             HadAnError=true;
+        }
     }
+
     if(HadAnError)
     {
         UIAsk("Error","There was an error applying settings to a connection",
                 e_AskBox_Error,e_AskBttns_Ok);
+    }
+
+    while(!ErrorList.empty())
+    {
+        ConPtr=ErrorList.front();
+        ErrorList.pop_front();
+
+        MW=ConPtr->GetMainWindowHandle();
+        if(MW!=NULL)
+            MW->CloseTab(ConPtr);
+        else
+            Con_FreeConnection(ConPtr);
     }
 }
 
@@ -884,7 +902,7 @@ bool Connection::Init(class TheMainWindow *MainWindow,void *ParentWidget,
 
         ResetZoom();
 
-        if(!ApplySettings())
+        if(!ApplySettings(false))
             throw(0);
     }
     catch(...)
@@ -1023,10 +1041,11 @@ bool Connection::SetConnectionBasedOnURI(const char *URI)
  *    Connection::ApplySettings
  *
  * SYNOPSIS:
- *    bool Connection::ApplySettings(void);
+ *    bool Connection::ApplySettings(bool SuppressErrorAsk);
  *
  * PARAMETERS:
- *    NONE
+ *    SuppressErrorAsk [I] -- If this is true then we don't do any ask() popups
+ *                            when we get an error.
  *
  * FUNCTION:
  *    This function takes the global settings and apply any changes.
@@ -1038,7 +1057,7 @@ bool Connection::SetConnectionBasedOnURI(const char *URI)
  * SEE ALSO:
  *    ApplyCustomSettings()
  ******************************************************************************/
-bool Connection::ApplySettings(void)
+bool Connection::ApplySettings(bool SuppressErrorAsk)
 {
     int RoundedBufferSize;
     union ConMWInfo EventData;
@@ -1049,12 +1068,11 @@ bool Connection::ApplySettings(void)
         CustomSettings=g_Settings.DefaultConSettings;
     }
 
-    ApplyCustomSettings();
+    if(!ApplyCustomSettings(SuppressErrorAsk))
+        return false;
 
     if(Display!=NULL)
-    {
         Display->ApplySettings();
-    }
 
     RoundedBufferSize=g_Settings.HexDisplayBufferSize;
     if(RoundedBufferSize<16)
@@ -1147,7 +1165,7 @@ bool Connection::ApplySettings(void)
  *    Connection::SetCustomSettings
  *
  * SYNOPSIS:
- *    void Connection::SetCustomSettings(class ConSettings &NewSettings)
+ *    bool Connection::SetCustomSettings(class ConSettings &NewSettings)
  *
  * PARAMETERS:
  *    NewSettings [I] -- The new setting to apply to this connection.
@@ -1156,18 +1174,20 @@ bool Connection::ApplySettings(void)
  *    This function applies new custom settings to this connection.
  *
  * RETURNS:
- *    NONE
+ *    true -- All ok
+ *    false -- There was an error.  The connection is no longer stable and
+ *             needs to be closed/freed and the tab closed.
  *
  * SEE ALSO:
  *    GetCustomSettings()
  ******************************************************************************/
-void Connection::SetCustomSettings(class ConSettings &NewSettings)
+bool Connection::SetCustomSettings(class ConSettings &NewSettings)
 {
     /* Copy the settings and reapply them */
     UsingCustomSettings=true;
     CustomSettings=NewSettings;
 
-    ApplyCustomSettings();
+    return ApplyCustomSettings(false);
 }
 
 /*******************************************************************************
@@ -1202,122 +1222,147 @@ class ConSettings *Connection::GetCustomSettings(void)
  *    Connection::ApplyCustomSettings
  *
  * SYNOPSIS:
- *    void Connection::ApplyCustomSettings(void);
+ *    bool Connection::ApplyCustomSettings(bool SuppressErrorAsk);
  *
  * PARAMETERS:
- *    NONE
+ *    SuppressErrorAsk [I] -- If this is true then we don't do any ask() popups
+ *                            when we get an error.
  *
  * FUNCTION:
  *    This function applies the custom settings to this connection again.
  *    This should be called after you have changed the custom settings.
  *
  * RETURNS:
- *    NONE
+ *    true -- All ok
+ *    false -- There was an error (user has been prompted), you should close
+ *             this connection and close it's tab as it is no longer stable.
  *
  * SEE ALSO:
  *    
  ******************************************************************************/
-void Connection::ApplyCustomSettings(void)
+bool Connection::ApplyCustomSettings(bool SuppressErrorAsk)
 {
     int NewFontSize;
     bool NewIsBinary;
     uint16_t DrawMask;
 
-    if(!UsingCustomSettings)
-    {
-        /* Restore the globals */
-        CustomSettings=g_Settings.DefaultConSettings;
-    }
-
     if(Display==NULL)
-        return;
+        return true;
 
-    /* Set if the direct send panel is shown */
-    Display->SetBlockPanelAvailable(CustomSettings.SendPanel_ShowBlockPanel);
-    Display->SetTextPanelAvailable(CustomSettings.SendPanel_ShowTextPanel);
-
-    /* Switch processor data */
-    if(!DPS_ReapplyProcessor2Connection(&ProcessorData,&CustomSettings))
+    try
     {
-        UIAsk("Error","Failed to reallocate data processor data",
-                e_AskBox_Error,e_AskBttns_Ok);
-        /* DEBUG PAUL: We are now dead what do we do? */
-        return;
+        if(!UsingCustomSettings)
+        {
+            /* Restore the globals */
+            CustomSettings=g_Settings.DefaultConSettings;
+        }
+
+        /* Set if the direct send panel is shown */
+        Display->SetBlockPanelAvailable(CustomSettings.SendPanel_ShowBlockPanel);
+        Display->SetTextPanelAvailable(CustomSettings.SendPanel_ShowTextPanel);
+
+        /* Switch processor data */
+        if(!DPS_ReapplyProcessor2Connection(&ProcessorData,&CustomSettings))
+            throw("Failed to reallocate data processor data");
+
+        NewIsBinary=!IsProcessorATextProcessor(ProcessorData);
+        if(BinaryConnection!=NewIsBinary)
+        {
+            /* We are changing from binary to text or vice versa */
+            BinaryConnection=NewIsBinary;
+
+            if(Display!=NULL)
+                delete Display;
+            Display=NULL;
+
+            if(NewIsBinary)
+            {
+                /* We are binary */
+                Display=new DisplayBinary();
+            }
+            else
+            {
+                /* We are using a text display */
+                Display=new DisplayText();
+            }
+
+            if(!Display->Init(OurParentWidget,&CustomSettings,
+                    Con_DisplayBufferEvent,(uintptr_t)this))
+            {
+                throw("Failed to reallocate display system");
+            }
+
+            Display->SetBlockDeviceMode(BlockSendDevice);
+            Display->ReplaceFindHistoryFromSession();
+        }
+
+        /* Apply the zoom */
+        FontSize=CustomSettings.FontSize;
+
+        NewFontSize=FontSize+ZoomLevel;
+        if(NewFontSize>3)
+        {
+            Display->SetFont(CustomSettings.FontName,NewFontSize,
+                    CustomSettings.FontBold,CustomSettings.FontItalic);
+        }
+
+        DrawMask=~0;    // Draw everything
+        if(!CustomSettings.BoldEnabled)
+            DrawMask&=~UITD_DRAWMASK_BOLD;
+        if(!CustomSettings.ItalicEnabled)
+            DrawMask&=~UITD_DRAWMASK_ITALIC;
+        if(!CustomSettings.UnderlineEnabled)
+            DrawMask&=~(UITD_DRAWMASK_UNDERLINE|UITD_DRAWMASK_UNDERLINE_DOUBLE|UITD_DRAWMASK_UNDERLINE_DOTTED);
+        if(!CustomSettings.OverlineEnabled)
+            DrawMask&=~UITD_DRAWMASK_OVERLINE;
+        if(!CustomSettings.ReverseEnabled)
+            DrawMask&=~UITD_DRAWMASK_REVERSE;
+        if(!CustomSettings.LineThroughEnabled)
+            DrawMask&=~UITD_DRAWMASK_LINETHROUGH;
+        if(!CustomSettings.ColorsEnabled)
+            DrawMask&=~UITD_DRAWMASK_COLOR_ATTRIB;
+
+        Display->SetDrawMask(DrawMask);
+
+        if(LastSettingsTransmitDelayByte!=CustomSettings.DelayBetweenBytes ||
+                LastSettingsTransmitDelayLine!=CustomSettings.DelayAfterNewLineSent)
+        {
+            TransmitDelayByte=CustomSettings.DelayBetweenBytes;
+            TransmitDelayLine=CustomSettings.DelayAfterNewLineSent;
+            LastSettingsTransmitDelayByte=CustomSettings.DelayBetweenBytes;
+            LastSettingsTransmitDelayLine=CustomSettings.DelayAfterNewLineSent;
+            ApplyTransmitDelayChange();
+        }
+
+        AutoReopenEnabled=CustomSettings.AutoReopen;
+
+        /* We also need to update the session open conneciton list */
+        NoteSessionChanged();
     }
-
-    NewIsBinary=!IsProcessorATextProcessor(ProcessorData);
-    if(BinaryConnection!=NewIsBinary)
+    catch(const char *Msg)
     {
-        /* We are changing from binary to text or vice versa */
-        BinaryConnection=NewIsBinary;
+        /* We are now in bad shape, close the connection */
+        UIAsk("Error",Msg,e_AskBox_Error,e_AskBttns_Ok);
 
         if(Display!=NULL)
             delete Display;
         Display=NULL;
 
-        if(NewIsBinary)
-        {
-            /* We are binary */
-            Display=new DisplayBinary();
-        }
-        else
-        {
-            /* We are using a text display */
-            Display=new DisplayText();
-        }
-
-        if(!Display->Init(OurParentWidget,&CustomSettings,
-                Con_DisplayBufferEvent,(uintptr_t)this))
-        {
-            throw(0);
-        }
-
-        Display->SetBlockDeviceMode(BlockSendDevice);
-        Display->ReplaceFindHistoryFromSession();
+        return false;
     }
-
-    /* Apply the zoom */
-    FontSize=CustomSettings.FontSize;
-
-    NewFontSize=FontSize+ZoomLevel;
-    if(NewFontSize>3)
+    catch(...)
     {
-        Display->SetFont(CustomSettings.FontName,NewFontSize,
-                CustomSettings.FontBold,CustomSettings.FontItalic);
+        /* We are now in bad shape, we will need to close the connection */
+        if(!SuppressErrorAsk)
+            UIAsk("Error","Out of memory",e_AskBox_Error,e_AskBttns_Ok);
+
+        if(Display!=NULL)
+            delete Display;
+        Display=NULL;
+
+        return false;
     }
-
-    DrawMask=~0;    // Draw everything
-    if(!CustomSettings.BoldEnabled)
-        DrawMask&=~UITD_DRAWMASK_BOLD;
-    if(!CustomSettings.ItalicEnabled)
-        DrawMask&=~UITD_DRAWMASK_ITALIC;
-    if(!CustomSettings.UnderlineEnabled)
-        DrawMask&=~(UITD_DRAWMASK_UNDERLINE|UITD_DRAWMASK_UNDERLINE_DOUBLE|UITD_DRAWMASK_UNDERLINE_DOTTED);
-    if(!CustomSettings.OverlineEnabled)
-        DrawMask&=~UITD_DRAWMASK_OVERLINE;
-    if(!CustomSettings.ReverseEnabled)
-        DrawMask&=~UITD_DRAWMASK_REVERSE;
-    if(!CustomSettings.LineThroughEnabled)
-        DrawMask&=~UITD_DRAWMASK_LINETHROUGH;
-    if(!CustomSettings.ColorsEnabled)
-        DrawMask&=~UITD_DRAWMASK_COLOR_ATTRIB;
-
-    Display->SetDrawMask(DrawMask);
-
-    if(LastSettingsTransmitDelayByte!=CustomSettings.DelayBetweenBytes ||
-            LastSettingsTransmitDelayLine!=CustomSettings.DelayAfterNewLineSent)
-    {
-        TransmitDelayByte=CustomSettings.DelayBetweenBytes;
-        TransmitDelayLine=CustomSettings.DelayAfterNewLineSent;
-        LastSettingsTransmitDelayByte=CustomSettings.DelayBetweenBytes;
-        LastSettingsTransmitDelayLine=CustomSettings.DelayAfterNewLineSent;
-        ApplyTransmitDelayChange();
-    }
-
-    AutoReopenEnabled=CustomSettings.AutoReopen;
-
-    /* We also need to update the session open conneciton list */
-    NoteSessionChanged();
+    return true;
 }
 
 /*******************************************************************************

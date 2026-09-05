@@ -122,7 +122,9 @@ private slots:
     void on_Find_Prev_toolButton_clicked();
 
     void on_Find_Next_toolButton_clicked();
-
+    
+    void on_Find_Hex_checkBox_stateChanged(int arg1);
+    
 private:
     void SendContextMenuEvent(e_UITD_ContextMenuType EventMenu);
 };

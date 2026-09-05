@@ -30,6 +30,15 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_NEW_FEATURE,"Added find in text",
+            "A search the text panel has been added.  You can select it from"
+            " the edit menu, or with the default key bindings of SHIFT+CTRL+F."
+            "  The search supports whole words, match case, and searching from"
+            " the top of the scroll back buffer or top of the screen.  You"
+            " can search forward or backward and the system adds past searches"
+            " to the session data.\n"
+            "In binary mode you can also search using a hex string or normal"
+            " text."},
     {   NOTETYPE_NEW_FEATURE,"The bottom hex dump panels now support the same bytes per line/divider lines as binary mode",
             "The bottom panel hex dumps now support setting the number of"
             " bytes are displayed on a line.  A divider line can all be set"
@@ -47,7 +56,6 @@ static struct ReleaseNote m_Notes_NEXT[]=
             "In binary mode settings you can now set the number of bytes per"
             "line.  This can be found under:"
             " Settings->Terminal->Data Processing->Set Hex Dump Appearance"},
-            },
     {   NOTETYPE_BUG_FIX,"In binary mode with a fixed size window the horz scroll bar had wrong size",
             "When you used a fixed size term (like 80 chars) in binary mode"
             " the bottom horz scroll bar would still use the full screen"

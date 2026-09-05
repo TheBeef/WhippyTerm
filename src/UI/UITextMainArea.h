@@ -168,6 +168,7 @@ typedef enum
     e_TextDisplayEvent_ContextMenu,
     e_TextDisplayEvent_ButtonPress,
     e_TextDisplayEvent_ComboxChange,
+    e_TextDisplayEvent_CheckboxChange,
     e_TextDisplayEvent_RadioButtonPress,
     e_TextDisplayEvent_MouseDoubleClick,
     e_TextDisplayEvent_MouseTripleClick,
@@ -224,6 +225,11 @@ struct TextDisplayEventCombox
     e_UITC_ComboxType BoxID;
 };
 
+struct TextDisplayEventCheckbox
+{
+    e_UITC_CheckboxType CheckboxID;
+};
+
 struct TextDisplayEventRadioBttn
 {
     e_UITC_RadioButtonType BttnID;
@@ -244,6 +250,7 @@ union TextDisplayEventData
     struct TextDisplayEventContextMenu Context;
     struct TextDisplayEventButtonPress ButtonPress;
     struct TextDisplayEventCombox Combox;
+    struct TextDisplayEventCheckbox Checkbox;
     struct TextDisplayEventRadioBttn RadioButton;
 };
 

@@ -619,6 +619,7 @@ bool DisplayText::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
             TmpText=""; // No longer valid
         break;
         case e_TextDisplayEvent_ComboxChange:
+        case e_TextDisplayEvent_CheckboxChange:
         case e_TextDisplayEventMAX:
         default:
             return true;
@@ -6355,9 +6356,10 @@ bool DisplayText::TextLine_FindFragAndPos(i_TextLines Line,
 
                 if(CalX>=Offset)
                 {
-                    /* Ok, we found the 'Offset' char */
+                    /* Ok, we found the 'Offset' char.  'StartPos' is on
+                       the first byte of it */
                     *FoundFrag=CurFrag;
-                    *FoundPos=EndPos-CurFrag->Text.begin()-1;
+                    *FoundPos=StartPos-CurFrag->Text.begin();
                     return true;
                 }
 
@@ -9227,9 +9229,6 @@ void DisplayText::MovePageDown(void)
  *    Only the normal text of a line is searched.  Non printable chars that
  *    are being shown as symbols and the end of line markers are skipped.
  *
- *    A match that starts at the start point is found by both a forward and
- *    a backward search.
- *
  * RETURNS:
  *    true -- A match was found.  'FoundLineY' and 'FoundOffset' have been
  *            set to where the match starts.
@@ -9251,6 +9250,7 @@ bool DisplayText::TextSearch(const char *SearchStr,int StartLineY,
     const char *cstr;
     const char *StartOfFragTxt;
     const char *StartOfMatch;
+    const char *EndOfMatch;
     unsigned char c;
     uint_fast32_t r;
 
@@ -9333,7 +9333,12 @@ bool DisplayText::TextSearch(const char *SearchStr,int StartLineY,
                             {
                                 c=*cstr;
                                 if(Options&DBTXT_SEARCH_CASE_INSENSITIVE)
-                                    c=tolower(c);
+                                {
+                                    /* Only fold ascII, 'FindStr' was lower
+                                       cased the same way */
+                                    if(c>='A' && c<='Z')
+                                        c+='a'-'A';
+                                }
                                 if(c==(unsigned char)FindStr[MatchCount])
                                 {
                                     if(MatchCount==0)
@@ -9348,8 +9353,11 @@ bool DisplayText::TextSearch(const char *SearchStr,int StartLineY,
                                     MatchCount++;
                                     if(MatchCount==TotalMatchCount)
                                     {
-                                        /* We have a match (maybe) */
-                                        CurPoint.StrPos=cstr-StartOfFragTxt;
+                                        /* We have a match (maybe). */
+                                        EndOfMatch=cstr+1;
+                                        utf8::unchecked::prior(EndOfMatch);
+                                        CurPoint.StrPos=
+                                                EndOfMatch-StartOfFragTxt;
                                         RightPoint=CurPoint;
 
                                         if(!(Options&DBTXT_SEARCH_WHOLE_WORD))
@@ -9458,6 +9466,7 @@ bool DisplayText::SearchMatchAt(struct DTPoint StartPt,
     struct DTPoint MatchRight;
     const char *StartOfFragTxt;
     const char *cstr;
+    const char *EndOfMatch;
     unsigned char c;
     int_fast32_t MatchCount;
     int_fast32_t TotalMatchCount;
@@ -9494,7 +9503,13 @@ bool DisplayText::SearchMatchAt(struct DTPoint StartPt,
                     {
                         c=*cstr;
                         if(Options&DBTXT_SEARCH_CASE_INSENSITIVE)
-                            c=tolower(c);
+                        {
+                            /* Only fold ascII, 'FindStr' was lower cased
+                               the same way (folding bytes >=0x80 would
+                               break UTF-8 chars) */
+                            if(c>='A' && c<='Z')
+                                c+='a'-'A';
+                        }
                         if(c!=(unsigned char)FindStr[MatchCount])
                         {
                             /* The match must start exactly at 'StartPt' so
@@ -9504,9 +9519,15 @@ bool DisplayText::SearchMatchAt(struct DTPoint StartPt,
                         MatchCount++;
                         if(MatchCount==TotalMatchCount)
                         {
-                            /* We have a match */
+                            /* We have a match.  'cstr' is on the last
+                               BYTE of the match which maybe in the middle
+                               of a UTF-8 char, so we back up to the first
+                               byte of that char (points are on chars, not
+                               bytes) */
+                            EndOfMatch=cstr+1;
+                            utf8::unchecked::prior(EndOfMatch);
                             MatchRight=CurPoint;
-                            MatchRight.StrPos=cstr-StartOfFragTxt;
+                            MatchRight.StrPos=EndOfMatch-StartOfFragTxt;
                             if(Options&DBTXT_SEARCH_WHOLE_WORD)
                             {
                                 if(!IsWholeWord(StartPt,MatchRight))
@@ -9663,12 +9684,7 @@ bool DisplayText::Find(const char *Txt,unsigned int TxtLenBytes,
     if(SearchFound && ContinueSearch)
     {
         /* Continue the search */
-        if(Options&DBTXT_SEARCH_BACKWARD)
-        {
-            /* Move back by 1 and search from there */
-            AdvancePoint(Search_X,Search_Y,-1,0,0,ScreenWidthChars,LinesCount);
-        }
-        else
+        if(!(Options&DBTXT_SEARCH_BACKWARD))
         {
             /* Move forward by 1 and search from there */
             AdvancePoint(Search_X,Search_Y,1,0,0,ScreenWidthChars,LinesCount);

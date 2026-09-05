@@ -317,6 +317,8 @@ bool DisplayBinary::Init(void *ParentWidget,class ConSettings *SettingsPtr,
 
         UITimerSetTimeout(ScrollTimer,SELECTION_SCROLL_SPEED_TIMER);
 
+        RethinkSearchOptions();
+
         ApplySettings();
 
         InitCalled=true;
@@ -741,6 +743,9 @@ bool DisplayBinary::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
             Info.Find.SearchStr=TmpText.c_str();
             SendEvent(e_DBEvent_FindTextEvent,&Info);
             TmpText=""; // No longer valid
+        break;
+        case e_TextDisplayEvent_CheckboxChange:
+            RethinkSearchOptions();
         break;
         case e_TextDisplayEvent_HeadersRearranged:
         case e_TextDisplayEvent_ComboxChange:
@@ -5333,4 +5338,47 @@ void DisplayBinary::ReplaceFindHistoryFromSession(void)
     UIClearComboBox(ComboBox);
     for(i=g_Session.FindHistory.begin();i!=g_Session.FindHistory.end();i++)
         UIAddItem2ComboBox(ComboBox,*i,0);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::RethinkSearchOptions
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::RethinkSearchOptions(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function rethinks what search options should be enabled.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void DisplayBinary::RethinkSearchOptions(void)
+{
+    t_UICheckboxCtrl *HexMode;
+    t_UICheckboxCtrl *FindMatchCase;
+    t_UICheckboxCtrl *FindWholeWords;
+    bool Enabled;
+
+    if(TextDisplayCtrl==NULL)
+        return;
+
+    HexMode=UITC_GetCheckboxHandle(TextDisplayCtrl,e_UITC_Checkbox_HexMode);
+    FindMatchCase=UITC_GetCheckboxHandle(TextDisplayCtrl,
+            e_UITC_Checkbox_FindMatchCase);
+    FindWholeWords=UITC_GetCheckboxHandle(TextDisplayCtrl,
+            e_UITC_Checkbox_FindWholeWords);
+
+    Enabled=true;
+    if(UIGetCheckboxCheckStatus(HexMode))
+        Enabled=false;
+
+    UIEnableCheckbox(FindMatchCase,Enabled);
+    UIEnableCheckbox(FindWholeWords,Enabled);
 }

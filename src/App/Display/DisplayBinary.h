@@ -228,6 +228,7 @@ class DisplayBinary : public DisplayBase
         void Select4SearchMatch(bool InAscII);
         void ScrollScreen2ShowSearchMatch(void);
         void MoveSearchOnScroll(uint32_t DroppedBytes);
+        void RethinkSearchOptions(void);
 
         /* Marks */
         void InvalidateMarksOnScroll(void);

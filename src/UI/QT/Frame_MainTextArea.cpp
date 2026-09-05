@@ -514,3 +514,19 @@ void Frame_MainTextArea::onFindTextReturnPressed()
     EventHandler(&NewEvent);
 }
 
+
+void Frame_MainTextArea::on_Find_Hex_checkBox_stateChanged(int arg1)
+{
+    struct TextDisplayEvent NewEvent;
+
+    if(EventHandler==nullptr)
+        return;
+
+    NewEvent.EventType=e_TextDisplayEvent_CheckboxChange;
+    NewEvent.ID=ID;
+
+    NewEvent.Info.Checkbox.CheckboxID=e_UITC_Checkbox_HexMode;
+
+    EventHandler(&NewEvent);
+}
+

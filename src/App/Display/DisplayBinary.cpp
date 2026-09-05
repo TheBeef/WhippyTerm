@@ -204,6 +204,13 @@ DisplayBinary::DisplayBinary()
     DisplayBytesPerLine=16;
     LastDisplayBytesPerLine=0;
 
+    LeftMouseDown=false;
+    InsertPoint=0;
+    SelectionLineOffset=0;
+    SelectionLineAnchorOffset=0;
+    AutoSelectionScrolldx=0;
+    AutoSelectionScrolldy=0;
+
     CursorStyle=e_TextCursorStyle_Block;
 
     ScrollTimer=NULL;

@@ -8975,6 +8975,7 @@ void Connection::FreeFrozenQueue(void)
         FrozenQueue=Tmp;
     }
     FrozenQueueStrLen=0;
+    FrozenQueueEnd=NULL;
 }
 
 /*******************************************************************************

@@ -1805,22 +1805,24 @@ i_TextLineFrags DisplayText::AddSpecialFrag(struct TextLineFrag &SpecialFrag)
     if(ActiveLine==NULL)
         throw(0);
 
-    if(ActiveLine->Frags.back().FragType==e_TextCanvasFrag_String &&
-            ActiveLine->Frags.back().Text.empty())
+    if(!ActiveLine->Frags.empty())
     {
-        /* Ok, we have a blank string, replace it with the special frag */
-        ActiveLine->Frags.pop_back();
-    }
+        if(ActiveLine->Frags.back().FragType==e_TextCanvasFrag_String &&
+                ActiveLine->Frags.back().Text.empty())
+        {
+            /* Ok, we have a blank string, replace it with the special frag */
+            ActiveLine->Frags.pop_back();
+        }
 
-    if(!ActiveLine->Frags.empty() &&
-        ActiveLine->Frags.front().FragType==e_TextCanvasFrag_HR)
-    {
-        /* Ok, the first frag of this line is a HR, we delete that and
-           setup for a virtual insert */
-        ActiveLine->Frags.clear();
-        InsertFrag=ActiveLine->Frags.end();
-        /* We don't set 'InsertPos' so if the user was in virtual space
-           we will still pad correctly */
+        if(ActiveLine->Frags.front().FragType==e_TextCanvasFrag_HR)
+        {
+            /* Ok, the first frag of this line is a HR, we delete that and
+               setup for a virtual insert */
+            ActiveLine->Frags.clear();
+            InsertFrag=ActiveLine->Frags.end();
+            /* We don't set 'InsertPos' so if the user was in virtual space
+               we will still pad correctly */
+        }
     }
 
     if(InsertFrag==ActiveLine->Frags.end())
@@ -2456,8 +2458,9 @@ void DisplayText::PadOutCurrentLine2Cursor(void)
 
     /* Move Insert Frag to the (new) end of the line */
     /* See if we are a string frag and that the styles are the same */
-    if(ActiveLine->Frags.back().FragType!=e_TextCanvasFrag_String ||
-            !CmpCharStyle(&CurrentStyle,&ActiveLine->Frags.back().Styling))
+    if(!ActiveLine->Frags.empty() &&
+            (ActiveLine->Frags.back().FragType!=e_TextCanvasFrag_String ||
+            !CmpCharStyle(&CurrentStyle,&ActiveLine->Frags.back().Styling)))
     {
         InsertFrag=AddNewEmptyFragToLine(ActiveLine,ActiveLine->Frags.end());
     }
@@ -6057,6 +6060,11 @@ void DisplayText::ScrollVertAreaDown(uint32_t X1,uint32_t Y1,uint32_t X2,
         return;
     }
 
+    /* DEBUG PAUL: Is this correct?  AreaHeight is a delta, ScreenHeightChars
+       includes Y1, so might this "AreaHeight+Y1>ScreenHeightChars" be correct?
+       When assigned it removes Y1.  Needs to be looked at more.  Testing
+       might need to be done where the scroll buffer has stuff in it (just
+       a thought, didn't look at it at all) */
     AreaHeight=Y2-Y1;
     if(AreaHeight>ScreenHeightChars)
         AreaHeight=ScreenHeightChars-Y1;

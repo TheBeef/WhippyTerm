@@ -252,17 +252,28 @@ PG_BOOL UDPServer_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
     {
         SetOptions=0;
         if(ReuseAddressBool)
-            SetOptions|=SO_REUSEADDR;
-        if(ReusePortBool)
-            SetOptions|=SO_REUSEPORT;
-
-        opt=1;
-        if(setsockopt(OurData->DataSockFD,SOL_SOCKET,SetOptions,&opt,
-                sizeof(opt)))
         {
-            close(OurData->DataSockFD);
-            OurData->DataSockFD=-1;
-            return false;
+            SetOptions=SO_REUSEADDR;
+            opt=1;
+            if(setsockopt(OurData->DataSockFD,SOL_SOCKET,SetOptions,&opt,
+                    sizeof(opt)))
+            {
+                close(OurData->DataSockFD);
+                OurData->DataSockFD=-1;
+                return false;
+            }
+        }
+        if(ReusePortBool)
+        {
+            SetOptions=SO_REUSEPORT;
+            opt=1;
+            if(setsockopt(OurData->DataSockFD,SOL_SOCKET,SetOptions,&opt,
+                    sizeof(opt)))
+            {
+                close(OurData->DataSockFD);
+                OurData->DataSockFD=-1;
+                return false;
+            }
         }
     }
 

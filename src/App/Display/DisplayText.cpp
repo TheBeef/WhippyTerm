@@ -307,6 +307,7 @@ bool DisplayText::Init(void *ParentWidget,class ConSettings *SettingsPtr,
         FirstLine.LineBackgroundColor=
                 Settings->DefaultColors[e_DefaultColors_BG];
         FirstLine.EOL=e_DTEOL_Hard;
+        FirstLine.EOLGuess=e_DTEOLGuess_Unknown;
         Lines.push_back(FirstLine);
         LinesCount++;
         TopLine=Lines.begin();
@@ -2744,6 +2745,8 @@ i_TextLineFrags DisplayText::AddNewEmptyFragToLine(struct TextLine *Line,
     NewFrag.Styling=CurrentStyle;
     NewFrag.Text="";
     NewFrag.WidthPx=0;
+    NewFrag.Value=0;
+    NewFrag.Data=NULL;
 
     return Line->Frags.insert(InsertPoint,NewFrag);
 }
@@ -8291,7 +8294,7 @@ void DisplayText::FindWordStartEndPoints(int &PX,int &PY,int &PX2,int &PY2)
 bool DisplayText::CheckWordBreak(const char *Letter)
 {
     if(*Letter==' ' || *Letter==':' || *Letter==';' || *Letter=='\'' ||
-            *Letter=='\'' || *Letter==',' || *Letter=='.' || *Letter=='?' ||
+            *Letter=='\"' || *Letter==',' || *Letter=='.' || *Letter=='?' ||
             *Letter=='\\' || *Letter=='/' || *Letter=='`' || *Letter=='~' ||
             *Letter=='|' || *Letter=='(' || *Letter==')' || *Letter=='[' ||
             *Letter==']' || *Letter=='!' || *Letter=='@' || *Letter=='#' ||

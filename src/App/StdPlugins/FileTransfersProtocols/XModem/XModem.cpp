@@ -1940,12 +1940,14 @@ static PG_BOOL XModemDownload_RxData(t_FTPSystemData *SysHandle,
                     /* 128 byte block */
                     Data->ExpectedByteCount=XMODEM_STANDARD_PACKET_SIZE;
                     Data->Waiting4Start=false;
+                    Data->DownloadState++;
                 }
                 else if(c==XMODEM_STX)
                 {
                     /* 1K block */
                     Data->ExpectedByteCount=XMODEM_LARGE_PACKET_SIZE;
                     Data->Waiting4Start=false;
+                    Data->DownloadState++;
                 }
                 else if(c==XMODEM_EOT)
                 {
@@ -1957,7 +1959,6 @@ static PG_BOOL XModemDownload_RxData(t_FTPSystemData *SysHandle,
                     m_FTPS->DLFinish(SysHandle,false);
                     return true;    // Data has been free'ed we are done
                 }
-                Data->DownloadState++;
             break;
             case e_XModemDownload_PacketNum:
                 /* Ignore packets with the current Packet and the last one */

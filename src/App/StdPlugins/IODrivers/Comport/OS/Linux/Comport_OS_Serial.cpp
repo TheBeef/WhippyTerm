@@ -344,7 +344,7 @@ static bool Comport_ProcessUEventFile(const char *Filename,const char *Tag,
 
         ve=v+strlen(v)-1;
 
-        while(*ve==' ' || *ve=='\t' || *ve=='\n' || *ve=='\r')
+        while(ve>v && (*ve==' ' || *ve=='\t' || *ve=='\n' || *ve=='\r'))
             ve--;
 
         *(ve+1)=0;
@@ -1692,7 +1692,7 @@ PG_BOOL Comport_GetConnectionInfo(const char *DeviceUniqueID,t_PIKVList *Options
 
     /* Find the start of the name */
     p=&DeviceUniqueID[strlen(DeviceUniqueID)-1];
-    while(*p!='/' && p>DeviceUniqueID)
+    while(p>DeviceUniqueID && *p!='/')
         p--;
     if(*p=='/')
         p++;

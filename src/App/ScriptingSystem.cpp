@@ -2404,7 +2404,7 @@ struct ScriptHandle *Scripting_LoadScript(const char *Filename)
 
         NewSEInstance->SharedMutex=AllocMutex();
         if(NewSEInstance->SharedMutex==NULL)
-            throw(0);
+            throw("Failed to get a mutex");
         MutexAllocated=true;
         NewSEInstance->MainThreadFreed=false;
         NewSEInstance->ThreadFreed=false;

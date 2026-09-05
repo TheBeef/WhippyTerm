@@ -1179,7 +1179,7 @@ class Connection *TheMainWindow::ReloadTabFromURI(const char *TabLabel,
                 URIStart++;
 
             URIEnd=&URIBuffer[strlen(URIBuffer)-1];
-            while(*URIEnd==' ' || *URIEnd=='\t')
+            while(URIEnd>URIStart && (*URIEnd==' ' || *URIEnd=='\t'))
                 URIEnd--;
             *(URIEnd+1)=0;
         }
@@ -1190,7 +1190,7 @@ class Connection *TheMainWindow::ReloadTabFromURI(const char *TabLabel,
                free the tab so we can reuse it */
 
             /* Allocate a new connection for this tab */
-            NewConnection=Con_AllocateConnection(URI);
+            NewConnection=Con_AllocateConnection(URIStart);
             if(NewConnection==NULL)
                 throw(0);
 
@@ -1232,7 +1232,7 @@ class Connection *TheMainWindow::ReloadTabFromURI(const char *TabLabel,
         else
         {
             /* Allocate a new tab and connection */
-            NewConnection=AllocNewTab(TabLabel,UseSettings,URI,NULL,
+            NewConnection=AllocNewTab(TabLabel,UseSettings,URIStart,NULL,
                     IgnoreAutoConnect);
         }
     }

@@ -196,11 +196,15 @@ PG_BOOL UDPClient_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
     MulticastStr=g_UDPC_System->KVGetItem(Options,"Multicast");
     MulticastGroupStr=g_UDPC_System->KVGetItem(Options,"MulticastGroup");
 
-    if(AddressStr==NULL || PortStr==NULL || BroadcastStr==NULL ||
-            MulticastStr==NULL || MulticastGroupStr==NULL)
-    {
+    if(AddressStr==NULL || PortStr==NULL)
         return false;
-    }
+
+    if(BroadcastStr==NULL)
+        BroadcastStr="0";
+    if(MulticastStr==NULL)
+        MulticastStr="0";
+    if(MulticastGroupStr==NULL)
+        MulticastGroupStr="0";
 
     Port=strtoul(PortStr,NULL,10);
     BroadcastBool=atoi(BroadcastStr);

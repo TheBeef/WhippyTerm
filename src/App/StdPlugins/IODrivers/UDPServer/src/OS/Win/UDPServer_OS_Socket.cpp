@@ -255,15 +255,16 @@ PG_BOOL UDPServer_Open(t_DriverIOHandleType *DriverIO,const t_PIKVList *Options)
     {
         SetOptions=0;
         if(ReuseAddressBool)
-            SetOptions|=SO_REUSEADDR;
-
-        opt=1;
-        if(setsockopt(OurData->DataSockFD,SOL_SOCKET,SetOptions,
-                (const char *)&opt,sizeof(opt))==SOCKET_ERROR)
         {
-            closesocket(OurData->DataSockFD);
-            OurData->DataSockFD=INVALID_SOCKET;
-            return false;
+            SetOptions=SO_REUSEADDR;
+            opt=1;
+            if(setsockopt(OurData->DataSockFD,SOL_SOCKET,SetOptions,
+                    (const char *)&opt,sizeof(opt))==SOCKET_ERROR)
+            {
+                closesocket(OurData->DataSockFD);
+                OurData->DataSockFD=INVALID_SOCKET;
+                return false;
+            }
         }
     }
 

@@ -207,6 +207,7 @@ DisplayBinary::DisplayBinary()
     CursorStyle=e_TextCursorStyle_Block;
 
     ScrollTimer=NULL;
+    InitCalled=false;
 }
 
 /*******************************************************************************

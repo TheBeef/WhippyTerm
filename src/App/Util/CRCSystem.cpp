@@ -760,9 +760,9 @@ static uint64_t *CRC_CalcCRCTable(int Bits,uint64_t Poly)
     if(CRCTable==NULL)
         return NULL;
 
-    MSB=1LL<<(Bits-1);
+    MSB=1ULL<<(Bits-1);
     if(Bits<64)
-        Mask=(1LL<<Bits)-1;
+        Mask=(1ULL<<Bits)-1;
     else
         Mask=0xFFFFFFFFFFFFFFFF;
 
@@ -830,7 +830,7 @@ static uint64_t CRC_DoCRCFromParam(const uint8_t *DataPtr,int Bytes,
     int LookupIndex;
 
     if(Bits<64)
-        Mask=(1LL<<Bits)-1;
+        Mask=(1ULL<<Bits)-1;
     else
         Mask=0xFFFFFFFFFFFFFFFF;
 

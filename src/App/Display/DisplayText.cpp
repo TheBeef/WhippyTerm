@@ -553,12 +553,16 @@ bool DisplayText::DoTextDisplayCtrlEvent(const struct TextDisplayEvent *Event)
             switch(Event->Info.ButtonPress.Bttn)
             {
                 case e_UITC_Bttn_SendBlockBuff:
+                    DoBlock_SendBlockBuffer();
                 break;
                 case e_UITC_Bttn_HexEdit:
+                    DoBlock_EditHex();
                 break;
                 case e_UITC_Bttn_Clear:
+                    DoBlock_ClearHexInput();
                 break;
                 case e_UITC_Bttn_Jump2SendBuffers:
+                    DoBlock_Jump2SendBuffers();
                 break;
                 case e_UITC_Bttn_SendTextLine:
                     DoBlock_SendTextBuffer(false);

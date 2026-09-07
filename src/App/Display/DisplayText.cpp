@@ -7069,6 +7069,12 @@ t_UIComboBoxCtrl *DisplayText::GetSendPanel_TextSend_TextInput(void)
  ******************************************************************************/
 t_UIComboBoxCtrl *DisplayText::GetDirectSendPanel_LineEndInput(void)
 {
+    if(UsingBlockSendPanel())
+    {
+        return UITC_GetComboBoxHandle(TextDisplayCtrl,
+                e_UITC_Combox_BlockSend_LineEnd);
+    }
+
     return UITC_GetComboBoxHandle(TextDisplayCtrl,
             e_UITC_Combox_TextSend_LineEnd);
 }

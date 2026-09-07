@@ -3063,6 +3063,12 @@ t_UIMuliLineTextInputCtrl *DisplayBinary::GetSendPanel_BlockBuffer_TextInput(voi
  ******************************************************************************/
 t_UIComboBoxCtrl *DisplayBinary::GetDirectSendPanel_LineEndInput(void)
 {
+    if(!UsingBlockSendPanel())
+    {
+        return UITC_GetComboBoxHandle(TextDisplayCtrl,
+                e_UITC_Combox_TextSend_LineEnd);
+    }
+
     return UITC_GetComboBoxHandle(TextDisplayCtrl,
             e_UITC_Combox_BlockSend_LineEnd);
 }

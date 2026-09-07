@@ -202,6 +202,7 @@ class DisplayBinary : public DisplayBase
         void HandleLeftMousePress(bool Down,int x,int y);
         void HandleMouseMove(int x,int y);
         void SetBlockDeviceMode(bool On);
+        bool UsingBlockSendPanel(void);
         void DoScrollTimerTimeout(void);
         void ScrollScreen(int dxpx,int dy);
         void BuildSelOutputAndAppendData(std::string &Dest,const uint8_t *Src,int Bytes,bool AscII);

@@ -312,10 +312,10 @@ linux {
     CONFIG(debug, debug|release){
         SOURCES += \
             ../ExternPlugins/IODrivers/TestLoopback/src/LB2_Main.cpp \
+    }
 
     CONFIG += link_pkgconfig
     PKGCONFIG += libpipewire-0.3
-    }
 }
 
 macx {

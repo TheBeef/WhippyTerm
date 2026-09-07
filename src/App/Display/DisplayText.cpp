@@ -1012,6 +1012,36 @@ void DisplayText::SetBlockDeviceMode(bool On)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayText::UsingBlockSendPanel
+ *
+ * SYNOPSIS:
+ *    bool DisplayText::UsingBlockSendPanel(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets which of the two direct send panels the text display
+ *    is currently using.  In text mode a block device (UDP for example) uses
+ *    the block send panel and a stream device uses the text line send panel.
+ *
+ *    This must be kept in sync with SetBlockDeviceMode() as that is what
+ *    actually shows / hides the panels.
+ *
+ * RETURNS:
+ *    true -- The block send panel is the panel in use.
+ *    false -- The text line send panel is the panel in use.
+ *
+ * SEE ALSO:
+ *    SetBlockDeviceMode()
+ ******************************************************************************/
+bool DisplayText::UsingBlockSendPanel(void)
+{
+    return LastBlockDeviceSetToBlock;
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayText::SetupCanvas
  *
  * SYNOPSIS:

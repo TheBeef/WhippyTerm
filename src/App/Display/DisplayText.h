@@ -207,6 +207,7 @@ class DisplayText : public DisplayBase
         const uint8_t *GetMarkString(t_DataProMark *Mark,uint32_t *Size,uint32_t Offset,uint32_t Len);
 
         void SetBlockDeviceMode(bool On);
+        bool UsingBlockSendPanel(void);
 
         void MoveViewTop(void);
         void MoveViewBottom(void);

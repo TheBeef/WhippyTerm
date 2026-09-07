@@ -1297,6 +1297,10 @@ bool Connection::ApplyCustomSettings(bool SuppressErrorAsk)
                 throw("Failed to reallocate display system");
             }
 
+            /* Hide the find panel */
+            Display->FindPanel_ShowPanel(false);
+            Display->ReplaceFindHistoryFromSession();
+
             Display->SetBlockDeviceMode(BlockSendDevice);
             Display->ReplaceFindHistoryFromSession();
         }
@@ -3443,11 +3447,8 @@ bool Connection::ProcessDisplayEvent(const struct DBEvent *Event)
         case e_DBEvent_DirectPanelToggled:
             if(MW!=NULL)
             {
-                if(BinaryConnection)
-                    PanelOpen=Display->GetBlockPanelAvailable();
-                else
-                    PanelOpen=Display->GetTextPanelAvailable();
-                MW->InformOf_SendPanelOpenClose(PanelOpen);
+                PanelOpen=Display->GetSendPanelOpen();
+                MW->InformOf_SendPanelOpenClose(this,PanelOpen);
             }
         break;
         case e_DBEvent_FindTextEvent:
@@ -9537,14 +9538,7 @@ void Connection::DirectSendPanelToggleOpenClosed(void)
     if(Display==NULL)
         return;
 
-    if(BinaryConnection)
-    {
-        Display->SetBlockPanelAvailable(!Display->GetBlockPanelAvailable());
-    }
-    else
-    {
-        Display->SetTextPanelAvailable(!Display->GetTextPanelAvailable());
-    }
+    Display->ToggleSendPanelOpen();
 }
 
 /*******************************************************************************

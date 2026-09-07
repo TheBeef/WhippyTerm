@@ -5641,24 +5641,34 @@ void TheMainWindow::InformOf_DownloadSettingsChange(class Connection *Con)
  *    TheMainWindow::InformOf_SendPanelOpenClose
  *
  * SYNOPSIS:
- *    void TheMainWindow::InformOf_SendPanelOpenClose(bool PanelOpen);
+ *    void TheMainWindow::InformOf_SendPanelOpenClose(class Connection *Con,
+ *              bool PanelOpen);
  *
  * PARAMETERS:
- *    BufferIndex [I] -- The send buffer that was changed.
+ *    Con [I] -- The connection that had it's direct send panel change.
+ *    PanelOpen [I] -- Is the direct send panel now open (true) or closed
+ *                     (false).
  *
  * FUNCTION:
- *    This function is called when there is a change to a send buffer.
- *    It updates the menu name for this send buffer.
+ *    This function is called when a connection opens or closes it's direct
+ *    send panel.  It updates the check mark on the view menu entry.
+ *
+ *    Connections that are not the active tab are ignored (the menu only
+ *    shows the state of the tab you are looking at).
  *
  * RETURNS:
  *    NONE
  *
  * SEE ALSO:
- *    
+ *    ToggleSendPanel()
  ******************************************************************************/
-void TheMainWindow::InformOf_SendPanelOpenClose(bool PanelOpen)
+void TheMainWindow::InformOf_SendPanelOpenClose(class Connection *Con,
+        bool PanelOpen)
 {
     e_UIMenuCtrl *SendPanelToggleMenu;
+
+    if(Con==NULL || Con!=ActiveCon)
+        return;
 
     SendPanelToggleMenu=UIMW_GetMenuHandle(UIWin,e_UIMWMenu_SendPanel);
     UICheckMenu(SendPanelToggleMenu,PanelOpen);

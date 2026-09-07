@@ -171,7 +171,7 @@ void Debug6(void);
         void InformOf_ScriptDone(struct ScriptHandle *Script);
         void InformOf_UploadSettingsChange(class Connection *Con);
         void InformOf_DownloadSettingsChange(class Connection *Con);
-        void InformOf_SendPanelOpenClose(bool PanelOpen);
+        void InformOf_SendPanelOpenClose(class Connection *Con,bool PanelOpen);
         void ShowTermEmuSettingsDialog(void);
 
         /* Panel handlers */

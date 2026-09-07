@@ -236,6 +236,10 @@ class DisplayBase
         void SetBlockPanelAvailable(bool Available);
         bool GetTextPanelAvailable(void);
         bool GetBlockPanelAvailable(void);
+        virtual bool UsingBlockSendPanel(void);
+        void SetSendPanelOpen(bool Open);
+        bool GetSendPanelOpen(void);
+        void ToggleSendPanelOpen(void);
 
         /* Find Panel */
         virtual void FindPanel_ShowPanel(bool Visible);

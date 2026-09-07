@@ -2948,6 +2948,124 @@ bool DisplayBase::GetBlockPanelAvailable(void)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayBase::UsingBlockSendPanel
+ *
+ * SYNOPSIS:
+ *    bool DisplayBase::UsingBlockSendPanel(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets which of the two direct send panels this display
+ *    would show for the device mode it is currently in (see
+ *    SetBlockDeviceMode()).  Only one of the two panels can be shown at a
+ *    time and which one it is depends on the display type and if we are
+ *    connected to a block or a stream device.
+ *
+ *    Anything that wants to open / close / query "the" direct send panel
+ *    must use this to figure out which panel it is working on, or it will
+ *    end up changing the panel that isn't on the screen.
+ *
+ *    This is the default version and always says the text line panel.
+ *
+ * RETURNS:
+ *    true -- The block send panel is the panel in use.
+ *    false -- The text line send panel is the panel in use.
+ *
+ * SEE ALSO:
+ *    SetBlockDeviceMode(), GetSendPanelOpen(), SetSendPanelOpen()
+ ******************************************************************************/
+bool DisplayBase::UsingBlockSendPanel(void)
+{
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::SetSendPanelOpen
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::SetSendPanelOpen(bool Open);
+ *
+ * PARAMETERS:
+ *    Open [I] -- Open (show) the panel (true), or close (hide) it (false).
+ *
+ * FUNCTION:
+ *    This function opens / closes the direct send panel that this display is
+ *    currently using (block or text line).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    GetSendPanelOpen(), ToggleSendPanelOpen(), UsingBlockSendPanel()
+ ******************************************************************************/
+void DisplayBase::SetSendPanelOpen(bool Open)
+{
+    if(UsingBlockSendPanel())
+        SetBlockPanelAvailable(Open);
+    else
+        SetTextPanelAvailable(Open);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::GetSendPanelOpen
+ *
+ * SYNOPSIS:
+ *    bool DisplayBase::GetSendPanelOpen(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets if the direct send panel that this display is
+ *    currently using (block or text line) is open (visible) or closed
+ *    (hidden).
+ *
+ * RETURNS:
+ *    true -- Panel is open
+ *    false -- Panel is closed
+ *
+ * SEE ALSO:
+ *    SetSendPanelOpen(), ToggleSendPanelOpen(), UsingBlockSendPanel()
+ ******************************************************************************/
+bool DisplayBase::GetSendPanelOpen(void)
+{
+    if(UsingBlockSendPanel())
+        return GetBlockPanelAvailable();
+
+    return GetTextPanelAvailable();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBase::ToggleSendPanelOpen
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::ToggleSendPanelOpen(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function toggles open / closed the direct send panel that this
+ *    display is currently using (block or text line).
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    SetSendPanelOpen(), GetSendPanelOpen(), UsingBlockSendPanel()
+ ******************************************************************************/
+void DisplayBase::ToggleSendPanelOpen(void)
+{
+    SetSendPanelOpen(!GetSendPanelOpen());
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayBase::FindPanel_ShowPanel
  *
  * SYNOPSIS:

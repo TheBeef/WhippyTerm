@@ -1956,6 +1956,36 @@ void DisplayBinary::SetBlockDeviceMode(bool On)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayBinary::UsingBlockSendPanel
+ *
+ * SYNOPSIS:
+ *    bool DisplayBinary::UsingBlockSendPanel(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function gets which of the two direct send panels the binary
+ *    display is currently using.  In binary mode a stream device uses the
+ *    block send panel and a block device uses the text line send panel.
+ *
+ *    This must be kept in sync with SetBlockDeviceMode() as that is what
+ *    actually shows / hides the panels.
+ *
+ * RETURNS:
+ *    true -- The block send panel is the panel in use.
+ *    false -- The text line send panel is the panel in use.
+ *
+ * SEE ALSO:
+ *    SetBlockDeviceMode()
+ ******************************************************************************/
+bool DisplayBinary::UsingBlockSendPanel(void)
+{
+    return !LastBlockDeviceSetToBlock;
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayBinary::ConvertScreenXY2BufferLinePtr
  *
  * SYNOPSIS:

@@ -30,6 +30,12 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_NEW_FEATURE,"Add insert horizontal rule to toolbar",
+            "Added a toolbar button to insert horizontal rule."},
+    {   NOTETYPE_ENHANCEMENT,"Changed the defaults for horizontal rule",
+            "Changed the default settings for the horizontal rule.  It now"
+            " defaults to override and set to green.  This makes it stand"
+            " out more."},
     {   NOTETYPE_NEW_FEATURE,"Added find in text",
             "A search the text panel has been added.  You can select it from"
             " the edit menu, or with the default key bindings of SHIFT+CTRL+F."

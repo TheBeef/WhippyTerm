@@ -1970,3 +1970,9 @@ void Form_MainWindow::on_actionFind_Next_triggered()
     DoMenuTriggered(e_UIMWMenu_FindNext);
 }
 
+
+void Form_MainWindow::on_Insert_HR_toolButton_clicked()
+{
+    DoToolbarTriggered(e_UIMWToolbar_InsertHorizontalRule);
+}
+

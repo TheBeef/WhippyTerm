@@ -366,6 +366,8 @@ t_UIToolbarCtrl *UIMW_GetToolbarHandle(t_UIMainWindow *win,
             return (t_UIToolbarCtrl *)realwin->ui->StyleColor_toolButton;
         case e_UIMWToolbar_StyleStrikeThrough:
             return (t_UIToolbarCtrl *)realwin->ui->StyleStrikeThrough_toolButton;
+        case e_UIMWToolbar_InsertHorizontalRule:
+            return (t_UIToolbarCtrl *)realwin->ui->Insert_HR_toolButton;
         case e_UIMWToolbarMAX:
         default:
         break;

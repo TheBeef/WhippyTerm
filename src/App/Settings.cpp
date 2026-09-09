@@ -1657,8 +1657,8 @@ void ConSettings::DefaultSettings(void)
     ColorsEnabled=true;
     TabSize=8;
 
-    OverrideHR=false;
-    HorizontalRuleColor=SysColors[e_SysColShade_Normal][e_SysCol_White];
+    OverrideHR=true;
+    HorizontalRuleColor=SysColors[e_SysColShade_Normal][e_SysCol_Green];
 
     BeepMode=e_Beep_System;
     UseCustomSound=false;

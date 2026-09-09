@@ -470,6 +470,8 @@ private slots:
     
     void on_actionFind_Next_triggered();
     
+    void on_Insert_HR_toolButton_clicked();
+    
 private:
     void resizeEvent(QResizeEvent *event);
     void showEvent(QShowEvent *event);

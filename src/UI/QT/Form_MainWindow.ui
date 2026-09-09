@@ -387,6 +387,32 @@
            </widget>
           </item>
           <item>
+           <widget class="QToolButton" name="Insert_HR_toolButton">
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="toolTip">
+             <string>Insert Horizontal Rule</string>
+            </property>
+            <property name="text">
+             <string>Insert Horizontal Rule</string>
+            </property>
+            <property name="icon">
+             <iconset resource="MainResource.qrc">
+              <normaloff>:/G/Graphics/text_horizontalrule.png</normaloff>:/G/Graphics/text_horizontalrule.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>31</width>
+              <height>29</height>
+             </size>
+            </property>
+            <property name="autoRaise">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QToolButton" name="Clear_Screen_toolButton">
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>

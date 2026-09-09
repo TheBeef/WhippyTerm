@@ -231,6 +231,7 @@ typedef enum
     e_UIMWToolbar_StyleUnderline,
     e_UIMWToolbar_StyleBGColor,
     e_UIMWToolbar_StyleStrikeThrough,
+    e_UIMWToolbar_InsertHorizontalRule,
     e_UIMWToolbarMAX
 } e_UIMWToolbarType;
 

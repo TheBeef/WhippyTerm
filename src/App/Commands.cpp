@@ -376,6 +376,7 @@ e_CmdType m_Cmd2ToolbarMapping[]=
     e_Cmd_StyleSelectionUnderline,      // e_UIMWToolbar_StyleUnderline
     e_Cmd_StyleSelectionBGColor,        // e_UIMWToolbar_StyleBGColor
     e_Cmd_StyleSelectionStrikeThrough,  // e_UIMWToolbar_StyleStrikeThrough
+    e_Cmd_InsertHorizontalRule,         // e_UIMWToolbar_InsertHorizontalRule
 };
 
 e_CmdType m_Cmd2ButtonMapping[]=

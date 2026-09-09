@@ -637,7 +637,8 @@ void HexDisplayBuffer::RebuildDisplay(void)
     StyledFrag=DisplayFrag;
 
     memset(Line,' ',sizeof(Line));
-    Line[sizeof(Line)-1]=0;
+    Line[ASCIILEFTEDGE+BytesPerLine]=0;
+
     for(i=0;i<sizeof(LineStyling)/sizeof(struct CharStyling);i++)
     {
         LineStyling[i].FGColor=FGColor;

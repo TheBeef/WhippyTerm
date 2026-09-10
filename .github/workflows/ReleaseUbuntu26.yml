@@ -39,7 +39,8 @@ jobs:
 
     - name: Install Dependencies v2
       run: |
-        sudo apt-get update && sudo apt-get install qt6-base-dev qmake6 qt6-tools-dev qt6-base-dev-tools qt6-multimedia-dev fakeroot gzip dpkg
+        sudo apt-get update && sudo apt-get install -y qt6-base-dev qmake6 qt6-tools-dev qt6-base-dev-tools qt6-multimedia-dev libpipewire-0.3-dev pkg-config fakeroot gzip dpkg
+        pkg-config --modversion libpipewire-0.3
 
     - name: Build
       working-directory: ./Project

@@ -3,6 +3,12 @@ name: Ubuntu 26.04
 on:
   release:
     types: [created]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version string (the part that would normally follow "Rel_", e.g. 1.0.0.0)'
+        required: true
+        default: '0.0.0.0'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -16,11 +22,18 @@ jobs:
     runs-on: ubuntu-26.04
 
     steps:
-    - uses: bhowell2/github-substring-action@1.0.2
+    # On a release this is the tag name with the leading "Rel_" stripped;
+    # on a manual run it is whatever version string was typed into the input.
+    - name: Set version
       id: RelVer
-      with:
-        value: ${{ github.event.release.tag_name }}
-        index_of_str: "Rel_"
+      env:
+        INPUT_VERSION: ${{ github.event.inputs.version }}
+      run: |
+        if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+          echo "substring=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
+        else
+          echo "substring=${GITHUB_REF_NAME:4}" >> "$GITHUB_OUTPUT"
+        fi
 
     - uses: actions/checkout@v4
 
@@ -35,16 +48,25 @@ jobs:
 
     - name: deb
       working-directory: ./LinuxInstaller
+      env:
+        REL_VER: ${{ steps.RelVer.outputs.substring }}
       run: |
-        ./MakeRelease.sh ${GITHUB_REF_NAME:4} ../Project 26
-        mv WhippyTerm${GITHUB_REF_NAME:4}-1.deb WhippyTerm_${GITHUB_REF_NAME:4}-1_Ubuntu26_04.deb
+        ./MakeRelease.sh "$REL_VER" ../Project 26
+        mv "WhippyTerm${REL_VER}-1.deb" "WhippyTerm_${REL_VER}-1_Ubuntu26_04.deb"
 
 #    - name: Setup tmate session
 #      uses: mxschmitt/action-tmate@v3
 
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: WhippyTerm-Ubuntu26_04-${{ steps.RelVer.outputs.substring }}
+        path: LinuxInstaller/WhippyTerm_${{ steps.RelVer.outputs.substring }}-1_Ubuntu26_04.deb
+        if-no-files-found: error
+
     - name: Upload Release files
       uses: softprops/action-gh-release@v1
-      if: github.ref_type == 'tag'
+      if: github.event_name == 'release'
       with:
         files: |
           LinuxInstaller/WhippyTerm_${{steps.RelVer.outputs.substring}}-1_Ubuntu26_04.deb

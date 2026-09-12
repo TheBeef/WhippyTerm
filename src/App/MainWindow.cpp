@@ -1511,6 +1511,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     t_UIToolbarCtrl *CopyTool;
     t_UIToolbarCtrl *PasteTool;
     t_UIToolbarCtrl *ClearScreenTool;
+    t_UIToolbarCtrl *InsertHorizontalRuleTool;
     t_UIToolbarCtrl *StyleBoldTool;
     t_UIToolbarCtrl *StyleItalicsTool;
     t_UIToolbarCtrl *StyleUnderlineTool;
@@ -1627,6 +1628,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
     CopyTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_Copy);
     PasteTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_Paste);
     ClearScreenTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_ClearScreen);
+    InsertHorizontalRuleTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_InsertHorizontalRule);
     StyleBoldTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_StyleBold);
     StyleItalicsTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_StyleItalics);
     StyleUnderlineTool=UIMW_GetToolbarHandle(UIWin,e_UIMWToolbar_StyleUnderline);
@@ -1785,6 +1787,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableToolbar(CopyTool,false);
         UIEnableToolbar(PasteTool,false);
         UIEnableToolbar(ClearScreenTool,false);
+        UIEnableToolbar(InsertHorizontalRuleTool,false);
         UIEnableToolbar(StyleBoldTool,false);
         UIEnableToolbar(StyleItalicsTool,false);
         UIEnableToolbar(StyleUnderlineTool,false);
@@ -1835,6 +1838,7 @@ void TheMainWindow::RethinkActiveConnectionUI(void)
         UIEnableToolbar(CopyTool,true);
         UIEnableToolbar(PasteTool,true);
         UIEnableToolbar(ClearScreenTool,true);
+        UIEnableToolbar(InsertHorizontalRuleTool,true);
 
         Con=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
         if(Con==NULL)

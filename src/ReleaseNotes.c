@@ -30,6 +30,10 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_ENHANCEMENT,"Added a new settings to let you set the auto lap time",
+            "The auto lap in the stop watch was set to a fixed 500ms"
+            " of quite before the auto lap will trigger.  You can now select"
+            " how long to wait in settings."},
     {   NOTETYPE_NEW_FEATURE,"Add insert horizontal rule to toolbar",
             "Added a toolbar button to insert horizontal rule."},
     {   NOTETYPE_ENHANCEMENT,"Changed the defaults for horizontal rule",

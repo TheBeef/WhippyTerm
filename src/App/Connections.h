@@ -142,6 +142,7 @@ struct StopWatchType
     uint64_t LastRxDataTime;
     bool AutoStartOnTx;
     bool AutoLap;
+    uint32_t AutoLapTime;
     t_StopWatchLapTimes Laps;
     i_StopWatchLapTimes CurrentLapInfoPoint;
 };

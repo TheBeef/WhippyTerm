@@ -226,6 +226,7 @@ class Settings
         bool StopWatchAutoLap;
         bool StopWatchAutoStart;
         bool StopWatchShowPanel;
+        uint32_t StopWatchAutoLapTime;
 
         /* Capture */
         bool CaptureTimestamp;

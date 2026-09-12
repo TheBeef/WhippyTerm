@@ -787,6 +787,10 @@ static void DS_SetSettingGUI(void)
     UICheckCheckbox(CheckboxHandle,g_Settings.StopWatchAutoStart);
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_StopWatchShowPanel);
     UICheckCheckbox(CheckboxHandle,g_Settings.StopWatchShowPanel);
+    NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_StopWatchAutoLapTime);
+    UISetNumberInputCtrlMin(NumberInputHandle,100);
+    UISetNumberInputCtrlMax(NumberInputHandle,60000);
+    UISetNumberInputCtrlValue(NumberInputHandle,g_Settings.StopWatchAutoLapTime);
 
     /* Capture */
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CaptureTimestamp);
@@ -1344,6 +1348,9 @@ static void DS_GetSettingsFromGUI(void)
         g_Settings.StopWatchAutoStart=UIGetCheckboxCheckStatus(CheckboxHandle);
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_StopWatchShowPanel);
         g_Settings.StopWatchShowPanel=UIGetCheckboxCheckStatus(CheckboxHandle);
+
+        NumberInputHandle=UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput_StopWatchAutoLapTime);
+        g_Settings.StopWatchAutoLapTime=UIGetNumberInputCtrlValue(NumberInputHandle);
 
         /* Capture */
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CaptureTimestamp);

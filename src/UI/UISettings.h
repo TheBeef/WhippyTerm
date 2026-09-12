@@ -164,6 +164,7 @@ enum e_UIS_NumberInput
     e_UIS_NumberInput_HexDisplay_BytesPerLine,
     e_UIS_NumberInput_HexDisplay_DividerEvery,
     e_UIS_NumberInput_HexDisplay_DivLineWidth,
+    e_UIS_NumberInput_StopWatchAutoLapTime,
     e_UIS_NumberInputMAX
 };
 

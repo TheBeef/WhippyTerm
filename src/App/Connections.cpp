@@ -71,7 +71,6 @@ using namespace std;
 #define MAX_TIME_2_PROCESS_BYTES        100     // 100mS to process as many bytes as we can before we handle UI events again
 //#define MAX_TIME_2_PROCESS_BYTES        1000  // 1000mS to process as many bytes as we can before we handle UI events again
 
-#define AUTOLAP_TIMEOUT                 500     // in ms
 #define TRANSMIT_DELAY_BUFFER_SIZE      4000    // A little under a page size
 #define SMART_CLIPBOARD_PASTE_TIME      250     // 250ms
 
@@ -561,6 +560,7 @@ Connection::Connection(const char *URI)
         StopWatch.Running=false;
         StopWatch.AutoStartOnTx=g_Settings.StopWatchAutoStart;
         StopWatch.AutoLap=g_Settings.StopWatchAutoLap;
+        StopWatch.AutoLapTime=g_Settings.StopWatchAutoLapTime;
 
         Upload.Filename="";
         Upload.ProtocolID="";
@@ -4289,7 +4289,7 @@ void Connection::StopWatchHandleAutoLap(void)
     if(!StopWatch.Running || !StopWatch.AutoLap)
         return;
 
-    if(GetMSCounter()-StopWatch.LastRxDataTime>=AUTOLAP_TIMEOUT)
+    if(GetMSCounter()-StopWatch.LastRxDataTime>=StopWatch.AutoLapTime)
         StopWatchTakeLap();
 
     StopWatch.LastRxDataTime=GetMSCounter();

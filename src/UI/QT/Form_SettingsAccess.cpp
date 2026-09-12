@@ -319,6 +319,8 @@ t_UINumberInput *UIS_GetNumberInputCtrlHandle(e_UIS_NumberInput UIObj)
             return (t_UINumberInput *)g_SettingsDialog->ui->HexDisplay_DividerEvery_spinBox;
         case e_UIS_NumberInput_HexDisplay_DivLineWidth:
             return (t_UINumberInput *)g_SettingsDialog->ui->HexDisplay_DivLineWidth_spinBox;
+        case e_UIS_NumberInput_StopWatchAutoLapTime:
+            return (t_UINumberInput *)g_SettingsDialog->ui->spinBox_StopWatch_AutoLapTime;
         case e_UIS_NumberInputMAX:
         default:
         break;

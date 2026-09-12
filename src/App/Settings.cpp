@@ -1241,6 +1241,7 @@ void Settings::RegisterAllMembers(class TinyCFG &cfg)
                 cfg.Register("StopWatchAutoLap",StopWatchAutoLap);
                 cfg.Register("StopWatchAutoStart",StopWatchAutoStart);
                 cfg.Register("StopWatchShowPanel",StopWatchShowPanel);
+                cfg.Register("StopWatchAutoLapTime",StopWatchAutoLapTime);
             cfg.EndBlock();
             cfg.StartBlock("Capture");
                 cfg.Register("CaptureTimestamp",CaptureTimestamp);
@@ -1557,6 +1558,7 @@ void Settings::DefaultSettings(void)
     StopWatchAutoLap=false;
     StopWatchAutoStart=false;
     StopWatchShowPanel=true;
+    StopWatchAutoLapTime=500;   // 500ms
 
     /* Capture */
     CaptureTimestamp=false;

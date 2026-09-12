@@ -3,7 +3,7 @@ Version: x.x.x.x-1
 Section: comm
 Priority: optional
 Architecture: amd64
-Depends: libqt6core6t64 (>= 6.10.0), libqt6gui6 (>= 6.10.0), libqt6widgets6 (>= 6.10.0), libqt6multimedia6 (>= 6.10.0), libc6 (>= 2.43), libgcc-s1 (>= 4.2), libstdc++6 (>= 14)
+Depends: libqt6core6t64 (>= 6.10.0), libqt6gui6 (>= 6.10.0), libqt6widgets6 (>= 6.10.0), libqt6multimedia6 (>= 6.10.0), libpipewire-0.3-0t64, libc6 (>= 2.43), libgcc-s1 (>= 4.2), libstdc++6 (>= 14)
 Maintainer: Paul Hutchinson <paul@whippyterm.com>
 Description: Modern term program.
  Terminal program with Modern GUI, hex dumps, plugins, and binary protocols.

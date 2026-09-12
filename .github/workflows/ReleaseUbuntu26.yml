@@ -13,6 +13,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
+  DEBIAN_FRONTEND: noninteractive
 
 jobs:
   build:
@@ -21,7 +22,44 @@ jobs:
     name: Build Ubuntu
     runs-on: ubuntu-26.04
 
+    # The GitHub 26.04 runner image has the x86-64-v3 package variants enabled,
+    # and its preinstalled gcc/glibc are v3 builds. Anything linked on the bare
+    # runner is stamped "x86 ISA needed: x86-64-v3" and refuses to start on a CPU
+    # without AVX2, no matter what -march the project passes. Building inside a
+    # stock ubuntu:26.04 container gives a baseline toolchain that matches what
+    # end users actually have installed.
+    container:
+      image: ubuntu:26.04
+
     steps:
+    # Runs as root in the container, so no sudo. Dependencies go in before
+    # checkout so that git is available to actions/checkout.
+    - name: Install Dependencies
+      run: |
+        # Most of Qt6 is in universe; make sure it is enabled in the base image.
+        sed -i 's/^Components:.*/Components: main restricted universe multiverse/' \
+          /etc/apt/sources.list.d/ubuntu.sources 2>/dev/null || true
+        apt-get update
+        apt-get install -y \
+          build-essential binutils git ca-certificates \
+          qt6-base-dev qmake6 qt6-tools-dev qt6-base-dev-tools qt6-multimedia-dev \
+          libpipewire-0.3-dev pkg-config fakeroot gzip dpkg
+        pkg-config --modversion libpipewire-0.3
+
+    # Confirms the container toolchain is baseline before anything is built.
+    - name: Show toolchain microarchitecture
+      run: |
+        gcc --version | head -1
+        echo 'int main(){return 0;}' > /tmp/isa.c
+        gcc -march=x86-64 -o /tmp/isa /tmp/isa.c
+        printf 'hello-world ISA needed: %s\n' \
+          "$(readelf -W -n /tmp/isa | sed -n 's/.*x86 ISA needed:[[:space:]]*//p' | head -1)"
+        for o in Scrt1.o crtbegin.o; do
+          p=$(gcc -print-file-name=$o)
+          printf '%-12s ISA needed: %s\n' "$o" \
+            "$(readelf -W -n "$p" 2>/dev/null | sed -n 's/.*x86 ISA needed:[[:space:]]*//p' | head -1)"
+        done
+
     # On a release this is the tag name with the leading "Rel_" stripped;
     # on a manual run it is whatever version string was typed into the input.
     - name: Set version
@@ -37,22 +75,7 @@ jobs:
 
     - uses: actions/checkout@v4
 
-    # The Ubuntu 26.04 runner enables the x86-64-v3 package variants, so an
-    # unqualified apt-get pulls _amd64v3.deb builds of Qt and the toolchain and
-    # the resulting binary refuses to start on any CPU without AVX2.
-    # Force plain amd64 so the build matches what end users actually install.
-    - name: Disable amd64v3 package variants
-      run: |
-        echo 'APT::Architecture-Variants "";' | sudo tee /etc/apt/apt.conf.d/99-no-amd64v3
-        apt-config dump | grep -i architecture
-
-    - name: Install Dependencies v2
-      run: |
-        sudo apt-get update && sudo apt-get install -y qt6-base-dev qmake6 qt6-tools-dev qt6-base-dev-tools qt6-multimedia-dev libpipewire-0.3-dev pkg-config fakeroot gzip dpkg
-        pkg-config --modversion libpipewire-0.3
-
-    # -march=x86-64 is belt-and-braces: it pins the baseline even if the
-    # runner's gcc itself defaults to a higher microarchitecture level.
+    # -march=x86-64 pins the baseline even if Ubuntu raises the amd64 default later.
     - name: Build
       working-directory: ./Project
       run: |

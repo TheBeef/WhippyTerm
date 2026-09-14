@@ -1032,6 +1032,37 @@ void UITabCtrlSetTabVisible(t_UITabCtrl *TabCtrl,t_UITab *Tab,bool Show)
 #endif
 }
 
+void UITabCtrlSetTabIndicator(t_UITabCtrl *TabCtrl,t_UITab *Tab,e_TabCtrlTabIndicatorType Indicator)
+{
+    QWidget *tabwidget=(QWidget *)Tab;
+    QTabWidget *tabc=(QTabWidget *)TabCtrl;
+
+    UITabCtrlSetTabIndicatorByIndex(TabCtrl,tabc->indexOf(tabwidget),Indicator);
+}
+
+void UITabCtrlSetTabIndicatorByIndex(t_UITabCtrl *TabCtrl,int Index,e_TabCtrlTabIndicatorType Indicator)
+{
+    QTabWidget *tabc=(QTabWidget *)TabCtrl;
+    QIcon bullet_purple(":/G/Graphics/bullet_purple.png");
+    QIcon comment(":/G/Graphics/comment.png");
+    QIcon blankicon(":/G/Graphics/blankicon.png");
+    switch(Indicator)
+    {
+        case e_TabCtrlTabIndicator_None:
+            tabc->setTabIcon(Index,QIcon());
+        break;
+        case e_TabCtrlTabIndicator_Blank:
+            tabc->setTabIcon(Index,blankicon);
+        break;
+        case e_TabCtrlTabIndicator_Activity:
+            tabc->setTabIcon(Index,comment);
+        break;
+        case e_TabCtrlTabIndicatorMAX:
+        default:
+        break;
+    }
+}
+
 /*************************************/
 /* ScrollBarCtrl                     */
 /*************************************/

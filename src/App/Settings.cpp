@@ -1266,6 +1266,7 @@ void Settings::RegisterAllMembers(class TinyCFG &cfg)
     cfg.StartBlock("Display");
         cfg.Register("AlwaysShowTabs",AlwaysShowTabs);
         cfg.Register("CloseButtonOnTabs",CloseButtonOnTabs);
+        cfg.Register("ShowActivityOnBackgroundTabs",ShowActivityOnBackgroundTabs);
         cfg.Register("MouseCursorIBeam",MouseCursorIBeam);
         cfg.StartBlock("HexDisplays");
             cfg.Register("HexDisplaysFGColor",HexDisplaysFGColor);
@@ -1539,6 +1540,7 @@ void Settings::DefaultSettings(void)
     WindowWidth=640;
     WindowHeight=480;
     CloseButtonOnTabs=false;
+    ShowActivityOnBackgroundTabs=false;
     MouseCursorIBeam=true;
 
     AlwaysShowTabs=true;

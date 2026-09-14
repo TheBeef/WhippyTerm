@@ -119,8 +119,8 @@ void MWDebug5(uintptr_t ID)
     class Connection *Con=(class Connection *)ID;
 
     {
-        bool InDark;
-        InDark=OS_IsSystemInDarkMode();
+//        bool InDark;
+//        InDark=OS_IsSystemInDarkMode();
 //        printf("%d\n",InDark);
     }
 
@@ -471,6 +471,7 @@ TheMainWindow::TheMainWindow()
     CurrentBGStyleColor=e_SysCol_Black;
     CurrentBGStyleShade=e_SysColShade_Normal;
     ActiveManualScript=NULL;
+    ActiveShowActivityOnBackgroundTabs=false;
 
     UIWin=UIMW_AllocMainWindow(this,0);
     if(UIWin==NULL)
@@ -886,9 +887,14 @@ void TheMainWindow::ApplySettings(void)
     uint8_t Mod;
     e_UIKeys Key;
     char Letter;
+    t_UITabCtrl *MainTabs;
+    e_TabCtrlTabIndicatorType Indicator;
+    unsigned int r;
+    unsigned int Count;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
 
     /* Setup all the menu shortcuts */
-
     /* First clear all the current shortcuts */
     for(MenuID=0;MenuID<e_UIMWMenuMAX;MenuID++)
     {
@@ -910,6 +916,23 @@ void TheMainWindow::ApplySettings(void)
         }
 
         UISetMenuKeySeq(MenuHandle,Mod,Key,Letter);
+    }
+
+    if(g_Settings.ShowActivityOnBackgroundTabs!=
+            ActiveShowActivityOnBackgroundTabs)
+    {
+        ActiveShowActivityOnBackgroundTabs=
+                g_Settings.ShowActivityOnBackgroundTabs;
+
+        /* If we are turning on/off the indicator on activity then we need
+           to set all the tabs to have a blank or none indicator */
+        Count=UITabCtrlGetTabCount(MainTabs);
+        if(g_Settings.ShowActivityOnBackgroundTabs)
+            Indicator=e_TabCtrlTabIndicator_Blank;
+        else
+            Indicator=e_TabCtrlTabIndicator_None;
+        for(r=0;r<Count;r++)
+            UITabCtrlSetTabIndicatorByIndex(MainTabs,r,Indicator);
     }
 
     ConnectionOptionsPanel.ApplySettings();
@@ -1466,10 +1489,10 @@ void TheMainWindow::SetActiveTab(class Connection *Con)
         UITabCtrlMakeTabActive(MainTabs,(uintptr_t)Con);
     }
 
+    MainTabChanged(Con,UITabCtrlGetActiveTabIndex(MainTabs));
+
     /* Give the connection focus */
     Con->GiveFocus();
-
-    SetActiveConnection(Con);
 }
 
 /*******************************************************************************
@@ -3906,6 +3929,41 @@ void TheMainWindow::SetActiveConnection(class Connection *NewCon)
 
 /*******************************************************************************
  * NAME:
+ *    TheMainWindow::MainTabChanged
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::MainTabChanged(class Connection *Con,int NewIndex);
+ *
+ * PARAMETERS:
+ *    Con [I] -- The connection that is connected to this tab
+ *    NewIndex [I] -- The index of the selected tab.
+ *
+ * FUNCTION:
+ *    This function is called after a tab has changed.  It rethinks anything
+ *    that needs to be.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::MainTabChanged(class Connection *Con,int NewIndex)
+{
+    t_UITabCtrl *MainTabs;
+
+    MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+    if(g_Settings.ShowActivityOnBackgroundTabs)
+    {
+        UITabCtrlSetTabIndicatorByIndex(MainTabs,NewIndex,
+                e_TabCtrlTabIndicator_Blank);
+    }
+
+    SetActiveConnection(Con);
+}
+
+/*******************************************************************************
+ * NAME:
  *    TheMainWindow::ConnectionEvent
  *
  * SYNOPSIS:
@@ -4819,6 +4877,54 @@ void TheMainWindow::InformOfPluginRemoved(const char *PluginIDStr)
     RebuildTerminalEmulationMenu();
     UploadPanel.RescanAvailableProtocols();
     DownloadPanel.RescanAvailableProtocols();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    TheMainWindow::InformOfWrite2Display
+ *
+ * SYNOPSIS:
+ *    void TheMainWindow::InformOfWrite2Display(class Connection *Con,
+ *              const uint8_t *Chr);
+ *
+ * PARAMETERS:
+ *    Con [I] -- The connection that wrote to the display
+ *    Chr [I] -- The char (UTF8) that was written.
+ *
+ * FUNCTION:
+ *    This funciton is called to inform the main window that text was written
+ *    the display.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+void TheMainWindow::InformOfWrite2Display(class Connection *Con,
+        const uint8_t *Chr)
+{
+    t_UITabCtrl *MainTabs;
+    class Connection *TabCon;
+    t_UITab *Tab;
+
+    /* Handle highlighting background tab (if needed) */
+    if(g_Settings.ShowActivityOnBackgroundTabs)
+    {
+        MainTabs=UIMW_GetTabCtrlHandle(UIWin,e_UIMWTabCtrl_MainTabs);
+        TabCon=(class Connection *)UITabCtrlGetActiveTabID(MainTabs);
+
+        if(Con!=TabCon)
+        {
+            /* Find this tab */
+            Tab=UITabCtrlGetTabFromID(MainTabs,(uintptr_t)Con);
+            if(Tab!=NULL)
+            {
+                UITabCtrlSetTabIndicator(MainTabs,Tab,
+                        e_TabCtrlTabIndicator_Activity);
+            }
+        }
+    }
 }
 
 /*******************************************************************************
@@ -5930,8 +6036,11 @@ bool MW_Event(const struct MWEvent *Event)
             switch(Event->Info.PanelTab.TabID)
             {
                 case e_UIMWTabCtrl_MainTabs:
-                    Event->MW->SetActiveConnection((class Connection *)
-                            Event->ID);
+                    Event->MW->MainTabChanged((class Connection *)Event->ID,
+                            Event->Info.PanelTab.NewIndex);
+
+//                    Event->MW->SetActiveConnection((class Connection *)
+//                            Event->ID);
                 break;
                 case e_UIMWTabCtrl_LeftPanel:
                     if(Event->MW->ActiveCon!=NULL)

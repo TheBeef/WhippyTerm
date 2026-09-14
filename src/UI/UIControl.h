@@ -52,6 +52,17 @@
 /***  MACROS                           ***/
 
 /***  TYPE DEFINITIONS                 ***/
+/* We just a key word, instead of what it looks like so the UI can use whatever
+   works for it.  It might be a graphic, or setting the text styling, or
+   the background color, whatever works on the widgets set being used (different
+   widget set have different ablitlies) */
+typedef enum
+{
+    e_TabCtrlTabIndicator_None,         // No indicator
+    e_TabCtrlTabIndicator_Blank,        // A blank indicator.  Might be the same as None or different depending on the how the indicator is shown.  For example if an icon is used None frees the space the icon used, but this keeps the space.
+    e_TabCtrlTabIndicator_Activity,
+    e_TabCtrlTabIndicatorMAX
+} e_TabCtrlTabIndicatorType;
 
 /* ListView */
 struct ListViewItem
@@ -279,6 +290,8 @@ uintptr_t UITabCtrlGetID(t_UITabCtrl *TabCtrl,t_UITab *Tab);
 void UITabCtrlSetTabLabel(t_UITabCtrl *TabCtrl,t_UITab *Tab,const char *Label);
 void UITabCtrlSetTabVisibleByIndex(t_UITabCtrl *TabCtrl,int Index,bool Hidden);
 void UITabCtrlSetTabVisible(t_UITabCtrl *TabCtrl,t_UITab *Tab,bool Hidden);
+void UITabCtrlSetTabIndicator(t_UITabCtrl *TabCtrl,t_UITab *Tab,e_TabCtrlTabIndicatorType Indicator);
+void UITabCtrlSetTabIndicatorByIndex(t_UITabCtrl *TabCtrl,int Index,e_TabCtrlTabIndicatorType Indicator);
 
 /* ScrollBarCtrl */
 void UIEnableScrollBarCtrl(t_UIScrollBarCtrl *ScrollBarCtrl,bool Enable);

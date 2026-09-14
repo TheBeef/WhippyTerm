@@ -248,6 +248,7 @@ class Settings
         /***** Display *****/
         bool AlwaysShowTabs;
         bool CloseButtonOnTabs;
+        bool ShowActivityOnBackgroundTabs;
         bool MouseCursorIBeam;
 
         /***** Terminal *****/

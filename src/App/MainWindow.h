@@ -144,6 +144,7 @@ void Debug6(void);
         bool IsPanelVisible(e_MWPanelsType PanelID);
         void SetActiveConnection(class Connection *NewCon);
         void SetActiveTab(class Connection *Con);
+        void MainTabChanged(class Connection *Con,int NewIndex);
         void RethinkActiveTabControls(void);
         void ConnectionEvent(const struct ConMWEvent *Event);
         void CloseTab(class Connection *Con);
@@ -156,6 +157,7 @@ void Debug6(void);
         void InformOfNewPluginInstalled(const char *PluginIDStr);
         void InformOfPluginAboutToUninstall(const char *PluginIDStr);
         void InformOfPluginRemoved(const char *PluginIDStr);
+        void InformOfWrite2Display(class Connection *Con,const uint8_t *Chr);
         void HandleGoURIToolBttnEnabled(void);
         void InformOfSendBufferChange(int BufferIndex);
         void ToolbarMenuSelected(e_UIMWToolbarMenuType InputID);
@@ -205,6 +207,7 @@ void Debug6(void);
 //        class Connection *BridgedCon2;
         e_SysColType CurrentBGStyleColor;
         e_SysColShadeType CurrentBGStyleShade;
+        bool ActiveShowActivityOnBackgroundTabs;
 
         class Connection *NoTabsConnection;
 

@@ -887,6 +887,8 @@ static void DS_SetSettingGUI(void)
     UICheckCheckbox(CheckboxHandle,m_SettingConSettings->CursorBlink);
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_MouseCursorUseIBeam);
     UICheckCheckbox(CheckboxHandle,g_Settings.MouseCursorIBeam);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ShowActivityOnBackgroundTabs);
+    UICheckCheckbox(CheckboxHandle,g_Settings.ShowActivityOnBackgroundTabs);
 
     m_CursorColor=m_SettingConSettings->CursorColor;
     ColorPreviewHandle=UIS_GetColorPreviewHandle(e_UIS_ColorPreview_CursorColor);
@@ -1423,6 +1425,8 @@ static void DS_GetSettingsFromGUI(void)
         g_Settings.AlwaysShowTabs=UIGetCheckboxCheckStatus(CheckboxHandle);
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CloseButtonOnTabs);
         g_Settings.CloseButtonOnTabs=UIGetCheckboxCheckStatus(CheckboxHandle);
+        CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_ShowActivityOnBackgroundTabs);
+        g_Settings.ShowActivityOnBackgroundTabs=UIGetCheckboxCheckStatus(CheckboxHandle);
 
         CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_MouseCursorUseIBeam);
         g_Settings.MouseCursorIBeam=UIGetCheckboxCheckStatus(CheckboxHandle);
@@ -3269,6 +3273,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_Checkbox_SendPanel_ShowBlockPanel:
                 case e_UIS_Checkbox_ClearScreen_DoubleClear:
                 case e_UIS_Checkbox_ClearScreen_HexPanels:
+                case e_UIS_Checkbox_ShowActivityOnBackgroundTabs:
                 case e_UIS_CheckboxMAX:
                 default:
                 break;
@@ -3421,6 +3426,7 @@ bool DS_Event(const struct DSEvent *Event)
                 case e_UIS_NumberInput_HexDisplay_BytesPerLine:
                 case e_UIS_NumberInput_HexDisplay_DividerEvery:
                 case e_UIS_NumberInput_HexDisplay_DivLineWidth:
+                case e_UIS_NumberInput_StopWatchAutoLapTime:
                 case e_UIS_NumberInputMAX:
                 default:
                 break;

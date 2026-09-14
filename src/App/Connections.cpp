@@ -2394,6 +2394,10 @@ void Connection::WriteChar2Display(uint8_t *Chr)
         return;
 
     Display->WriteChar(Chr);
+
+    /* Ok, we need to tell the main window so it can update any UI elements */
+    if(MW!=NULL)
+        MW->InformOfWrite2Display(this,Chr);
 }
 
 /*******************************************************************************

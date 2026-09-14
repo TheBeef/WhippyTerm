@@ -30,6 +30,11 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_NEW_FEATURE,"Added an option to highlight a tab when new data arrives in the background",
+            "You can now choose to display an icon beside the tab name when"
+            " new data arrives on an inactive tab. This allows you to keep"
+            " multiple tabs open while easily spotting which ones need"
+            " attention."},
     {   NOTETYPE_ENHANCEMENT,"Added a new settings to let you set the auto lap time",
             "The auto lap in the stop watch was set to a fixed 500ms"
             " of quite before the auto lap will trigger.  You can now select"

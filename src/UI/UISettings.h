@@ -78,6 +78,7 @@ enum e_UIS_Checkbox
     e_UIS_Checkbox_SendPanel_ShowBlockPanel,
     e_UIS_Checkbox_ClearScreen_DoubleClear,
     e_UIS_Checkbox_ClearScreen_HexPanels,
+    e_UIS_Checkbox_ShowActivityOnBackgroundTabs,
     e_UIS_CheckboxMAX
 };
 

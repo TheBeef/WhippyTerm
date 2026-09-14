@@ -91,6 +91,11 @@
         <file>Graphics/point_down.png</file>
         <file>Graphics/point_up.png</file>
         <file>Graphics/application_form.png</file>
+        <file>Graphics/bullet_purple.png</file>
+        <file>Graphics/blankicon.png</file>
+        <file>Graphics/asterisk_yellow.png</file>
+        <file>Graphics/comment.png</file>
+        <file>Graphics/star.png</file>
     </qresource>
     <qresource prefix="/S">
         <file>Sounds/Computer_Error_Alert_Short.wav</file>

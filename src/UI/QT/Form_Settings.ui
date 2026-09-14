@@ -40,7 +40,7 @@
       <item>
        <widget class="QStackedWidget" name="Editing_stackedWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="page_Panel">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -1619,6 +1619,13 @@
                   <widget class="QCheckBox" name="CloseBttnOnTabs_checkBox">
                    <property name="text">
                     <string>Close Buttons On Tabs</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="ShowActivityOnBackgroundTabs_checkBox">
+                   <property name="text">
+                    <string>Show Activity On Background Tabs</string>
                    </property>
                   </widget>
                  </item>

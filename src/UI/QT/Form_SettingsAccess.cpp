@@ -138,6 +138,8 @@ t_UICheckboxCtrl *UIS_GetCheckboxHandle(e_UIS_Checkbox UIObj)
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->ClearScreen_DoubleClear_checkBox;
         case e_UIS_Checkbox_ClearScreen_HexPanels:
             return (t_UICheckboxCtrl *)g_SettingsDialog->ui->ClearScreen_HexPanels_checkBox;
+        case e_UIS_Checkbox_ShowActivityOnBackgroundTabs:
+            return (t_UICheckboxCtrl *)g_SettingsDialog->ui->ShowActivityOnBackgroundTabs_checkBox;
 
         case e_UIS_CheckboxMAX:
         default:

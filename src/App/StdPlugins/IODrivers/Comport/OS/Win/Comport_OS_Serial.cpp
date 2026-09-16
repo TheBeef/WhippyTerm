@@ -46,6 +46,8 @@ using namespace std;
 //#define INBUFFER_GROW_SIZE                      100   // We grow by 10k at a time
 //#define INBUFFER_MAX_SIZE                       10000 // Cap at 1M
 
+#define PORTPRESENT_POLL_TIME                   250     // How often (in ms) we ask the OS if our com port is still plugged in
+
 /*** MACROS                   ***/
 
 /*** TYPE DEFINITIONS         ***/
@@ -79,6 +81,8 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
         uint32_t BitRate,e_ComportDataBitsType DataBits,
         e_ComportParityType Parity,e_ComportStopBitsType StopBits,
         e_ComportFlowControlType FlowControl);
+static bool Comport_OS_PortStillPresent(struct OpenComportInfo *ComInfo);
+static void Comport_OS_MarkPortAsGone(struct OpenComportInfo *ComInfo);
 
 /*** VARIABLE DEFINITIONS     ***/
 
@@ -734,6 +738,7 @@ int Comport_Write(t_DriverIOHandleType *DriverIO,const uint8_t *Data,int Bytes)
     DWORD dwWritten;
     bool HaveMutex;
 
+    HaveMutex=false;
     try
     {
         ComInfo->LastErrorMsg="";
@@ -743,7 +748,13 @@ int Comport_Write(t_DriverIOHandleType *DriverIO,const uint8_t *Data,int Bytes)
         HaveMutex=true;
 
         if(!WriteFile(ComInfo->hComm,Data,Bytes,&dwWritten,NULL))
+        {
+            /* If the port was pulled out from under us tidy up the handle
+               and tell the main loop, otherwise just report the error */
+            if(!Comport_OS_PortStillPresent(ComInfo))
+                Comport_OS_MarkPortAsGone(ComInfo);
             throw(0);
+        }
         RetBytes=dwWritten;
 
         ReleaseMutex(ComInfo->ThreadMutex);
@@ -1092,6 +1103,108 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
 
 /*******************************************************************************
  * NAME:
+ *    Comport_OS_PortStillPresent
+ *
+ * SYNOPSIS:
+ *    static bool Comport_OS_PortStillPresent(struct OpenComportInfo *ComInfo);
+ *
+ * PARAMETERS:
+ *    ComInfo [I] -- The connection to check the port of.
+ *
+ * FUNCTION:
+ *    This function asks the OS if the com port this connection was opened
+ *    on is still known to the system.
+ *
+ *    When a device is removed (a USB device unplugged, or an embedded device
+ *    that provides the port reboots) Windows deletes the "COMx" symbolic
+ *    link right away, but our open handle hangs around and the comm API's
+ *    will happily keep reporting success on it.  Looking the name up in the
+ *    object manager tells us the device is gone without having to send
+ *    anything to it.
+ *
+ * RETURNS:
+ *    true -- The port is still in the system.
+ *    false -- The port has been removed from the system.
+ *
+ * NOTES:
+ *    This does an object manager lookup so it should not be called on every
+ *    pass of the poll loop.  See PORTPRESENT_POLL_TIME.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static bool Comport_OS_PortStillPresent(struct OpenComportInfo *ComInfo)
+{
+    string PortName;
+    char TargetPath[MAX_PATH];
+
+    /* 'DriverName' is in the "\\.\COMx" form but QueryDosDevice() wants
+       just "COMx" */
+    PortName=ComInfo->DriverName;
+    if(PortName.compare(0,4,"\\\\.\\")==0)
+        PortName.erase(0,4);
+
+    if(QueryDosDeviceA(PortName.c_str(),TargetPath,sizeof(TargetPath))!=0)
+        return true;
+
+    /* A too small buffer means the port is there, we just couldn't read
+       where it points (a port can have more than one target) */
+    if(GetLastError()==ERROR_INSUFFICIENT_BUFFER)
+        return true;
+
+    return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Comport_OS_MarkPortAsGone
+ *
+ * SYNOPSIS:
+ *    static void Comport_OS_MarkPortAsGone(struct OpenComportInfo *ComInfo);
+ *
+ * PARAMETERS:
+ *    ComInfo [I] -- The connection whose port has been removed.
+ *
+ * FUNCTION:
+ *    This function shuts down a connection whose port has disappeared out
+ *    from under us and tells the IO system that we are now disconnected.
+ *
+ *    The handle is closed here because the main loop will not call Close()
+ *    for us on an unexpected disconnect.  If we left it open the handle
+ *    would be leaked and an auto reopen would stomp on it.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    The caller must be holding 'ThreadMutex' when it calls this.
+ *
+ *    This is safe to call more than once, the second and later calls do
+ *    nothing.
+ *
+ * SEE ALSO:
+ *    Comport_OS_PortStillPresent(), Comport_Close()
+ ******************************************************************************/
+static void Comport_OS_MarkPortAsGone(struct OpenComportInfo *ComInfo)
+{
+    if(!ComInfo->Opened)
+        return;
+
+    /* Stop the poll loop from touching the port before we close it */
+    ComInfo->Opened=false;
+
+    if(ComInfo->hComm!=INVALID_HANDLE_VALUE)
+        CloseHandle(ComInfo->hComm);
+    ComInfo->hComm=INVALID_HANDLE_VALUE;
+
+    ComInfo->LastErrorMsg="The com port was removed from the system";
+
+    g_CP_IOSystem->DrvDataEvent(ComInfo->DriverIO,
+            e_DataEventCode_Disconnected);
+}
+
+/*******************************************************************************
+ * NAME:
  *    Comport_OS_PollThread
  *
  * SYNOPSIS:
@@ -1123,8 +1236,13 @@ static DWORD WINAPI Comport_OS_PollThread(LPVOID lpParameter)
     unsigned int NextHead;
     unsigned int Bytes2Copy;
     DWORD dwModemStatus;
+    DWORD Now;
+    DWORD LastPresentPoll;
+    bool CheckIfPortGone;
 
     ComInfo=(struct OpenComportInfo *)lpParameter;
+
+    LastPresentPoll=GetTickCount();
 
     while(!ComInfo->RequestThreadQuit)
     {
@@ -1134,12 +1252,18 @@ static DWORD WINAPI Comport_OS_PollThread(LPVOID lpParameter)
             continue;
         }
 
-/* DEBUG PAUL: Looks like we also need change this to check for connection going
-   away because it does not return an error until we try to send something... */
+        CheckIfPortGone=false;
 
         /* Grab com port while we wait for incoming bytes */
         WaitForSingleObject(ComInfo->ThreadMutex,INFINITE);
         Ret=ClearCommError(ComInfo->hComm,&Errors,&Stat);
+
+        /* A failure here is our first hint the device may have been
+           unplugged.  We don't act on it directly because the error codes
+           the different comport drivers hand back are all over the map, we
+           just use it as a reason to go ask the OS. */
+        if(!Ret)
+            CheckIfPortGone=true;
 
         /* Check the Line Status */
         if(Ret)
@@ -1220,10 +1344,13 @@ static DWORD WINAPI Comport_OS_PollThread(LPVOID lpParameter)
                 MaxBytes=ComInfo->InBufferTail-ComInfo->InBufferHead-1;
             }
 
+            BytesRead=0;
             if(!ReadFile(ComInfo->hComm,&ComInfo->InBuffer[ComInfo->InBufferHead],
                     MaxBytes,&BytesRead,NULL))
             {
-                /* DEBUG PAUL: We need to flag an error */
+                /* The read failed even though ClearCommError() said there
+                   was data waiting.  The port may have gone away. */
+                CheckIfPortGone=true;
             }
 
             ComInfo->InBufferHead+=BytesRead;
@@ -1243,6 +1370,24 @@ static DWORD WINAPI Comport_OS_PollThread(LPVOID lpParameter)
                         e_DataEventCode_BytesAvailable);
             }
         }
+        else
+        {
+            CheckIfPortGone=true;
+        }
+
+        /* Some comport drivers never fail on a handle to a device that has
+           been removed, they just sit there looking happy until we try to
+           send something.  So every so often we go ask the OS if the port
+           is still in the system. */
+        Now=GetTickCount();
+        if(Now-LastPresentPoll>=PORTPRESENT_POLL_TIME)
+        {
+            LastPresentPoll=Now;
+            CheckIfPortGone=true;
+        }
+
+        if(CheckIfPortGone && !Comport_OS_PortStillPresent(ComInfo))
+            Comport_OS_MarkPortAsGone(ComInfo);
 
         ReleaseMutex(ComInfo->ThreadMutex);
 

@@ -30,6 +30,11 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_BUG_FIX,"Local echo was showing file transfer data",
+            "When local echo was turned on and you uploaded or downloaded a"
+            " file the bytes sent by the file transfer protocol were being"
+            " echoed to the screen.  File transfer data is no longer local"
+            " echoed."},
     {   NOTETYPE_NEW_FEATURE,"Added an option to highlight a tab when new data arrives in the background",
             "You can now choose to display an icon beside the tab name when"
             " new data arrives on an inactive tab. This allows you to keep"

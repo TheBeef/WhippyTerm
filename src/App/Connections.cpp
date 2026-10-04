@@ -545,6 +545,7 @@ Connection::Connection(const char *URI)
         TransmitDelayBufferSize=0;
         TransmitDelayBufferWritePos=0;
         TransmitDelayBufferReadPos=0;
+        TransmitDelayBufferNoEchoPos=0;
 
         CaptureToFile.WriteHandle=NULL;
         CaptureToFile.Filename=g_Settings.CaptureDefaultFilename;
@@ -1887,9 +1888,16 @@ e_ConWriteType Connection::WriteData(const uint8_t *Data,int Bytes,
         e_ConWriteSourceType Source)
 {
     e_ConWriteType RetValue;
+    bool AllowLocalEcho;
 
     if(!IsConnected)
         return e_ConWrite_Failed;
+
+    /* We don't local echo file transfer data.  It is protocol packets (or
+       raw file data), not something the user wants to see on the screen */
+    AllowLocalEcho=true;
+    if(Source==e_ConWriteSource_Upload || Source==e_ConWriteSource_Download)
+        AllowLocalEcho=false;
 
     /* We ignore key presses if it's a block send connection */
     if(Source==e_ConWriteSource_Keyboard && BlockSendDevice)
@@ -1951,7 +1959,7 @@ e_ConWriteType Connection::WriteData(const uint8_t *Data,int Bytes,
         else
         {
             /* Queue the data for sending later. */
-            if(QueueTransmitDelayData(Data,Bytes))
+            if(QueueTransmitDelayData(Data,Bytes,AllowLocalEcho))
             {
                 /* Send the first byte / block if we haven't already sent
                    something (or we are finished the last timeout) */
@@ -1968,7 +1976,7 @@ e_ConWriteType Connection::WriteData(const uint8_t *Data,int Bytes,
     }
     else
     {
-        RetValue=InternalWriteBytes(Data,Bytes);
+        RetValue=InternalWriteBytes(Data,Bytes,AllowLocalEcho);
     }
     return RetValue;
 }
@@ -1979,11 +1987,16 @@ e_ConWriteType Connection::WriteData(const uint8_t *Data,int Bytes,
  *
  * SYNOPSIS:
  *    e_ConWriteType Connection::InternalWriteBytes(const uint8_t *Data,
- *          int Bytes);
+ *          int Bytes,bool AllowLocalEcho);
  *
  * PARAMETERS:
  *    Data [I] -- The data to send
  *    Bytes [I] -- The number of bytes to send
+ *    AllowLocalEcho [I] -- Can these bytes be local echoed?
+ *                      true -- If the local echo setting is on then these
+ *                              bytes are echoed to the display.
+ *                      false -- These bytes are never echoed (for example
+ *                              file transfer protocol data).
  *
  * FUNCTION:
  *    This is an internal helper function that writes bytes out to the device.
@@ -2004,7 +2017,8 @@ e_ConWriteType Connection::WriteData(const uint8_t *Data,int Bytes,
  * SEE ALSO:
  *    Connection::WriteData()
  ******************************************************************************/
-e_ConWriteType Connection::InternalWriteBytes(const uint8_t *Data,int Bytes)
+e_ConWriteType Connection::InternalWriteBytes(const uint8_t *Data,int Bytes,
+        bool AllowLocalEcho)
 {
     e_ConWriteType RetValue;
 
@@ -2040,7 +2054,8 @@ e_ConWriteType Connection::InternalWriteBytes(const uint8_t *Data,int Bytes)
     }
 
     /* Do local echo (only on success) */
-    if(RetValue==e_ConWrite_Success && CustomSettings.LocalEcho)
+    if(RetValue==e_ConWrite_Success && CustomSettings.LocalEcho &&
+            AllowLocalEcho)
     {
         Con_SetActiveConnection(this);
         DoingIncomingByteProcessing=true;
@@ -6339,7 +6354,7 @@ void Connection::ApplyTransmitDelayChange(void)
             /* We are waiting to send the next block, abort the timer and
                just send whatever's left */
             UITimerStop(TransmitDelayTimer);
-            InternalWriteBytes(&TransmitDelayBuffer[TransmitDelayBufferReadPos],
+            SendTransmitDelayData(TransmitDelayBufferReadPos,
                     TransmitDelayBufferWritePos-TransmitDelayBufferReadPos);
         }
 
@@ -6384,6 +6399,7 @@ void Connection::FreeTransmitDelayBuffer(void)
     TransmitDelayBuffer=NULL;
     TransmitDelayBufferSize=0;
     TransmitDelayBufferWritePos=0;
+    TransmitDelayBufferNoEchoPos=0;
 }
 
 /*******************************************************************************
@@ -6392,11 +6408,17 @@ void Connection::FreeTransmitDelayBuffer(void)
  *
  * SYNOPSIS:
  *    bool Connection::QueueTransmitDelayData(const uint8_t *Data,
- *              int Bytes);
+ *              int Bytes,bool AllowLocalEcho);
  *
  * PARAMETERS:
  *    Data [I] -- The data to send
  *    Bytes [I] -- The number of bytes to send
+ *    AllowLocalEcho [I] -- Can these bytes be local echoed when they are
+ *                          sent?
+ *                              true -- Echo them if the local echo setting
+ *                                      is on.
+ *                              false -- Never echo these bytes (for example
+ *                                      file transfer protocol data).
  *
  * FUNCTION:
  *    This function adds data to the transmit delay buffer.
@@ -6407,8 +6429,11 @@ void Connection::FreeTransmitDelayBuffer(void)
  *
  * SEE ALSO:
  *    
+ * SEE ALSO:
+ *    Connection::SendTransmitDelayData()
  ******************************************************************************/
-bool Connection::QueueTransmitDelayData(const uint8_t *Data,int Bytes)
+bool Connection::QueueTransmitDelayData(const uint8_t *Data,int Bytes,
+        bool AllowLocalEcho)
 {
     uint8_t *NewMemory;
     unsigned int AllocSize;
@@ -6441,10 +6466,69 @@ bool Connection::QueueTransmitDelayData(const uint8_t *Data,int Bytes)
         TransmitDelayBufferSize=AllocSize;
     }
 
+    /* If the buffer is empty then there is nothing left that we need to
+       stop from being echoed */
+    if(TransmitDelayBufferWritePos==0)
+        TransmitDelayBufferNoEchoPos=0;
+
     memcpy(&TransmitDelayBuffer[TransmitDelayBufferWritePos],Data,Bytes);
     TransmitDelayBufferWritePos+=Bytes;
 
+    if(!AllowLocalEcho)
+        TransmitDelayBufferNoEchoPos=TransmitDelayBufferWritePos;
+
     return true;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::SendTransmitDelayData
+ *
+ * SYNOPSIS:
+ *    void Connection::SendTransmitDelayData(unsigned int StartPos,
+ *              unsigned int Bytes);
+ *
+ * PARAMETERS:
+ *    StartPos [I] -- The position in the transmit delay buffer of the first
+ *                    byte to send.
+ *    Bytes [I] -- The number of bytes to send
+ *
+ * FUNCTION:
+ *    This function sends bytes from the transmit delay buffer out the
+ *    connection.  The bytes are local echoed only if they were queued as
+ *    being allowed to be echoed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    This does not move the read position of the transmit delay buffer.
+ *
+ * SEE ALSO:
+ *    Connection::QueueTransmitDelayData(), Connection::InternalWriteBytes()
+ ******************************************************************************/
+void Connection::SendTransmitDelayData(unsigned int StartPos,
+        unsigned int Bytes)
+{
+    unsigned int NoEchoBytes;
+
+    /* Figure out how many of these bytes we can't echo */
+    NoEchoBytes=0;
+    if(StartPos<TransmitDelayBufferNoEchoPos)
+    {
+        NoEchoBytes=TransmitDelayBufferNoEchoPos-StartPos;
+        if(NoEchoBytes>Bytes)
+            NoEchoBytes=Bytes;
+    }
+
+    if(NoEchoBytes>0)
+        InternalWriteBytes(&TransmitDelayBuffer[StartPos],NoEchoBytes,false);
+
+    if(Bytes>NoEchoBytes)
+    {
+        InternalWriteBytes(&TransmitDelayBuffer[StartPos+NoEchoBytes],
+                Bytes-NoEchoBytes,true);
+    }
 }
 
 /*******************************************************************************
@@ -6472,6 +6556,7 @@ void Connection::InformOfDelayTransmitTimeout(void)
     const uint8_t *Send;
     uint32_t Delay;
     unsigned int r;
+    unsigned int SendPos;
 
     if(TransmitDelayBuffer==NULL)
         return;
@@ -6488,16 +6573,18 @@ void Connection::InformOfDelayTransmitTimeout(void)
            data */
         TransmitDelayBufferWritePos=0;
         TransmitDelayBufferReadPos=0;
+        TransmitDelayBufferNoEchoPos=0;
         return;
     }
 
-    Send=&TransmitDelayBuffer[TransmitDelayBufferReadPos];
+    SendPos=TransmitDelayBufferReadPos;
+    Send=&TransmitDelayBuffer[SendPos];
 
     if(TransmitDelayByte>0)
     {
         /* Delay between bytes, so we only send 1 byte at a time */
         TransmitDelayBufferReadPos++;
-        InternalWriteBytes(Send,1);
+        SendTransmitDelayData(SendPos,1);
 
         /* Setup for the next byte delay */
         Delay=TransmitDelayByte;
@@ -6520,16 +6607,17 @@ void Connection::InformOfDelayTransmitTimeout(void)
         if(r==TransmitDelayBufferWritePos)
         {
             /* No new line char, send the whole thing */
-            InternalWriteBytes(Send,
+            SendTransmitDelayData(SendPos,
                     TransmitDelayBufferWritePos-TransmitDelayBufferReadPos);
             TransmitDelayBufferWritePos=0;
             TransmitDelayBufferReadPos=0;
+            TransmitDelayBufferNoEchoPos=0;
             Delay=0;
         }
         else
         {
             /* Send out up to (and including) the '\n' */
-            InternalWriteBytes(Send,r-TransmitDelayBufferReadPos+1);
+            SendTransmitDelayData(SendPos,r-TransmitDelayBufferReadPos+1);
             TransmitDelayBufferReadPos+=(r-TransmitDelayBufferReadPos+1);
             Delay=TransmitDelayLine;
         }

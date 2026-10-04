@@ -628,6 +628,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         unsigned int TransmitDelayBufferSize;
         unsigned int TransmitDelayBufferWritePos;
         unsigned int TransmitDelayBufferReadPos;
+        unsigned int TransmitDelayBufferNoEchoPos;  // Bytes in the buffer before this pos are not local echoed (file transfer data)
         struct UITimer *TransmitDelayTimer;
 
         /* Frozen */
@@ -651,9 +652,10 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void HandleHexDisplayIncomingData(const uint8_t *inbuff,int Bytes);
         void HandleHexDisplayOutGoingData(const uint8_t *inbuff,int Bytes);
         void HandleComTestRx(uint8_t *inbuff,int bytes);
-        bool QueueTransmitDelayData(const uint8_t *Data,int Bytes);
+        bool QueueTransmitDelayData(const uint8_t *Data,int Bytes,bool AllowLocalEcho);
+        void SendTransmitDelayData(unsigned int StartPos,unsigned int Bytes);
         void ApplyTransmitDelayChange(void);
-        e_ConWriteType InternalWriteBytes(const uint8_t *Data,int Bytes);
+        e_ConWriteType InternalWriteBytes(const uint8_t *Data,int Bytes,bool AllowLocalEcho);
         void FreeTransmitDelayBuffer(void);
         void RethinkLockOut(void);
         void RethinkCursor(void);

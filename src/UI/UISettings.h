@@ -79,6 +79,8 @@ enum e_UIS_Checkbox
     e_UIS_Checkbox_ClearScreen_DoubleClear,
     e_UIS_Checkbox_ClearScreen_HexPanels,
     e_UIS_Checkbox_ShowActivityOnBackgroundTabs,
+    e_UIS_Checkbox_Scroll2BottonOnTx,
+    e_UIS_Checkbox_Scroll2BottonOnRx,
     e_UIS_CheckboxMAX
 };
 

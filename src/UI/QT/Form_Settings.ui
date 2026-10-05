@@ -2140,6 +2140,29 @@
                </widget>
               </item>
               <item>
+               <widget class="QGroupBox" name="groupBox_47">
+                <property name="title">
+                 <string>Scroll To Bottom</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_63">
+                 <item>
+                  <widget class="QCheckBox" name="Scroll2BottomOnSend_checkBox">
+                   <property name="text">
+                    <string>On Send</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="Scroll2BottomOnReceive_checkBox">
+                   <property name="text">
+                    <string>On Receive</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
                <spacer name="verticalSpacer_6">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>

@@ -2459,6 +2459,10 @@ void DisplayText::WriteCharWithOptions(uint8_t *Chr,bool AdvCursor)
 
         if(AdvCursor)
             AdjustCursorAfterWriteChar(Chr);
+
+        if(Settings->Jump2BottomOnRx)
+            Jump2Bottom();
+
         RedrawActiveLine();
     }
     catch(...)
@@ -9225,6 +9229,68 @@ void DisplayText::MovePageUp(void)
 void DisplayText::MovePageDown(void)
 {
     ScrollScreen(0,WindowHeightChars);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayText::Jump2Bottom
+ *
+ * SYNOPSIS:
+ *    void DisplayText::Jump2Bottom(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves the view so the user can see where new data is
+ *    being added to the display.  If the user is looking at the scroll back
+ *    buffer the view is moved back to the screen area, and then the view is
+ *    scrolled (if needed) so the cursor can be seen.
+ *
+ *    If the user can already see the cursor then nothing is changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * NOTES:
+ *    This is not the same as MoveViewBottom().  This function leaves the
+ *    view alone if the user doesn't need it moved, where MoveViewBottom()
+ *    always resets the view (including the left/right scroll).
+ *
+ * SEE ALSO:
+ *    MoveViewBottom(), ScrollScreen2MakeCursorVisible()
+ ******************************************************************************/
+void DisplayText::Jump2Bottom(void)
+{
+    int ScreenFirstLineY;
+
+    if(TextDisplayCtrl==NULL || WindowHeightChars<=0 ||
+            ScreenFirstLine==Lines.end())
+    {
+        return;
+    }
+
+    /* Find how many lines from the top of 'Lines' the screen area starts */
+    if(LinesCount>=ScreenHeightChars)
+        ScreenFirstLineY=LinesCount-ScreenHeightChars;
+    else
+        ScreenFirstLineY=0;
+
+    if(TopLineY<ScreenFirstLineY)
+    {
+        /* The user is looking at the scroll back buffer.  Move the window
+           back down to the top of the screen area */
+        TopLine=ScreenFirstLine;
+        TopLineY=ScreenFirstLineY;
+
+        UITC_SetCursorPos(TextDisplayCtrl,CursorX,CalcCorrectedCursorPos());
+        RethinkCursorHidden();
+        RedrawFullScreen();
+    }
+
+    /* The screen area can be bigger than the window (a fixed size term in a
+       small window) so we also need to make sure we can see the cursor */
+    ScrollScreen2MakeCursorVisible();
 }
 
 /*******************************************************************************

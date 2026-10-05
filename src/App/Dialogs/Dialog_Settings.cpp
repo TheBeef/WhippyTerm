@@ -894,6 +894,11 @@ static void DS_SetSettingGUI(void)
     ColorPreviewHandle=UIS_GetColorPreviewHandle(e_UIS_ColorPreview_CursorColor);
     UISetColorPreviewColor(ColorPreviewHandle,m_CursorColor);
 
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_Scroll2BottonOnTx);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->Jump2BottomOnTx);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_Scroll2BottonOnRx);
+    UICheckCheckbox(CheckboxHandle,m_SettingConSettings->Jump2BottomOnRx);
+
     /* Attributes */
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_BoldFontEnable);
     UICheckCheckbox(CheckboxHandle,m_SettingConSettings->BoldEnabled);
@@ -1486,6 +1491,11 @@ static void DS_GetSettingsFromGUI(void)
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_CursorBlink);
     m_SettingConSettings->CursorBlink=UIGetCheckboxCheckStatus(CheckboxHandle);
     m_SettingConSettings->CursorColor=m_CursorColor;
+
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_Scroll2BottonOnTx);
+    m_SettingConSettings->Jump2BottomOnTx=UIGetCheckboxCheckStatus(CheckboxHandle);
+    CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_Scroll2BottonOnRx);
+    m_SettingConSettings->Jump2BottomOnRx=UIGetCheckboxCheckStatus(CheckboxHandle);
 
     /* Attributes */
     CheckboxHandle=UIS_GetCheckboxHandle(e_UIS_Checkbox_BoldFontEnable);

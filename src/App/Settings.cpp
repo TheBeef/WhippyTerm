@@ -1317,13 +1317,6 @@ void Settings::RegisterAllMembers(class TinyCFG &cfg)
 
 void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
 {
-    cfg.Register("CursorColor",CursorColor,true);
-    cfg.Register("CursorBlink",CursorBlink);
-    cfg.Register("FontName",FontName);
-    cfg.Register("FontSize",FontSize);
-    cfg.Register("FontBold",FontBold);
-    cfg.Register("FontItalic",FontItalic);
-
     /***** Connections *****/
     cfg.Register("AutoReopen",AutoReopen);
     cfg.Register("AutoReopenWaitTime",AutoReopenWaitTime);
@@ -1374,6 +1367,17 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
         cfg.Register("DestructiveBackspace",DestructiveBackspace);
     cfg.EndBlock();
 
+    /* Display */
+    cfg.Register("CursorColor",CursorColor,true);
+    cfg.Register("FontName",FontName);
+    cfg.Register("FontSize",FontSize);
+    cfg.Register("FontBold",FontBold);
+    cfg.Register("FontItalic",FontItalic);
+    cfg.Register("CursorBlink",CursorBlink);
+    cfg.Register("Jump2BottomOnRx",Jump2BottomOnRx);
+    cfg.Register("Jump2BottomOnTx",Jump2BottomOnTx);
+
+    /* Attribs */
     cfg.StartBlock("AttribEnable");
     cfg.Register("BoldEnabled",BoldEnabled);
     cfg.Register("ItalicEnabled",ItalicEnabled);
@@ -1385,6 +1389,7 @@ void ConSettings::RegisterAllMembers(class TinyCFG &cfg)
     cfg.Register("TabSize",TabSize);
     cfg.EndBlock();
 
+    /* Elements */
     cfg.StartBlock("Elements");
     cfg.Register("OverrideHR",OverrideHR);
     cfg.Register("HorizontalRuleColor",HorizontalRuleColor,true);
@@ -1413,6 +1418,11 @@ bool AreConSettingsEqual(class ConSettings &Con1,class ConSettings &Con2)
     if(Con1.CursorColor!=Con2.CursorColor)
         return false;
     if(Con1.CursorBlink!=Con2.CursorBlink)
+        return false;
+
+    if(Con1.Jump2BottomOnRx!=Con2.Jump2BottomOnRx)
+        return false;
+    if(Con1.Jump2BottomOnTx!=Con2.Jump2BottomOnTx)
         return false;
 
     if(Con1.FontName!=Con2.FontName)
@@ -1606,6 +1616,9 @@ void ConSettings::DefaultSettings(void)
 {
     CursorColor=0xFFFB00;
     CursorBlink=true;
+
+    Jump2BottomOnRx=false;
+    Jump2BottomOnTx=true;
 
     UI_GetDefaultFixedWidthFont(FontName);
     FontSize=12;

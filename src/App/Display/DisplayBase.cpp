@@ -2698,6 +2698,31 @@ void DisplayBase::MovePageDown(void)
 
 /*******************************************************************************
  * NAME:
+ *    DisplayBase::Jump2Bottom
+ *
+ * SYNOPSIS:
+ *    void DisplayBase::Jump2Bottom(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves the view so the user can see where new data is
+ *    being added to the display.  If the user can already see it then
+ *    nothing is changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    MoveViewBottom()
+ ******************************************************************************/
+void DisplayBase::Jump2Bottom(void)
+{
+}
+
+/*******************************************************************************
+ * NAME:
  *    DisplayBase::GetScreenSize
  *
  * SYNOPSIS:

@@ -656,6 +656,7 @@ void Debug1(void);void Debug2(void);void Debug3(void);void Debug4(void);void Deb
         void SendTransmitDelayData(unsigned int StartPos,unsigned int Bytes);
         void ApplyTransmitDelayChange(void);
         e_ConWriteType InternalWriteBytes(const uint8_t *Data,int Bytes,bool AllowLocalEcho);
+        void HandleJump2BottomOnTx(e_ConWriteSourceType Source);
         void FreeTransmitDelayBuffer(void);
         void RethinkLockOut(void);
         void RethinkCursor(void);

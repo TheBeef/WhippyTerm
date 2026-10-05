@@ -120,12 +120,6 @@ typedef enum
 class ConSettings
 {
     public:
-        uint32_t CursorColor;
-        std::string FontName;
-        int FontSize;
-        bool FontBold;
-        bool FontItalic;
-
         /***** Connections *****/
         bool AutoReopen;
         uint32_t AutoReopenWaitTime;
@@ -142,7 +136,6 @@ class ConSettings
         uint32_t SysColors[e_SysColShadeMAX][e_SysColMAX];
         uint32_t DefaultColors[e_DefaultColorsMAX];
         uint32_t SelectionColors[e_ColorMAX];
-        bool CursorBlink;
 
         /***** Terminal *****/
         bool TermSizeFixedWidth;
@@ -174,6 +167,15 @@ class ConSettings
         std::string BeepFilename;
 
         /***** Display *****/
+        /* Display */
+        uint32_t CursorColor;
+        std::string FontName;
+        int FontSize;
+        bool FontBold;
+        bool FontItalic;
+        bool CursorBlink;
+        bool Jump2BottomOnRx;
+        bool Jump2BottomOnTx;
 
         /* Attribs */
         bool BoldEnabled;
@@ -195,6 +197,7 @@ class ConSettings
         /* Send Panel */
         bool SendPanel_ShowTextPanel;
         bool SendPanel_ShowBlockPanel;
+
 
         void RegisterAllMembers(class TinyCFG &cfg);
         void DefaultSettings(void);

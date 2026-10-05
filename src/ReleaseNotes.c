@@ -30,6 +30,16 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_NEW_FEATURE,"New options have been added to scroll to be bottom to rx/tx",
+            "Two new options have been added to the settings.  Under Display"
+            " there is now a Scroll To Bottom with two checkboxes.  One"
+            " will have the screen scroll to the bottom when a byte is sent"
+            " and the other scrolls to the bottom when a byte is received."
+            "  If both a checked then the screen will be scrolled to the"
+            " bottom on send and receive.  If neither are check then the"
+            " screen will not be scrolled back to the bottom when bytes are"
+            " sent or received (it will still stay at the bottom if it was"
+            " already there)"},
     {   NOTETYPE_BUG_FIX,"Local echo was showing file transfer data",
             "When local echo was turned on and you uploaded or downloaded a"
             " file the bytes sent by the file transfer protocol were being"

@@ -212,6 +212,7 @@ class DisplayBase
         virtual void MoveViewEnd(void);
         virtual void MovePageUp(void);
         virtual void MovePageDown(void);
+        virtual void Jump2Bottom(void);
 
         virtual void ClearScreen(e_ScreenClearType Type);
         virtual void ClearArea(uint32_t X1,uint32_t Y1,uint32_t X2,uint32_t Y2);

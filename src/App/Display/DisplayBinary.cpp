@@ -537,6 +537,11 @@ void DisplayBinary::WriteChar(uint8_t *Chr)
             RedrawScreen();
     }
 
+    /* We do this for every byte (not just when we start a new line) so the
+       user sees the new data even if it doesn't fill the line */
+    if(Settings->Jump2BottomOnRx)
+        Jump2Bottom();
+
     RethinkCursor();
 }
 
@@ -4475,6 +4480,36 @@ void DisplayBinary::MovePageUp(void)
 void DisplayBinary::MovePageDown(void)
 {
     ScrollScreen(0,ScreenHeightPx/CharHeightPx);
+}
+
+/*******************************************************************************
+ * NAME:
+ *    DisplayBinary::Jump2Bottom
+ *
+ * SYNOPSIS:
+ *    void DisplayBinary::Jump2Bottom(void);
+ *
+ * PARAMETERS:
+ *    NONE
+ *
+ * FUNCTION:
+ *    This function moves the view so the user can see where new data is
+ *    being added to the display (the bottom of the buffer).  If the view is
+ *    already at the bottom then nothing is changed.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    MoveViewBottom()
+ ******************************************************************************/
+void DisplayBinary::Jump2Bottom(void)
+{
+    /* Don't touch the scroll bar unless we have to */
+    if(TextDisplayCtrl==NULL || ScrollBarAtBottom())
+        return;
+
+    MoveViewBottom();
 }
 
 /*******************************************************************************

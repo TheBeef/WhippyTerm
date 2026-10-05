@@ -121,6 +121,7 @@ class DisplayBinary : public DisplayBase
         void MoveViewEnd(void);
         void MovePageUp(void);
         void MovePageDown(void);
+        void Jump2Bottom(void);
 
         void ClearScreen(e_ScreenClearType Type);
         bool IsScreenClear(void);

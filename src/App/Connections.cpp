@@ -1889,9 +1889,14 @@ e_ConWriteType Connection::WriteData(const uint8_t *Data,int Bytes,
 {
     e_ConWriteType RetValue;
     bool AllowLocalEcho;
+    bool ProcessingIncomingBytes;
 
     if(!IsConnected)
         return e_ConWrite_Failed;
+
+    /* Note if this write is coming from inside the incoming byte processing
+       (we grab it now because a local echo will change this flag) */
+    ProcessingIncomingBytes=DoingIncomingByteProcessing;
 
     /* We don't local echo file transfer data.  It is protocol packets (or
        raw file data), not something the user wants to see on the screen */
@@ -1978,6 +1983,14 @@ e_ConWriteType Connection::WriteData(const uint8_t *Data,int Bytes,
     {
         RetValue=InternalWriteBytes(Data,Bytes,AllowLocalEcho);
     }
+
+    /* A write that is made while we are processing incoming bytes is a
+       data processor replying to something that was received (a term
+       emulator answering a status request for example).  The user didn't
+       send it, so it does not move the view */
+    if(RetValue==e_ConWrite_Success && !ProcessingIncomingBytes)
+        HandleJump2BottomOnTx(Source);
+
     return RetValue;
 }
 
@@ -2066,6 +2079,57 @@ e_ConWriteType Connection::InternalWriteBytes(const uint8_t *Data,int Bytes,
     }
 
     return RetValue;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Connection::HandleJump2BottomOnTx
+ *
+ * SYNOPSIS:
+ *    void Connection::HandleJump2BottomOnTx(e_ConWriteSourceType Source);
+ *
+ * PARAMETERS:
+ *    Source [I] -- Who sent the data.  See WriteData()
+ *
+ * FUNCTION:
+ *    This function handles the "jump to bottom on tx" setting.  It is called
+ *    when data has been sent out this connection.  If the setting is on and
+ *    the data was sent by the user then the display is moved so the user
+ *    can see where new data will be added.
+ *
+ *    Only data sent by the user moves the display (the keyboard, a paste,
+ *    a send buffer, or the send panel).  Data that is sent automatically
+ *    (file transfers, a bridged connection, or a script) does not, because
+ *    it would keep pulling the user away from what they are reading in the
+ *    scroll back buffer.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    Connection::WriteData(), DisplayBase::Jump2Bottom()
+ ******************************************************************************/
+void Connection::HandleJump2BottomOnTx(e_ConWriteSourceType Source)
+{
+    if(Display==NULL || !CustomSettings.Jump2BottomOnTx)
+        return;
+
+    switch(Source)
+    {
+        case e_ConWriteSource_Keyboard:
+        case e_ConWriteSource_Paste:
+        case e_ConWriteSource_Buffers:
+        case e_ConWriteSource_BlockSend:
+            Display->Jump2Bottom();
+        break;
+        case e_ConWriteSource_Upload:
+        case e_ConWriteSource_Download:
+        case e_ConWriteSource_Bridge:
+        case e_ConWriteSource_Script:
+        case e_ConWriteSourceMAX:
+        default:
+        break;
+    }
 }
 
 /*******************************************************************************

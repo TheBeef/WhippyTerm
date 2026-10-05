@@ -733,7 +733,7 @@ static struct ReleaseNote m_Notes_Rel1_0_0_0[]=
 const struct ReleaseInfo m_ReleaseNotes[]=
 {
 //    {RELEASE_NOTE("x.x.x.x","-- -- ----",NULL,m_Notes_NEXT)},
-    {RELEASE_NOTE("2.4.0.0","05 Oct 2026","",m_Notes_Rel2_4_0_0)},
+    {RELEASE_NOTE("2.4.0.0","05 Oct 2026","Enhancements to binary mode",m_Notes_Rel2_4_0_0)},
     {RELEASE_NOTE("2.3.1.0","16 Apr 2026",NULL,m_Notes_Rel2_3_1_0)},
     {RELEASE_NOTE("2.3.0.0","15 Apr 2026","Numerous small fixes and enhancements",m_Notes_Rel2_3_0_0)},
     {RELEASE_NOTE("2.2.1.0","26 Jan 2026","Bug fix",m_Notes_Rel2_2_1_0)},

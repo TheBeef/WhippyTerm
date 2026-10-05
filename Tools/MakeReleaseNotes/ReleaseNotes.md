@@ -1,5 +1,55 @@
 # Release Notes
 
+## Version 2.4.0.0 -- 05 Oct 2026
+### Enhancements to binary mode
+ * [New Feature] New options have been added to scroll to be bottom to rx/tx
+   - Two new options have been added to the settings.  Under Display there is now a Scroll To Bottom with two checkboxes.  One will have the screen scroll to the bottom when a byte is sent and the other scrolls to the bottom when a byte is received.  If both a checked then the screen will be scrolled to the bottom on send and receive.  If neither are check then the screen will not be scrolled back to the bottom when bytes are sent or received (it will still stay at the bottom if it was already there)
+ * [Bug fix] Local echo was showing file transfer data
+   - When local echo was turned on and you uploaded or downloaded a file the bytes sent by the file transfer protocol were being echoed to the screen.  File transfer data is no longer local echoed.
+ * [New Feature] Added an option to highlight a tab when new data arrives in the background
+   - You can now choose to display an icon beside the tab name when new data arrives on an inactive tab. This allows you to keep multiple tabs open while easily spotting which ones need attention.
+ * [Enhancement] Added a new settings to let you set the auto lap time
+   - The auto lap in the stop watch was set to a fixed 500ms of quite before the auto lap will trigger.  You can now select how long to wait in settings.
+ * [New Feature] Add insert horizontal rule to toolbar
+   - Added a toolbar button to insert horizontal rule.
+ * [Enhancement] Changed the defaults for horizontal rule
+   - Changed the default settings for the horizontal rule.  It now defaults to override and set to green.  This makes it stand out more.
+ * [New Feature] Added find in text
+   - A search the text panel has been added.  You can select it from the edit menu, or with the default key bindings of SHIFT+CTRL+F.  The search supports whole words, match case, and searching from the top of the scroll back buffer or top of the screen.  You can search forward or backward and the system adds past searches to the session data.
+In binary mode you can also search using a hex string or normal text.
+ * [New Feature] The bottom hex dump panels now support the same bytes per line/divider lines as binary mode
+   - The bottom panel hex dumps now support setting the number of bytes are displayed on a line.  A divider line can all be set to group bytes together (all the same size).  The color and thickness of these divider lines and also be set.  This can be found under: Settings->Panels->Hex Display->Hex Dumps
+ * [New Feature] In binary mode now includes divider lines
+   - In binary mode settings you can set a divider line every x bytes.  A line will be drawn in the selected color grouping the bytes together.  The thickness of the line can also be selected.  This can be found under: Settings->Terminal->Data Processing->Set Hex Dump Appearance
+ * [New Feature] In binary mode you can now select number of bytes per line
+   - In binary mode settings you can now set the number of bytes perline.  This can be found under: Settings->Terminal->Data Processing->Set Hex Dump Appearance
+ * [Bug fix] In binary mode with a fixed size window the horz scroll bar had wrong size
+   - When you used a fixed size term (like 80 chars) in binary mode the bottom horz scroll bar would still use the full screen width instead of the fixed term size.  Fixed
+ * [Bug fix] In binary mode with a fixed size window selection did not work
+   - When you used a fixed size term (like 80 chars) the selection wasn't taking the edge into account and so would select incorrectly
+ * [Bug fix] Rewrote sound playback system
+   - Was using the Qt sound playback system but this turned out to be unreliable and inconsistent between platforms.  It has been rewritten to use platform API calls instead.
+ * [Polish] Fixed a number background color issues
+   - The background color would act odd when starting from a new connection/reset term/clear screen.  It has all been cleaned up.
+ * [Polish] Newline now fills the line with the background color
+   - When you do a newline it will fill the rest of the line with the current background color.
+ * [Polish] Fixed color below text area
+   - When a full line doesn't fit below the text area, that area needs to be filled with something.  It was always being filled with the default background color.  It is now filled with the active background color or the color of the last line drawn.
+ * [Polish] More work on the scroll lock button
+   - More work has been added to trying to get the scroll lock key to behave correcly.
+ * [New Feature] Added a better indictor of cursor keys mode
+   - When you toggle the cursor keys mode (scrolllock/insert/etc) the system would change the shape of the cursor in the window.  However if the cursor was off the bottom there was no way to see what mode you where in.
+ A new indicator box has been added to show it's state in the top right corner of the display.
+ * [New Feature] Added check for new version system
+   - Added a new menu option (help->Check for new version) to go out to the WhippyTerm web site and check for a new version.
+This can also added settings to be able to auto check for new versions on startup/daily/monthly/yearly.
+ * [Bug fix] Fixed a number of small bugs
+   - More scanning found a number of small bugs.  Fixed them.
+ * [Bug fix] Found a number of problems with the ANSI clearing
+   - The ANSI processor was not handling the ESC[J and ESC[K commands correctly.  It was trying to clear 0 size areas which resulted in nothing changing.
+ * [Functionally fix] Custom connection settings where confusing
+   - When a connection was using custom settings and the user selected to change the settings (global) the changes would not get applied (because it was setting the global, but the custom settings override it).
+A new dialog has been added to warn the user they are using custom settings when they select the global settings.  The user can select to edit the global settings or the connection settings.
 ## Version 2.3.1.0 -- 16 Apr 2026
  * [Bug fix] Fixed bug that wasn't applying settings
    - When you used the new 2.3 term settings it did not apply your changes to the open connection.  Fixed
@@ -19,7 +69,7 @@
    - The main window now includes the base version number.
  * [Enhancement] Added quick jump button to send line inputs
    - In the main window below the text canvas there is a line input (for binary connections) that lets the user input a line / buffer and send it.  A new jump to send buffer panel was added.
- * [Enhancement] Added new standard text input line to text mode
+ * [New Feature] Added new standard text input line to text mode
    - A new text input panel has been added to text mode.  This lets you type in a string (and edit it) before sending it.  This text input also supports a history of lines sent as well as the line endings to send.
 This is useful if your device has a command prompt but doesn't support editing or a command history.
  * [Enhancement] Added direct panel selections to session

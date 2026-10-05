@@ -1,3 +1,30 @@
+whippyterm (2.4.0.0-1) unstable; urgency=low
+
+  * Enhancements to binary mode
+    - New options have been added to scroll to be bottom to rx/tx
+    - Local echo was showing file transfer data
+    - Added an option to highlight a tab when new data arrives in the background
+    - Added a new settings to let you set the auto lap time
+    - Add insert horizontal rule to toolbar
+    - Changed the defaults for horizontal rule
+    - Added find in text
+    - The bottom hex dump panels now support the same bytes per line/divider lines as binary mode
+    - In binary mode now includes divider lines
+    - In binary mode you can now select number of bytes per line
+    - In binary mode with a fixed size window the horz scroll bar had wrong size
+    - In binary mode with a fixed size window selection did not work
+    - Rewrote sound playback system
+    - Fixed a number background color issues
+    - Newline now fills the line with the background color
+    - Fixed color below text area
+    - More work on the scroll lock button
+    - Added a better indictor of cursor keys mode
+    - Added check for new version system
+    - Fixed a number of small bugs
+    - Found a number of problems with the ANSI clearing
+    - Custom connection settings where confusing
+
+ -- Paul Hutchinson <paul@whippyterm.com>  Mon, 05 Oct 2026 00:00:00 +0000
 whippyterm (2.3.1.0-1) unstable; urgency=low
 
   * Numerous small fixes and enhancements - bug fix #1

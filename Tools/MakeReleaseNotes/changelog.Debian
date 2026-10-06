@@ -1,6 +1,9 @@
 whippyterm (2.4.0.0-1) unstable; urgency=low
 
   * Enhancements to binary mode
+    - Added a link to the web site to the help menu
+    - Windows: removing an open com port was not noticed
+    - Linux: UDP server reuse address / reuse port options were not applied correctly
     - New options have been added to scroll to be bottom to rx/tx
     - Local echo was showing file transfer data
     - Added an option to highlight a tab when new data arrives in the background

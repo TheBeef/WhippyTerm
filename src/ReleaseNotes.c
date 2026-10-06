@@ -30,6 +30,17 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_Rel2_4_0_0[]=
 {
+    {   NOTETYPE_POLISH,"Added a link to the web site to the help menu",
+            "A new menu option (Help&rarr;Goto WhippyTerm Web Site) opens"
+            " whippyterm.com in your browser."},
+    {   NOTETYPE_BUG_FIX,"Windows: removing an open com port was not noticed",
+            "If a serial port was removed from the system while it was open (for"
+            " example unplugging a USB serial adapter) the connection could still show"
+            " as open.  The serial driver now checks that the port is still there and"
+            " reports the connection as disconnected when it is gone."},
+    {   NOTETYPE_BUG_FIX,"Linux: UDP server reuse address / reuse port options were not applied correctly",
+            "The two options were being combined into one request to the system."
+            " They are now set one at a time."},
     {   NOTETYPE_NEW_FEATURE,"New options have been added to scroll to be bottom to rx/tx",
             "Two new options have been added to the settings.  Under Display"
             " there is now a Scroll To Bottom with two checkboxes.  One"

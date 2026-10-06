@@ -64,6 +64,7 @@ jobs:
     # on a manual run it is whatever version string was typed into the input.
     - name: Set version
       id: RelVer
+      shell: bash
       env:
         INPUT_VERSION: ${{ github.event.inputs.version }}
       run: |

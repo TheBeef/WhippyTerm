@@ -2,6 +2,12 @@
 
 ## Version 2.4.0.0 -- 05 Oct 2026
 ### Enhancements to binary mode
+ * [Polish] Added a link to the web site to the help menu
+   - A new menu option (Help&rarr;Goto WhippyTerm Web Site) opens whippyterm.com in your browser.
+ * [Bug fix] Windows: removing an open com port was not noticed
+   - If a serial port was removed from the system while it was open (for example unplugging a USB serial adapter) the connection could still show as open.  The serial driver now checks that the port is still there and reports the connection as disconnected when it is gone.
+ * [Bug fix] Linux: UDP server reuse address / reuse port options were not applied correctly
+   - The two options were being combined into one request to the system. They are now set one at a time.
  * [New Feature] New options have been added to scroll to be bottom to rx/tx
    - Two new options have been added to the settings.  Under Display there is now a Scroll To Bottom with two checkboxes.  One will have the screen scroll to the bottom when a byte is sent and the other scrolls to the bottom when a byte is received.  If both a checked then the screen will be scrolled to the bottom on send and receive.  If neither are check then the screen will not be scrolled back to the bottom when bytes are sent or received (it will still stay at the bottom if it was already there)
  * [Bug fix] Local echo was showing file transfer data

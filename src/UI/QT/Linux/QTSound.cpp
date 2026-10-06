@@ -670,7 +670,7 @@ static void WavPlayProcessCb(void *UserData)
     }
 
     /* how much the graph wants this cycle, clamped to the buffer size */
-    Request=(uint32_t)(PwBuffer->requested*sample->Stride);
+    Request=(uint32_t)(SpaBuffer->datas[0].maxsize);
     if(Request==0)
         Request=SpaBuffer->datas[0].maxsize;
 

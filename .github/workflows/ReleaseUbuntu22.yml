@@ -3,6 +3,12 @@ name: Ubuntu 22.04
 on:
   release:
     types: [created]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version string (the part that would normally follow "Rel_", e.g. 1.0.0.0)'
+        required: true
+        default: '0.0.0.0'
 
 env:
   BUILD_TYPE: Release
@@ -10,16 +16,24 @@ env:
 jobs:
   build:
     permissions:
-      contents: write 
+      contents: write
     name: Build Ubuntu
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: bhowell2/github-substring-action@1.0.2
+    # On a release this is the tag name with the leading "Rel_" stripped;
+    # on a manual run it is whatever version string was typed into the input.
+    - name: Set version
       id: RelVer
-      with:
-        value: ${{ github.event.release.tag_name }}
-        index_of_str: "Rel_"
+      shell: bash
+      env:
+        INPUT_VERSION: ${{ github.event.inputs.version }}
+      run: |
+        if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+          echo "substring=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
+        else
+          echo "substring=${GITHUB_REF_NAME:4}" >> "$GITHUB_OUTPUT"
+        fi
 
     - uses: actions/checkout@v4
 
@@ -34,24 +48,37 @@ jobs:
 
     - name: deb
       working-directory: ./LinuxInstaller
+      env:
+        REL_VER: ${{ steps.RelVer.outputs.substring }}
       run: |
-        ./MakeRelease.sh ${GITHUB_REF_NAME:4} ../Project 22
-        mv WhippyTerm${GITHUB_REF_NAME:4}-1.deb WhippyTerm_${GITHUB_REF_NAME:4}-1_Ubuntu22_04.deb
+        ./MakeRelease.sh "$REL_VER" ../Project 22
+        mv "WhippyTerm${REL_VER}-1.deb" "WhippyTerm_${REL_VER}-1_Ubuntu22_04.deb"
 
     - name: AppImage
       working-directory: ./LinuxAppImage
+      env:
+        REL_VER: ${{ steps.RelVer.outputs.substring }}
       run: |
         wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
         chmod +x linuxdeployqt-continuous-x86_64.AppImage
-        ./MakeRelease.sh ${GITHUB_REF_NAME:4} ../Project
-        mv Whippy_Term-${GITHUB_REF_NAME:4}-x86_64.AppImage WhippyTerm_${GITHUB_REF_NAME:4}-x86_64.AppImage
+        ./MakeRelease.sh "$REL_VER" ../Project
+        mv "Whippy_Term-${REL_VER}-x86_64.AppImage" "WhippyTerm_${REL_VER}-x86_64.AppImage"
 
 #    - name: Setup tmate session
 #      uses: mxschmitt/action-tmate@v3
 
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: WhippyTerm-Ubuntu22_04-${{ steps.RelVer.outputs.substring }}
+        path: |
+          LinuxInstaller/WhippyTerm_${{ steps.RelVer.outputs.substring }}-1_Ubuntu22_04.deb
+          LinuxAppImage/WhippyTerm_${{ steps.RelVer.outputs.substring }}-x86_64.AppImage
+        if-no-files-found: error
+
     - name: Upload Release files
       uses: softprops/action-gh-release@v1
-      if: github.ref_type == 'tag'
+      if: github.event_name == 'release'
       with:
         files: |
           LinuxInstaller/WhippyTerm_${{steps.RelVer.outputs.substring}}-1_Ubuntu22_04.deb

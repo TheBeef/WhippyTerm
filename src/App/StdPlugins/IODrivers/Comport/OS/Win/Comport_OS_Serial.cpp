@@ -83,8 +83,19 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
         e_ComportFlowControlType FlowControl);
 static bool Comport_OS_PortStillPresent(struct OpenComportInfo *ComInfo);
 static void Comport_OS_MarkPortAsGone(struct OpenComportInfo *ComInfo);
+static string Comport_OS_GetPortDisplayName(HDEVINFO DeviceInfoSet,
+        SP_DEVINFO_DATA *DeviceInfoData,const char *PortName,
+        const char *FriendlyName);
 
 /*** VARIABLE DEFINITIONS     ***/
+/* DEVPKEY_Device_BusReportedDeviceDesc from devpkey.h.  This is the name
+   the device reports about itself (the USB product string).  It is defined
+   here so we don't need INITGUID or an extra lib to get at it. */
+static const DEVPROPKEY m_BusReportedDeviceDescKey=
+{
+    {0x540b947e,0x8b40,0x45bc,{0xa8,0xa2,0x6a,0x0b,0x89,0x4c,0xbd,0xa2}},
+    4
+};
 
 /*******************************************************************************
  * NAME:
@@ -188,7 +199,9 @@ bool Comport_OS_GetSerialPortList(t_OSComportListType &List)
             {
                 /* Didn't find it, add it */
                 NewComportInfo.DriverName=DevName;
-                NewComportInfo.FullName=szFriendlyName;
+                NewComportInfo.FullName=Comport_OS_GetPortDisplayName(
+                        DeviceInfoSet,&DeviceInfoData,szPortName,
+                        szFriendlyName);
                 NewComportInfo.ShortName=szPortName;
                 List.push_back(NewComportInfo);
             }
@@ -244,6 +257,89 @@ bool Comport_OS_SerialPortBusy(const std::string &DriverName)
     CloseHandle(hComm);
 
     return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Comport_OS_GetPortDisplayName
+ *
+ * SYNOPSIS:
+ *    static string Comport_OS_GetPortDisplayName(HDEVINFO DeviceInfoSet,
+ *              SP_DEVINFO_DATA *DeviceInfoData,const char *PortName,
+ *              const char *FriendlyName);
+ *
+ * PARAMETERS:
+ *    DeviceInfoSet [I] -- The SetupAPI device info set the port came from.
+ *    DeviceInfoData [I] -- The SetupAPI device info for this port.
+ *    PortName [I] -- The short name of the port ("COM5").
+ *    FriendlyName [I] -- The Device Manager name of the port
+ *                        ("USB Serial Device (COM5)").
+ *
+ * FUNCTION:
+ *    This function works out the name to show the user for a com port.
+ *
+ *    If the device reports a name for itself (for USB devices this is the
+ *    product string that USB View shows) that name is used with the port
+ *    name added on the end ("My Widget (COM5)").  Otherwise the Device
+ *    Manager name is used.
+ *
+ *    The name the device reports is the same name Windows shows on the
+ *    "Bus reported device description" property in Device Manager.
+ *
+ *    For a USB device with more than one function (a composite device) and
+ *    a name on the interface, Windows reports the interface name instead of
+ *    the product name.
+ *
+ *    Devices that are not on USB (built in UARTs, Bluetooth) don't report a
+ *    name, so they keep the Device Manager name.
+ *
+ * RETURNS:
+ *    The name to show the user.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static string Comport_OS_GetPortDisplayName(HDEVINFO DeviceInfoSet,
+        SP_DEVINFO_DATA *DeviceInfoData,const char *PortName,
+        const char *FriendlyName)
+{
+    DEVPROPTYPE PropType;
+    WCHAR BusName[MAX_PATH];
+    char UTF8Name[MAX_PATH*3];
+    int Len;
+    string RetName;
+
+    if(!SetupDiGetDevicePropertyW(DeviceInfoSet,DeviceInfoData,
+            &m_BusReportedDeviceDescKey,&PropType,(PBYTE)BusName,
+            sizeof(BusName)-sizeof(WCHAR),NULL,0))
+    {
+        return FriendlyName;
+    }
+
+    if(PropType!=DEVPROP_TYPE_STRING)
+        return FriendlyName;
+
+    /* Make sure it's terminated */
+    BusName[MAX_PATH-1]=0;
+
+    Len=WideCharToMultiByte(CP_UTF8,0,BusName,-1,UTF8Name,sizeof(UTF8Name),
+            NULL,NULL);
+    if(Len<=1)
+        return FriendlyName;
+
+    RetName=UTF8Name;
+
+    /* Some devices pad the string with spaces */
+    while(!RetName.empty() && RetName[RetName.length()-1]==' ')
+        RetName.erase(RetName.length()-1);
+    if(RetName.empty())
+        return FriendlyName;
+
+    RetName+=" (";
+    RetName+=PortName;
+    RetName+=")";
+
+    return RetName;
 }
 
 /*******************************************************************************
@@ -1709,7 +1805,10 @@ PG_BOOL Comport_GetConnectionInfo(const char *DeviceUniqueID,t_PIKVList *Options
             if(strcmp(DevName.c_str(),DeviceUniqueID)==0)
             {
                 /* We found it */
-                snprintf(RetInfo->Name,sizeof(RetInfo->Name),"%s",szFriendlyName);
+                Name=Comport_OS_GetPortDisplayName(DeviceInfoSet,
+                        &DeviceInfoData,szPortName,szFriendlyName);
+                snprintf(RetInfo->Name,sizeof(RetInfo->Name),"%s",
+                        Name.c_str());
                 snprintf(RetInfo->Title,sizeof(RetInfo->Title),"%s",szPortName);
                 RetInfo->Flags=0;
                 break;
@@ -1759,4 +1858,3 @@ void Comport_CustomizeComportInfo(struct IODriverInfo *ComportInfo)
             "<ARG>Stop Bits -- How many stop bits to use.  Supported values are 1 or 2 stop bits.</ARG>"
             "<Example>" COMPORT_URI_PREFIX "1:9600,8,n,1</Example>";
 }
-

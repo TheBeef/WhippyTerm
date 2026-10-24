@@ -70,6 +70,8 @@ Give this some thought....
 using namespace std;
 
 /*** DEFINES                  ***/
+#define MAX_SYSFS_LEVELS_TO_WALK                10
+#define UDEV_DATA_PATH                          "/run/udev/data/c"
 
 /*** MACROS                   ***/
 
@@ -117,6 +119,12 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
         uint32_t BitRate,e_ComportDataBitsType DataBits,
         e_ComportParityType Parity,e_ComportStopBitsType StopBits,
         e_ComportFlowControlType FlowControl);
+static void Comport_OS_BuildDisplayName(const char *TTYName,
+        string &DisplayName);
+static bool Comport_OS_ReadSysFSString(const char *Filename,string &Value);
+static void Comport_OS_CleanUpName(string &Name);
+static bool Comport_OS_ReadUdevProperty(const char *DevNumbers,
+        const char *Property,string &Value);
 
 /*** VARIABLE DEFINITIONS     ***/
 
@@ -267,7 +275,8 @@ bool Comport_OS_GetSerialPortList(t_OSComportListType &List)
         {
             NewComportInfo.DriverName="/dev/";
             NewComportInfo.DriverName+=*pcpli;
-            NewComportInfo.FullName=*pcpli;
+            Comport_OS_BuildDisplayName(pcpli->c_str(),
+                    NewComportInfo.FullName);
             NewComportInfo.ShortName=*pcpli;
             List.push_back(NewComportInfo);
         }
@@ -362,6 +371,264 @@ static bool Comport_ProcessUEventFile(const char *Filename,const char *Tag,
     fclose(in);
 
     return false;
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Comport_OS_BuildDisplayName
+ *
+ * SYNOPSIS:
+ *    static void Comport_OS_BuildDisplayName(const char *TTYName,
+ *          string &DisplayName);
+ *
+ * PARAMETERS:
+ *    TTYName [I] -- The name of the tty device without the "/dev/" in front
+ *                   of it (for example "ttyUSB0").
+ *    DisplayName [O] -- The name to show the user for this port.
+ *
+ * FUNCTION:
+ *    This function builds the name we show the user for a serial port.  This
+ *    is the tty name followed by the friendly name of the device in ()'s
+ *    (for example "ttyUSB0 (USB NULL modem)").  If there is no friendly
+ *    name for the device then just the tty name is used.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void Comport_OS_BuildDisplayName(const char *TTYName,
+        string &DisplayName)
+{
+    string FriendlyName;
+    string SysPath;
+    string TestFile;
+    string DevNumbers;
+    char ResolvedPath[PATH_MAX];
+    size_t Slash;
+    int Level;
+
+    DisplayName=TTYName;
+
+    /* Figure out the "friendly" name (if we can) */
+    FriendlyName="";
+
+    /* Try the USB product string first.  The tty's "device" link points
+       somewhere under the USB device (normally the interface or a port
+       under the interface), so we walk up the tree until we find the
+       USB device (the one with an idVendor) and read it's "product" */
+    SysPath="/sys/class/tty/";
+    SysPath+=TTYName;
+    SysPath+="/device";
+    if(realpath(SysPath.c_str(),ResolvedPath)!=NULL)
+    {
+        SysPath=ResolvedPath;
+        for(Level=0;Level<MAX_SYSFS_LEVELS_TO_WALK;Level++)
+        {
+            if(SysPath.compare(0,13,"/sys/devices/")!=0)
+                break;
+
+            TestFile=SysPath+"/idVendor";
+            if(access(TestFile.c_str(),F_OK)==0)
+            {
+                /* This is the USB device.  We stop here even if it doesn't
+                   have a product string so we don't end up with the name
+                   of the hub it's plugged into */
+                TestFile=SysPath+"/product";
+                Comport_OS_ReadSysFSString(TestFile.c_str(),FriendlyName);
+                break;
+            }
+
+            Slash=SysPath.find_last_of('/');
+            if(Slash==string::npos)
+                break;
+            SysPath.erase(Slash);
+        }
+    }
+
+    if(FriendlyName=="")
+    {
+        /* No USB name, see if udev has a name from it's hardware database
+           (this covers things like PCI serial cards) */
+        TestFile="/sys/class/tty/";
+        TestFile+=TTYName;
+        TestFile+="/dev";
+        if(Comport_OS_ReadSysFSString(TestFile.c_str(),DevNumbers))
+        {
+            Comport_OS_ReadUdevProperty(DevNumbers.c_str(),
+                    "ID_MODEL_FROM_DATABASE",FriendlyName);
+        }
+    }
+
+    if(FriendlyName!="")
+    {
+        DisplayName+=" (";
+        DisplayName+=FriendlyName;
+        DisplayName+=")";
+    }
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Comport_OS_ReadSysFSString
+ *
+ * SYNOPSIS:
+ *    static bool Comport_OS_ReadSysFSString(const char *Filename,
+ *          string &Value);
+ *
+ * PARAMETERS:
+ *    Filename [I] -- The sysfs file to read (for example
+ *                    "/sys/class/tty/ttyUSB0/dev").
+ *    Value [O] -- The string that was read from the file.
+ *
+ * FUNCTION:
+ *    This function reads the first line of a sysfs attribute file and
+ *    cleans it up (removes the new line, leading / trailing spaces, and any
+ *    control chars).
+ *
+ * RETURNS:
+ *    true -- The file was read and 'Value' is not empty.
+ *    false -- The file could not be read or it was empty.
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static bool Comport_OS_ReadSysFSString(const char *Filename,string &Value)
+{
+    char buff[256];
+    FILE *in;
+
+    Value="";
+
+    in=fopen(Filename,"r");
+    if(in==NULL)
+        return false;
+
+    if(fgets(buff,sizeof(buff),in)!=NULL)
+        Value=buff;
+
+    fclose(in);
+
+    Comport_OS_CleanUpName(Value);
+
+    return !Value.empty();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Comport_OS_ReadUdevProperty
+ *
+ * SYNOPSIS:
+ *    static bool Comport_OS_ReadUdevProperty(const char *DevNumbers,
+ *          const char *Property,string &Value);
+ *
+ * PARAMETERS:
+ *    DevNumbers [I] -- The major and minor device numbers for the char
+ *                      device in "major:minor" format (for example "188:0").
+ *                      This is the format of the sysfs "dev" file.
+ *    Property [I] -- The name of the udev property to look up (for example
+ *                    "ID_MODEL_FROM_DATABASE").
+ *    Value [O] -- The value of the property.
+ *
+ * FUNCTION:
+ *    This function looks up a property that udev has stored about a char
+ *    device.
+ *
+ * RETURNS:
+ *    true -- The property was found and 'Value' is not empty.
+ *    false -- The property was not found (or udev isn't running).
+ *
+ * LIMITATIONS:
+ *    This reads udev's database files directly instead of using libudev
+ *    (so we don't have to link against libudev).  The format of these files
+ *    has been stable for a long time but isn't officially a public API.  If
+ *    the format changes this will just fail to find a name.
+ *
+ * SEE ALSO:
+ *    Comport_OS_ReadSysFSString()
+ ******************************************************************************/
+static bool Comport_OS_ReadUdevProperty(const char *DevNumbers,
+        const char *Property,string &Value)
+{
+    char buff[512];
+    string Filename;
+    string SearchFor;
+    FILE *in;
+
+    Value="";
+
+    Filename=UDEV_DATA_PATH;
+    Filename+=DevNumbers;
+
+    /* Properties are stored as "E:NAME=VALUE" */
+    SearchFor="E:";
+    SearchFor+=Property;
+    SearchFor+="=";
+
+    in=fopen(Filename.c_str(),"r");
+    if(in==NULL)
+        return false;
+
+    while(fgets(buff,sizeof(buff),in)!=NULL)
+    {
+        if(strncmp(buff,SearchFor.c_str(),SearchFor.length())==0)
+        {
+            Value=&buff[SearchFor.length()];
+            break;
+        }
+    }
+
+    fclose(in);
+
+    Comport_OS_CleanUpName(Value);
+
+    return !Value.empty();
+}
+
+/*******************************************************************************
+ * NAME:
+ *    Comport_OS_CleanUpName
+ *
+ * SYNOPSIS:
+ *    static void Comport_OS_CleanUpName(string &Name);
+ *
+ * PARAMETERS:
+ *    Name [I/O] -- The name to clean up.
+ *
+ * FUNCTION:
+ *    This function cleans up a name read from the system so it can be shown
+ *    to the user.  It removes any control chars (including new lines) and
+ *    any leading or trailing white space.
+ *
+ * RETURNS:
+ *    NONE
+ *
+ * SEE ALSO:
+ *    
+ ******************************************************************************/
+static void Comport_OS_CleanUpName(string &Name)
+{
+    string Clean;
+    size_t r;
+    size_t Start;
+    size_t End;
+
+    for(r=0;r<Name.length();r++)
+    {
+        if((unsigned char)Name[r]>=' ' && Name[r]!=0x7F)
+            Clean+=Name[r];
+    }
+
+    Start=Clean.find_first_not_of(' ');
+    if(Start==string::npos)
+    {
+        Name="";
+        return;
+    }
+    End=Clean.find_last_not_of(' ');
+
+    Name=Clean.substr(Start,End-Start+1);
 }
 
 /*******************************************************************************
@@ -1688,6 +1955,7 @@ PG_BOOL Comport_GetConnectionInfo(const char *DeviceUniqueID,t_PIKVList *Options
         struct IODriverDetectedInfo *RetInfo)
 {
     static string Name;
+    string DisplayName;
     const char *p;
 
     /* Find the start of the name */
@@ -1698,7 +1966,9 @@ PG_BOOL Comport_GetConnectionInfo(const char *DeviceUniqueID,t_PIKVList *Options
         p++;
     Name=p;
 
-    snprintf(RetInfo->Name,sizeof(RetInfo->Name),"%s",Name.c_str());
+    Comport_OS_BuildDisplayName(Name.c_str(),DisplayName);
+
+    snprintf(RetInfo->Name,sizeof(RetInfo->Name),"%s",DisplayName.c_str());
     snprintf(RetInfo->Title,sizeof(RetInfo->Title),"%s",Name.c_str());
     RetInfo->Flags=0;
 

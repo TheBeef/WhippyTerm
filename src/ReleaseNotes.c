@@ -28,6 +28,13 @@ struct ReleaseInfo
 //            "Description"},
 //};
 
+static struct ReleaseNote m_Notes_NEXT[]=
+{
+    {   NOTETYPE_ENHANCEMENT,"Added friendly COMPORT names to Linux",
+            "Added code to read the friendly name of a comport from"
+            " the driver on Linux."},
+};
+
 static struct ReleaseNote m_Notes_Rel2_4_0_0[]=
 {
     {   NOTETYPE_POLISH,"Added a link to the web site to the help menu",

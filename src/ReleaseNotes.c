@@ -33,6 +33,10 @@ static struct ReleaseNote m_Notes_NEXT[]=
     {   NOTETYPE_ENHANCEMENT,"Added friendly COMPORT names to Linux",
             "Added code to read the friendly name of a comport from"
             " the driver on Linux."},
+    {   NOTETYPE_ENHANCEMENT,"Changed show Windows makes a friendly COMPORT names",
+            "Changed how Windows reads and builds the COMPORT name it shows."
+            "  It was using the device manager, now it pulls it from"
+            " the device it's self and falls back to the device manager."},
 };
 
 static struct ReleaseNote m_Notes_Rel2_4_0_0[]=

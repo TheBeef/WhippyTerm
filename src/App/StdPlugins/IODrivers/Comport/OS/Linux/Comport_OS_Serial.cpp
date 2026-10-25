@@ -486,15 +486,15 @@ static void Comport_OS_BuildDisplayName(const char *TTYName,
         }
     }
 
-    if(MarkAsNew)
-        DisplayName+=" -- NEW --";
-
     if(FriendlyName!="")
     {
         DisplayName+=" (";
         DisplayName+=FriendlyName;
         DisplayName+=")";
     }
+
+    if(MarkAsNew)
+        DisplayName+=" -- NEW";
 }
 
 /*******************************************************************************

@@ -364,12 +364,12 @@ static string Comport_OS_GetPortDisplayName(HDEVINFO DeviceInfoSet,
     if(RetName.empty())
         return FriendlyName;
 
-    if(MarkAsNew)
-        RetName+=" -- NEW --";
-
     RetName+=" (";
     RetName+=PortName;
     RetName+=")";
+
+    if(MarkAsNew)
+        RetName+=" -- NEW";
 
     return RetName;
 }

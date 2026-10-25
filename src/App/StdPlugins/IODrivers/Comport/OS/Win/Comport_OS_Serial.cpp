@@ -31,6 +31,7 @@
 /*** HEADER FILES TO INCLUDE  ***/
 #include "../Comport_Serial.h"
 #include "../../Comport_Main.h"
+#include <list>
 #include <string>
 #include <stdbool.h>
 #include <windows.h>
@@ -75,6 +76,9 @@ struct OpenComportInfo
     string LastErrorMsg;
 };
 
+typedef list<string> t_LastSerialPortsListType;
+typedef t_LastSerialPortsListType::iterator i_LastSerialPortsListType;
+
 /*** FUNCTION PROTOTYPES      ***/
 static DWORD WINAPI Comport_OS_PollThread(LPVOID lpParameter);
 static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
@@ -85,9 +89,12 @@ static bool Comport_OS_PortStillPresent(struct OpenComportInfo *ComInfo);
 static void Comport_OS_MarkPortAsGone(struct OpenComportInfo *ComInfo);
 static string Comport_OS_GetPortDisplayName(HDEVINFO DeviceInfoSet,
         SP_DEVINFO_DATA *DeviceInfoData,const char *PortName,
-        const char *FriendlyName);
+        const char *FriendlyName,bool MarkAsNew);
 
 /*** VARIABLE DEFINITIONS     ***/
+t_LastSerialPortsListType g_LastSerialPortsList;
+bool g_LastSerialPortFilledIn;
+
 /* DEVPKEY_Device_BusReportedDeviceDesc from devpkey.h.  This is the name
    the device reports about itself (the USB product string).  It is defined
    here so we don't need INITGUID or an extra lib to get at it. */
@@ -132,6 +139,9 @@ bool Comport_OS_GetSerialPortList(t_OSComportListType &List)
     char szPortName[MAX_PATH];
     HKEY hKey;
     DWORD dwReqSize;
+    i_OSComportListType cp;
+    i_LastSerialPortsListType LastPortScan;
+    bool FoundPort;
 
     DeviceInfoSet=NULL;
     hKey=NULL;
@@ -198,14 +208,32 @@ bool Comport_OS_GetSerialPortList(t_OSComportListType &List)
             if(FoundPorts==List.end())
             {
                 /* Didn't find it, add it */
+
+                /* See if this a new port or not */
+                FoundPort=false;
+                for(LastPortScan=g_LastSerialPortsList.begin();
+                        LastPortScan!=g_LastSerialPortsList.end();
+                        LastPortScan++)
+                {
+                    if(*LastPortScan==szPortName)
+                        FoundPort=true;
+                }
+
                 NewComportInfo.DriverName=DevName;
                 NewComportInfo.FullName=Comport_OS_GetPortDisplayName(
                         DeviceInfoSet,&DeviceInfoData,szPortName,
-                        szFriendlyName);
+                        szFriendlyName,
+                        (!FoundPort && g_LastSerialPortFilledIn));
                 NewComportInfo.ShortName=szPortName;
                 List.push_back(NewComportInfo);
             }
         }
+
+        /* Ok, now make a copy of all the serial ports detected */
+        g_LastSerialPortsList.clear();
+        for(cp=List.begin();cp!=List.end();cp++)
+            g_LastSerialPortsList.push_back(cp->ShortName);
+        g_LastSerialPortFilledIn=true;
 
         RetValue=true;
     }
@@ -266,7 +294,7 @@ bool Comport_OS_SerialPortBusy(const std::string &DriverName)
  * SYNOPSIS:
  *    static string Comport_OS_GetPortDisplayName(HDEVINFO DeviceInfoSet,
  *              SP_DEVINFO_DATA *DeviceInfoData,const char *PortName,
- *              const char *FriendlyName);
+ *              const char *FriendlyName,bool MarkAsNew);
  *
  * PARAMETERS:
  *    DeviceInfoSet [I] -- The SetupAPI device info set the port came from.
@@ -274,6 +302,7 @@ bool Comport_OS_SerialPortBusy(const std::string &DriverName)
  *    PortName [I] -- The short name of the port ("COM5").
  *    FriendlyName [I] -- The Device Manager name of the port
  *                        ("USB Serial Device (COM5)").
+ *    MarkAsNew [I] -- If this is true then we mark the port as newly connected.
  *
  * FUNCTION:
  *    This function works out the name to show the user for a com port.
@@ -301,7 +330,7 @@ bool Comport_OS_SerialPortBusy(const std::string &DriverName)
  ******************************************************************************/
 static string Comport_OS_GetPortDisplayName(HDEVINFO DeviceInfoSet,
         SP_DEVINFO_DATA *DeviceInfoData,const char *PortName,
-        const char *FriendlyName)
+        const char *FriendlyName,bool MarkAsNew)
 {
     DEVPROPTYPE PropType;
     WCHAR BusName[MAX_PATH];
@@ -334,6 +363,9 @@ static string Comport_OS_GetPortDisplayName(HDEVINFO DeviceInfoSet,
         RetName.erase(RetName.length()-1);
     if(RetName.empty())
         return FriendlyName;
+
+    if(MarkAsNew)
+        RetName+=" -- NEW --";
 
     RetName+=" (";
     RetName+=PortName;
@@ -1806,7 +1838,7 @@ PG_BOOL Comport_GetConnectionInfo(const char *DeviceUniqueID,t_PIKVList *Options
             {
                 /* We found it */
                 Name=Comport_OS_GetPortDisplayName(DeviceInfoSet,
-                        &DeviceInfoData,szPortName,szFriendlyName);
+                        &DeviceInfoData,szPortName,szFriendlyName,false);
                 snprintf(RetInfo->Name,sizeof(RetInfo->Name),"%s",
                         Name.c_str());
                 snprintf(RetInfo->Title,sizeof(RetInfo->Title),"%s",szPortName);

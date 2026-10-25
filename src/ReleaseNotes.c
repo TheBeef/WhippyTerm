@@ -30,6 +30,10 @@ struct ReleaseInfo
 
 static struct ReleaseNote m_Notes_NEXT[]=
 {
+    {   NOTETYPE_ENHANCEMENT,"Added detection of new serial ports",
+            "When a new serial port is added to the system after the ports"
+            " have been scanned the new port is marked as NEW in the new"
+            " connection dialog."},
     {   NOTETYPE_ENHANCEMENT,"Added friendly COMPORT names to Linux",
             "Added code to read the friendly name of a comport from"
             " the driver on Linux."},

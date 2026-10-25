@@ -111,6 +111,9 @@ struct termios2
     speed_t c_ospeed;       /* output speed */
 };
 
+typedef list<string> t_LastSerialPortsListType;
+typedef t_LastSerialPortsListType::iterator i_LastSerialPortsListType;
+
 /*** FUNCTION PROTOTYPES      ***/
 static bool Comport_ProcessUEventFile(const char *Filename,const char *Tag,
         char *Value,int MaxValueLen);
@@ -120,13 +123,15 @@ static bool Comport_OS_ConfigPort(struct OpenComportInfo *ComInfo,
         e_ComportParityType Parity,e_ComportStopBitsType StopBits,
         e_ComportFlowControlType FlowControl);
 static void Comport_OS_BuildDisplayName(const char *TTYName,
-        string &DisplayName);
+        string &DisplayName,bool MarkAsNew);
 static bool Comport_OS_ReadSysFSString(const char *Filename,string &Value);
 static void Comport_OS_CleanUpName(string &Name);
 static bool Comport_OS_ReadUdevProperty(const char *DevNumbers,
         const char *Property,string &Value);
 
 /*** VARIABLE DEFINITIONS     ***/
+t_LastSerialPortsListType g_LastSerialPortsList;
+bool g_LastSerialPortFilledIn;
 
 /*******************************************************************************
  * NAME:
@@ -163,6 +168,9 @@ bool Comport_OS_GetSerialPortList(t_OSComportListType &List)
     bool Valid;
     bool TryGetSerialInfo;
     struct termios tio;
+    i_OSComportListType cp;
+    i_LastSerialPortsListType LastPortScan;
+    bool FoundPort;
 
     /*
         Ok, the philosophy we are using here is we look at all the stuff in
@@ -273,14 +281,30 @@ bool Comport_OS_GetSerialPortList(t_OSComportListType &List)
 
         if(Valid)
         {
+            /* See if this a new port or not */
+            FoundPort=false;
+            for(LastPortScan=g_LastSerialPortsList.begin();
+                    LastPortScan!=g_LastSerialPortsList.end();
+                    LastPortScan++)
+            {
+                if(*LastPortScan==*pcpli)
+                    FoundPort=true;
+            }
+
             NewComportInfo.DriverName="/dev/";
             NewComportInfo.DriverName+=*pcpli;
-            Comport_OS_BuildDisplayName(pcpli->c_str(),
-                    NewComportInfo.FullName);
+            Comport_OS_BuildDisplayName(pcpli->c_str(),NewComportInfo.FullName,
+                    (!FoundPort && g_LastSerialPortFilledIn));
             NewComportInfo.ShortName=*pcpli;
             List.push_back(NewComportInfo);
         }
     }
+
+    /* Ok, now make a copy of all the serial ports detected */
+    g_LastSerialPortsList.clear();
+    for(cp=List.begin();cp!=List.end();cp++)
+        g_LastSerialPortsList.push_back(cp->ShortName);
+    g_LastSerialPortFilledIn=true;
 
     return true;
 }
@@ -379,12 +403,13 @@ static bool Comport_ProcessUEventFile(const char *Filename,const char *Tag,
  *
  * SYNOPSIS:
  *    static void Comport_OS_BuildDisplayName(const char *TTYName,
- *          string &DisplayName);
+ *          string &DisplayName,bool MarkAsNew);
  *
  * PARAMETERS:
  *    TTYName [I] -- The name of the tty device without the "/dev/" in front
  *                   of it (for example "ttyUSB0").
  *    DisplayName [O] -- The name to show the user for this port.
+ *    MarkAsNew [I] -- If this is true then we mark the port as newly connected.
  *
  * FUNCTION:
  *    This function builds the name we show the user for a serial port.  This
@@ -399,7 +424,7 @@ static bool Comport_ProcessUEventFile(const char *Filename,const char *Tag,
  *    
  ******************************************************************************/
 static void Comport_OS_BuildDisplayName(const char *TTYName,
-        string &DisplayName)
+        string &DisplayName,bool MarkAsNew)
 {
     string FriendlyName;
     string SysPath;
@@ -460,6 +485,9 @@ static void Comport_OS_BuildDisplayName(const char *TTYName,
                     "ID_MODEL_FROM_DATABASE",FriendlyName);
         }
     }
+
+    if(MarkAsNew)
+        DisplayName+=" -- NEW --";
 
     if(FriendlyName!="")
     {
@@ -1966,7 +1994,7 @@ PG_BOOL Comport_GetConnectionInfo(const char *DeviceUniqueID,t_PIKVList *Options
         p++;
     Name=p;
 
-    Comport_OS_BuildDisplayName(Name.c_str(),DisplayName);
+    Comport_OS_BuildDisplayName(Name.c_str(),DisplayName,false);
 
     snprintf(RetInfo->Name,sizeof(RetInfo->Name),"%s",DisplayName.c_str());
     snprintf(RetInfo->Title,sizeof(RetInfo->Title),"%s",Name.c_str());
